@@ -289,7 +289,6 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.core)
-    implementation(libs.androidx.security.crypto) // Added AndroidX Security
     
     // Kotlinx Serialization
     implementation(libs.jetbrains.kotlinx.serialization.json)
