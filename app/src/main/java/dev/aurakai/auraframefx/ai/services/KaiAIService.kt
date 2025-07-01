@@ -28,10 +28,26 @@ class KaiAIService @Inject constructor(
     private val cloudStatusMonitor: CloudStatusMonitor,
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
-    override fun getName(): String? = "Kai"
-    override fun getType(): ApiAgentType = ApiAgentType.KAI // Changed to non-nullable ApiAgentType
+    /**
+ * Returns the name of the agent.
+ *
+ * @return The string "Kai".
+ */
+override fun getName(): String? = "Kai"
+    /**
+ * Returns the agent type as ApiAgentType.KAI.
+ *
+ * @return The type of this agent.
+ */
+override fun getType(): ApiAgentType = ApiAgentType.KAI // Changed to non-nullable ApiAgentType
 
-    // Not part of Agent interface
+    /**
+         * Returns a map describing the agent's supported capabilities.
+         *
+         * The map includes keys for "security", "analysis", "memory", and "service_implemented", all set to true.
+         *
+         * @return A map indicating the agent's capabilities.
+         */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
             "security" to true,
@@ -40,6 +56,13 @@ class KaiAIService @Inject constructor(
             "service_implemented" to true
         )
 
+    /**
+     * Processes an AI request with the provided context and returns a stubbed agent response.
+     *
+     * @param request The AI request to process.
+     * @param context Additional context information for the request.
+     * @return An agent response containing a message referencing the request and context, with a confidence score of 1.0.
+     */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         auraFxLogger.log(
             AuraFxLogger.LogLevel.INFO,
@@ -50,21 +73,39 @@ class KaiAIService @Inject constructor(
         return AgentResponse("Kai response to '${request.query}' with context '$context'", 1.0f)
     }
 
+    /**
+     * Processes an AI request and returns a flow emitting a single agent response.
+     *
+     * @return A flow containing one AgentResponse referencing the request query.
+     */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> { // Added from Agent interface
         return flowOf(AgentResponse("Kai flow response for: ${request.query}", 1.0f))
     }
 
-    // Not part of Agent interface
+    /**
+     * Returns the agent's continuous memory, or null if not available.
+     *
+     * @return Always returns null, indicating no continuous memory is implemented.
+     */
     fun getContinuousMemory(): Any? {
         return null
     }
 
-    // Not part of Agent interface
+    /**
+     * Returns a list of ethical guidelines followed by the agent.
+     *
+     * @return A list containing the agent's ethical principles.
+     */
     fun getEthicalGuidelines(): List<String> {
         return listOf("Prioritize security.", "Report threats accurately.")
     }
 
-    // Not part of Agent interface
+    /**
+     * Returns an empty list representing the agent's learning history.
+     *
+     * This implementation does not maintain or expose any learning history.
+     * @return An empty list.
+     */
     fun getLearningHistory(): List<String> {
         return emptyList()
     }

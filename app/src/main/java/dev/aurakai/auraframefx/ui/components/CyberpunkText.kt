@@ -7,6 +7,17 @@ import androidx.compose.ui.graphics.Color // For direct color usage if needed
 import dev.aurakai.auraframefx.ui.theme.CyberpunkTextColor
 import dev.aurakai.auraframefx.ui.theme.CyberpunkTextStyle
 
+/**
+ * Displays text with a custom cyberpunk color and style.
+ *
+ * Renders the provided text using the specified `CyberpunkTextColor` and `CyberpunkTextStyle`. The `enableGlitch` parameter is reserved for a future glitch effect and is currently unused.
+ *
+ * @param text The text to display.
+ * @param color The cyberpunk-themed color to apply.
+ * @param style The cyberpunk-themed text style to apply.
+ * @param modifier Optional modifier for layout or interaction.
+ * @param enableGlitch If true, will enable a glitch effect in the future (currently has no effect).
+ */
 @Composable
 fun CyberpunkText(
     text: String,

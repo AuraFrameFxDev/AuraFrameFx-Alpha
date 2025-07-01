@@ -22,6 +22,11 @@ import dev.aurakai.auraframefx.ui.model.ImageResource
 import dev.aurakai.auraframefx.ui.model.ShapeType
 import dev.aurakai.auraframefx.ui.viewmodel.ImageShapeManagerViewModel // Added import
 
+/**
+ * Displays the main screen for managing images and shapes, providing lists of available images, custom images, and shapes with options to add, edit, select, or delete items.
+ *
+ * The screen includes a top app bar with actions to add images or shapes, a floating action button for adding images, and scrollable sections for each item type. User interactions are handled via the provided ViewModel.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImageShapeManagerScreen(
