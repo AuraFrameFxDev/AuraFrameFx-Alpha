@@ -27,10 +27,9 @@ import dev.aurakai.auraframefx.ui.theme.AuraFrameFXTheme
 
 class MainActivity : ComponentActivity() {
     /**
-     * Initializes the activity and sets the Compose UI content to the main screen within the app's theme.
-     * Uses digital transition animations for a cyberpunk aesthetic.
+     * Initializes the activity and sets the Compose UI content to the main screen using the app's theme.
      *
-     * @param savedInstanceState The saved state of the activity, or null if none exists.
+     * @param savedInstanceState The previously saved state of the activity, or null if none exists.
      */
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +59,11 @@ class MainActivity : ComponentActivity() {
  * Applies cyberpunk-style digital transition effects between screens.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays the main UI scaffold with bottom navigation and optional digital visual effects.
+ *
+ * Sets up navigation, applies cyberpunk-style digital transition effects to the main content area when enabled, and hosts the app's navigation graph.
+ */
 @Composable
 fun MainScreen() {
     // Use Jetpack Navigation 3's nav controller for digital transitions

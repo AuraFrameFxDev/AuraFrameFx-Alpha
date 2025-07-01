@@ -20,19 +20,39 @@ open class BaseAgent(
 
 ) : Agent {
 
+    /**
+     * Returns the name of the agent.
+     *
+     * @return The agent's name, or null if not set.
+     */
     override fun getName(): String? {
         return _agentName
     }
 
-    override fun getType(): AgentType { // Return non-nullable AgentType from api.model
-        return try {
-            AgentType.valueOf(_agentType.uppercase())
-        } catch (e: IllegalArgumentException) {
-            // Or handle error more gracefully, e.g., map to a default or throw
-            throw IllegalArgumentException("Invalid agent type string: $_agentType", e)
-        }
+
+    /**
+     * Returns the agent's type as an `ApiAgentType` by mapping the internal type string, defaulting to `ApiAgentType.Aura` if no match is found.
+     *
+     * If the internal type string does not correspond to any known `ApiAgentType`, the method returns `ApiAgentType.Aura` as a fallback.
+     *
+     * @return The mapped `ApiAgentType` for this agent.
+     */
+    override fun getType(): ApiAgentType {
+        // Map string to the generated ApiAgentType
+        // Fallback to a default or throw an error if mapping fails
+        return ApiAgentType.values().firstOrNull { it.value.equals(_agentType, ignoreCase = true) }
+            ?: ApiAgentType.Aura // Defaulting to Aura, consider a more robust fallback or error
     }
 
+    /**
+     * Processes an AI request with the provided context and returns a default agent response.
+     *
+     * Subclasses should override this method to provide custom request handling logic.
+     *
+     * @param request The AI request to process.
+     * @param context Additional context for the request.
+     * @return A default `AgentResponse` containing a message referencing the request, context, and agent name, with fixed confidence.
+     */
 
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Default implementation for base agent, override in subclasses
@@ -45,7 +65,14 @@ open class BaseAgent(
             isSuccess = true
         )
     }
-
+    /**
+     * Returns a flow emitting a default agent response for the given request.
+     *
+     * The response includes the request query and agent name with a fixed confidence score. Intended to be overridden by subclasses for custom streaming behavior.
+     *
+     * @return A flow containing a single default `AgentResponse`.
+     */
+=
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // Basic implementation, can be overridden for more complex streaming logic
         return flow {
