@@ -45,6 +45,12 @@ android {
         jvmToolchain(17)
     }
 
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -53,6 +59,7 @@ android {
 
     sourceSets {
         getByName("main") {
+            aidl.srcDirs("src/main/aidl")
             java.setSrcDirs(listOf(
                 "src/main/java",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
@@ -65,6 +72,7 @@ android {
                 "${layout.buildDirectory.get().asFile}/generated/ksp/debug/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
             ))
+            aidl.setSrcDirs(listOf("src/main/aidl"))
         }
     }
     ndkVersion = "26.2.11394342"
@@ -122,7 +130,7 @@ tasks.named<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openAp
     modelPackage.set("dev.aurakai.auraframefx.api.model")
     invokerPackage.set("dev.aurakai.auraframefx.api.invoker")
     configOptions.set(mapOf(
-        "dateLibrary" to "java8",
+        "dateLibrary" to "kotlinx-datetime",
         "serializationLibrary" to "kotlinx_serialization"
     ))
 
@@ -140,7 +148,18 @@ val generatePythonClient by tasks.registering(org.openapitools.generator.gradle.
     configOptions.set(mapOf(
         "packageName" to "auraframefx_api_client"
     ))
-} // Add missing closing brace
+}
+
+tasks.register("generateOpenApiContract") {
+    group = "OpenAPI tools"
+    description = "Generates all OpenAPI client artifacts (Kotlin, TypeScript, Java, Python)."
+    dependsOn(
+        "openApiGenerate",
+        "generateTypeScriptClient",
+        "generateJavaClient",
+        generatePythonClient // Use the val here
+    )
+}
 
 // Ensure codegen runs before build
 // Ensure OpenAPI generation runs before KSP and compilation
@@ -258,6 +277,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.jetbrains.kotlinx.serialization.json)
+    implementation(libs.jetbrains.kotlinx.datetime) // Added kotlinx-datetime
 
     // Network
     implementation(libs.squareup.retrofit2.retrofit)

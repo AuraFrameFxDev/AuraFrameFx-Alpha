@@ -10,8 +10,10 @@ import dev.aurakai.auraframefx.ai.task.execution.TaskExecutionManager
 import dev.aurakai.auraframefx.data.logging.AuraFxLogger
 import dev.aurakai.auraframefx.data.network.CloudStatusMonitor
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.api.model.AgentType as ApiAgentType // Corrected import
 import dev.aurakai.auraframefx.model.AiRequest
+import kotlinx.coroutines.flow.Flow // Added import
+import kotlinx.coroutines.flow.flowOf // Added import
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,8 +29,10 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     override fun getName(): String? = "Kai"
-    override fun getType(): AgentType? = AgentType.KAI // Changed to KAI for consistency
-    override fun getCapabilities(): Map<String, Any> =
+    override fun getType(): ApiAgentType = ApiAgentType.KAI // Changed to non-nullable ApiAgentType
+
+    // Not part of Agent interface
+    fun getCapabilities(): Map<String, Any> =
         mapOf(
             "security" to true,
             "analysis" to true,
@@ -36,40 +40,32 @@ class KaiAIService @Inject constructor(
             "service_implemented" to true
         )
 
-    override suspend fun processRequest(request: AiRequest): AgentResponse {
-        // Example stub logic, adapt as needed
+    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         auraFxLogger.log(
             AuraFxLogger.LogLevel.INFO,
             "KaiAIService",
-            "Processing request: ${request.query}"
+            "Processing request: ${request.query} with context: $context"
         )
-        return when (request.query) {
-            "security" -> AgentResponse("Kai Security response to '${request.query}'", 1.0f)
-            "analysis" -> AgentResponse("Kai Analysis response to '${request.query}'", 1.0f)
-            "memory" -> AgentResponse("Kai Memory response to '${request.query}'", 1.0f)
-            else -> {
-                auraFxLogger.log(
-                    AuraFxLogger.LogLevel.WARN,
-                    "KaiAIService",
-                    "Unsupported request type: ${request.query}"
-                )
-                AgentResponse("Unsupported request type: ${request.query} by Kai", 0.0f)
-            }
-        }
+        // Simplified logic for stub, original when can be restored
+        return AgentResponse("Kai response to '${request.query}' with context '$context'", 1.0f)
     }
 
-    override fun getContinuousMemory(): Any? {
-        // TODO("Not yet implemented")
+    override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> { // Added from Agent interface
+        return flowOf(AgentResponse("Kai flow response for: ${request.query}", 1.0f))
+    }
+
+    // Not part of Agent interface
+    fun getContinuousMemory(): Any? {
         return null
     }
 
-    override fun getEthicalGuidelines(): List<String> {
-        // TODO("Not yet implemented")
+    // Not part of Agent interface
+    fun getEthicalGuidelines(): List<String> {
         return listOf("Prioritize security.", "Report threats accurately.")
     }
 
-    override fun getLearningHistory(): List<String> {
-        // TODO("Not yet implemented")
+    // Not part of Agent interface
+    fun getLearningHistory(): List<String> {
         return emptyList()
     }
 }

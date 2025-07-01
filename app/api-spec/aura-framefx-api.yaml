@@ -42,6 +42,7 @@ paths:
   # User Management Endpoints
   /user:
     get:
+      operationId: getUser
       tags: [ users ]
       summary: Get current user information
       security:
@@ -58,6 +59,7 @@ paths:
 
   /user/preferences:
     put:
+      operationId: updateUserPreferences
       tags: [ users ]
       summary: Update user preferences
       security:
@@ -79,6 +81,7 @@ paths:
   # Theme Management Endpoints
   /themes:
     get:
+      operationId: getThemes
       tags: [ themes ]
       summary: Get available themes
       responses:
@@ -93,6 +96,7 @@ paths:
 
   /theme/apply:
     put:
+      operationId: applyTheme
       tags: [ themes ]
       summary: Apply a theme
       security:
@@ -116,6 +120,7 @@ paths:
   # AI Content Generation Endpoints
   /generate-text:
     post:
+      operationId: generateText
       tags: [ ai-content ]
       summary: Generate text content
       security:
@@ -145,6 +150,7 @@ paths:
   # AI Agents Endpoints
   /agent/{agentType}/process-request:
     post:
+      operationId: processAgentRequest
       tags: [ ai-agents ]
       summary: Send a request to an AI agent
       security:
@@ -176,6 +182,7 @@ paths:
   # System Customization Endpoints
   /system/lockscreen-config:
     get:
+      operationId: getSystemLockscreenConfig
       tags: [ system-customization ]
       summary: Get lock screen configuration
       security:
@@ -191,6 +198,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
 
     put:
+      operationId: updateSystemLockscreenConfig
       tags: [ system-customization ]
       summary: Update lock screen configuration
       security:
@@ -213,6 +221,7 @@ paths:
   # Conference Room Endpoints
   /conference/create:
     post:
+      operationId: createConferenceRoom
       tags: [ conference-room ]
       summary: Create a new AI conference room
       security:
@@ -239,6 +248,7 @@ paths:
   # Task Management Endpoints
   /tasks/schedule:
     post:
+      operationId: scheduleTask
       tags: [ tasks ]
       summary: Schedule a new task
       security:

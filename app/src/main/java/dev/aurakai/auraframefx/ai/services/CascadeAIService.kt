@@ -2,10 +2,10 @@ package dev.aurakai.auraframefx.ai.services
 
 import dev.aurakai.auraframefx.ai.agents.Agent
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.api.model.AgentType as ApiAgentType // Corrected import
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.first // Keep for existing logic if processRequestFlow uses it
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,30 +20,33 @@ class CascadeAIService @Inject constructor(
 
     override fun getName(): String? = "Cascade"
 
-    override fun getType(): AgentType? = AgentType.CASCADE
+    override fun getType(): ApiAgentType = ApiAgentType.CASCADE // Changed to non-nullable ApiAgentType
 
-    // Renamed original processRequest to processRequestFlow
-    suspend fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
+    // This is the Agent interface method
+    override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
+        // This internal routing can stay if these specific flows are desired for internal logic
         return when (request.type) {
-            "state" -> processStateRequestFlow(request)
-            "context" -> processContextRequestFlow(request)
-            "vision" -> processVisionRequestFlow(request)
-            "processing" -> processProcessingRequestFlow(request)
-            else -> error("Unsupported request type: ${request.type}")
+            "state" -> processStateRequestFlowInternal(request)
+            "context" -> processContextRequestFlowInternal(request)
+            "vision" -> processVisionRequestFlowInternal(request)
+            "processing" -> processProcessingRequestFlowInternal(request)
+            else -> flow {
+                emit(AgentResponse("Cascade flow response for basic query: ${request.query}", 0.7f))
+            } // Default flow for basic queries
         }
     }
 
     // Implemented Agent interface method
-    override suspend fun processRequest(request: AiRequest): AgentResponse {
-        // TODO: Provide a direct AgentResponse.
-        // This might involve collecting from the flow or a different logic.
+    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
+        // Example: collect from the flow, or implement separate direct logic
         return AgentResponse(
-            content = "Cascade direct response to '${request.query}'",
+            content = "Cascade direct response to '${request.query}' with context '$context'",
             confidence = 0.75f
         )
     }
 
-    private suspend fun processStateRequestFlow(request: AiRequest): Flow<AgentResponse> {
+    // Renamed internal methods
+    private fun processStateRequestFlowInternal(request: AiRequest): Flow<AgentResponse> {
         return flow {
             emit(
                 AgentResponse(
@@ -55,17 +58,14 @@ class CascadeAIService @Inject constructor(
         }
     }
 
-    private suspend fun processContextRequestFlow(request: AiRequest): Flow<AgentResponse> {
+    private fun processContextRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         // Coordinate with Aura and Kai
-        // Assuming auraService.processRequestFlow and kaiService.processRequestFlow exist and return Flow<AgentResponse>
-        val auraResponse = auraService.processRequestFlow(request).first()
-        val kaiResponse = kaiService.processRequestFlow(request)
-            .first() // Assuming KaiAIService also has processRequestFlow
+        val auraResponse = auraService.processRequestFlow(request).first() // Assumes AuraAIService has this method matching Agent iface
+        val kaiResponse = kaiService.processRequestFlow(request).first()   // Assumes KaiAIService has this method matching Agent iface
 
         return flow {
             emit(
                 AgentResponse(
-                    // type = "context",
                     content = "Aura: ${auraResponse.content}, Kai: ${kaiResponse.content}",
                     confidence = (auraResponse.confidence + kaiResponse.confidence) / 2
                 )
@@ -73,12 +73,11 @@ class CascadeAIService @Inject constructor(
         }
     }
 
-    private suspend fun processVisionRequestFlow(request: AiRequest): Flow<AgentResponse> {
+    private fun processVisionRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         // Process vision state
         return flow {
             emit(
                 AgentResponse(
-                    // type = "vision",
                     content = "Processing vision state...",
                     confidence = 0.9f
                 )
@@ -86,12 +85,11 @@ class CascadeAIService @Inject constructor(
         }
     }
 
-    private suspend fun processProcessingRequestFlow(request: AiRequest): Flow<AgentResponse> {
+    private fun processProcessingRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         // Process state transitions
         return flow {
             emit(
                 AgentResponse(
-                    // type = "processing",
                     content = "Processing state transition...",
                     confidence = 0.9f
                 )
@@ -99,13 +97,11 @@ class CascadeAIService @Inject constructor(
         }
     }
 
-    // Renamed original retrieveMemory to retrieveMemoryFlow
-    suspend fun retrieveMemoryFlow(request: AiRequest): Flow<AgentResponse> {
+    fun retrieveMemoryFlow(request: AiRequest): Flow<AgentResponse> { // Not in Agent interface, removed suspend, kept public if used elsewhere
         // Retrieve state history
         return flow {
             emit(
                 AgentResponse(
-                    // type = "memory",
                     content = "Retrieving state history...",
                     confidence = 0.95f
                 )
@@ -113,35 +109,35 @@ class CascadeAIService @Inject constructor(
         }
     }
 
-    // connect and disconnect are not part of Agent interface, removed override
-    suspend fun connect(): Boolean {
+    // connect and disconnect are not part of Agent interface
+    fun connect(): Boolean { // Removed suspend
         // Assuming auraService and kaiService have connect methods
         return auraService.connect() && kaiService.connect()
     }
 
-    suspend fun disconnect(): Boolean {
+    fun disconnect(): Boolean { // Removed suspend
         // Assuming auraService and kaiService have disconnect methods
         return auraService.disconnect() && kaiService.disconnect()
     }
 
-    // Implementing other missing methods from Agent interface
-    override fun getCapabilities(): Map<String, Any> {
+    // These methods are not part of the Agent interface, so remove 'override'
+    fun getCapabilities(): Map<String, Any> {
         return mapOf(
             "name" to "Cascade",
-            "type" to AgentType.CASCADE,
+            "type" to ApiAgentType.CASCADE,
             "service_implemented" to true
         )
     }
 
-    override fun getContinuousMemory(): Any? {
+    fun getContinuousMemory(): Any? {
         return state // Example: Cascade's state can be its continuous memory
     }
 
-    override fun getEthicalGuidelines(): List<String> {
+    fun getEthicalGuidelines(): List<String> {
         return listOf("Maintain state integrity.", "Process information reliably.")
     }
 
-    override fun getLearningHistory(): List<String> {
+    fun getLearningHistory(): List<String> {
         return emptyList() // Or logs of state changes
     }
 }

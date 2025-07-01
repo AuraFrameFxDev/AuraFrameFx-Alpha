@@ -1,68 +1,81 @@
 package dev.aurakai.auraframefx.ai.agents
 
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.model.AgentType
+
+import dev.aurakai.auraframefx.api.model.AgentType // Corrected import
 import dev.aurakai.auraframefx.model.AiRequest
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+ 
 
 /**
  * Base implementation of the [Agent] interface.
- * TODO: Reported as unused declaration. Ensure this class is subclassed or used.
- * TODO: Constructor parameters _agentName, _agentType were reported as unused in the base class context.
  * @param agentName The name of the agent.
- * @param agentType The type or model of the agent.
+
+ * @param agentType The string representation of the agent type, to be mapped to [AgentType].
  */
 open class BaseAgent(
-    private val _agentName: String, // Underscore if constructor params are directly for properties not overridden
+    private val _agentName: String,
     private val _agentType: String,
+
 ) : Agent {
 
-    // TODO: Consider if _agentName and _agentType should be used for overridden getName() and getType()
-    // or if those methods should allow further customization by subclasses.
-
-    override fun getName(): String? { // Changed to String?
-        // TODO: Reported as unused (inherited method).
-        return _agentName // Using constructor parameter
+    /**
+     * Returns the name of the agent.
+     *
+     * @return The agent's name, or null if not set.
+     */
+    override fun getName(): String? {
+        return _agentName
     }
 
-    override fun getType(): AgentType? { // Changed to AgentType?
-        // TODO: Reported as unused (inherited method).
-        // Basic mapping from string to AgentType enum, adjust as needed
-        return try {
-            AgentType.valueOf(_agentType.uppercase())
-        } catch (e: IllegalArgumentException) {
-            null // Or a default AgentType
+
+    /**
+     * Returns the agent's type as an `ApiAgentType` by mapping the internal type string, defaulting to `ApiAgentType.Aura` if no match is found.
+     *
+     * If the internal type string does not correspond to any known `ApiAgentType`, the method returns `ApiAgentType.Aura` as a fallback.
+     *
+     * @return The mapped `ApiAgentType` for this agent.
+     */
+    override fun getType(): ApiAgentType {
+        // Map string to the generated ApiAgentType
+        // Fallback to a default or throw an error if mapping fails
+        return ApiAgentType.values().firstOrNull { it.value.equals(_agentType, ignoreCase = true) }
+            ?: ApiAgentType.Aura // Defaulting to Aura, consider a more robust fallback or error
+    }
+
+    /**
+     * Processes an AI request with the provided context and returns a default agent response.
+     *
+     * Subclasses should override this method to provide custom request handling logic.
+     *
+     * @param request The AI request to process.
+     * @param context Additional context for the request.
+     * @return A default `AgentResponse` containing a message referencing the request, context, and agent name, with fixed confidence.
+     */
+
+    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
+        // Default implementation for base agent, override in subclasses
+        return AgentResponse(
+            content = "BaseAgent response to '${request.query}' for agent $_agentName with context '$context'",
+            confidence = 1.0f
+        )
+    }
+    /**
+     * Returns a flow emitting a default agent response for the given request.
+     *
+     * The response includes the request query and agent name with a fixed confidence score. Intended to be overridden by subclasses for custom streaming behavior.
+     *
+     * @return A flow containing a single default `AgentResponse`.
+     */
+=
+    override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
+        // Basic implementation, can be overridden for more complex streaming logic
+        return flow {
+            // For simplicity, using a dummy context. Subclasses should provide meaningful context.
+            emit(processRequest(request, "DefaultContext_BaseAgentFlow"))
         }
     }
 
-    override suspend fun processRequest(request: AiRequest): AgentResponse {
-        // Default implementation for base agent, override in subclasses
-        return AgentResponse(
-            content = "BaseAgent response to '${request.query}' for agent $_agentName",
-            confidence = 0.5f
-        )
-    }
-
-    override fun getCapabilities(): Map<String, Any> {
-        // TODO: Reported as unused (inherited method).
-        // TODO: Implement base capabilities or leave for subclasses.
-        return mapOf("name" to _agentName, "type" to _agentType, "base_implemented" to true)
-    }
-
-    override fun getContinuousMemory(): Any? {
-        // TODO: Reported as unused (inherited method).
-        // TODO: Implement base memory access or leave for subclasses.
-        return null
-    }
-
-    override fun getEthicalGuidelines(): List<String> {
-        // TODO: Reported as unused (inherited method).
-        // TODO: Implement base ethical guidelines or leave for subclasses.
-        return listOf("Be helpful.", "Be harmless.", "Adhere to base agent principles.")
-    }
-
-    override fun getLearningHistory(): List<String> {
-        // TODO: Reported as unused (inherited method).
-        // TODO: Implement base learning history access or leave for subclasses.
-        return emptyList()
-    }
+    
 }

@@ -16,12 +16,15 @@ enum class CyberpunkTextStyle {
     Glitch
 }
 
+
 @Composable
 fun CyberpunkText(
     text: String,
     color: CyberpunkTextColor,
+
     style: CyberpunkTextStyle = CyberpunkTextStyle.Body,
     enableGlitch: Boolean = false
 ) {
     // TODO: Implement cyberpunk text
+
 }

@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Duration
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Contextual // Added import
+import kotlinx.serialization.Serializable // Added import for @Serializable on ContextStats if not already there
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,11 +25,20 @@ class ContextManager @Inject constructor(
     private val _contextStats = MutableStateFlow(ContextStats())
     val contextStats: StateFlow<ContextStats> = _contextStats
 
+    /**
+     * Creates a new context chain with an initial context node and registers it as active.
+     *
+     * @param rootContext The identifier for the root context of the chain.
+     * @param initialContext The initial context string to start the chain.
+     * @param agent The agent associated with the initial context.
+     * @param metadata Optional metadata for the context chain and its initial node.
+     * @return The unique identifier of the newly created context chain.
+     */
     fun createContextChain(
         rootContext: String,
         initialContext: String,
         agent: AgentType,
-        metadata: Map<String, Any> = emptyMap(),
+        metadata: Map<String, String> = emptyMap(), // Changed Map<String, Any> to Map<String, String>
     ): String {
         val chain = ContextChain(
             rootContext = rootContext,
@@ -37,11 +48,11 @@ class ContextManager @Inject constructor(
                     id = "ctx_${Clock.System.now().toEpochMilliseconds()}_0",
                     content = initialContext,
                     agent = agent,
-                    metadata = metadata
+                    metadata = metadata.mapValues { it.value.toString() } // Convert Map<String, Any> to Map<String, String>
                 )
             ),
             agentContext = mapOf(agent to initialContext),
-            metadata = metadata
+            metadata = metadata.mapValues { it.value.toString() } // Convert Map<String, Any> to Map<String, String>
         )
 
         _activeContexts.update { current ->
@@ -51,11 +62,21 @@ class ContextManager @Inject constructor(
         return chain.id
     }
 
+    /**
+     * Updates an existing context chain with a new context node and agent information.
+     *
+     * @param chainId The identifier of the context chain to update.
+     * @param newContext The new context string to add to the chain.
+     * @param agent The agent associated with the new context.
+     * @param metadata Optional metadata to associate with the new context node.
+     * @return The updated context chain.
+     * @throws IllegalStateException if the specified context chain does not exist.
+     */
     fun updateContextChain(
         chainId: String,
         newContext: String,
         agent: AgentType,
-        metadata: Map<String, Any> = emptyMap(),
+        metadata: Map<String, String> = emptyMap(), // Changed Map<String, Any> to Map<String, String>
     ): ContextChain {
         val chain =
             _activeContexts.value[chainId] ?: throw IllegalStateException("Context chain not found")
@@ -66,7 +87,7 @@ class ContextManager @Inject constructor(
                 id = "ctx_${Clock.System.now().toEpochMilliseconds()}_${chain.contextHistory.size}",
                 content = newContext,
                 agent = agent,
-                metadata = metadata
+                metadata = metadata.mapValues { it.value.toString() } // Convert Map<String, Any> to Map<String, String>
             ),
             agentContext = chain.agentContext + (agent to newContext),
             lastUpdated = Clock.System.now()
@@ -107,6 +128,12 @@ class ContextManager @Inject constructor(
         )
     }
 
+    /**
+     * Updates the context statistics to reflect the current state of all active context chains.
+     *
+     * Recalculates the total number of chains, the number of recently updated (active) chains,
+     * the length of the longest chain, and sets the last updated timestamp.
+     */
     private fun updateStats() {
         val chains = _activeContexts.value.values
         _contextStats.update { current ->
@@ -123,9 +150,10 @@ class ContextManager @Inject constructor(
     }
 }
 
+@Serializable // Ensure ContextStats is serializable if it's part of a larger serializable graph implicitly
 data class ContextStats(
     val totalChains: Int = 0,
     val activeChains: Int = 0,
     val longestChain: Int = 0,
-    val lastUpdated: Instant = Clock.System.now(),
+    @Serializable(with = dev.aurakai.auraframefx.serialization.InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
 )
