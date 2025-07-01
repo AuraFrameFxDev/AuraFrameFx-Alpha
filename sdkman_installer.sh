@@ -253,7 +253,7 @@ SDKMAN_CANDIDATES_CSV=$(curl -s "${SDKMAN_SERVICE}/candidates/all")
 echo "$SDKMAN_CANDIDATES_CSV" > "${SDKMAN_DIR}/var/candidates"
 
 echo "Prime platform file..."
-# infer_platform detects the current operating system and hardware architecture, and echoes a platform identifier string recognized by SDKMAN.
+# infer_platform detects the current operating system and hardware architecture, and echoes an SDKMAN-compatible platform identifier string.
 function infer_platform() {
 	local kernel
 	local machine
