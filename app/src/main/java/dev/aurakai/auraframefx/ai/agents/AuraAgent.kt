@@ -98,30 +98,29 @@ class AuraAgent(
         return emptyMap()
     }
 
-    /**
-     * Processes an AI request and returns an agent response.
-     * @param request The AI request to process.
-     * @return The response from the agent, including content and confidence level.
-     * TODO: Implement actual request processing logic. Method reported as unused.
-     */
-    override suspend fun processRequest(request: AiRequest): AgentResponse { // Added 'override' back
-        // Aura-specific logic can be added here
-        return AgentResponse(
-            content = "Aura's response to '${request.query}'",
-            confidence = 0.8f
-        )
-    }
+    // Removed the incorrect override fun processRequest(request: AiRequest): AgentResponse
+    // The logic will be consolidated into the correct overriding method below.
 
     override suspend fun processRequest(
         request: AiRequest,
-        context: String,
+        context: String, // Context parameter is part of the interface
     ): AgentResponse {
-        TODO("Not yet implemented")
+        // Aura-specific logic can be added here
+        // Using request.prompt instead of request.query
+        // Using isSuccess instead of confidence
+        // Incorporating context into the response for demonstration
+        return AgentResponse(
+            content = "Aura's response to '${request.prompt}' with context '$context'",
+            isSuccess = true // Example: assume success
+        )
     }
 
-    override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
-        TODO("Not yet implemented")
-    }
+    // processRequestFlow is inherited from BaseAgent, which provides a default implementation.
+    // If AuraAgent needs custom flow logic, it can override it here.
+    // For now, we'll rely on BaseAgent's implementation.
+    // override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
+    //     TODO("Not yet implemented for AuraAgent custom flow")
+    // }
 
     // You can override other methods from BaseAgent or Agent interface if needed
     // override suspend fun processRequest(_prompt: String): String {

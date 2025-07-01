@@ -77,28 +77,6 @@ fun AuraFrameFXTheme(
     )
 }
 
-/**
- * Applies the AuraFrameFX Material3 theme with proper system integration
- */
-@Composable
-fun AuraFrameFXThemeCompat(
-    content: @Composable () -> Unit,
-) {
-    // Wrap the existing theme implementation
-    AuraFrameFXTheme {
-        // Get the current view to apply system UI colors
-        val view = LocalView.current
-        if (!view.isInEditMode) {
-            SideEffect {
-                val window = (view.context as Activity).window
-                // Use MaterialTheme color values for system bars
-                window.statusBarColor = MaterialTheme.colorScheme.background.toArgb()
-                // Ensure proper contrast for status bar icons
-                WindowCompat.getInsetsController(window, view)
-                    .isAppearanceLightStatusBars = !isSystemInDarkTheme()
-            }
-        }
-
-        content()
-    }
-}
+// Removed duplicate AuraFrameFXThemeCompat function.
+// The version in MaterialThemeCompat.kt is kept as it has more robust logic
+// for isAppearanceLightStatusBars.

@@ -1,68 +1,68 @@
 package dev.aurakai.auraframefx.ai.agents
 
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.api.model.AgentType // Corrected import
 import dev.aurakai.auraframefx.model.AiRequest
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 /**
  * Base implementation of the [Agent] interface.
- * TODO: Reported as unused declaration. Ensure this class is subclassed or used.
- * TODO: Constructor parameters _agentName, _agentType were reported as unused in the base class context.
  * @param agentName The name of the agent.
- * @param agentType The type or model of the agent.
+ * @param agentType The string representation of the agent type, to be mapped to [AgentType].
  */
 open class BaseAgent(
-    private val _agentName: String, // Underscore if constructor params are directly for properties not overridden
+    private val _agentName: String,
     private val _agentType: String,
 ) : Agent {
 
-    // TODO: Consider if _agentName and _agentType should be used for overridden getName() and getType()
-    // or if those methods should allow further customization by subclasses.
-
-    override fun getName(): String? { // Changed to String?
-        // TODO: Reported as unused (inherited method).
-        return _agentName // Using constructor parameter
+    override fun getName(): String? {
+        return _agentName
     }
 
-    override fun getType(): AgentType? { // Changed to AgentType?
-        // TODO: Reported as unused (inherited method).
-        // Basic mapping from string to AgentType enum, adjust as needed
+    override fun getType(): AgentType { // Return non-nullable AgentType from api.model
         return try {
             AgentType.valueOf(_agentType.uppercase())
         } catch (e: IllegalArgumentException) {
-            null // Or a default AgentType
+            // Or handle error more gracefully, e.g., map to a default or throw
+            throw IllegalArgumentException("Invalid agent type string: $_agentType", e)
         }
     }
 
-    override suspend fun processRequest(request: AiRequest): AgentResponse {
+    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Default implementation for base agent, override in subclasses
+        // Added 'context' parameter to match interface
+        // Used request.prompt instead of request.query
+        // Used isSuccess instead of confidence
         return AgentResponse(
-            content = "BaseAgent response to '${request.query}' for agent $_agentName",
-            confidence = 0.5f
+            content = "BaseAgent response to '${request.prompt}' for agent $_agentName with context '$context'",
+            isSuccess = true
         )
     }
 
-    override fun getCapabilities(): Map<String, Any> {
-        // TODO: Reported as unused (inherited method).
-        // TODO: Implement base capabilities or leave for subclasses.
+    override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
+        // Basic implementation, can be overridden for more complex streaming logic
+        return flow {
+            // For simplicity, using a dummy context. Subclasses should provide meaningful context.
+            emit(processRequest(request, "DefaultContext_BaseAgentFlow"))
+        }
+    }
+
+    // These methods are not part of the Agent interface, so @Override is removed.
+    // They can be part of BaseAgent's own API for subclasses.
+    fun getCapabilities(): Map<String, Any> {
         return mapOf("name" to _agentName, "type" to _agentType, "base_implemented" to true)
     }
 
-    override fun getContinuousMemory(): Any? {
-        // TODO: Reported as unused (inherited method).
-        // TODO: Implement base memory access or leave for subclasses.
+    fun getContinuousMemory(): Any? {
         return null
     }
 
-    override fun getEthicalGuidelines(): List<String> {
-        // TODO: Reported as unused (inherited method).
-        // TODO: Implement base ethical guidelines or leave for subclasses.
+    fun getEthicalGuidelines(): List<String> {
         return listOf("Be helpful.", "Be harmless.", "Adhere to base agent principles.")
     }
 
-    override fun getLearningHistory(): List<String> {
-        // TODO: Reported as unused (inherited method).
-        // TODO: Implement base learning history access or leave for subclasses.
+    fun getLearningHistory(): List<String> {
         return emptyList()
     }
 }
