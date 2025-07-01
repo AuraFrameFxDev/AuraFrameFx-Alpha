@@ -42,17 +42,22 @@ class AuraAgent(
     // This `processRequest(prompt: String)` does not match the Agent interface.
     // If it's a helper or different functionality, it should be named differently
     // or its logic integrated into the overridden `processRequest(AiRequest, String)`.
-    // For now, renaming to avoid conflict and make its purpose clearer if it's kept.
+    /**
+     * Generates a simple Aura-specific response to the given prompt.
+     *
+     * @param prompt The input prompt to process.
+     * @return A string containing Aura's response to the prompt.
+     */
     suspend fun processSimplePrompt(prompt: String): String {
         return "Aura's response to '$prompt'"
     }
 
     // --- Collaboration placeholders (not part of Agent interface) ---
     /**
-     * Placeholder for participating in inter-agent federation logic.
+     * Placeholder for inter-agent federation participation logic.
      *
-     * @param data Input data relevant to federation participation.
-     * @return An empty map. Intended for future implementation of federation collaboration.
+     * @param data Input data for federation collaboration.
+     * @return An empty map. Intended for future federation logic implementation.
      */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
@@ -87,11 +92,11 @@ class AuraAgent(
     }
 
     /**
-     * Serves as a placeholder for collaborative processing between Genesis, KaiAgent, and user input.
+     * Placeholder for collaborative processing involving Genesis, KaiAgent, and user input.
      *
      * Intended for future implementation of multi-agent collaboration logic. Currently returns an empty map.
      *
-     * @param data The input data for the collaboration.
+     * @param data Input data for the collaboration.
      * @param kai The KaiAgent participating in the collaboration.
      * @param genesis The Genesis agent or entity involved.
      * @param userInput Additional input provided by the user.
@@ -109,11 +114,11 @@ class AuraAgent(
 
     // Removed the incorrect override fun processRequest(request: AiRequest): AgentResponse
     /**
-     * Processes an AI request with Aura-specific logic, generating a response that includes the provided context.
+     * Processes an AI request using Aura-specific logic, generating a response that incorporates the provided context.
      *
      * @param request The AI request containing the prompt to process.
-     * @param context Additional context to be incorporated into the response.
-     * @return An AgentResponse with Aura's reply and a success status.
+     * @param context Additional context to include in the response.
+     * @return An AgentResponse containing Aura's reply and a success status.
      */
 
     override suspend fun processRequest(

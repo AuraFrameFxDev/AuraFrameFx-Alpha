@@ -26,12 +26,12 @@ class ContextManager @Inject constructor(
     val contextStats: StateFlow<ContextStats> = _contextStats
 
     /**
-     * Initializes and registers a new context chain with the specified root context, initial content, agent, and optional metadata.
+     * Creates and registers a new context chain with the specified root context, initial content, agent, and optional metadata.
      *
-     * The new chain starts with a single context node and is added to the set of active context chains. Metadata values are stored as strings.
+     * The new chain is initialized with a single context node and added to the set of active context chains. Metadata values are stored as strings.
      *
      * @param rootContext The identifier for the root context of the chain.
-     * @param initialContext The initial content to populate the context node.
+     * @param initialContext The initial content for the context node.
      * @param agent The agent associated with the initial context.
      * @param metadata Optional metadata to associate with the chain and its initial node.
      * @return The unique identifier assigned to the newly created context chain.
@@ -65,7 +65,7 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Updates an existing context chain by appending a new context node.
+     * Appends a new context node to an existing context chain.
      *
      * Adds a new context entry with the specified agent and metadata to the chain identified by `chainId`, updates the current context and agent mapping, and refreshes the last updated timestamp.
      *
