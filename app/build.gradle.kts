@@ -72,6 +72,7 @@ android {
                 "${layout.buildDirectory.get().asFile}/generated/ksp/debug/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
             ))
+            aidl.setSrcDirs(listOf("src/main/aidl"))
         }
     }
     ndkVersion = "26.2.11394342"
@@ -265,6 +266,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.jetbrains.kotlinx.serialization.json)
+    implementation(libs.jetbrains.kotlinx.datetime) // Added kotlinx-datetime
 
     // Network
     implementation(libs.squareup.retrofit2.retrofit)

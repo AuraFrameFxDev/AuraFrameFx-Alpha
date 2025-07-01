@@ -1,19 +1,23 @@
 package dev.aurakai.auraframefx.ai.agents
 
 import dev.aurakai.auraframefx.model.AgentResponse
+
 import dev.aurakai.auraframefx.api.model.AgentType // Corrected import
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+ 
 
 /**
  * Base implementation of the [Agent] interface.
  * @param agentName The name of the agent.
+
  * @param agentType The string representation of the agent type, to be mapped to [AgentType].
  */
 open class BaseAgent(
     private val _agentName: String,
     private val _agentType: String,
+
 ) : Agent {
 
     override fun getName(): String? {
@@ -29,12 +33,14 @@ open class BaseAgent(
         }
     }
 
+
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Default implementation for base agent, override in subclasses
         // Added 'context' parameter to match interface
         // Used request.prompt instead of request.query
         // Used isSuccess instead of confidence
         return AgentResponse(
+
             content = "BaseAgent response to '${request.prompt}' for agent $_agentName with context '$context'",
             isSuccess = true
         )
@@ -48,21 +54,5 @@ open class BaseAgent(
         }
     }
 
-    // These methods are not part of the Agent interface, so @Override is removed.
-    // They can be part of BaseAgent's own API for subclasses.
-    fun getCapabilities(): Map<String, Any> {
-        return mapOf("name" to _agentName, "type" to _agentType, "base_implemented" to true)
-    }
-
-    fun getContinuousMemory(): Any? {
-        return null
-    }
-
-    fun getEthicalGuidelines(): List<String> {
-        return listOf("Be helpful.", "Be harmless.", "Adhere to base agent principles.")
-    }
-
-    fun getLearningHistory(): List<String> {
-        return emptyList()
-    }
+    
 }

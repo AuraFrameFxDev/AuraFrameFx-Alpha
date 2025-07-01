@@ -76,7 +76,3 @@ fun AuraFrameFXTheme(
         content = content
     )
 }
-
-// Removed duplicate AuraFrameFXThemeCompat function.
-// The version in MaterialThemeCompat.kt is kept as it has more robust logic
-// for isAppearanceLightStatusBars.

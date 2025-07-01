@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Duration
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Contextual // Added import
+import kotlinx.serialization.Serializable // Added import for @Serializable on ContextStats if not already there
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,7 +29,7 @@ class ContextManager @Inject constructor(
         rootContext: String,
         initialContext: String,
         agent: AgentType,
-        metadata: Map<String, Any> = emptyMap(),
+        metadata: Map<String, String> = emptyMap(), // Changed Map<String, Any> to Map<String, String>
     ): String {
         val chain = ContextChain(
             rootContext = rootContext,
@@ -55,7 +57,7 @@ class ContextManager @Inject constructor(
         chainId: String,
         newContext: String,
         agent: AgentType,
-        metadata: Map<String, Any> = emptyMap(),
+        metadata: Map<String, String> = emptyMap(), // Changed Map<String, Any> to Map<String, String>
     ): ContextChain {
         val chain =
             _activeContexts.value[chainId] ?: throw IllegalStateException("Context chain not found")
@@ -123,9 +125,10 @@ class ContextManager @Inject constructor(
     }
 }
 
+@Serializable // Ensure ContextStats is serializable if it's part of a larger serializable graph implicitly
 data class ContextStats(
     val totalChains: Int = 0,
     val activeChains: Int = 0,
     val longestChain: Int = 0,
-    val lastUpdated: Instant = Clock.System.now(),
+    @Contextual val lastUpdated: Instant = Clock.System.now(),
 )

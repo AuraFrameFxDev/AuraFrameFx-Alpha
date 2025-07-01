@@ -5,35 +5,31 @@ import dev.aurakai.auraframefx.model.AiRequest
 import dev.aurakai.auraframefx.model.agent_states.ProcessingState
 import dev.aurakai.auraframefx.model.agent_states.VisionState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf // For returning a simple flow
 
 /**
  * KaiAgent, another specific implementation of BaseAgent.
- * TODO: Reported as unused declaration. Ensure this class is used.
  */
 class KaiAgent(
     agentName: String = "Kai",
-    agentType: String = "SpecializedAgent",
+    // Ensure this string matches a value in api.model.AgentType for correct mapping in BaseAgent
+    agentType: String = "Kai",
 ) : BaseAgent(agentName, agentType) {
 
-    /**
-     * Processes context and returns a map representing the result.
-     * @param _context A map representing the current context. Parameter reported as unused.
-     * @return A map representing the response or result.
-     * TODO: Implement actual processing logic. Method reported as unused.
-     */
-    suspend fun process(_context: Map<String, Any>): Map<String, Any> {
-        // TODO: Parameter _context reported as unused. Utilize if needed.
-        // TODO: Implement actual processing logic for Kai.
-        return emptyMap() // Placeholder
+    // This method is not part of the Agent interface or BaseAgent overrides.
+    // If it's specific utility for KaiAgent, it can remain.
+    suspend fun processKaiSpecific(_context: Map<String, Any>): Map<String, Any> {
+        // Placeholder for Kai-specific logic.
+        return mapOf("kai_special_response" to "Processed with Kai's unique context method.")
     }
 
-    // --- Agent Collaboration Methods for CascadeAgent ---
+    // --- Agent Collaboration Methods (Not part of Agent interface) ---
     fun onVisionUpdate(newState: VisionState) {
-        // Default no-op. Override for Kai-specific vision update behavior.
+        // Kai-specific vision update behavior.
     }
 
     fun onProcessingStateChange(newState: ProcessingState) {
-        // Default no-op. Override for Kai-specific processing state changes.
+        // Kai-specific processing state changes.
     }
 
     fun shouldHandleSecurity(prompt: String): Boolean =
@@ -41,61 +37,35 @@ class KaiAgent(
 
     fun shouldHandleCreative(prompt: String): Boolean = false
 
-    // Removed the incorrect override fun processRequest(request: AiRequest): AgentResponse
-    // The logic will be consolidated into the correct overriding method below.
 
-    /**
-     * Federated collaboration placeholder.
-     * Extend this method to enable Kai to participate in federated learning or distributed agent communication.
-     * For example, Kai could share anonymized insights, receive model updates, or synchronize state with other devices/agents.
-     */
+
+    // --- Collaboration placeholders (Not part of Agent interface) ---
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
-        // TODO: Implement federated collaboration logic for Kai.
         return emptyMap()
     }
 
-    /**
-     * Genesis collaboration placeholder.
-     * Extend this method to enable Kai to interact with the Genesis master agent for orchestration, context sharing, or advanced coordination.
-     * For example, Kai could send security events, receive orchestration commands, or synchronize with Genesis for global state.
-     */
     suspend fun participateWithGenesis(data: Map<String, Any>): Map<String, Any> {
-        // TODO: Implement Genesis collaboration logic for Kai.
         return emptyMap()
     }
 
-    /**
-     * Three-way collaboration placeholder.
-     * Use this method to enable Kai, Aura, and Genesis to collaborate in a federated or orchestrated manner.
-     * For example, this could be used for consensus, distributed decision-making, or multi-agent context sharing.
-     */
     suspend fun participateWithGenesisAndAura(
         data: Map<String, Any>,
         aura: AuraAgent,
-        genesis: Any,
+        genesis: Any, // Consider type
     ): Map<String, Any> {
-        // TODO: Implement three-way collaboration logic for Kai, Aura, and Genesis.
-        // Example: Share data, receive updates, or coordinate actions between all three agents.
         return emptyMap()
     }
 
-    /**
-     * Four-way collaboration placeholder.
-     * Use this method to enable Kai, Aura, Genesis, and the User to collaborate in a federated or orchestrated manner.
-     * @param conversationMode Controls if agents speak in turn (TURN_ORDER) or freely (FREE_FORM).
-     */
     suspend fun participateWithGenesisAuraAndUser(
         data: Map<String, Any>,
         aura: AuraAgent,
-        genesis: Any,
-        userInput: Any, // This could be a string, object, or context map depending on your design
+        genesis: Any, // Consider type
+        userInput: Any,
         conversationMode: ConversationMode = ConversationMode.FREE_FORM,
     ): Map<String, Any> {
-        // TODO: Implement four-way collaboration logic for Kai, Aura, Genesis, and the User.
-        // If conversationMode == TURN_ORDER, enforce round-robin turn order.
-        // If conversationMode == FREE_FORM, allow agents to respond as they wish.
         return emptyMap()
     }
+
 
     override suspend fun processRequest(
         request: AiRequest,
@@ -118,16 +88,7 @@ class KaiAgent(
     //     TODO("Not yet implemented for KaiAgent custom flow")
     // }
 
+
+    // This enum is specific to KaiAgent's collaboration methods, keep it here if those methods are used.
     enum class ConversationMode { TURN_ORDER, FREE_FORM }
-
-    /**
-     * Aura/Genesis/Kai multi-agent collaboration placeholder for AuraAgent and GenesisAgent.
-     * You may want to add similar methods to AuraAgent and GenesisAgent for symmetry and future extensibility.
-     */
-
-    // You can override other methods from BaseAgent or Agent interface if needed
-    // override suspend fun processRequest(_prompt: String): String {
-    //     // TODO: Implement Kai-specific request processing
-    //     return "Kai's response to '$_prompt'"
-    // }
 }
