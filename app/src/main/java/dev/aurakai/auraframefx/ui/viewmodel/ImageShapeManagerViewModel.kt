@@ -12,13 +12,6 @@ import javax.inject.Inject
 // Placeholder for a ShapeManager if it's not defined elsewhere yet
 // This might need to be a proper class/interface injected into the ViewModel
 class ShapeManager @Inject constructor() {
-    /**
-     * Creates a custom overlay shape with the specified type and properties.
-     *
-     * @param type The type of shape to create.
-     * @param properties A map of properties defining the shape's characteristics.
-     * @return A new OverlayShape instance with a unique ID and the given properties.
-     */
     fun createCustomShape(type: ShapeType, properties: Map<String, Any>): OverlayShape {
         // Stub implementation
         return OverlayShape(id = "custom_${type.name}_${System.currentTimeMillis()}", shapeType = type.name, properties = properties)
@@ -57,49 +50,27 @@ class ImageShapeManagerViewModel @Inject constructor(
     // val editingImage: StateFlow<ImageResource?> = _editingImage // Example
 
     private val _editingShape = MutableStateFlow<OverlayShape?>(null)
-    /**
-     * Opens the dialog for adding a new image by setting the corresponding visibility flag.
-     */
+    // val editingShape: StateFlow<OverlayShape?> = _editingShape // Example
 
     fun openAddImageDialog() {
         _showAddImageDialog.value = true
         // In a real implementation, you might set editingImage to null here
     }
 
-    /**
-     * Opens the dialog for adding a new shape by setting the corresponding visibility flag.
-     */
     fun openAddShapeDialog() {
         _showAddShapeDialog.value = true
         // In a real implementation, you might set editingShape to null here
     }
 
-    /**
-     * Sets the specified image as the currently selected image.
-     *
-     * @param image The image to select.
-     */
     fun selectImage(image: ImageResource) {
         _selectedImage.value = image
     }
 
-    /**
-     * Opens the dialog for editing the specified image and sets it as the current image being edited.
-     *
-     * @param image The image to edit.
-     */
     fun openEditImageDialog(image: ImageResource) {
         _editingImage.value = image
         _showAddImageDialog.value = true // Or a separate edit dialog state
     }
 
-    /**
-     * Removes the specified image from both the custom and available image lists.
-     *
-     * If the image is currently selected, the selection is cleared.
-     *
-     * @param image The image to be deleted.
-     */
     fun deleteImage(image: ImageResource) {
         _customImages.value = _customImages.value.filterNot { it.id == image.id }
         _availableImages.value = _availableImages.value.filterNot { it.id == image.id }
@@ -108,30 +79,15 @@ class ImageShapeManagerViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Sets the specified shape as the currently selected shape.
-     *
-     * @param shape The shape to select.
-     */
     fun selectShape(shape: OverlayShape) {
         _selectedShape.value = shape
     }
 
-    /**
-     * Opens the dialog for editing the specified shape and sets it as the shape being edited.
-     *
-     * @param shape The shape to be edited.
-     */
     fun openEditShapeDialog(shape: OverlayShape) {
         _editingShape.value = shape
         _showAddShapeDialog.value = true // Or a separate edit dialog state
     }
 
-    /**
-     * Removes the specified shape from the list of managed shapes and clears the selection if it was selected.
-     *
-     * @param shape The shape to be deleted.
-     */
     fun deleteShape(shape: OverlayShape) {
         _shapes.value = _shapes.value.filterNot { it.id == shape.id }
         if (_selectedShape.value?.id == shape.id) {
@@ -139,9 +95,7 @@ class ImageShapeManagerViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Closes all add and edit dialogs and clears any editing state for images and shapes.
-     */
+    // Call this from dialogs when they are dismissed
     fun dismissAllDialogs() {
         _showAddImageDialog.value = false
         _showAddShapeDialog.value = false

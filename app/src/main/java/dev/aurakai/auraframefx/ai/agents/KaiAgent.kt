@@ -49,28 +49,31 @@ class KaiAgent(
     }
 
     /**
- * Indicates that KaiAgent always handles security-related prompts.
- *
- * @return `true`, meaning all security prompts are handled by KaiAgent.
- */
+         * Determines whether KaiAgent should handle a given security-related prompt.
+         *
+         * Always returns `true`, indicating KaiAgent handles all security prompts by default.
+         *
+         * @param prompt The prompt to evaluate for security handling.
+         * @return `true` to indicate security prompts are always handled.
+         */
         fun shouldHandleSecurity(prompt: String): Boolean = true
 
     /**
- * Indicates whether KaiAgent handles creative prompts.
- *
- * Always returns `false`, meaning KaiAgent does not process creative prompts.
- *
- * @param prompt The prompt to evaluate.
- * @return `false`, as creative prompts are not handled by KaiAgent.
- */
+     * Determines whether KaiAgent should handle creative prompts.
+     *
+     * Always returns `false`, indicating that KaiAgent does not process creative prompts.
+     *
+     * @param prompt The prompt to evaluate.
+     * @return `false`, as creative prompts are not handled by KaiAgent.
+     */
     fun shouldHandleCreative(prompt: String): Boolean = false
 
     /**
      * Placeholder for Kai's participation in a federation context.
      *
-     * Currently returns an empty map, indicating no federation logic is implemented.
+     * Returns an empty map, indicating no federation logic is implemented.
      *
-     * @param data Input data for federation participation.
+     * @param data Input data relevant to federation participation.
      * @return An empty map.
      */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
@@ -127,13 +130,13 @@ class KaiAgent(
 
 
     /**
-     * Processes an AI request with the given context and returns a Kai-specific response.
+     * Analyzes an AI request for security concerns within the provided context and returns a response indicating the security status.
      *
-     * The response includes a message referencing the query and context, with a fixed confidence score.
+     * The response content reflects whether the query is considered secure or potentially a threat based on keyword detection.
      *
-     * @param request The AI request to process.
-     * @param context Additional context for the request.
-     * @return An AgentResponse containing Kai's response and a confidence score.
+     * @param request The AI request to analyze.
+     * @param context Additional context for the analysis.
+     * @return An AgentResponse containing the security analysis result and a confidence score.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Kai-specific logic for handling the request with context.

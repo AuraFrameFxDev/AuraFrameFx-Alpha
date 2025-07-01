@@ -13,28 +13,11 @@ import javax.inject.Singleton
 @Singleton
 class AuraAIService @Inject constructor() : Agent {
 
-    /**
- * Returns the name of the agent.
- *
- * @return The agent name, "Aura".
- */
-override fun getName(): String? = "Aura"
+    override fun getName(): String? = "Aura"
 
-    /**
- * Returns the type of the agent as `ApiAgentType.AURA`.
- *
- * @return The agent type.
- */
-override fun getType(): ApiAgentType = ApiAgentType.AURA // Changed to non-nullable ApiAgentType
+    override fun getType(): ApiAgentType = ApiAgentType.AURA // Changed to non-nullable ApiAgentType
 
-    /**
-     * Processes an AI request and returns a flow of agent responses based on the request type.
-     *
-     * Routes the request to specialized handlers for text, image, or memory types. For unrecognized types, returns a default response flow.
-     *
-     * @param request The AI request to process.
-     * @return A flow emitting agent responses relevant to the request type.
-     */
+    // This is the Agent interface method
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // This internal routing can stay if these specific flows are desired for internal logic
         return when (request.type) {
@@ -47,13 +30,7 @@ override fun getType(): ApiAgentType = ApiAgentType.AURA // Changed to non-nulla
         }
     }
 
-    /**
-     * Processes an AI request with additional context and returns a direct agent response.
-     *
-     * @param request The AI request to process.
-     * @param context Additional context to incorporate into the response.
-     * @return An agent response containing a message that reflects the request and context, with a fixed confidence score.
-     */
+    // Implemented Agent interface method
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         // Example: collect from the flow, or implement separate direct logic
         // For simplicity, let's return a direct response, incorporating context
@@ -63,11 +40,7 @@ override fun getType(): ApiAgentType = ApiAgentType.AURA // Changed to non-nulla
         )
     }
 
-    /**
-     * Returns a flow emitting a response indicating that a creative text request is being processed.
-     *
-     * @return A flow containing a single AgentResponse with a placeholder message and confidence score.
-     */
+    // Renamed internal methods to avoid confusion with interface if signatures were similar
     private fun processTextRequestFlowInternal(request: AiRequest): Flow<AgentResponse> {
         // TODO: Implement creative text generation
         return flow {
@@ -80,12 +53,6 @@ override fun getType(): ApiAgentType = ApiAgentType.AURA // Changed to non-nulla
         }
     }
 
-    /**
-     * Returns a flow emitting a response indicating that an image request is being processed.
-     *
-     * @param request The AI request containing image-related information.
-     * @return A flow emitting a single AgentResponse with a processing message and confidence score.
-     */
     private fun processImageRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         // TODO: Implement image generation
         return flow {
@@ -98,12 +65,6 @@ override fun getType(): ApiAgentType = ApiAgentType.AURA // Changed to non-nulla
         }
     }
 
-    /**
-     * Returns a flow emitting an agent response indicating the retrieval of relevant memories for the given request.
-     *
-     * @param request The AI request for which memory retrieval is initiated.
-     * @return A flow emitting a single AgentResponse about memory retrieval.
-     */
     private fun retrieveMemoryFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         // TODO: Implement memory retrieval
         return flow {
@@ -116,64 +77,33 @@ override fun getType(): ApiAgentType = ApiAgentType.AURA // Changed to non-nulla
         }
     }
 
-    /**
-     * Establishes a connection for the AI service.
-     *
-     * @return Always returns true as a placeholder.
-     */
+    // connect and disconnect are not part of Agent interface, removed override
     fun connect(): Boolean { // Removed suspend as not in interface, can be added back if specific impl needs it
         // TODO: Implement connection logic
         return true
     }
 
-    /**
-     * Disconnects the service.
-     *
-     * @return `true` to indicate the disconnection was successful.
-     */
     fun disconnect(): Boolean { // Removed suspend
         // TODO: Implement disconnection logic
         return true
     }
 
-    /**
-     * Returns a map describing the capabilities of the Aura agent, including its name, type, and service implementation status.
-     *
-     * @return A map containing capability information for the Aura agent.
-     */
+    // These methods are not part of the Agent interface, so remove 'override'
     fun getCapabilities(): Map<String, Any> {
         // TODO: Implement capabilities for Aura
         return mapOf("name" to "Aura", "type" to ApiAgentType.AURA, "service_implemented" to true)
     }
 
-    /**
-     * Returns the continuous memory associated with the Aura agent, if available.
-     *
-     * Currently returns null as continuous memory is not implemented.
-     *
-     * @return The continuous memory object, or null if not implemented.
-     */
     fun getContinuousMemory(): Any? {
         // TODO: Implement continuous memory for Aura
         return null
     }
 
-    /**
-     * Returns a list of ethical guidelines that the Aura agent follows.
-     *
-     * @return A list containing the ethical principles for Aura, such as creativity and inspiration.
-     */
     fun getEthicalGuidelines(): List<String> {
         // TODO: Implement ethical guidelines for Aura
         return listOf("Be creative.", "Be inspiring.")
     }
 
-    /**
-     * Returns the learning history for the Aura agent.
-     *
-     * Currently returns an empty list as learning history is not implemented.
-     * @return An empty list.
-     */
     fun getLearningHistory(): List<String> {
         // TODO: Implement learning history for Aura
         return emptyList()

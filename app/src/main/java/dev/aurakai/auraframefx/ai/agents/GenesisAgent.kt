@@ -93,37 +93,22 @@ class GenesisAgent @Inject constructor(
 
 
         // Process through Cascade first for state management
-        val cascadeAgentResponse: AgentResponse =
-            cascadeService.processRequest(
-                AiRequest(prompt = query) // Use 'prompt', remove 'type'
-                // Assuming cascadeService.processRequest matches Agent.processRequest(request, context)
-                // For now, let's pass a default context string. This should be refined.
-                , "GenesisContext_Cascade"
-            )
-        responses.add(
-            AgentMessage(
-                content = cascadeAgentResponse.content,
-                sender = AgentType.CASCADE, // Ensure this AgentType is from the correct import
-                timestamp = System.currentTimeMillis(),
-                // Derive confidence from isSuccess
-                confidence = if (cascadeAgentResponse.isSuccess) 1.0f else 0.1f
-            )
-        )
+        // Assuming cascadeService.processRequest matches Agent.processRequest(request, context)
+        // For now, let's pass a default context string. This should be refined.
+        val currentContextString = _context.value.toString() // Example context string
 
-        // Process through Kai for security analysis
-        if (_activeAgents.value.contains(AgentType.KAI)) {
-            val kaiAgentResponse: AgentResponse =
-                kaiService.processRequest(
-                    AiRequest(prompt = query), // Use 'prompt', remove 'type'
-                    "GenesisContext_KaiSecurity" // Default context
+        try {
+            val cascadeAgentResponse: AgentResponse =
+                cascadeService.processRequest(
+                    AiRequest(query = queryText, context = currentContextString), // Use 'query' and pass context
+                    "GenesisContext_Cascade" // This context parameter for processRequest is the one from Agent interface
                 )
             responses.add(
                 AgentMessage(
-                    content = kaiAgentResponse.content,
-                    sender = AgentType.KAI,
+                    content = cascadeAgentResponse.content,
+                    sender = dev.aurakai.auraframefx.model.AgentType.CASCADE,
                     timestamp = System.currentTimeMillis(),
-                    confidence = if (kaiAgentResponse.isSuccess) 1.0f else 0.1f
-
+                    confidence = cascadeAgentResponse.confidence // Use confidence directly
                 )
             )
         } catch (e: Exception) {
@@ -131,26 +116,20 @@ class GenesisAgent @Inject constructor(
             responses.add(AgentMessage("Error with Cascade: ${e.message}", dev.aurakai.auraframefx.model.AgentType.CASCADE, currentTimestamp, 0.0f))
         }
 
-        // Process through Aura for creative response
-        if (_activeAgents.value.contains(AgentType.AURA)) {
-            val auraAgentResponse: AgentResponse =
-                auraService.processRequest(
-                    AiRequest(prompt = query), // Use 'prompt', remove 'type'
-                    "GenesisContext_AuraCreative" // Default context
-                )
-            responses.add(
-                AgentMessage(
-                    content = auraAgentResponse.content,
-                    sender = AgentType.AURA,
-                    timestamp = System.currentTimeMillis(),
-                    confidence = if (auraAgentResponse.isSuccess) 1.0f else 0.1f
-)
+        // Process through Kai for security analysis
+        if (_activeAgents.value.contains(dev.aurakai.auraframefx.model.AgentType.KAI)) {
+            try {
+                val kaiAgentResponse: AgentResponse =
+                    kaiService.processRequest(
+                        AiRequest(query = queryText, context = currentContextString), // Use 'query' and pass context
+                        "GenesisContext_KaiSecurity" // Context for Agent.processRequest
+                    )
                 responses.add(
                     AgentMessage(
                         content = kaiAgentResponse.content,
                         sender = dev.aurakai.auraframefx.model.AgentType.KAI,
-                        timestamp = currentTimestamp,
-                        confidence = kaiAgentResponse.confidence
+                        timestamp = System.currentTimeMillis(),
+                        confidence = kaiAgentResponse.confidence // Use confidence directly
                     )
                 )
             } catch (e: Exception) {
@@ -163,14 +142,17 @@ class GenesisAgent @Inject constructor(
         if (_activeAgents.value.contains(dev.aurakai.auraframefx.model.AgentType.AURA)) {
             try {
                 val auraAgentResponse = auraService.processRequest(
-                    AiRequest(query = queryText, type = "creative_text", context = currentContextString)
+                    // AiRequest query and context are from the Agent interface method.
+                    // The AiRequest object itself can have its own context if needed by the service.
+                    AiRequest(query = queryText, context = currentContextString, type = "creative_text"),
+                    "GenesisContext_AuraCreative" // Context for Agent.processRequest
                 )
                 responses.add(
                     AgentMessage(
                         content = auraAgentResponse.content,
                         sender = dev.aurakai.auraframefx.model.AgentType.AURA,
                         timestamp = currentTimestamp,
-                        confidence = auraAgentResponse.confidence
+                        confidence = auraAgentResponse.confidence // Use confidence directly
                     )
                 )
             } catch (e: Exception) {
@@ -275,34 +257,33 @@ fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriorit
     ): Map<String, AgentResponse> {
         val responses = mutableMapOf<String, AgentResponse>()
 
-        val currentContextMap = data.toMutableMap() // Renamed to avoid confusion with context string
+        val currentContextMap = data.toMutableMap()
         val inputQuery = userInput?.toString() ?: currentContextMap["latestInput"]?.toString() ?: ""
 
-        // Construct AiRequest with prompt only
-        val request = AiRequest(prompt = inputQuery)
-        // Prepare context string for agent.processRequest call
-        val contextString = currentContextMap.toString() // Or a more structured summary
-
+        // AiRequest for the Agent.processRequest method
+        val baseAiRequest = AiRequest(query = inputQuery)
+        // Context string for the Agent.processRequest method
+        val contextStringForAgent = currentContextMap.toString() // Or a more structured summary
 
         Log.d("GenesisAgent", "Starting multi-agent collaboration: mode=$conversationMode, agents=${agentsToUse.mapNotNull { it.getName() }}")
 
-        val baseRequest = AiRequest(query = inputQuery, context = contextString) // Base request for all
-
         when (conversationMode) {
             ConversationMode.TURN_ORDER -> {
-                var dynamicContext = contextString
+                var dynamicContextForAgent = contextStringForAgent
                 for (agent in agentsToUse) {
                     try {
                         val agentName = agent.getName() ?: agent.javaClass.simpleName
-
-                        // Call processRequest with request and contextString
-                        val response = agent.processRequest(request, contextString)
+                        // Each agent in turn order might modify the context for the next,
+                        // so the AiRequest's internal context might also need updating if used by agent.
+                        // For now, keeping baseAiRequest simple and relying on dynamicContextForAgent for processRequest.
+                        val response = agent.processRequest(baseAiRequest, dynamicContextForAgent)
                         Log.d(
                             "GenesisAgent",
-                            "[TURN_ORDER] $agentName responded: ${response.content} (success=${response.isSuccess})"
+                            "[TURN_ORDER] $agentName responded: ${response.content} (confidence=${response.confidence})"
                         )
                         responses[agentName] = response
-                        currentContextMap["latestInput"] = response.content // Update context map for next turn
+                        // Update context for the next agent based on this response
+                        dynamicContextForAgent = "${dynamicContextForAgent}\n${agentName}: ${response.content}"
                     } catch (e: Exception) {
                         Log.e(
                             "GenesisAgent",
@@ -310,10 +291,9 @@ fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriorit
                         )
                         responses[agent.javaClass.simpleName] = AgentResponse(
                             content = "Error: ${e.message}",
-                            isSuccess = false,
+                            confidence = 0.0f, // Use confidence
                             error = e.message
                         )
-
                     }
                 }
             }
@@ -321,12 +301,10 @@ fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriorit
                 agentsToUse.forEach { agent ->
                     try {
                         val agentName = agent.getName() ?: agent.javaClass.simpleName
-
-                        // Call processRequest with request and contextString
-                        val response = agent.processRequest(request, contextString)
+                        val response = agent.processRequest(baseAiRequest, contextStringForAgent)
                         Log.d(
                             "GenesisAgent",
-                            "[FREE_FORM] $agentName responded: ${response.content} (success=${response.isSuccess})"
+                            "[FREE_FORM] $agentName responded: ${response.content} (confidence=${response.confidence})"
                         )
                         responses[agentName] = response
                     } catch (e: Exception) {
@@ -336,10 +314,9 @@ fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriorit
                         )
                         responses[agent.javaClass.simpleName] = AgentResponse(
                             content = "Error: ${e.message}",
-                            isSuccess = false,
+                            confidence = 0.0f, // Use confidence
                             error = e.message
                         )
-
                     }
                 }
             }
@@ -361,16 +338,11 @@ fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriorit
         val flatResponses = agentResponseMapList.flatMap { it.entries }
         return flatResponses.groupBy { it.key }
             .mapValues { entry ->
-
-                // Determine "best" response, e.g., first successful, or combine content.
-                // For now, let's pick the first successful response, or the first response if none are successful.
-                // The original logic used confidence, which is no longer directly available.
-                val best = entry.value.firstOrNull { it.value.isSuccess }?.value
-                    ?: entry.value.firstOrNull()?.value
-                    ?: AgentResponse("No response", isSuccess = false, error = "No responses to aggregate")
+                val best = entry.value.maxByOrNull { it.value.confidence }?.value
+                    ?: AgentResponse("No response", confidence = 0.0f, error = "No responses to aggregate")
                 Log.d(
                     "GenesisAgent",
-                    "Consensus for ${entry.key}: ${best.content} (success=${best.isSuccess})"
+                    "Consensus for ${entry.key}: ${best.content} (confidence=${best.confidence})"
                 )
                 best
 

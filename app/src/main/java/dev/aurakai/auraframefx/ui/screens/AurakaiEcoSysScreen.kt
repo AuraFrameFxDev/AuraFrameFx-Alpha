@@ -19,11 +19,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import dev.aurakai.auraframefx.ui.AuraMoodViewModel // Corrected import
 
 // TODO: Function reported as unused or needs implementation.
-/**
- * Displays the Aurakai Ecosystem screen, showing the current mood and allowing the user to update it.
- *
- * Presents the current mood from the ViewModel and provides buttons to set the mood to "happy" or "sad".
- */
 @Composable
 fun AurakaiEcoSysScreen(
     // viewModel: AuraMoodViewModel = hiltViewModel() // Alternative injection for previews if needed
