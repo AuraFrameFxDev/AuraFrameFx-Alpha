@@ -18,7 +18,14 @@ class AuraAgent(
 
     // This method is not part of the Agent interface or BaseAgent overrides.
     // If it's specific utility for AuraAgent, it can remain.
-    // Consider if its functionality is covered by processRequest or processRequestFlow.
+    /**
+     * Processes Aura-specific context and returns a flow with a placeholder response.
+     *
+     * Intended for handling logic unique to Aura that is not covered by the standard Agent interface.
+     *
+     * @param _context The context map containing data for Aura-specific processing.
+     * @return A flow emitting a map with a placeholder Aura-specific response.
+     */
     suspend fun processAuraSpecific(_context: Map<String, Any>): Flow<Map<String, Any>> {
         // Placeholder for Aura-specific logic that doesn't fit the standard Agent interface.
         return flowOf(mapOf("aura_special_response" to "Processed with Aura's unique context method."))
@@ -26,18 +33,40 @@ class AuraAgent(
 
     // --- Agent Collaboration Methods (These are not part of Agent interface) ---
     // These can remain if they are used for internal logic or by other specific components
-    // that interact directly with AuraAgent.
+    /**
+     * Handles updates to the vision state specific to Aura.
+     *
+     * @param newState The updated vision state.
+     */
     fun onVisionUpdate(newState: VisionState) {
         // Aura-specific vision update behavior.
     }
 
+    /**
+     * Handles updates to the processing state specific to Aura.
+     *
+     * @param newState The new processing state.
+     */
     fun onProcessingStateChange(newState: ProcessingState) {
         // Aura-specific processing state changes.
     }
 
-    fun shouldHandleSecurity(prompt: String): Boolean = false
-    fun shouldHandleCreative(prompt: String): Boolean =
-        true // Aura handles creative prompts by default
+    /**
+ * Determines whether AuraAgent should handle security-related prompts.
+ *
+ * @return Always returns false, indicating AuraAgent does not process security prompts.
+ */
+fun shouldHandleSecurity(prompt: String): Boolean = false
+
+    /**
+     * Determines whether AuraAgent should handle creative prompts.
+     *
+     * Always returns true, indicating creative prompts are handled by default.
+     *
+     * @param prompt The input prompt to evaluate.
+     * @return True, indicating creative prompts are supported.
+     */
+    fun shouldHandleCreative(prompt: String): Boolean = true // Aura handles creative prompts by default
 
     // This `processRequest(prompt: String)` does not match the Agent interface.
     // If it's a helper or different functionality, it should be named differently
@@ -46,6 +75,7 @@ class AuraAgent(
      * Generates a simple Aura-specific response to the given prompt.
      *
      * @param prompt The input prompt to process.
+
      * @return A string containing Aura's response to the prompt.
      */
     suspend fun processSimplePrompt(prompt: String): String {
@@ -58,6 +88,7 @@ class AuraAgent(
      *
      * @param data Input data for federation collaboration.
      * @return An empty map. Intended for future federation logic implementation.
+
      */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
@@ -70,6 +101,7 @@ class AuraAgent(
      *
      * @param data Input data for the collaboration process.
      * @return An empty map as a placeholder result.
+
      */
     suspend fun participateWithGenesis(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
@@ -82,6 +114,7 @@ class AuraAgent(
      * @param kai The KaiAgent participating in the collaboration.
      * @param genesis The Genesis agent or object involved in the process.
      * @return An empty map. Intended for future implementation.
+
      */
     suspend fun participateWithGenesisAndKai(
         data: Map<String, Any>,
@@ -101,6 +134,7 @@ class AuraAgent(
      * @param genesis The Genesis agent or entity involved.
      * @param userInput Additional input provided by the user.
      * @return An empty map.
+
      */
     suspend fun participateWithGenesisKaiAndUser(
         data: Map<String, Any>,
@@ -121,30 +155,28 @@ class AuraAgent(
      * @return An AgentResponse containing Aura's reply and a success status.
      */
 
-    override suspend fun processRequest(
-        request: AiRequest,
-        context: String, // Context parameter is part of the interface
-    ): AgentResponse {
-        // Aura-specific logic can be added here
-        // Using request.prompt instead of request.query
-        // Using isSuccess instead of confidence
-        // Incorporating context into the response for demonstration
+
         return AgentResponse(
-            content = "Aura's response to '${request.prompt}' with context '$context'",
-            isSuccess = true // Example: assume success
+            content = responseContent, // Use the variable that correctly uses request.query
+            confidence = 1.0f
         )
     }
 
-    // processRequestFlow is inherited from BaseAgent, which provides a default implementation.
-    // If AuraAgent needs custom flow logic, it can override it here.
-    // For now, we'll rely on BaseAgent's implementation.
-    // override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
-    //     TODO("Not yet implemented for AuraAgent custom flow")
-    // }
-
-    // You can override other methods from BaseAgent or Agent interface if needed
-    // override suspend fun processRequest(_prompt: String): String {
-    //     // TODO: Implement Aura-specific request processing
-    //     return "Aura's response to '$_prompt'"
-    // }
-}
+    /**
+     * Returns a flow emitting a single agent response to the given AI request.
+     *
+     * The response content is based on the request's query, with a fixed confidence score.
+     *
+     * @return A flow containing one AgentResponse for the provided request.
+     */
+    override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
+        // Aura-specific logic for handling the request as a flow.
+        // Example: could emit multiple responses or updates.
+        // For simplicity, emitting a single response in a flow.
+        return flowOf(
+            AgentResponse(
+                content = "Aura's flow response to '${request.query}'",
+                confidence = 0.80f
+            )
+        )
+    }

@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dev.aurakai.auraframefx.api.AiContentApi
 import dev.aurakai.auraframefx.network.AuraFxContentApiClient
+import dev.aurakai.auraframefx.network.NetworkConstants
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -39,12 +40,13 @@ object AuraFxAiApiModule {
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
     @Singleton
-    fun provideAiContentApi(okHttpClient: OkHttpClient, json: Json): AiContentApi {
-        val baseUrl = "https://api.auraframefx.com/v1/"
+
+    fun provideContentApi(okHttpClient: OkHttpClient, json: Json): ContentApi {
+ 
         val contentType = "application/json".toMediaType()
 
         return Retrofit.Builder()
-            .baseUrl(baseUrl)
+            .baseUrl(NetworkConstants.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()

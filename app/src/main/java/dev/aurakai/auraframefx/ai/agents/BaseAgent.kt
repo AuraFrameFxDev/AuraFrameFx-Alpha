@@ -24,6 +24,7 @@ open class BaseAgent(
      * Retrieves the agent's name.
      *
      * @return The name of the agent, or null if not set.
+
      */
     override fun getName(): String? {
         return _agentName
@@ -42,8 +43,18 @@ open class BaseAgent(
             // Or handle error more gracefully, e.g., map to a default or throw
             throw IllegalArgumentException("Invalid agent type string: $_agentType", e)
         }
+
     }
 
+    /**
+     * Processes an AI request with the provided context and returns a default agent response.
+     *
+     * Subclasses should override this method to provide custom request handling logic.
+     *
+     * @param request The AI request to process.
+     * @param context Additional context for the request.
+     * @return A default `AgentResponse` containing a message referencing the request, context, and agent name, with fixed confidence.
+     */
 
     /**
      * Processes an AI request and returns a default successful response.
@@ -57,13 +68,9 @@ open class BaseAgent(
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Default implementation for base agent, override in subclasses
-        // Added 'context' parameter to match interface
-        // Used request.prompt instead of request.query
-        // Used isSuccess instead of confidence
         return AgentResponse(
-
-            content = "BaseAgent response to '${request.prompt}' for agent $_agentName with context '$context'",
-            isSuccess = true
+            content = "BaseAgent response to '${request.query}' for agent $_agentName with context '$context'",
+            confidence = 1.0f
         )
     }
 
@@ -74,6 +81,7 @@ open class BaseAgent(
      *
      * @return A flow emitting one `AgentResponse` for the provided request.
      */
+
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // Basic implementation, can be overridden for more complex streaming logic
         return flow {

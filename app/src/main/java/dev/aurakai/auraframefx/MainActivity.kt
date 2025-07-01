@@ -17,7 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 
-import dev.aurakai.auraframefx.ui.animation.DigitalTransitions.* // Import all members
+import dev.aurakai.auraframefx.ui.animation.digitalPixelEffect // Specific import
+// import dev.aurakai.auraframefx.ui.animation.digitalScanlineEffect // Was commented out, ensure it's not needed or defined
 
 import dev.aurakai.auraframefx.ui.components.BottomNavigationBar
 import dev.aurakai.auraframefx.ui.navigation.AppNavGraph
@@ -27,10 +28,9 @@ import dev.aurakai.auraframefx.ui.theme.AuraFrameFXTheme
 
 class MainActivity : ComponentActivity() {
     /**
-     * Initializes the activity and sets the Compose UI content to the main screen within the app's theme.
-     * Uses digital transition animations for a cyberpunk aesthetic.
+     * Initializes the activity and sets the Compose UI content to the main screen using the app's theme.
      *
-     * @param savedInstanceState The saved state of the activity, or null if none exists.
+     * @param savedInstanceState The previously saved state of the activity, or null if none exists.
      */
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,9 +61,11 @@ class MainActivity : ComponentActivity() {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
+
  * Composes the main application screen with integrated navigation and optional digital visual effects.
  *
  * Initializes the navigation controller, displays a bottom navigation bar, and conditionally applies a digital pixel effect to the main content area.
+
  */
 @Composable
 fun MainScreen() {
@@ -83,11 +85,8 @@ fun MainScreen() {
                 // Apply our custom digital effects
                 .then(
                     if (showDigitalEffects) {
-
-                        // Use the DigitalTransitions object to call the extension function
-                        Modifier.then(DigitalTransitions.digitalPixelEffect(visible = true))
+                        Modifier.digitalPixelEffect(visible = true) // Direct use of extension function
                         // digitalScanlineEffect was removed as it's not defined
-
                     } else {
                         Modifier
                     }

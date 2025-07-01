@@ -26,6 +26,7 @@ class ContextManager @Inject constructor(
     val contextStats: StateFlow<ContextStats> = _contextStats
 
     /**
+
      * Creates and registers a new context chain with the specified root context, initial content, agent, and optional metadata.
      *
      * The new chain is initialized with a single context node and added to the set of active context chains. Metadata values are stored as strings.
@@ -35,6 +36,7 @@ class ContextManager @Inject constructor(
      * @param agent The agent associated with the initial context.
      * @param metadata Optional metadata to associate with the chain and its initial node.
      * @return The unique identifier assigned to the newly created context chain.
+
      */
     fun createContextChain(
         rootContext: String,
@@ -65,6 +67,7 @@ class ContextManager @Inject constructor(
     }
 
     /**
+
      * Appends a new context node to an existing context chain.
      *
      * Adds a new context entry with the specified agent and metadata to the chain identified by `chainId`, updates the current context and agent mapping, and refreshes the last updated timestamp.
@@ -74,6 +77,7 @@ class ContextManager @Inject constructor(
      * @param agent The agent responsible for the new context entry.
      * @param metadata Optional metadata to associate with the new context node.
      * @return The updated `ContextChain` instance.
+
      * @throws IllegalStateException if the specified context chain does not exist.
      */
     fun updateContextChain(
@@ -132,6 +136,12 @@ class ContextManager @Inject constructor(
         )
     }
 
+    /**
+     * Updates the context statistics to reflect the current state of all active context chains.
+     *
+     * Recalculates the total number of chains, the number of recently updated (active) chains,
+     * the length of the longest chain, and sets the last updated timestamp.
+     */
     private fun updateStats() {
         val chains = _activeContexts.value.values
         _contextStats.update { current ->
@@ -153,5 +163,5 @@ data class ContextStats(
     val totalChains: Int = 0,
     val activeChains: Int = 0,
     val longestChain: Int = 0,
-    @Contextual val lastUpdated: Instant = Clock.System.now(),
+    @Serializable(with = dev.aurakai.auraframefx.serialization.InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
 )
