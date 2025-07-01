@@ -34,11 +34,7 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides an implementation of the AiContentApi interface for accessing the AuraFrameFx AI API.
-     *
-     * Configures a Retrofit instance with the specified OkHttp client and Kotlinx serialization for JSON.
-     *
-     * @return An implementation of AiContentApi for communicating with the AuraFrameFx AI API.
+     * Provides the ContentApi interface implementation for accessing the AuraFrameFx AI API.
      */
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
@@ -56,10 +52,7 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton instance of AuraFxContentApiClient that wraps the AiContentApi.
-     *
-     * @param aiContentApi The API interface implementation to be wrapped by the client.
-     * @return An AuraFxContentApiClient instance configured with the provided AiContentApi.
+     * Provides the AuraFxContentApiClient wrapper for the AiContentApi.
      */
     @Provides
     @Singleton
