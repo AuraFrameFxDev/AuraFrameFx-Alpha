@@ -1,0 +1,23 @@
+# Created by Gemini
+
+# Android Studio/IntelliJ
+.idea/
+*.iml
+*.hprof
+
+# Build files
+.gradle/
+build/
+app/build/
+**/build/
+
+# Local configuration
+local.properties
+
+# CMake/NDK build artifacts from CodeRabbitAI review
+app/.cxx/
+*.cmake
+cmake_install.cmake
+
+# Ignore developer-specific run configurations
+.idea/deploymentTargetSelector.xml
