@@ -9,8 +9,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Duration
 import kotlinx.datetime.Instant
-import kotlinx.serialization.Contextual // Added import
-import kotlinx.serialization.Serializable // Added import for @Serializable on ContextStats if not already there
+// import kotlinx.serialization.Contextual // No longer needed for Instant here
+import kotlinx.serialization.Serializable
+import dev.aurakai.auraframefx.serialization.InstantSerializer // Ensure this is imported
+import dev.aurakai.auraframefx.model.AgentType // Ensure this is imported
 import javax.inject.Inject
 import javax.inject.Singleton
 
