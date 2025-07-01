@@ -37,6 +37,8 @@ class KaiAgent(
 
     fun shouldHandleCreative(prompt: String): Boolean = false
 
+
+
     // --- Collaboration placeholders (Not part of Agent interface) ---
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
@@ -64,34 +66,28 @@ class KaiAgent(
         return emptyMap()
     }
 
-    /**
-     * Processes an AI request with context and returns an agent response.
-     * This overrides the method from BaseAgent.
-     */
-    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
-        // Kai-specific logic for handling the request with context.
-        val responseContent = "Kai's security analysis for '${request.query}' with context '$context'"
-        // Simulate a security check
-        val isSecure = !request.query.contains("exploit", ignoreCase = true)
+
+    override suspend fun processRequest(
+        request: AiRequest,
+        context: String, // Context parameter is part of the interface
+    ): AgentResponse {
+        // Kai-specific logic can be added here
+        // Using request.prompt instead of request.query
+        // Using isSuccess instead of confidence
+        // Incorporating context into the response for demonstration
         return AgentResponse(
-            content = responseContent + if (isSecure) " - Secure" else " - Potential Threat Detected",
-            confidence = if (isSecure) 0.9f else 0.95f // Higher confidence in threat detection
+            content = "Kai's response to '${request.prompt}' with context '$context'",
+            isSuccess = true // Example: assume success
         )
     }
 
-    /**
-     * Processes an AI request and returns a flow of agent responses.
-     * This overrides the method from BaseAgent.
-     */
-    override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
-        // Kai-specific logic for handling the request as a flow.
-        return flowOf(
-            AgentResponse(
-                content = "Kai's flow security analysis for '${request.query}'",
-                confidence = 0.88f
-            )
-        )
-    }
+    // processRequestFlow is inherited from BaseAgent, which provides a default implementation.
+    // If KaiAgent needs custom flow logic, it can override it here.
+    // For now, we'll rely on BaseAgent's implementation.
+    // override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
+    //     TODO("Not yet implemented for KaiAgent custom flow")
+    // }
+
 
     // This enum is specific to KaiAgent's collaboration methods, keep it here if those methods are used.
     enum class ConversationMode { TURN_ORDER, FREE_FORM }

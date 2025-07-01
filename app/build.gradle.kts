@@ -59,6 +59,7 @@ android {
 
     sourceSets {
         getByName("main") {
+            aidl.srcDirs("src/main/aidl")
             java.setSrcDirs(listOf(
                 "src/main/java",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",

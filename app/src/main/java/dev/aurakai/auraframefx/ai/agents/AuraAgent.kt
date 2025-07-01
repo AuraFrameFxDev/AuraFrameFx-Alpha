@@ -74,33 +74,34 @@ class AuraAgent(
         return emptyMap()
     }
 
-    /**
-     * Processes an AI request with context and returns an agent response.
-     * This overrides the method from BaseAgent.
-     */
-    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
-        // Aura-specific logic for handling the request with context.
-        // Example: combine request.query with context for a more detailed response.
-        val responseContent = "Aura's response to '${request.query}' with context '$context'"
+
+    // Removed the incorrect override fun processRequest(request: AiRequest): AgentResponse
+    // The logic will be consolidated into the correct overriding method below.
+
+    override suspend fun processRequest(
+        request: AiRequest,
+        context: String, // Context parameter is part of the interface
+    ): AgentResponse {
+        // Aura-specific logic can be added here
+        // Using request.prompt instead of request.query
+        // Using isSuccess instead of confidence
+        // Incorporating context into the response for demonstration
         return AgentResponse(
-            content = responseContent,
-            confidence = 0.85f // Aura is quite confident
+            content = "Aura's response to '${request.prompt}' with context '$context'",
+            isSuccess = true // Example: assume success
         )
     }
 
-    /**
-     * Processes an AI request and returns a flow of agent responses.
-     * This overrides the method from BaseAgent.
-     */
-    override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
-        // Aura-specific logic for handling the request as a flow.
-        // Example: could emit multiple responses or updates.
-        // For simplicity, emitting a single response in a flow.
-        return flowOf(
-            AgentResponse(
-                content = "Aura's flow response to '${request.query}'",
-                confidence = 0.80f
-            )
-        )
-    }
+    // processRequestFlow is inherited from BaseAgent, which provides a default implementation.
+    // If AuraAgent needs custom flow logic, it can override it here.
+    // For now, we'll rely on BaseAgent's implementation.
+    // override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
+    //     TODO("Not yet implemented for AuraAgent custom flow")
+    // }
+
+    // You can override other methods from BaseAgent or Agent interface if needed
+    // override suspend fun processRequest(_prompt: String): String {
+    //     // TODO: Implement Aura-specific request processing
+    //     return "Aura's response to '$_prompt'"
+    // }
 }

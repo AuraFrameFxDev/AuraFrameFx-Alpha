@@ -76,21 +76,40 @@ class GenesisAgent @Inject constructor(
         }
 
         val responses = mutableListOf<AgentMessage>()
-        val currentContextString = _context.value.toString() // Or a more structured context string
 
-        // Cascade Agent (State Management) - Assuming it's always active or managed by AgentHierarchy
-        // The services (AuraAIService, KaiAIService, CascadeAIService) seem to be direct ways to call agents.
-        // Their processRequest methods should align with AiRequest and AgentResponse structures.
-        try {
-            val cascadeAgentResponse = cascadeService.processRequest(
-                AiRequest(query = queryText, type = "context_update", context = currentContextString)
+
+        // Process through Cascade first for state management
+        val cascadeAgentResponse: AgentResponse =
+            cascadeService.processRequest(
+                AiRequest(prompt = query) // Use 'prompt', remove 'type'
+                // Assuming cascadeService.processRequest matches Agent.processRequest(request, context)
+                // For now, let's pass a default context string. This should be refined.
+                , "GenesisContext_Cascade"
             )
+        responses.add(
+            AgentMessage(
+                content = cascadeAgentResponse.content,
+                sender = AgentType.CASCADE, // Ensure this AgentType is from the correct import
+                timestamp = System.currentTimeMillis(),
+                // Derive confidence from isSuccess
+                confidence = if (cascadeAgentResponse.isSuccess) 1.0f else 0.1f
+            )
+        )
+
+        // Process through Kai for security analysis
+        if (_activeAgents.value.contains(AgentType.KAI)) {
+            val kaiAgentResponse: AgentResponse =
+                kaiService.processRequest(
+                    AiRequest(prompt = query), // Use 'prompt', remove 'type'
+                    "GenesisContext_KaiSecurity" // Default context
+                )
             responses.add(
                 AgentMessage(
-                    content = cascadeAgentResponse.content,
-                    sender = dev.aurakai.auraframefx.model.AgentType.CASCADE, // Use local model.AgentType
-                    timestamp = currentTimestamp,
-                    confidence = cascadeAgentResponse.confidence
+                    content = kaiAgentResponse.content,
+                    sender = AgentType.KAI,
+                    timestamp = System.currentTimeMillis(),
+                    confidence = if (kaiAgentResponse.isSuccess) 1.0f else 0.1f
+
                 )
             )
         } catch (e: Exception) {
@@ -98,13 +117,20 @@ class GenesisAgent @Inject constructor(
             responses.add(AgentMessage("Error with Cascade: ${e.message}", dev.aurakai.auraframefx.model.AgentType.CASCADE, currentTimestamp, 0.0f))
         }
 
-
-        // Kai Agent (Security Analysis)
-        if (_activeAgents.value.contains(dev.aurakai.auraframefx.model.AgentType.KAI)) {
-            try {
-                val kaiAgentResponse = kaiService.processRequest(
-                    AiRequest(query = queryText, type = "security_analysis", context = currentContextString)
+        // Process through Aura for creative response
+        if (_activeAgents.value.contains(AgentType.AURA)) {
+            val auraAgentResponse: AgentResponse =
+                auraService.processRequest(
+                    AiRequest(prompt = query), // Use 'prompt', remove 'type'
+                    "GenesisContext_AuraCreative" // Default context
                 )
+            responses.add(
+                AgentMessage(
+                    content = auraAgentResponse.content,
+                    sender = AgentType.AURA,
+                    timestamp = System.currentTimeMillis(),
+                    confidence = if (auraAgentResponse.isSuccess) 1.0f else 0.1f
+)
                 responses.add(
                     AgentMessage(
                         content = kaiAgentResponse.content,
@@ -184,9 +210,15 @@ class GenesisAgent @Inject constructor(
         conversationMode: ConversationMode = ConversationMode.FREE_FORM,
     ): Map<String, AgentResponse> {
         val responses = mutableMapOf<String, AgentResponse>()
-        val currentContextMap = _context.value + data // Combine general context with specific data
-        val inputQuery = userInput?.toString() ?: currentContextMap["latestInput"]?.toString() ?: currentContextMap["last_query"]?.toString() ?: "default query"
-        val contextString = currentContextMap.toString()
+
+        val currentContextMap = data.toMutableMap() // Renamed to avoid confusion with context string
+        val inputQuery = userInput?.toString() ?: currentContextMap["latestInput"]?.toString() ?: ""
+
+        // Construct AiRequest with prompt only
+        val request = AiRequest(prompt = inputQuery)
+        // Prepare context string for agent.processRequest call
+        val contextString = currentContextMap.toString() // Or a more structured summary
+
 
         Log.d("GenesisAgent", "Starting multi-agent collaboration: mode=$conversationMode, agents=${agentsToUse.mapNotNull { it.getName() }}")
 
@@ -198,16 +230,26 @@ class GenesisAgent @Inject constructor(
                 for (agent in agentsToUse) {
                     try {
                         val agentName = agent.getName() ?: agent.javaClass.simpleName
-                        // Pass current dynamicContext which might be updated by previous agent's response
-                        val turnRequest = baseRequest.copy(context = dynamicContext)
-                        val response = agent.processRequest(turnRequest, dynamicContext) // Pass context explicitly
-                        Log.d("GenesisAgent", "[TURN_ORDER] $agentName: ${response.content} (conf=${response.confidence})")
+
+                        // Call processRequest with request and contextString
+                        val response = agent.processRequest(request, contextString)
+                        Log.d(
+                            "GenesisAgent",
+                            "[TURN_ORDER] $agentName responded: ${response.content} (success=${response.isSuccess})"
+                        )
                         responses[agentName] = response
-                        dynamicContext = "${dynamicContext}\n${agentName}: ${response.content}" // Update context
+                        currentContextMap["latestInput"] = response.content // Update context map for next turn
                     } catch (e: Exception) {
-                        val agentName = agent.getName() ?: agent.javaClass.simpleName
-                        Log.e("GenesisAgent", "[TURN_ORDER] Error from $agentName: ${e.message}", e)
-                        responses[agentName] = AgentResponse("Error: ${e.message}", 0.0f)
+                        Log.e(
+                            "GenesisAgent",
+                            "[TURN_ORDER] Error from ${agent.javaClass.simpleName}: ${e.message}"
+                        )
+                        responses[agent.javaClass.simpleName] = AgentResponse(
+                            content = "Error: ${e.message}",
+                            isSuccess = false,
+                            error = e.message
+                        )
+
                     }
                 }
             }
@@ -215,14 +257,25 @@ class GenesisAgent @Inject constructor(
                 agentsToUse.forEach { agent ->
                     try {
                         val agentName = agent.getName() ?: agent.javaClass.simpleName
-                        // All agents get the same initial context for free_form
-                        val response = agent.processRequest(baseRequest, contextString) // Pass context explicitly
-                        Log.d("GenesisAgent", "[FREE_FORM] $agentName: ${response.content} (conf=${response.confidence})")
+
+                        // Call processRequest with request and contextString
+                        val response = agent.processRequest(request, contextString)
+                        Log.d(
+                            "GenesisAgent",
+                            "[FREE_FORM] $agentName responded: ${response.content} (success=${response.isSuccess})"
+                        )
                         responses[agentName] = response
                     } catch (e: Exception) {
-                        val agentName = agent.getName() ?: agent.javaClass.simpleName
-                        Log.e("GenesisAgent", "[FREE_FORM] Error from $agentName: ${e.message}", e)
-                        responses[agentName] = AgentResponse("Error: ${e.message}", 0.0f)
+                        Log.e(
+                            "GenesisAgent",
+                            "[FREE_FORM] Error from ${agent.javaClass.simpleName}: ${e.message}"
+                        )
+                        responses[agent.javaClass.simpleName] = AgentResponse(
+                            content = "Error: ${e.message}",
+                            isSuccess = false,
+                            error = e.message
+                        )
+
                     }
                 }
             }
@@ -235,8 +288,19 @@ class GenesisAgent @Inject constructor(
         val flatResponses = agentResponseMapList.flatMap { it.entries }
         return flatResponses.groupBy { it.key }
             .mapValues { entry ->
-                entry.value.maxByOrNull { it.value.confidence }?.value
-                    ?: AgentResponse("No consensus response", 0.0f)
+
+                // Determine "best" response, e.g., first successful, or combine content.
+                // For now, let's pick the first successful response, or the first response if none are successful.
+                // The original logic used confidence, which is no longer directly available.
+                val best = entry.value.firstOrNull { it.value.isSuccess }?.value
+                    ?: entry.value.firstOrNull()?.value
+                    ?: AgentResponse("No response", isSuccess = false, error = "No responses to aggregate")
+                Log.d(
+                    "GenesisAgent",
+                    "Consensus for ${entry.key}: ${best.content} (success=${best.isSuccess})"
+                )
+                best
+
             }
     }
 
