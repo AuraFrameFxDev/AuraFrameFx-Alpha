@@ -54,6 +54,16 @@ open class BaseAgent(
      * @return A default `AgentResponse` containing a message referencing the request, context, and agent name, with fixed confidence.
      */
 
+    /**
+     * Processes an AI request with the provided context and returns a default agent response.
+     *
+     * This base implementation generates a generic response referencing the request query, agent name, and context,
+     * with a fixed confidence score of 1.0. Subclasses should override this method to provide custom request handling.
+     *
+     * @param request The AI request to process.
+     * @param context Additional context for the request.
+     * @return A default [AgentResponse] containing a message and a confidence score of 1.0.
+     */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Default implementation for base agent, override in subclasses
         return AgentResponse(
