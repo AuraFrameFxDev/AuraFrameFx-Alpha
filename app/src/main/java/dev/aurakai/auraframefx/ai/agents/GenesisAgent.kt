@@ -55,6 +55,12 @@ class GenesisAgent @Inject constructor(
         // registerAgent("kai", kaiAgentInstance)
     }
 
+    /**
+     * Initializes the set of active agents based on the master agent hierarchy.
+     *
+     * Attempts to map each agent configuration name from the hierarchy to a corresponding `AgentType` enum value.
+     * Adds recognized agent types to the active agents set; logs a warning for any unknown types.
+     */
     private fun initializeAgents() {
         AgentHierarchy.MASTER_AGENTS.forEach { config ->
             // Assuming AgentType enum values align with config names
@@ -67,6 +73,14 @@ class GenesisAgent @Inject constructor(
         }
     }
 
+    /**
+     * Processes a user query by coordinating active AI agents and aggregating their responses.
+     *
+     * Updates the shared context with the query and timestamp, invokes each relevant AI service (Cascade, Kai, Aura) based on active agent types, and collects their responses as `AgentMessage` objects. Handles exceptions for each agent, appending error messages if necessary. Synthesizes a final response from all agent outputs and adds it as a Genesis agent message with aggregated confidence.
+     *
+     * @param queryText The user query to process.
+     * @return A list of `AgentMessage` objects containing responses from each agent and the final Genesis synthesis.
+     */
     suspend fun processQuery(queryText: String): List<AgentMessage> {
         _state.update { "processing_query: $queryText" }
         val currentTimestamp = System.currentTimeMillis()
@@ -153,30 +167,80 @@ class GenesisAgent @Inject constructor(
         return responses
     }
 
+    /**
+     * Generates a synthesized response string by concatenating messages from all agents except Genesis.
+     *
+     * The resulting string is prefixed with "[Genesis Synthesis]" and includes each agent's name and message content, separated by " | ".
+     *
+     * @param agentMessages The list of agent messages to aggregate.
+     * @return A single synthesized response string representing the combined output of all non-Genesis agents.
+     */
     fun generateFinalResponse(agentMessages: List<AgentMessage>): String {
         // Simple concatenation for now, could be more sophisticated
         return "[Genesis Synthesis] ${agentMessages.filter { it.sender != dev.aurakai.auraframefx.model.AgentType.GENESIS }.joinToString(" | ") { "${it.sender}: ${it.content}" }}"
     }
 
+    /**
+     * Calculates the average confidence score from a list of agent messages.
+     *
+     * Returns 0.0 if the list is empty. The result is clamped between 0.0 and 1.0.
+     *
+     * @param agentMessages The list of agent messages to evaluate.
+     * @return The average confidence score as a float between 0.0 and 1.0.
+     */
     fun calculateConfidence(agentMessages: List<AgentMessage>): Float {
         if (agentMessages.isEmpty()) return 0.0f
         return agentMessages.map { it.confidence }.average().toFloat().coerceIn(0.0f, 1.0f)
     }
 
+    /**
+     * Enables or disables the specified agent type by adding it to or removing it from the set of active agents.
+     *
+     * If the agent type is currently active, it will be deactivated; if inactive, it will be activated.
+     */
     fun toggleAgent(agentType: dev.aurakai.auraframefx.model.AgentType) {
         _activeAgents.update { current ->
             if (current.contains(agentType)) current - agentType else current + agentType
         }
     }
 
+    /**
+     * Registers a new auxiliary agent with the specified name and capabilities.
+     *
+     * @param name The unique name for the auxiliary agent.
+     * @param capabilities The set of capabilities to assign to the agent.
+     * @return The configuration of the newly registered auxiliary agent.
+     */
     fun registerAuxiliaryAgent(name: String, capabilities: Set<String>): AgentConfig {
         return AgentHierarchy.registerAuxiliaryAgent(name, capabilities)
     }
 
-    fun getAgentConfig(name: String): AgentConfig? = AgentHierarchy.getAgentConfig(name)
+    /**
+ * Retrieves the configuration for the agent with the specified name.
+ *
+ * @param name The name of the agent whose configuration is requested.
+ * @return The agent's configuration if found, or null if no such agent exists.
+ */
+fun getAgentConfig(name: String): AgentConfig? = AgentHierarchy.getAgentConfig(name)
 
-    fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriority()
+    /**
+ * Retrieves the list of agent configurations ordered by their priority.
+ *
+ * @return A list of agent configurations sorted from highest to lowest priority.
+ */
+fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriority()
 
+    /**
+     * Facilitates collaborative processing among multiple agents using the provided data and conversation mode.
+     *
+     * Agents can interact in either sequential (TURN_ORDER) or parallel (FREE_FORM) modes. In TURN_ORDER, each agent receives an updated context that includes prior agents' responses; in FREE_FORM, all agents receive the same initial context. Handles exceptions per agent and returns a map of agent names to their responses.
+     *
+     * @param data Additional contextual data to merge with the current context for agent processing.
+     * @param agentsToUse The list of agents participating in the collaboration.
+     * @param userInput Optional user input to use as the query; falls back to context values if not provided.
+     * @param conversationMode Determines whether agents process requests sequentially or in parallel.
+     * @return A map associating each agent's name with its response.
+     */
     suspend fun participateWithAgents(
         data: Map<String, Any>,
         agentsToUse: List<Agent>, // List of Agent interface implementations
@@ -231,6 +295,15 @@ class GenesisAgent @Inject constructor(
         return responses
     }
 
+    /**
+     * Aggregates multiple agent response maps by selecting the highest confidence response for each agent.
+     *
+     * For each agent key present in the input maps, returns the response with the highest confidence score.
+     * If no response is found for an agent, a default response with zero confidence is used.
+     *
+     * @param agentResponseMapList A list of maps, each mapping agent names to their responses.
+     * @return A map of agent names to their highest confidence response.
+     */
     fun aggregateAgentResponses(agentResponseMapList: List<Map<String, AgentResponse>>): Map<String, AgentResponse> {
         val flatResponses = agentResponseMapList.flatMap { it.entries }
         return flatResponses.groupBy { it.key }
@@ -240,6 +313,14 @@ class GenesisAgent @Inject constructor(
             }
     }
 
+    /**
+     * Shares the provided context with all target agents that support context updates.
+     *
+     * Only agents implementing the `ContextAwareAgent` interface will receive the new context.
+     *
+     * @param newContext The context data to broadcast.
+     * @param targetAgents The list of agents to receive the context update.
+     */
     fun broadcastContext(newContext: Map<String, Any>, targetAgents: List<Agent>) {
         targetAgents.forEach { agent ->
             if (agent is ContextAwareAgent) {
@@ -248,6 +329,11 @@ class GenesisAgent @Inject constructor(
         }
     }
 
+    /**
+     * Registers an agent instance under the specified name in the internal agent registry.
+     *
+     * If an agent with the same name already exists, it will be replaced.
+     */
     fun registerAgent(name: String, agentInstance: Agent) {
         _agentRegistry[name] = agentInstance
         Log.d("GenesisAgent", "Registered agent: $name")
@@ -263,15 +349,32 @@ class GenesisAgent @Inject constructor(
         Log.d("GenesisAgent", "Cleared conversation history")
     }
 
+    /**
+     * Adds an entry to the conversation or interaction history.
+     *
+     * @param entry The history entry to add.
+     */
     fun addToHistory(entry: Map<String, Any>) {
         _history.add(entry)
         Log.d("GenesisAgent", "Added to history: $entry")
     }
 
+    /**
+     * Persists the current conversation history using the provided persistence function.
+     *
+     * @param persistAction A function that handles saving the list of history entries.
+     */
     fun saveHistory(persistAction: (List<Map<String, Any>>) -> Unit) {
         persistAction(_history)
     }
 
+    /**
+     * Loads conversation history using the provided loader function and updates the internal history and context.
+     *
+     * The context is updated with the most recent entry from the loaded history, if available.
+     *
+     * @param loadAction A function that returns a list of history entries to load.
+     */
     fun loadHistory(loadAction: () -> List<Map<String, Any>>) {
         val loadedHistory = loadAction()
         _history.clear()
@@ -279,6 +382,11 @@ class GenesisAgent @Inject constructor(
         _context.update { it + (loadedHistory.lastOrNull() ?: emptyMap()) }
     }
 
+    /**
+     * Shares the current context with all registered agents that support context awareness.
+     *
+     * For each agent in the registry implementing `ContextAwareAgent`, updates its context to match the current shared context.
+     */
     fun shareContextWithAgents() {
         agentRegistry.values.forEach { agent ->
             if (agent is ContextAwareAgent) {
@@ -287,11 +395,24 @@ class GenesisAgent @Inject constructor(
         }
     }
 
+    /**
+     * Dynamically registers an agent instance under the specified name.
+     *
+     * Adds the agent to the internal registry, making it available for participation in agent operations.
+     *
+     * @param name The unique identifier for the agent.
+     * @param agentInstance The agent instance to register.
+     */
     fun registerDynamicAgent(name: String, agentInstance: Agent) {
         _agentRegistry[name] = agentInstance
         Log.d("GenesisAgent", "Dynamically registered agent: $name")
     }
 
+    /**
+     * Removes a dynamically registered agent from the internal registry by name.
+     *
+     * @param name The unique identifier of the agent to deregister.
+     */
     fun deregisterDynamicAgent(name: String) {
         _agentRegistry.remove(name)
         Log.d("GenesisAgent", "Dynamically deregistered agent: $name")
