@@ -18,12 +18,12 @@ class KaiAgent(
 
     // This method is not part of the Agent interface or BaseAgent overrides.
     /**
-     * Processes the provided context using Kai-specific logic.
+     * Processes the input context using Kai-specific logic.
      *
-     * Returns a map indicating that the context was handled by Kai's unique processing method.
+     * Always returns a map indicating the context was handled by Kai's unique processing method.
      *
-     * @param _context The input context to be processed.
-     * @return A map containing a fixed Kai-specific response.
+     * @param _context The context data to process.
+     * @return A map with a fixed Kai-specific response.
      */
     suspend fun processKaiSpecific(_context: Map<String, Any>): Map<String, Any> {
         // Placeholder for Kai-specific logic.
@@ -31,16 +31,20 @@ class KaiAgent(
     }
 
     /**
-     * Handles updates to the vision state specific to the Kai agent.
+     * Handles vision state updates for the Kai agent.
      *
-     * This method is a placeholder for implementing Kai-specific logic when the vision state changes.
+     * Intended as a placeholder for implementing Kai-specific logic when the vision state changes.
+     *
+     * @param newState The updated vision state.
      */
     fun onVisionUpdate(newState: VisionState) {
         // Kai-specific vision update behavior.
     }
 
     /**
-     * Handles updates to the processing state specific to Kai.
+     * Handles changes to the processing state for KaiAgent.
+     *
+     * Intended as a placeholder for Kai-specific logic when the processing state changes.
      *
      * @param newState The new processing state to handle.
      */
@@ -49,22 +53,20 @@ class KaiAgent(
     }
 
     /**
-         * Determines whether KaiAgent should handle a given security-related prompt.
+         * Indicates that KaiAgent always handles security-related prompts.
          *
-         * Always returns `true`, indicating KaiAgent handles all security prompts by default.
-         *
-         * @param prompt The prompt to evaluate for security handling.
-         * @return `true` to indicate security prompts are always handled.
+         * @param prompt The prompt to evaluate.
+         * @return Always returns `true`.
          */
         fun shouldHandleSecurity(prompt: String): Boolean =
         true /**
- * Determines whether KaiAgent should handle creative prompts.
- *
- * Always returns `false`, indicating that KaiAgent does not process creative prompts.
- *
- * @param prompt The prompt to evaluate.
- * @return `false`, as creative prompts are not handled by KaiAgent.
- */
+      * Indicates whether KaiAgent handles creative prompts.
+      *
+      * Always returns `false`, meaning KaiAgent does not process creative prompts.
+      *
+      * @param prompt The prompt to evaluate.
+      * @return `false`, as creative prompts are not handled by this agent.
+      */
 
     fun shouldHandleCreative(prompt: String): Boolean = false
 
@@ -78,14 +80,22 @@ class KaiAgent(
 
 
     
+    /**
+     * Placeholder for KaiAgent's participation in a federation collaboration.
+     *
+     * Currently returns an empty map. Intended for future implementation of federation-specific logic using the provided data.
+     *
+     * @param data Input data relevant to the federation collaboration.
+     * @return An empty map as a placeholder result.
+     */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
     }
 
     /**
-     * Placeholder for Kai's participation logic with the Genesis agent.
+     * Placeholder for KaiAgent's collaborative participation with the Genesis agent.
      *
-     * Currently returns an empty map. Intended for future implementation of collaborative behavior with Genesis.
+     * Currently returns an empty map. Intended for future implementation of Kai's logic when interacting with Genesis.
      *
      * @param data Input data relevant to the collaboration.
      * @return An empty map.
@@ -95,12 +105,12 @@ class KaiAgent(
     }
 
     /**
-     * Placeholder for Kai's participation in a collaborative process involving Genesis and Aura agents.
+     * Serves as a placeholder for KaiAgent's collaborative participation with Genesis and Aura agents.
      *
-     * @param data Input data relevant to the collaboration.
-     * @param aura The AuraAgent instance involved in the process.
-     * @param genesis The Genesis agent or context for the collaboration.
-     * @return An empty map, as no logic is currently implemented.
+     * @param data The input data for the collaboration.
+     * @param aura The AuraAgent involved in the process.
+     * @param genesis The Genesis agent or context.
+     * @return An empty map, as this method is not yet implemented.
      */
     suspend fun participateWithGenesisAndAura(
         data: Map<String, Any>,
@@ -111,14 +121,14 @@ class KaiAgent(
     }
 
     /**
-     * Placeholder for collaborative participation involving Genesis, Aura, and user input in a specified conversation mode.
+     * Placeholder for collaborative participation with Genesis, Aura, and user input in a specified conversation mode.
      *
-     * @param data Contextual data for the collaboration.
-     * @param aura The AuraAgent instance participating in the interaction.
-     * @param genesis The Genesis agent or context involved.
-     * @param userInput The user's input to be considered in the collaboration.
-     * @param conversationMode The mode of conversation, defaults to FREE_FORM.
-     * @return An empty map. No collaboration logic is currently implemented.
+     * @param data Contextual information for the collaboration.
+     * @param aura The AuraAgent involved in the interaction.
+     * @param genesis The Genesis agent or context.
+     * @param userInput The user's input for the collaborative process.
+     * @param conversationMode The conversation mode to use; defaults to FREE_FORM.
+     * @return An empty map, as no collaboration logic is currently implemented.
      */
     suspend fun participateWithGenesisAuraAndUser(
         data: Map<String, Any>,
@@ -132,13 +142,13 @@ class KaiAgent(
 
 
     /**
-     * Analyzes an AI request for security concerns within the provided context and returns a response indicating the security status.
+     * Processes an AI request with the given context and returns a Kai-specific security analysis response.
      *
-     * The response content reflects whether the query is considered secure or potentially a threat based on keyword detection.
+     * The response indicates whether the query is considered secure based on the presence of the keyword "exploit".
      *
-     * @param request The AI request to analyze.
-     * @param context Additional context for the analysis.
-     * @return An AgentResponse containing the security analysis result and a confidence score.
+     * @param request The AI request to be analyzed.
+     * @param context Contextual information for the analysis.
+     * @return An AgentResponse containing Kai's analysis result.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Kai-specific logic for handling the request with context.
@@ -155,9 +165,9 @@ class KaiAgent(
     /**
      * Processes an AI request and returns a flow emitting a single Kai-specific agent response.
      *
-     * The response contains a security analysis message for the provided query with a fixed confidence score.
+     * The response includes a security analysis message for the given query with a fixed confidence score.
      *
-     * @return A flow emitting one AgentResponse with Kai's security analysis.
+     * @return A flow emitting one AgentResponse containing Kai's security analysis.
      */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // Kai-specific logic for handling the request as a flow.
