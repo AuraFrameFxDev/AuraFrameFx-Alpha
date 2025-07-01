@@ -21,19 +21,19 @@ open class BaseAgent(
 ) : Agent {
 
     /**
-     * Returns the name of the agent.
+     * Retrieves the agent's name.
      *
-     * @return The agent's name, or null if not set.
+     * @return The name of the agent, or null if not set.
      */
     override fun getName(): String? {
         return _agentName
     }
 
     /**
-     * Retrieves the agent's type as an `AgentType` enum.
+     * Returns the agent's type as an `AgentType` enum.
      *
      * @return The `AgentType` corresponding to the agent's internal type string.
-     * @throws IllegalArgumentException If the internal type string does not match any `AgentType` value.
+     * @throws IllegalArgumentException If the internal type string does not correspond to any `AgentType` value.
      */
     override fun getType(): AgentType { // Return non-nullable AgentType from api.model
         return try {
@@ -68,11 +68,11 @@ open class BaseAgent(
     }
 
     /**
-     * Returns a flow that emits a single agent response for the given AI request.
+     * Returns a flow emitting a single agent response for the provided AI request.
      *
-     * This base implementation calls `processRequest` with a default context string. Subclasses can override to provide streaming or multi-part responses.
+     * This default implementation invokes `processRequest` with a placeholder context. Subclasses may override to support streaming or multi-part responses.
      *
-     * @return A flow emitting one `AgentResponse` corresponding to the request.
+     * @return A flow that emits one `AgentResponse` for the given request.
      */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // Basic implementation, can be overridden for more complex streaming logic
