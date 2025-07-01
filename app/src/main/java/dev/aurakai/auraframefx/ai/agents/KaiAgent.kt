@@ -33,13 +33,24 @@ class KaiAgent(
     }
 
     fun shouldHandleSecurity(prompt: String): Boolean =
-        true // Kai handles security prompts by default
+        true /**
+ * Determines whether the agent should handle creative prompts.
+ *
+ * @return `false`, indicating that creative prompts are not handled by this agent.
+ */
 
     fun shouldHandleCreative(prompt: String): Boolean = false
 
 
 
-    // --- Collaboration placeholders (Not part of Agent interface) ---
+    /**
+     * Handles participation in a federation collaboration using the provided data.
+     *
+     * This is a placeholder implementation that returns an empty map.
+     *
+     * @param data The input data for federation participation.
+     * @return An empty map.
+     */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
     }
@@ -56,6 +67,18 @@ class KaiAgent(
         return emptyMap()
     }
 
+    /**
+     * Placeholder for collaborative participation involving Genesis, AuraAgent, and user input.
+     *
+     * This method is intended to handle scenarios where the agent interacts with both Genesis and AuraAgent entities, incorporating user input and an optional conversation mode.
+     *
+     * @param data Contextual data for the collaboration.
+     * @param aura The AuraAgent involved in the interaction.
+     * @param genesis The Genesis entity participating in the collaboration.
+     * @param userInput Input provided by the user.
+     * @param conversationMode The mode of conversation, defaults to free form.
+     * @return An empty map, as no implementation is currently provided.
+     */
     suspend fun participateWithGenesisAuraAndUser(
         data: Map<String, Any>,
         aura: AuraAgent,
@@ -67,6 +90,13 @@ class KaiAgent(
     }
 
 
+    /**
+     * Processes an AI request and returns a successful response incorporating the request prompt and provided context.
+     *
+     * @param request The AI request containing the prompt to process.
+     * @param context Additional context information to include in the response.
+     * @return An AgentResponse with content reflecting the prompt and context, and isSuccess set to true.
+     */
     override suspend fun processRequest(
         request: AiRequest,
         context: String, // Context parameter is part of the interface

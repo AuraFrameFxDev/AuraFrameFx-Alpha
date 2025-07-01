@@ -20,12 +20,14 @@
 
 set -e
 
+# track_last_command updates tracking variables to record the most recently executed Bash command.
 track_last_command() {
     last_command=$current_command
     current_command=$BASH_COMMAND
 }
 trap track_last_command DEBUG
 
+# echo_failed_command prints an error message with the last executed command and its exit code if the previous command failed.
 echo_failed_command() {
     local exit_code="$?"
 	if [[ "$exit_code" != "0" ]]; then
@@ -251,7 +253,7 @@ SDKMAN_CANDIDATES_CSV=$(curl -s "${SDKMAN_SERVICE}/candidates/all")
 echo "$SDKMAN_CANDIDATES_CSV" > "${SDKMAN_DIR}/var/candidates"
 
 echo "Prime platform file..."
-# infer platform
+# infer_platform detects the current operating system and hardware architecture, and echoes a platform identifier string used by SDKMAN.
 function infer_platform() {
 	local kernel
 	local machine
