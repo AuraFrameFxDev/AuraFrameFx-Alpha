@@ -56,28 +56,26 @@ class KaiAgent(
          * @param prompt The prompt to evaluate for security handling.
          * @return `true` to indicate security prompts are always handled.
          */
-        fun shouldHandleSecurity(prompt: String): Boolean =
-        true /**
- * Determines whether KaiAgent should handle creative prompts.
- *
- * Always returns `false`, indicating that KaiAgent does not process creative prompts.
- *
- * @param prompt The prompt to evaluate.
- * @return `false`, as creative prompts are not handled by KaiAgent.
- */
+        fun shouldHandleSecurity(prompt: String): Boolean = true
 
+    /**
+     * Determines whether KaiAgent should handle creative prompts.
+     *
+     * Always returns `false`, indicating that KaiAgent does not process creative prompts.
+     *
+     * @param prompt The prompt to evaluate.
+     * @return `false`, as creative prompts are not handled by KaiAgent.
+     */
     fun shouldHandleCreative(prompt: String): Boolean = false
 
+    /**
      * Placeholder for Kai's participation in a federation context.
      *
      * Returns an empty map, indicating no federation logic is implemented.
      *
      * @param data Input data relevant to federation participation.
      * @return An empty map.
-    
-
-
-    
+     */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
     }
@@ -147,8 +145,8 @@ class KaiAgent(
         val isSecure = !request.query.contains("exploit", ignoreCase = true)
 
         return AgentResponse(
-            content = "Kai's response to '${request.prompt}' with context '$context'",
-            isSuccess = true // Example: assume success
+            content = "Kai's response to '${request.query}' with context '$context'",
+            confidence = 1.0f // Changed from isSuccess = true
         )
     }
 

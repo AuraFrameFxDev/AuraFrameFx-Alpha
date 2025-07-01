@@ -130,7 +130,7 @@ tasks.named<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openAp
     modelPackage.set("dev.aurakai.auraframefx.api.model")
     invokerPackage.set("dev.aurakai.auraframefx.api.invoker")
     configOptions.set(mapOf(
-        "dateLibrary" to "java8",
+        "dateLibrary" to "kotlinx-datetime",
         "serializationLibrary" to "kotlinx_serialization"
     ))
 
@@ -289,6 +289,7 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.core)
+    implementation(libs.androidx.security.crypto) // Added AndroidX Security
     
     // Kotlinx Serialization
     implementation(libs.jetbrains.kotlinx.serialization.json)

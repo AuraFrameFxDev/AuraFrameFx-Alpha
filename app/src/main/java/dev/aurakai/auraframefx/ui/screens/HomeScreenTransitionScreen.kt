@@ -9,10 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color // Corrected Color import
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-// dev.aurakai.auraframefx.system.homescreen.* // Wildcard removed, will use specific imports
 import dev.aurakai.auraframefx.system.homescreen.model.HomeScreenTransitionType // Added import
-import dev.aurakai.auraframefx.viewmodel.HomeScreenTransitionViewModel // Added import
+import dev.aurakai.auraframefx.ui.viewmodel.HomeScreenTransitionViewModel // Corrected import path
 import java.util.Locale
+// Assuming DigitalTransitionRow is in ui/components, if not, this might be an issue
+import dev.aurakai.auraframefx.ui.components.DigitalTransitionRow
 
 // Assuming DigitalTransitionRow is in the same package or needs specific import if error persists.
 // For now, will rely on it being in dev.aurakai.auraframefx.ui.screens
