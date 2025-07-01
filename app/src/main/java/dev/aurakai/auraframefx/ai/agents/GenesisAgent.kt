@@ -54,6 +54,14 @@ class GenesisAgent @Inject constructor(
         }
     }
 
+    /**
+     * Processes a user query by routing it through active AI agents, collecting their responses, and generating a final aggregated reply.
+     *
+     * The query is sent to the Cascade agent for state management, and to the Kai and Aura agents if they are active, each with their respective context. Each agent's response is recorded with a confidence score based on success. A final Genesis response is generated from all agent outputs and appended to the result.
+     *
+     * @param query The user query to process.
+     * @return A list of agent messages, including individual agent responses and the final aggregated Genesis response.
+     */
     suspend fun processQuery(query: String): List<AgentMessage> {
         _state.update { "processing_query: $query" }
 
@@ -172,11 +180,15 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Multi-agent collaboration: Genesis as the hive mind.
-     * Orchestrates N-way collaboration between any set of agents and the user.
-     * @param agents List of participating agents (Kai, Aura, Cascade, etc.)
-     * @param userInput User input or context
-     * @param conversationMode Controls if agents speak in turn (TURN_ORDER) or freely (FREE_FORM)
+     * Facilitates collaborative interaction between multiple agents and the user, supporting both sequential and parallel response modes.
+     *
+     * In TURN_ORDER mode, agents respond one after another, with each agent receiving updated context from the previous agent's response. In FREE_FORM mode, all agents respond independently to the same input and context.
+     *
+     * @param data The initial context map shared among agents.
+     * @param agents The list of agents participating in the collaboration.
+     * @param userInput Optional user input to seed the conversation; if null, uses the latest input from the context map.
+     * @param conversationMode Determines whether agents respond in sequence (TURN_ORDER) or in parallel (FREE_FORM).
+     * @return A map of agent names to their respective responses.
      */
     suspend fun participateWithAgents(
         data: Map<String, Any>,
@@ -257,7 +269,10 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Aggregates responses from all agents for consensus or decision-making.
+     * Aggregates multiple agent response maps into a consensus map, selecting the first successful response for each agent or the first available response if none are successful.
+     *
+     * @param responses A list of maps, each mapping agent names to their responses.
+     * @return A map of agent names to their consensus response.
      */
     fun aggregateAgentResponses(responses: List<Map<String, AgentResponse>>): Map<String, AgentResponse> {
         val flatResponses = responses.flatMap { it.entries }

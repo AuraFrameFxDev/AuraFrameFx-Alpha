@@ -83,9 +83,15 @@ class AuraAgent(
     }
 
     /**
-     * Four-way collaboration placeholder.
-     * Use this method to enable Kai, Aura, Genesis, and the User to collaborate in a federated or orchestrated manner.
-     * For example, this could be used for consensus, distributed decision-making, or multi-agent context sharing with user input.
+     * Placeholder for four-way collaboration among Kai, Aura, Genesis, and the user.
+     *
+     * Intended for scenarios involving consensus, distributed decision-making, or multi-agent context sharing that incorporates user input.
+     *
+     * @param data Shared context or state for collaboration.
+     * @param kai The KaiAgent participant.
+     * @param genesis The Genesis agent or coordinator.
+     * @param userInput Input or context provided by the user.
+     * @return A map representing the result of the collaborative process. Currently returns an empty map.
      */
     suspend fun participateWithGenesisKaiAndUser(
         data: Map<String, Any>,
@@ -99,7 +105,15 @@ class AuraAgent(
     }
 
     // Removed the incorrect override fun processRequest(request: AiRequest): AgentResponse
-    // The logic will be consolidated into the correct overriding method below.
+    /**
+     * Processes an AI request with the provided context and returns an Aura-specific response.
+     *
+     * The response content incorporates both the request prompt and the context string.
+     *
+     * @param request The AI request containing the prompt to process.
+     * @param context Additional context information for the request.
+     * @return An [AgentResponse] containing Aura's response and a success flag.
+     */
 
     override suspend fun processRequest(
         request: AiRequest,

@@ -23,6 +23,17 @@ class ContextManager @Inject constructor(
     private val _contextStats = MutableStateFlow(ContextStats())
     val contextStats: StateFlow<ContextStats> = _contextStats
 
+    /**
+     * Creates a new context chain with the specified root and initial context.
+     *
+     * Initializes the chain's history with a single context node and stores all metadata as string values.
+     *
+     * @param rootContext The identifier for the root context of the chain.
+     * @param initialContext The initial context content for the chain.
+     * @param agent The agent associated with the initial context.
+     * @param metadata Optional metadata for the context, with all values converted to strings.
+     * @return The unique identifier of the newly created context chain.
+     */
     fun createContextChain(
         rootContext: String,
         initialContext: String,
@@ -51,6 +62,18 @@ class ContextManager @Inject constructor(
         return chain.id
     }
 
+    /**
+     * Updates an existing context chain with a new context, agent, and metadata.
+     *
+     * Appends a new context node to the chain's history, updates the agent context mapping, and refreshes the last updated timestamp.
+     *
+     * @param chainId The identifier of the context chain to update.
+     * @param newContext The new context string to add.
+     * @param agent The agent associated with the new context.
+     * @param metadata Additional metadata for the context node; all values are converted to strings.
+     * @return The updated context chain.
+     * @throws IllegalStateException if the specified context chain does not exist.
+     */
     fun updateContextChain(
         chainId: String,
         newContext: String,

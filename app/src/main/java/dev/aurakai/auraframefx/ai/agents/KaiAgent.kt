@@ -36,8 +36,21 @@ class KaiAgent(
         // Default no-op. Override for Kai-specific processing state changes.
     }
 
-    fun shouldHandleSecurity(prompt: String): Boolean =
-        true // Kai handles security prompts by default
+    /**
+         * Determines whether KaiAgent should handle a security-related prompt.
+         *
+         * Always returns `true`, indicating that security prompts are handled by default.
+         *
+         * @param prompt The input prompt to evaluate.
+         * @return `true` to indicate security handling is enabled.
+         */
+        fun shouldHandleSecurity(prompt: String): Boolean =
+        true /**
+ * Determines whether Kai should handle creative prompts.
+ *
+ * @param prompt The input prompt to evaluate.
+ * @return `false`, indicating Kai does not handle creative prompts.
+ */
 
     fun shouldHandleCreative(prompt: String): Boolean = false
 
@@ -97,6 +110,15 @@ class KaiAgent(
         return emptyMap()
     }
 
+    /**
+     * Processes an AI request with the provided context and returns a response.
+     *
+     * Constructs an `AgentResponse` that includes the request prompt and the given context.
+     *
+     * @param request The AI request containing the prompt to process.
+     * @param context Additional context information to include in the response.
+     * @return An `AgentResponse` containing the generated content and a success flag.
+     */
     override suspend fun processRequest(
         request: AiRequest,
         context: String, // Context parameter is part of the interface
