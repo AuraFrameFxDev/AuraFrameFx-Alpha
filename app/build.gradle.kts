@@ -316,4 +316,5 @@ dependencies {
 
     // Compose Animation Tooling
     debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.animation.tooling) // Added specific animation tooling
 }
