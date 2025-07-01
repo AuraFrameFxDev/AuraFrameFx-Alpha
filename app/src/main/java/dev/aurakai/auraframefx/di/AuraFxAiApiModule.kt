@@ -5,7 +5,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dev.aurakai.auraframefx.generated.api.auraframefxai.ContentApi
+import dev.aurakai.auraframefx.api.AiContentApi
 import dev.aurakai.auraframefx.network.AuraFxContentApiClient
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -39,7 +39,7 @@ object AuraFxAiApiModule {
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
     @Singleton
-    fun provideContentApi(okHttpClient: OkHttpClient, json: Json): ContentApi {
+    fun provideAiContentApi(okHttpClient: OkHttpClient, json: Json): AiContentApi {
         val baseUrl = "https://api.auraframefx.com/v1/"
         val contentType = "application/json".toMediaType()
 
@@ -48,15 +48,15 @@ object AuraFxAiApiModule {
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
-            .create(ContentApi::class.java)
+            .create(AiContentApi::class.java)
     }
 
     /**
-     * Provides the AuraFxContentApiClient wrapper for the ContentApi.
+     * Provides the AuraFxContentApiClient wrapper for the AiContentApi.
      */
     @Provides
     @Singleton
-    fun provideAuraFxContentApiClient(contentApi: ContentApi): AuraFxContentApiClient {
-        return AuraFxContentApiClient(contentApi)
+    fun provideAuraFxContentApiClient(aiContentApi: AiContentApi): AuraFxContentApiClient {
+        return AuraFxContentApiClient(aiContentApi)
     }
 }
