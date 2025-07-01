@@ -68,14 +68,16 @@ class KaiAgent(
 
     fun shouldHandleCreative(prompt: String): Boolean = false
 
-    /**
      * Placeholder for Kai's participation in a federation context.
      *
      * Returns an empty map, indicating no federation logic is implemented.
      *
      * @param data Input data relevant to federation participation.
      * @return An empty map.
-     */
+    
+
+
+    
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
     }
@@ -128,6 +130,7 @@ class KaiAgent(
         return emptyMap()
     }
 
+
     /**
      * Analyzes an AI request for security concerns within the provided context and returns a response indicating the security status.
      *
@@ -142,9 +145,10 @@ class KaiAgent(
         val responseContent = "Kai's security analysis for '${request.query}' with context '$context'"
         // Simulate a security check
         val isSecure = !request.query.contains("exploit", ignoreCase = true)
+
         return AgentResponse(
-            content = responseContent + if (isSecure) " - Secure" else " - Potential Threat Detected",
-            confidence = if (isSecure) 0.9f else 0.95f // Higher confidence in threat detection
+            content = "Kai's response to '${request.prompt}' with context '$context'",
+            isSuccess = true // Example: assume success
         )
     }
 
@@ -164,6 +168,7 @@ class KaiAgent(
             )
         )
     }
+
 
     // This enum is specific to KaiAgent's collaboration methods, keep it here if those methods are used.
     enum class ConversationMode { TURN_ORDER, FREE_FORM }

@@ -48,11 +48,11 @@ class ContextManager @Inject constructor(
                     id = "ctx_${Clock.System.now().toEpochMilliseconds()}_0",
                     content = initialContext,
                     agent = agent,
-                    metadata = metadata
+                    metadata = metadata.mapValues { it.value.toString() } // Convert Map<String, Any> to Map<String, String>
                 )
             ),
             agentContext = mapOf(agent to initialContext),
-            metadata = metadata
+            metadata = metadata.mapValues { it.value.toString() } // Convert Map<String, Any> to Map<String, String>
         )
 
         _activeContexts.update { current ->
@@ -87,7 +87,7 @@ class ContextManager @Inject constructor(
                 id = "ctx_${Clock.System.now().toEpochMilliseconds()}_${chain.contextHistory.size}",
                 content = newContext,
                 agent = agent,
-                metadata = metadata
+                metadata = metadata.mapValues { it.value.toString() } // Convert Map<String, Any> to Map<String, String>
             ),
             agentContext = chain.agentContext + (agent to newContext),
             lastUpdated = Clock.System.now()

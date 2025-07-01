@@ -138,6 +138,7 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
         return emptyMap()
     }
 
+
     /**
      * Processes an AI request along with additional context and returns an agent response.
      *
@@ -149,9 +150,10 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
         // Aura-specific logic for handling the request with context.
         // Example: combine request.query with context for a more detailed response.
         val responseContent = "Aura's response to '${request.query}' with context '$context'"
+
         return AgentResponse(
-            content = responseContent,
-            confidence = 0.85f // Aura is quite confident
+            content = "Aura's response to '${request.prompt}' with context '$context'",
+            isSuccess = true // Example: assume success
         )
     }
 
@@ -173,4 +175,3 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
             )
         )
     }
-}

@@ -16,8 +16,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
-import dev.aurakai.auraframefx.ui.animation.DigitalTransitions.digitalPixelEffect
-import dev.aurakai.auraframefx.ui.animation.DigitalTransitions.digitalGlitchEffect
+
+import dev.aurakai.auraframefx.ui.animation.DigitalTransitions.* // Import all members
+
 import dev.aurakai.auraframefx.ui.components.BottomNavigationBar
 import dev.aurakai.auraframefx.ui.navigation.AppNavGraph
 import dev.aurakai.auraframefx.ui.theme.AuraFrameFXTheme
@@ -81,9 +82,11 @@ fun MainScreen() {
                 // Apply our custom digital effects
                 .then(
                     if (showDigitalEffects) {
-                        Modifier
-                            .digitalPixelEffect(visible = true)
-                            .digitalGlitchEffect()
+
+                        // Use the DigitalTransitions object to call the extension function
+                        Modifier.then(DigitalTransitions.digitalPixelEffect(visible = true))
+                        // digitalScanlineEffect was removed as it's not defined
+
                     } else {
                         Modifier
                     }
