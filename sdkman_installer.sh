@@ -20,7 +20,7 @@
 
 set -e
 
-# track_last_command updates variables to keep track of the last and current Bash commands executed.
+# track_last_command updates variables to record the most recently and currently executed Bash commands for error tracking.
 track_last_command() {
     last_command=$current_command
     current_command=$BASH_COMMAND
@@ -253,7 +253,7 @@ SDKMAN_CANDIDATES_CSV=$(curl -s "${SDKMAN_SERVICE}/candidates/all")
 echo "$SDKMAN_CANDIDATES_CSV" > "${SDKMAN_DIR}/var/candidates"
 
 echo "Prime platform file..."
-# infer_platform detects the current operating system and hardware architecture, and echoes an SDKMAN-compatible platform identifier string.
+# infer_platform detects the current operating system and hardware architecture and echoes an SDKMAN-compatible platform identifier string.
 function infer_platform() {
 	local kernel
 	local machine

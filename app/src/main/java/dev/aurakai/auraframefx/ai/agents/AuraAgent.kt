@@ -48,7 +48,12 @@ class AuraAgent(
     }
 
     // --- Collaboration placeholders (not part of Agent interface) ---
-    // These can remain for specific inter-agent communication patterns if needed.
+    /**
+     * Placeholder for participating in inter-agent federation logic.
+     *
+     * @param data Input data relevant to federation participation.
+     * @return An empty map. Intended for future implementation of federation collaboration.
+     */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
     }
@@ -66,12 +71,12 @@ class AuraAgent(
     }
 
     /**
-     * Serves as a placeholder for collaborative processing involving Genesis and Kai agents.
+     * Placeholder for collaborative processing involving Genesis and Kai agents.
      *
      * @param data Input data for the collaboration.
      * @param kai The KaiAgent participating in the collaboration.
      * @param genesis The Genesis agent or object involved in the process.
-     * @return An empty map. Intended for future implementation of collaborative logic.
+     * @return An empty map. Intended for future implementation.
      */
     suspend fun participateWithGenesisAndKai(
         data: Map<String, Any>,
@@ -82,14 +87,14 @@ class AuraAgent(
     }
 
     /**
-     * Placeholder for collaborative processing involving Genesis, KaiAgent, and user input.
+     * Serves as a placeholder for collaborative processing between Genesis, KaiAgent, and user input.
      *
-     * Currently returns an empty map. Intended for future implementation of multi-agent collaboration logic.
+     * Intended for future implementation of multi-agent collaboration logic. Currently returns an empty map.
      *
-     * @param data Input data for the collaboration.
-     * @param kai The KaiAgent participating in the process.
+     * @param data The input data for the collaboration.
+     * @param kai The KaiAgent participating in the collaboration.
      * @param genesis The Genesis agent or entity involved.
-     * @param userInput Additional input from the user.
+     * @param userInput Additional input provided by the user.
      * @return An empty map.
      */
     suspend fun participateWithGenesisKaiAndUser(
@@ -104,11 +109,11 @@ class AuraAgent(
 
     // Removed the incorrect override fun processRequest(request: AiRequest): AgentResponse
     /**
-     * Processes an AI request using Aura-specific logic, incorporating the provided context into the response.
+     * Processes an AI request with Aura-specific logic, generating a response that includes the provided context.
      *
      * @param request The AI request containing the prompt to process.
-     * @param context Additional context information to include in the response.
-     * @return An AgentResponse containing Aura's reply and a success status.
+     * @param context Additional context to be incorporated into the response.
+     * @return An AgentResponse with Aura's reply and a success status.
      */
 
     override suspend fun processRequest(
