@@ -40,6 +40,11 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.math.*
 
+/**
+ * Displays an interactive rotating halo interface for managing agents and delegating tasks.
+ *
+ * Renders a visual halo with agent nodes, supports drag-and-drop task assignment, tracks task history, and animates agent status. Users can assign tasks to agents by dragging nodes, input tasks, and monitor processing status in real time. Includes controls for rotation, resetting, and clearing task history.
+ */
 @OptIn(
     ExperimentalMaterial3Api::class,
     androidx.compose.foundation.gestures.ExperimentalFoundationApi::class
