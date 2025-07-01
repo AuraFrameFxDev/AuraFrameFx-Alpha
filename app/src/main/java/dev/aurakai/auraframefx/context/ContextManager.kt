@@ -8,11 +8,9 @@ class ContextManager @Inject constructor() {
     private val contexts = mutableListOf<String>()
 
     /**
-     * Creates and stores a new context.
-     * For now, this is a simple in-memory list.
-     * TODO: Implement more sophisticated context storage (e.g., persistent learning, session memory)
+     * Adds a new, non-blank, unique context string to the in-memory context list.
      *
-     * @param context The context string to add.
+     * @param context The context string to add. Must be non-blank and not already present.
      */
     fun createContext(context: String) {
         if (context.isNotBlank() && !contexts.contains(context)) {
@@ -21,7 +19,7 @@ class ContextManager @Inject constructor() {
     }
 
     /**
-     * Retrieves the current list of contexts.
+     * Returns a list of all stored context strings.
      *
      * @return A new list containing all current contexts.
      */
@@ -35,11 +33,12 @@ class ContextChain @Inject constructor() {
     private val contextLinks = mutableMapOf<String, String>()
 
     /**
-     * Links two contexts together, implying a sequential or causal relationship.
-     * TODO: Implement more complex context linking logic (e.g., weighted links, graph database)
+     * Establishes a link from one context to another, representing a sequential or causal relationship.
      *
-     * @param contextA The source context.
-     * @param contextB The target context to link to.
+     * If both context strings are non-blank, stores `contextB` as the successor of `contextA`.
+     *
+     * @param contextA The source context to be linked from.
+     * @param contextB The target context to be linked to.
      */
     fun linkContexts(contextA: String, contextB: String) {
         if (contextA.isNotBlank() && contextB.isNotBlank()) {
@@ -48,10 +47,10 @@ class ContextChain @Inject constructor() {
     }
 
     /**
-     * Finds the context that follows the given context.
+     * Returns the context linked as the successor to the given context, or null if no link exists.
      *
-     * @param context The context to find the link for.
-     * @return The linked context, or null if no link exists.
+     * @param context The context whose successor is to be retrieved.
+     * @return The successor context, or null if there is no linked context.
      */
     fun getNextInChain(context: String): String? {
         return contextLinks[context]
