@@ -16,10 +16,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
-import dev.aurakai.auraframefx.ui.animation.digitalPixelEffect
+import dev.aurakai.auraframefx.ui.animation.DigitalTransitions.digitalPixelEffect
+import dev.aurakai.auraframefx.ui.animation.DigitalTransitions.digitalGlitchEffect
 import dev.aurakai.auraframefx.ui.components.BottomNavigationBar
 import dev.aurakai.auraframefx.ui.navigation.AppNavGraph
-import dev.aurakai.auraframefx.ui.theme.AuraFrameFXThemeCompat
+import dev.aurakai.auraframefx.ui.theme.AuraFrameFXTheme
 
 // Using Jetpack Navigation 3 with built-in animation support
 
@@ -34,7 +35,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AuraFrameFXThemeCompat {
+            AuraFrameFXTheme {
                 MainScreen()
             }
         }
@@ -78,7 +79,7 @@ fun MainScreen() {
                     if (showDigitalEffects) {
                         Modifier
                             .digitalPixelEffect(visible = true)
-                            .digitalScanlineEffect(visible = true)
+                            .digitalGlitchEffect()
                     } else {
                         Modifier
                     }
@@ -95,7 +96,7 @@ fun MainScreen() {
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    AuraFrameFXThemeCompat {
+    AuraFrameFXTheme {
         MainScreen()
     }
 }

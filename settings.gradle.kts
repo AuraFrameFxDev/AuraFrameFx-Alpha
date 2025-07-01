@@ -28,7 +28,12 @@ pluginManagement {
         id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion apply false
         id("org.jetbrains.kotlin.plugin.compose") version kotlinVersion apply false
         id("org.openapi.generator") version openApiGeneratorVersion apply false
+        id("org.gradle.toolchains.foojay-resolver") version "0.8.0" apply false
     }
+}
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver")
 }
 
 dependencyResolutionManagement {
@@ -43,3 +48,13 @@ dependencyResolutionManagement {
 
 rootProject.name = "AuraFrameFXAlpha"
 include(":app")
+
+toolchainManagement {
+    jvm {
+        javaRepositories {
+            repository("foojay") {
+                resolverClass.set(org.gradle.toolchains.foojay.FoojayToolchainResolver::class.java)
+            }
+        }
+    }
+}
