@@ -60,6 +60,11 @@ class MainActivity : ComponentActivity() {
  * Applies cyberpunk-style digital transition effects between screens.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays the main screen of the app with navigation and optional digital visual effects.
+ *
+ * Sets up the navigation controller, bottom navigation bar, and applies a digital pixel effect to the content area when enabled.
+ */
 @Composable
 fun MainScreen() {
     // Use Jetpack Navigation 3's nav controller for digital transitions

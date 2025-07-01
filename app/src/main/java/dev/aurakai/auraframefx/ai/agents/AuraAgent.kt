@@ -65,6 +65,15 @@ class AuraAgent(
         return emptyMap()
     }
 
+    /**
+     * Placeholder for collaborative processing involving Genesis, KaiAgent, and user input.
+     *
+     * @param data Input data for the collaboration.
+     * @param kai The KaiAgent participating in the collaboration.
+     * @param genesis The Genesis agent or entity involved.
+     * @param userInput Additional input from the user.
+     * @return An empty map, as this method is not yet implemented.
+     */
     suspend fun participateWithGenesisKaiAndUser(
         data: Map<String, Any>,
         kai: KaiAgent,
@@ -76,7 +85,13 @@ class AuraAgent(
 
 
     // Removed the incorrect override fun processRequest(request: AiRequest): AgentResponse
-    // The logic will be consolidated into the correct overriding method below.
+    /**
+     * Processes an AI request with the provided context and returns an Aura-specific response.
+     *
+     * @param request The AI request containing the prompt to process.
+     * @param context Additional context information to include in the response.
+     * @return An AgentResponse containing Aura's reply and a success status.
+     */
 
     override suspend fun processRequest(
         request: AiRequest,
