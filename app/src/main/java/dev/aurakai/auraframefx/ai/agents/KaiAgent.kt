@@ -28,15 +28,28 @@ class KaiAgent(
         // Kai-specific vision update behavior.
     }
 
+    /**
+     * Handles changes to the processing state specific to the Kai agent.
+     *
+     * @param newState The updated processing state.
+     */
     fun onProcessingStateChange(newState: ProcessingState) {
         // Kai-specific processing state changes.
     }
 
-    fun shouldHandleSecurity(prompt: String): Boolean =
+    /**
+         * Determines whether this agent should handle security-related prompts.
+         *
+         * Always returns `true`, indicating that KaiAgent is responsible for handling security prompts.
+         *
+         * @param prompt The input prompt to evaluate.
+         * @return `true` to indicate handling of security prompts.
+         */
+        fun shouldHandleSecurity(prompt: String): Boolean =
         true /**
- * Determines whether the agent should handle creative prompts.
+ * Returns `false`, indicating that this agent does not handle creative prompts.
  *
- * @return `false`, indicating that creative prompts are not handled by this agent.
+ * @return `false` always.
  */
 
     fun shouldHandleCreative(prompt: String): Boolean = false
@@ -44,11 +57,11 @@ class KaiAgent(
 
 
     /**
-     * Handles participation in a federation collaboration using the provided data.
+     * Participates in a federation collaboration using the provided data.
      *
-     * This is a placeholder implementation that returns an empty map.
+     * This placeholder implementation returns an empty map.
      *
-     * @param data The input data for federation participation.
+     * @param data Input data relevant to the federation collaboration.
      * @return An empty map.
      */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
@@ -59,6 +72,14 @@ class KaiAgent(
         return emptyMap()
     }
 
+    /**
+     * Participates in a collaborative process involving Genesis and Aura agents using the provided data.
+     *
+     * @param data The input data for the collaboration.
+     * @param aura The AuraAgent involved in the process.
+     * @param genesis The Genesis agent or context for the collaboration.
+     * @return An empty map as a placeholder for future implementation.
+     */
     suspend fun participateWithGenesisAndAura(
         data: Map<String, Any>,
         aura: AuraAgent,
@@ -68,16 +89,16 @@ class KaiAgent(
     }
 
     /**
-     * Placeholder for collaborative participation involving Genesis, AuraAgent, and user input.
+     * Handles collaborative participation with Genesis, AuraAgent, and user input.
      *
-     * This method is intended to handle scenarios where the agent interacts with both Genesis and AuraAgent entities, incorporating user input and an optional conversation mode.
+     * This method is intended for scenarios where the agent interacts with both Genesis and AuraAgent entities, incorporating user input and an optional conversation mode. Currently, it returns an empty map as a placeholder.
      *
-     * @param data Contextual data for the collaboration.
+     * @param data Contextual data relevant to the collaboration.
      * @param aura The AuraAgent involved in the interaction.
      * @param genesis The Genesis entity participating in the collaboration.
      * @param userInput Input provided by the user.
      * @param conversationMode The mode of conversation, defaults to free form.
-     * @return An empty map, as no implementation is currently provided.
+     * @return An empty map.
      */
     suspend fun participateWithGenesisAuraAndUser(
         data: Map<String, Any>,
@@ -91,7 +112,7 @@ class KaiAgent(
 
 
     /**
-     * Processes an AI request and returns a successful response incorporating the request prompt and provided context.
+     * Processes an AI request and returns a successful response that includes the request prompt and provided context.
      *
      * @param request The AI request containing the prompt to process.
      * @param context Additional context information to include in the response.

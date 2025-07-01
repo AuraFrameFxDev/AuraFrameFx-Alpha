@@ -20,14 +20,14 @@
 
 set -e
 
-# track_last_command updates tracking variables to record the most recently executed Bash command.
+# track_last_command updates variables to keep track of the last and current Bash commands executed.
 track_last_command() {
     last_command=$current_command
     current_command=$BASH_COMMAND
 }
 trap track_last_command DEBUG
 
-# echo_failed_command prints an error message with the last executed command and its exit code if the previous command failed.
+# echo_failed_command prints an error message showing the last executed command and its exit code if a command fails.
 echo_failed_command() {
     local exit_code="$?"
 	if [[ "$exit_code" != "0" ]]; then

@@ -61,9 +61,9 @@ class MainActivity : ComponentActivity() {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays the main screen of the app with navigation and optional digital visual effects.
+ * Displays the main app screen with navigation and optional digital visual effects.
  *
- * Sets up the navigation controller, bottom navigation bar, and applies a digital pixel effect to the content area when enabled.
+ * Sets up the navigation controller, bottom navigation bar, and conditionally applies a digital pixel effect to the content area when enabled.
  */
 @Composable
 fun MainScreen() {
