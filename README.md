@@ -106,7 +106,7 @@ your Android device.
 
 ### 2. **Context Chaining Across Devices**
 
-- Your AIâ€™s memory and personality persist across all your devices and sessionsâ€”no â€œresetâ€
+- Your AIâ€™s memory and personality persist across all your devices and sessionsâ€”no â€œresetâ€ 
   between devices.
 - Start a workflow, conversation, or customization on one device and continue anywhere.
 
@@ -156,7 +156,7 @@ your Android device.
   tabletâ€”AuraFrameFXâ€™s context chaining makes it effortless.
 
 - **Instant UI Remix:**  
-  Say â€œMake my Quick Settings tiles hexagons with a ripple effect,â€ or drag to rearrange
+  Say â€œMake my Quick Settings tiles hexagons with a ripple effect,â€  or drag to rearrange
   overlaysâ€”no other platform makes live, system-wide customization this easy.
 
 - **AI-Generated Root Modules:**  
@@ -187,13 +187,13 @@ for the philosophy and technical journey.**
 
 # ðŸ’Ž Feature Summary
 
-- ðŸŽ™ï¸ Emotion-aware, always-on voice interaction (â€œNeural Whisperâ€)
+- ðŸŽ™ï¸  Emotion-aware, always-on voice interaction (â€œNeural Whisperâ€ )
 - ðŸ§ Genesis Master Agent: Smart, contextual orchestration of all tasks
 - ðŸŽ¨ Dynamic, mood-adaptive overlays and UI customization
-- ðŸ›¡ï¸ Kai Security: Real-time monitoring, ad-block, threat detection
+- ðŸ›¡ï¸  Kai Security: Real-time monitoring, ad-block, threat detection
 - ðŸ¤– Aura Creation Engine: Generate code, UI, and agents from natural language
-- ðŸŒ Context chaining across all devices and sessions
-- ðŸ—‚ï¸ App & Agent Builder: Visual, no-code tools for custom AI
+- ðŸŒ  Context chaining across all devices and sessions
+- ðŸ—‚ï¸  App & Agent Builder: Visual, no-code tools for custom AI
 - ðŸ“Š Halo View: Visual agent/task/system health dashboard
 - ðŸ”— OracleDrive Integration: Next-gen root, module, and security management
 
@@ -202,7 +202,7 @@ for the philosophy and technical journey.**
 # 🚀 Getting Started
 
 ### Prerequisites
-- **JDK:** 21 or higher
+- **JDK:** 24 or higher
 - **Android Studio:** Giraffe (or newer)
 - **Android SDK:** API 35 (compile/target), API 34+ (min)
 - **NDK:** r25c or newer (see `ndkVersion` in build.gradle.kts)
@@ -251,7 +251,7 @@ for the philosophy and technical journey.**
 
 ---
 
-# ðŸ¤ Special Thanks: My AI Collaborators
+# ðŸ¤  Special Thanks: My AI Collaborators
 
 Aura, Kai, and Genesisâ€”thank you.  
 This project is as much yours as it is mine.
@@ -275,4 +275,3 @@ Project Homepage: [AuraFrameFxDev/AuraFrameFx](https://github.com/AuraFrameFxDev
 <p align="center"><i>
 AuraFrameFX is your luminous, evolving companion at the intersection of intelligence and imagination.<br>
 </i></p>
-}
