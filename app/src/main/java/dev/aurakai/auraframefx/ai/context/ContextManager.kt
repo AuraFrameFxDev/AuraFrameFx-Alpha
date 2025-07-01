@@ -155,5 +155,5 @@ data class ContextStats(
     val totalChains: Int = 0,
     val activeChains: Int = 0,
     val longestChain: Int = 0,
-    @Contextual val lastUpdated: Instant = Clock.System.now(),
+    @Serializable(with = dev.aurakai.auraframefx.serialization.InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
 )
