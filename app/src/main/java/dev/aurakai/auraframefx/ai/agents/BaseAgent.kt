@@ -30,7 +30,7 @@ open class BaseAgent(
     }
 
     /**
-     * Retrieves the agent's type as an `AgentType` enum value.
+     * Returns the agent's type as an `AgentType` enum value.
      *
      * @return The `AgentType` corresponding to the agent's internal type string.
      * @throws IllegalArgumentException If the internal type string does not match any valid `AgentType`.
@@ -49,11 +49,11 @@ open class BaseAgent(
      * Processes an AI request and returns a default successful response.
      *
      * Generates a generic agent response containing the request prompt, agent name, and provided context.
-     * Designed to be overridden by subclasses for custom request handling.
+     * Intended to be overridden by subclasses for custom request handling.
      *
      * @param request The AI request to process.
      * @param context Additional context information for the request.
-     * @return An [AgentResponse] containing a default message and success status.
+     * @return An [AgentResponse] with a default message and success status.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Default implementation for base agent, override in subclasses
@@ -68,11 +68,11 @@ open class BaseAgent(
     }
 
     /**
-     * Returns a flow that emits a single agent response for the given AI request.
+     * Returns a flow emitting a single agent response for the given AI request.
      *
-     * This default implementation calls `processRequest` with a placeholder context string. Subclasses can override this method to provide streaming or multi-part responses.
+     * This default implementation calls `processRequest` with a placeholder context. Subclasses may override to provide streaming or multi-part responses.
      *
-     * @return A flow emitting one `AgentResponse` corresponding to the provided request.
+     * @return A flow emitting one `AgentResponse` for the provided request.
      */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // Basic implementation, can be overridden for more complex streaming logic

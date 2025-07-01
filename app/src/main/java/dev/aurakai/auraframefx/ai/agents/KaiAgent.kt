@@ -20,8 +20,10 @@ class KaiAgent(
     /**
      * Processes the provided context using KaiAgent-specific logic.
      *
-     * @param _context A map containing contextual data for KaiAgent processing.
-     * @return A map with a placeholder response indicating Kai-specific processing.
+     * Currently returns a placeholder map indicating Kai-specific processing.
+     *
+     * @param _context Contextual data to be processed.
+     * @return A map containing a placeholder Kai-specific response.
      */
     suspend fun processKaiSpecific(_context: Map<String, Any>): Map<String, Any> {
         // Placeholder for Kai-specific logic.
@@ -31,38 +33,36 @@ class KaiAgent(
     /**
      * Handles updates to the vision state for KaiAgent.
      *
-     * This method is a placeholder for Kai-specific logic to be executed when the vision state changes.
+     * This is a placeholder for implementing Kai-specific logic when the vision state changes.
      *
-     * @param newState The new vision state.
+     * @param newState The updated vision state.
      */
     fun onVisionUpdate(newState: VisionState) {
         // Kai-specific vision update behavior.
     }
 
     /**
-     * Invoked when the agent's processing state changes.
+     * Handles updates to the agent's processing state.
      *
-     * This method is a placeholder for handling Kai-specific logic in response to processing state updates.
+     * This placeholder method can be overridden to implement Kai-specific logic when the processing state changes.
      *
-     * @param newState The updated processing state.
+     * @param newState The new processing state.
      */
     fun onProcessingStateChange(newState: ProcessingState) {
         // Kai-specific processing state changes.
     }
 
     /**
-         * Determines whether this agent handles security-related prompts.
-         *
-         * Always returns `true`, indicating that all security prompts are handled by this agent.
+         * Indicates that this agent handles all security-related prompts.
          *
          * @param prompt The prompt to evaluate.
-         * @return `true` for any input prompt.
+         * @return Always returns `true`.
          */
         fun shouldHandleSecurity(prompt: String): Boolean =
         true /**
- * Indicates whether this agent handles creative prompts.
+ * Determines if the agent handles creative prompts.
  *
- * Always returns `false`, meaning creative prompts are not supported by this agent.
+ * Always returns `false`, indicating that creative prompts are not supported by this agent.
  *
  * @return `false`
  */
@@ -72,11 +72,11 @@ class KaiAgent(
 
 
     /**
-     * Handles federation collaboration with the provided data.
+     * Handles collaboration with a federation using the provided data.
      *
-     * This placeholder implementation returns an empty map and performs no processing.
+     * This placeholder implementation returns an empty map without performing any processing.
      *
-     * @param data Data relevant to federation participation.
+     * @param data Input data for federation participation.
      * @return An empty map.
      */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
@@ -84,9 +84,9 @@ class KaiAgent(
     }
 
     /**
-     * Placeholder for KaiAgent's participation in collaborative tasks with Genesis.
+     * Placeholder for KaiAgent's collaborative participation with Genesis.
      *
-     * Currently returns an empty map. Intended for future implementation of collaboration logic involving Genesis.
+     * Currently returns an empty map. Intended for future implementation of logic involving collaboration between KaiAgent and Genesis.
      *
      * @param data Input data relevant to the collaboration.
      * @return An empty map as a placeholder.
@@ -96,13 +96,13 @@ class KaiAgent(
     }
 
     /**
-     * Serves as a placeholder for collaborative processing between KaiAgent, AuraAgent, and Genesis.
+     * Placeholder for collaborative processing involving KaiAgent, AuraAgent, and Genesis.
      *
      * Intended for future implementation of joint logic or data exchange among the agents. Currently returns an empty map.
      *
-     * @param data Input data relevant to the collaboration.
-     * @param aura The AuraAgent involved in the collaboration.
-     * @param genesis The Genesis entity participating in the collaboration.
+     * @param data Input data for the collaboration.
+     * @param aura The AuraAgent participating in the collaboration.
+     * @param genesis The Genesis entity involved.
      * @return An empty map.
      */
     suspend fun participateWithGenesisAndAura(
@@ -114,9 +114,9 @@ class KaiAgent(
     }
 
     /**
-     * Serves as a placeholder for collaborative participation involving Genesis, AuraAgent, and user input in a specified conversation mode.
+     * Placeholder for collaborative processing involving Genesis, AuraAgent, and user input in a specified conversation mode.
      *
-     * Currently returns an empty map without performing any processing.
+     * This function currently performs no processing and always returns an empty map.
      *
      * @param data Contextual information for the collaboration.
      * @param aura The AuraAgent participating in the interaction.

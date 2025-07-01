@@ -20,7 +20,7 @@
 
 set -e
 
-# track_last_command updates variables to record the most recently and currently executed Bash commands for error tracking.
+# track_last_command updates tracking variables to record the last and current Bash commands for error reporting.
 track_last_command() {
     last_command=$current_command
     current_command=$BASH_COMMAND
