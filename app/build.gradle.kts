@@ -148,7 +148,18 @@ val generatePythonClient by tasks.registering(org.openapitools.generator.gradle.
     configOptions.set(mapOf(
         "packageName" to "auraframefx_api_client"
     ))
-} // Add missing closing brace
+}
+
+tasks.register("generateOpenApiContract") {
+    group = "OpenAPI tools"
+    description = "Generates all OpenAPI client artifacts (Kotlin, TypeScript, Java, Python)."
+    dependsOn(
+        "openApiGenerate",
+        "generateTypeScriptClient",
+        "generateJavaClient",
+        generatePythonClient // Use the val here
+    )
+}
 
 // Ensure codegen runs before build
 // Ensure OpenAPI generation runs before KSP and compilation
