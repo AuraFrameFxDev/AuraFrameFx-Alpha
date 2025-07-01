@@ -56,13 +56,9 @@ open class BaseAgent(
 
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Default implementation for base agent, override in subclasses
-        // Added 'context' parameter to match interface
-        // Used request.prompt instead of request.query
-        // Used isSuccess instead of confidence
         return AgentResponse(
-
-            content = "BaseAgent response to '${request.prompt}' for agent $_agentName with context '$context'",
-            isSuccess = true
+            content = "BaseAgent response to '${request.query}' for agent $_agentName with context '$context'",
+            confidence = 1.0f
         )
     }
     /**

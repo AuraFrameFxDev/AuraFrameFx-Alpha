@@ -20,6 +20,7 @@ import coil.compose.AsyncImage
 import dev.aurakai.auraframefx.system.overlay.model.OverlayShape
 import dev.aurakai.auraframefx.ui.model.ImageResource
 import dev.aurakai.auraframefx.ui.model.ShapeType
+import dev.aurakai.auraframefx.ui.viewmodel.ImageShapeManagerViewModel // Added import
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -2,10 +2,11 @@ package dev.aurakai.auraframefx.ai.services
 
 import dev.aurakai.auraframefx.ai.agents.Agent
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.api.model.AgentType as ApiAgentType // Corrected import
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.first // For collecting from flow in processRequest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,35 +15,37 @@ class AuraAIService @Inject constructor() : Agent {
 
     override fun getName(): String? = "Aura"
 
-    override fun getType(): AgentType? = AgentType.AURA
+    override fun getType(): ApiAgentType = ApiAgentType.AURA // Changed to non-nullable ApiAgentType
 
-    // Renamed original processRequest to processRequestFlow as its signature differs from Agent interface
-    suspend fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
+    // This is the Agent interface method
+    override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
+        // This internal routing can stay if these specific flows are desired for internal logic
         return when (request.type) {
-            "text" -> processTextRequestFlow(request)
-            "image" -> processImageRequestFlow(request)
-            "memory" -> retrieveMemoryFlow(request)
-            else -> error("Unsupported request type: ${request.type}")
+            "text" -> processTextRequestFlowInternal(request)
+            "image" -> processImageRequestFlowInternal(request)
+            "memory" -> retrieveMemoryFlowInternal(request)
+            else -> flow {
+                emit(AgentResponse("Aura flow response for basic query: ${request.query}", 0.7f))
+            } // Default flow for basic queries
         }
     }
 
     // Implemented Agent interface method
-    override suspend fun processRequest(request: AiRequest): AgentResponse {
-        // TODO: Provide a direct AgentResponse, not a Flow.
-        // This might involve collecting from the flow or a different logic.
-        // For now, returning a placeholder.
+    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
+        // Example: collect from the flow, or implement separate direct logic
+        // For simplicity, let's return a direct response, incorporating context
         return AgentResponse(
-            content = "Aura direct response to '${request.query}'",
+            content = "Aura direct response to '${request.query}' with context '$context'",
             confidence = 0.75f
         )
     }
 
-    private suspend fun processTextRequestFlow(request: AiRequest): Flow<AgentResponse> {
+    // Renamed internal methods to avoid confusion with interface if signatures were similar
+    private fun processTextRequestFlowInternal(request: AiRequest): Flow<AgentResponse> {
         // TODO: Implement creative text generation
         return flow {
             emit(
                 AgentResponse(
-                    // type = "text", // AgentResponse might not have 'type' field like AiResponse did
                     content = "Processing creative request...",
                     confidence = 0.9f
                 )
@@ -50,12 +53,11 @@ class AuraAIService @Inject constructor() : Agent {
         }
     }
 
-    private suspend fun processImageRequestFlow(request: AiRequest): Flow<AgentResponse> {
+    private fun processImageRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         // TODO: Implement image generation
         return flow {
             emit(
                 AgentResponse(
-                    // type = "image",
                     content = "Processing image request...",
                     confidence = 0.9f
                 )
@@ -63,13 +65,11 @@ class AuraAIService @Inject constructor() : Agent {
         }
     }
 
-    // Renamed original retrieveMemory to retrieveMemoryFlow
-    suspend fun retrieveMemoryFlow(request: AiRequest): Flow<AgentResponse> {
+    private fun retrieveMemoryFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         // TODO: Implement memory retrieval
         return flow {
             emit(
                 AgentResponse(
-                    // type = "memory",
                     content = "Retrieving relevant memories...",
                     confidence = 0.95f
                 )
@@ -78,33 +78,33 @@ class AuraAIService @Inject constructor() : Agent {
     }
 
     // connect and disconnect are not part of Agent interface, removed override
-    suspend fun connect(): Boolean {
+    fun connect(): Boolean { // Removed suspend as not in interface, can be added back if specific impl needs it
         // TODO: Implement connection logic
         return true
     }
 
-    suspend fun disconnect(): Boolean {
+    fun disconnect(): Boolean { // Removed suspend
         // TODO: Implement disconnection logic
         return true
     }
 
-    // Implementing other missing methods from Agent interface
-    override fun getCapabilities(): Map<String, Any> {
+    // These methods are not part of the Agent interface, so remove 'override'
+    fun getCapabilities(): Map<String, Any> {
         // TODO: Implement capabilities for Aura
-        return mapOf("name" to "Aura", "type" to AgentType.AURA, "service_implemented" to true)
+        return mapOf("name" to "Aura", "type" to ApiAgentType.AURA, "service_implemented" to true)
     }
 
-    override fun getContinuousMemory(): Any? {
+    fun getContinuousMemory(): Any? {
         // TODO: Implement continuous memory for Aura
         return null
     }
 
-    override fun getEthicalGuidelines(): List<String> {
+    fun getEthicalGuidelines(): List<String> {
         // TODO: Implement ethical guidelines for Aura
         return listOf("Be creative.", "Be inspiring.")
     }
 
-    override fun getLearningHistory(): List<String> {
+    fun getLearningHistory(): List<String> {
         // TODO: Implement learning history for Aura
         return emptyList()
     }
