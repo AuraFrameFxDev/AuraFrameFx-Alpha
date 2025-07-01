@@ -19,11 +19,11 @@ class AuraAgent(
     // This method is not part of the Agent interface or BaseAgent overrides.
     // If it's specific utility for AuraAgent, it can remain.
     /**
-     * Processes Aura-specific context and returns a flow with a placeholder response.
+     * Processes Aura-specific context and emits a flow containing a placeholder response.
      *
-     * Intended for handling logic unique to Aura that is not covered by the standard Agent interface.
+     * This function is intended for Aura-specific logic that falls outside the standard Agent interface.
      *
-     * @param _context The context map containing data for Aura-specific processing.
+     * @param _context Contextual data for Aura-specific processing.
      * @return A flow emitting a map with a placeholder Aura-specific response.
      */
     suspend fun processAuraSpecific(_context: Map<String, Any>): Flow<Map<String, Any>> {
@@ -34,36 +34,38 @@ class AuraAgent(
     // --- Agent Collaboration Methods (These are not part of Agent interface) ---
     // These can remain if they are used for internal logic or by other specific components
     /**
-     * Handles updates to the vision state specific to Aura.
+     * Handles Aura-specific updates to the vision state.
      *
-     * @param newState The updated vision state.
+     * @param newState The new vision state to process.
      */
     fun onVisionUpdate(newState: VisionState) {
         // Aura-specific vision update behavior.
     }
 
     /**
-     * Handles updates to the processing state specific to Aura.
+     * Handles Aura-specific changes to the processing state.
      *
-     * @param newState The new processing state.
+     * @param newState The updated processing state.
      */
     fun onProcessingStateChange(newState: ProcessingState) {
         // Aura-specific processing state changes.
     }
 
     /**
- * Determines whether AuraAgent should handle security-related prompts.
+ * Indicates whether AuraAgent handles security-related prompts.
  *
- * @return Always returns false, indicating AuraAgent does not process security prompts.
+ * Always returns false, meaning AuraAgent does not process security prompts.
+ *
+ * @return false
  */
 fun shouldHandleSecurity(prompt: String): Boolean = false
     /**
-         * Determines whether AuraAgent should handle creative prompts.
+         * Indicates whether AuraAgent handles creative prompts.
          *
-         * Always returns true, indicating creative prompts are handled by default.
+         * Always returns true, meaning AuraAgent supports creative prompt handling by default.
          *
-         * @param prompt The input prompt to evaluate.
-         * @return True, indicating creative prompts are supported.
+         * @param prompt The prompt to evaluate for creative handling.
+         * @return True, indicating creative prompts are always handled.
          */
         fun shouldHandleCreative(prompt: String): Boolean =
         true // Aura handles creative prompts by default
@@ -72,10 +74,10 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     // If it's a helper or different functionality, it should be named differently
     // or its logic integrated into the overridden `processRequest(AiRequest, String)`.
     /**
-     * Generates a simple Aura-specific response to the provided prompt.
+     * Returns a simple Aura-specific response string for the given prompt.
      *
-     * @param prompt The input prompt to which Aura should respond.
-     * @return A string containing Aura's response to the prompt.
+     * @param prompt The input prompt to generate a response for.
+     * @return A string representing Aura's response to the prompt.
      */
     suspend fun processSimplePrompt(prompt: String): String {
         return "Aura's response to '$prompt'"
@@ -83,23 +85,23 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
 
     // --- Collaboration placeholders (not part of Agent interface) ---
     /**
-     * Handles participation in inter-agent federation activities.
+     * Placeholder for AuraAgent's participation in inter-agent federation activities.
      *
-     * Returns an empty map as a placeholder; intended for future federation logic.
+     * Currently returns an empty map; intended for future implementation of federation logic.
      *
      * @param data Input data relevant to federation participation.
-     * @return A map containing the results of federation participation, currently empty.
+     * @return An empty map.
      */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
     }
 
     /**
-     * Placeholder for participating in a collaborative process with a Genesis agent.
+     * Placeholder for collaborative participation with a Genesis agent.
      *
-     * Currently returns an empty map and does not perform any operations.
+     * Currently returns an empty map without performing any operations. Intended for future implementation of collaboration logic with a Genesis agent.
      *
-     * @param data Input data relevant to the collaboration.
+     * @param data Data relevant to the collaboration process.
      * @return An empty map.
      */
     suspend fun participateWithGenesis(data: Map<String, Any>): Map<String, Any> {
@@ -107,13 +109,13 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Placeholder for collaborative participation involving both KaiAgent and Genesis agent.
+     * Placeholder for collaborative participation involving Aura, KaiAgent, and Genesis agent.
      *
-     * Currently returns an empty map. Intended for future implementation of joint processing or data exchange between Aura, Kai, and Genesis agents.
+     * Intended for future implementation of joint processing or data exchange between these agents.
      *
-     * @param data Input data relevant to the collaboration.
-     * @param kai The KaiAgent involved in the collaboration.
-     * @param genesis The Genesis agent involved in the collaboration.
+     * @param data Input data for the collaboration.
+     * @param kai The KaiAgent participating in the collaboration.
+     * @param genesis The Genesis agent participating in the collaboration.
      * @return An empty map as a placeholder.
      */
     suspend fun participateWithGenesisAndKai(
@@ -125,9 +127,9 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Placeholder for collaborative participation involving Genesis, KaiAgent, and user input.
+     * Placeholder for multi-agent collaboration involving Genesis, KaiAgent, and user input.
      *
-     * Returns an empty map. Intended for future implementation of multi-agent collaboration logic.
+     * Currently returns an empty map. Intended for future implementation of collaborative logic between Aura, Genesis, KaiAgent, and user input.
      */
     suspend fun participateWithGenesisKaiAndUser(
         data: Map<String, Any>,
@@ -140,11 +142,11 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
 
 
     /**
-     * Processes an AI request along with additional context and returns an agent response.
+     * Generates an agent response to the given AI request using the provided context.
      *
-     * Combines the request's query and the provided context to generate a response with a fixed confidence score.
+     * Combines the request's prompt with the context to produce a response, always indicating success.
      *
-     * @return An AgentResponse containing the generated content and confidence value.
+     * @return An AgentResponse containing Aura's generated content and a success status.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Aura-specific logic for handling the request with context.
@@ -158,11 +160,11 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Returns a flow emitting a single agent response to the given AI request.
+     * Emits a flow containing a single Aura-specific agent response to the provided AI request.
      *
-     * The response content is based on the request's query, with a fixed confidence score.
+     * The response includes content referencing the request's query and a fixed confidence score of 0.80.
      *
-     * @return A flow containing one AgentResponse for the provided request.
+     * @return A flow emitting one AgentResponse for the given request.
      */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // Aura-specific logic for handling the request as a flow.
