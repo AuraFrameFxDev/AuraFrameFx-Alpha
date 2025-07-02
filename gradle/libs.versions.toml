@@ -4,7 +4,7 @@ accompanistSystemuicontroller = "0.36.0"
 agp = "8.7.0" # Updated by CodeRabbitAI's suggestion
 animationTooling = "1.6.7"
 toolchainsFoojayResolver = "0.8.0" # Added for settings plugin
-# comGoogleDevtoolsKspGradlePlugin version will be driven by 'ksp'
+# comGoogleDevtoolsKspGradlePlugin version was removed as KSP plugin version is driven by 'ksp' alias
 converterGson = "3.0.0"
 datastoreCore = "1.1.7"
 firebaseConfigKtx = "22.1.2"
@@ -132,7 +132,7 @@ androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-com-google-devtools-ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "comGoogleDevtoolsKspGradlePlugin" }
+# com-google-devtools-ksp-gradle-plugin removed as it referenced a non-existent version alias and KSP is applied as a plugin.
 com-google-firebase-firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version = "3.0.0" }
 firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx", version.ref = "firebaseConfigKtx" }
