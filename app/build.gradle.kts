@@ -316,5 +316,4 @@ dependencies {
 
     // Compose Animation Tooling
     debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidxAnimationTooling) // Corrected: kebab-case alias directly to camelCase
 }
