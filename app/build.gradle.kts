@@ -59,27 +59,24 @@ android {
 
     sourceSets {
         getByName("main") {
-            aidl.srcDirs("src/main/aidl") // Reverted to original direct access
-            java.setSrcDirs(listOf(       // Reverted to original direct access
+            aidl.srcDirs("src/main/aidl")
+            java.setSrcDirs(listOf(
                 "src/main/java",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/debug/java",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/release/java",
-                // Explicitly add AIDL generated sources
                 "${layout.buildDirectory.get().asFile}/generated/aidl_source_output_dir/debug/compileDebugAidl/out",
                 "${layout.buildDirectory.get().asFile}/generated/aidl_source_output_dir/release/compileReleaseAidl/out"
             ))
-            kotlin.setSrcDirs(listOf(     // Reverted to original direct access
+            kotlin.setSrcDirs(listOf(
                 "src/main/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/debug/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
             ))
-            // The redundant aidl line that was here is kept removed.
         }
     }
     ndkVersion = "26.2.11394342"
-    // JVM target is now configured in the kotlin compiler options block above
     kotlin {
         compilerOptions {
             freeCompilerArgs.addAll(
@@ -141,7 +138,6 @@ tasks.named<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openAp
     globalProperties.set(mapOf(
         "library" to "kotlin",
         "serializationLibrary" to "kotlinx_serialization"
-        // "typeMappings" to "DateTime=kotlinx.datetime.Instant,Date=kotlinx.datetime.LocalDate" // Potentially useful later
     ))
     dependsOn("generateTypeScriptClient", "generateJavaClient")
 }
@@ -150,178 +146,5 @@ val generatePythonClient by tasks.registering(org.openapitools.generator.gradle.
     generatorName.set("python")
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
     outputDir.set("${layout.buildDirectory.get().asFile}/generated/python")
-    configOptions.set(mapOf(
-        "packageName" to "auraframefx_api_client"
-    ))
-}
-
-tasks.register("generateOpenApiContract") {
-    group = "OpenAPI tools"
-    description = "Generates all OpenAPI client artifacts (Kotlin, TypeScript, Java, Python)."
-    dependsOn(
-        "openApiGenerate",
-        "generateTypeScriptClient",
-        "generateJavaClient",
-        generatePythonClient // Use the val here
-    )
-}
-
-// Ensure codegen runs before build
-// Ensure OpenAPI generation runs before KSP and compilation
-project.afterEvaluate {
-    // Make KSP tasks depend on OpenAPI generation
-    tasks.named("kspDebugKotlin") {
-        dependsOn("openApiGenerate")
-    }
-    tasks.named("kspReleaseKotlin") {
-        dependsOn("openApiGenerate")
-    }
-
-    // Make compile tasks depend on OpenAPI generation
-    tasks.named("compileDebugKotlin") {
-        dependsOn("openApiGenerate")
-    }
-    tasks.named("compileReleaseKotlin") {
-        dependsOn("openApiGenerate")
-    }
-
-    // Make sure KSP can see the generated sources
-    tasks.named("kspDebugKotlin") {
-        mustRunAfter("openApiGenerate")
-    }
-    tasks.named("kspReleaseKotlin") {
-        mustRunAfter("openApiGenerate")
-    }
-}
-
-tasks.named("preBuild") {
-    dependsOn(
-        "generateTypeScriptClient",
-        "generateJavaClient",
-        "openApiGenerate",
-        "generatePythonClient"
-    )
-}
-
-// Configure KSP
-ksp {
-    // Output directories
-    arg("ksp.class.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/kotlin/main")
-    arg("ksp.java.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/java/main")
-    arg("ksp.resources.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/resources/main")
-    arg("ksp.kotlin.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/kotlin")
-
-    // Include generated OpenAPI code in the classpath
-    arg("classOutputDir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/kotlin/main")
-    arg("javaOutputDir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/java/main")
-
-    // Add source directories to the classpath
-    arg("project.buildDir", layout.buildDirectory.get().asFile.absolutePath)
-
-    // Enable incremental processing
-    arg("ksp.incremental", "true")
-
-    // The source directories are already configured in the sourceSets block above
-}
-
-dependencies {
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
-    implementation(libs.hilt.navigation.compose)
-
-    // For WorkManager with Hilt
-    implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.androidx.hilt.work)
-    ksp(libs.androidx.hilt.hilt.compiler)
-
-    // JNDI API for the missing javax.naming classes
-
-    // AndroidX Core
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-
-    // Compose
-    val composeBom = platform(libs.androidx.compose.bom)
-    implementation(composeBom)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.hilt.navigation.compose)
-    implementation(libs.androidx.compose.material3)
-
-    // Lifecycle
-    implementation(libs.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.lifecycle.common.java8)
-    implementation(libs.androidx.lifecycle.process)
-    implementation(libs.androidx.lifecycle.service)
-    implementation(libs.androidx.lifecycle.extensions)
-
-    // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics.ktx)
-    implementation(libs.firebase.crashlytics.ktx)
-    implementation(libs.firebase.perf.ktx)
-    implementation(libs.firebase.config.ktx)
-    implementation(libs.firebase.storage.ktx)
-    implementation(libs.firebase.messaging.ktx)
-
-    // Kotlin
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kotlinx.coroutines.play.services)
-    implementation(libs.jetbrains.kotlinx.serialization.json)
-    implementation(libs.jetbrains.kotlinx.datetime) // Added kotlinx-datetime
-
-    // Network
-    implementation(libs.squareup.retrofit2.retrofit)
-    implementation(libs.converter.gson)
-    implementation(libs.squareup.okhttp3.okhttp)
-    implementation(libs.squareup.okhttp3.logging.interceptor)
-    implementation(libs.jakewharton.retrofit2.kotlinx.serialization.converter)
-
-    // DataStore
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.datastore.core)
-
-    // Kotlinx Serialization
-    implementation(libs.jetbrains.kotlinx.serialization.json)
-    implementation(libs.jakewharton.retrofit2.kotlinx.serialization.converter)
-
-    // Xposed API (LSPosed)
-    compileOnly("de.robv.android.xposed:api:82")
-
-    // UI
-    implementation(libs.coil.compose)
-    implementation(libs.google.accompanist.systemuicontroller)
-    implementation(libs.google.accompanist.permissions)
-    implementation(libs.accompanist.pager)
-
-
-
-    implementation(libs.accompanist.pager.indicators)
-    implementation(libs.accompanist.flowlayout)
-
-    // Testing
-    testImplementation(libs.test.junit)
-    androidTestImplementation(libs.androidTest.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidTest.espresso.core)
-    androidTestImplementation(composeBom)
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    // Compose Animation Tooling
-    debugImplementation(libs.androidx.compose.ui.tooling)
-}
+    configOptions.set(mapOf
+
