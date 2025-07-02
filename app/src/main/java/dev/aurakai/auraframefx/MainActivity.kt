@@ -61,9 +61,9 @@ class MainActivity : ComponentActivity() {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays the main application UI with a scaffolded layout, bottom navigation, and optional digital transition effects.
+ * Displays the main application UI with a scaffolded layout, bottom navigation, and optional digital pixel effects.
  *
- * Initializes navigation, conditionally applies cyberpunk-style digital pixel effects to the main content area, and hosts the app's navigation graph.
+ * Sets up navigation and conditionally applies a cyberpunk-style digital pixel effect to the main content area. Hosts the app's navigation graph within the scaffold.
  */
 @Composable
 fun MainScreen() {
