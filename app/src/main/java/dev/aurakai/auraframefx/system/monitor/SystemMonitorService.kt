@@ -17,12 +17,24 @@ class SystemMonitorService : Service() {
         private const val TAG = "SystemMonitorService"
     }
 
+    /**
+     * Initializes the service when it is created.
+     *
+     * Called by the system to perform one-time setup, such as initializing monitoring resources.
+     */
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "onCreate: SystemMonitorService created.")
         // TODO: Initialize any resources needed for monitoring (e.g., sensors, listeners)
     }
 
+    /**
+     * Handles the start request for the service and initiates system monitoring in a background coroutine.
+     *
+     * Returns `START_STICKY` to indicate the service should be restarted if terminated by the system.
+     *
+     * @return The start mode flag indicating the service should remain running and be restarted if killed.
+     */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "onStartCommand: SystemMonitorService started.")
 
@@ -35,6 +47,11 @@ class SystemMonitorService : Service() {
         return START_STICKY
     }
 
+    /**
+     * Continuously monitors system metrics while the coroutine is active.
+     *
+     * Intended to periodically collect data such as CPU usage, memory usage, battery status, network status, and logs, with a delay between each monitoring cycle.
+     */
     private suspend fun monitorSystem() {
         // Loop indefinitely (or until service is stopped) to perform monitoring
         while (isActive) {
@@ -60,12 +77,20 @@ class SystemMonitorService : Service() {
         }
     }
 
+    /**
+     * Returns null to indicate that this service does not support binding.
+     *
+     * @return Always null, as binding is not supported.
+     */
     override fun onBind(intent: Intent?): IBinder? {
         Log.d(TAG, "onBind called, returning null as this is not a bound service.")
         // This service is not intended to be bound, so return null.
         return null
     }
 
+    /**
+     * Handles cleanup when the service is destroyed by canceling all running coroutines and releasing resources.
+     */
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy: SystemMonitorService destroyed.")
