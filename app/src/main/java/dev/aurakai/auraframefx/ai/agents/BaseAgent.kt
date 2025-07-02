@@ -21,29 +21,27 @@ open class BaseAgent(
 ) : Agent {
 
     /**
-     * Retrieves the agent's name.
+     * Returns the name of the agent.
      *
-     * @return The name of the agent, or null if not set.
-
+     * @return The agent's name, or null if not set.
      */
     override fun getName(): String? {
         return _agentName
     }
 
-    /**
-     * Returns the agent's type as an `AgentType` enum value.
-     *
-     * @return The `AgentType` corresponding to the agent's internal type string.
-     * @throws IllegalArgumentException If the internal type string does not match any valid `AgentType`.
-     */
-    override fun getType(): AgentType { // Return non-nullable AgentType from api.model
-        return try {
-            AgentType.valueOf(_agentType.uppercase())
-        } catch (e: IllegalArgumentException) {
-            // Or handle error more gracefully, e.g., map to a default or throw
-            throw IllegalArgumentException("Invalid agent type string: $_agentType", e)
-        }
 
+    /**
+     * Returns the agent's type as an `ApiAgentType` by mapping the internal type string, defaulting to `ApiAgentType.Aura` if no match is found.
+     *
+     * If the internal type string does not correspond to any known `ApiAgentType`, the method returns `ApiAgentType.Aura` as a fallback.
+     *
+     * @return The mapped `ApiAgentType` for this agent.
+     */
+    override fun getType(): ApiAgentType {
+        // Map string to the generated ApiAgentType
+        // Fallback to a default or throw an error if mapping fails
+        return ApiAgentType.values().firstOrNull { it.value.equals(_agentType, ignoreCase = true) }
+            ?: ApiAgentType.Aura // Defaulting to Aura, consider a more robust fallback or error
     }
 
     /**
@@ -56,16 +54,6 @@ open class BaseAgent(
      * @return A default `AgentResponse` containing a message referencing the request, context, and agent name, with fixed confidence.
      */
 
-    /**
-     * Processes an AI request and returns a default successful response.
-     *
-     * Generates a generic agent response containing the request prompt, agent name, and provided context.
-     * Intended to be overridden by subclasses for custom request handling.
-     *
-     * @param request The AI request to process.
-     * @param context Additional context information for the request.
-     * @return An [AgentResponse] with a default message and success status.
-     */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Default implementation for base agent, override in subclasses
         return AgentResponse(
@@ -73,15 +61,14 @@ open class BaseAgent(
             confidence = 1.0f
         )
     }
-
     /**
-     * Returns a flow emitting a single agent response for the given AI request.
+     * Returns a flow emitting a default agent response for the given request.
      *
-     * This default implementation calls `processRequest` with a placeholder context. Subclasses may override to provide streaming or multi-part responses.
+     * The response includes the request query and agent name with a fixed confidence score. Intended to be overridden by subclasses for custom streaming behavior.
      *
-     * @return A flow emitting one `AgentResponse` for the provided request.
+     * @return A flow containing a single default `AgentResponse`.
      */
-
+=
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // Basic implementation, can be overridden for more complex streaming logic
         return flow {
