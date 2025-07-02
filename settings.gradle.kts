@@ -14,6 +14,7 @@ pluginManagement {
 plugins {
     // Use direct ID and version string here. Version is managed in libs.versions.toml (toolchainsFoojayResolver = "0.8.0").
     id("org.gradle.toolchains.foojay-resolver") version "0.8.0"
+
 }
 
 dependencyResolutionManagement {
