@@ -58,7 +58,7 @@ class GenesisAgent @Inject constructor(
     /**
      * Populates the set of active agents by mapping master agent configuration names to their corresponding `AgentType` enums.
      *
-     * Recognized agent types are added to the active agents set. Logs a warning for any configuration names that do not match a known `AgentType`.
+     * Adds recognized agent types to the active agents set and logs a warning for any configuration names that do not match a known `AgentType`.
      */
     private fun initializeAgents() {
         AgentHierarchy.MASTER_AGENTS.forEach { config ->
