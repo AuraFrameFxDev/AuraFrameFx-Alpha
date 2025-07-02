@@ -281,7 +281,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-    )
 
     // Xposed API - local JARs from app/Libs
     implementation(fileTree(mapOf("dir" to "app/Libs", "include" to listOf("*.jar"))))

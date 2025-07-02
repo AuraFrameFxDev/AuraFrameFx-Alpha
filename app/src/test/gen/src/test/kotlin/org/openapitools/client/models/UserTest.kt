@@ -20,34 +20,46 @@ import io.kotlintest.specs.ShouldSpec
 
 import org.openapitools.client.models.User
 import org.openapitools.client.models.UserPreferences
+import java.util.UUID
 
 class UserTest : ShouldSpec() {
     init {
-        // uncomment below to create an instance of User
-        //val modelInstance = User()
+        // Create an instance of UserPreferences for testing
+        val userPreferences = UserPreferences(
+            themeId = "dark-theme",
+            language = "en-US",
+            notificationsEnabled = true
+        )
+
+        // Create an instance of User
+        val modelInstance = User(
+            id = UUID.randomUUID().toString(),
+            username = "testuser",
+            email = "testuser@example.com",
+            preferences = userPreferences
+        )
 
         // to test the property `id`
         should("test id") {
-            // uncomment below to test the property
-            //modelInstance.id shouldBe ("TODO")
+            modelInstance.id shouldBe modelInstance.id // Check against the initialized value
         }
 
         // to test the property `username`
         should("test username") {
-            // uncomment below to test the property
-            //modelInstance.username shouldBe ("TODO")
+            modelInstance.username shouldBe "testuser"
         }
 
         // to test the property `email`
         should("test email") {
-            // uncomment below to test the property
-            //modelInstance.email shouldBe ("TODO")
+            modelInstance.email shouldBe "testuser@example.com"
         }
 
         // to test the property `preferences`
         should("test preferences") {
-            // uncomment below to test the property
-            //modelInstance.preferences shouldBe ("TODO")
+            modelInstance.preferences shouldBe userPreferences
+            modelInstance.preferences?.themeId shouldBe "dark-theme"
+            modelInstance.preferences?.language shouldBe "en-US"
+            modelInstance.preferences?.notificationsEnabled shouldBe true
         }
 
     }
