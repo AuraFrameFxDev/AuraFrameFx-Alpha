@@ -59,29 +59,20 @@ android {
 
     sourceSets {
         getByName("main") {
-            aidl {
-                srcDirs("src/main/aidl")
-            }
-            java {
-                // Using setSrcDirs should be fine, the error is puzzling.
-                // This explicitly sets these as the source directories, replacing defaults.
-                setSrcDirs(listOf(
-                    "src/main/java",
-                    "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
-                    "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
-                    "${layout.buildDirectory.get().asFile}/generated/ksp/debug/java",
-                    "${layout.buildDirectory.get().asFile}/generated/ksp/release/java"
-                ))
-            }
-            kotlin {
-                // Using setSrcDirs should be fine.
-                setSrcDirs(listOf(
-                    "src/main/kotlin",
-                    "${layout.buildDirectory.get().asFile}/generated/ksp/debug/kotlin",
-                    "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
-                ))
-            }
-            // Removed redundant aidl.setSrcDirs from original line 75
+            aidl.srcDirs("src/main/aidl") // Reverted to original direct access
+            java.setSrcDirs(listOf(       // Reverted to original direct access
+                "src/main/java",
+                "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
+                "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
+                "${layout.buildDirectory.get().asFile}/generated/ksp/debug/java",
+                "${layout.buildDirectory.get().asFile}/generated/ksp/release/java"
+            ))
+            kotlin.setSrcDirs(listOf(     // Reverted to original direct access
+                "src/main/kotlin",
+                "${layout.buildDirectory.get().asFile}/generated/ksp/debug/kotlin",
+                "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
+            ))
+            // The redundant aidl line that was here is kept removed.
         }
     }
     ndkVersion = "26.2.11394342"
