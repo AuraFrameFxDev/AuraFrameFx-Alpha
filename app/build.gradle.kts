@@ -37,18 +37,9 @@ android {
     }
 
     compileOptions {
+        // Use VERSION_17 or VERSION_1_8. VERSION_24 does not exist!
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlin {
-        jvmToolchain(17)
-    }
-
-    java {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
-        }
     }
 
     packaging {
@@ -61,6 +52,7 @@ android {
         getByName("main") {
             aidl.srcDirs("src/main/aidl") // Reverted to original direct access
             java.setSrcDirs(listOf(       // Reverted to original direct access
+
                 "src/main/java",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
@@ -73,23 +65,33 @@ android {
                 "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
             ))
             // The redundant aidl line that was here is kept removed.
+
         }
     }
+
     ndkVersion = "26.2.11394342"
-    // JVM target is now configured in the kotlin compiler options block above
-    kotlin {
-        compilerOptions {
-            freeCompilerArgs.addAll(
-                "-opt-in=kotlin.RequiresOptIn",
-                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-opt-in=kotlinx.coroutines.InternalCoroutinesApi"
-            )
-        }
+}
+
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-opt-in=kotlinx.coroutines.FlowPreview",
+            "-opt-in=kotlinx.coroutines.InternalCoroutinesApi"
+        )
     }
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+// OpenAPI codegen tasks
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("generateTypeScriptClient") {
     generatorName.set("typescript-fetch")
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
@@ -157,35 +159,25 @@ tasks.register("generateOpenApiContract") {
         "openApiGenerate",
         "generateTypeScriptClient",
         "generateJavaClient",
-        generatePythonClient // Use the val here
+        generatePythonClient
     )
 }
 
-// Ensure codegen runs before build
-// Ensure OpenAPI generation runs before KSP and compilation
+// Ensure codegen runs before build and KSP
 project.afterEvaluate {
-    // Make KSP tasks depend on OpenAPI generation
     tasks.named("kspDebugKotlin") {
         dependsOn("openApiGenerate")
+        mustRunAfter("openApiGenerate")
     }
     tasks.named("kspReleaseKotlin") {
         dependsOn("openApiGenerate")
+        mustRunAfter("openApiGenerate")
     }
-    
-    // Make compile tasks depend on OpenAPI generation
     tasks.named("compileDebugKotlin") {
         dependsOn("openApiGenerate")
     }
     tasks.named("compileReleaseKotlin") {
         dependsOn("openApiGenerate")
-    }
-    
-    // Make sure KSP can see the generated sources
-    tasks.named("kspDebugKotlin") {
-        mustRunAfter("openApiGenerate")
-    }
-    tasks.named("kspReleaseKotlin") {
-        mustRunAfter("openApiGenerate")
     }
 }
 
@@ -200,37 +192,27 @@ tasks.named("preBuild") {
 
 // Configure KSP
 ksp {
-    // Output directories
     arg("ksp.class.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/kotlin/main")
     arg("ksp.java.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/java/main")
     arg("ksp.resources.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/resources/main")
     arg("ksp.kotlin.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/kotlin")
-    
-    // Include generated OpenAPI code in the classpath
     arg("classOutputDir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/kotlin/main")
     arg("javaOutputDir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/java/main")
-    
-    // Add source directories to the classpath
     arg("project.buildDir", layout.buildDirectory.get().asFile.absolutePath)
-    
-    // Enable incremental processing
     arg("ksp.incremental", "true")
-    
-    // The source directories are already configured in the sourceSets block above
 }
 
+// Dependencies block
 dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.navigation.compose)
-    
-    // For WorkManager with Hilt
+
+    // WorkManager with Hilt
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.hilt.compiler)
-
-    // JNDI API for the missing javax.naming classes
 
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
@@ -277,7 +259,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.jetbrains.kotlinx.serialization.json)
-    implementation(libs.jetbrains.kotlinx.datetime) // Added kotlinx-datetime
+    implementation(libs.jetbrains.kotlinx.datetime)
 
     // Network
     implementation(libs.squareup.retrofit2.retrofit)
@@ -285,11 +267,11 @@ dependencies {
     implementation(libs.squareup.okhttp3.okhttp)
     implementation(libs.squareup.okhttp3.logging.interceptor)
     implementation(libs.jakewharton.retrofit2.kotlinx.serialization.converter)
-    
+
     // DataStore
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.core)
-    
+
     // Kotlinx Serialization
     implementation(libs.jetbrains.kotlinx.serialization.json)
     implementation(libs.jakewharton.retrofit2.kotlinx.serialization.converter)
@@ -299,9 +281,6 @@ dependencies {
     implementation(libs.google.accompanist.systemuicontroller)
     implementation(libs.google.accompanist.permissions)
     implementation(libs.accompanist.pager)
-
-
-
     implementation(libs.accompanist.pager.indicators)
     implementation(libs.accompanist.flowlayout)
 
@@ -311,10 +290,9 @@ dependencies {
     androidTestImplementation(libs.androidTest.espresso.core)
     androidTestImplementation(composeBom)
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.animationTooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    // Compose Animation Tooling
     debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.animationTooling) // Corrected alias to match TOML conversion (kebab-case to camelCase)
 }
+
+
