@@ -57,29 +57,27 @@ class KaiAgent(
          *
          * @param prompt The prompt to evaluate.
          * @return Always returns `true`.
-         */
-        fun shouldHandleSecurity(prompt: String): Boolean =
-        true /**
-      * Indicates whether KaiAgent handles creative prompts.
-      *
-      * Always returns `false`, meaning KaiAgent does not process creative prompts.
-      *
-      * @param prompt The prompt to evaluate.
-      * @return `false`, as creative prompts are not handled by this agent.
-      */
 
+        fun shouldHandleSecurity(prompt: String): Boolean = true
+
+    /**
+     * Determines whether KaiAgent should handle creative prompts.
+     *
+     * Always returns `false`, indicating that KaiAgent does not process creative prompts.
+     *
+     * @param prompt The prompt to evaluate.
+     * @return `false`, as creative prompts are not handled by KaiAgent.
+     */
     fun shouldHandleCreative(prompt: String): Boolean = false
 
+    /**
      * Placeholder for Kai's participation in a federation context.
      *
      * Returns an empty map, indicating no federation logic is implemented.
      *
      * @param data Input data relevant to federation participation.
      * @return An empty map.
-    
 
-
-    
     /**
      * Placeholder for KaiAgent's participation in a federation collaboration.
      *
@@ -87,6 +85,7 @@ class KaiAgent(
      *
      * @param data Input data relevant to the federation collaboration.
      * @return An empty map as a placeholder result.
+
      */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
@@ -157,8 +156,8 @@ class KaiAgent(
         val isSecure = !request.query.contains("exploit", ignoreCase = true)
 
         return AgentResponse(
-            content = "Kai's response to '${request.prompt}' with context '$context'",
-            isSuccess = true // Example: assume success
+            content = "Kai's response to '${request.query}' with context '$context'",
+            confidence = 1.0f // Changed from isSuccess = true
         )
     }
 

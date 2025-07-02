@@ -59,16 +59,19 @@ class AuraAgent(
  * @return false
  */
 fun shouldHandleSecurity(prompt: String): Boolean = false
+
+    }
+
     /**
-         * Indicates whether AuraAgent handles creative prompts.
-         *
-         * Always returns true, meaning AuraAgent supports creative prompt handling by default.
-         *
-         * @param prompt The prompt to evaluate for creative handling.
-         * @return True, indicating creative prompts are always handled.
-         */
-        fun shouldHandleCreative(prompt: String): Boolean =
-        true // Aura handles creative prompts by default
+     * Determines whether AuraAgent should handle creative prompts.
+     *
+     * Always returns true, indicating creative prompts are handled by default.
+     *
+     * @param prompt The input prompt to evaluate.
+     * @return True, indicating creative prompts are supported.
+     */
+    fun shouldHandleCreative(prompt: String): Boolean = true // Aura handles creative prompts by default
+
 
     // This `processRequest(prompt: String)` does not match the Agent interface.
     // If it's a helper or different functionality, it should be named differently
@@ -154,8 +157,8 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
         val responseContent = "Aura's response to '${request.query}' with context '$context'"
 
         return AgentResponse(
-            content = "Aura's response to '${request.prompt}' with context '$context'",
-            isSuccess = true // Example: assume success
+            content = responseContent, // Use the variable that correctly uses request.query
+            confidence = 1.0f
         )
     }
 

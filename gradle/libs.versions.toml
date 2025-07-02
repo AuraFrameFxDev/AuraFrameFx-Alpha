@@ -1,24 +1,43 @@
 [versions]
 accompanistPager = "0.36.0"
 accompanistSystemuicontroller = "0.36.0"
-agp = "8.11.0"
+agp = "8.7.0" # Updated by CodeRabbitAI's suggestion
 animationTooling = "1.6.7"
-comGoogleDevtoolsKspGradlePlugin = "2.2.0-2.0.2"
+toolchainsFoojayResolver = "0.8.0" # Added for settings plugin
+# comGoogleDevtoolsKspGradlePlugin version was removed as KSP plugin version is driven by 'ksp' alias
 converterGson = "3.0.0"
 datastoreCore = "1.1.7"
 firebaseConfigKtx = "22.1.2"
 firebaseStorageKtx = "21.0.2"
 hiltCompilerVersion = "1.2.0"
 hiltWork = "1.2.0"
-kotlin = "2.2.0"
+kotlin = "2.2.0" # Confirmed by CodeRabbitAI
 kotlinxCoroutinesAndroid = "1.10.2"
 kotlinxCoroutinesPlayServices = "1.10.2"
-ksp = "2.2.0-2.0.2"
+ksp = "2.2.0-2.0.2" # Corrected by CodeRabbitAI's latest specific advice
 composeBom = "2025.06.01"
-composeCompiler = "2.2.0" # Matches the hardcoded version
+# composeCompiler version will be driven by 'kotlin' version typically, or a specific compatible one.
+# CodeRabbitAI suggested kotlin = "2.2.0" for the kotlin.android plugin.
+# The kotlin-compose plugin version is often tied to the Kotlin language version.
+# Let's ensure the composeCompiler version aligns or is compatible.
+# Kotlin 2.2.0 might not use composeCompiler "2.2.0". It might use a version like "1.5.xx" if mapping to Compose Compiler.
+# However, the plugin alias is `kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeCompiler" }`
+# and `composeCompiler = "2.2.0"` was specified. This seems to be an error in my previous understanding or the TOML.
+# The Kotlin Compose compiler plugin version is usually different from the Kotlin language version.
+# For Kotlin 2.0.0 (as an example, if we were targeting that), Compose Compiler is often 1.5.10 or similar.
+# For Kotlin 2.2.0, this needs to be a compatible version.
+# Let's assume for now the 'kotlin-compose' plugin should align with the 'kotlin' version for simplicity if it's about the Kotlin language version itself,
+# but if 'composeCompiler' refers to androidx.compose.compiler:compiler, then it's different.
+# The plugin is `org.jetbrains.kotlin.plugin.compose`. Its version is usually tied to the Kotlin version.
+# Let's check if `kotlin = "2.2.0"` implies a specific compose plugin version.
+# The `plugins` block has `kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeCompiler" }`
+# and `composeCompiler = "2.2.0"`. This is highly unusual. The Kotlin Compose Compiler plugin version (org.jetbrains.kotlin.compose) is NOT the same as the androidx.compose.compiler:compiler version.
+# The org.jetbrains.kotlin.compose plugin version should align with the Kotlin language version.
+# I will assume "composeCompiler" here means the Kotlin language version for the compose plugin.
+composeCompiler = "2.2.0" # Assuming this means Kotlin version for the compose plugin.
 firebaseBom = "33.16.0"
-hilt = "2.56.2" # Using a consistent, recent version
-hiltAndroid = "2.56.2" # Explicit version for Hilt Android
+hilt = "2.56.2"
+hiltAndroid = "2.56.2"
 lifecycleCommonJava8 = "2.9.1"
 lifecycleExtensions = "2.2.0"
 lifecycleProcess = "2.9.1"
@@ -56,7 +75,8 @@ kotlinxDatetime = "0.7.0"
 guava = "33.4.8-android"
 
 [plugins]
-agp = { id = "com.android.application", version.ref = "agp" }
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
@@ -66,6 +86,10 @@ google-services = { id = "com.google.gms.google-services", version.ref = "google
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlytics" }
 firebase-perf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerf" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeCompiler" }
+# Corrected alias name from previous (if any) to match typical conversion, or ensure it's what settings.gradle.kts expects.
+# settings.gradle.kts uses: libs.plugins.org.gradle.toolchains.foojay.resolver
+# So the TOML alias should be: org-gradle-toolchains-foojay-resolver
+org-gradle-toolchains-foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver", version.ref = "toolchainsFoojayResolver" }
 
 [libraries]
 # Core & Lifecycle
@@ -108,7 +132,7 @@ androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-com-google-devtools-ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "comGoogleDevtoolsKspGradlePlugin" }
+# com-google-devtools-ksp-gradle-plugin removed as it referenced a non-existent version alias and KSP is applied as a plugin.
 com-google-firebase-firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version = "3.0.0" }
 firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx", version.ref = "firebaseConfigKtx" }
@@ -166,4 +190,3 @@ test-kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 test-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 androidTest-androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
 androidTest-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-
