@@ -23,7 +23,9 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides the JSON serializer configured for the API.
+     * Provides a singleton instance of the JSON serializer configured to ignore unknown keys, coerce input values, be lenient in parsing, and encode default values.
+     *
+     * @return A configured instance of `Json` for use with the API.
      */
     @Provides
     @Singleton
@@ -35,9 +37,9 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton implementation of the ContentApi interface for accessing the AuraFrameFx AI API using Retrofit.
+     * Provides a singleton implementation of the ContentApi interface for accessing the AuraFrameFx AI API via Retrofit.
      *
-     * Configures Retrofit with the base URL from NetworkConstants, the provided OkHttp client, and a JSON converter using the supplied Json instance.
+     * Configures Retrofit with the base URL from NetworkConstants, the specified OkHttp client, and a JSON converter created from the given Json instance.
      *
      * @return An implementation of ContentApi for interacting with the AuraFrameFx AI API.
      */
