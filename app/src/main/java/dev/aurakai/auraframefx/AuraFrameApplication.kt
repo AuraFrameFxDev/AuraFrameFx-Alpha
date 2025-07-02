@@ -7,9 +7,8 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class AuraFrameApplication : Application(), Configuration.Provider {
-    override fun getWorkManagerConfiguration(): Configuration {
-        return Configuration.Builder()
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
             .setMinimumLoggingLevel(Log.INFO)
             .build()
-    }
 }

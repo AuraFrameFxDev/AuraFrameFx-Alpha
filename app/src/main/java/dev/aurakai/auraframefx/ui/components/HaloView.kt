@@ -75,6 +75,7 @@ import kotlin.math.*
  *
  * Renders agent nodes arranged in a rotating halo, allowing users to assign tasks via drag-and-drop or by tapping the central "GENESIS" node. Visualizes agent statuses with animated effects, provides real-time status updates, and displays a scrollable task history panel. Includes controls for toggling rotation, resetting the halo, and clearing task history.
  */
+
 @OptIn(
     ExperimentalMaterial3Api::class,
     androidx.compose.foundation.gestures.ExperimentalFoundationApi::class
