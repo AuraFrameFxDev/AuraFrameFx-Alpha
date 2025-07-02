@@ -8,9 +8,9 @@ class ContextManager @Inject constructor() {
     private val contexts = mutableListOf<String>()
 
     /**
-     * Adds a new context string if it is non-blank and not already present in the list.
+     * Adds a context string to the list if it is non-blank and not already present.
      *
-     * @param context The context string to add. Ignored if blank or already exists.
+     * @param context The context string to add; ignored if blank or already exists.
      */
     fun createContext(context: String) {
         if (context.isNotBlank() && !contexts.contains(context)) {
@@ -33,9 +33,9 @@ class ContextChain @Inject constructor() {
     private val contextLinks = mutableMapOf<String, String>()
 
     /**
-     * Sets a successor relationship between two context strings in the context chain.
+     * Links one context string as the successor of another in the context chain.
      *
-     * Links `contextB` as the successor of `contextA` if both strings are non-blank. No action is taken if either string is blank.
+     * Sets `contextB` as the successor of `contextA` if both strings are non-blank. Does nothing if either string is blank.
      *
      * @param contextA The context string to link from.
      * @param contextB The context string to set as the successor.
@@ -47,10 +47,10 @@ class ContextChain @Inject constructor() {
     }
 
     /**
-     * Returns the successor context linked to the specified context, or null if no successor exists.
+     * Retrieves the successor context linked to the specified context.
      *
-     * @param context The context whose successor is to be retrieved.
-     * @return The linked successor context, or null if none is found.
+     * @param context The context for which to find the successor.
+     * @return The successor context if one exists, or null otherwise.
      */
     fun getNextInChain(context: String): String? {
         return contextLinks[context]
