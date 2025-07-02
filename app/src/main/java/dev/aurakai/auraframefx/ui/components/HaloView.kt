@@ -45,11 +45,6 @@ import kotlin.math.*
  *
  * Renders a visual halo with agent nodes, supports drag-and-drop task assignment, tracks task history, and animates agent status. Users can assign tasks to agents by dragging nodes, input tasks, and monitor processing status in real time. Includes controls for rotation, resetting, and clearing task history.
  */
-/**
- * Displays an interactive, animated halo interface for managing agents and delegating tasks.
- *
- * Renders a rotating halo with agent nodes, supporting drag-and-drop task assignment, real-time agent status updates, animated effects, and task history tracking. Users can assign tasks to agents by dragging nodes or tapping the central "GENESIS" node, view task history, and control the halo's rotation and state.
- */
 @OptIn(
     ExperimentalMaterial3Api::class,
     androidx.compose.foundation.gestures.ExperimentalFoundationApi::class

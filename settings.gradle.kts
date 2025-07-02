@@ -12,7 +12,8 @@ pluginManagement {
 
 // This top-level plugins block is for plugins applied to the settings script itself.
 plugins {
-    alias(libs.plugins.org.gradle.toolchains.foojay.resolver)
+    // Use direct ID and version string here. Version is managed in libs.versions.toml (toolchainsFoojayResolver = "0.8.0").
+    id("org.gradle.toolchains.foojay-resolver") version "0.8.0"
 }
 
 dependencyResolutionManagement {

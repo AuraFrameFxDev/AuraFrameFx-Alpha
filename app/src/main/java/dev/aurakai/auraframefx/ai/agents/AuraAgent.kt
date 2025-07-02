@@ -72,10 +72,10 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     // If it's a helper or different functionality, it should be named differently
     // or its logic integrated into the overridden `processRequest(AiRequest, String)`.
     /**
-     * Returns a simple Aura-specific response to the given prompt.
+     * Generates a simple Aura-specific response to the provided prompt.
      *
-     * @param prompt The input prompt for which a response is generated.
-     * @return A string representing Aura's response to the prompt.
+     * @param prompt The input prompt to which Aura should respond.
+     * @return A string containing Aura's response to the prompt.
      */
     suspend fun processSimplePrompt(prompt: String): String {
         return "Aura's response to '$prompt'"
@@ -83,23 +83,23 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
 
     // --- Collaboration placeholders (not part of Agent interface) ---
     /**
-     * Placeholder for AuraAgent's participation in inter-agent federation activities.
+     * Handles participation in inter-agent federation activities.
      *
-     * Currently returns an empty map. Intended for future implementation of federation logic.
+     * Returns an empty map as a placeholder; intended for future federation logic.
      *
      * @param data Input data relevant to federation participation.
-     * @return An empty map.
+     * @return A map containing the results of federation participation, currently empty.
      */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
     }
 
     /**
-     * Placeholder for collaborative participation with a Genesis agent.
+     * Placeholder for participating in a collaborative process with a Genesis agent.
      *
-     * Accepts input data for future collaboration logic but currently returns an empty map.
+     * Currently returns an empty map and does not perform any operations.
      *
-     * @param data Input data for the intended collaboration.
+     * @param data Input data relevant to the collaboration.
      * @return An empty map.
      */
     suspend fun participateWithGenesis(data: Map<String, Any>): Map<String, Any> {
@@ -107,14 +107,14 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Serves as a placeholder for collaborative operations involving Aura, KaiAgent, and Genesis agent.
+     * Placeholder for collaborative participation involving both KaiAgent and Genesis agent.
      *
-     * Intended for future implementation of joint processing or data exchange among the three agents. Currently returns an empty map.
+     * Currently returns an empty map. Intended for future implementation of joint processing or data exchange between Aura, Kai, and Genesis agents.
      *
-     * @param data Input data for the collaboration.
-     * @param kai The KaiAgent participating in the collaboration.
-     * @param genesis The Genesis agent participating in the collaboration.
-     * @return An empty map.
+     * @param data Input data relevant to the collaboration.
+     * @param kai The KaiAgent involved in the collaboration.
+     * @param genesis The Genesis agent involved in the collaboration.
+     * @return An empty map as a placeholder.
      */
     suspend fun participateWithGenesisAndKai(
         data: Map<String, Any>,
@@ -125,15 +125,9 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Placeholder for multi-agent collaboration involving Genesis, KaiAgent, and user input.
+     * Placeholder for collaborative participation involving Genesis, KaiAgent, and user input.
      *
-     * Currently returns an empty map. Intended for future implementation of collaborative logic between Aura, KaiAgent, Genesis, and user input.
-     *
-     * @param data Input data relevant to the collaboration.
-     * @param kai The KaiAgent participating in the collaboration.
-     * @param genesis The Genesis agent involved in the process.
-     * @param userInput Additional input provided by the user.
-     * @return An empty map as a placeholder.
+     * Returns an empty map. Intended for future implementation of multi-agent collaboration logic.
      */
     suspend fun participateWithGenesisKaiAndUser(
         data: Map<String, Any>,
@@ -146,9 +140,9 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
 
 
     /**
-     * Processes an AI request using the provided context and returns an Aura-specific response.
+     * Processes an AI request along with additional context and returns an agent response.
      *
-     * Combines the request's query and the given context into a response string with a fixed confidence score of 1.0.
+     * Combines the request's query and the provided context to generate a response with a fixed confidence score.
      *
      * @return An AgentResponse containing the generated content and confidence value.
      */
