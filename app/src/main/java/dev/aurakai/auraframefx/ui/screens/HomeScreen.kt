@@ -12,9 +12,20 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.aurakai.auraframefx.R
 import dev.aurakai.auraframefx.ui.animation.DigitalTransitions
-import dev.aurakai.auraframefx.ui.components.*
+// Wildcard import dev.aurakai.auraframefx.ui.components.* already covers CyberpunkText if it's there
+// Explicitly adding for clarity and because CyberpunkText was created by the agent
+import dev.aurakai.auraframefx.ui.components.CyberpunkText
+import dev.aurakai.auraframefx.ui.components.CyberMenuItem // Assuming this exists from usage
+import dev.aurakai.auraframefx.ui.components.DigitalLandscapeBackground
+import dev.aurakai.auraframefx.ui.components.FloatingCyberWindow
+import dev.aurakai.auraframefx.ui.components.HexagonGridBackground
+import dev.aurakai.auraframefx.ui.components.cyberEdgeGlow // Assuming these are Modifier extensions
+import dev.aurakai.auraframefx.ui.components.digitalGlitchEffect
+import dev.aurakai.auraframefx.ui.components.digitalPixelEffect
 import dev.aurakai.auraframefx.ui.navigation.NavDestination
-import dev.aurakai.auraframefx.ui.theme.*
+import dev.aurakai.auraframefx.ui.theme.* // Covers Neon colors and AppTypography
+import dev.aurakai.auraframefx.ui.theme.CyberpunkTextColor
+import dev.aurakai.auraframefx.ui.theme.CyberpunkTextStyle
 
 /**
  * Home screen for the AuraFrameFX app with cyberpunk-style floating UI

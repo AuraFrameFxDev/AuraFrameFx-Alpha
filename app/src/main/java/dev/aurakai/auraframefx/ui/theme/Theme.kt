@@ -45,6 +45,15 @@ private val LightColorScheme = lightColorScheme(
     onError = LightOnError
 )
 
+/**
+ * Applies the AuraFrameFX Material3 theme to the provided composable content.
+ *
+ * Selects between light, dark, and dynamic color schemes based on system settings and parameters, and updates the system status bar color and icon appearance to match the theme.
+ *
+ * @param darkTheme Whether to use the dark color scheme. Defaults to the system dark theme setting.
+ * @param dynamicColor Whether to use dynamic color schemes on supported Android versions (12+). Defaults to true.
+ * @param content The composable content to which the theme will be applied.
+ */
 @Composable
 fun AuraFrameFXTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -75,30 +84,4 @@ fun AuraFrameFXTheme(
         typography = AppTypography,
         content = content
     )
-}
-
-/**
- * Applies the AuraFrameFX Material3 theme with proper system integration
- */
-@Composable
-fun AuraFrameFXThemeCompat(
-    content: @Composable () -> Unit,
-) {
-    // Wrap the existing theme implementation
-    AuraFrameFXTheme {
-        // Get the current view to apply system UI colors
-        val view = LocalView.current
-        if (!view.isInEditMode) {
-            SideEffect {
-                val window = (view.context as Activity).window
-                // Use MaterialTheme color values for system bars
-                window.statusBarColor = MaterialTheme.colorScheme.background.toArgb()
-                // Ensure proper contrast for status bar icons
-                WindowCompat.getInsetsController(window, view)
-                    .isAppearanceLightStatusBars = !isSystemInDarkTheme()
-            }
-        }
-
-        content()
-    }
 }

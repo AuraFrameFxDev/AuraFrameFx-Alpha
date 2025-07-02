@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import dev.aurakai.auraframefx.ui.models.AuraMoodViewModel // Adjust import if AuraMoodViewModel is elsewhere
+import dev.aurakai.auraframefx.ui.AuraMoodViewModel // Corrected import
 
 // TODO: Function reported as unused or needs implementation.
 @Composable

@@ -37,13 +37,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_24
+        targetCompatibility = JavaVersion.VERSION_24
     }
 
     kotlin {
-        jvmToolchain(17)
-    }
+        jvmToolchain(24)
+    
 
     java {
         toolchain {
@@ -57,20 +57,35 @@ android {
         }
     }
 
-    sourceSets {
-        getByName("main") {
-            java.setSrcDirs(listOf(
-                "src/main/java",
-                "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
-                "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
-                "${layout.buildDirectory.get().asFile}/generated/ksp/debug/java",
-                "${layout.buildDirectory.get().asFile}/generated/ksp/release/java"
-            ))
-            kotlin.setSrcDirs(listOf(
-                "src/main/kotlin",
-                "${layout.buildDirectory.get().asFile}/generated/ksp/debug/kotlin",
-                "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
-            ))
+   sourceSets {
+    getByName("main") {
+        aidl {
+            setSrcDirs(listOf("src/main/aidl"))
+        }
+        java {
+            setSrcDirs(
+                listOf(
+                    "src/main/java",
+                    "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
+                    "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
+                    "${layout.buildDirectory.get().asFile}/generated/ksp/debug/java",
+                    "${layout.buildDirectory.get().asFile}/generated/ksp/release/java"
+                )
+            )
+        }
+    }
+}
+                ))
+            }
+            kotlin {
+                // Using setSrcDirs should be fine.
+                setSrcDirs(listOf(
+                    "src/main/kotlin",
+                    "${layout.buildDirectory.get().asFile}/generated/ksp/debug/kotlin",
+                    "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
+                ))
+            }
+            // Removed redundant aidl.setSrcDirs from original line 75
         }
     }
     ndkVersion = "26.2.11394342"
@@ -128,7 +143,7 @@ tasks.named<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openAp
     modelPackage.set("dev.aurakai.auraframefx.api.model")
     invokerPackage.set("dev.aurakai.auraframefx.api.invoker")
     configOptions.set(mapOf(
-        "dateLibrary" to "java8",
+        "dateLibrary" to "kotlinx-datetime",
         "serializationLibrary" to "kotlinx_serialization"
     ))
 
@@ -146,7 +161,18 @@ val generatePythonClient by tasks.registering(org.openapitools.generator.gradle.
     configOptions.set(mapOf(
         "packageName" to "auraframefx_api_client"
     ))
-} // Add missing closing brace
+}
+
+tasks.register("generateOpenApiContract") {
+    group = "OpenAPI tools"
+    description = "Generates all OpenAPI client artifacts (Kotlin, TypeScript, Java, Python)."
+    dependsOn(
+        "openApiGenerate",
+        "generateTypeScriptClient",
+        "generateJavaClient",
+        generatePythonClient // Use the val here
+    )
+}
 
 // Ensure codegen runs before build
 // Ensure OpenAPI generation runs before KSP and compilation
@@ -264,6 +290,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.jetbrains.kotlinx.serialization.json)
+    implementation(libs.jetbrains.kotlinx.datetime) // Added kotlinx-datetime
 
     // Network
     implementation(libs.squareup.retrofit2.retrofit)
@@ -286,8 +313,6 @@ dependencies {
     implementation(libs.google.accompanist.permissions)
     implementation(libs.accompanist.pager)
 
-
-
     implementation(libs.accompanist.pager.indicators)
     implementation(libs.accompanist.flowlayout)
 
@@ -297,9 +322,11 @@ dependencies {
     androidTestImplementation(libs.androidTest.espresso.core)
     androidTestImplementation(composeBom)
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.animationTooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     // Compose Animation Tooling
     debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.animationTooling) // Corrected alias to match TOML conversion (kebab-case to camelCase)
+    }
 }
