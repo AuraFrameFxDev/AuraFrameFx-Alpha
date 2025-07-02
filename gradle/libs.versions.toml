@@ -1,16 +1,20 @@
 [versions]
+# Existing versions from your file
 accompanistPager = "0.36.0"
 accompanistSystemuicontroller = "0.36.0"
+
 agp = "8.7.0" # Updated by CodeRabbitAI's suggestion
 animationTooling = "1.6.7"
 toolchainsFoojayResolver = "0.8.0" # Added for settings plugin
 # comGoogleDevtoolsKspGradlePlugin version will be driven by 'ksp'
+
 converterGson = "3.0.0"
 datastoreCore = "1.1.7"
 firebaseConfigKtx = "22.1.2"
 firebaseStorageKtx = "21.0.2"
 hiltCompilerVersion = "1.2.0"
 hiltWork = "1.2.0"
+
 kotlin = "2.2.0" # Confirmed by CodeRabbitAI
 kotlinxCoroutinesAndroid = "1.10.2"
 kotlinxCoroutinesPlayServices = "1.10.2"
@@ -38,6 +42,7 @@ composeCompiler = "2.2.0" # Assuming this means Kotlin version for the compose p
 firebaseBom = "33.16.0"
 hilt = "2.56.2"
 hiltAndroid = "2.56.2"
+
 lifecycleCommonJava8 = "2.9.1"
 lifecycleExtensions = "2.2.0"
 lifecycleProcess = "2.9.1"
@@ -45,17 +50,11 @@ lifecycleRuntimeCompose = "2.9.1"
 lifecycleService = "2.9.1"
 lifecycleViewmodelCompose = "2.9.1"
 material3 = "1.3.2"
-openapiGenerator = "7.6.0"
-googleServices = "4.4.3"
-firebaseCrashlytics = "3.0.4" # Matches the hardcoded version
-
-firebasePerf = "1.4.2"
 coreKtx = "1.16.0"
 appcompat = "1.7.1"
 lifecycle = "2.9.1"
 activityCompose = "1.10.1"
 navigation = "2.9.0"
-room = "2.7.2"
 workManager = "2.10.2"
 datastore = "1.1.7"
 securityCrypto = "1.1.0-beta01"
@@ -74,9 +73,26 @@ kotlinxSerializationJson = "1.9.0"
 kotlinxDatetime = "0.7.0"
 guava = "33.4.8-android"
 
+# Updated versions from settings.gradle.kts
+agp = "8.11.0"
+googleServices = "4.4.3"
+firebaseCrashlytics = "2.9.9"
+firebasePerf = "1.4.2"
+openapiGenerator = "7.6.0"
+composeCompiler = "2.0.0"
+
+# Reverted to latest known stable versions
+kotlin = "2.0.0"
+ksp = "2.0.0-1.0.20"
+hilt = "2.56.2"
+room = "2.7.2"
+
+
 [plugins]
+
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
+
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
@@ -87,6 +103,7 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "
 firebase-perf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerf" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeCompiler" }
 org-gradle-toolchains-foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver", version.ref = "toolchainsFoojayResolver" }
+
 
 [libraries]
 # Core & Lifecycle
@@ -129,7 +146,7 @@ androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-com-google-devtools-ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "comGoogleDevtoolsKspGradlePlugin" }
+com-google-devtools-ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 com-google-firebase-firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version = "3.0.0" }
 firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx", version.ref = "firebaseConfigKtx" }
@@ -138,13 +155,13 @@ firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx", ve
 google-accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version = "0.36.0" }
 google-firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
 google-firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltAndroid" }
-hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hiltAndroid" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version = "2.56.2" }
+hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 
 # Room (Persistence)
-androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version = "2.7.2" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version = "2.7.2" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 # Network (Retrofit + Kotlinx Serialization)
@@ -187,4 +204,3 @@ test-kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 test-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 androidTest-androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
 androidTest-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-
