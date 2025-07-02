@@ -316,5 +316,5 @@ dependencies {
 
     // Compose Animation Tooling
     debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.animation.tooling) // Added specific animation tooling
+    debugImplementation(libs.androidx.animationTooling) // Corrected alias to match TOML conversion (kebab-case to camelCase)
 }

@@ -151,11 +151,6 @@ class ErrorHandler @Inject constructor(
         return RecoveryResult.PARTIAL_SUCCESS
     }
 
-    /**
-     * Updates the error statistics to reflect the occurrence of a new error.
-     *
-     * Increments total and active error counts, records the latest error, updates the count for the error's type, and sets the last updated timestamp.
-     */
     private fun updateStats(error: AIError) {
         _errorStats.update { current ->
             current.copy(
