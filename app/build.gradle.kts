@@ -50,19 +50,22 @@ android {
 
     sourceSets {
         getByName("main") {
-            aidl.srcDirs("src/main/aidl")
-            java.srcDirs(
+            aidl.srcDirs("src/main/aidl") // Reverted to original direct access
+            java.setSrcDirs(listOf(       // Reverted to original direct access
+
                 "src/main/java",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/debug/java",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/release/java"
-            )
-            kotlin.srcDirs(
+            ))
+            kotlin.setSrcDirs(listOf(     // Reverted to original direct access
                 "src/main/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/debug/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
-            )
+            ))
+            // The redundant aidl line that was here is kept removed.
+
         }
     }
 
