@@ -285,5 +285,5 @@ dependencies {
     debugImplementation(libs.androidxAnimationTooling) // Corrected alias for Compose animation tooling
 
     // Xposed API - local JARs from app/Libs
-    implementation(files("app/Libs/api-82.jar"))
+    implementation(fileTree(mapOf("dir" to "app/Libs", "include" to listOf("*.jar"))))
 }
