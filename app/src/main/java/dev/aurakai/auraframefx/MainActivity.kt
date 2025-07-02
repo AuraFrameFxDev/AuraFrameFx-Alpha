@@ -28,9 +28,9 @@ import dev.aurakai.auraframefx.ui.theme.AuraFrameFXTheme
 
 class MainActivity : ComponentActivity() {
     /**
-     * Initializes the activity and sets the Compose UI content to the main screen using the app's theme.
+     * Initializes the activity and sets the Compose UI content to the main screen within the app's theme.
      *
-     * @param savedInstanceState The previously saved state of the activity, or null if none exists.
+     * @param savedInstanceState The previously saved state of the activity, or null if the activity is being created for the first time.
      */
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,9 +61,9 @@ class MainActivity : ComponentActivity() {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays the main UI scaffold with bottom navigation and optional digital visual effects.
+ * Displays the main application UI with a scaffolded layout, bottom navigation, and optional digital transition effects.
  *
- * Sets up navigation, applies cyberpunk-style digital transition effects to the main content area when enabled, and hosts the app's navigation graph.
+ * Initializes navigation, conditionally applies cyberpunk-style digital pixel effects to the main content area, and hosts the app's navigation graph.
  */
 @Composable
 fun MainScreen() {
