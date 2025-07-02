@@ -282,7 +282,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.animationTooling)
+    )
 
     // Xposed API - local JARs from app/Libs
     implementation(fileTree(mapOf("dir" to "app/Libs", "include" to listOf("*.jar"))))
