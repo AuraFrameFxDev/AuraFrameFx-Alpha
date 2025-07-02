@@ -309,8 +309,6 @@ dependencies {
     implementation(libs.google.accompanist.permissions)
     implementation(libs.accompanist.pager)
 
-
-
     implementation(libs.accompanist.pager.indicators)
     implementation(libs.accompanist.flowlayout)
 
