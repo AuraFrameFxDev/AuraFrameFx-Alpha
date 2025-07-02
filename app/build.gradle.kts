@@ -57,20 +57,24 @@ android {
         }
     }
 
-    sourceSets {
-        getByName("main") {
-            aidl {
-                srcDirs("src/main/aidl")
-            }
-            java {
-                // Using setSrcDirs should be fine, the error is puzzling.
-                // This explicitly sets these as the source directories, replacing defaults.
-                setSrcDirs(listOf(
+   sourceSets {
+    getByName("main") {
+        aidl {
+            setSrcDirs(listOf("src/main/aidl"))
+        }
+        java {
+            setSrcDirs(
+                listOf(
                     "src/main/java",
                     "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
                     "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
                     "${layout.buildDirectory.get().asFile}/generated/ksp/debug/java",
                     "${layout.buildDirectory.get().asFile}/generated/ksp/release/java"
+                )
+            )
+        }
+    }
+}
                 ))
             }
             kotlin {
@@ -318,10 +322,11 @@ dependencies {
     androidTestImplementation(libs.androidTest.espresso.core)
     androidTestImplementation(composeBom)
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.animationTooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     // Compose Animation Tooling
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.animationTooling) // Corrected alias to match TOML conversion (kebab-case to camelCase)
+    }
 }
