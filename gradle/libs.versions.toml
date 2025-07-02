@@ -96,7 +96,7 @@ org-gradle-toolchains-foojay-resolver = { id = "org.gradle.toolchains.foojay-res
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version = "0.36.0" }
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version = "0.36.0" }
 accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version = "0.36.0" }
-androidx-animation-tooling = { module = "androidx.compose.animation:animation-tooling", version.ref = "animationTooling" }
+androidxAnimationTooling = { module = "androidx.compose.animation:animation-tooling", version.ref = "animationTooling" } # Changed alias to camelCase
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version = "1.16.0" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version = "1.7.1" }
 androidx-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastoreCore" }
