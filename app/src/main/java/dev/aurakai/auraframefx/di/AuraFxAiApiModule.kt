@@ -35,7 +35,11 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides the ContentApi interface implementation for accessing the AuraFrameFx AI API.
+     * Provides a singleton implementation of the ContentApi interface for accessing the AuraFrameFx AI API using Retrofit.
+     *
+     * Configures Retrofit with the base URL from NetworkConstants, the provided OkHttp client, and a JSON converter using the supplied Json instance.
+     *
+     * @return An implementation of ContentApi for interacting with the AuraFrameFx AI API.
      */
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
