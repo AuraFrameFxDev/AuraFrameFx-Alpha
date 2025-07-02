@@ -11,10 +11,10 @@ firebaseConfigKtx = "22.1.2"
 firebaseStorageKtx = "21.0.2"
 hiltCompilerVersion = "1.2.0"
 hiltWork = "1.2.0"
-kotlin = "2.2.0" # Aligned
+kotlin = "2.2.0" # Confirmed by CodeRabbitAI
 kotlinxCoroutinesAndroid = "1.10.2"
 kotlinxCoroutinesPlayServices = "1.10.2"
-ksp = "2.2.0-1.0.22" # Updated by CodeRabbitAI's suggestion (ensure this is KSP plugin version, not just compiler)
+ksp = "2.2.0-2.0.2" # Corrected by CodeRabbitAI's latest specific advice
 composeBom = "2025.06.01"
 # composeCompiler version will be driven by 'kotlin' version typically, or a specific compatible one.
 # CodeRabbitAI suggested kotlin = "2.2.0" for the kotlin.android plugin.
