@@ -8,9 +8,9 @@ class ContextManager @Inject constructor() {
     private val contexts = mutableListOf<String>()
 
     /**
-     * Adds a new, non-blank, unique context string to the in-memory context list.
+     * Adds a non-blank, unique context string to the in-memory list of contexts.
      *
-     * @param context The context string to add. Must be non-blank and not already present.
+     * @param context The context string to add. Must not be blank and must not already exist in the list.
      */
     fun createContext(context: String) {
         if (context.isNotBlank() && !contexts.contains(context)) {
@@ -33,12 +33,12 @@ class ContextChain @Inject constructor() {
     private val contextLinks = mutableMapOf<String, String>()
 
     /**
-     * Establishes a link from one context to another, representing a sequential or causal relationship.
+     * Links one context string to another, establishing a sequential relationship.
      *
-     * If both context strings are non-blank, stores `contextB` as the successor of `contextA`.
+     * If both context strings are non-blank, sets `contextB` as the successor of `contextA` in the chain.
      *
-     * @param contextA The source context to be linked from.
-     * @param contextB The target context to be linked to.
+     * @param contextA The context to link from.
+     * @param contextB The context to link to as the next in the chain.
      */
     fun linkContexts(contextA: String, contextB: String) {
         if (contextA.isNotBlank() && contextB.isNotBlank()) {
@@ -47,10 +47,10 @@ class ContextChain @Inject constructor() {
     }
 
     /**
-     * Returns the context linked as the successor to the given context, or null if no link exists.
+     * Retrieves the successor context linked to the specified context.
      *
-     * @param context The context whose successor is to be retrieved.
-     * @return The successor context, or null if there is no linked context.
+     * @param context The context for which to find the successor.
+     * @return The linked successor context, or null if no successor exists.
      */
     fun getNextInChain(context: String): String? {
         return contextLinks[context]

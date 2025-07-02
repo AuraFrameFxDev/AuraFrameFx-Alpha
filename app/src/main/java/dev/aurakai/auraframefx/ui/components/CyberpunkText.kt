@@ -18,12 +18,12 @@ enum class CyberpunkTextStyle {
 
 
 /**
- * Displays text with a customizable cyberpunk-inspired style.
+ * Displays text using a cyberpunk-inspired style with customizable color, style, and optional glitch effect.
  *
- * @param text The content to display.
- * @param color The color scheme to apply to the text.
+ * @param text The text content to display.
+ * @param color The color scheme for the text.
  * @param style The visual style of the text. Defaults to [CyberpunkTextStyle.Body].
- * @param enableGlitch Whether to apply a glitch effect to the text.
+ * @param enableGlitch If true, applies a glitch effect to the text.
  */
 @Composable
 fun CyberpunkText(
