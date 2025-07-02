@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -187,11 +188,12 @@ class TaskScheduler @Inject constructor(
     }
 }
 
+@kotlinx.serialization.Serializable // Added annotation
 data class TaskStats(
     val totalTasks: Int = 0,
     val activeTasks: Int = 0,
     val completedTasks: Int = 0,
     val pendingTasks: Int = 0,
     val taskCounts: Map<TaskStatus, Int> = emptyMap(),
-    val lastUpdated: Instant = Clock.System.now(),
+    @kotlinx.serialization.Serializable(with = dev.aurakai.auraframefx.serialization.InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
 )

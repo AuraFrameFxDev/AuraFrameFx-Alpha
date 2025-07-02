@@ -65,7 +65,10 @@ android {
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/debug/java",
-                "${layout.buildDirectory.get().asFile}/generated/ksp/release/java"
+                "${layout.buildDirectory.get().asFile}/generated/ksp/release/java",
+                // Explicitly add AIDL generated sources
+                "${layout.buildDirectory.get().asFile}/generated/aidl_source_output_dir/debug/compileDebugAidl/out",
+                "${layout.buildDirectory.get().asFile}/generated/aidl_source_output_dir/release/compileReleaseAidl/out"
             ))
             kotlin.setSrcDirs(listOf(     // Reverted to original direct access
                 "src/main/kotlin",
@@ -131,12 +134,14 @@ tasks.named<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openAp
     invokerPackage.set("dev.aurakai.auraframefx.api.invoker")
     configOptions.set(mapOf(
         "dateLibrary" to "kotlinx-datetime",
-        "serializationLibrary" to "kotlinx_serialization"
+        "serializationLibrary" to "kotlinx_serialization",
+        "importMappings" to "Instant=kotlinx.datetime.Instant"
     ))
 
     globalProperties.set(mapOf(
         "library" to "kotlin",
         "serializationLibrary" to "kotlinx_serialization"
+        // "typeMappings" to "DateTime=kotlinx.datetime.Instant,Date=kotlinx.datetime.LocalDate" // Potentially useful later
     ))
     dependsOn("generateTypeScriptClient", "generateJavaClient")
 }
@@ -293,6 +298,9 @@ dependencies {
     // Kotlinx Serialization
     implementation(libs.jetbrains.kotlinx.serialization.json)
     implementation(libs.jakewharton.retrofit2.kotlinx.serialization.converter)
+
+    // Xposed API (LSPosed)
+    compileOnly("de.robv.android.xposed:api:82")
 
     // UI
     implementation(libs.coil.compose)

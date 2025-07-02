@@ -1,6 +1,7 @@
 package dev.aurakai.auraframefx.ai.task.execution
 
 import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -10,8 +11,8 @@ data class TaskExecution(
     val id: String = "exec_${Clock.System.now().toEpochMilliseconds()}",
     val taskId: String,
     val agent: AgentType,
-    val startTime: Instant = Clock.System.now(),
-    val endTime: Instant? = null,
+    @Serializable(with = InstantSerializer::class) val startTime: Instant = Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val endTime: Instant? = null,
     val status: ExecutionStatus = ExecutionStatus.PENDING,
     val progress: Float = 0.0f,
     val result: ExecutionResult? = null,
@@ -43,7 +44,7 @@ data class ExecutionStep(
 @Serializable
 data class Checkpoint(
     val id: String = "chk_${Clock.System.now().toEpochMilliseconds()}",
-    val timestamp: Instant = Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val stepId: String,
     val status: CheckpointStatus,
     val progress: Float = 0.0f,
