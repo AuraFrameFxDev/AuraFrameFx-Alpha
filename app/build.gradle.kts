@@ -43,6 +43,15 @@ android {
 
     kotlin {
         jvmToolchain(17)
+        compilerOptions {
+            freeCompilerArgs.addAll(
+                "-opt-in=kotlin.RequiresOptIn",
+                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+                "-opt-in=kotlinx.coroutines.InternalCoroutinesApi"
+            )
+        }
     }
 
     java {
@@ -60,34 +69,21 @@ android {
     sourceSets {
         getByName("main") {
             aidl.srcDirs("src/main/aidl")
-            java.setSrcDirs(listOf(
+            java.srcDirs(
                 "src/main/java",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/debug/java",
-                "${layout.buildDirectory.get().asFile}/generated/ksp/release/java",
-                "${layout.buildDirectory.get().asFile}/generated/aidl_source_output_dir/debug/compileDebugAidl/out",
-                "${layout.buildDirectory.get().asFile}/generated/aidl_source_output_dir/release/compileReleaseAidl/out"
-            ))
-            kotlin.setSrcDirs(listOf(
+                "${layout.buildDirectory.get().asFile}/generated/ksp/release/java"
+            )
+            kotlin.srcDirs(
                 "src/main/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/debug/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
-            ))
-        }
-    }
-    ndkVersion = "26.2.11394342"
-    kotlin {
-        compilerOptions {
-            freeCompilerArgs.addAll(
-                "-opt-in=kotlin.RequiresOptIn",
-                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-opt-in=kotlinx.coroutines.InternalCoroutinesApi"
             )
         }
     }
+    ndkVersion = "26.2.11394342"
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("generateTypeScriptClient") {
@@ -95,13 +91,15 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("gen
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
     outputDir.set("${layout.buildDirectory.get().asFile}/generated/typescript")
 
-    configOptions.set(mapOf(
-        "npmName" to "@auraframefx/api-client",
-        "npmVersion" to "1.0.0",
-        "supportsES6" to "true",
-        "withInterfaces" to "true",
-        "typescriptThreePlus" to "true"
-    ))
+    configOptions.set(
+        mapOf(
+            "npmName" to "@auraframefx/api-client",
+            "npmVersion" to "1.0.0",
+            "supportsES6" to "true",
+            "withInterfaces" to "true",
+            "typescriptThreePlus" to "true"
+        )
+    )
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("generateJavaClient") {
@@ -109,13 +107,15 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("gen
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
     outputDir.set("${layout.buildDirectory.get().asFile}/generated/java")
 
-    configOptions.set(mapOf(
-        "library" to "retrofit2",
-        "serializationLibrary" to "gson",
-        "dateLibrary" to "java8",
-        "java8" to "true",
-        "useRxJava2" to "false"
-    ))
+    configOptions.set(
+        mapOf(
+            "library" to "retrofit2",
+            "serializationLibrary" to "gson",
+            "dateLibrary" to "java8",
+            "java8" to "true",
+            "useRxJava2" to "false"
+        )
+    )
 
     apiPackage.set("dev.aurakai.auraframefx.java.api")
     modelPackage.set("dev.aurakai.auraframefx.java.model")
@@ -129,16 +129,19 @@ tasks.named<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openAp
     apiPackage.set("dev.aurakai.auraframefx.api")
     modelPackage.set("dev.aurakai.auraframefx.api.model")
     invokerPackage.set("dev.aurakai.auraframefx.api.invoker")
-    configOptions.set(mapOf(
-        "dateLibrary" to "kotlinx-datetime",
-        "serializationLibrary" to "kotlinx_serialization",
-        "importMappings" to "Instant=kotlinx.datetime.Instant"
-    ))
+    configOptions.set(
+        mapOf(
+            "dateLibrary" to "kotlinx-datetime",
+            "serializationLibrary" to "kotlinx_serialization"
+        )
+    )
 
-    globalProperties.set(mapOf(
-        "library" to "kotlin",
-        "serializationLibrary" to "kotlinx_serialization"
-    ))
+    globalProperties.set(
+        mapOf(
+            "library" to "kotlin",
+            "serializationLibrary" to "kotlinx_serialization"
+        )
+    )
     dependsOn("generateTypeScriptClient", "generateJavaClient")
 }
 
@@ -146,7 +149,51 @@ val generatePythonClient by tasks.registering(org.openapitools.generator.gradle.
     generatorName.set("python")
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
     outputDir.set("${layout.buildDirectory.get().asFile}/generated/python")
-    configOptions.set(mapOf
+    configOptions.set(
+        mapOf(
+            "packageName" to "auraframefx_api_client"
+        )
+    )
+}
+
+tasks.register("generateOpenApiContract") {
+    group = "OpenAPI tools"
+    description = "Generates all OpenAPI client artifacts (Kotlin, TypeScript, Java, Python)."
+    dependsOn(
+        "openApiGenerate",
+        "generateTypeScriptClient",
+        "generateJavaClient",
+        generatePythonClient
+    )
+}
+
+project.afterEvaluate {
+    tasks.named("kspDebugKotlin") { dependsOn("openApiGenerate") }
+    tasks.named("kspReleaseKotlin") { dependsOn("openApiGenerate") }
+    tasks.named("compileDebugKotlin") { dependsOn("openApiGenerate") }
+    tasks.named("compileReleaseKotlin") { dependsOn("openApiGenerate") }
+    tasks.named("kspDebugKotlin") { mustRunAfter("openApiGenerate") }
+    tasks.named("kspReleaseKotlin") { mustRunAfter("openApiGenerate") }
+}
+
+tasks.named("preBuild") {
+    dependsOn(
+        "generateTypeScriptClient",
+        "generateJavaClient",
+        "openApiGenerate",
+        "generatePythonClient"
+    )
+}
+
+ksp {
+    arg("ksp.class.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/kotlin/main")
+    arg("ksp.java.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/java/main")
+    arg("ksp.resources.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/resources/main")
+    arg("ksp.kotlin.output.dir", "${layout.buildDirectory.get().asFile}/generated/ksp/kotlin")
+    arg("classOutputDir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/kotlin/main")
+    arg("javaOutputDir", "${layout.buildDirectory.get().asFile}/generated/ksp/classes/java/main")
+    arg("project.buildDir", layout.buildDirectory.get().asFile.absolutePath)
+    arg("ksp.incremental", "true")
 }
 
 dependencies {
@@ -154,19 +201,15 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.navigation.compose)
-    
-    // For WorkManager with Hilt
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.hilt.compiler)
 
-    // AndroidX Core
+    // AndroidX Core & Compose
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-
-    // Compose
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
     implementation(libs.androidx.ui)
@@ -244,4 +287,3 @@ dependencies {
     // Xposed API - local JARs from app/Libs
     implementation(fileTree(mapOf("dir" to "app/Libs", "include" to listOf("*.jar"))))
 }
-
