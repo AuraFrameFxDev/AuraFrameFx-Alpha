@@ -283,5 +283,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     // Xposed API - local JARs from app/Libs
-    implementation(fileTree(mapOf("dir" to "app/Libs", "include" to listOf("*.jar"))))
+    implementation(files("app/Libs/api-82.jar"))
 }
