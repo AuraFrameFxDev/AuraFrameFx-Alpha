@@ -282,7 +282,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.animation.tooling) // Added for Compose animation tooling
+    debugImplementation(libs.androidxAnimationTooling) // Corrected alias for Compose animation tooling
 
     // Xposed API - local JARs from app/Libs
     implementation(files("app/Libs/api-82.jar"))
