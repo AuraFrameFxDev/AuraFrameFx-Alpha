@@ -45,6 +45,12 @@ import androidx.compose.ui.Modifier
  * @param modifier Optional modifier to adjust the item's layout or appearance.
  * @param isSelected Whether the menu item is currently selected.
  */
+/**
+ * Displays a menu item with customizable text and selection state for use in a Compose UI.
+ *
+ * @param text The label displayed on the menu item.
+ * @param isSelected Indicates whether the menu item is currently selected.
+ */
 @Composable
 fun CyberMenuItem(
     text: String,
