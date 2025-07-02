@@ -12,7 +12,7 @@ pluginManagement {
 
 // This top-level plugins block is for plugins applied to the settings script itself.
 plugins {
-    alias(libs.plugins.org.gradle.toolchains.foojay.resolver)
+    id(libs.plugins.org.gradle.toolchains.foojay.resolver)
 }
 
 dependencyResolutionManagement {
