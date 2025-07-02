@@ -31,11 +31,11 @@ open class BaseAgent(
 
 
     /**
-     * Returns the agent's type as an `ApiAgentType`, mapping the internal type string to the corresponding enum value.
+     * Returns the agent's type as an `ApiAgentType` by mapping the internal type string, defaulting to `ApiAgentType.Aura` if no match is found.
      *
-     * If the internal type string does not match any known `ApiAgentType`, returns `ApiAgentType.Aura` as a default.
+     * If the internal type string does not correspond to any known `ApiAgentType`, the method returns `ApiAgentType.Aura` as a fallback.
      *
-     * @return The resolved `ApiAgentType` for this agent.
+     * @return The mapped `ApiAgentType` for this agent.
      */
     override fun getType(): ApiAgentType {
         // Map string to the generated ApiAgentType
@@ -54,16 +54,6 @@ open class BaseAgent(
      * @return A default `AgentResponse` containing a message referencing the request, context, and agent name, with fixed confidence.
      */
 
-    /**
-     * Processes an AI request with the provided context and returns a default agent response.
-     *
-     * This base implementation returns an `AgentResponse` referencing the request prompt, agent name, and context,
-     * with `isSuccess` set to `true`. Subclasses should override this method to provide custom processing logic.
-     *
-     * @param request The AI request to process.
-     * @param context Additional context for the request.
-     * @return A default `AgentResponse` indicating successful processing.
-     */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Default implementation for base agent, override in subclasses
         return AgentResponse(
@@ -79,15 +69,6 @@ open class BaseAgent(
      * @return A flow containing a single default `AgentResponse`.
      */
 =
-    /**
-     * Returns a flow emitting a single default [AgentResponse] for the given [request].
-     *
-     * This implementation calls [processRequest] with a fixed dummy context and emits the result.
-     * Subclasses can override this method to provide custom streaming or multi-step response behavior.
-     *
-     * @param request The AI request to process.
-     * @return A [Flow] emitting a single [AgentResponse].
-     */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // Basic implementation, can be overridden for more complex streaming logic
         return flow {
