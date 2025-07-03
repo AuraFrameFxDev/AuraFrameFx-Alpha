@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import dev.aurakai.auraframefx.model.AgentType // Explicit import
+import dev.aurakai.auraframefx.serialization.InstantSerializer // Import for serializer
+import kotlinx.serialization.Serializable // Import for @Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -162,13 +165,17 @@ class ErrorHandler @Inject constructor(
     }
 }
 
+@Serializable // Added Serializable
 data class ErrorStats(
     val totalErrors: Int = 0,
     val activeErrors: Int = 0,
-    val lastError: AIError? = null,
-    val errorTypes: Map<ErrorType, Int> = emptyMap(),
-    val lastUpdated: Instant = Clock.System.now(),
+    val lastError: AIError? = null, // AIError would also need to be @Serializable if ErrorStats is
+    val errorTypes: Map<ErrorType, Int> = emptyMap(), // ErrorType would also need to be @Serializable
+    @Serializable(with = InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
 )
+
+// Assuming AIError and ErrorType will be made serializable if ErrorStats is used in a serializable context.
+// For now, only marking ErrorStats and its Instant field.
 
 class ProcessingException(message: String? = null) : Exception(message)
 

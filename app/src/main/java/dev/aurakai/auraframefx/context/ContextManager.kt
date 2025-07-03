@@ -8,23 +8,17 @@ class ContextManager @Inject constructor() {
     private val contexts = mutableListOf<String>()
 
     /**
+
      * Adds a context string to the in-memory list if it is non-blank and not already present.
      *
      * @param context The context string to add. Ignored if blank or already exists.
-     */
-    fun createContext(context: String) {
-        if (context.isNotBlank() && !contexts.contains(context)) {
-            contexts.add(context)
-        }
-    }
 
-    /**
-     * Returns a list of all stored context strings.
-     *
-     * @return A new list containing all current contexts.
      */
-    fun getAllContexts(): List<String> {
-        return contexts.toList()
+
+    fun createContext(context: String) {
+        // TODO: Implement context creation logic (e.g., persistent learning, session memory)
+        // Example: val newChain = dev.aurakai.auraframefx.ai.context.ContextChain(rootContext = context, currentContext = context)
+        // TODO: Persist or manage newChain
     }
 }
 
