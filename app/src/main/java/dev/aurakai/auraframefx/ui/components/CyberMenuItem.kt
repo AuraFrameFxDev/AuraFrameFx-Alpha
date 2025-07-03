@@ -23,44 +23,6 @@ import androidx.compose.ui.unit.sp
  * @param modifier Modifier to adjust the layout or appearance of the menu item.
  * @param isSelected Whether the menu item is currently selected.
  */
-/**
- * Displays a cyberpunk-themed menu item with customizable text, selection state, and click behavior.
- *
- * @param text The label displayed on the menu item.
- * @param onClick Callback invoked when the menu item is clicked.
- * @param modifier Modifier for layout or appearance customization.
- * @param isSelected Whether the menu item is currently selected, affecting its visual style.
- */
-/**
- * Displays a cyberpunk-themed menu item with customizable text and selection state.
- *
- * The visual style changes based on whether the item is selected. When selected, the background and text color are highlighted to indicate active state.
- *
- * @param text The label displayed on the menu item.
- * @param onClick Callback invoked when the menu item is clicked.
- * @param modifier Modifier for customizing the layout or appearance.
- * @param isSelected Whether the menu item is currently selected, affecting its visual style.
- */
-/**
- * Displays a cyberpunk-themed menu item with customizable text, selection state, and click behavior.
- *
- * The visual style changes based on whether the item is selected, including background and text color adjustments.
- *
- * @param text The label displayed on the menu item.
- * @param onClick Callback invoked when the menu item is clicked.
- * @param modifier Modifier for customizing the layout or appearance.
- * @param isSelected Whether the menu item is currently selected.
- */
-/**
- * Displays a cyberpunk-themed menu item with customizable text and selection state.
- *
- * Visually distinguishes the selected item using background and text color changes. Executes the provided action when clicked.
- *
- * @param text The label displayed on the menu item.
- * @param onClick The action to perform when the item is clicked.
- * @param modifier Optional modifier for layout or appearance customization.
- * @param isSelected Whether the menu item is currently selected.
- */
 @Composable
 fun CyberMenuItem(
     text: String,
