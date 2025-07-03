@@ -6,7 +6,7 @@ ksp = "2.0.0-1.0.21" # Matches Kotlin 2.0.0
 hilt = "2.51.1"
 composeBom = "2024.06.00"
 composeCompiler = "2.0.0" # For Kotlin 2.0.0 ; This is the Compose Compiler Extension version
-xposedApi = "82"
+# xposedApi = "82" # REMOVING - Will be a local file dependency
 googleServices = "4.4.2" # Plugin
 
 # --- APP Dependencies ---
@@ -78,8 +78,8 @@ toolchainsFoojayResolver = "0.8.0" # Updated plugin version
 
 
 [libraries]
-# Xposed
-xposedApi = { group = "de.robv.android.xposed", name = "api", version.ref = "xposedApi" }
+# Xposed - REMOVING - Will be a local file dependency
+# xposedApi = { group = "de.robv.android.xposed", name = "api", version.ref = "xposedApi" }
 
 # Hilt (Core)
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
