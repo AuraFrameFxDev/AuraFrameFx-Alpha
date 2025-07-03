@@ -1,40 +1,99 @@
+[versions]
+agp = "8.10.1"
+appcompat = "1.7.0"
+#noinspection GradleDependency
+bcpkixJdk18on = "1.78.1"
+blurview = "version-2.0.6"
+circleindicator = "2.1.6"
+collapsingtoolbarlayoutSubtitle = "1.5.0"
+colorpickerVersion = "1.1.0"
+commonsText = "1.12.0"
+concurrentFutures = "1.2.0"
+constraintlayout = "2.2.1"
+coreKtx = "1.16.0"
+coreSplashscreen = "1.0.1"
+desugar_jdk_libs = "2.1.5"
+dotsindicator = "5.1.0"
+eventbus = "3.3.1"
+fadingedgelayout = "1.0.0"
+flexbox = "3.0.0"
+glide = "4.16.0"
+googlePlayServicesMlkitSubjectSegmentationVersion = "16.0.0-beta1"
+guava = "33.3.1-jre"
+jsoup = "1.18.3"
+kotlin = "2.1.10"
+kotlinxCoroutinesAndroid = "1.9.0"
+ksp = "2.1.10-1.0.31"
+library = "8.10.1"
+libsuVersion = "6.0.0"
+lottie = "6.6.2"
+material = "1.12.0"
+navigationUiKtx = "2.9.0"
+navigationFragmentKtx = "2.9.0"
+parcelize = "2.0.0"
+paletteKtx = "1.0.0"
+playServicesBase = "18.7.0"
+preferenceKtx = "1.2.1"
+recyclerviewSelection = "1.2.0"
+recyclerview = "1.4.0"
+remotepreferences = "0.8"
+roomVersion = "2.7.1"
+slf4jApi = "2.0.17"
+viewpager2 = "1.1.0"
+workRuntime = "2.10.1"
+xposedbridge = "main-SNAPSHOT"
+zip4j = "2.11.5"
 
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-    // Hardcoded plugin versions removed from here.
-    // Versions will be sourced from the version catalog (libs.versions.toml)
-    // when plugins are applied in build.gradle.kts files.
-}
+[libraries]
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-concurrent-futures = { module = "androidx.concurrent:concurrent-futures", version.ref = "concurrentFutures" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationUiKtx" }
+androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-palette-ktx = { group = "androidx.palette", name = "palette-ktx", version.ref = "paletteKtx" }
+androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
+androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
+androidx-recyclerview-selection = { module = "androidx.recyclerview:recyclerview-selection", version.ref = "recyclerviewSelection" }
+androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntime" }
+bcpkix-jdk18on = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bcpkixJdk18on" }
+blurview = { module = "com.github.Dimezis:BlurView", version.ref = "blurview" }
+circleindicator = { module = "me.relex:circleindicator", version.ref = "circleindicator" }
+collapsingtoolbarlayout-subtitle = { module = "com.hendraanggrian.material:collapsingtoolbarlayout-subtitle", version.ref = "collapsingtoolbarlayoutSubtitle" }
+com-google-android-gms-play-services-mlkit-subject-segmentation = { module = "com.google.android.gms:play-services-mlkit-subject-segmentation", version.ref = "googlePlayServicesMlkitSubjectSegmentationVersion" }
+commons-text = { module = "org.apache.commons:commons-text", version.ref = "commonsText" }
+desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
+dotsindicator = { module = "com.tbuonomo:dotsindicator", version.ref = "dotsindicator" }
+eventbus = { module = "org.greenrobot:eventbus", version.ref = "eventbus" }
+fadingedgelayout = { module = "com.github.bosphere.android-fadingedgelayout:fadingedgelayout", version.ref = "fadingedgelayout" }
+flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+glide-compiler = { module = "com.github.bumptech.glide:ksp", version.ref = "glide" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+jaredrummler-colorpicker = { module = "com.jaredrummler:colorpicker", version.ref = "colorpickerVersion" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+library = { module = "com.android.databinding:library", version.ref = "library" }
+lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "4.12.0" }
+play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
+remotepreferences = { module = "com.crossbowffs.remotepreferences:remotepreferences", version.ref = "remotepreferences" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomVersion" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomVersion" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomVersion" }
+su-core = { module = "com.github.topjohnwu.libsu:core", version.ref = "libsuVersion" }
+su-nio = { module = "com.github.topjohnwu.libsu:nio", version.ref = "libsuVersion" }
+su-service = { module = "com.github.topjohnwu.libsu:service", version.ref = "libsuVersion" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4jApi" }
+xposedbridge = { module = "com.github.Mahmud0808:XposedBridge", version.ref = "xposedbridge" }
+zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
 
-// This top-level plugins block is for plugins applied to the settings script itself.
-plugins {
-    // Use direct ID and version string here. Version is managed in libs.versions.toml (toolchainsFoojayResolver = "0.8.0").
-    id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
-}
-
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-        maven { url = uri("https://jitpack.io") }
-        maven { url = uri("https://androidx.dev/storage/compose-compiler/repository/") }
-    }
-}
-
-rootProject.name = "AuraFrameFXAlpha"
-include(":app")
-
-toolchainManagement {
-    jvm {
-        javaRepositories {
-            repository("foojay") {
-                resolverClass.set(org.gradle.toolchains.foojay.FoojayToolchainResolver::class.java)
-            }
-        }
-    }
-}
+[plugins]
+agp-app = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "parcelize" }
