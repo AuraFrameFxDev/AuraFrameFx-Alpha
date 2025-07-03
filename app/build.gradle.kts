@@ -51,8 +51,9 @@ android {
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-opt-in=kotlinx.coroutines.FlowPreview",
                 "-opt-in=kotlinx.coroutines.InternalCoroutinesApi"
-         )
-    }
+            )
+        }
+    } // <- This closing brace was missing
 
     packaging {
         resources {
