@@ -13,12 +13,12 @@ plugins {
 
 android {
     namespace = "dev.aurakai.auraframefx"
-    compileSdk = 34 // Updated per CodeRabbitAI
+    compileSdk = 36 // Updated per CodeRabbitAI
 
     defaultConfig {
         applicationId = "dev.aurakai.auraframefx"
         minSdk = 33
-        targetSdk = 34 // Updated per CodeRabbitAI
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -52,7 +52,7 @@ android {
                 "-opt-in=kotlinx.coroutines.InternalCoroutinesApi"
             )
         }
-        jvmTarget = "21" // Added per CodeRabbitAI
+        jvmTarget = "17" // Added per CodeRabbitAI
     }
 
     // java block might be redundant if kotlinOptions.jvmTarget and compileOptions are set for Java 21
