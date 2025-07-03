@@ -20,13 +20,13 @@ class ContextManager @Inject constructor() {
         }
     }
 
-    /**
-     * Returns a list of all stored context strings.
-     *
-     * @return A new list containing all current contexts.
+
      */
-    fun getAllContexts(): List<String> {
-        return contexts.toList()
+
+    fun createContext(context: String) {
+        // TODO: Implement context creation logic (e.g., persistent learning, session memory)
+        // Example: val newChain = dev.aurakai.auraframefx.ai.context.ContextChain(rootContext = context, currentContext = context)
+        // TODO: Persist or manage newChain
     }
 }
 
@@ -38,6 +38,7 @@ class ContextChain @Inject constructor() {
      * Sets one context string as the successor of another in the context chain.
      *
      * Links `contextA` to `contextB` as its successor if both strings are non-blank. No action is taken if either string is blank.
+
      *
      * @param contextA The context string to link from.
      * @param contextB The context string to set as the successor.

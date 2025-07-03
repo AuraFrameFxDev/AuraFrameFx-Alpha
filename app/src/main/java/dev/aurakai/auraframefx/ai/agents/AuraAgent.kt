@@ -175,3 +175,4 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
             )
         )
     }
+}
