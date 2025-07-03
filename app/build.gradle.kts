@@ -48,7 +48,7 @@ android {
 
 dependencies {
     // Xposed
-    compileOnly(libs.xposedApi) // Using alias from new TOML
+    compileOnly(files("Libs/api-82.jar")) // Changed to local file dependency
 
     // Hilt - Already in new base, using new aliases
     implementation(libs.hiltAndroid)
