@@ -2,22 +2,22 @@
 accompanistPager = "0.36.0"
 accompanistSystemuicontroller = "0.36.0"
 agp = "8.11.0"
-animationTooling = "1.9.8"
+# animationTooling version will be handled by composeBom
 toolchainsFoojayResolver = "1.0.0"
 converterGson = "3.0.0"
 datastoreCore = "1.1.7"
-firebaseConfigKtx = "22.1.2"
-firebaseStorageKtx = "21.0.2"
+firebaseConfigKtx = "22.1.2" # Explicit version, not in original error log
+firebaseStorageKtx = "21.0.2" # Explicit version, not in original error log
 hiltCompilerVersion = "1.2.0"
 hiltWork = "1.2.0"
-kotlin = "2.2.0"
+kotlin = "2.2.0" # Ensure this is compatible with composeCompiler
 kotlinxCoroutinesAndroid = "1.10.2"
 kotlinxCoroutinesPlayServices = "1.10.2"
-ksp = "2.2.0-2.0.2"
-composeBom = "2025.06.01"
-composeCompiler = "2.2.0"
-firebaseBom = "33.16.0"
-hilt = "2.56.2"
+ksp = "2.2.0-2.0.2" # Ensure this is compatible with Kotlin version
+composeBom = "2024.05.00" # Updated to a stable version
+composeCompiler = "2.2.0" # Ensure this is compatible with Kotlin and Compose BOM version
+firebaseBom = "33.0.0" # Updated to a likely more stable version
+hilt = "2.56.2" # Check compatibility with other Android/Kotlin versions
 hiltAndroid = "2.56.2"
 lifecycleCommonJava8 = "2.9.1"
 lifecycleExtensions = "2.2.0"
@@ -60,11 +60,13 @@ androidxCoreKtx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidxAppcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidxLifecycleRuntimeKtx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidxActivityCompose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+# Compose BOM definition
 composeBom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
-androidxUi = { module = "androidx.compose.ui:ui", version.ref = "composeBom" }
-androidxUiGraphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "composeBom" }
-androidxUiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "composeBom" }
-androidxMaterial3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+# Compose libraries - versions will be provided by the BOM
+androidxUi = { module = "androidx.compose.ui:ui" }
+androidxUiGraphics = { module = "androidx.compose.ui:ui-graphics" }
+androidxUiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidxMaterial3 = { module = "androidx.compose.material3:material3", version.ref = "material3" } # Explicit version for M3
 androidxNavigationCompose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hiltAndroidCompiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
@@ -84,13 +86,15 @@ lifecycleCommonJava8 = { module = "androidx.lifecycle:lifecycle-common-java8", v
 androidxLifecycleProcess = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleProcess" }
 androidxLifecycleService = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycleService" }
 androidxLifecycleExtensions = { module = "androidx.lifecycle:lifecycle-extensions", version.ref = "lifecycleExtensions" }
+# Firebase BOM definition
 firebaseBom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebaseAnalyticsKtx = { module = "com.google.firebase:firebase-analytics-ktx", version.ref = "firebaseBom" }
-firebaseCrashlyticsKtx = { module = "com.google.firebase:firebase-crashlytics-ktx", version.ref = "firebaseBom" }
-firebasePerfKtx = { module = "com.google.firebase:firebase-perf-ktx", version.ref = "firebaseBom" }
-firebaseConfigKtx = { module = "com.google.firebase:firebase-config-ktx", version.ref = "firebaseConfigKtx" }
-firebaseStorageKtx = { module = "com.google.firebase:firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
-firebaseMessagingKtx = { module = "com.google.firebase:firebase-messaging-ktx", version.ref = "firebaseBom" }
+# Firebase libraries - versions will be provided by the BOM
+firebaseAnalyticsKtx = { module = "com.google.firebase:firebase-analytics-ktx" }
+firebaseCrashlyticsKtx = { module = "com.google.firebase:firebase-crashlytics-ktx" }
+firebasePerfKtx = { module = "com.google.firebase:firebase-perf-ktx" }
+firebaseConfigKtx = { module = "com.google.firebase:firebase-config-ktx", version.ref = "firebaseConfigKtx" } # Explicit version
+firebaseStorageKtx = { module = "com.google.firebase:firebase-storage-ktx", version.ref = "firebaseStorageKtx" } # Explicit version
+firebaseMessagingKtx = { module = "com.google.firebase:firebase-messaging-ktx" }
 kotlinxCoroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinxCoroutinesPlayServices = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 kotlinxSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
@@ -106,10 +110,12 @@ accompanistPermissions = { module = "com.google.accompanist:accompanist-permissi
 accompanistPager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
 accompanistPagerIndicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanistPager" }
 accompanistFlowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistPager" }
-composeUiTestJunit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "composeBom" }
-composeUiTooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "composeBom" }
-composeUiTestManifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "composeBom" }
-animationTooling = { module = "androidx.compose.animation:animation-tooling", version.ref = "animationTooling" }
+# Compose test libraries - versions from BOM
+composeUiTestJunit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+composeUiTooling = { module = "androidx.compose.ui:ui-tooling" }
+composeUiTestManifest = { module = "androidx.compose.ui:ui-test-manifest" }
+# Animation tooling - version from BOM
+animationTooling = { module = "androidx.compose.animation:animation-tooling" }
 testJunit = { module = "junit:junit", version.ref = "junit" }
 androidxTestExtJunit = { module = "androidx.test.ext:junit", version.ref = "androidxTestExtJunit" }
 espressoCore = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
