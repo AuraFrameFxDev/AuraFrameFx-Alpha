@@ -38,22 +38,14 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
-    kotlin {
-        jvmToolchain(17)
-        compilerOptions {
-            freeCompilerArgs.addAll(
-                "-opt-in=kotlin.RequiresOptIn",
+        sourceCompatibility = JavaVersion.VERSION "-opt-in=kotlin.RequiresOptIn",
                 "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-opt-in=kotlinx.coroutines.FlowPreview",
                 "-opt-in=kotlinx.coroutines.InternalCoroutinesApi"
             )
         }
-        jvmTarget = "17"
+        // Removed invalid jvmTarget line
     }
 
     packaging {
@@ -66,8 +58,7 @@ android {
         getByName("main") {
             aidl.srcDirs("src/main/aidl")
             java.srcDirs(
-                "src/main/java",
-                "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
+Directory.get().asFile}/generated/kotlin/src/main/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/debug/java",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/release/java"
@@ -188,9 +179,7 @@ ksp {
 dependencies {
     // Hilt
     implementation(libs.hiltAndroid)
-    ksp(libs.hiltAndroidCompiler)
-    implementation(libs.hiltNavigationCompose)
-    implementation(libs.androidxWorkRuntimeKtx)
+    ksp(libs.androidxWorkRuntimeKtx)
     implementation(libs.androidxHiltWork)
     ksp(libs.hiltAndroidCompiler)
 
@@ -199,22 +188,13 @@ dependencies {
     implementation(libs.androidxAppcompat)
     implementation(libs.androidxLifecycleRuntimeKtx)
     implementation(libs.androidxActivityCompose)
-    val composeBom = platform(libs.composeBom)
+    val composeBom = platform(libs.compose.bom)
     implementation(composeBom)
     implementation(libs.androidxUi)
     implementation(libs.androidxUiGraphics)
     implementation(libs.androidxUiToolingPreview)
     implementation(libs.androidxMaterial3)
-    implementation(libs.androidxNavigationCompose)
-    implementation(libs.hiltNavigationCompose)
-    implementation(libs.androidxMaterial3)
-
-    // Animation
-    implementation(libs.animationTooling)
-
-    // Lifecycle
-    implementation(libs.lifecycleViewmodelCompose)
-    implementation(libs.androidxLifecycleRuntimeCompose)
+xLifecycleRuntimeCompose)
     implementation(libs.androidxLifecycleViewmodelKtx)
     implementation(libs.androidxLifecycleLivedataKtx)
     implementation(libs.lifecycleCommonJava8)
@@ -222,9 +202,7 @@ dependencies {
     implementation(libs.androidxLifecycleService)
     implementation(libs.androidxLifecycleExtensions)
 
-    // Room
-    implementation(libs.androidxRoomRuntime)
-    implementation(libs.androidxRoomKtx)
+ implementation(libs.androidxRoomKtx)
     ksp(libs.androidxRoomCompiler)
 
     // Firebase
@@ -271,8 +249,7 @@ dependencies {
     debugImplementation(libs.composeUiTooling)
     debugImplementation(libs.animationTooling)
 
-    // Xposed API - local JARs from app/Libs
-    compileOnly(files("app/Libs/api-82.jar"))
+    // Xposed API - local JAR/Libs/api-82.jar"))
 
     // Logging
     implementation(libs.timber)
