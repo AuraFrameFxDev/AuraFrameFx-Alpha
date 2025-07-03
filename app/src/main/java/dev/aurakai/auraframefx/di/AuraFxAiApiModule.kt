@@ -24,10 +24,9 @@ object AuraFxAiApiModule {
     /**
      * Provides a singleton `Json` serializer configured to ignore unknown keys, coerce input values, parse leniently, and encode default values.
      *
-     * This configuration enables robust serialization and deserialization for API communication, supporting flexible or evolving JSON schemas.
+     * This configuration supports robust serialization and deserialization for API communication, accommodating flexible or evolving JSON schemas.
      *
      * @return A configured `Json` instance for API serialization and deserialization.
-
      */
     @Provides
     @Singleton
