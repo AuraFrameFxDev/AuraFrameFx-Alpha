@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)  // Reverted to correct dot notation for 'google-services'
     alias(libs.plugins.kotlin.compose)   // Ensured this matches 'kotlin-compose' in TOML
+    alias(libs.plugins.kotlin.serialization) // Required for kotlinx.serialization
 }
 
 android {
