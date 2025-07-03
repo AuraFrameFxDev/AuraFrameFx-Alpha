@@ -24,6 +24,16 @@ import androidx.compose.ui.unit.sp
  * @param isSelected Whether the menu item is currently selected.
  */
 
+/**
+ * Displays a selectable menu item with customizable text and click behavior for a cyberpunk-themed UI.
+ *
+ * The menu item highlights visually when selected and executes the provided action when clicked.
+ *
+ * @param text The label displayed on the menu item.
+ * @param onClick The action to perform when the menu item is clicked.
+ * @param modifier Optional modifier for layout or appearance customization.
+ * @param isSelected Whether the menu item is currently selected, affecting its visual style.
+ */
 @Composable
 fun CyberMenuItem(
     text: String,
