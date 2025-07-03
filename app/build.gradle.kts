@@ -1,19 +1,19 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.serialization")
-    id("com.google.devtools.ksp")
-    id("com.google.dagger.hilt.android")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
-    id("com.google.firebase.firebase-perf")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("org.openapi.generator")
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.firebaseCrashlytics)
+    alias(libs.plugins.firebasePerf)
+    alias(libs.plugins.kotlinCompose)
+    alias(libs.plugins.openapiGenerator)
 }
 
 android {
     namespace = "dev.aurakai.auraframefx"
-    compileSdk = 36 // Updated per CodeRabbitAI
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "dev.aurakai.auraframefx"
@@ -22,9 +22,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        vectorDrawables.useSupportLibrary = true
         signingConfig = signingConfigs.getByName("debug")
     }
 
@@ -32,17 +30,20 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21 // Updated per CodeRabbitAI
-        targetCompatibility = JavaVersion.VERSION_21 // Updated per CodeRabbitAI
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     kotlin {
-        jvmToolchain(17) // Keeping this for now, but kotlinOptions.jvmTarget will be set to 21
+        jvmToolchain(17)
         compilerOptions {
             freeCompilerArgs.addAll(
                 "-opt-in=kotlin.RequiresOptIn",
@@ -52,15 +53,8 @@ android {
                 "-opt-in=kotlinx.coroutines.InternalCoroutinesApi"
             )
         }
-        jvmTarget = "17" // Added per CodeRabbitAI
+        jvmTarget = "17"
     }
-
-    // java block might be redundant if kotlinOptions.jvmTarget and compileOptions are set for Java 21
-    // java {
-    //     toolchain {
-    //         languageVersion.set(JavaLanguageVersion.of(17)) // This would conflict if we set jvmTarget to 21
-    //     }
-    // }
 
     packaging {
         resources {
@@ -80,7 +74,7 @@ android {
             )
             kotlin.srcDirs(
                 "src/main/kotlin",
-                "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin", // Added path for OpenAPI generated Kotlin
+                "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/debug/kotlin",
                 "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
             )
@@ -93,7 +87,6 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("gen
     generatorName.set("typescript-fetch")
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
     outputDir.set("${layout.buildDirectory.get().asFile}/generated/typescript")
-
     configOptions.set(
         mapOf(
             "npmName" to "@auraframefx/api-client",
@@ -109,7 +102,6 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("gen
     generatorName.set("java")
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
     outputDir.set("${layout.buildDirectory.get().asFile}/generated/java")
-
     configOptions.set(
         mapOf(
             "library" to "retrofit2",
@@ -119,7 +111,6 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("gen
             "useRxJava2" to "false"
         )
     )
-
     apiPackage.set("dev.aurakai.auraframefx.java.api")
     modelPackage.set("dev.aurakai.auraframefx.java.model")
     invokerPackage.set("dev.aurakai.auraframefx.java.client")
@@ -138,7 +129,6 @@ tasks.named<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openAp
             "serializationLibrary" to "kotlinx_serialization"
         )
     )
-
     globalProperties.set(
         mapOf(
             "library" to "kotlin",
@@ -152,11 +142,7 @@ val generatePythonClient by tasks.registering(org.openapitools.generator.gradle.
     generatorName.set("python")
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
     outputDir.set("${layout.buildDirectory.get().asFile}/generated/python")
-    configOptions.set(
-        mapOf(
-            "packageName" to "auraframefx_api_client"
-        )
-    )
+    configOptions.set(mapOf("packageName" to "auraframefx_api_client"))
 }
 
 tasks.register("generateOpenApiContract") {
@@ -201,99 +187,92 @@ ksp {
 
 dependencies {
     // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
-    implementation(libs.hilt.navigation.compose)
-    implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.androidx.hilt.work)
-    ksp(libs.androidx.hilt.hilt.compiler)
+    implementation(libs.hiltAndroid)
+    ksp(libs.hiltAndroidCompiler)
+    implementation(libs.hiltNavigationCompose)
+    implementation(libs.androidxWorkRuntimeKtx)
+    implementation(libs.androidxHiltWork)
+    ksp(libs.hiltAndroidCompiler)
 
     // AndroidX Core & Compose
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    val composeBom = platform(libs.androidx.compose.bom)
+    implementation(libs.androidxCoreKtx)
+    implementation(libs.androidxAppcompat)
+    implementation(libs.androidxLifecycleRuntimeKtx)
+    implementation(libs.androidxActivityCompose)
+    val composeBom = platform(libs.composeBom)
     implementation(composeBom)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.hilt.navigation.compose)
-    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidxUi)
+    implementation(libs.androidxUiGraphics)
+    implementation(libs.androidxUiToolingPreview)
+    implementation(libs.androidxMaterial3)
+    implementation(libs.androidxNavigationCompose)
+    implementation(libs.hiltNavigationCompose)
+    implementation(libs.androidxMaterial3)
 
     // Animation
-    implementation(libs.androidx.compose.animation)
-    implementation(libs.androidx.compose.animation.core)
-    implementation(libs.androidx.compose.animation.graphics)
-    // androidxAnimationTooling is already included below as debugImplementation
+    implementation(libs.animationTooling)
 
     // Lifecycle
-    implementation(libs.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.lifecycle.common.java8)
-    implementation(libs.androidx.lifecycle.process)
-    implementation(libs.androidx.lifecycle.service)
-    implementation(libs.androidx.lifecycle.extensions)
+    implementation(libs.lifecycleViewmodelCompose)
+    implementation(libs.androidxLifecycleRuntimeCompose)
+    implementation(libs.androidxLifecycleViewmodelKtx)
+    implementation(libs.androidxLifecycleLivedataKtx)
+    implementation(libs.lifecycleCommonJava8)
+    implementation(libs.androidxLifecycleProcess)
+    implementation(libs.androidxLifecycleService)
+    implementation(libs.androidxLifecycleExtensions)
 
     // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidxRoomRuntime)
+    implementation(libs.androidxRoomKtx)
+    ksp(libs.androidxRoomCompiler)
 
     // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics.ktx)
-    implementation(libs.firebase.crashlytics.ktx)
-    implementation(libs.firebase.perf.ktx)
-    implementation(libs.firebase.config.ktx)
-    implementation(libs.firebase.storage.ktx)
-    implementation(libs.firebase.messaging.ktx)
+    implementation(platform(libs.firebaseBom))
+    implementation(libs.firebaseAnalyticsKtx)
+    implementation(libs.firebaseCrashlyticsKtx)
+    implementation(libs.firebasePerfKtx)
+    implementation(libs.firebaseConfigKtx)
+    implementation(libs.firebaseStorageKtx)
+    implementation(libs.firebaseMessagingKtx)
 
     // Kotlin
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kotlinx.coroutines.play.services)
-    implementation(libs.jetbrains.kotlinx.serialization.json)
-    implementation(libs.jetbrains.kotlinx.datetime)
+    implementation(libs.kotlinxCoroutinesAndroid)
+    implementation(libs.kotlinxCoroutinesPlayServices)
+    implementation(libs.kotlinxSerializationJson)
+    implementation(libs.kotlinxDatetime)
 
     // Network
-    implementation(libs.squareup.retrofit2.retrofit)
-    implementation(libs.converter.gson)
-    implementation(libs.squareup.okhttp3.okhttp)
-    implementation(libs.squareup.okhttp3.logging.interceptor)
-    implementation(libs.jakewharton.retrofit2.kotlinx.serialization.converter)
+    implementation(libs.retrofit2Retrofit)
+    implementation(libs.converterGson)
+    implementation(libs.okhttp3Okhttp)
+    implementation(libs.okhttp3LoggingInterceptor)
+    implementation(libs.retrofit2KotlinxSerializationConverter)
     
     // DataStore
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.datastore.core)
+    implementation(libs.androidxDatastorePreferences)
+    implementation(libs.androidxDatastoreCore)
     
-    // Kotlinx Serialization
-    implementation(libs.jetbrains.kotlinx.serialization.json)
-    implementation(libs.jakewharton.retrofit2.kotlinx.serialization.converter)
-
     // UI
-    implementation(libs.coil.compose)
-    implementation(libs.google.accompanist.systemuicontroller)
-    implementation(libs.google.accompanist.permissions)
-    implementation(libs.accompanist.pager)
-    implementation(libs.accompanist.pager.indicators)
-    implementation(libs.accompanist.flowlayout)
+    implementation(libs.coilCompose)
+    implementation(libs.accompanistSystemuicontroller)
+    implementation(libs.accompanistPermissions)
+    implementation(libs.accompanistPager)
+    implementation(libs.accompanistPagerIndicators)
+    implementation(libs.accompanistFlowlayout)
 
     // Testing
-    testImplementation(libs.test.junit)
-    androidTestImplementation(libs.androidTest.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidTest.espresso.core)
+    testImplementation(libs.testJunit)
+    androidTestImplementation(libs.androidxTestExtJunit)
+    androidTestImplementation(libs.espressoCore)
     androidTestImplementation(composeBom)
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidxAnimationTooling) // Corrected alias for Compose animation tooling
+    androidTestImplementation(libs.composeUiTestJunit4)
+    debugImplementation(libs.composeUiTestManifest)
+    debugImplementation(libs.composeUiTooling)
+    debugImplementation(libs.animationTooling)
 
     // Xposed API - local JARs from app/Libs
-    compileOnly(files("app/Libs/api-82.jar")) // Changed to compileOnly and specific JAR
+    compileOnly(files("app/Libs/api-82.jar"))
 
     // Logging
     implementation(libs.timber)
