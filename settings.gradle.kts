@@ -5,35 +5,15 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
-    
-    // Define plugin versions (aligned with Android Studio Giraffe+ requirements)
-    val agpVersion = "8.11.0"  // Updated to latest stable version
-    val kotlinVersion = "2.2.0"
-    val hiltVersion = "2.56.2"
-    val googleServicesVersion = "4.4.3"
-    val firebaseCrashlyticsVersion = "2.9.9"
-    val firebasePerfVersion = "1.4.2"
-    val kspVersion = "2.2.0-2.0.2"
-    val openApiGeneratorVersion = "7.6.0"
-
-    plugins {
-        id("com.android.application") version agpVersion apply false
-        id("com.android.library") version agpVersion apply false
-        id("org.jetbrains.kotlin.android") version kotlinVersion apply false
-        id("com.google.dagger.hilt.android") version hiltVersion apply false
-        id("com.google.gms.google-services") version googleServicesVersion apply false
-        id("com.google.firebase.crashlytics") version firebaseCrashlyticsVersion apply false
-        id("com.google.firebase.firebase-perf") version firebasePerfVersion apply false
-        id("com.google.devtools.ksp") version kspVersion apply false
-        id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion apply false
-        id("org.jetbrains.kotlin.plugin.compose") version kotlinVersion apply false
-        id("org.openapi.generator") version openApiGeneratorVersion apply false
-        id("org.gradle.toolchains.foojay-resolver") version "0.8.0" apply false
-    }
+    // Hardcoded plugin versions removed from here.
+    // Versions will be sourced from the version catalog (libs.versions.toml)
+    // when plugins are applied in build.gradle.kts files.
 }
 
+// This top-level plugins block is for plugins applied to the settings script itself.
 plugins {
-    id("org.gradle.toolchains.foojay-resolver")
+    // Use direct ID and version string here. Version is managed in libs.versions.toml (toolchainsFoojayResolver = "0.8.0").
+    id("org.gradle.toolchains.foojay-resolver") version "0.8.0"
 }
 
 dependencyResolutionManagement {

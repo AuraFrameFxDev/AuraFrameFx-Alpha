@@ -1,7 +1,6 @@
 package dev.aurakai.auraframefx.ai.memory
 
-import dev.aurakai.auraframefx.model.AgentType
-import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.model.AgentType // Keep one import
 import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant

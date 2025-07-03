@@ -29,19 +29,20 @@ open class BaseAgent(
         return _agentName
     }
 
-
     /**
-     * Returns the agent's type as an `ApiAgentType` by mapping the internal type string, defaulting to `ApiAgentType.Aura` if no match is found.
+     * Returns the agent's type as an `AgentType` (from api.model) by mapping the internal type string,
+     * defaulting to `AgentType.AURA` if no match is found.
      *
-     * If the internal type string does not correspond to any known `ApiAgentType`, the method returns `ApiAgentType.Aura` as a fallback.
+     * If the internal type string does not correspond to any known `AgentType`,
+     * the method returns `AgentType.AURA` as a fallback.
      *
-     * @return The mapped `ApiAgentType` for this agent.
+     * @return The mapped `dev.aurakai.auraframefx.api.model.AgentType` for this agent.
      */
-    override fun getType(): ApiAgentType {
-        // Map string to the generated ApiAgentType
+    override fun getType(): dev.aurakai.auraframefx.api.model.AgentType { // Corrected return type
+        // Map string to the generated dev.aurakai.auraframefx.api.model.AgentType
         // Fallback to a default or throw an error if mapping fails
-        return ApiAgentType.values().firstOrNull { it.value.equals(_agentType, ignoreCase = true) }
-            ?: ApiAgentType.Aura // Defaulting to Aura, consider a more robust fallback or error
+        return dev.aurakai.auraframefx.api.model.AgentType.values().firstOrNull { it.value.equals(_agentType, ignoreCase = true) }
+            ?: dev.aurakai.auraframefx.api.model.AgentType.AURA // Defaulting to Aura, consider a more robust fallback or error
     }
 
     /**
@@ -68,7 +69,7 @@ open class BaseAgent(
      *
      * @return A flow containing a single default `AgentResponse`.
      */
-=
+    // Stray '=' was removed from here
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // Basic implementation, can be overridden for more complex streaming logic
         return flow {
