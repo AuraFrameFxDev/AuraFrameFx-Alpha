@@ -62,24 +62,19 @@ android {
         }
     }
 
+    // Only include sourceSets if you have custom dirs, otherwise remove or keep minimal.
+    // Remove if unnecessary; Gradle will use defaults.
+    /*
     sourceSets {
         getByName("main") {
-            aidl.srcDirs("src/main/aidl")
-            java.srcDirs(
-                "src/main/java",
-                "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
-                "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/java",
-                "${layout.buildDirectory.get().asFile}/generated/ksp/debug/java",
-                "${layout.buildDirectory.get().asFile}/generated/ksp/release/java"
-            )
-            kotlin.srcDirs(
-                "src/main/kotlin",
-                "${layout.buildDirectory.get().asFile}/generated/kotlin/src/main/kotlin",
-                "${layout.buildDirectory.get().asFile}/generated/ksp/debug/kotlin",
-                "${layout.buildDirectory.get().asFile}/generated/ksp/release/kotlin"
-            )
+            java.srcDir("src/main/java")
+            kotlin.srcDir("src/main/kotlin")
+            aidl.srcDir("src/main/aidl")
+            // Add generated dirs ONLY if you have them
         }
     }
+    */
+
     ndkVersion = "26.2.11394342"
 }
 
