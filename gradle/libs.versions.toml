@@ -73,6 +73,7 @@ retrofitKotlinxSerializationConverter = "1.0.0"
 kotlinxSerializationJson = "1.9.0"
 kotlinxDatetime = "0.7.0"
 guava = "33.4.8-android"
+timber = "5.0.1"
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -190,3 +191,6 @@ test-kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 test-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 androidTest-androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
 androidTest-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+
+# Logging
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
