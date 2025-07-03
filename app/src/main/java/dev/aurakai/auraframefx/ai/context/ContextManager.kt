@@ -12,7 +12,7 @@ import kotlinx.datetime.Instant
 // import kotlinx.serialization.Contextual // No longer needed for Instant here
 import kotlinx.serialization.Serializable
 import dev.aurakai.auraframefx.serialization.InstantSerializer // Ensure this is imported
-import dev.aurakai.auraframefx.model.AgentType // Ensure this is imported
+// dev.aurakai.auraframefx.model.AgentType is already imported by line 4, removing duplicate
 import javax.inject.Inject
 import javax.inject.Singleton
 
