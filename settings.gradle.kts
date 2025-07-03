@@ -1,14 +1,10 @@
+// settings.gradle.kts
 pluginManagement {
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
     }
-    // Plugin versions are managed in gradle/libs.versions.toml.
-}
-
-plugins {
-    id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
 }
 
 dependencyResolutionManagement {
@@ -16,20 +12,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven(url = "https://jitpack.io")
-        maven(url = "https://androidx.dev/storage/compose-compiler/repository/")
+        maven { url = uri("https://jitpack.io") } // For Xposed
     }
 }
 
-rootProject.name = "AuraFrameFXAlpha"
+rootProject.name = "AuraFrameFX"
 include(":app")
-
-toolchainManagement {
-    jvm {
-        javaRepositories {
-            repository("foojay") {
-                resolverClass.set(org.gradle.toolchains.foojay.FoojayToolchainResolver::class.java)
-            }
-        }
-    }
-}
