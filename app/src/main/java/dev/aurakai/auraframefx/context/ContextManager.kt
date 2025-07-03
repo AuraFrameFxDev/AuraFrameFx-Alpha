@@ -14,6 +14,11 @@ class ContextManager @Inject constructor() {
      *
      * @param context The context string to add.
      */
+    /**
+     * Adds a non-blank context string to the list if it is not already present.
+     *
+     * Ignores blank or duplicate context strings.
+     */
     fun createContext(context: String) {
         if (context.isNotBlank() && !contexts.contains(context)) {
             contexts.add(context)
