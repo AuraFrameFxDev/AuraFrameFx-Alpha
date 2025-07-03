@@ -22,7 +22,7 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Returns a configured instance of the Kotlinx JSON serializer for API communication.
+     * Provides the JSON serializer configured for the API.
      */
     @Provides
     @Singleton
@@ -34,11 +34,7 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton implementation of the AiContentApi for accessing the AuraFrameFx AI API.
-     *
-     * @param okHttpClient The OkHttp client used for network requests.
-     * @param json The configured Kotlinx Json serializer for request and response conversion.
-     * @return An implementation of the AiContentApi interface.
+     * Provides the ContentApi interface implementation for accessing the AuraFrameFx AI API.
      */
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
