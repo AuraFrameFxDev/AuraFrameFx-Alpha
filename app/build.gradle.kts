@@ -13,12 +13,12 @@ plugins {
 
 android {
     namespace = "dev.aurakai.auraframefx"
-    compileSdk = 36
+    compileSdk = 34 // Updated per CodeRabbitAI
 
     defaultConfig {
         applicationId = "dev.aurakai.auraframefx"
         minSdk = 33
-        targetSdk = 36
+        targetSdk = 34 // Updated per CodeRabbitAI
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -37,12 +37,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21 // Updated per CodeRabbitAI
+        targetCompatibility = JavaVersion.VERSION_21 // Updated per CodeRabbitAI
     }
 
     kotlin {
-        jvmToolchain(17)
+        jvmToolchain(17) // Keeping this for now, but kotlinOptions.jvmTarget will be set to 21
         compilerOptions {
             freeCompilerArgs.addAll(
                 "-opt-in=kotlin.RequiresOptIn",
@@ -52,13 +52,15 @@ android {
                 "-opt-in=kotlinx.coroutines.InternalCoroutinesApi"
             )
         }
+        jvmTarget = "21" // Added per CodeRabbitAI
     }
 
-    java {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
-        }
-    }
+    // java block might be redundant if kotlinOptions.jvmTarget and compileOptions are set for Java 21
+    // java {
+    //     toolchain {
+    //         languageVersion.set(JavaLanguageVersion.of(17)) // This would conflict if we set jvmTarget to 21
+    //     }
+    // }
 
     packaging {
         resources {
@@ -221,6 +223,12 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.compose.material3)
 
+    // Animation
+    implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.compose.animation.core)
+    implementation(libs.androidx.compose.animation.graphics)
+    // androidxAnimationTooling is already included below as debugImplementation
+
     // Lifecycle
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -285,5 +293,8 @@ dependencies {
     debugImplementation(libs.androidxAnimationTooling) // Corrected alias for Compose animation tooling
 
     // Xposed API - local JARs from app/Libs
-    implementation(fileTree(mapOf("dir" to "app/Libs", "include" to listOf("*.jar"))))
+    compileOnly(files("app/Libs/api-82.jar")) // Changed to compileOnly and specific JAR
+
+    // Logging
+    implementation(libs.timber)
 }
