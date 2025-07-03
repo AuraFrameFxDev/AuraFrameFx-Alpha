@@ -2,8 +2,8 @@
 accompanistPager = "0.36.0"
 accompanistSystemuicontroller = "0.36.0"
 agp = "8.14.2" # Updated per CodeRabbitAI for API 36+
-animationTooling = "1.5.4" # Keeping this version as a fallback, BOM might override
-toolchainsFoojayResolver = "0.8.0" # Added for settings plugin
+animationTooling = "1.9.8 # Keeping this version as a fallback, BOM might override
+toolchainsFoojayResolver = "1.0.0" # Added for settings plugin
 # comGoogleDevtoolsKspGradlePlugin version was removed as KSP plugin version is driven by 'ksp' alias
 converterGson = "3.0.0"
 datastoreCore = "1.1.7"
