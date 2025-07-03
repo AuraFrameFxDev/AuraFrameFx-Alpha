@@ -8,8 +8,7 @@ pluginManagement {
 }
 
 plugins {
-    // Use version catalog for plugin version management.
-    alias(libs.plugins.orgGradleToolchainsFoojayResolver)
+    id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
 }
 
 dependencyResolutionManagement {
