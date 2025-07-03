@@ -286,6 +286,7 @@ dependencies {
 
     // Xposed API - local JARs from app/Libs
     compileOnly(files("app/Libs/api-82.jar")) // Changed to compileOnly and specific JAR
+    runtimeOnly(files("app/Libs/api-82.jar")) // Added runtimeOnly to ensure availability at runtime
 
     // Logging
     implementation(libs.timber)
