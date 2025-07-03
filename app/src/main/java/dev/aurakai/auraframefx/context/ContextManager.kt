@@ -3,9 +3,11 @@ package dev.aurakai.auraframefx.context
 class ContextManager {
     // Skeleton for managing AI context chaining
     /**
-     * Prepares a new AI context for chaining, such as for persistent learning or session memory.
+     * Initializes a new AI context chain using the provided context string as the starting point.
      *
-     * @param context The initial context string to base the new context chain on.
+     * Intended for use cases such as persistent learning or session memory, where a new context chain must be established based on an initial context.
+     *
+     * @param context The initial context string to serve as the root of the new context chain.
      */
     fun createContext(context: String) {
         // TODO: Implement context creation logic (e.g., persistent learning, session memory)
