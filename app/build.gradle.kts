@@ -192,18 +192,17 @@ dependencies {
     implementation(libs.androidxAppcompat)
     implementation(libs.androidxLifecycleRuntimeKtx)
     implementation(libs.androidxActivityCompose)
-    val composeBom = platform(libs.composeBom)
-    implementation(composeBom)
-    implementation(libs.androidxUi)
-    implementation(libs.androidxUiGraphics)
-    implementation(libs.androidxUiToolingPreview)
-    implementation(libs.androidxMaterial3)
-    implementation(libs.androidxNavigationCompose)
-    implementation(libs.hiltNavigationCompose)
-    implementation(libs.androidxMaterial3)
+    implementation(platform(libs.composeBom)) // Apply the Compose BOM platform directly
+    implementation(libs.androidxUi) // Version will come from composeBom
+    implementation(libs.androidxUiGraphics) // Version will come from composeBom
+    implementation(libs.androidxUiToolingPreview) // Version will come from composeBom
+    implementation(libs.androidxMaterial3) // Has its own version defined in TOML
+    implementation(libs.androidxNavigationCompose) // Has its own version
+    implementation(libs.hiltNavigationCompose) // Has its own version
+    // implementation(libs.androidxMaterial3) // This was a duplicate line
 
     // Animation
-    implementation(libs.animationTooling)
+    implementation(libs.animationTooling) // Version will come from composeBom
 
     // Lifecycle
     implementation(libs.lifecycleViewmodelCompose)
@@ -258,11 +257,11 @@ dependencies {
     testImplementation(libs.testJunit)
     androidTestImplementation(libs.androidxTestExtJunit)
     androidTestImplementation(libs.espressoCore)
-    androidTestImplementation(composeBom)
-    androidTestImplementation(libs.composeUiTestJunit4)
-    debugImplementation(libs.composeUiTestManifest)
-    debugImplementation(libs.composeUiTooling)
-    debugImplementation(libs.animationTooling)
+    androidTestImplementation(platform(libs.composeBom)) // Apply BOM for test dependencies too
+    androidTestImplementation(libs.composeUiTestJunit4) // Version from composeBom
+    debugImplementation(libs.composeUiTestManifest) // Version from composeBom
+    debugImplementation(libs.composeUiTooling) // Version from composeBom
+    debugImplementation(libs.animationTooling) // Version from composeBom
 
     // Xposed API - local JARs from app/Libs
     compileOnly(files("app/Libs/api-82.jar"))
