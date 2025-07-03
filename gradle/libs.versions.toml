@@ -60,6 +60,7 @@ androidxCoreKtx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidxAppcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidxLifecycleRuntimeKtx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidxActivityCompose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+composeBom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidxUi = { module = "androidx.compose.ui:ui", version.ref = "composeBom" }
 androidxUiGraphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "composeBom" }
 androidxUiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "composeBom" }
