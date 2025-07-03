@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.sp
  * @param modifier Modifier to adjust the layout or appearance of the menu item.
  * @param isSelected Whether the menu item is currently selected.
  */
-
 @Composable
 fun CyberMenuItem(
     text: String,
