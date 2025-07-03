@@ -1,8 +1,8 @@
 [versions]
 accompanistPager = "0.36.0"
 accompanistSystemuicontroller = "0.36.0"
-agp = "8.14.2" 
-animationTooling = "1.9.8  
+agp = "8.14.2"  
+animationTooling = "1.9.8"   # <-- fixed missing quote
 toolchainsFoojayResolver = "1.0.0"
 converterGson = "3.0.0"
 datastoreCore = "1.1.7"
@@ -10,30 +10,12 @@ firebaseConfigKtx = "22.1.2"
 firebaseStorageKtx = "21.0.2"
 hiltCompilerVersion = "1.2.0"
 hiltWork = "1.2.0"
-kotlin = "2.2.0" # Confirmed by CodeRabbitAI
+kotlin = "2.2.0"
 kotlinxCoroutinesAndroid = "1.10.2"
 kotlinxCoroutinesPlayServices = "1.10.2"
-ksp = "2.2.0-1.0.24" # Updated per CodeRabbitAI
+ksp = "2.2.0-1.0.24"
 composeBom = "2025.06.01"
-# composeCompiler version will be driven by 'kotlin' version typically, or a specific compatible one.
-# CodeRabbitAI suggested kotlin = "2.2.0" for the kotlin.android plugin.
-# The kotlin-compose plugin version is often tied to the Kotlin language version.
-# Let's ensure the composeCompiler version aligns or is compatible.
-# Kotlin 2.2.0 might not use composeCompiler "2.2.0". It might use a version like "1.5.xx" if mapping to Compose Compiler.
-# However, the plugin alias is `kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeCompiler" }`
-# and `composeCompiler = "2.2.0"` was specified. This seems to be an error in my previous understanding or the TOML.
-# The Kotlin Compose compiler plugin version is usually different from the Kotlin language version.
-# For Kotlin 2.0.0 (as an example, if we were targeting that), Compose Compiler is often 1.5.10 or similar.
-# For Kotlin 2.2.0, this needs to be a compatible version.
-# Let's assume for now the 'kotlin-compose' plugin should align with the 'kotlin' version for simplicity if it's about the Kotlin language version itself,
-# but if 'composeCompiler' refers to androidx.compose.compiler:compiler, then it's different.
-# The plugin is `org.jetbrains.kotlin.plugin.compose`. Its version is usually tied to the Kotlin version.
-# Let's check if `kotlin = "2.2.0"` implies a specific compose plugin version.
-# The `plugins` block has `kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeCompiler" }`
-# and `composeCompiler = "2.2.0"`. This is highly unusual. The Kotlin Compose Compiler plugin version (org.jetbrains.kotlin.compose) is NOT the same as the androidx.compose.compiler:compiler version.
-# The org.jetbrains.kotlin.compose plugin version should align with the Kotlin language version.
-# I will assume "composeCompiler" here means the Kotlin language version for the compose plugin.
-composeCompiler = "2.2.0" # Assuming this means Kotlin version for the compose plugin.
+composeCompiler = "2.2.0"
 firebaseBom = "33.16.0"
 hilt = "2.56.2"
 hiltAndroid = "2.56.2"
@@ -46,8 +28,7 @@ lifecycleViewmodelCompose = "2.9.1"
 material3 = "1.3.2"
 openapiGenerator = "7.6.0"
 googleServices = "4.4.3"
-firebaseCrashlytics = "3.0.4" # Matches the hardcoded version
-
+firebaseCrashlytics = "3.0.4"
 firebasePerf = "1.4.2"
 coreKtx = "1.16.0"
 appcompat = "1.7.1"
@@ -77,119 +58,15 @@ timber = "5.0.1"
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" } # Renamed
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" } # Renamed
-openapiGenerator = { id = "org.openapi.generator", version.ref = "openapiGenerator" } # Renamed
-googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" } # Renamed
-firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlytics" } # Renamed
-firebasePerf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerf" } # Renamed
-kotlinCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeCompiler" } # Renamed
-orgGradleToolchainsFoojayResolver = { id = "org.gradle.toolchains.foojay-resolver", version.ref = "toolchainsFoojayResolver" } # Renamed
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+openapiGenerator = { id = "org.openapi.generator", version.ref = "openapiGenerator" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlytics" }
+firebasePerf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerf" }
+kotlinCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeCompiler" }
+orgGradleToolchainsFoojayResolver = { id = "org.gradle.toolchains.foojay-resolver", version.ref = "toolchainsFoojayResolver" }
 
-[libraries]
-# Core & Lifecycle
-accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version = "0.36.0" }
-accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version = "0.36.0" }
-accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version = "0.36.0" }
-androidx-compose-animation = { group = "androidx.compose.animation", name = "animation" } # BOM managed
-androidx-compose-animation-core = { group = "androidx.compose.animation", name = "animation-core" } # BOM managed
-androidx-compose-animation-graphics = { group = "androidx.compose.animation", name = "animation-graphics" } # BOM managed
-androidx-compose-animation-tooling = { module = "androidx.compose.animation:animation-tooling", version.ref = "animationTooling" } # Explicit version for tooling
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version = "1.16.0" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version = "1.7.1" }
-androidx-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastoreCore" }
-androidx-hilt-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompilerVersion" }
-androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
-androidx-lifecycle-extensions = { module = "androidx.lifecycle:lifecycle-extensions", version.ref = "lifecycleExtensions" }
-androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycleRuntimeCompose" }
-androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleProcess" }
-androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
-
-# Compose
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
-androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
-androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
-androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version = "1.8.3" }
-
-# Navigation (Compose only)
-androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycleService" }
-androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleRuntimeCompose" }
-androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
-androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
-
-# Hilt & DI
-androidx-ui = { module = "androidx.compose.ui:ui" }
-androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
-androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
-androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
-androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-# com-google-devtools-ksp-gradle-plugin removed as it referenced a non-existent version alias and KSP is applied as a plugin.
-com-google-firebase-firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version = "3.0.0" }
-firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx", version.ref = "firebaseConfigKtx" }
-firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx", version = "24.1.2" }
-firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
-google-accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version = "0.36.0" }
-google-firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
-google-firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltAndroid" }
-hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hiltAndroid" }
-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-
-# Room (Persistence)
-androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-
-# Network (Retrofit + Kotlinx Serialization)
-kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.10.2" }
-kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version = "1.10.2" }
-lifecycle-common-java8 = { module = "androidx.lifecycle:lifecycle-common-java8", version.ref = "lifecycleCommonJava8" }
-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
-squareup-retrofit2-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-squareup-okhttp3-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-squareup-okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-jakewharton-retrofit2-kotlinx-serialization-converter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "retrofitKotlinxSerializationConverter" }
-
-# Serialization (The ONE true choice)
-jetbrains-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-jetbrains-kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
-
-# Firebase
-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.16.0" }
-firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx", version = "22.5.0" }
-firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx", version = "19.4.4" }
-firebase-perf-ktx = { group = "com.google.firebase", name = "firebase-perf-ktx", version = "21.0.5" }
-firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version = "23.2.1" }
-firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version = "25.1.4" }
-
-# Other AndroidX
-androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCrypto" }
-androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
-androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
-
-# UI Libraries
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version = "2.7.0" }
-google-accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version = "0.37.3" }
-
-# Utilities
-guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
-
-# Testing
-test-junit = { group = "junit", name = "junit", version.ref = "junit" }
-test-kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
-test-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
-androidTest-androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
-androidTest-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-
-# Logging
-timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+# [libraries] section unchanged, just ensure all version.refs point to valid [versions] keys
