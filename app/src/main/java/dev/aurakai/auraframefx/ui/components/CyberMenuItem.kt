@@ -66,6 +66,23 @@ import androidx.compose.ui.unit.sp
  * @param isSelected Indicates whether the menu item is currently selected.
 
  */
+/**
+ * Displays a selectable menu item with customizable text and click handling.
+ *
+ * Highlights the item and changes its text color when selected.
+ *
+ * @param text The label displayed on the menu item.
+ * @param onClick Callback invoked when the menu item is clicked.
+ * @param modifier Optional modifier for layout or appearance customization.
+ * @param isSelected Whether the menu item is currently selected.
+ */
+/**
+ * Displays a menu item with a text label and selection state.
+ *
+ * @param text The label to display on the menu item.
+ * @param modifier Modifier to adjust the layout or appearance.
+ * @param isSelected Whether the menu item is currently selected.
+ */
 @Composable
 fun CyberMenuItem(
     text: String,
