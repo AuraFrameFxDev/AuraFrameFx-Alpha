@@ -34,7 +34,7 @@ room = "2.6.1"
 
 # WorkManager & Hilt Work
 workManager = "2.9.0"
-# hiltWork uses hilt version by ref (see androidxHiltWork library definition)
+hiltWork = "1.2.0" # ADDED for androidx.hilt:hilt-work
 
 # Datastore
 datastore = "1.1.1" # For preferences
@@ -85,7 +85,7 @@ xposedApi = { group = "de.robv.android.xposed", name = "api", version.ref = "xpo
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hiltCompiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" } # KSP
 hiltNavigationCompose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-androidxHiltWork = { module = "androidx.hilt:hilt-work", version.ref = "hilt" } # For Hilt + WorkManager
+androidxHiltWork = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" } # CORRECTED: Point to hiltWork version
 
 # Compose BOM (Bill of Materials for Jetpack Compose)
 composeBom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -95,10 +95,11 @@ androidxUiGraphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidxUiToolingPreview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidxMaterial3 = { group = "androidx.compose.material3", name = "material3" } # Compose M3, version from BOM
 androidxComposeAnimation = { group = "androidx.compose.animation", name = "animation" }
-animationTooling = { group = "androidx.compose.animation", name = "animation-tooling" } # For debug
+# animationTooling = { group = "androidx.compose.animation", name = "animation-tooling" } # For debug - User wants this to be ui-tooling
+animationTooling = { group = "androidx.compose.ui", name = "ui-tooling" } # CORRECTED: animation-tooling is just ui-tooling, version from BOM
 # Compose Test Libraries (versions managed by compose-bom)
 composeUiTestJunit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-composeUiTooling = { group = "androidx.compose.ui", name = "ui-tooling" } # For debug
+composeUiTooling = { group = "androidx.compose.ui", name = "ui-tooling" } # For debug - this is the one for debugImplementation
 composeUiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest" } # For debug
 
 # AndroidX Core & AppCompat
