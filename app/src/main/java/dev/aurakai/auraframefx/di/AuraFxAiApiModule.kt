@@ -22,9 +22,9 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides a singleton `Json` serializer configured to ignore unknown keys, coerce input values, parse leniently, and encode default values.
+     * Provides a singleton `Json` serializer configured for flexible and robust API communication.
      *
-     * This configuration supports robust serialization and deserialization for API communication, accommodating flexible or evolving JSON schemas.
+     * The returned `Json` instance ignores unknown keys, coerces input values, parses leniently, and encodes default values, making it suitable for handling evolving or non-strict JSON schemas.
      *
      * @return A configured `Json` instance for API serialization and deserialization.
      */
