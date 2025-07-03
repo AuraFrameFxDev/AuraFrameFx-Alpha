@@ -57,6 +57,12 @@ import androidx.compose.ui.unit.sp
  * @param text The label to display for the menu item.
  * @param isSelected Whether the menu item is currently selected.
  */
+/**
+ * Displays a menu item with customizable text and selection state for use in Jetpack Compose UI.
+ *
+ * @param text The label to display for the menu item.
+ * @param isSelected Whether the menu item is currently selected.
+ */
 @Composable
 fun CyberMenuItem(
     text: String,
