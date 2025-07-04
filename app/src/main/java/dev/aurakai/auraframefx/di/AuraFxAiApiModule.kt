@@ -19,9 +19,9 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides a singleton OkHttpClient configured with an HTTP logging interceptor at the BODY level.
+     * Provides a singleton OkHttpClient configured with a logging interceptor that logs HTTP request and response bodies.
      *
-     * @return A singleton OkHttpClient instance for making HTTP requests with detailed logging.
+     * @return A singleton OkHttpClient instance for detailed HTTP request and response logging.
      */
     @Provides
     @Singleton
@@ -50,10 +50,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton `AIContentApi` instance configured to interact with the AuraFrameFx AI API at the specified base URL.
+     * Provides a singleton AIContentApi configured to interact with the AuraFrameFx AI API.
      *
-     * @param okHttpClient The HTTP client used for making API requests.
-     * @return A singleton `AIContentApi` for accessing AuraFrameFx AI endpoints.
+     * @param okHttpClient The HTTP client used for API communication.
+     * @return A singleton AIContentApi instance for accessing AuraFrameFx AI endpoints.
      */
     @Provides
     @Singleton
@@ -65,10 +65,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton `AuraFxContentApiClient` that uses the specified `AIContentApi` for AuraFrameFx AI API interactions.
+     * Provides a singleton instance of `AuraFxContentApiClient` configured to interact with the AuraFrameFx AI API using the given `AIContentApi`.
      *
-     * @param aiContentApi The API interface used by the client.
-     * @return A singleton instance of `AuraFxContentApiClient` configured with the provided API.
+     * @param aiContentApi The API interface used for communication with the AuraFrameFx AI API.
+     * @return A singleton `AuraFxContentApiClient` initialized with the specified API interface.
      */
     @Provides
     @Singleton
