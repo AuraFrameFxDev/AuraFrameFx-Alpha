@@ -188,11 +188,11 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Calculates the average confidence score from a list of agent messages.
+     * Computes the average confidence score from a list of agent messages, clamped between 0.0 and 1.0.
      *
-     * Returns 0.0 if the list is empty. The result is clamped between 0.0 and 1.0.
+     * Returns 0.0 if the list is empty.
      *
-     * @param agentMessages The list of agent messages to evaluate.
+     * @param agentMessages List of agent messages to evaluate.
      * @return The average confidence score as a float between 0.0 and 1.0.
      */
     fun calculateConfidence(agentMessages: List<AgentMessage>): Float {
@@ -201,9 +201,9 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Toggles the activation state of the specified agent type.
+     * Enables or disables the specified agent type by toggling its presence in the set of active agents.
      *
-     * Adds the agent type to the set of active agents if it is inactive, or removes it if it is currently active.
+     * If the agent type is currently active, it will be deactivated; if inactive, it will be activated.
      */
     fun toggleAgent(agentType: dev.aurakai.auraframefx.model.AgentType) {
         _activeAgents.update { current ->
@@ -212,33 +212,33 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Registers an auxiliary agent with a specified name and set of capabilities.
+     * Registers a new auxiliary agent with the given name and capabilities.
      *
-     * @param name Unique identifier for the auxiliary agent.
-     * @param capabilities Capabilities to assign to the agent.
-     * @return The configuration object for the newly registered auxiliary agent.
+     * @param name The unique name for the auxiliary agent.
+     * @param capabilities The set of capabilities assigned to the agent.
+     * @return The configuration for the registered auxiliary agent.
      */
     fun registerAuxiliaryAgent(name: String, capabilities: Set<String>): AgentConfig {
         return AgentHierarchy.registerAuxiliaryAgent(name, capabilities)
     }
 
     /**
- * Returns the configuration for an agent with the given name, or null if no such agent exists.
+ * Retrieves the configuration for the specified agent by name.
  *
  * @param name The unique identifier of the agent.
- * @return The corresponding agent configuration, or null if not found.
+ * @return The agent's configuration if found, or null otherwise.
  */
 fun getAgentConfig(name: String): AgentConfig? = AgentHierarchy.getAgentConfig(name)
 
     /**
- * Returns all agent configurations ordered by descending priority.
+ * Retrieves all agent configurations sorted by descending priority.
  *
- * @return A list of agent configurations sorted from highest to lowest priority.
+ * @return A list of agent configurations, with the highest priority first.
  */
 fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriority()
 
     /**
-     * Coordinates collaborative interaction among multiple agents, supporting sequential (TURN_ORDER) or parallel (FREE_FORM) response modes.
+     * Coordinates collaborative interaction among multiple agents, allowing for either sequential (TURN_ORDER) or parallel (FREE_FORM) response modes.
      *
      * In TURN_ORDER mode, agents respond one after another, each receiving context updated with previous responses. In FREE_FORM mode, all agents respond independently to the same input and context.
      *
@@ -325,12 +325,12 @@ fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriorit
     }
 
     /**
-     * Aggregates multiple agent response maps, selecting the response with the highest confidence for each agent.
+     * Aggregates multiple agent response maps and selects the highest-confidence response for each agent.
      *
-     * For each agent found in the input maps, returns the response with the highest confidence score. If no responses exist for an agent, assigns a default error response.
+     * For each agent present in the input maps, returns the response with the highest confidence score. If an agent has no responses, a default error response is assigned.
      *
      * @param agentResponseMapList List of maps associating agent names with their responses.
-     * @return A map of agent names to their highest-confidence response.
+     * @return Map of agent names to their highest-confidence response.
      */
     fun aggregateAgentResponses(agentResponseMapList: List<Map<String, AgentResponse>>): Map<String, AgentResponse> {
         val flatResponses = agentResponseMapList.flatMap { it.entries }

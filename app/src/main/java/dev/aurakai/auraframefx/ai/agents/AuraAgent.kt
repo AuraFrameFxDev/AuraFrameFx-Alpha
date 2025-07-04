@@ -86,9 +86,9 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
 
     // --- Collaboration placeholders (not part of Agent interface) ---
     /**
-     * Placeholder for AuraAgent's participation in inter-agent federation activities.
+     * Placeholder for future inter-agent federation participation logic for AuraAgent.
      *
-     * Currently returns an empty map. Intended for future implementation of federation collaboration logic.
+     * Currently returns an empty map.
      *
      * @param data Input data relevant to federation participation.
      * @return An empty map.
@@ -110,7 +110,7 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Placeholder for future collaborative processing involving AuraAgent, KaiAgent, and Genesis agent.
+     * Placeholder for future collaborative processing between AuraAgent, KaiAgent, and Genesis agent.
      *
      * Currently returns an empty map. Intended for future implementation of joint logic or data exchange among these agents.
      *
