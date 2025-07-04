@@ -1,17 +1,14 @@
 package dev.aurakai.auraframefx.di
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dev.aurakai.auraframefx.api.AiContentApi
+import dev.aurakai.auraframefx.api.client.apis.AIContentApi
 import dev.aurakai.auraframefx.network.AuraFxContentApiClient
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import retrofit2.Retrofit
+import okhttp3.logging.HttpLoggingInterceptor
 import javax.inject.Singleton
 
 /**
@@ -20,6 +17,21 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AuraFxAiApiModule {
+
+    /**
+     * Provides the OkHttpClient configured for API requests.
+     */
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+        
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+    }
 
     /**
      * Provides the JSON serializer configured for the API.
@@ -36,19 +48,12 @@ object AuraFxAiApiModule {
     /**
      * Provides the ContentApi interface implementation for accessing the AuraFrameFx AI API.
      */
-    @OptIn(ExperimentalSerializationApi::class)
     @Provides
     @Singleton
-    fun provideAiContentApi(okHttpClient: OkHttpClient, json: Json): AiContentApi {
-        val baseUrl = "https://api.auraframefx.com/v1/"
-        val contentType = "application/json".toMediaType()
-
-        return Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory(contentType))
-            .build()
-            .create(AiContentApi::class.java)
+    fun provideAiContentApi(okHttpClient: OkHttpClient, json: Json): AIContentApi {
+        val baseUrl = "https://api.auraframefx.com/v1"
+        
+        return AIContentApi(basePath = baseUrl, client = okHttpClient)
     }
 
     /**
@@ -56,7 +61,7 @@ object AuraFxAiApiModule {
      */
     @Provides
     @Singleton
-    fun provideAuraFxContentApiClient(aiContentApi: AiContentApi): AuraFxContentApiClient {
+    fun provideAuraFxContentApiClient(aiContentApi: AIContentApi): AuraFxContentApiClient {
         return AuraFxContentApiClient(aiContentApi)
     }
 }
