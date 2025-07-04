@@ -1,8 +1,9 @@
 [versions]
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
-agp = "8.5.0"
+agp = "8.11.0"
 kotlin = "2.0.0"
-ksp = "2.0.0-1.0.21" # Matches Kotlin 2.0.0
+ksp = "2.0.0-1.0.28" # Updated KSP for AGP 8.11.0 compatibility
+
 hilt = "2.56.2"
 composeBom = "2024.06.00"
 composeCompiler = "2.0.0" # For Kotlin 2.0.0 ; This is the Compose Compiler Extension version
