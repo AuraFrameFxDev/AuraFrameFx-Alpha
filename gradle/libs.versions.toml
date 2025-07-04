@@ -52,7 +52,7 @@ firebaseStorageKtx = "21.0.2" # Explicit as per old, check latest if issues
 # KotlinX
 kotlinxCoroutines = "1.8.0" # For coroutines-android, -play-services, -test
 kotlinxSerializationJson = "1.7.1" # Updated for Kotlin 2.2.0 compatibility (was 1.9.0 likely a typo)
-kotlinxDatetime = "0.6.0" # For Kotlin 2.0
+kotlinxDatetime = "0.7.0" # Updated for Kotlin 2.2.0 (was 0.6.0)
 
 # Network (Retrofit, OkHttp)
 retrofit = "2.11.0"
