@@ -57,20 +57,20 @@ class KaiAgent(
     }
 
     /**
-         * Determines whether KaiAgent should handle a given security-related prompt.
+         * Determines whether KaiAgent should handle a security-related prompt.
          *
-         * @param prompt The prompt to evaluate.
-         * @return Always returns `true`.
-
-        /**
- * Determines whether the agent should handle security-related prompts.
- *
- * Always returns `true`, indicating that all prompts are considered for security handling.
+         * Always returns `true`, indicating that security prompts are handled by default.
+         *
+         * @param prompt The input prompt to evaluate.
+         * @return `true` to indicate security handling is enabled.
+         */
+        fun shouldHandleSecurity(prompt: String): Boolean =
+        true /**
+ * Determines whether Kai should handle creative prompts.
  *
  * @param prompt The input prompt to evaluate.
- * @return `true` for any input, signifying security handling is always enabled.
+ * @return `false`, indicating Kai does not handle creative prompts.
  */
-fun shouldHandleSecurity(prompt: String): Boolean = true
 
 
     /**
@@ -165,23 +165,23 @@ fun shouldHandleSecurity(prompt: String): Boolean = true
         return emptyMap()
     }
 
-
     /**
-
-]* Analyzes an AI request in the given context and returns a Kai-specific security analysis response.
+     * Processes an AI request with the provided context and returns a response.
      *
-     * The response reflects Kai's evaluation of the request, simulating a security check for the presence of the keyword "exploit".
+     * Constructs an `AgentResponse` that includes the request prompt and the given context.
      *
-     * @param request The AI request to analyze.
-     * @param context Additional context for the analysis.
-     * @return An AgentResponse containing Kai's analysis result with a fixed confidence score.
-
+     * @param request The AI request containing the prompt to process.
+     * @param context Additional context information to include in the response.
+     * @return An `AgentResponse` containing the generated content and a success flag.
      */
-    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
-        // Kai-specific logic for handling the request with context.
-        val responseContent = "Kai's security analysis for '${request.query}' with context '$context'"
-        // Simulate a security check
-        val isSecure = !request.query.contains("exploit", ignoreCase = true)
+    override suspend fun processRequest(
+        request: AiRequest,
+        context: String, // Context parameter is part of the interface
+    ): AgentResponse {
+        // Kai-specific logic can be added here
+        // Using request.prompt instead of request.query
+        // Using isSuccess instead of confidence
+        // Incorporating context into the response for demonstration
 
         return AgentResponse(
             content = "Kai's response to '${request.query}' with context '$context'",

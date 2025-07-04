@@ -46,13 +46,13 @@ private val LightColorScheme = lightColorScheme(
 )
 
 /**
- * Applies the AuraFrameFX Material3 theme to the provided composable content.
+ * Applies the AuraFrameFX theme to the provided composable content.
  *
- * Selects a light, dark, or dynamic color scheme based on the specified parameters and system settings. On supported devices, synchronizes the system status bar color and icon appearance with the chosen theme.
+ * Selects and applies a color scheme (dark, light, or dynamic based on system support and parameters), sets the status bar color and icon appearance to match the theme, and provides the app's typography.
  *
- * @param darkTheme If true, applies the dark color scheme; otherwise, applies the light color scheme. Defaults to the system dark theme setting.
- * @param dynamicColor If true and supported (Android 12+), enables dynamic color schemes based on the user's wallpaper. Defaults to true.
- * @param content The composable content to display within the themed context.
+ * @param darkTheme Whether to use the dark theme. Defaults to the system setting.
+ * @param dynamicColor Whether to use dynamic color schemes on supported devices (Android 12+). Defaults to true.
+ * @param content The composable content to which the theme will be applied.
 
  */
 @Composable
