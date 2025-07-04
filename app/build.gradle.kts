@@ -36,10 +36,12 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs += listOf("-opt-in=kotlin.RequiresOptIn")
     }
 
     buildFeatures {
         compose = true
+        aidl = true
     }
 
     composeOptions {

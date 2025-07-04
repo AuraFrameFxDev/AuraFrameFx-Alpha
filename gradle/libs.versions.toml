@@ -1,12 +1,12 @@
 [versions]
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
 agp = "8.11.0"
-kotlin = "2.0.0"
-ksp = "2.0.0-1.0.28" # Updated KSP for AGP 8.11.0 compatibility
+kotlin = "2.2.0" # Upgraded Kotlin
+ksp = "2.2.0-2.0.2" # Upgraded KSP for Kotlin 2.2.0
 
 hilt = "2.56.2"
 composeBom = "2024.06.00"
-composeCompiler = "2.0.0" # For Kotlin 2.0.0 ; This is the Compose Compiler Extension version
+composeCompiler = "2.2.0" # Upgraded Compose Compiler for Kotlin 2.2.0
 # xposedApi = "82" # REMOVING - Will be a local file dependency
 googleServices = "4.4.2" # Plugin
 
@@ -51,7 +51,7 @@ firebaseStorageKtx = "21.0.2" # Explicit as per old, check latest if issues
 
 # KotlinX
 kotlinxCoroutines = "1.8.0" # For coroutines-android, -play-services, -test
-kotlinxSerializationJson = "1.6.3" # For Kotlin 2.0
+kotlinxSerializationJson = "1.7.1" # Updated for Kotlin 2.2.0 compatibility (was 1.9.0 likely a typo)
 kotlinxDatetime = "0.6.0" # For Kotlin 2.0
 
 # Network (Retrofit, OkHttp)
