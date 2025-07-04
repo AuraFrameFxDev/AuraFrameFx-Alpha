@@ -28,7 +28,7 @@ class AuraFxContentApiClient @Inject constructor(
         prompt: String,
         maxTokens: Int? = null,
         temperature: Float? = null,
-    ) = withContext(Dispatchers.IO) {
+    ): AIContentApi.ResponseType = withContext(Dispatchers.IO) {
         aiContentApi.aiGenerateTextPost(
             GenerateTextRequest(
                 prompt = prompt,
