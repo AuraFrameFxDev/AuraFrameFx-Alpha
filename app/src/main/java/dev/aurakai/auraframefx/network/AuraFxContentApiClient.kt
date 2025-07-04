@@ -17,12 +17,12 @@ class AuraFxContentApiClient @Inject constructor(
     private val aiContentApi: AIContentApi,
 ) {
     /**
-     * Generates AI text from a given prompt, with optional control over output length and randomness.
+     * Generates AI text based on the provided prompt, with optional parameters to control output length and randomness.
      *
-     * @param prompt The input prompt for the AI model.
-     * @param maxTokens Optional maximum number of tokens to generate; defaults to 500 if not provided.
-     * @param temperature Optional value controlling output randomness; defaults to 0.7 if not provided.
-     * @return The API response containing the generated text and completion reason.
+     * @param prompt The text prompt to generate a response for.
+     * @param maxTokens Optional maximum number of tokens in the generated output. Defaults to 500 if not specified.
+     * @param temperature Optional value to control the randomness of the output. Defaults to 0.7 if not specified.
+     * @return The API response containing the generated text and the reason for completion.
      */
     suspend fun generateText(
         prompt: String,
@@ -40,11 +40,11 @@ class AuraFxContentApiClient @Inject constructor(
     }
 
     /**
-     * Generates an AI description for the given image URL, optionally incorporating additional context to refine the result.
+     * Generates an AI-powered description for an image at the specified URL, optionally using additional context to influence the output.
      *
-     * @param imageUrl The URL of the image to describe.
-     * @param context Optional context to guide or influence the generated description.
-     * @return The API response containing the AI-generated image description.
+     * @param imageUrl The URL of the image to be described.
+     * @param context Optional text providing extra context or guidance for the description.
+     * @return The response containing the generated image description.
      */
     suspend fun generateImageDescription(
         imageUrl: String,
