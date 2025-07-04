@@ -30,13 +30,12 @@ class ContextManager @Inject constructor(
     /**
      * Creates a new context chain with the specified root and initial context.
      *
-     * Initializes the chain's history with a single context node and stores all metadata as string values.
+     * Initializes the chain's history with a single context node and ensures all metadata values are stored as strings.
      *
      * @param rootContext The identifier for the root context of the chain.
-     * @param initialContext The initial context content for the chain.
+     * @param initialContext The content of the initial context node.
      * @param agent The agent associated with the initial context.
-     * @param metadata Optional metadata for the context, with all values converted to strings.
-
+     * @param metadata Optional metadata for the context; all values are converted to strings.
      * @return The unique identifier of the newly created context chain.
      */
     fun createContextChain(

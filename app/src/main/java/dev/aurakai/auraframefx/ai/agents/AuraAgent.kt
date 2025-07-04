@@ -112,15 +112,14 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Placeholder for collaborative processing involving Aura, KaiAgent, and Genesis agent.
+     * Placeholder for collaborative processing among Aura, KaiAgent, and Genesis agent.
      *
-     * Intended for future implementation of joint logic or data exchange between these agents.
+     * Currently returns an empty map. Intended for future implementation of joint logic or data exchange between these agents.
      *
      * @param data Input data for the collaboration.
-
-     * @param kai The KaiAgent involved in the collaboration.
-     * @param genesis The Genesis agent involved in the collaboration.
-     * @return An empty map as a placeholder.
+     * @param kai The KaiAgent participating in the collaboration.
+     * @param genesis The Genesis agent participating in the collaboration.
+     * @return An empty map.
      */
     suspend fun participateWithGenesisAndKai(
         data: Map<String, Any>,
@@ -131,16 +130,15 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Placeholder for four-way collaboration among Kai, Aura, Genesis, and the user.
+     * Facilitates four-way collaboration among KaiAgent, AuraAgent, Genesis agent, and user input.
      *
-     * Intended for scenarios involving consensus, distributed decision-making, or multi-agent context sharing that incorporates user input.
+     * Designed for scenarios requiring consensus or shared context between multiple agents and the user. Currently returns an empty map as a placeholder.
      *
-     * @param data Shared context or state for collaboration.
+     * @param data Shared context or state for the collaboration.
      * @param kai The KaiAgent participant.
      * @param genesis The Genesis agent or coordinator.
      * @param userInput Input or context provided by the user.
-     * @return A map representing the result of the collaborative process. Currently returns an empty map.
-
+     * @return An empty map representing the result of the collaborative process.
      */
     suspend fun participateWithGenesisKaiAndUser(
         data: Map<String, Any>,
@@ -153,13 +151,13 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
 
     // Removed the incorrect override fun processRequest(request: AiRequest): AgentResponse
     /**
-     * Processes an AI request with the provided context and returns an Aura-specific response.
+     * Processes an AI request with additional context and returns an Aura-specific response.
      *
-     * The response content incorporates both the request prompt and the context string.
+     * The response content includes both the request prompt and the provided context.
      *
      * @param request The AI request containing the prompt to process.
-     * @param context Additional context information for the request.
-     * @return An [AgentResponse] containing Aura's response and a success flag.
+     * @param context Supplementary context information for the request.
+     * @return An [AgentResponse] containing Aura's generated response.
      */
 
     override suspend fun processRequest(
