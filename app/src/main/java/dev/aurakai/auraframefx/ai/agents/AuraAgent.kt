@@ -99,12 +99,11 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Placeholder for future collaboration logic with a Genesis agent.
+     * Placeholder for future collaboration with a Genesis agent.
      *
-     * Currently returns an empty map and performs no operations.
+     * Currently returns an empty map and does not perform any operations.
      *
-     * @param data Input data for the intended collaboration.
-
+     * @param data Input data intended for collaboration.
      * @return An empty map.
      */
     suspend fun participateWithGenesis(data: Map<String, Any>): Map<String, Any> {
@@ -112,9 +111,9 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Placeholder for collaborative processing among Aura, KaiAgent, and Genesis agent.
+     * Placeholder for collaborative processing involving AuraAgent, KaiAgent, and Genesis agent.
      *
-     * Currently returns an empty map. Intended for future implementation of joint logic or data exchange between these agents.
+     * Currently returns an empty map. Intended for future implementation of joint logic or data exchange among these agents.
      *
      * @param data Input data for the collaboration.
      * @param kai The KaiAgent participating in the collaboration.
@@ -130,15 +129,15 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Facilitates four-way collaboration among KaiAgent, AuraAgent, Genesis agent, and user input.
+     * Placeholder for collaborative interaction among AuraAgent, KaiAgent, Genesis agent, and user input.
      *
-     * Designed for scenarios requiring consensus or shared context between multiple agents and the user. Currently returns an empty map as a placeholder.
+     * Intended for future implementation of multi-agent and user collaboration logic. Currently returns an empty map.
      *
      * @param data Shared context or state for the collaboration.
      * @param kai The KaiAgent participant.
      * @param genesis The Genesis agent or coordinator.
      * @param userInput Input or context provided by the user.
-     * @return An empty map representing the result of the collaborative process.
+     * @return An empty map.
      */
     suspend fun participateWithGenesisKaiAndUser(
         data: Map<String, Any>,
@@ -151,12 +150,12 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
 
     // Removed the incorrect override fun processRequest(request: AiRequest): AgentResponse
     /**
-     * Processes an AI request with additional context and returns an Aura-specific response.
+     * Processes an AI request with supplementary context and returns an Aura-specific response.
      *
-     * The response content includes both the request prompt and the provided context.
+     * The response content incorporates both the request prompt and the provided context.
      *
-     * @param request The AI request containing the prompt to process.
-     * @param context Supplementary context information for the request.
+     * @param request The AI request to process.
+     * @param context Additional context information for generating the response.
      * @return An [AgentResponse] containing Aura's generated response.
      */
 
