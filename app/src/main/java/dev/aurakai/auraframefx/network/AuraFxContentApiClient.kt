@@ -23,6 +23,7 @@ class AuraFxContentApiClient @Inject constructor(
      * @param maxTokens Optional maximum number of tokens for the generated text. Defaults to 500.
      * @param temperature Optional value controlling the randomness of the output. Defaults to 0.7.
      * @return The API response containing the generated text and the finish reason.
+
      */
     suspend fun generateText(
         prompt: String,
@@ -43,6 +44,7 @@ class AuraFxContentApiClient @Inject constructor(
      * Generates a descriptive caption for an image using its URL and optional context.
      *
      * @param imageUrl The URL of the image to describe.
+
 
      * @param context Optional additional context to guide the description.
      * @return The API response containing the generated image description.

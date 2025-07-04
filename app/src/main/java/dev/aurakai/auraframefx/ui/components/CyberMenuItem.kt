@@ -23,6 +23,95 @@ import androidx.compose.ui.unit.sp
  * @param modifier Modifier to adjust the layout or appearance of the menu item.
  * @param isSelected Whether the menu item is currently selected.
  */
+/**
+ * Displays a menu item with customizable text and selection state in a Compose UI.
+ *
+ * @param text The label displayed for the menu item.
+ * @param modifier Optional modifier to adjust the layout or appearance.
+ * @param isSelected Indicates whether the menu item is currently selected.
+ */
+/**
+ * Displays a menu item with customizable text and selection state.
+ *
+ * @param text The label to display for the menu item.
+ * @param modifier Optional modifier to adjust the layout or appearance.
+ * @param isSelected Whether the menu item is currently selected.
+ */
+/**
+ * Displays a menu item with a label and selection state for use in Jetpack Compose UI.
+ *
+ * @param text The label to display for the menu item.
+ * @param modifier Optional modifier to customize the appearance or layout.
+ * @param isSelected Indicates whether the menu item is currently selected.
+ */
+/**
+ * Displays a menu item with a text label and selection state for use in Jetpack Compose UI.
+ *
+ * @param text The label to display for the menu item.
+ * @param modifier Optional modifier to adjust the layout or appearance.
+ * @param isSelected Indicates whether the menu item is currently selected.
+ */
+/**
+ * Displays a menu item with customizable text and selection state for use in Jetpack Compose UI.
+ *
+ * @param text The label to display for the menu item.
+ * @param isSelected Whether the menu item is currently selected.
+ */
+/**
+ * Displays a menu item with customizable text and selection state for use in Jetpack Compose UI.
+ *
+ * @param text The label to display for the menu item.
+ * @param isSelected Whether the menu item is currently selected.
+ */
+
+/**
+ * Displays a clickable menu item with customizable text and selection state for a cyberpunk-themed UI.
+ *
+ * The menu item highlights visually when selected and executes the provided action when clicked.
+ *
+ * @param text The label displayed on the menu item.
+ * @param isSelected Whether the menu item is currently selected, affecting its visual style.
+ */
+/**
+ * Displays a clickable menu item with customizable text and selection state for a cyberpunk-themed UI.
+ *
+ * The menu item visually highlights when selected and triggers the provided action when clicked.
+ *
+ * @param text The label displayed on the menu item.
+ * @param isSelected Whether the menu item is currently selected, affecting its visual style.
+ */
+/**
+ * Displays a clickable menu item with customizable text and selection state for a cyberpunk-themed UI.
+ *
+ * The menu item visually highlights when selected and triggers the provided action when clicked.
+ *
+ * @param text The label displayed on the menu item.
+ * @param isSelected Whether the menu item is currently selected, affecting its visual style.
+ */
+/**
+ * Displays a clickable menu item with customizable text and selection state for a cyberpunk-themed UI.
+ *
+ * The menu item visually highlights when selected and triggers the provided action when clicked.
+ *
+ * @param text The label displayed on the menu item.
+ * @param isSelected Whether the menu item is currently selected, affecting its visual style.
+ */
+/**
+ * Displays a clickable menu item with customizable text and selection state for a cyberpunk-themed UI.
+ *
+ * The menu item visually highlights when selected and triggers the provided action when clicked.
+ *
+ * @param text The label displayed on the menu item.
+ * @param isSelected Whether the menu item is currently selected, affecting its visual style.
+ */
+/**
+ * Displays a clickable menu item with customizable text and selection state for a cyberpunk-themed UI.
+ *
+ * The menu item visually highlights when selected and triggers the provided action when clicked.
+ *
+ * @param text The label displayed on the menu item.
+ * @param isSelected Whether the menu item is currently selected, affecting its visual style.
+ */
 @Composable
 fun CyberMenuItem(
     text: String,

@@ -22,6 +22,7 @@ object AuraFxAiApiModule {
      * Provides a singleton OkHttpClient configured with an HTTP logging interceptor at the BODY level.
      *
      * @return An OkHttpClient instance that logs request and response bodies for debugging and monitoring API interactions.
+
      */
     @Provides
     @Singleton
@@ -37,6 +38,7 @@ object AuraFxAiApiModule {
 
     /**
      * Provides the JSON serializer configured for the API.
+
      */
     @Provides
     @Singleton
@@ -53,6 +55,7 @@ object AuraFxAiApiModule {
      * The returned API client uses the specified base URL and the provided `OkHttpClient` for HTTP requests.
      *
      * @return An `AIContentApi` instance with the base URL set to "https://api.auraframefx.com/v1".
+
      */
     @Provides
     @Singleton
@@ -68,6 +71,7 @@ object AuraFxAiApiModule {
      *
      * @param aiContentApi The AI content API implementation to be wrapped.
      * @return An `AuraFxContentApiClient` configured to use the provided API.
+
      */
     @Provides
     @Singleton
