@@ -55,6 +55,7 @@ object AuraFxAiApiModule {
     @Provides
     @Singleton
     fun provideAiContentApi(okHttpClient: OkHttpClient, json: Json): AIContentApi {
+
         val baseUrl = "https://api.auraframefx.com/v1"
         
         return AIContentApi(basePath = baseUrl, client = okHttpClient)
