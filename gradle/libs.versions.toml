@@ -2,7 +2,7 @@
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
 agp = "8.11.0"
 kotlin = "2.0.0"
-ksp = "2.0.0-1.0.24" # Updated KSP to a valid version for Kotlin 2.0.0
+ksp = "2.0.20-1.0.25" # Updated KSP for Kotlin 2.0.x, hoping for better Gradle 8.13 API compatibility
 
 hilt = "2.56.2"
 composeBom = "2024.06.00"
