@@ -63,7 +63,8 @@ class MainActivity : ComponentActivity() {
 /**
  * Displays the main UI scaffold with bottom navigation and optional digital visual effects.
  *
- * Sets up navigation, applies cyberpunk-style digital transition effects to the main content area when enabled, and hosts the app's navigation graph.
+ * Sets up the navigation controller, applies a custom digital pixel effect when enabled, and hosts the app's navigation graph within a scaffold layout.
+
  */
 @Composable
 fun MainScreen() {

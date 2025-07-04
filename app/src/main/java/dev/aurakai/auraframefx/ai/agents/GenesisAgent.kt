@@ -58,8 +58,8 @@ class GenesisAgent @Inject constructor(
     /**
      * Initializes the set of active agents based on the master agent hierarchy.
      *
-     * Attempts to map each agent configuration name from the hierarchy to a corresponding `AgentType` enum value.
-     * Adds recognized agent types to the active agents set; logs a warning for any unknown types.
+     * Adds recognized agent types to the active agents set and logs a warning for any configuration names that do not match a known `AgentType`.
+
      */
     private fun initializeAgents() {
         AgentHierarchy.MASTER_AGENTS.forEach { config ->
@@ -74,16 +74,16 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Processes a user query by coordinating active AI agents and aggregating their responses.
+     * Processes a user query by routing it through active AI agents, collecting their responses, and generating a final aggregated reply.
      *
-     * Updates the shared context with the query and timestamp, invokes each relevant AI service (Cascade, Kai, Aura) based on active agent types, and collects their responses as `AgentMessage` objects. Handles exceptions for each agent, appending error messages if necessary. Synthesizes a final response from all agent outputs and adds it as a Genesis agent message with aggregated confidence.
+     * The query is sent to the Cascade agent for state management, and to the Kai and Aura agents if they are active, each with their respective context. Each agent's response is recorded with a confidence score based on success. A final Genesis response is generated from all agent outputs and appended to the result.
      *
-     * @param queryText The user query to process.
-     * @return A list of `AgentMessage` objects containing responses from each agent and the final Genesis synthesis.
+     * @param query The user query to process.
+     * @return A list of agent messages, including individual agent responses and the final aggregated Genesis response.
      */
-    suspend fun processQuery(queryText: String): List<AgentMessage> {
-        _state.update { "processing_query: $queryText" }
-        val currentTimestamp = System.currentTimeMillis()
+    suspend fun processQuery(query: String): List<AgentMessage> {
+        _state.update { "processing_query: $query" }
+
 
         _context.update { current ->
             current + mapOf("last_query" to queryText, "timestamp" to currentTimestamp)
@@ -239,15 +239,16 @@ fun getAgentConfig(name: String): AgentConfig? = AgentHierarchy.getAgentConfig(n
 fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriority()
 
     /**
-     * Facilitates collaborative processing among multiple agents using the provided data and conversation mode.
+     * Facilitates collaborative interaction between multiple agents and the user, supporting both sequential and parallel response modes.
      *
-     * Agents can interact in either sequential (TURN_ORDER) or parallel (FREE_FORM) modes. In TURN_ORDER, each agent receives an updated context that includes prior agents' responses; in FREE_FORM, all agents receive the same initial context. Handles exceptions per agent and returns a map of agent names to their responses.
+     * In TURN_ORDER mode, agents respond one after another, with each agent receiving updated context from the previous agent's response. In FREE_FORM mode, all agents respond independently to the same input and context.
      *
-     * @param data Additional contextual data to merge with the current context for agent processing.
-     * @param agentsToUse The list of agents participating in the collaboration.
-     * @param userInput Optional user input to use as the query; falls back to context values if not provided.
-     * @param conversationMode Determines whether agents process requests sequentially or in parallel.
-     * @return A map associating each agent's name with its response.
+     * @param data The initial context map shared among agents.
+     * @param agents The list of agents participating in the collaboration.
+     * @param userInput Optional user input to seed the conversation; if null, uses the latest input from the context map.
+     * @param conversationMode Determines whether agents respond in sequence (TURN_ORDER) or in parallel (FREE_FORM).
+     * @return A map of agent names to their respective responses.
+
      */
     suspend fun participateWithAgents(
         data: Map<String, Any>,
@@ -326,13 +327,11 @@ fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriorit
     }
 
     /**
-     * Aggregates multiple agent response maps by selecting the highest confidence response for each agent.
+     * Aggregates multiple agent response maps into a consensus map, selecting the first successful response for each agent or the first available response if none are successful.
      *
-     * For each agent key present in the input maps, returns the response with the highest confidence score.
-     * If no response is found for an agent, a default response with zero confidence is used.
-     *
-     * @param agentResponseMapList A list of maps, each mapping agent names to their responses.
-     * @return A map of agent names to their highest confidence response.
+     * @param responses A list of maps, each mapping agent names to their responses.
+     * @return A map of agent names to their consensus response.
+
      */
     fun aggregateAgentResponses(agentResponseMapList: List<Map<String, AgentResponse>>): Map<String, AgentResponse> {
         val flatResponses = agentResponseMapList.flatMap { it.entries }

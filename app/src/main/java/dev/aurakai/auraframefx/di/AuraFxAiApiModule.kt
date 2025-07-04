@@ -20,6 +20,7 @@ object AuraFxAiApiModule {
 
     /**
      * Provides the OkHttpClient configured for API requests.
+
      */
     @Provides
     @Singleton
@@ -35,6 +36,7 @@ object AuraFxAiApiModule {
 
     /**
      * Provides the JSON serializer configured for the API.
+
      */
     @Provides
     @Singleton
@@ -50,6 +52,7 @@ object AuraFxAiApiModule {
      *
      * @param okHttpClient The HTTP client used for network requests.
      * @return An `AIContentApi` targeting the AuraFrameFx API base URL.
+
      */
     @Provides
     @Singleton
@@ -62,6 +65,7 @@ object AuraFxAiApiModule {
 
     /**
      * Provides the AuraFxContentApiClient wrapper for the AiContentApi.
+
      */
     @Provides
     @Singleton
