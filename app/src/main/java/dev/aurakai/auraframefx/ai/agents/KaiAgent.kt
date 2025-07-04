@@ -48,21 +48,18 @@ class KaiAgent(
      * @param newState The new processing state to handle.
      */
     /**
-     * Handles changes to the processing state with Kai-specific logic.
+     * Invoked when the agent's processing state changes, allowing for Kai-specific handling.
      *
-     * This method is intended to be overridden with behavior that responds to updates in the agent's processing state.
+     * Intended to be overridden to implement custom behavior in response to processing state updates.
      */
     fun onProcessingStateChange(newState: ProcessingState) {
         // Kai-specific processing state changes.
     }
 
     /**
-         * Determines whether KaiAgent should handle a security-related prompt.
+         * Indicates that KaiAgent always handles security-related prompts.
          *
-         * Always returns `true`, indicating that security prompts are handled by default.
-         *
-         * @param prompt The input prompt to evaluate.
-         * @return `true` to indicate security handling is enabled.
+         * @return `true`, signifying that security prompt handling is always enabled.
          */
         fun shouldHandleSecurity(prompt: String): Boolean =
         true /**
