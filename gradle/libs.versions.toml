@@ -5,77 +5,77 @@ kotlin = "2.2.0" # Upgraded Kotlin
 ksp = "2.2.0-2.0.2" # Upgraded KSP for Kotlin 2.2.0
 
 hilt = "2.56.2"
-composeBom = "2024.06.00"
+composeBom = "2025.06.01"
 composeCompiler = "2.2.0" # Upgraded Compose Compiler for Kotlin 2.2.0
 # xposedApi = "82" # REMOVING - Will be a local file dependency
-googleServices = "4.4.2" # Plugin
+googleServices = "4.4.3" # Plugin
 
 # --- APP Dependencies ---
 # Accompanist (Consider if still needed or if Compose BOM covers them)
-accompanistPager = "0.34.0" # Check latest if used
-accompanistPermissions = "0.34.0" # Check latest if used
-accompanistSystemuicontroller = "0.34.0" # Check latest if used
+accompanistPager = "0.36.0" # Check latest if used
+accompanistPermissions = "0.37.3" # Check latest if used
+accompanistSystemuicontroller = "0.36.0" # Check latest if used
 
 # AndroidX Core & AppCompat
-coreKtx = "1.13.1"
-appcompat = "1.7.0"
+coreKtx = "1.16.0"
+appcompat = "1.7.1"
 
 # Activity & Navigation
-activityCompose = "1.9.0"
-navigationCompose = "2.7.7" # navigation version for navigation-compose
+activityCompose = "1.10.1"
+navigationCompose = "2.9.1" # navigation version for navigation-compose
 hiltNavigationCompose = "1.2.0" # AndroidX Hilt Navigation Compose
 
 # Lifecycle (using a common version)
-lifecycle = "2.8.2" # For runtime-ktx, viewmodel-ktx, livedata-ktx, common-java8, process, service
-lifecycleRuntimeCompose = "2.8.2" # Explicit for runtime-compose
-lifecycleViewmodelCompose = "2.8.2" # Explicit for viewmodel-compose
+lifecycle = "2.9.1" # For runtime-ktx, viewmodel-ktx, livedata-ktx, common-java8, process, service
+lifecycleRuntimeCompose = "2.9.1" # Explicit for runtime-compose
+lifecycleViewmodelCompose = "2.9.1" # Explicit for viewmodel-compose
 
 # Room
-room = "2.6.1"
+room = "2.7.2"
 
 # WorkManager & Hilt Work
-workManager = "2.9.0"
+workManager = "2.10.2"
 hiltWork = "1.2.0" # ADDED for androidx.hilt:hilt-work
 
 # Datastore
-datastore = "1.1.1" # For preferences
-datastoreCore = "1.1.1" # For core
+datastore = "1.1.7" # For preferences
+datastoreCore = "1.1.7" # For core
 
 # Security
 securityCrypto = "1.0.0" # Stable version
 
 # Firebase (BOM and specific components)
-firebaseBomVersion = "33.2.0" # Version for Firebase BOM
+firebaseBomVersion = "33.16.0" # Version for Firebase BOM
 firebaseConfigKtx = "22.1.2" # Explicit as per old, check latest if issues
 firebaseStorageKtx = "21.0.2" # Explicit as per old, check latest if issues
 
 # KotlinX
-kotlinxCoroutines = "1.8.0" # For coroutines-android, -play-services, -test
-kotlinxSerializationJson = "1.7.1" # Updated for Kotlin 2.2.0 compatibility (was 1.9.0 likely a typo)
-kotlinxDatetime = "0.7.0" # Updated for Kotlin 2.2.0 (was 0.6.0)
+kotlinxCoroutines = "1.10.2" # For coroutines-android, -play-services, -test
+kotlinxSerializationJson = "1.9.0" # Updated for Kotlin 2.2.0 compatibility (was 1.9.0 likely a typo)
+kotlinxDatetime = "0.7.0" # For Kotlin 2.0
 
 # Network (Retrofit, OkHttp)
-retrofit = "2.11.0"
-okhttp = "4.12.0" # Sticking to v4 for now
-converterGson = "2.11.0" # Align with retrofit
+retrofit = "3.0.0"
+okhttp = "5.0.0" # Sticking to v4 for now
+converterGson = "3.0.0" # Align with retrofit
 retrofitKotlinxSerializationConverter = "1.0.0"
 
 # UI Utils
-coilCompose = "2.6.0"
+coilCompose = "2.7.0"
 timber = "5.0.1"
-guavaAndroid = "33.2.1-android"
+guavaAndroid = "33.4.8-android"
 
 # Testing
 junit = "4.13.2"
-androidxTestExtJunit = "1.1.5"
-espressoCore = "3.5.1"
-mockk = "1.13.10"
+androidxTestExtJunit = "1.2.1"
+espressoCore = "3.6.1"
+mockk = "1.14.4"
 
 # Build Logic Plugins (not for app dependencies directly)
-openapiGeneratorPlugin = "7.7.0" # Updated plugin version
-firebaseCrashlyticsPlugin = "3.0.2" # Updated plugin version for com.google.firebase.crashlytics
+openapiGeneratorPlugin = "7.14.0" # Updated plugin version
+firebaseCrashlyticsPlugin = "3.0.4" # Updated plugin version for com.google.firebase.crashlytics
 firebasePerfPlugin = "1.4.2" # Plugin version for com.google.firebase.firebase-perf
-toolchainsFoojayResolver = "0.8.0" # Updated plugin version
+toolchainsFoojayResolver = "1.0.0" # Updated plugin version
 
 
 [libraries]
@@ -87,7 +87,8 @@ hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" 
 hiltCompiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" } # KSP
 hiltNavigationCompose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidxHiltWork = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" } # CORRECTED: Point to hiltWork version
-
+daggerHiltAndroidTesting = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
+daggerHiltAndroidCompiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 # Compose BOM (Bill of Materials for Jetpack Compose)
 composeBom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 # Individual Compose libraries (versions managed by compose-bom)

@@ -5,13 +5,12 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.googleServices)  // Corrected: camelCase from google-services
-    alias(libs.plugins.kotlinCompose)   // Corrected: camelCase from kotlin-compose
-    alias(libs.plugins.kotlinSerialization) // Corrected: camelCase from kotlin-serialization
-    // If firebase-crashlytics, firebase-perf, openapi-generator are needed here, they should be added using their camelCase aliases:
-    // alias(libs.plugins.firebaseCrashlytics)
-    // alias(libs.plugins.firebasePerf)
-    // alias(libs.plugins.openapiGenerator)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.kotlinCompose)
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.firebaseCrashlytics) // Added based on error log
+    alias(libs.plugins.firebasePerf)        // Added based on error log
+    alias(libs.plugins.openapiGenerator)    // Added based on error log
 }
 
 android {
