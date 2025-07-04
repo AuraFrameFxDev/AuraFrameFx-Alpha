@@ -175,12 +175,12 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Creates a synthesized response by concatenating messages from all non-Genesis agents.
+     * Synthesizes a response by concatenating messages from all non-Genesis agents.
      *
-     * The resulting string is prefixed with "[Genesis Synthesis]" and includes each agent's name and message content, separated by " | ".
+     * The result is prefixed with "[Genesis Synthesis]" and includes each agent's name and message content, separated by " | ".
      *
-     * @param agentMessages The list of agent messages to synthesize.
-     * @return A single string representing the combined output of all non-Genesis agents.
+     * @param agentMessages List of agent messages to include in the synthesis.
+     * @return The combined output string from all non-Genesis agents.
      */
     fun generateFinalResponse(agentMessages: List<AgentMessage>): String {
         // Simple concatenation for now, could be more sophisticated
@@ -188,11 +188,11 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Calculates the average confidence score from a list of agent messages, clamped between 0.0 and 1.0.
+     * Computes the average confidence score from a list of agent messages, clamped between 0.0 and 1.0.
      *
      * Returns 0.0 if the list is empty.
      *
-     * @param agentMessages The agent messages to evaluate.
+     * @param agentMessages List of agent messages to evaluate.
      * @return The average confidence score as a float between 0.0 and 1.0.
      */
     fun calculateConfidence(agentMessages: List<AgentMessage>): Float {
@@ -201,7 +201,7 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Toggles the activation state of the given agent type.
+     * Toggles the specified agent type between active and inactive states.
      *
      * Activates the agent if it is currently inactive, or deactivates it if already active.
      */
@@ -212,11 +212,11 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Registers a new auxiliary agent with the given name and capabilities.
+     * Registers a new auxiliary agent with the specified name and capabilities.
      *
-     * @param name The unique name for the auxiliary agent.
-     * @param capabilities The set of capabilities assigned to the agent.
-     * @return The configuration object for the registered auxiliary agent.
+     * @param name The unique identifier for the auxiliary agent.
+     * @param capabilities The set of capabilities to assign to the agent.
+     * @return The configuration for the newly registered auxiliary agent.
      */
     fun registerAuxiliaryAgent(name: String, capabilities: Set<String>): AgentConfig {
         return AgentHierarchy.registerAuxiliaryAgent(name, capabilities)
@@ -238,14 +238,14 @@ fun getAgentConfig(name: String): AgentConfig? = AgentHierarchy.getAgentConfig(n
 fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriority()
 
     /**
-     * Coordinates collaborative interaction among multiple agents, allowing for either sequential (TURN_ORDER) or parallel (FREE_FORM) response modes.
+     * Coordinates collaborative interaction among multiple agents, supporting sequential (TURN_ORDER) or parallel (FREE_FORM) response modes.
      *
      * In TURN_ORDER mode, agents respond one after another, each receiving context updated with previous responses. In FREE_FORM mode, all agents respond independently to the same input and context.
      *
      * @param data The initial context map shared among agents.
      * @param agentsToUse The agents participating in the collaboration.
      * @param userInput Optional user input to seed the conversation; if null, uses the latest input from the context map.
-     * @param conversationMode Determines whether agents respond sequentially (TURN_ORDER) or in parallel (FREE_FORM).
+     * @param conversationMode Specifies whether agents respond sequentially (TURN_ORDER) or in parallel (FREE_FORM).
      * @return A map of agent names to their respective responses.
      */
     suspend fun participateWithAgents(
