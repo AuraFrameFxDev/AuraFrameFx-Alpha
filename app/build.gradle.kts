@@ -138,7 +138,7 @@ dependencies {
     testImplementation(libs.testJunit)
     testImplementation(libs.kotlinxCoroutinesTest) // Added from old TOML's list
     testImplementation(libs.mockkAgent) // For local unit tests
-    
+
     // Hilt testing dependencies
     testImplementation("com.google.dagger:hilt-android-testing:2.56.2")
     kspTest("com.google.dagger:hilt-compiler:2.56.2")
