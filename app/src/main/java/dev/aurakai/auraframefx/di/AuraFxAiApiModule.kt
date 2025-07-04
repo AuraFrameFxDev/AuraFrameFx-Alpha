@@ -19,9 +19,9 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides a singleton OkHttpClient configured with an HTTP logging interceptor at the BODY level.
+     * Provides a singleton OkHttpClient with HTTP request and response body logging enabled.
      *
-     * @return An OkHttpClient instance that logs request and response bodies.
+     * @return An OkHttpClient instance configured to log HTTP bodies at the BODY level.
      */
     @Provides
     @Singleton
@@ -36,7 +36,9 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides the JSON serializer configured for the API.
+     * Provides a singleton `Json` serializer configured to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values.
+     *
+     * @return A configured `Json` instance for API serialization and deserialization.
      */
     @Provides
     @Singleton
@@ -48,9 +50,11 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton `AIContentApi` instance configured to interact with the AuraFrameFx AI API.
+     * Provides a singleton `AIContentApi` configured to communicate with the AuraFrameFx AI API.
      *
-     * @return An `AIContentApi` with the base URL set to "https://api.auraframefx.com/v1" and using the supplied `OkHttpClient`.
+     * The returned instance uses the base URL "https://api.auraframefx.com/v1" and the supplied `OkHttpClient`.
+     *
+     * @return A configured `AIContentApi` instance.
      */
     @Provides
     @Singleton
@@ -62,10 +66,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton `AuraFxContentApiClient` that wraps the specified `AIContentApi` instance.
+     * Provides a singleton instance of `AuraFxContentApiClient` that wraps the given `AIContentApi`.
      *
-     * @param aiContentApi The AI content API to be wrapped.
-     * @return An `AuraFxContentApiClient` configured with the provided API.
+     * @param aiContentApi The AI content API instance to wrap.
+     * @return A singleton `AuraFxContentApiClient` configured with the specified API.
      */
     @Provides
     @Singleton
