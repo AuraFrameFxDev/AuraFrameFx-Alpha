@@ -28,12 +28,12 @@ class ContextChain @Inject constructor() {
     private val contextLinks = mutableMapOf<String, String>()
 
     /**
-     * Links one context string to another as its successor in the context chain.
+     * Sets one context string as the successor of another in the context chain.
      *
-     * Assigns `contextB` as the successor of `contextA` if both strings are non-blank. Does nothing if either string is blank.
+     * Assigns `contextB` as the successor to `contextA` if both strings are non-blank. No action is taken if either string is blank.
      *
      * @param contextA The context string to link from.
-     * @param contextB The context string to set as the successor.
+     * @param contextB The context string to designate as the successor.
      */
     fun linkContexts(contextA: String, contextB: String) {
         if (contextA.isNotBlank() && contextB.isNotBlank()) {
@@ -42,10 +42,10 @@ class ContextChain @Inject constructor() {
     }
 
     /**
-     * Retrieves the successor context linked to the specified context.
+     * Returns the successor context string linked to the given context, or null if no successor exists.
      *
-     * @param context The context for which to find the successor.
-     * @return The successor context string if one exists; otherwise, null.
+     * @param context The context whose successor is to be retrieved.
+     * @return The successor context string, or null if none is linked.
      */
     fun getNextInChain(context: String): String? {
         return contextLinks[context]
