@@ -22,6 +22,7 @@ object AuraFxAiApiModule {
      * Provides a singleton OkHttpClient configured with an HTTP logging interceptor at the BODY level.
      *
      * @return A configured OkHttpClient instance for network requests.
+
      */
     @Provides
     @Singleton
@@ -55,6 +56,7 @@ object AuraFxAiApiModule {
      * The `json` parameter is accepted for consistency with other providers but is not used in this method.
      *
      * @return An `AIContentApi` instance set to communicate with `https://api.auraframefx.com/v1` using the given HTTP client.
+
      */
     @Provides
     @Singleton
@@ -70,6 +72,7 @@ object AuraFxAiApiModule {
      *
      * @param aiContentApi The API implementation to be wrapped by the client.
      * @return A configured `AuraFxContentApiClient` instance.
+
      */
     @Provides
     @Singleton
