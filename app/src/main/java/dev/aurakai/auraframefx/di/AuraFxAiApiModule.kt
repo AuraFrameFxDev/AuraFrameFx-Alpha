@@ -22,6 +22,7 @@ object AuraFxAiApiModule {
      * Provides a singleton OkHttpClient configured with an HTTP logging interceptor for request and response bodies.
      *
      * @return A configured OkHttpClient instance for API requests.
+
      */
     @Provides
     @Singleton
@@ -36,7 +37,11 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides the JSON serializer configured for the API.
+     * Provides a singleton Json serializer configured for flexible and resilient API data handling.
+     *
+     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values, supporting robust serialization and deserialization for API communication.
+     *
+     * @return A configured Json instance for processing API requests and responses.
      */
     @Provides
     @Singleton
@@ -51,10 +56,12 @@ object AuraFxAiApiModule {
      * Provides a singleton instance of `AIContentApi` configured to access the AuraFrameFx AI API.
      *
      * @return An `AIContentApi` instance with the base URL set to "https://api.auraframefx.com/v1" and using the provided `OkHttpClient`.
+
      */
     @Provides
     @Singleton
     fun provideAiContentApi(okHttpClient: OkHttpClient, json: Json): AIContentApi {
+
         val baseUrl = "https://api.auraframefx.com/v1"
         
         return AIContentApi(basePath = baseUrl, client = okHttpClient)
@@ -65,6 +72,7 @@ object AuraFxAiApiModule {
      *
      * @param aiContentApi The AI content API implementation to be wrapped.
      * @return A configured `AuraFxContentApiClient` instance.
+
      */
     @Provides
     @Singleton
