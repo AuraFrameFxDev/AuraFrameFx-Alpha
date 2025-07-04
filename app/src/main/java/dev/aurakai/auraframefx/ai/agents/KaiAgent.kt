@@ -48,11 +48,11 @@ class KaiAgent(
      * @param newState The new processing state to handle.
      */
     /**
-     * Handles updates to the agent's processing state.
+     * Invoked when the agent's processing state changes.
      *
-     * Override to implement Kai-specific behavior when the processing state changes.
+     * Override to implement Kai-specific logic in response to processing state updates.
      *
-     * @param newState The new processing state of the agent.
+     * @param newState The updated processing state.
      */
     fun onProcessingStateChange(newState: ProcessingState) {
         // Kai-specific processing state changes.
