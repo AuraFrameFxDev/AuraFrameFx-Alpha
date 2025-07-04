@@ -19,9 +19,9 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides a singleton OkHttpClient with HTTP request and response body logging enabled at the BODY level.
+     * Provides a singleton OkHttpClient configured to log HTTP request and response bodies at the BODY level.
      *
-     * @return A singleton OkHttpClient instance configured for detailed HTTP traffic logging.
+     * @return A singleton OkHttpClient instance with detailed HTTP traffic logging enabled.
      */
     @Provides
     @Singleton
@@ -36,11 +36,11 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton `Json` serializer configured for robust and flexible API communication.
+     * Provides a singleton Json serializer configured for resilient API communication.
      *
-     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values to ensure resilient serialization and deserialization of API data.
+     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values to support flexible serialization and deserialization of API data.
      *
-     * @return A configured `Json` instance for handling API requests and responses.
+     * @return A configured Json instance for handling API requests and responses.
      */
     @Provides
     @Singleton
@@ -52,9 +52,9 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton AIContentApi instance configured to interact with the AuraFrameFx AI API.
+     * Provides a singleton AIContentApi configured to interact with the AuraFrameFx AI API.
      *
-     * @return A singleton AIContentApi for accessing AuraFrameFx AI API endpoints.
+     * @return A singleton instance of AIContentApi for accessing AuraFrameFx AI API endpoints.
      */
     @Provides
     @Singleton
@@ -66,9 +66,9 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton `AuraFxContentApiClient` that uses the specified `AIContentApi`.
+     * Provides a singleton instance of `AuraFxContentApiClient` configured with the given `AIContentApi`.
      *
-     * @return A singleton instance of `AuraFxContentApiClient`.
+     * @return A singleton `AuraFxContentApiClient` for accessing AuraFrameFx AI content services.
      */
     @Provides
     @Singleton
