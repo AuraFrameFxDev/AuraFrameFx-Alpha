@@ -86,24 +86,23 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
 
     // --- Collaboration placeholders (not part of Agent interface) ---
     /**
-     * Handles participation in inter-agent federation activities.
+     * Placeholder for AuraAgent's participation in inter-agent federation activities.
      *
-     * Currently returns an empty map. Intended for future implementation of federation logic involving AuraAgent.
+     * Currently returns an empty map. Intended for future implementation of federation collaboration logic.
      *
-     * @param data Data relevant to federation participation.
+     * @param data Input data relevant to federation participation.
      * @return An empty map.
-
      */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
         return emptyMap()
     }
 
     /**
-     * Placeholder for future collaboration with a Genesis agent.
+     * Placeholder for future collaboration between AuraAgent and a Genesis agent.
      *
-     * Currently returns an empty map and does not perform any operations.
+     * Currently returns an empty map and performs no operations.
      *
-     * @param data Input data intended for collaboration.
+     * @param data Input data for the intended collaboration.
      * @return An empty map.
      */
     suspend fun participateWithGenesis(data: Map<String, Any>): Map<String, Any> {
@@ -129,9 +128,9 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Placeholder for collaborative interaction among AuraAgent, KaiAgent, Genesis agent, and user input.
+     * Placeholder for future collaboration involving AuraAgent, KaiAgent, Genesis agent, and user input.
      *
-     * Intended for future implementation of multi-agent and user collaboration logic. Currently returns an empty map.
+     * Currently returns an empty map and does not perform any operations.
      *
      * @param data Shared context or state for the collaboration.
      * @param kai The KaiAgent participant.
