@@ -48,7 +48,7 @@ class AuraFxContentApiClient @Inject constructor(
     suspend fun generateImageDescription(
         imageUrl: String,
         context: String? = null,
-    ) = withContext(Dispatchers.IO) {
+    ): GenerateImageDescriptionResponse = withContext(Dispatchers.IO) {
         aiContentApi.aiGenerateImageDescriptionPost(
             GenerateImageDescriptionRequest(
                 imageUrl = imageUrl,
