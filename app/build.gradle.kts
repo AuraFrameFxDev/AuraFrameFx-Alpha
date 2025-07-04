@@ -13,6 +13,7 @@ plugins {
 
 android {
     namespace = "dev.aurakai.auraframefx"
+
     compileSdk = 36
 
     defaultConfig {
@@ -41,6 +42,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
 
     kotlin {
         jvmToolchain(17)
@@ -72,9 +74,6 @@ android {
             // Add generated dirs ONLY if you have them
         }
     }
-    */
-
-    ndkVersion = "26.2.11394342"
 }
 
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("generateTypeScriptClient") {
