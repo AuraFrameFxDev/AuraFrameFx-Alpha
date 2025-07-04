@@ -21,9 +21,9 @@ open class BaseAgent(
 ) : Agent {
 
     /**
-     * Retrieves the agent's name.
+     * Returns the agent's name, or null if it is not set.
      *
-     * @return The agent's name, or null if not set.
+     * @return The agent's name, or null.
      */
     override fun getName(): String? {
         return _agentName
@@ -113,6 +113,15 @@ open class BaseAgent(
      * @param request The AI request to process.
      * @param context The context in which the request is processed.
      * @return A default `AgentResponse` containing information about the request, agent, and context.
+     */
+    /**
+     * Processes an AI request with the provided context and returns a default response.
+     *
+     * Subclasses should override this method to implement custom request handling logic.
+     *
+     * @param request The AI request to process.
+     * @param context The context in which the request is processed.
+     * @return A default [AgentResponse] referencing the request, agent name, and context, with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Default implementation for base agent, override in subclasses
@@ -207,6 +216,14 @@ open class BaseAgent(
      * @param request The AI request to process.
      * @return A Flow emitting a single AgentResponse.
      */
+    /**
+     * Returns a flow emitting a single agent response for the given request using a default context.
+     *
+     * Subclasses can override this method to provide streaming or multi-step responses.
+     *
+     * @param request The AI request to process.
+     * @return A flow emitting one AgentResponse generated from the request.
+     */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // Basic implementation, can be overridden for more complex streaming logic
         return flow {
@@ -217,9 +234,9 @@ open class BaseAgent(
 
     // These methods are not part of the Agent interface, so @Override is removed.
     /**
-     * Retrieves a map containing metadata and capability information about the agent.
+     * Returns a map with metadata describing the agent's capabilities.
      *
-     * The map includes the agent's name, type as a string, and a flag indicating this is the base implementation.
+     * The map contains the agent's name, type, and a flag indicating this is the base implementation.
      *
      * @return A map with the keys "name", "type", and "base_implemented".
      */
@@ -228,9 +245,9 @@ open class BaseAgent(
     }
 
     /**
-     * Retrieves the agent's continuous memory object, or null if continuous memory is not implemented.
+     * Returns the agent's continuous memory object, or null if not supported.
      *
-     * By default, this returns null to indicate that continuous memory is not supported. Subclasses may override to provide memory functionality.
+     * Subclasses may override to provide continuous memory functionality.
      *
      * @return The continuous memory object, or null if not implemented.
      */
@@ -239,9 +256,9 @@ open class BaseAgent(
     }
 
     /**
-     * Retrieves the ethical guidelines that define the foundational values of the base agent.
+     * Returns the default ethical guidelines for the base agent.
      *
-     * @return A list of default ethical principles.
+     * @return A list of foundational ethical principles.
      */
     fun getEthicalGuidelines(): List<String> {
         return listOf("Be helpful.", "Be harmless.", "Adhere to base agent principles.")

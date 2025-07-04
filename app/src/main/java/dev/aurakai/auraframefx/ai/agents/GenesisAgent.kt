@@ -175,11 +175,11 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Creates a synthesized response by concatenating the messages from all non-Genesis agents.
+     * Creates a synthesized response by concatenating messages from all non-Genesis agents.
      *
-     * The output string is prefixed with "[Genesis Synthesis]" and lists each agent's name and message content, separated by " | ".
+     * The resulting string is prefixed with "[Genesis Synthesis]" and includes each agent's name and message content, separated by " | ".
      *
-     * @param agentMessages The list of agent messages to include in the synthesis.
+     * @param agentMessages The list of agent messages to synthesize.
      * @return A single string representing the combined output of all non-Genesis agents.
      */
     fun generateFinalResponse(agentMessages: List<AgentMessage>): String {
@@ -190,9 +190,9 @@ class GenesisAgent @Inject constructor(
     /**
      * Calculates the average confidence score from a list of agent messages, clamped between 0.0 and 1.0.
      *
-     * Returns 0.0 if the input list is empty.
+     * Returns 0.0 if the list is empty.
      *
-     * @param agentMessages The list of agent messages to evaluate.
+     * @param agentMessages The agent messages to evaluate.
      * @return The average confidence score as a float between 0.0 and 1.0.
      */
     fun calculateConfidence(agentMessages: List<AgentMessage>): Float {
@@ -201,9 +201,9 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Toggles the activation state of the specified agent type.
+     * Toggles the activation state of the given agent type.
      *
-     * If the agent type is active, it will be deactivated; if inactive, it will be activated.
+     * Activates the agent if it is currently inactive, or deactivates it if already active.
      */
     fun toggleAgent(agentType: dev.aurakai.auraframefx.model.AgentType) {
         _activeAgents.update { current ->
@@ -212,11 +212,11 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Registers an auxiliary agent with the specified name and capabilities.
+     * Registers a new auxiliary agent with the given name and capabilities.
      *
-     * @param name The unique identifier for the auxiliary agent.
-     * @param capabilities The set of capabilities to assign to the agent.
-     * @return The configuration object for the newly registered auxiliary agent.
+     * @param name The unique name for the auxiliary agent.
+     * @param capabilities The set of capabilities assigned to the agent.
+     * @return The configuration object for the registered auxiliary agent.
      */
     fun registerAuxiliaryAgent(name: String, capabilities: Set<String>): AgentConfig {
         return AgentHierarchy.registerAuxiliaryAgent(name, capabilities)
@@ -325,9 +325,9 @@ fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriorit
     }
 
     /**
-     * Aggregates multiple agent response maps and selects the highest-confidence response for each agent.
+     * Aggregates multiple agent response maps and returns the highest-confidence response for each agent.
      *
-     * For each agent found in the input maps, returns the response with the highest confidence score. If an agent has no responses, assigns a default error response.
+     * For each agent present in the input maps, selects the response with the highest confidence score. If no responses exist for an agent, assigns a default error response.
      *
      * @param agentResponseMapList List of maps associating agent names with their responses.
      * @return Map of agent names to their highest-confidence response, or a default error response if none exist.
