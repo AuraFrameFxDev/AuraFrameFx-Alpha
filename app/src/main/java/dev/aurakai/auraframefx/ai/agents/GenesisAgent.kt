@@ -56,9 +56,9 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Populates the set of active agents by matching master agent hierarchy configurations to known agent types.
+     * Initializes the set of active agents by adding agent types found in the master agent hierarchy.
      *
-     * Adds each recognized agent type to the active agents set. Logs a warning for any configuration names that do not correspond to a valid `AgentType`.
+     * For each configuration in the master agent hierarchy, attempts to match its name to a known `AgentType` and adds it to the active agents set. Logs a warning if a configuration name does not correspond to a valid agent type.
      */
     private fun initializeAgents() {
         AgentHierarchy.MASTER_AGENTS.forEach { config ->
@@ -223,27 +223,27 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
- * Retrieves the configuration for the agent with the specified name.
+ * Returns the configuration for the agent with the given name, or null if the agent does not exist.
  *
- * @param name The name of the agent whose configuration is requested.
- * @return The agent's configuration if found, or null if no such agent exists.
+ * @param name The name of the agent.
+ * @return The agent's configuration, or null if not found.
  */
 fun getAgentConfig(name: String): AgentConfig? = AgentHierarchy.getAgentConfig(name)
 
     /**
- * Returns agent configurations sorted by priority from highest to lowest.
+ * Retrieves all agent configurations sorted from highest to lowest priority.
  *
- * @return A list of agent configurations in priority order.
+ * @return A list of agent configurations ordered by priority.
  */
 fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriority()
 
     /**
-     * Coordinates collaborative interaction among multiple agents, supporting both sequential (TURN_ORDER) and parallel (FREE_FORM) response modes.
+     * Coordinates collaborative interaction among multiple agents, supporting sequential (TURN_ORDER) and parallel (FREE_FORM) response modes.
      *
      * In TURN_ORDER mode, agents respond one after another, each receiving updated context that includes previous agents' responses. In FREE_FORM mode, all agents respond independently to the same input and context.
      *
      * @param data The initial context map shared among agents.
-     * @param agents The agents participating in the collaboration.
+     * @param agentsToUse The agents participating in the collaboration.
      * @param userInput Optional user input to seed the conversation; if null, uses the latest input from the context map.
      * @param conversationMode Specifies whether agents respond sequentially (TURN_ORDER) or in parallel (FREE_FORM).
      * @return A map of agent names to their respective responses.
@@ -325,12 +325,12 @@ fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriorit
     }
 
     /**
-     * Aggregates multiple agent response maps by selecting the response with the highest confidence for each agent.
+     * Aggregates multiple agent response maps, selecting the response with the highest confidence for each agent.
      *
-     * For each agent, the response with the highest confidence is chosen from all provided maps. If no responses are available for an agent, a default error response is used.
+     * For each agent, chooses the response with the highest confidence score from all provided maps. If no responses exist for an agent, a default error response is assigned.
      *
-     * @param agentResponseMapList A list of maps, each mapping agent names to their responses.
-     * @return A map of agent names to their consensus response.
+     * @param agentResponseMapList List of maps, each mapping agent names to their responses.
+     * @return Map of agent names to their consensus response with the highest confidence.
      */
     fun aggregateAgentResponses(agentResponseMapList: List<Map<String, AgentResponse>>): Map<String, AgentResponse> {
         val flatResponses = agentResponseMapList.flatMap { it.entries }
