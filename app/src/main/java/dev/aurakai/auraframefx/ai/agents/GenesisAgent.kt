@@ -175,12 +175,12 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Synthesizes a response by concatenating messages from all non-Genesis agents.
+     * Synthesizes a response by combining messages from all non-Genesis agents.
      *
-     * The result is prefixed with "[Genesis Synthesis]" and includes each agent's name and message content, separated by " | ".
+     * The output is prefixed with "[Genesis Synthesis]" and lists each agent's name and message content, separated by " | ".
      *
-     * @param agentMessages List of agent messages to include in the synthesis.
-     * @return The combined output string from all non-Genesis agents.
+     * @param agentMessages The list of agent messages to include in the synthesis.
+     * @return A single string representing the combined responses from all non-Genesis agents.
      */
     fun generateFinalResponse(agentMessages: List<AgentMessage>): String {
         // Simple concatenation for now, could be more sophisticated
@@ -192,7 +192,7 @@ class GenesisAgent @Inject constructor(
      *
      * Returns 0.0 if the list is empty.
      *
-     * @param agentMessages List of agent messages to evaluate.
+     * @param agentMessages The list of agent messages to evaluate.
      * @return The average confidence score as a float between 0.0 and 1.0.
      */
     fun calculateConfidence(agentMessages: List<AgentMessage>): Float {
@@ -201,9 +201,9 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Toggles the specified agent type between active and inactive states.
+     * Toggles the activation state of the given agent type.
      *
-     * Activates the agent if it is currently inactive, or deactivates it if already active.
+     * Activates the agent if it is inactive, or deactivates it if already active.
      */
     fun toggleAgent(agentType: dev.aurakai.auraframefx.model.AgentType) {
         _activeAgents.update { current ->
@@ -212,11 +212,11 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Registers a new auxiliary agent with the specified name and capabilities.
+     * Registers a new auxiliary agent with the given name and capabilities.
      *
-     * @param name The unique identifier for the auxiliary agent.
-     * @param capabilities The set of capabilities to assign to the agent.
-     * @return The configuration for the newly registered auxiliary agent.
+     * @param name The unique name for the auxiliary agent.
+     * @param capabilities The set of capabilities assigned to the agent.
+     * @return The configuration object for the registered auxiliary agent.
      */
     fun registerAuxiliaryAgent(name: String, capabilities: Set<String>): AgentConfig {
         return AgentHierarchy.registerAuxiliaryAgent(name, capabilities)
@@ -231,7 +231,7 @@ class GenesisAgent @Inject constructor(
 fun getAgentConfig(name: String): AgentConfig? = AgentHierarchy.getAgentConfig(name)
 
     /**
- * Returns all agent configurations sorted in descending order of priority.
+ * Retrieves all agent configurations sorted by descending priority.
  *
  * @return A list of agent configurations, with the highest priority first.
  */
