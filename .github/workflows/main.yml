@@ -1,3 +1,4 @@
+name: Build AuraFrameFX (Kotlin KSP2)
 
 on:
   push:
@@ -53,4 +54,3 @@ jobs:
         with:
           name: aura-apk
           path: app/build/outputs/apk/debug/*.apk
-
