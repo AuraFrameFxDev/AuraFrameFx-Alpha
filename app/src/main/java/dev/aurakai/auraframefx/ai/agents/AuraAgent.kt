@@ -100,8 +100,6 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     /**
      * Placeholder for future collaboration logic between AuraAgent and a Genesis agent.
      *
-     * Currently returns an empty map and performs no operations.
-     *
      * @param data Input data for the intended collaboration.
      * @return An empty map.
      */
