@@ -1,5 +1,7 @@
 package com.example.app.ipc
 
+// Explicitly import the AIDL interface
+import com.example.app.ipc.IAuraDriveService
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
