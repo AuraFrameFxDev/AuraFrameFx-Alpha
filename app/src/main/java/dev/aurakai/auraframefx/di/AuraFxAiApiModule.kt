@@ -1,17 +1,14 @@
 package dev.aurakai.auraframefx.di
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dev.aurakai.auraframefx.api.AiContentApi
+import dev.aurakai.auraframefx.api.client.apis.AIContentApi
 import dev.aurakai.auraframefx.network.AuraFxContentApiClient
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import retrofit2.Retrofit
+import okhttp3.logging.HttpLoggingInterceptor
 import javax.inject.Singleton
 
 /**
@@ -22,11 +19,29 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides a singleton Json serializer configured for robust and flexible API data model serialization and deserialization.
+     * Provides a singleton OkHttpClient configured with an HTTP logging interceptor for request and response bodies.
      *
-     * The returned Json instance is set to ignore unknown keys, coerce input values, parse leniently, and encode default values, ensuring compatibility with varying API responses.
+     * @return A configured OkHttpClient instance for API requests.
+
+     */
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+        
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+    }
+
+    /**
+     * Provides a singleton Json serializer configured for flexible and resilient API data handling.
      *
-     * @return A configured Json instance for use with AuraFrameFx AI API data models.
+     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values, supporting robust serialization and deserialization for API communication.
+     *
+     * @return A configured Json instance for processing API requests and responses.
      */
     @Provides
     @Singleton
@@ -38,34 +53,30 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton implementation of the ContentApi interface for accessing the AuraFrameFx AI API via Retrofit.
+     * Provides a singleton instance of `AIContentApi` configured to access the AuraFrameFx AI API.
      *
-     * Configures Retrofit with the base URL from NetworkConstants, the specified OkHttp client, and a JSON converter created from the given Json instance.
-     *
-     * @return An implementation of ContentApi for interacting with the AuraFrameFx AI API.
+     * @return An `AIContentApi` instance with the base URL set to "https://api.auraframefx.com/v1" and using the provided `OkHttpClient`.
 
      */
-    @OptIn(ExperimentalSerializationApi::class)
     @Provides
     @Singleton
-    fun provideAiContentApi(okHttpClient: OkHttpClient, json: Json): AiContentApi {
-        val baseUrl = "https://api.auraframefx.com/v1/"
-        val contentType = "application/json".toMediaType()
+    fun provideAiContentApi(okHttpClient: OkHttpClient, json: Json): AIContentApi {
 
-        return Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory(contentType))
-            .build()
-            .create(AiContentApi::class.java)
+        val baseUrl = "https://api.auraframefx.com/v1"
+        
+        return AIContentApi(basePath = baseUrl, client = okHttpClient)
     }
 
     /**
-     * Provides the AuraFxContentApiClient wrapper for the AiContentApi.
+     * Provides a singleton instance of `AuraFxContentApiClient` that wraps the given `AIContentApi`.
+     *
+     * @param aiContentApi The AI content API implementation to be wrapped.
+     * @return A configured `AuraFxContentApiClient` instance.
+
      */
     @Provides
     @Singleton
-    fun provideAuraFxContentApiClient(aiContentApi: AiContentApi): AuraFxContentApiClient {
+    fun provideAuraFxContentApiClient(aiContentApi: AIContentApi): AuraFxContentApiClient {
         return AuraFxContentApiClient(aiContentApi)
     }
 }

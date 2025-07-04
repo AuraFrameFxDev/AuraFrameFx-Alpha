@@ -13,6 +13,7 @@ class ContextManager @Inject constructor() {
      * @param context The context string to add. Ignored if blank or already exists in the list.
      */
 
+
     fun createContext(context: String) {
         // TODO: Implement context creation logic (e.g., persistent learning, session memory)
         // Example: val newChain = dev.aurakai.auraframefx.ai.context.ContextChain(rootContext = context, currentContext = context)
@@ -48,3 +49,4 @@ class ContextChain @Inject constructor() {
         return contextLinks[context]
     }
 }
+
