@@ -12,19 +12,14 @@ plugins {
 
 android {
     namespace = "dev.aurakai.auraframefx"
-    compileSdk = 36 // As requested
+    compileSdk = 34 // As requested
 
     defaultConfig {
         applicationId = "dev.aurakai.auraframefx"
         minSdk = 33
-        targetSdk = 36 // As requested
+        targetSdk = 34 // As requested
         versionCode = 1
         versionName = "1.0"
-        externalNativeBuild {
-            cmake {
-                cppFlags += ""
-            }
-        }
     }
 
     buildTypes {
@@ -41,7 +36,6 @@ android {
 
     kotlinOptions {
         jvmTarget = "21"
-
     }
 
     buildFeatures {
@@ -50,12 +44,6 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    }
-    externalNativeBuild {
-        cmake {
-            path = file("src/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
     }
 }
 
@@ -152,8 +140,8 @@ dependencies {
     testImplementation(libs.mockkAgent) // For local unit tests
 
     // Hilt testing dependencies
-    testImplementation(libs.daggerHiltAndroidTesting)
-    kspTest(libs.hiltCompiler)
+    testImplementation("com.google.dagger:hilt-android-testing:2.56.2")
+    kspTest("com.google.dagger:hilt-compiler:2.56.2")
 
     androidTestImplementation(libs.androidxTestExtJunit)
     androidTestImplementation(libs.espressoCore)
@@ -162,8 +150,8 @@ dependencies {
     androidTestImplementation(libs.mockkAndroid) // For instrumented tests
     
     // Hilt instrumentation testing dependencies
-    androidTestImplementation(libs.daggerHiltAndroidTesting)
-    kspAndroidTest(libs.hiltCompiler)
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.56.2")
+    kspAndroidTest("com.google.dagger:hilt-compiler:2.56.2")
     // androidTestImplementation(libs.kotlinxCoroutinesTest) // Already in testImplementation
 
     debugImplementation(libs.composeUiTooling) // For debug builds
