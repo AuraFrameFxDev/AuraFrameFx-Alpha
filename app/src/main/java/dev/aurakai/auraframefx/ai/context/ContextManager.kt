@@ -12,7 +12,7 @@ import kotlinx.datetime.Instant
 // import kotlinx.serialization.Contextual // No longer needed for Instant here
 import kotlinx.serialization.Serializable
 import dev.aurakai.auraframefx.serialization.InstantSerializer // Ensure this is imported
-import dev.aurakai.auraframefx.model.AgentType // Ensure this is imported
+// dev.aurakai.auraframefx.model.AgentType is already imported by line 4, removing duplicate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,6 +31,7 @@ class ContextManager @Inject constructor(
      * Creates and registers a new context chain with a root context, initial context, agent, and optional metadata.
      *
      * Initializes the chain with a single context node and assigns a unique identifier. The new chain is added to the set of active context chains.
+
      *
      * @param rootContext The identifier for the root context of the chain.
      * @param initialContext The initial context string for the chain.
@@ -74,9 +75,10 @@ class ContextManager @Inject constructor(
      * @param chainId The unique identifier of the context chain to update.
      * @param newContext The context string to append as a new node.
      * @param agent The agent associated with the new context node.
+
      * @param metadata Optional metadata to associate with the new context node.
      * @return The updated context chain.
-     * @throws IllegalStateException If the specified context chain does not exist.
+     * @throws IllegalStateException if the specified context chain does not exist.
      */
     fun updateContextChain(
         chainId: String,
@@ -124,6 +126,8 @@ class ContextManager @Inject constructor(
      * @param query The criteria for filtering, sorting, and limiting context chains.
      * @return A [ContextChainResult] with the selected chain, related chains, and the query.
      */
+
+  
     fun queryContext(query: ContextQuery): ContextChainResult {
         val chains = _activeContexts.value.values
             .filter { chain ->
@@ -153,6 +157,7 @@ class ContextManager @Inject constructor(
      *
      * Recalculates the total number of chains, the number of recently updated (active) chains,
      * the length of the longest chain, and sets the timestamp of the last update.
+
      */
     private fun updateStats() {
         val chains = _activeContexts.value.values

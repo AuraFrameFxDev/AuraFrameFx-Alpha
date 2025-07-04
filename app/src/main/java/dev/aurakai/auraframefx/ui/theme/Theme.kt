@@ -53,6 +53,7 @@ private val LightColorScheme = lightColorScheme(
  * @param darkTheme If true, applies the dark color scheme; otherwise, applies the light color scheme. Defaults to the system dark theme setting.
  * @param dynamicColor If true and supported (Android 12+), enables dynamic color schemes based on the user's wallpaper. Defaults to true.
  * @param content The composable content to display within the themed context.
+
  */
 @Composable
 fun AuraFrameFXTheme(

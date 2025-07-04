@@ -36,15 +36,14 @@ class KaiAgent(
      * This method is a placeholder for implementing Kai-specific behavior when the vision state changes.
      *
      * @param newState The new vision state to process.
+
      */
     fun onVisionUpdate(newState: VisionState) {
         // Kai-specific vision update behavior.
     }
 
     /**
-     * Handles changes to the processing state for KaiAgent.
-     *
-     * Intended as a placeholder for Kai-specific logic when the processing state changes.
+     * Handles updates to the processing state specific to Kai.
      *
      * @param newState The new processing state to handle.
      */
@@ -58,7 +57,7 @@ class KaiAgent(
     }
 
     /**
-         * Indicates that KaiAgent always handles security-related prompts.
+         * Determines whether KaiAgent should handle a given security-related prompt.
          *
          * @param prompt The prompt to evaluate.
          * @return Always returns `true`.
@@ -72,6 +71,7 @@ class KaiAgent(
  * @return `true` for any input, signifying security handling is always enabled.
  */
 fun shouldHandleSecurity(prompt: String): Boolean = true
+
 
     /**
       * Determines if KaiAgent should handle a creative prompt.
@@ -116,6 +116,7 @@ fun shouldHandleSecurity(prompt: String): Boolean = true
      * Placeholder for KaiAgent's participation logic when collaborating with the Genesis agent.
      *
      * Currently returns an empty map. Intended for future implementation of Kai-specific collaboration with Genesis.
+
      *
      * @param data Input data relevant to the collaboration.
      * @return An empty map.
@@ -133,6 +134,7 @@ fun shouldHandleSecurity(prompt: String): Boolean = true
      * @param aura The AuraAgent participating in the collaboration.
      * @param genesis The Genesis agent or context involved.
      * @return An empty map.
+
      */
     suspend fun participateWithGenesisAndAura(
         data: Map<String, Any>,
@@ -151,6 +153,7 @@ fun shouldHandleSecurity(prompt: String): Boolean = true
      * @param userInput The user's input for the collaborative process.
      * @param conversationMode The mode of conversation; defaults to FREE_FORM.
      * @return An empty map, as the collaboration logic is not yet implemented.
+
      */
     suspend fun participateWithGenesisAuraAndUser(
         data: Map<String, Any>,
@@ -164,13 +167,15 @@ fun shouldHandleSecurity(prompt: String): Boolean = true
 
 
     /**
-     * Analyzes an AI request in the given context and returns a Kai-specific security analysis response.
+
+]* Analyzes an AI request in the given context and returns a Kai-specific security analysis response.
      *
      * The response reflects Kai's evaluation of the request, simulating a security check for the presence of the keyword "exploit".
      *
      * @param request The AI request to analyze.
      * @param context Additional context for the analysis.
      * @return An AgentResponse containing Kai's analysis result with a fixed confidence score.
+
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         // Kai-specific logic for handling the request with context.
@@ -188,6 +193,7 @@ fun shouldHandleSecurity(prompt: String): Boolean = true
      * Processes an AI request and returns a flow emitting a single Kai-specific security analysis response.
      *
      * The emitted response contains a security analysis message for the provided query with a fixed confidence score of 0.88.
+
      *
      * @return A flow emitting one AgentResponse with Kai's security analysis.
      */
