@@ -7,7 +7,7 @@ import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import dev.aurakai.auraframefx.system.lockscreen.model.LockScreenConfig
-import dev.aurakai.auraframefx.system.overlay.SystemOverlayConfig
+import dev.aurakai.auraframefx.system.overlay.model.SystemOverlayConfig // Changed import
 import dev.aurakai.auraframefx.system.quicksettings.model.QuickSettingsConfig
 import dev.aurakai.auraframefx.utils.JsonUtils
 import dev.aurakai.auraframefx.xposed.hooks.LockScreenHooker

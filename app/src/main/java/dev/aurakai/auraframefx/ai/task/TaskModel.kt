@@ -1,6 +1,7 @@
 package dev.aurakai.auraframefx.ai.task
 
 import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -8,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Task(
     val id: String = "task_${Clock.System.now().toEpochMilliseconds()}",
-    val timestamp: Instant = Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val priority: TaskPriority = TaskPriority.NORMAL,
     val urgency: TaskUrgency = TaskUrgency.MEDIUM,
     val importance: TaskImportance = TaskImportance.MEDIUM,
@@ -18,7 +19,7 @@ data class Task(
     val status: TaskStatus = TaskStatus.PENDING,
     val assignedAgents: Set<AgentType> = emptySet(),
     val requiredAgents: Set<AgentType> = emptySet(),
-    val completionTime: Instant? = null,
+    @Serializable(with = InstantSerializer::class) val completionTime: Instant? = null,
     val estimatedDuration: Long = 0,
     val dependencies: Set<String> = emptySet(),
 )

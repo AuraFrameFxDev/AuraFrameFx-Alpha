@@ -1,6 +1,7 @@
 package dev.aurakai.auraframefx.ai.memory
 
-import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.model.AgentType // Keep one import
+import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -9,7 +10,7 @@ import kotlinx.serialization.Serializable
 data class MemoryItem(
     val id: String = "mem_${Clock.System.now().toEpochMilliseconds()}",
     val content: String,
-    val timestamp: Instant = Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val agent: AgentType,
     val context: String? = null,
     val priority: Float = 0.5f,
@@ -24,7 +25,7 @@ data class MemoryQuery(
     val maxResults: Int = 5,
     val minSimilarity: Float = 0.7f,
     val tags: List<String> = emptyList(),
-    val timeRange: Pair<Instant, Instant>? = null,
+    val timeRange: Pair<@Serializable(with = InstantSerializer::class) Instant, @Serializable(with = InstantSerializer::class) Instant>? = null,
     val agentFilter: List<AgentType> = emptyList(),
 )
 

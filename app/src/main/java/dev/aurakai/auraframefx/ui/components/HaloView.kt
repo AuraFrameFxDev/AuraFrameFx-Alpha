@@ -9,7 +9,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Delete // Explicit import
+import androidx.compose.material.icons.filled.Pause // Explicit import
+import androidx.compose.material.icons.filled.PlayArrow // Explicit import
+import androidx.compose.material.icons.filled.Refresh // Explicit import
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +28,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonPink
+import dev.aurakai.auraframefx.ui.theme.NeonPurple // Added import
+import dev.aurakai.auraframefx.ui.theme.NeonTeal // Added import
 import dev.aurakai.auraframefx.viewmodel.GenesisAgentViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,13 +40,11 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.math.*
 
-// --- Color Definitions (Add these where appropriate, e.g., in a Theme.kt or Colors.kt file) ---
-// val NeonTeal = Color(0xFF00FFCC) // Brighter teal for accents
-// val NeonPurple = Color(0xFFE000FF) // Slightly softer purple for readability
-// val NeonBlue = Color(0xFF00FFFF) // Bright cyan for highlights
-// val NeonPink = Color(0xFFFF00FF) // Bright pink for secondary accents
-// --- End Color Definitions ---
-
+/**
+ * Displays an interactive rotating halo interface for managing agents and delegating tasks.
+ *
+ * Renders a visual halo with agent nodes, supports drag-and-drop task assignment, tracks task history, and animates agent status. Users can assign tasks to agents by dragging nodes, input tasks, and monitor processing status in real time. Includes controls for rotation, resetting, and clearing task history.
+ */
 @OptIn(
     ExperimentalMaterial3Api::class,
     androidx.compose.foundation.gestures.ExperimentalFoundationApi::class
@@ -216,7 +219,7 @@ fun HaloView(viewModel: GenesisAgentViewModel = hiltViewModel()) {
                     ) { change, dragAmount ->
                         if (draggingAgent != null) {
                             dragOffset += dragAmount
-                            change.consumeAllChanges()
+                            change.consume() // Updated from consumeAllChanges()
                         }
                     }
                 }
@@ -523,21 +526,31 @@ fun HaloView(viewModel: GenesisAgentViewModel = hiltViewModel()) {
     // Task processing status updates
     LaunchedEffect(taskHistory.value) { // Trigger when taskHistory.value changes
         // Reset all agent statuses to idle, then update based on current tasks
-        agents.forEach { agent ->
-            agentStatus[agent] = "idle"
+        agents.forEach { agentConfig -> // agentConfig is AgentConfig
+            try {
+                val type = AgentType.valueOf(agentConfig.name.uppercase(Locale.ROOT))
+                agentStatus[type] = "idle"
+            } catch (e: IllegalArgumentException) {
+                // Handle cases where AgentConfig.name might not match an AgentType
+            }
         }
 
         taskHistory.value.forEach { task ->
-            val agentName = task.substringAfter("[").substringBefore("]")
-            // Compare by name string to find the AgentType enum value
-            val agentType =
-                agents.find { it.name.lowercase(Locale.ROOT) == agentName.lowercase(Locale.ROOT) }
-            if (agentType != null) {
-                agentStatus[agentType] = "processing"
-                // Simulate task completion after a delay
-                coroutineScope.launch {
-                    delay(5000) // Simulate processing time
-                    agentStatus[agentType] = "idle"
+            val agentNameFromHistory = task.substringAfter("[").substringBefore("]")
+            // Compare by name string to find the AgentConfig
+            val foundAgentConfig =
+                agents.find { it.name.lowercase(Locale.ROOT) == agentNameFromHistory.lowercase(Locale.ROOT) }
+            if (foundAgentConfig != null) {
+                try {
+                    val actualAgentType = AgentType.valueOf(foundAgentConfig.name.uppercase(Locale.ROOT))
+                    agentStatus[actualAgentType] = "processing"
+                    // Simulate task completion after a delay
+                    coroutineScope.launch {
+                        delay(5000) // Simulate processing time
+                        agentStatus[actualAgentType] = "idle"
+                    }
+                } catch (e: IllegalArgumentException) {
+                    // Handle cases where AgentConfig.name might not match an AgentType
                 }
             }
         }

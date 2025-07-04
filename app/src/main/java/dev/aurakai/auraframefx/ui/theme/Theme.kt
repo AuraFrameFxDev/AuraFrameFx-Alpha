@@ -53,6 +53,7 @@ private val LightColorScheme = lightColorScheme(
  * @param darkTheme Whether to use the dark theme. Defaults to the system setting.
  * @param dynamicColor Whether to use dynamic color schemes on supported devices (Android 12+). Defaults to true.
  * @param content The composable content to which the theme will be applied.
+
  */
 @Composable
 fun AuraFrameFXTheme(
@@ -85,7 +86,3 @@ fun AuraFrameFXTheme(
         content = content
     )
 }
-
-// Removed duplicate AuraFrameFXThemeCompat function.
-// The version in MaterialThemeCompat.kt is kept as it has more robust logic
-// for isAppearanceLightStatusBars.

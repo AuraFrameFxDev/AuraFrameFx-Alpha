@@ -5,80 +5,128 @@ import dev.aurakai.auraframefx.model.AiRequest
 import dev.aurakai.auraframefx.model.agent_states.ProcessingState
 import dev.aurakai.auraframefx.model.agent_states.VisionState
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf // For returning a simple flow
 
 /**
  * AuraAgent, a specific implementation of BaseAgent.
- * TODO: Reported as unused declaration. Ensure this class is used.
  */
 class AuraAgent(
     agentName: String = "Aura",
-    agentType: String = "VersatileAssistant",
+    // Ensure this string matches a value in api.model.AgentType for correct mapping in BaseAgent
+    agentType: String = "Aura",
 ) : BaseAgent(agentName, agentType) {
 
+    // This method is not part of the Agent interface or BaseAgent overrides.
+    // If it's specific utility for AuraAgent, it can remain.
     /**
-     * Processes context and returns a flow of responses or states.
-     * @param _context A map representing the current context. Parameter reported as unused.
-     * @return A Flow emitting maps representing responses or state changes.
-     * TODO: Implement actual processing logic. Method reported as unused.
+     * Emits a flow containing a placeholder Aura-specific response based on the provided context.
+     *
+     * Intended for Aura-specific processing that is not covered by the standard Agent interface.
+     *
+
+     * @return A flow emitting a map with a placeholder Aura-specific response.
      */
-    suspend fun process(_context: Map<String, Any>): Flow<Map<String, Any>> {
-        // TODO: Parameter _context reported as unused. Utilize if needed.
-        // TODO: Implement actual processing logic for Aura.
-        return emptyFlow() // Placeholder
+    suspend fun processAuraSpecific(_context: Map<String, Any>): Flow<Map<String, Any>> {
+        // Placeholder for Aura-specific logic that doesn't fit the standard Agent interface.
+        return flowOf(mapOf("aura_special_response" to "Processed with Aura's unique context method."))
     }
 
-    // --- Agent Collaboration Methods for CascadeAgent ---
+    // --- Agent Collaboration Methods (These are not part of Agent interface) ---
+    // These can remain if they are used for internal logic or by other specific components
+    /**
+     * Processes updates to the vision state with Aura-specific behavior.
+     *
+     * @param newState The updated vision state to handle.
+
+     */
     fun onVisionUpdate(newState: VisionState) {
-        // Default no-op. Override for Aura-specific vision update behavior.
+        // Aura-specific vision update behavior.
     }
 
+    /**
+     * Performs Aura-specific actions in response to a change in processing state.
+     *
+     * @param newState The new processing state to handle.
+
+     */
     fun onProcessingStateChange(newState: ProcessingState) {
-        // Default no-op. Override for Aura-specific processing state changes.
+        // Aura-specific processing state changes.
     }
 
-    fun shouldHandleSecurity(prompt: String): Boolean = false
-    fun shouldHandleCreative(prompt: String): Boolean =
-        true // Aura handles creative prompts by default
+    /**
+ * Determines if AuraAgent should handle security-related prompts.
+ *
+ * Always returns false, indicating AuraAgent does not process security prompts.
+ *
+ * @return false
 
-    // Removed 'override' as this signature is likely not in BaseAgent or Agent interface
-    suspend fun processRequest(prompt: String): String {
-        // TODO: Implement Aura-specific request processing
+ */
+fun shouldHandleSecurity(prompt: String): Boolean = false
+
+    /**
+ * Indicates that AuraAgent always handles creative prompts.
+ *
+ * @return Always returns true.
+ */
+    fun shouldHandleCreative(prompt: String): Boolean = true // Aura handles creative prompts by default
+
+    // This `processRequest(prompt: String)` does not match the Agent interface.
+    // If it's a helper or different functionality, it should be named differently
+    // or its logic integrated into the overridden `processRequest(AiRequest, String)`.
+    /**
+     * Generates a simple Aura-specific response string for the provided prompt.
+     *
+     * @param prompt The input prompt to respond to.
+
+     * @return A string containing Aura's response to the prompt.
+     */
+    suspend fun processSimplePrompt(prompt: String): String {
         return "Aura's response to '$prompt'"
     }
 
+    // --- Collaboration placeholders (not part of Agent interface) ---
     /**
-     * Federated collaboration placeholder.
-     * Extend this method to enable Aura to participate in federated learning or distributed agent communication.
-     * For example, Aura could share creative insights, receive model updates, or synchronize state with other devices/agents.
+     * Handles participation in inter-agent federation activities.
+     *
+     * Currently returns an empty map. Intended for future implementation of federation logic involving AuraAgent.
+     *
+     * @param data Data relevant to federation participation.
+     * @return An empty map.
+
      */
     suspend fun participateInFederation(data: Map<String, Any>): Map<String, Any> {
-        // TODO: Implement federated collaboration logic for Aura.
         return emptyMap()
     }
 
     /**
-     * Genesis collaboration placeholder.
-     * Extend this method to enable Aura to interact with the Genesis master agent for orchestration, context sharing, or advanced coordination.
-     * For example, Aura could send creative events, receive orchestration commands, or synchronize with Genesis for global state.
+     * Placeholder for future collaboration logic with a Genesis agent.
+     *
+     * Currently returns an empty map and performs no operations.
+     *
+     * @param data Input data for the intended collaboration.
+
+     * @return An empty map.
      */
     suspend fun participateWithGenesis(data: Map<String, Any>): Map<String, Any> {
-        // TODO: Implement Genesis collaboration logic for Aura.
         return emptyMap()
     }
 
     /**
-     * Three-way collaboration placeholder.
-     * Use this method to enable Kai, Aura, and Genesis to collaborate in a federated or orchestrated manner.
-     * For example, this could be used for consensus, distributed decision-making, or multi-agent context sharing.
+     * Placeholder for collaborative processing involving Aura, KaiAgent, and Genesis agent.
+     *
+     * Intended for future implementation of joint logic or data exchange between these agents.
+     *
+     * @param data Input data for the collaboration.
+
+     * @param kai The KaiAgent involved in the collaboration.
+     * @param genesis The Genesis agent involved in the collaboration.
+     * @return An empty map as a placeholder.
      */
     suspend fun participateWithGenesisAndKai(
         data: Map<String, Any>,
         kai: KaiAgent,
-        genesis: Any,
+        genesis: Any, // Consider using a more specific type if GenesisAgent is standardized
     ): Map<String, Any> {
-        // TODO: Implement three-way collaboration logic for Kai, Aura, and Genesis.
-        // Example: Share data, receive updates, or coordinate actions between all three agents.
         return emptyMap()
     }
 
@@ -92,15 +140,14 @@ class AuraAgent(
      * @param genesis The Genesis agent or coordinator.
      * @param userInput Input or context provided by the user.
      * @return A map representing the result of the collaborative process. Currently returns an empty map.
+
      */
     suspend fun participateWithGenesisKaiAndUser(
         data: Map<String, Any>,
         kai: KaiAgent,
-        genesis: Any,
-        userInput: Any, // This could be a string, object, or context map depending on your design
+        genesis: Any, // Similarly, consider type
+        userInput: Any,
     ): Map<String, Any> {
-        // TODO: Implement four-way collaboration logic for Kai, Aura, Genesis, and the User.
-        // Example: Share data, receive updates, or coordinate actions between all agents and the user.
         return emptyMap()
     }
 
@@ -123,22 +170,30 @@ class AuraAgent(
         // Using request.prompt instead of request.query
         // Using isSuccess instead of confidence
         // Incorporating context into the response for demonstration
+
         return AgentResponse(
-            content = "Aura's response to '${request.prompt}' with context '$context'",
-            isSuccess = true // Example: assume success
+            content = responseContent, // Use the variable that correctly uses request.query
+            confidence = 1.0f
         )
     }
 
-    // processRequestFlow is inherited from BaseAgent, which provides a default implementation.
-    // If AuraAgent needs custom flow logic, it can override it here.
-    // For now, we'll rely on BaseAgent's implementation.
-    // override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
-    //     TODO("Not yet implemented for AuraAgent custom flow")
-    // }
+    /**
+     * Returns a flow emitting a single Aura-specific response to the given AI request.
+     *
+     * The response content references the request's query and has a fixed confidence score of 0.80.
 
-    // You can override other methods from BaseAgent or Agent interface if needed
-    // override suspend fun processRequest(_prompt: String): String {
-    //     // TODO: Implement Aura-specific request processing
-    //     return "Aura's response to '$_prompt'"
-    // }
+     *
+     * @return A flow containing one AgentResponse for the provided request.
+     */
+    override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
+        // Aura-specific logic for handling the request as a flow.
+        // Example: could emit multiple responses or updates.
+        // For simplicity, emitting a single response in a flow.
+        return flowOf(
+            AgentResponse(
+                content = "Aura's flow response to '${request.query}'",
+                confidence = 0.80f
+            )
+        )
+    }
 }

@@ -8,9 +8,13 @@ import dev.aurakai.auraframefx.model.AgentConfig
 import dev.aurakai.auraframefx.model.AgentHierarchy
 import dev.aurakai.auraframefx.model.AgentMessage
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AiRequest
 import dev.aurakai.auraframefx.model.ContextAwareAgent
+// Import the local model AgentType for internal logic, aliasing the generated one if needed for clarity elsewhere
+import dev.aurakai.auraframefx.model.AgentType
+// Use an alias if dev.aurakai.auraframefx.api.model.AgentType is also needed directly, though Agent interface uses it.
+// import dev.aurakai.auraframefx.api.model.AgentType as ApiAgentType
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -22,6 +26,9 @@ class GenesisAgent @Inject constructor(
     private val auraService: AuraAIService,
     private val kaiService: KaiAIService,
     private val cascadeService: CascadeAIService,
+    // Assuming Agent instances are injected or created. For this example, let's assume they are managed elsewhere
+    // or this class will need to create/obtain them.
+    // private val registeredAgents: Map<String, Agent> // Example if agents are injected
 ) {
     private val _state = MutableStateFlow("pending_initialization")
     val state: StateFlow<String> = _state
@@ -29,27 +36,39 @@ class GenesisAgent @Inject constructor(
     private val _context = MutableStateFlow(mapOf<String, Any>())
     val context: StateFlow<Map<String, Any>> = _context
 
-    private val _activeAgents = MutableStateFlow(setOf<AgentType>())
-    val activeAgents: StateFlow<Set<AgentType>> = _activeAgents
+    // Use the local model.AgentType for _activeAgents state
+    private val _activeAgents = MutableStateFlow(setOf<dev.aurakai.auraframefx.model.AgentType>())
+    val activeAgents: StateFlow<Set<dev.aurakai.auraframefx.model.AgentType>> = _activeAgents
 
-    private val _agentRegistry = mutableMapOf<String, Agent>()
+
+    private val _agentRegistry = mutableMapOf<String, Agent>() // Stores Agent interface instances
     val agentRegistry: Map<String, Agent> get() = _agentRegistry
 
     private val _history = mutableListOf<Map<String, Any>>()
     val history: List<Map<String, Any>> get() = _history
 
     init {
-        initializeAgents()
+        initializeAgents() // Populates _activeAgents based on AgentHierarchy
         _state.update { "initialized" }
+        // Example: Registering agents if they are available (e.g. via injection or service location)
+        // registerAgent("aura", auraAgentInstance)
+        // registerAgent("kai", kaiAgentInstance)
     }
 
+    /**
+     * Initializes the set of active agents based on the master agent hierarchy.
+     *
+     * Adds recognized agent types to the active agents set and logs a warning for any configuration names that do not match a known `AgentType`.
+
+     */
     private fun initializeAgents() {
-        // Register all master agents
         AgentHierarchy.MASTER_AGENTS.forEach { config ->
-            when (config.name) {
-                "Aura" -> _activeAgents.value += AgentType.AURA
-                "Kai" -> _activeAgents.value += AgentType.KAI
-                "Cascade" -> _activeAgents.value += AgentType.CASCADE
+            // Assuming AgentType enum values align with config names
+            try {
+                val agentTypeEnum = dev.aurakai.auraframefx.model.AgentType.valueOf(config.name.uppercase())
+                _activeAgents.update { it + agentTypeEnum }
+            } catch (e: IllegalArgumentException) {
+                Log.w("GenesisAgent", "Unknown agent type in hierarchy: ${config.name}")
             }
         }
     }
@@ -65,77 +84,90 @@ class GenesisAgent @Inject constructor(
     suspend fun processQuery(query: String): List<AgentMessage> {
         _state.update { "processing_query: $query" }
 
-        // Update context with new query
+
         _context.update { current ->
-            current + mapOf(
-                "last_query" to query,
-                "timestamp" to System.currentTimeMillis()
-            )
+            current + mapOf("last_query" to queryText, "timestamp" to currentTimestamp)
         }
 
-        // Get responses from all active agents
         val responses = mutableListOf<AgentMessage>()
 
+
         // Process through Cascade first for state management
-        val cascadeAgentResponse: AgentResponse =
-            cascadeService.processRequest(
-                AiRequest(prompt = query) // Use 'prompt', remove 'type'
-                // Assuming cascadeService.processRequest matches Agent.processRequest(request, context)
-                // For now, let's pass a default context string. This should be refined.
-                , "GenesisContext_Cascade"
+        // Assuming cascadeService.processRequest matches Agent.processRequest(request, context)
+        // For now, let's pass a default context string. This should be refined.
+        val currentContextString = _context.value.toString() // Example context string
+
+        try {
+            val cascadeAgentResponse: AgentResponse =
+                cascadeService.processRequest(
+                    AiRequest(query = queryText, context = currentContextString), // Use 'query' and pass context
+                    "GenesisContext_Cascade" // This context parameter for processRequest is the one from Agent interface
+                )
+            responses.add(
+                AgentMessage(
+                    content = cascadeAgentResponse.content,
+                    sender = dev.aurakai.auraframefx.model.AgentType.CASCADE,
+                    timestamp = System.currentTimeMillis(),
+                    confidence = cascadeAgentResponse.confidence // Use confidence directly
+                )
             )
-        responses.add(
-            AgentMessage(
-                content = cascadeAgentResponse.content,
-                sender = AgentType.CASCADE, // Ensure this AgentType is from the correct import
-                timestamp = System.currentTimeMillis(),
-                // Derive confidence from isSuccess
-                confidence = if (cascadeAgentResponse.isSuccess) 1.0f else 0.1f
-            )
-        )
+        } catch (e: Exception) {
+            Log.e("GenesisAgent", "Error processing with Cascade: ${e.message}")
+            responses.add(AgentMessage("Error with Cascade: ${e.message}", dev.aurakai.auraframefx.model.AgentType.CASCADE, currentTimestamp, 0.0f))
+        }
 
         // Process through Kai for security analysis
-        if (_activeAgents.value.contains(AgentType.KAI)) {
-            val kaiAgentResponse: AgentResponse =
-                kaiService.processRequest(
-                    AiRequest(prompt = query), // Use 'prompt', remove 'type'
-                    "GenesisContext_KaiSecurity" // Default context
+        if (_activeAgents.value.contains(dev.aurakai.auraframefx.model.AgentType.KAI)) {
+            try {
+                val kaiAgentResponse: AgentResponse =
+                    kaiService.processRequest(
+                        AiRequest(query = queryText, context = currentContextString), // Use 'query' and pass context
+                        "GenesisContext_KaiSecurity" // Context for Agent.processRequest
+                    )
+                responses.add(
+                    AgentMessage(
+                        content = kaiAgentResponse.content,
+                        sender = dev.aurakai.auraframefx.model.AgentType.KAI,
+                        timestamp = System.currentTimeMillis(),
+                        confidence = kaiAgentResponse.confidence // Use confidence directly
+                    )
                 )
-            responses.add(
-                AgentMessage(
-                    content = kaiAgentResponse.content,
-                    sender = AgentType.KAI,
-                    timestamp = System.currentTimeMillis(),
-                    confidence = if (kaiAgentResponse.isSuccess) 1.0f else 0.1f
-                )
-            )
+            } catch (e: Exception) {
+                Log.e("GenesisAgent", "Error processing with Kai: ${e.message}")
+                responses.add(AgentMessage("Error with Kai: ${e.message}", dev.aurakai.auraframefx.model.AgentType.KAI, currentTimestamp, 0.0f))
+            }
         }
 
-        // Process through Aura for creative response
-        if (_activeAgents.value.contains(AgentType.AURA)) {
-            val auraAgentResponse: AgentResponse =
-                auraService.processRequest(
-                    AiRequest(prompt = query), // Use 'prompt', remove 'type'
-                    "GenesisContext_AuraCreative" // Default context
+        // Aura Agent (Creative Response)
+        if (_activeAgents.value.contains(dev.aurakai.auraframefx.model.AgentType.AURA)) {
+            try {
+                val auraAgentResponse = auraService.processRequest(
+                    // AiRequest query and context are from the Agent interface method.
+                    // The AiRequest object itself can have its own context if needed by the service.
+                    AiRequest(query = queryText, context = currentContextString, type = "creative_text"),
+                    "GenesisContext_AuraCreative" // Context for Agent.processRequest
                 )
-            responses.add(
-                AgentMessage(
-                    content = auraAgentResponse.content,
-                    sender = AgentType.AURA,
-                    timestamp = System.currentTimeMillis(),
-                    confidence = if (auraAgentResponse.isSuccess) 1.0f else 0.1f
+                responses.add(
+                    AgentMessage(
+                        content = auraAgentResponse.content,
+                        sender = dev.aurakai.auraframefx.model.AgentType.AURA,
+                        timestamp = currentTimestamp,
+                        confidence = auraAgentResponse.confidence // Use confidence directly
+                    )
                 )
-            )
+            } catch (e: Exception) {
+                Log.e("GenesisAgent", "Error processing with Aura: ${e.message}")
+                responses.add(AgentMessage("Error with Aura: ${e.message}", dev.aurakai.auraframefx.model.AgentType.AURA, currentTimestamp, 0.0f))
+            }
         }
 
-        // Generate final response using all agent inputs
-        val finalResponse = generateFinalResponse(responses)
+        val finalResponseContent = generateFinalResponse(responses)
         responses.add(
             AgentMessage(
-                content = finalResponse,
-                sender = AgentType.GENESIS,
-                timestamp = System.currentTimeMillis(),
-                confidence = calculateConfidence(responses)
+                content = finalResponseContent,
+                sender = dev.aurakai.auraframefx.model.AgentType.GENESIS,
+                timestamp = currentTimestamp,
+                confidence = calculateConfidence(responses.filter { it.sender != dev.aurakai.auraframefx.model.AgentType.GENESIS }) // Exclude Genesis's own message for confidence calc
             )
         )
 
@@ -143,41 +175,68 @@ class GenesisAgent @Inject constructor(
         return responses
     }
 
-    fun generateFinalResponse(responses: List<AgentMessage>): String {
-        // TODO: Implement sophisticated response generation
-        // This will use context chaining and agent coordination
-        return "[Genesis] ${responses.joinToString("\n") { it.content }}"
+    /**
+     * Generates a synthesized response string by concatenating messages from all agents except Genesis.
+     *
+     * The resulting string is prefixed with "[Genesis Synthesis]" and includes each agent's name and message content, separated by " | ".
+     *
+     * @param agentMessages The list of agent messages to aggregate.
+     * @return A single synthesized response string representing the combined output of all non-Genesis agents.
+     */
+    fun generateFinalResponse(agentMessages: List<AgentMessage>): String {
+        // Simple concatenation for now, could be more sophisticated
+        return "[Genesis Synthesis] ${agentMessages.filter { it.sender != dev.aurakai.auraframefx.model.AgentType.GENESIS }.joinToString(" | ") { "${it.sender}: ${it.content}" }}"
     }
 
-    fun calculateConfidence(responses: List<AgentMessage>): Float {
-        // Calculate confidence based on all agent responses
-        return responses.map { it.confidence }.average().toFloat().coerceIn(0.0f, 1.0f)
+    /**
+     * Calculates the average confidence score from a list of agent messages.
+     *
+     * Returns 0.0 if the list is empty. The result is clamped between 0.0 and 1.0.
+     *
+     * @param agentMessages The list of agent messages to evaluate.
+     * @return The average confidence score as a float between 0.0 and 1.0.
+     */
+    fun calculateConfidence(agentMessages: List<AgentMessage>): Float {
+        if (agentMessages.isEmpty()) return 0.0f
+        return agentMessages.map { it.confidence }.average().toFloat().coerceIn(0.0f, 1.0f)
     }
 
-    fun toggleAgent(agent: AgentType) {
+    /**
+     * Enables or disables the specified agent type by adding it to or removing it from the set of active agents.
+     *
+     * If the agent type is currently active, it will be deactivated; if inactive, it will be activated.
+     */
+    fun toggleAgent(agentType: dev.aurakai.auraframefx.model.AgentType) {
         _activeAgents.update { current ->
-            if (current.contains(agent)) {
-                current - agent
-            } else {
-                current + agent
-            }
+            if (current.contains(agentType)) current - agentType else current + agentType
         }
     }
 
-    fun registerAuxiliaryAgent(
-        name: String,
-        capabilities: Set<String>,
-    ): AgentConfig {
+    /**
+     * Registers a new auxiliary agent with the specified name and capabilities.
+     *
+     * @param name The unique name for the auxiliary agent.
+     * @param capabilities The set of capabilities to assign to the agent.
+     * @return The configuration of the newly registered auxiliary agent.
+     */
+    fun registerAuxiliaryAgent(name: String, capabilities: Set<String>): AgentConfig {
         return AgentHierarchy.registerAuxiliaryAgent(name, capabilities)
     }
 
-    fun getAgentConfig(name: String): AgentConfig? {
-        return AgentHierarchy.getAgentConfig(name)
-    }
+    /**
+ * Retrieves the configuration for the agent with the specified name.
+ *
+ * @param name The name of the agent whose configuration is requested.
+ * @return The agent's configuration if found, or null if no such agent exists.
+ */
+fun getAgentConfig(name: String): AgentConfig? = AgentHierarchy.getAgentConfig(name)
 
-    fun getAgentsByPriority(): List<AgentConfig> {
-        return AgentHierarchy.getAgentsByPriority()
-    }
+    /**
+ * Retrieves the list of agent configurations ordered by their priority.
+ *
+ * @return A list of agent configurations sorted from highest to lowest priority.
+ */
+fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriority()
 
     /**
      * Facilitates collaborative interaction between multiple agents and the user, supporting both sequential and parallel response modes.
@@ -189,41 +248,43 @@ class GenesisAgent @Inject constructor(
      * @param userInput Optional user input to seed the conversation; if null, uses the latest input from the context map.
      * @param conversationMode Determines whether agents respond in sequence (TURN_ORDER) or in parallel (FREE_FORM).
      * @return A map of agent names to their respective responses.
+
      */
     suspend fun participateWithAgents(
         data: Map<String, Any>,
-        agents: List<Agent>,
+        agentsToUse: List<Agent>, // List of Agent interface implementations
         userInput: Any? = null,
         conversationMode: ConversationMode = ConversationMode.FREE_FORM,
     ): Map<String, AgentResponse> {
         val responses = mutableMapOf<String, AgentResponse>()
-        val currentContextMap = data.toMutableMap() // Renamed to avoid confusion with context string
+
+        val currentContextMap = data.toMutableMap()
         val inputQuery = userInput?.toString() ?: currentContextMap["latestInput"]?.toString() ?: ""
 
-        // Construct AiRequest with prompt only
-        val request = AiRequest(prompt = inputQuery)
-        // Prepare context string for agent.processRequest call
-        val contextString = currentContextMap.toString() // Or a more structured summary
+        // AiRequest for the Agent.processRequest method
+        val baseAiRequest = AiRequest(query = inputQuery)
+        // Context string for the Agent.processRequest method
+        val contextStringForAgent = currentContextMap.toString() // Or a more structured summary
 
-        Log.d(
-            "GenesisAgent",
-            "Starting multi-agent collaboration: mode=$conversationMode, agents=${agents.map { it.getName() }}"
-        )
+        Log.d("GenesisAgent", "Starting multi-agent collaboration: mode=$conversationMode, agents=${agentsToUse.mapNotNull { it.getName() }}")
 
         when (conversationMode) {
             ConversationMode.TURN_ORDER -> {
-                // Each agent takes a turn in order
-                for (agent in agents) {
+                var dynamicContextForAgent = contextStringForAgent
+                for (agent in agentsToUse) {
                     try {
                         val agentName = agent.getName() ?: agent.javaClass.simpleName
-                        // Call processRequest with request and contextString
-                        val response = agent.processRequest(request, contextString)
+                        // Each agent in turn order might modify the context for the next,
+                        // so the AiRequest's internal context might also need updating if used by agent.
+                        // For now, keeping baseAiRequest simple and relying on dynamicContextForAgent for processRequest.
+                        val response = agent.processRequest(baseAiRequest, dynamicContextForAgent)
                         Log.d(
                             "GenesisAgent",
-                            "[TURN_ORDER] $agentName responded: ${response.content} (success=${response.isSuccess})"
+                            "[TURN_ORDER] $agentName responded: ${response.content} (confidence=${response.confidence})"
                         )
                         responses[agentName] = response
-                        currentContextMap["latestInput"] = response.content // Update context map for next turn
+                        // Update context for the next agent based on this response
+                        dynamicContextForAgent = "${dynamicContextForAgent}\n${agentName}: ${response.content}"
                     } catch (e: Exception) {
                         Log.e(
                             "GenesisAgent",
@@ -231,23 +292,20 @@ class GenesisAgent @Inject constructor(
                         )
                         responses[agent.javaClass.simpleName] = AgentResponse(
                             content = "Error: ${e.message}",
-                            isSuccess = false,
+                            confidence = 0.0f, // Use confidence
                             error = e.message
                         )
                     }
                 }
             }
-
             ConversationMode.FREE_FORM -> {
-                // All agents respond in parallel to the same input/context
-                agents.forEach { agent ->
+                agentsToUse.forEach { agent ->
                     try {
                         val agentName = agent.getName() ?: agent.javaClass.simpleName
-                        // Call processRequest with request and contextString
-                        val response = agent.processRequest(request, contextString)
+                        val response = agent.processRequest(baseAiRequest, contextStringForAgent)
                         Log.d(
                             "GenesisAgent",
-                            "[FREE_FORM] $agentName responded: ${response.content} (success=${response.isSuccess})"
+                            "[FREE_FORM] $agentName responded: ${response.content} (confidence=${response.confidence})"
                         )
                         responses[agentName] = response
                     } catch (e: Exception) {
@@ -257,7 +315,7 @@ class GenesisAgent @Inject constructor(
                         )
                         responses[agent.javaClass.simpleName] = AgentResponse(
                             content = "Error: ${e.message}",
-                            isSuccess = false,
+                            confidence = 0.0f, // Use confidence
                             error = e.message
                         )
                     }
@@ -273,37 +331,46 @@ class GenesisAgent @Inject constructor(
      *
      * @param responses A list of maps, each mapping agent names to their responses.
      * @return A map of agent names to their consensus response.
+
      */
-    fun aggregateAgentResponses(responses: List<Map<String, AgentResponse>>): Map<String, AgentResponse> {
-        val flatResponses = responses.flatMap { it.entries }
-        val consensus = flatResponses.groupBy { it.key }
+    fun aggregateAgentResponses(agentResponseMapList: List<Map<String, AgentResponse>>): Map<String, AgentResponse> {
+        val flatResponses = agentResponseMapList.flatMap { it.entries }
+        return flatResponses.groupBy { it.key }
             .mapValues { entry ->
-                // Determine "best" response, e.g., first successful, or combine content.
-                // For now, let's pick the first successful response, or the first response if none are successful.
-                // The original logic used confidence, which is no longer directly available.
-                val best = entry.value.firstOrNull { it.value.isSuccess }?.value
-                    ?: entry.value.firstOrNull()?.value
-                    ?: AgentResponse("No response", isSuccess = false, error = "No responses to aggregate")
+                val best = entry.value.maxByOrNull { it.value.confidence }?.value
+                    ?: AgentResponse("No response", confidence = 0.0f, error = "No responses to aggregate")
                 Log.d(
                     "GenesisAgent",
-                    "Consensus for ${entry.key}: ${best.content} (success=${best.isSuccess})"
+                    "Consensus for ${entry.key}: ${best.content} (confidence=${best.confidence})"
                 )
                 best
+
             }
-        return consensus
     }
 
     /**
-     * Broadcasts context/memory to all agents for distributed state sharing.
+     * Shares the provided context with all target agents that support context updates.
+     *
+     * Only agents implementing the `ContextAwareAgent` interface will receive the new context.
+     *
+     * @param newContext The context data to broadcast.
+     * @param targetAgents The list of agents to receive the context update.
      */
-    fun broadcastContext(context: Map<String, Any>, agents: List<Agent>) {
-        // Example: call a setContext method if available (not implemented in Agent interface)
-        // This is a placeholder for distributed memory sharing
-        // agents.forEach { it.setContext(context) }
+    fun broadcastContext(newContext: Map<String, Any>, targetAgents: List<Agent>) {
+        targetAgents.forEach { agent ->
+            if (agent is ContextAwareAgent) {
+                agent.setContext(newContext) // Assuming ContextAwareAgent has setContext
+            }
+        }
     }
 
-    fun registerAgent(name: String, agent: Agent) {
-        _agentRegistry[name] = agent
+    /**
+     * Registers an agent instance under the specified name in the internal agent registry.
+     *
+     * If an agent with the same name already exists, it will be replaced.
+     */
+    fun registerAgent(name: String, agentInstance: Agent) {
+        _agentRegistry[name] = agentInstance
         Log.d("GenesisAgent", "Registered agent: $name")
     }
 
@@ -317,34 +384,43 @@ class GenesisAgent @Inject constructor(
         Log.d("GenesisAgent", "Cleared conversation history")
     }
 
+    /**
+     * Adds an entry to the conversation or interaction history.
+     *
+     * @param entry The history entry to add.
+     */
     fun addToHistory(entry: Map<String, Any>) {
         _history.add(entry)
         Log.d("GenesisAgent", "Added to history: $entry")
     }
 
-    // --- Enhanced Memory/History Mechanism ---
     /**
-     * Persists the current conversation history to a storage provider (stub).
-     * Replace with actual persistence (e.g., file, database) as needed.
+     * Persists the current conversation history using the provided persistence function.
+     *
+     * @param persistAction A function that handles saving the list of history entries.
      */
-    fun saveHistory(persist: (List<Map<String, Any>>) -> Unit) {
-        persist(_history)
+    fun saveHistory(persistAction: (List<Map<String, Any>>) -> Unit) {
+        persistAction(_history)
     }
 
     /**
-     * Loads conversation history from a storage provider (stub).
-     * Replace with actual loading logic as needed.
+     * Loads conversation history using the provided loader function and updates the internal history and context.
+     *
+     * The context is updated with the most recent entry from the loaded history, if available.
+     *
+     * @param loadAction A function that returns a list of history entries to load.
      */
-    fun loadHistory(load: () -> List<Map<String, Any>>) {
-        val loaded = load()
+    fun loadHistory(loadAction: () -> List<Map<String, Any>>) {
+        val loadedHistory = loadAction()
         _history.clear()
-        _history.addAll(loaded)
-        _context.update { it + (loaded.lastOrNull() ?: emptyMap()) }
+        _history.addAll(loadedHistory)
+        _context.update { it + (loadedHistory.lastOrNull() ?: emptyMap()) }
     }
 
     /**
-     * Shares the current context with all registered agents that support context sharing.
-     * Agents must implement setContext if they want to receive context.
+     * Shares the current context with all registered agents that support context awareness.
+     *
+     * For each agent in the registry implementing `ContextAwareAgent`, updates its context to match the current shared context.
      */
     fun shareContextWithAgents() {
         agentRegistry.values.forEach { agent ->
@@ -354,17 +430,23 @@ class GenesisAgent @Inject constructor(
         }
     }
 
-    // --- Dynamic Agent Registration/Deregistration ---
     /**
-     * Registers a new agent at runtime. If an agent with the same name exists, it is replaced.
+     * Dynamically registers an agent instance under the specified name.
+     *
+     * Adds the agent to the internal registry, making it available for participation in agent operations.
+     *
+     * @param name The unique identifier for the agent.
+     * @param agentInstance The agent instance to register.
      */
-    fun registerDynamicAgent(name: String, agent: Agent) {
-        _agentRegistry[name] = agent
+    fun registerDynamicAgent(name: String, agentInstance: Agent) {
+        _agentRegistry[name] = agentInstance
         Log.d("GenesisAgent", "Dynamically registered agent: $name")
     }
 
     /**
-     * Deregisters an agent by name at runtime.
+     * Removes a dynamically registered agent from the internal registry by name.
+     *
+     * @param name The unique identifier of the agent to deregister.
      */
     fun deregisterDynamicAgent(name: String) {
         _agentRegistry.remove(name)

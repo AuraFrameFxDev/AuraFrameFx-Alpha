@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Duration
 import kotlinx.datetime.Instant
+// import kotlinx.serialization.Contextual // No longer needed for Instant here
+import kotlinx.serialization.Serializable
+import dev.aurakai.auraframefx.serialization.InstantSerializer // Ensure this is imported
+// dev.aurakai.auraframefx.model.AgentType is already imported by line 4, removing duplicate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,13 +36,14 @@ class ContextManager @Inject constructor(
      * @param initialContext The initial context content for the chain.
      * @param agent The agent associated with the initial context.
      * @param metadata Optional metadata for the context, with all values converted to strings.
+
      * @return The unique identifier of the newly created context chain.
      */
     fun createContextChain(
         rootContext: String,
         initialContext: String,
         agent: AgentType,
-        metadata: Map<String, Any> = emptyMap(),
+        metadata: Map<String, String> = emptyMap(), // Changed Map<String, Any> to Map<String, String>
     ): String {
         val chain = ContextChain(
             rootContext = rootContext,
@@ -71,6 +76,7 @@ class ContextManager @Inject constructor(
      * @param newContext The new context string to add.
      * @param agent The agent associated with the new context.
      * @param metadata Additional metadata for the context node; all values are converted to strings.
+
      * @return The updated context chain.
      * @throws IllegalStateException if the specified context chain does not exist.
      */
@@ -78,7 +84,7 @@ class ContextManager @Inject constructor(
         chainId: String,
         newContext: String,
         agent: AgentType,
-        metadata: Map<String, Any> = emptyMap(),
+        metadata: Map<String, String> = emptyMap(), // Changed Map<String, Any> to Map<String, String>
     ): ContextChain {
         val chain =
             _activeContexts.value[chainId] ?: throw IllegalStateException("Context chain not found")
@@ -102,10 +108,26 @@ class ContextManager @Inject constructor(
         return updatedChain
     }
 
+    /**
+     * Retrieves the context chain associated with the specified chain ID.
+     *
+     * @param chainId The unique identifier of the context chain.
+     * @return The corresponding ContextChain if found, or null if no chain exists for the given ID.
+     */
     fun getContextChain(chainId: String): ContextChain? {
         return _activeContexts.value[chainId]
     }
 
+    /**
+     * Retrieves the most relevant context chain and related chains based on the specified query criteria.
+     *
+     * Filters active context chains by agent (if specified), sorts them by most recent update, and limits the results according to configuration and query parameters. Returns a [ContextChainResult] containing the most recently updated chain (or a new chain initialized with the query if none exist), a list of related chains meeting the minimum relevance threshold, and the original query.
+     *
+     * @param query The criteria for filtering, sorting, and limiting context chains.
+     * @return A [ContextChainResult] with the selected chain, related chains, and the query.
+     */
+
+  
     fun queryContext(query: ContextQuery): ContextChainResult {
         val chains = _activeContexts.value.values
             .filter { chain ->
@@ -130,6 +152,13 @@ class ContextManager @Inject constructor(
         )
     }
 
+    /**
+     * Updates context chain statistics based on the current set of active chains.
+     *
+     * Recalculates the total number of chains, the number of recently updated (active) chains,
+     * the length of the longest chain, and sets the timestamp of the last update.
+
+     */
     private fun updateStats() {
         val chains = _activeContexts.value.values
         _contextStats.update { current ->
@@ -146,9 +175,10 @@ class ContextManager @Inject constructor(
     }
 }
 
+@Serializable // Ensure ContextStats is serializable if it's part of a larger serializable graph implicitly
 data class ContextStats(
     val totalChains: Int = 0,
     val activeChains: Int = 0,
     val longestChain: Int = 0,
-    val lastUpdated: Instant = Clock.System.now(),
+    @Serializable(with = dev.aurakai.auraframefx.serialization.InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
 )
