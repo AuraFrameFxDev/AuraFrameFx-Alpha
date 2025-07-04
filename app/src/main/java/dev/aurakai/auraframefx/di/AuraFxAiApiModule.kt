@@ -19,8 +19,9 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides the OkHttpClient configured for API requests.
-
+     * Provides a singleton OkHttpClient configured with an HTTP logging interceptor for API requests.
+     *
+     * @return The configured OkHttpClient instance.
      */
     @Provides
     @Singleton
@@ -35,8 +36,9 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides the JSON serializer configured for the API.
-
+     * Provides a singleton Json serializer configured to be lenient, ignore unknown keys, coerce input values, and encode default values.
+     *
+     * @return A configured Json instance for API serialization and deserialization.
      */
     @Provides
     @Singleton
@@ -48,11 +50,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Returns an `AIContentApi` instance configured to communicate with the AuraFrameFx AI API.
+     * Provides a singleton `AIContentApi` configured for the AuraFrameFx AI API.
      *
-     * @param okHttpClient The HTTP client used for network requests.
-     * @return An `AIContentApi` targeting the AuraFrameFx API base URL.
-
+     * @param okHttpClient The HTTP client used for API requests.
+     * @return An `AIContentApi` instance targeting the AuraFrameFx API.
      */
     @Provides
     @Singleton
@@ -64,8 +65,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides the AuraFxContentApiClient wrapper for the AiContentApi.
-
+     * Provides a singleton instance of AuraFxContentApiClient that wraps the AIContentApi.
+     *
+     * @param aiContentApi The AIContentApi instance to be wrapped.
+     * @return A configured AuraFxContentApiClient.
      */
     @Provides
     @Singleton
