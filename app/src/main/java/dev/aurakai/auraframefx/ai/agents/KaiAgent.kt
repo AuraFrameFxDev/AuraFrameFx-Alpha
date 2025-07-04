@@ -59,9 +59,9 @@ class KaiAgent(
     }
 
     /**
-         * Determines if KaiAgent will handle the specified security-related prompt.
+         * Determines whether KaiAgent will handle the given security-related prompt.
          *
-         * Always returns `true`, indicating KaiAgent handles all security prompts.
+         * Always returns `true`, indicating that KaiAgent handles all security prompts.
          *
          * @return `true`
          */
