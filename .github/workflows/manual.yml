@@ -13,11 +13,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up JDK
+    - name: Set up JDK 17 # Changed name
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '17'  # Use the version required by your project
+        java-version: '17'  # Changed to JDK 17
 
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
