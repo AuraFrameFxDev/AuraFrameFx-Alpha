@@ -98,7 +98,7 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Placeholder for future collaboration between AuraAgent and a Genesis agent.
+     * Placeholder for future collaboration logic between AuraAgent and a Genesis agent.
      *
      * Currently returns an empty map and performs no operations.
      *
@@ -110,13 +110,13 @@ fun shouldHandleSecurity(prompt: String): Boolean = false
     }
 
     /**
-     * Placeholder for collaborative processing involving AuraAgent, KaiAgent, and Genesis agent.
+     * Placeholder for future collaborative processing involving AuraAgent, KaiAgent, and Genesis agent.
      *
      * Currently returns an empty map. Intended for future implementation of joint logic or data exchange among these agents.
      *
      * @param data Input data for the collaboration.
-     * @param kai The KaiAgent participating in the collaboration.
-     * @param genesis The Genesis agent participating in the collaboration.
+     * @param kai The KaiAgent involved in the collaboration.
+     * @param genesis The Genesis agent involved in the collaboration.
      * @return An empty map.
      */
     suspend fun participateWithGenesisAndKai(
