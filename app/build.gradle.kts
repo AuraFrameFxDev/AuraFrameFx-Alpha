@@ -138,14 +138,27 @@ dependencies {
     testImplementation(libs.testJunit)
     testImplementation(libs.kotlinxCoroutinesTest) // Added from old TOML's list
     testImplementation(libs.mockkAgent) // For local unit tests
+    
+    // Hilt testing dependencies
+    testImplementation("com.google.dagger:hilt-android-testing:2.56.2")
+    kspTest("com.google.dagger:hilt-compiler:2.56.2")
 
     androidTestImplementation(libs.androidxTestExtJunit)
     androidTestImplementation(libs.espressoCore)
     androidTestImplementation(platform(libs.composeBom)) // Compose BOM for tests
     androidTestImplementation(libs.composeUiTestJunit4)
     androidTestImplementation(libs.mockkAndroid) // For instrumented tests
+    
+    // Hilt instrumentation testing dependencies
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.56.2")
+    kspAndroidTest("com.google.dagger:hilt-compiler:2.56.2")
     // androidTestImplementation(libs.kotlinxCoroutinesTest) // Already in testImplementation
 
     debugImplementation(libs.composeUiTooling) // For debug builds
     debugImplementation(libs.composeUiTestManifest) // For debug builds
+}
+
+// Hilt configuration for better incremental builds
+hilt {
+    enableAggregatingTask = true
 }
