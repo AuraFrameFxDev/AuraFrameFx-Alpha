@@ -19,9 +19,9 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides a singleton OkHttpClient configured with an HTTP logging interceptor at the BODY level.
+     * Provides a singleton OkHttpClient with HTTP request and response body logging enabled.
      *
-     * @return A configured OkHttpClient instance for network requests.
+     * @return An OkHttpClient instance configured to log HTTP bodies at the BODY level.
 
      */
     @Provides
@@ -37,9 +37,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Creates and provides a singleton Json serializer configured to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values.
+     * Provides a singleton `Json` serializer configured to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values.
      *
-     * @return A configured Json instance for API serialization and deserialization.
+     * @return A configured `Json` instance for API serialization and deserialization.
+
      */
     @Provides
     @Singleton
@@ -51,11 +52,11 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton `AIContentApi` instance configured with the base URL for the AuraFrameFx AI API and the specified `OkHttpClient`.
+     * Provides a singleton `AIContentApi` configured to communicate with the AuraFrameFx AI API.
      *
-     * The `json` parameter is accepted for consistency with other providers but is not used in this method.
+     * The returned instance uses the base URL "https://api.auraframefx.com/v1" and the supplied `OkHttpClient`.
      *
-     * @return An `AIContentApi` instance set to communicate with `https://api.auraframefx.com/v1` using the given HTTP client.
+     * @return A configured `AIContentApi` instance.
 
      */
     @Provides
@@ -68,10 +69,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Returns a singleton `AuraFxContentApiClient` that delegates API requests to the provided `AIContentApi`.
+     * Provides a singleton instance of `AuraFxContentApiClient` that wraps the given `AIContentApi`.
      *
-     * @param aiContentApi The API implementation to be wrapped by the client.
-     * @return A configured `AuraFxContentApiClient` instance.
+     * @param aiContentApi The AI content API instance to wrap.
+     * @return A singleton `AuraFxContentApiClient` configured with the specified API.
 
      */
     @Provides
