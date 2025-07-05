@@ -20,6 +20,11 @@ class OracleDriveServiceConnector(private val context: Context) {
     val isServiceConnected: StateFlow<Boolean> = _isServiceConnected.asStateFlow()
 
     private val serviceConnection = object : ServiceConnection {
+        /**
+         * Called when the AuraDrive service is connected.
+         *
+         * Initializes the AIDL interface for the AuraDrive service and updates the connection status to connected.
+         */
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             auraDriveService = IAuraDriveService.Companion.Stub.asInterface(service)
             _isServiceConnected.value = true
@@ -62,7 +67,14 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
     }
 
-    suspend fun toggleModuleOnOracleDrive(packageName: String, enable: Boolean): String? =
+    /**
+         * Toggles the LSPosed module state on the connected AuraDrive service.
+         *
+         * @param packageName The package name of the module to toggle (currently unused).
+         * @param enable Whether to enable or disable the module (currently unused).
+         * @return "Success" if the operation succeeds, "Failed" if it does not, or null if the service is unavailable or a remote exception occurs.
+         */
+        suspend fun toggleModuleOnOracleDrive(packageName: String, enable: Boolean): String? =
         withContext(Dispatchers.IO) {
             try {
                 val result = auraDriveService?.toggleLSPosedModule()
@@ -80,6 +92,11 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
     }
 
+    /**
+     * Retrieves the internal diagnostics log from the AuraDrive service as a single string.
+     *
+     * @return The diagnostics log joined by newlines, or null if the service is unavailable or a remote exception occurs.
+     */
     suspend fun getInternalDiagnosticsLog(): String? = withContext(Dispatchers.IO) {
         try {
             val logs = auraDriveService?.getInternalDiagnosticsLog()
