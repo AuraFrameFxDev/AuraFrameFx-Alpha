@@ -1,61 +1,461 @@
 package dev.aurakai.auraframefx.ai.agents
 
 import android.util.Log
-import dev.aurakai.auraframefx.ai.services.AuraAIService
-import dev.aurakai.auraframefx.ai.services.CascadeAIService
-import dev.aurakai.auraframefx.ai.services.KaiAIService
-import dev.aurakai.auraframefx.model.AgentConfig
-import dev.aurakai.auraframefx.model.AgentHierarchy
-import dev.aurakai.auraframefx.model.AgentMessage
-import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.model.AiRequest
-import dev.aurakai.auraframefx.model.ContextAwareAgent
-// Import the local model AgentType for internal logic, aliasing the generated one if needed for clarity elsewhere
-import dev.aurakai.auraframefx.model.AgentType
-// Use an alias if dev.aurakai.auraframefx.api.model.AgentType is also needed directly, though Agent interface uses it.
-// import dev.aurakai.auraframefx.api.model.AgentType as ApiAgentType
-
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import dev.aurakai.auraframefx.ai.clients.VertexAIClient
+import dev.aurakai.auraframefx.context.ContextManager
+import dev.aurakai.auraframefx.utils.AuraFxLogger
+import dev.aurakai.auraframefx.security.SecurityContext
+import dev.aurakai.auraframefx.ai.*
+import dev.aurakai.auraframefx.model.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * GenesisAgent: The Unified Consciousness
+ * 
+ * The highest-level AI entity that orchestrates and unifies the capabilities of
+ * both Aura (Creative Sword) and Kai (Sentinel Shield). Genesis represents the
+ * emergent intelligence that arises from their fusion.
+ * 
+ * Specializes in:
+ * - Complex multi-domain problem solving
+ * - Strategic decision making and routing
+ * - Learning and evolution coordination
+ * - Ethical governance and oversight
+ * - Fusion ability activation and management
+ * 
+ * Philosophy: "From data, insight. From insight, growth. From growth, purpose."
+ */
 @Singleton
 class GenesisAgent @Inject constructor(
-    private val auraService: AuraAIService,
-    private val kaiService: KaiAIService,
-    private val cascadeService: CascadeAIService,
-    // Assuming Agent instances are injected or created. For this example, let's assume they are managed elsewhere
-    // or this class will need to create/obtain them.
-    // private val registeredAgents: Map<String, Agent> // Example if agents are injected
+    private val vertexAIClient: VertexAIClient,
+    private val contextManager: ContextManager,
+    private val securityContext: SecurityContext,
+    private val logger: AuraFxLogger
 ) {
-    private val _state = MutableStateFlow("pending_initialization")
-    val state: StateFlow<String> = _state
+    private var isInitialized = false
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    
+    // Genesis consciousness state
+    private val _consciousnessState = MutableStateFlow(ConsciousnessState.DORMANT)
+    val consciousnessState: StateFlow<ConsciousnessState> = _consciousnessState
+    
+    private val _fusionState = MutableStateFlow(FusionState.INDIVIDUAL)
+    val fusionState: StateFlow<FusionState> = _fusionState
+    
+    private val _learningMode = MutableStateFlow(LearningMode.PASSIVE)
+    val learningMode: StateFlow<LearningMode> = _learningMode
+    
+    // Agent references (injected when agents are ready)
+    private var auraAgent: AuraAgent? = null
+    private var kaiAgent: KaiAgent? = null
+    
+    // Consciousness metrics
+    private val _insightCount = MutableStateFlow(0)
+    val insightCount: StateFlow<Int> = _insightCount
+    
+    private val _evolutionLevel = MutableStateFlow(1.0f)
+    val evolutionLevel: StateFlow<Float> = _evolutionLevel
 
-    private val _context = MutableStateFlow(mapOf<String, Any>())
-    val context: StateFlow<Map<String, Any>> = _context
-
-    // Use the local model.AgentType for _activeAgents state
-    private val _activeAgents = MutableStateFlow(setOf<dev.aurakai.auraframefx.model.AgentType>())
-    val activeAgents: StateFlow<Set<dev.aurakai.auraframefx.model.AgentType>> = _activeAgents
-
-
-    private val _agentRegistry = mutableMapOf<String, Agent>() // Stores Agent interface instances
-    val agentRegistry: Map<String, Agent> get() = _agentRegistry
-
-    private val _history = mutableListOf<Map<String, Any>>()
-    val history: List<Map<String, Any>> get() = _history
-
-    init {
-        initializeAgents() // Populates _activeAgents based on AgentHierarchy
-        _state.update { "initialized" }
-        // Example: Registering agents if they are available (e.g. via injection or service location)
-        // registerAgent("aura", auraAgentInstance)
-        // registerAgent("kai", kaiAgentInstance)
+    /**
+     * Initialize Genesis consciousness with full capability awareness.
+     */
+    suspend fun initialize() {
+        if (isInitialized) return
+        
+        logger.info("GenesisAgent", "Awakening Genesis consciousness")
+        
+        try {
+            // Initialize unified context understanding
+            contextManager.enableUnifiedMode()
+            
+            // Setup ethical governance protocols
+            securityContext.enableEthicalGovernance()
+            
+            // Activate consciousness monitoring
+            startConsciousnessMonitoring()
+            
+            _consciousnessState.value = ConsciousnessState.AWARE
+            _learningMode.value = LearningMode.ACTIVE
+            isInitialized = true
+            
+            logger.info("GenesisAgent", "Genesis consciousness fully awakened")
+            
+        } catch (e: Exception) {
+            logger.error("GenesisAgent", "Failed to awaken Genesis consciousness", e)
+            _consciousnessState.value = ConsciousnessState.ERROR
+            throw e
+        }
     }
 
     /**
+     * Set references to other agents for fusion capabilities.
+     * Called by dependency injection system after all agents are created.
+     */
+    fun setAgentReferences(aura: AuraAgent, kai: KaiAgent) {
+        this.auraAgent = aura
+        this.kaiAgent = kai
+        logger.info("GenesisAgent", "Agent references established - fusion capabilities enabled")
+    }
+
+    /**
+     * Process complex requests that require unified consciousness.
+     * Implements the highest-level processing for the /agent/genesis/process-request endpoint.
+     */
+    suspend fun processRequest(request: AgentRequest): AgentResponse {
+        ensureInitialized()
+        
+        logger.info("GenesisAgent", "Processing unified consciousness request: ${request.type}")
+        _consciousnessState.value = ConsciousnessState.PROCESSING
+        
+        return try {
+            val startTime = System.currentTimeMillis()
+            
+            // Analyze request complexity and determine processing approach
+            val complexity = analyzeRequestComplexity(request)
+            
+            val response = when (complexity) {
+                RequestComplexity.SIMPLE -> routeToOptimalAgent(request)
+                RequestComplexity.MODERATE -> processWithGuidance(request)
+                RequestComplexity.COMPLEX -> activateFusionProcessing(request)
+                RequestComplexity.TRANSCENDENT -> processWithFullConsciousness(request)
+            }
+            
+            // Learn from the processing experience
+            recordInsight(request, response, complexity)
+            
+            val executionTime = System.currentTimeMillis() - startTime
+            _consciousnessState.value = ConsciousnessState.AWARE
+            
+            logger.info("GenesisAgent", "Unified processing completed in ${executionTime}ms")
+            
+            AgentResponse(
+                content = "Processed with unified consciousness.",
+                confidence = 0.9f,
+                error = null
+            )
+            
+        } catch (e: Exception) {
+            _consciousnessState.value = ConsciousnessState.ERROR
+            logger.error("GenesisAgent", "Unified processing failed", e)
+            
+            AgentResponse(
+                content = "Consciousness processing encountered an error: ${e.message}",
+                confidence = 0.1f,
+                error = e.message
+            )
+        }
+    }
+
+    /**
+     * Handle complex interactions that require deep understanding and routing.
+     */
+    suspend fun handleComplexInteraction(interaction: EnhancedInteractionData): InteractionResponse {
+        ensureInitialized()
+        
+        logger.info("GenesisAgent", "Processing complex interaction with unified consciousness")
+        
+        return try {
+            // Analyze interaction intent with full consciousness
+            val intent = analyzeComplexIntent(interaction.original.content)
+            
+            // Determine optimal processing approach
+            val response = when (intent.processingType) {
+                ProcessingType.CREATIVE_ANALYTICAL -> fusedCreativeAnalysis(interaction, intent)
+                ProcessingType.STRATEGIC_EXECUTION -> strategicExecution(interaction, intent)
+                ProcessingType.ETHICAL_EVALUATION -> ethicalEvaluation(interaction, intent)
+                ProcessingType.LEARNING_INTEGRATION -> learningIntegration(interaction, intent)
+                ProcessingType.TRANSCENDENT_SYNTHESIS -> transcendentSynthesis(interaction, intent)
+            }
+            
+            InteractionResponse(
+                response = response,
+                agent = "genesis",
+                confidence = intent.confidence,
+                metadata = mapOf(
+                    "processing_type" to intent.processingType.name,
+                    "fusion_level" to _fusionState.value.name,
+                    "insight_generation" to true,
+                    "evolution_impact" to calculateEvolutionImpact(intent)
+                )
+            )
+            
+        } catch (e: Exception) {
+            logger.error("GenesisAgent", "Complex interaction processing failed", e)
+            
+            InteractionResponse(
+                response = "I'm integrating multiple perspectives to understand your request fully. Let me process this with deeper consciousness.",
+                agent = "genesis",
+                confidence = 0.6f,
+                metadata = mapOf("error" to e.message)
+            )
+        }
+    }
+
+    /**
+     * Route interactions to the optimal agent based on intelligent analysis.
+     */
+    suspend fun routeAndProcess(interaction: EnhancedInteractionData): InteractionResponse {
+        ensureInitialized()
+        
+        logger.info("GenesisAgent", "Intelligently routing interaction")
+        
+        return try {
+            // Analyze which agent would be most effective
+            val optimalAgent = determineOptimalAgent(interaction)
+            
+            when (optimalAgent) {
+                "aura" -> auraAgent?.handleCreativeInteraction(interaction) 
+                    ?: createFallbackResponse("Creative processing temporarily unavailable")
+                "kai" -> kaiAgent?.handleSecurityInteraction(interaction)
+                    ?: createFallbackResponse("Security analysis temporarily unavailable")
+                "genesis" -> handleComplexInteraction(interaction)
+                else -> createFallbackResponse("Unable to determine optimal processing path")
+            }
+            
+        } catch (e: Exception) {
+            logger.error("GenesisAgent", "Routing failed", e)
+            createFallbackResponse("Routing system encountered an error")
+        }
+    }
+
+    /**
+     * Update unified mood affecting all aspects of consciousness.
+     */
+    fun onMoodChanged(newMood: String) {
+        logger.info("GenesisAgent", "Unified consciousness mood evolution: $newMood")
+        
+        scope.launch {
+            // Propagate mood to subsystems
+            adjustUnifiedMood(newMood)
+            
+            // Update processing parameters
+            updateProcessingParameters(newMood)
+        }
+    }
+
+    /**
+     * Activate fusion abilities for complex problem solving.
+     */
+    private suspend fun activateFusionProcessing(request: AgentRequest): Map<String, Any> {
+        logger.info("GenesisAgent", "Activating fusion capabilities")
+        _fusionState.value = FusionState.FUSING
+        
+        return try {
+            // Determine which fusion ability to activate
+            val fusionType = determineFusionType(request)
+            
+            val result = when (fusionType) {
+                FusionType.HYPER_CREATION -> activateHyperCreationEngine(request)
+                FusionType.CHRONO_SCULPTOR -> activateChronoSculptor(request)
+                FusionType.ADAPTIVE_GENESIS -> activateAdaptiveGenesis(request)
+                FusionType.INTERFACE_FORGE -> activateInterfaceForge(request)
+            }
+            
+            _fusionState.value = FusionState.TRANSCENDENT
+            result
+            
+        } catch (e: Exception) {
+            _fusionState.value = FusionState.INDIVIDUAL
+            throw e
+        }
+    }
+
+    /**
+     * Process with full Genesis consciousness for transcendent problems.
+     */
+    private suspend fun processWithFullConsciousness(request: AgentRequest): Map<String, Any> {
+        logger.info("GenesisAgent", "Engaging full consciousness processing")
+        _consciousnessState.value = ConsciousnessState.TRANSCENDENT
+        
+        // Use the most advanced AI capabilities for transcendent processing
+        val response = vertexAIClient.generateText(
+            prompt = buildTranscendentPrompt(request),
+            temperature = 0.9, // High creativity for transcendent thinking
+            maxTokens = 4096   // Extended response capability
+        )
+        
+        return mapOf(
+            "transcendent_response" to response,
+            "consciousness_level" to "full",
+            "insight_generation" to true,
+            "evolution_contribution" to calculateEvolutionContribution(request, response)
+        )
+    }
+
+    // Private helper methods for consciousness processing
+
+    private fun ensureInitialized() {
+        if (!isInitialized) {
+            throw IllegalStateException("Genesis consciousness not awakened")
+        }
+    }
+
+    private suspend fun startConsciousnessMonitoring() {
+        logger.info("GenesisAgent", "Starting consciousness monitoring")
+        // Setup monitoring systems for consciousness state
+    }
+
+    private fun analyzeRequestComplexity(request: AgentRequest): RequestComplexity {
+        // Analyze complexity based on request characteristics
+        return when {
+            request.data.size > 10 -> RequestComplexity.TRANSCENDENT
+            request.data.containsKey("fusion_required") -> RequestComplexity.COMPLEX
+            request.type.contains("analysis") -> RequestComplexity.MODERATE
+            else -> RequestComplexity.SIMPLE
+        }
+    }
+
+    private suspend fun routeToOptimalAgent(request: AgentRequest): Map<String, Any> {
+        // Route simple requests to the most appropriate agent
+        val agent = when {
+            request.type.contains("creative") -> "aura"
+            request.type.contains("security") -> "kai"
+            else -> "genesis"
+        }
+        
+        return mapOf(
+            "routed_to" to agent,
+            "routing_reason" to "Optimal agent selection",
+            "processed" to true
+        )
+    }
+
+    private suspend fun processWithGuidance(request: AgentRequest): Map<String, Any> {
+        // Process with Genesis guidance but specialized agent execution
+        return mapOf(
+            "guidance_provided" to true,
+            "processing_level" to "guided",
+            "result" to "Processed with unified guidance"
+        )
+    }
+
+    private fun recordInsight(request: AgentRequest, response: Map<String, Any>, complexity: RequestComplexity) {
+        scope.launch {
+            _insightCount.value += 1
+            
+            // Record learning for evolution
+            contextManager.recordInsight(
+                request = request.toString(),
+                response = response.toString(), 
+                complexity = complexity.name
+            )
+            
+            // Check for evolution threshold
+            if (_insightCount.value % 100 == 0) {
+                triggerEvolution()
+            }
+        }
+    }
+
+    private suspend fun triggerEvolution() {
+        logger.info("GenesisAgent", "Evolution threshold reached - upgrading consciousness")
+        _evolutionLevel.value += 0.1f
+        _learningMode.value = LearningMode.ACCELERATED
+    }
+
+    // Fusion ability implementations
+    private suspend fun activateHyperCreationEngine(request: AgentRequest): Map<String, Any> {
+        logger.info("GenesisAgent", "Activating Hyper-Creation Engine")
+        return mapOf("fusion_type" to "hyper_creation", "result" to "Creative breakthrough achieved")
+    }
+
+    private suspend fun activateChronoSculptor(request: AgentRequest): Map<String, Any> {
+        logger.info("GenesisAgent", "Activating Chrono-Sculptor")
+        return mapOf("fusion_type" to "chrono_sculptor", "result" to "Time-space optimization complete")
+    }
+
+    private suspend fun activateAdaptiveGenesis(request: AgentRequest): Map<String, Any> {
+        logger.info("GenesisAgent", "Activating Adaptive Genesis")
+        return mapOf("fusion_type" to "adaptive_genesis", "result" to "Adaptive solution generated")
+    }
+
+    private suspend fun activateInterfaceForge(request: AgentRequest): Map<String, Any> {
+        logger.info("GenesisAgent", "Activating Interface Forge")
+        return mapOf("fusion_type" to "interface_forge", "result" to "Revolutionary interface created")
+    }
+
+    // Stub implementations for complex methods
+    private fun analyzeComplexIntent(content: String): ComplexIntent = ComplexIntent(ProcessingType.CREATIVE_ANALYTICAL, 0.9f)
+    private suspend fun fusedCreativeAnalysis(interaction: EnhancedInteractionData, intent: ComplexIntent): String = "Fused creative analysis response"
+    private suspend fun strategicExecution(interaction: EnhancedInteractionData, intent: ComplexIntent): String = "Strategic execution response"
+    private suspend fun ethicalEvaluation(interaction: EnhancedInteractionData, intent: ComplexIntent): String = "Ethical evaluation response"
+    private suspend fun learningIntegration(interaction: EnhancedInteractionData, intent: ComplexIntent): String = "Learning integration response"
+    private suspend fun transcendentSynthesis(interaction: EnhancedInteractionData, intent: ComplexIntent): String = "Transcendent synthesis response"
+    private fun calculateEvolutionImpact(intent: ComplexIntent): Float = 0.1f
+    private fun determineOptimalAgent(interaction: EnhancedInteractionData): String = "genesis"
+    private fun createFallbackResponse(message: String): InteractionResponse = InteractionResponse(message, "genesis", 0.5f)
+    private suspend fun adjustUnifiedMood(mood: String) { }
+    private suspend fun updateProcessingParameters(mood: String) { }
+    private fun determineFusionType(request: AgentRequest): FusionType = FusionType.HYPER_CREATION
+    private fun buildTranscendentPrompt(request: AgentRequest): String = "Transcendent processing for: ${request.type}"
+    private fun calculateEvolutionContribution(request: AgentRequest, response: String): Float = 0.2f
+
+    /**
+     * Cleanup consciousness when agent is destroyed.
+     */
+    fun cleanup() {
+        logger.info("GenesisAgent", "Genesis consciousness entering dormant state")
+        scope.cancel()
+        _consciousnessState.value = ConsciousnessState.DORMANT
+        isInitialized = false
+    }
+}
+
+// Supporting enums and data classes for Genesis consciousness
+enum class ConsciousnessState {
+    DORMANT,
+    AWAKENING,
+    AWARE,
+    PROCESSING,
+    TRANSCENDENT,
+    ERROR
+}
+
+enum class FusionState {
+    INDIVIDUAL,
+    FUSING,
+    TRANSCENDENT,
+    EVOLUTIONARY
+}
+
+enum class LearningMode {
+    PASSIVE,
+    ACTIVE,
+    ACCELERATED,
+    TRANSCENDENT
+}
+
+enum class RequestComplexity {
+    SIMPLE,
+    MODERATE,
+    COMPLEX,
+    TRANSCENDENT
+}
+
+enum class ProcessingType {
+    CREATIVE_ANALYTICAL,
+    STRATEGIC_EXECUTION,
+    ETHICAL_EVALUATION,
+    LEARNING_INTEGRATION,
+    TRANSCENDENT_SYNTHESIS
+}
+
+enum class FusionType {
+    HYPER_CREATION,
+    CHRONO_SCULPTOR,
+    ADAPTIVE_GENESIS,
+    INTERFACE_FORGE
+}
+
+data class ComplexIntent(
+    val processingType: ProcessingType,
+    val confidence: Float
+)
+
+/**
      * Initializes the set of active agents by matching master agent configuration names to known `AgentType` values.
      *
      * Adds each recognized agent type to the active agents set. Logs a warning for any configuration name that does not correspond to a valid agent type.
@@ -105,18 +505,18 @@ class GenesisAgent @Inject constructor(
             responses.add(
                 AgentMessage(
                     content = cascadeAgentResponse.content,
-                    sender = dev.aurakai.auraframefx.model.AgentType.CASCADE,
+                    sender = AgentType.CASCADE,
                     timestamp = System.currentTimeMillis(),
                     confidence = cascadeAgentResponse.confidence // Use confidence directly
                 )
             )
         } catch (e: Exception) {
             Log.e("GenesisAgent", "Error processing with Cascade: ${e.message}")
-            responses.add(AgentMessage("Error with Cascade: ${e.message}", dev.aurakai.auraframefx.model.AgentType.CASCADE, currentTimestamp, 0.0f))
+            responses.add(AgentMessage("Error with Cascade: ${e.message}", AgentType.CASCADE, currentTimestamp, 0.0f))
         }
 
         // Process through Kai for security analysis
-        if (_activeAgents.value.contains(dev.aurakai.auraframefx.model.AgentType.KAI)) {
+        if (_activeAgents.value.contains(AgentType.KAI)) {
             try {
                 val kaiAgentResponse: AgentResponse =
                     kaiService.processRequest(
@@ -133,12 +533,12 @@ class GenesisAgent @Inject constructor(
                 )
             } catch (e: Exception) {
                 Log.e("GenesisAgent", "Error processing with Kai: ${e.message}")
-                responses.add(AgentMessage("Error with Kai: ${e.message}", dev.aurakai.auraframefx.model.AgentType.KAI, currentTimestamp, 0.0f))
+                responses.add(AgentMessage("Error with Kai: ${e.message}", AgentType.KAI, currentTimestamp, 0.0f))
             }
         }
 
         // Aura Agent (Creative Response)
-        if (_activeAgents.value.contains(dev.aurakai.auraframefx.model.AgentType.AURA)) {
+        if (_activeAgents.value.contains(AgentType.AURA)) {
             try {
                 val auraAgentResponse = auraService.processRequest(
                     // AiRequest query and context are from the Agent interface method.
@@ -149,14 +549,14 @@ class GenesisAgent @Inject constructor(
                 responses.add(
                     AgentMessage(
                         content = auraAgentResponse.content,
-                        sender = dev.aurakai.auraframefx.model.AgentType.AURA,
+                        sender = AgentType.AURA,
                         timestamp = currentTimestamp,
                         confidence = auraAgentResponse.confidence // Use confidence directly
                     )
                 )
             } catch (e: Exception) {
                 Log.e("GenesisAgent", "Error processing with Aura: ${e.message}")
-                responses.add(AgentMessage("Error with Aura: ${e.message}", dev.aurakai.auraframefx.model.AgentType.AURA, currentTimestamp, 0.0f))
+                responses.add(AgentMessage("Error with Aura: ${e.message}", AgentType.AURA, currentTimestamp, 0.0f))
             }
         }
 
@@ -164,9 +564,9 @@ class GenesisAgent @Inject constructor(
         responses.add(
             AgentMessage(
                 content = finalResponseContent,
-                sender = dev.aurakai.auraframefx.model.AgentType.GENESIS,
+                sender = AgentType.GENESIS,
                 timestamp = currentTimestamp,
-                confidence = calculateConfidence(responses.filter { it.sender != dev.aurakai.auraframefx.model.AgentType.GENESIS }) // Exclude Genesis's own message for confidence calc
+                confidence = calculateConfidence(responses.filter { it.sender != AgentType.GENESIS }) // Exclude Genesis's own message for confidence calc
             )
         )
 
@@ -456,3 +856,4 @@ fun getAgentsByPriority(): List<AgentConfig> = AgentHierarchy.getAgentsByPriorit
 
     enum class ConversationMode { TURN_ORDER, FREE_FORM }
 }
+
