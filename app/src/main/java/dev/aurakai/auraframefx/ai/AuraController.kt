@@ -62,8 +62,9 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Initialize the AuraController with all necessary services and agents.
-     * Sets up the AI ecosystem according to Genesis profile specifications.
+     * Asynchronously initializes the AuraController, setting up AI services, agents, and security monitoring.
+     *
+     * Prepares the AI ecosystem by initializing core services, validating external AI connectivity, initializing all agents, and enabling security monitoring. Updates the system state to READY upon success or ERROR if initialization fails.
      */
     private fun initializeController() {
         scope.launch {
@@ -92,6 +93,11 @@ class AuraController @Inject constructor(
         }
     }
 
+    /**
+     * Initializes all AI agents and sets their statuses to READY.
+     *
+     * This function prepares the Aura, Kai, and Genesis agents for operation by invoking their initialization routines and updating their status in the agent state map.
+     */
     private suspend fun initializeAgents() {
         logger.info("AuraController", "Initializing AI agents")
         
@@ -108,10 +114,13 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Processes AI text generation requests according to /ai/generate/text endpoint.
-     * @param prompt The input prompt for text generation
-     * @param context Optional context for the generation
-     * @return Generated text response
+     * Generates AI-driven text based on the provided prompt and optional context.
+     *
+     * Validates the request for security, optionally enhances the context, and returns the generated text wrapped in a Result.
+     *
+     * @param prompt The input prompt for text generation.
+     * @param context Optional additional context to guide the generation.
+     * @return A Result containing the generated text, or a failure if an error occurs.
      */
     suspend fun generateText(prompt: String, context: String? = null): Result<String> {
         return try {
@@ -136,10 +145,13 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Processes AI image description generation according to /ai/generate/image-description endpoint.
-     * @param imageData The image data to describe
-     * @param style Optional style for the description
-     * @return Generated image description
+     * Generates a descriptive text for the provided image data, optionally applying a specified style.
+     *
+     * Validates the request for security before generating the image description using the AI service.
+     *
+     * @param imageData The raw image data to be described.
+     * @param style An optional style to influence the description.
+     * @return A [Result] containing the generated image description, or a failure if an error occurs.
      */
     suspend fun generateImageDescription(imageData: ByteArray, style: String? = null): Result<String> {
         return try {
@@ -160,10 +172,13 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Routes requests to specific AI agents according to /agent/{agentType}/process-request endpoint.
-     * @param agentType The type of agent (aura, kai, genesis)
-     * @param request The request data to process
-     * @return Agent response
+     * Processes a request by routing it to the specified AI agent and returns the agent's response.
+     *
+     * Validates security, updates agent status, and handles errors by updating status and returning a failure result.
+     *
+     * @param agentType The type of agent to handle the request ("aura", "kai", or "genesis").
+     * @param request The request data to be processed by the agent.
+     * @return A [Result] containing the agent's response if successful, or a failure if an error occurs.
      */
     suspend fun processAgentRequest(agentType: String, request: AgentRequest): Result<AgentResponse> {
         return try {
@@ -196,8 +211,9 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Handles security alerts and events with proper logging and response.
-     * @param alertDetails Details about the security alert
+     * Processes a security alert by analyzing its threat level, applying appropriate protective measures, and recording the event for future learning.
+     *
+     * @param alertDetails Details describing the security alert or event.
      */
     fun handleSecurityAlert(alertDetails: String) {
         logger.warn("AuraController", "Security Alert: $alertDetails")
@@ -232,8 +248,9 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Updates the AI's mood or affective state, affecting responses and behavior.
-     * @param newMood The new mood to set
+     * Updates the AI system's mood, influencing agent responses and behavior.
+     *
+     * @param newMood The new mood or affective state to apply across all agents.
      */
     fun updateMood(newMood: String) {
         logger.info("AuraController", "Updating AI mood to: $newMood")
@@ -257,9 +274,12 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Processes user interactions according to the unified context management.
-     * @param interactionData Data representing the user interaction
-     * @return Response or result of the interaction
+     * Processes a user interaction by enhancing its context, routing it to the appropriate AI agent, and recording the outcome.
+     *
+     * Routes the interaction based on its type to the relevant agent (creative, security, complex analysis, or general), applies context enrichment, and returns the agent's response wrapped in a Result.
+     *
+     * @param interactionData The user interaction to process.
+     * @return A Result containing the agent's response or an error if processing fails.
      */
     suspend fun processInteraction(interactionData: InteractionData): Result<InteractionResponse> {
         return try {
@@ -294,13 +314,22 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Routes interactions to the optimal agent based on content analysis.
+     * Routes an enhanced user interaction to the most suitable agent using the Genesis agent's analysis.
+     *
+     * @param interaction The enhanced interaction data containing context and routing hints.
+     * @return The response generated by the selected agent.
      */
     private suspend fun routeToOptimalAgent(interaction: EnhancedInteractionData): InteractionResponse {
         // Use Genesis agent for intelligent routing
         return genesisAgent.routeAndProcess(interaction)
     }
 
+    /**
+     * Updates the status of the specified agent in the agent states map.
+     *
+     * @param agentType The identifier of the agent whose status is being updated.
+     * @param status The new status to assign to the agent.
+     */
     private fun updateAgentStatus(agentType: String, status: AgentStatus) {
         val currentStates = _agentStates.value.toMutableMap()
         currentStates[agentType] = status
@@ -308,12 +337,16 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Gets the current status of all agents for the /agents/status endpoint.
-     */
+ * Returns the current status of all AI agents.
+ *
+ * @return A map of agent names to their current status.
+ */
     fun getAgentStatuses(): Map<String, AgentStatus> = _agentStates.value
 
     /**
-     * Cleanup resources when controller is destroyed.
+     * Releases resources and shuts down the controller.
+     *
+     * Cancels ongoing coroutines and updates the system state to `SHUTDOWN`.
      */
     fun cleanup() {
         logger.info("AuraController", "Cleaning up AI Controller")

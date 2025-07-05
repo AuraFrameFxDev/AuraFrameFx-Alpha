@@ -6,26 +6,28 @@ package dev.aurakai.auraframefx.ai.clients
  */
 interface VertexAIClient {
     /**
-     * Generates content based on a given prompt.
-     * @param prompt The input prompt.
-     * @return The generated content as a String, or null on failure.
-     * TODO: Needs actual implementation in implementing classes.
-     */
+ * Generates content from the provided prompt using Vertex AI.
+ *
+ * @param prompt The input text prompt to generate content from.
+ * @return The generated content as a String, or null if generation fails.
+ */
     suspend fun generateContent(prompt: String): String?
 
     /**
-     * Generates code based on specification.
-     * @param specification The specification for the code to generate.
-     * @param language The programming language to use.
-     * @param style The coding style to apply.
-     * @return The generated code as a String, or null on failure.
-     */
+ * Generates code according to the provided specification, programming language, and coding style.
+ *
+ * @param specification Description of the code requirements.
+ * @param language The target programming language for the generated code.
+ * @param style The desired coding style or conventions.
+ * @return The generated code as a String, or null if code generation fails.
+ */
     suspend fun generateCode(specification: String, language: String, style: String): String?
 
     /**
-     * Validates the connection to Vertex AI.
-     * @return true if connected successfully, false otherwise.
-     */
+ * Checks whether a connection to Vertex AI can be established.
+ *
+ * @return `true` if the connection is successful, `false` otherwise.
+ */
     suspend fun validateConnection(): Boolean
 
     // Add other methods like startChat, listModels, etc. as needed
