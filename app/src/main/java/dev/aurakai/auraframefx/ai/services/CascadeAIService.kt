@@ -18,11 +18,28 @@ class CascadeAIService @Inject constructor(
 
     private val state = mutableMapOf<String, Any>()
 
-    override fun getName(): String? = "Cascade"
+    /**
+ * Returns the name of the agent, which is "Cascade".
+ *
+ * @return The agent's name.
+ */
+override fun getName(): String? = "Cascade"
 
-    override fun getType(): AgentType = AgentType.CASCADE
+    /**
+ * Returns the agent type as `AgentType.CASCADE`.
+ *
+ * @return The type of this agent.
+ */
+override fun getType(): AgentType = AgentType.CASCADE
 
-    // This is the Agent interface method
+    /**
+     * Processes an AI request asynchronously and emits agent responses as a flow.
+     *
+     * Routes the request to specialized internal handlers based on its type, or emits a default response for unrecognized types.
+     *
+     * @param request The AI request to process.
+     * @return A flow emitting one or more agent responses relevant to the request type.
+     */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // This internal routing can stay if these specific flows are desired for internal logic
         return when (request.type) {
