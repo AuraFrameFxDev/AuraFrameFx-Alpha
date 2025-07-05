@@ -21,9 +21,9 @@ class OracleDriveServiceConnector(private val context: Context) {
 
     private val serviceConnection = object : ServiceConnection {
         /**
-         * Handles the event when the AuraDrive service is connected.
+         * Called when the AuraDrive service is connected.
          *
-         * Initializes the AIDL interface for the AuraDrive service and sets the connection status to true.
+         * Initializes the AuraDrive AIDL interface and updates the connection status to true.
          */
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             auraDriveService = IAuraDriveService.Companion.Stub.asInterface(service)
@@ -50,6 +50,11 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
     }
 
+    /**
+     * Unbinds from the AuraDrive service and updates the connection status to disconnected.
+     *
+     * Any exceptions during unbinding are ignored. The service interface reference is cleared.
+     */
     fun unbindService() {
         try {
             context.unbindService(serviceConnection)
@@ -105,7 +110,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Retrieves the internal diagnostics log from the AuraDrive service as a single string.
      *
-     * @return The diagnostics log joined by newline characters, or null if the service is unavailable or a remote exception occurs.
+     * @return The diagnostics log entries joined by newline characters, or null if the service is unavailable or a remote exception occurs.
      */
     suspend fun getInternalDiagnosticsLog(): String? = withContext(Dispatchers.IO) {
         try {

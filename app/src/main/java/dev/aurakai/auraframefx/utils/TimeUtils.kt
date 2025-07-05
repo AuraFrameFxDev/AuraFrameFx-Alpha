@@ -18,7 +18,7 @@ object TimeUtils {
 fun now(): Instant = Instant.now(systemClock)
     
     /**
- * Returns the current system time in milliseconds since the Unix epoch.
+ * Returns the current time in milliseconds since the Unix epoch.
  *
  * @return The current timestamp in milliseconds.
  */
