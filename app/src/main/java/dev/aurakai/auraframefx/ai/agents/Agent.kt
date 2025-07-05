@@ -1,6 +1,6 @@
 package dev.aurakai.auraframefx.ai.agents
 
-import dev.aurakai.auraframefx.api.model.AgentType
+import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AgentResponse
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow

@@ -2,10 +2,10 @@ package dev.aurakai.auraframefx.ai.services
 
 import dev.aurakai.auraframefx.ai.agents.Agent
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.api.model.AgentType as ApiAgentType // Corrected import
+import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first // Keep for existing logic if processRequestFlow uses it
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,7 +20,7 @@ class CascadeAIService @Inject constructor(
 
     override fun getName(): String? = "Cascade"
 
-    override fun getType(): ApiAgentType = ApiAgentType.CASCADE // Changed to non-nullable ApiAgentType
+    override fun getType(): AgentType = AgentType.CASCADE
 
     // This is the Agent interface method
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
