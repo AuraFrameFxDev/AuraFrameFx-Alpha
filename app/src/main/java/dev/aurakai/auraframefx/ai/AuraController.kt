@@ -62,9 +62,9 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Asynchronously initializes the AuraController, setting up AI services, agents, and security monitoring.
+     * Launches asynchronous initialization of the AuraController, setting up core AI services, validating external AI connectivity, initializing all agents, and enabling security monitoring.
      *
-     * Prepares the AI ecosystem by initializing core services, validating external AI connectivity, initializing all agents, and enabling security monitoring. Updates the system state to READY upon success or ERROR if initialization fails.
+     * Updates the system state to READY upon successful initialization, or to ERROR if any step fails.
      */
     private fun initializeController() {
         scope.launch {
@@ -94,9 +94,9 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Initializes all AI agents and sets their statuses to READY.
+     * Initializes all AI agents and updates their statuses to READY.
      *
-     * This function prepares the Aura, Kai, and Genesis agents for operation by invoking their initialization routines and updating their status in the agent state map.
+     * Prepares the Aura, Kai, and Genesis agents for operation by invoking their initialization routines and marking each agent as ready in the agent state map.
      */
     private suspend fun initializeAgents() {
         logger.info("AuraController", "Initializing AI agents")
@@ -114,9 +114,9 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Generates AI-driven text based on the provided prompt and optional context.
+     * Generates AI-driven text from a given prompt and optional context.
      *
-     * Validates the request for security, optionally enhances the context, and returns the generated text wrapped in a Result.
+     * Validates the request for security, optionally enhances the context, and returns the generated text as a Result. Returns a failure Result if a security violation or other error occurs.
      *
      * @param prompt The input prompt for text generation.
      * @param context Optional additional context to guide the generation.
@@ -145,13 +145,13 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Generates a descriptive text for the provided image data, optionally applying a specified style.
+     * Generates a textual description for the given image data, optionally influenced by a specified style.
      *
-     * Validates the request for security before generating the image description using the AI service.
+     * Validates the request for security before invoking the AI service to generate the description.
      *
-     * @param imageData The raw image data to be described.
-     * @param style An optional style to influence the description.
-     * @return A [Result] containing the generated image description, or a failure if an error occurs.
+     * @param imageData The raw image data to describe.
+     * @param style An optional style parameter to guide the description's tone or format.
+     * @return A [Result] containing the generated image description on success, or a failure if an error occurs.
      */
     suspend fun generateImageDescription(imageData: ByteArray, style: String? = null): Result<String> {
         return try {
@@ -172,13 +172,13 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Processes a request by routing it to the specified AI agent and returns the agent's response.
+     * Routes a request to the specified AI agent and returns the agent's response.
      *
-     * Validates security, updates agent status, and handles errors by updating status and returning a failure result.
+     * Validates the request for security, updates the agent's status during processing, and handles errors by setting the agent's status to `ERROR` and returning a failure result.
      *
-     * @param agentType The type of agent to handle the request ("aura", "kai", or "genesis").
-     * @param request The request data to be processed by the agent.
-     * @return A [Result] containing the agent's response if successful, or a failure if an error occurs.
+     * @param agentType The name of the agent to handle the request ("aura", "kai", or "genesis").
+     * @param request The data to be processed by the agent.
+     * @return A [Result] containing the agent's response if successful, or a failure if an error or security violation occurs.
      */
     suspend fun processAgentRequest(agentType: String, request: AgentRequest): Result<AgentResponse> {
         return try {
@@ -211,9 +211,9 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Processes a security alert by analyzing its threat level, applying appropriate protective measures, and recording the event for future learning.
+     * Handles a security alert by analyzing its threat level, applying corresponding protective actions, and recording the event for future reference.
      *
-     * @param alertDetails Details describing the security alert or event.
+     * @param alertDetails Description of the security alert or event to be processed.
      */
     fun handleSecurityAlert(alertDetails: String) {
         logger.warn("AuraController", "Security Alert: $alertDetails")
@@ -248,9 +248,11 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Updates the AI system's mood, influencing agent responses and behavior.
+     * Updates the AI system's mood, propagating the new affective state to all agents.
      *
-     * @param newMood The new mood or affective state to apply across all agents.
+     * @param newMood The mood or affective state to set for the system and agents.
+     *
+     * This influences agent behavior and responses by updating the context manager and notifying each agent of the mood change.
      */
     fun updateMood(newMood: String) {
         logger.info("AuraController", "Updating AI mood to: $newMood")
@@ -274,11 +276,11 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Processes a user interaction by enhancing its context, routing it to the appropriate AI agent, and recording the outcome.
+     * Processes a user interaction by enriching its context, routing it to the appropriate AI agent, and returning the agent's response.
      *
-     * Routes the interaction based on its type to the relevant agent (creative, security, complex analysis, or general), applies context enrichment, and returns the agent's response wrapped in a Result.
+     * The interaction is enhanced with additional context, routed to the relevant agent based on its type, and the outcome is recorded for future learning. Returns a Result containing the agent's response or an error if processing fails.
      *
-     * @param interactionData The user interaction to process.
+     * @param interactionData The user interaction to be processed.
      * @return A Result containing the agent's response or an error if processing fails.
      */
     suspend fun processInteraction(interactionData: InteractionData): Result<InteractionResponse> {
@@ -314,10 +316,10 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Routes an enhanced user interaction to the most suitable agent using the Genesis agent's analysis.
+     * Routes an enhanced interaction to the optimal agent as determined by the Genesis agent's analysis.
      *
-     * @param interaction The enhanced interaction data containing context and routing hints.
-     * @return The response generated by the selected agent.
+     * @param interaction The enriched interaction data with context and agent suggestions.
+     * @return The response produced by the agent selected through Genesis agent's routing logic.
      */
     private suspend fun routeToOptimalAgent(interaction: EnhancedInteractionData): InteractionResponse {
         // Use Genesis agent for intelligent routing
@@ -325,9 +327,9 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Updates the status of the specified agent in the agent states map.
+     * Sets the status of a specific agent in the agent states map.
      *
-     * @param agentType The identifier of the agent whose status is being updated.
+     * @param agentType The name or identifier of the agent to update.
      * @param status The new status to assign to the agent.
      */
     private fun updateAgentStatus(agentType: String, status: AgentStatus) {
@@ -344,9 +346,9 @@ class AuraController @Inject constructor(
     fun getAgentStatuses(): Map<String, AgentStatus> = _agentStates.value
 
     /**
-     * Releases resources and shuts down the controller.
+     * Releases all resources and shuts down the AuraController.
      *
-     * Cancels ongoing coroutines and updates the system state to `SHUTDOWN`.
+     * Cancels all ongoing coroutines and transitions the system state to `SHUTDOWN`.
      */
     fun cleanup() {
         logger.info("AuraController", "Cleaning up AI Controller")

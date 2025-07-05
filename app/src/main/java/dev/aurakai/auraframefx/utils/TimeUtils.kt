@@ -25,10 +25,10 @@ fun now(): Instant = Instant.now(systemClock)
 fun currentTimestamp(): Long = System.currentTimeMillis()
     
     /**
-     * Returns the duration elapsed since the specified instant until the current time.
+     * Calculates the duration that has elapsed from the specified instant to the current time.
      *
-     * @param instant The starting point in time from which to measure the duration.
-     * @return The duration between the given instant and now.
+     * @param instant The starting point in time from which to measure the elapsed duration.
+     * @return The duration between the provided instant and the current moment.
      */
     fun durationSince(instant: Instant): Duration {
         return Duration.between(instant, now())
