@@ -49,16 +49,16 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Schedules a new task for execution, assigning it to the most suitable agent based on task type or preference.
+     * Schedules a new task for execution and assigns it to the most suitable agent.
      *
-     * Validates the scheduling request, creates a `TaskExecution` instance with the provided parameters, determines the optimal agent, enqueues the task for processing, and returns the scheduled execution.
+     * Validates the scheduling request, creates a `TaskExecution` instance with the specified parameters, determines the optimal agent based on task type or agent preference, and enqueues the task for processing.
      *
-     * @param type The type of task to execute.
+     * @param type The type of task to be executed.
      * @param data The input data required for the task.
-     * @param priority The priority level for task scheduling.
-     * @param agentPreference Optional agent preference for execution.
-     * @param scheduledTime Optional timestamp for delayed scheduling; defaults to immediate scheduling.
-     * @return The created `TaskExecution` representing the scheduled task.
+     * @param priority The priority level for scheduling the task.
+     * @param agentPreference Optional preferred agent for task execution.
+     * @param scheduledTime Optional timestamp for delayed scheduling; if not provided, the task is scheduled immediately.
+     * @return The `TaskExecution` object representing the scheduled task.
      */
     suspend fun scheduleTask(
         type: String,
@@ -97,10 +97,12 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Returns the current status of the task with the given ID, searching active, completed, and queued tasks.
+     * Retrieves the current status of a task by its ID.
+     *
+     * Searches active, completed, and queued tasks for the specified ID and returns the corresponding status, or null if the task is not found.
      *
      * @param taskId The unique identifier of the task.
-     * @return The status of the task if found, or null if the task does not exist.
+     * @return The current status of the task, or null if the task does not exist.
      */
     fun getTaskStatus(taskId: String): TaskStatus? {
         // Check active executions first
@@ -116,22 +118,22 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Retrieves the result of a completed task by its ID.
+     * Returns the result of a completed task by its unique ID.
      *
      * @param taskId The unique identifier of the task.
-     * @return The result of the task if it has completed, or null if not found or not completed.
+     * @return The TaskResult if the task has completed successfully or failed, or null if the task is not found or not yet completed.
      */
     fun getTaskResult(taskId: String): TaskResult? {
         return completedExecutions[taskId]
     }
 
     /**
-     * Attempts to cancel a task by its ID, whether it is queued or currently running.
+     * Cancels a task by its ID if it is queued or currently running.
      *
-     * If the task is in the queue, it is removed and marked as cancelled. If the task is running, its status is set to cancelling, signaling the execution to stop. Returns true if cancellation was initiated, or false if the task was not found.
+     * If the task is queued, it is removed from the queue and marked as cancelled. If the task is running, its status is set to cancelling to signal the execution to stop. Returns true if cancellation was initiated, or false if the task was not found.
      *
      * @param taskId The unique identifier of the task to cancel.
-     * @return True if the task was found and cancellation was initiated; false otherwise.
+     * @return True if cancellation was initiated; false if the task was not found.
      */
     suspend fun cancelTask(taskId: String): Boolean {
         logger.info("TaskExecutionManager", "Cancelling task: $taskId")
@@ -157,11 +159,11 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Returns a list of all tasks, including queued, active, and completed, optionally filtered by status and assigned agent type.
+     * Retrieves all tasks managed by the system, including queued, active, and completed tasks, with optional filtering.
      *
-     * @param status If provided, only tasks with this status are included.
-     * @param agentType If provided, only tasks assigned to this agent type are included.
-     * @return A list of tasks matching the specified filters.
+     * @param status If specified, filters tasks to include only those with the given status.
+     * @param agentType If specified, filters tasks to include only those assigned to the given agent type.
+     * @return A list of tasks matching the provided status and agent type filters.
      */
     fun getTasks(status: TaskStatus? = null, agentType: String? = null): List<TaskExecution> {
         val allTasks = mutableListOf<TaskExecution>()
@@ -195,9 +197,9 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Launches a background coroutine that continuously processes tasks from the queue while processing is enabled.
+     * Starts a background coroutine that continuously processes tasks from the queue while processing is active.
      *
-     * Handles exceptions by logging errors and applying a longer delay before retrying. Intended to be called once during initialization to start task execution management.
+     * Handles exceptions by logging errors and applying a longer delay before retrying. Should be invoked once during initialization to enable ongoing task execution management.
      */
 
     private fun startTaskProcessor() {
@@ -218,9 +220,9 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Processes the next eligible task from the queue if concurrency limits allow.
+     * Processes the next task from the queue if concurrency limits permit.
      *
-     * Polls the task queue for the next task, checks if it is scheduled to run, and executes it if ready and concurrency limits are not exceeded. If the task is not yet scheduled to run, it is re-queued.
+     * Polls the task queue for the next eligible task, checks if it is scheduled to run, and executes it if ready. If the task's scheduled time is in the future, it is re-queued. Skips processing if the maximum number of concurrent tasks is already running.
      */
     private suspend fun processNextTask() {
         // Check if we can process more tasks
@@ -243,9 +245,11 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Executes a given task using its assigned agent, updating its status, timing, and result.
+     * Executes the specified task using its assigned agent and updates its status, timing, and result.
      *
-     * Marks the task as running, invokes the appropriate agent for execution, and updates the task's status and result upon completion or failure. Removes the task from active executions and updates execution statistics and queue status.
+     * Marks the task as running, invokes the appropriate agent for execution, and updates the task's status and result upon completion or failure. Removes the task from active executions and refreshes execution statistics and queue status.
+     *
+     * @param execution The task execution to process.
      */
     private suspend fun executeTask(execution: TaskExecution) {
         execution.status = TaskStatus.RUNNING
@@ -304,10 +308,10 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Executes the given task using the Aura agent.
+     * Processes the specified task execution using the Aura agent.
      *
-     * @param execution The task execution details to be processed.
-     * @return The response from the Aura agent after processing the request.
+     * @param execution The task execution details to be handled by the Aura agent.
+     * @return The response generated by the Aura agent after processing the task.
      */
     private suspend fun executeWithAura(execution: TaskExecution): AgentResponse {
         val request = AgentRequest(
@@ -319,12 +323,12 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Executes the given task using the Kai agent.
+     * Executes a task using the Kai agent.
      *
-     * Constructs an agent request from the task execution details and processes it with the Kai agent.
+     * Builds an agent request from the provided task execution and submits it to the Kai agent for processing.
      *
-     * @param execution The task execution to process.
-     * @return The response from the Kai agent after processing the request.
+     * @param execution The task execution to be processed by the Kai agent.
+     * @return The response returned by the Kai agent after processing the request.
      */
     private suspend fun executeWithKai(execution: TaskExecution): AgentResponse {
         val request = AgentRequest(
@@ -336,10 +340,10 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Executes the given task using the Genesis agent.
+     * Processes a task execution using the Genesis agent.
      *
-     * @param execution The task execution details to be processed.
-     * @return The response from the Genesis agent after processing the request.
+     * @param execution The task execution containing type, data, and priority information.
+     * @return The response generated by the Genesis agent after handling the request.
      */
     private suspend fun executeWithGenesis(execution: TaskExecution): AgentResponse {
         val request = AgentRequest(
@@ -351,12 +355,12 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Determines the most suitable agent to execute a given task based on agent preference or task type.
+     * Selects the most appropriate agent for executing a task based on agent preference or task type.
      *
-     * If a valid agent preference is specified in the task, it is used. Otherwise, the agent is selected by matching keywords in the task type to an agent, defaulting to "genesis" if no match is found.
+     * Uses the specified agent preference if valid; otherwise, assigns an agent by matching keywords in the task type, defaulting to "genesis" if no match is found.
      *
-     * @param execution The task execution instance for which to select an agent.
-     * @return The name of the agent to assign to the task ("aura", "kai", or "genesis").
+     * @param execution The task execution instance for which to determine the agent.
+     * @return The agent name ("aura", "kai", or "genesis") to assign to the task.
      */
     private fun determineOptimalAgent(execution: TaskExecution): String {
         // Use agent preference if specified and valid
@@ -379,9 +383,9 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Updates the execution statistics state with current counts and average execution time.
+     * Updates the execution statistics state flow with current task counts and average execution time.
      *
-     * Aggregates totals for active, completed, queued, and failed tasks, and computes the average execution time from completed tasks.
+     * Aggregates totals for active, completed, queued, and failed tasks, and calculates the average execution time from completed tasks. Updates the `_executionStats` state flow with the latest statistics.
      */
     private fun updateExecutionStats() {
         val total = activeExecutions.size + completedExecutions.size
@@ -400,7 +404,7 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Updates the current queue status with the latest queue size, number of active executions, maximum concurrency, and processing state.
+     * Updates the queue status state flow with the current queue size, number of active executions, maximum concurrency, and processing flag.
      */
     private fun updateQueueStatus() {
         _queueStatus.value = QueueStatus(
@@ -412,9 +416,9 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Calculates the average execution time in milliseconds for all completed tasks.
+     * Returns the average execution time in milliseconds for all completed tasks.
      *
-     * @return The average execution time in milliseconds, or 0 if there are no completed tasks.
+     * @return The average execution time in milliseconds, or 0 if no tasks have been completed.
      */
     private fun calculateAverageExecutionTime(): Long {
         val executions = completedExecutions.values
@@ -424,9 +428,9 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Releases resources and stops background processing for the task execution manager.
+     * Stops all background processing and releases resources used by the task execution manager.
      *
-     * Cancels all running coroutines and halts task processing.
+     * Cancels all running coroutines and halts further task scheduling or execution.
      */
     fun cleanup() {
         logger.info("TaskExecutionManager", "Cleaning up TaskExecutionManager")
@@ -502,12 +506,11 @@ data class QueueStatus(
 
 class TaskPriorityComparator : Comparator<TaskExecution> {
     /**
-     * Compares two task executions for ordering in the priority queue.
+     * Compares two `TaskExecution` instances for ordering in the priority queue.
      *
-     * Tasks with higher priority values are ordered before those with lower priority.
-     * If priorities are equal, tasks scheduled earlier are ordered first.
+     * Tasks with higher priority values are ordered before those with lower priority. If priorities are equal, tasks scheduled earlier are ordered first.
      *
-     * @return A negative integer if t1 should come before t2, a positive integer if t1 should come after t2, or zero if they are considered equal.
+     * @return A negative integer if the first task should come before the second, a positive integer if it should come after, or zero if they are considered equal.
      */
     override fun compare(t1: TaskExecution, t2: TaskExecution): Int {
         // Higher priority first, then earlier scheduled time
