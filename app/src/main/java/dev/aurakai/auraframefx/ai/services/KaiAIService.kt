@@ -28,10 +28,26 @@ class KaiAIService @Inject constructor(
     private val cloudStatusMonitor: CloudStatusMonitor,
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
-    override fun getName(): String? = "Kai"
-    override fun getType(): AgentType = AgentType.KAI
+    /**
+ * Returns the name of the agent, "Kai".
+ *
+ * @return The agent's name.
+ */
+override fun getName(): String? = "Kai"
+    /**
+ * Returns the agent type as `AgentType.KAI`.
+ *
+ * @return The type of this agent.
+ */
+override fun getType(): AgentType = AgentType.KAI
 
-    // Not part of Agent interface
+    /**
+         * Returns a map describing the capabilities supported by the Kai agent.
+         *
+         * The map includes keys for security, analysis, memory, and service implementation, each set to true.
+         *
+         * @return A map indicating the agent's supported features.
+         */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
             "security" to true,
