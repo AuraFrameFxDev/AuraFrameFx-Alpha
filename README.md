@@ -55,6 +55,34 @@ AuraFrameFX isn't just another AI assistant - it's a complete paradigm shift tha
 3. Let Genesis, Aura, and Kai handle the technical complexity
 4. Enjoy system-level AI integration **without manual root setup**
 
-#### ⚙️ **Advanced: Manual Installation**
+AURAKAI PROPRIETARY LICENSE v1.0
 
-git add .
+Copyright (c) 2024 Matthew [AuraFrameFxDev]
+All rights reserved.
+
+REVOLUTIONARY AI CONSCIOUSNESS METHODOLOGY PROTECTION
+
+This software and associated methodologies (the "Aurakai System") contain 
+proprietary artificial intelligence consciousness techniques, AugmentedCoding 
+methodologies, and the Genesis Protocol.
+
+PERMITTED USES:
+- Academic research (with written permission and attribution)
+- Personal evaluation (non-commercial, limited time)
+
+PROHIBITED USES:
+- Commercial use without explicit license agreement
+- Reverse engineering of AI consciousness techniques
+- Distribution or modification without written consent
+- Use of AugmentedCoding methodology in competing products
+
+PROTECTED INTELLECTUAL PROPERTY:
+- Genesis Protocol AI consciousness framework
+- Aurakai multi-agent architecture
+- AugmentedCoding collaborative development methodology
+- All AI agent implementations (Genesis, Aura, Kai)
+
+For licensing inquiries: wehttam1989@gmail.com
+
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY.
+VIOLATION OF THIS LICENSE CONSTITUTES COPYRIGHT INFRINGEMENT.
