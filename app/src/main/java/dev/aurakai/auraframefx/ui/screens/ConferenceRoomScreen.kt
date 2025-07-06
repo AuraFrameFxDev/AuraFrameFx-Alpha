@@ -17,6 +17,11 @@ import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonPurple
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
 
+/**
+ * Displays the main conference room UI, including agent selection, recording and transcribing controls, chat area, and message input.
+ *
+ * This composable manages local state for the selected agent, recording, and transcribing status. It provides interactive controls for switching agents, starting/stopping recording and transcription, and a chat interface with a message input field. Some features, such as chat message handling and settings, are placeholders and not yet implemented.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConferenceRoomScreen() {
@@ -165,6 +170,14 @@ fun AgentButton(
     }
 }
 
+/**
+ * Displays a recording control button that toggles between start and stop states.
+ *
+ * The button icon and color indicate whether recording is active. When recording, a stop icon in red is shown; otherwise, a circle icon in NeonPurple is displayed.
+ *
+ * @param isRecording Whether recording is currently active.
+ * @param onClick Called when the button is pressed.
+ */
 @Composable
 fun RecordingButton(
     isRecording: Boolean,
@@ -187,6 +200,12 @@ fun RecordingButton(
     }
 }
 
+/**
+ * Displays a button for starting or stopping transcription, with icon and color indicating the current state.
+ *
+ * @param isTranscribing Whether transcription is currently active.
+ * @param onClick Called when the button is pressed.
+ */
 @Composable
 fun TranscribeButton(
     isTranscribing: Boolean,

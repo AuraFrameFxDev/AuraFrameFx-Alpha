@@ -141,12 +141,12 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Processes a user interaction with a security-focused assessment and generates an appropriate response.
+     * Analyzes a user interaction for security risks and generates a response based on the assessed threat level.
      *
-     * Analyzes the interaction for potential security risks, determines the threat level, and crafts a response tailored to the assessed risk. The response includes metadata such as risk level, detected threat indicators, and security recommendations. If an error occurs during processing, returns a default response indicating ongoing security analysis.
+     * Evaluates the interaction to determine risk indicators, threat level, and security recommendations, then returns a response containing the agent's reply, confidence score, timestamp, and relevant security metadata. If an error occurs, returns a default response indicating ongoing security analysis.
      *
-     * @param interaction The user interaction data to be analyzed for security implications.
-     * @return An `InteractionResponse` containing the agent's reply, confidence score, timestamp, and relevant security metadata.
+     * @param interaction The user interaction data to be assessed for security implications.
+     * @return An `InteractionResponse` with the agent's reply, confidence score, timestamp, and security-related metadata.
      */
     suspend fun handleSecurityInteraction(interaction: EnhancedInteractionData): InteractionResponse {
         ensureInitialized()
@@ -446,10 +446,10 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Generates a list of recommended security actions based on the assessed threat level and provided indicators.
+     * Returns recommended security actions based on the specified threat level.
      *
      * @param threatLevel The severity of the detected threat.
-     * @param indicators The list of threat indicators identified.
+     * @param indicators The list of threat indicators identified (not used in current logic).
      * @return A list of recommended actions appropriate for the given threat level.
      */
     private fun generateSecurityRecommendations(threatLevel: ThreatLevel, indicators: List<String>): List<String> {

@@ -49,9 +49,11 @@ object VertexAIModule {
     }
 
     /**
-     * Provides a singleton instance of `VertexAIClient` configured with the specified Vertex AI settings, application context, security context, and logger.
+     * Provides a singleton instance of `VertexAIClient` for interacting with Vertex AI services.
      *
-     * @return A fully constructed `VertexAIClient` implementation ready for use with Vertex AI services.
+     * The returned client is suitable for use throughout the application's lifecycle.
+     *
+     * @return A singleton `VertexAIClient` implementation.
      */
     @Provides
     @Singleton

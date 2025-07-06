@@ -151,10 +151,9 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Recalculates and updates statistics for all active context chains.
+     * Updates context chain statistics, including total count, number of recently active chains, longest chain length, and last update timestamp.
      *
-     * Updates the total number of chains, the count of recently updated (active) chains,
-     * the length of the longest chain, and the timestamp of the last update.
+     * Recalculates statistics based on the current set of active context chains and updates the state accordingly.
      */
     private fun updateStats() {
         val chains = _activeContexts.value.values
