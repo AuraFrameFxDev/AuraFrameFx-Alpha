@@ -12,7 +12,7 @@ object TimeUtils {
     
     fun now(): Instant = Instant.now(systemClock)
     
-    fun currentTimestamp(): Long = System.currentTimeMillis()
+    fun currentTimestamp(): Long = now().toEpochMilli()
     
     fun durationSince(instant: Instant): Duration {
         return Duration.between(instant, now())
