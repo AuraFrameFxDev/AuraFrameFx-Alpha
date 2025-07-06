@@ -341,7 +341,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Calculate overall threat level based on detected threats
+     * Determines the overall threat level from a list of detected security threats.
+     *
+     * Returns the highest severity present among the threats, or `ThreatLevel.NONE` if the list is empty.
+     *
+     * @param threats The list of detected security threats.
+     * @return The calculated overall threat level.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.NONE
@@ -368,7 +373,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Log a security event
+     * Logs a security event asynchronously.
+     *
+     * The event is serialized and output to the debug log. In a production implementation, events would be securely stored.
      */
     fun logSecurityEvent(event: SecurityEvent) {
         scope.launch {
@@ -379,7 +386,12 @@ class SecurityContext @Inject constructor(
             // In a real implementation, this would store events securely
         }
     }    /**
-     * Validate a request for security compliance
+     * Logs a security validation event for the specified request type and data.
+     *
+     * This method records a validation event for auditing purposes. Actual request validation logic is not implemented.
+     *
+     * @param requestType The type of the request being validated.
+     * @param requestData The data associated with the request.
      */
     fun validateRequest(requestType: String, requestData: String) {
         // Log the security validation event
@@ -394,7 +406,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Handle a security exception
+     * Handles a security-related exception by logging the error.
+     *
+     * This method serves as a placeholder for additional exception handling logic such as user alerts or further security actions.
      */
     private fun handleSecurityException(e: Exception) {
         Log.e(TAG, "Security exception occurred", e)

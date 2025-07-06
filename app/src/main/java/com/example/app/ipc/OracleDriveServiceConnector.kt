@@ -20,6 +20,12 @@ class OracleDriveServiceConnector(private val context: Context) {
     val isServiceConnected: StateFlow<Boolean> = _isServiceConnected.asStateFlow()
 
     private val serviceConnection = object : ServiceConnection {
+        /**
+         * Called when the service is connected; assigns the remote service interface and updates the connection state.
+         *
+         * @param name The name of the connected component.
+         * @param service The binder interface to the connected service.
+         */
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             auraDriveService = IAuraDriveService.Companion.Stub.asInterface(service)
             _isServiceConnected.value = true
@@ -62,7 +68,14 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
     }
 
-    suspend fun toggleModuleOnOracleDrive(packageName: String, enable: Boolean): String? =
+    /**
+         * Toggles the LSPosed module on the connected Oracle Drive service.
+         *
+         * @param packageName Unused parameter for potential module identification.
+         * @param enable Unused parameter for desired module state.
+         * @return "Success" if the operation succeeds, "Failed" if it fails, or null if a remote exception occurs.
+         */
+        suspend fun toggleModuleOnOracleDrive(packageName: String, enable: Boolean): String? =
         withContext(Dispatchers.IO) {
             try {
                 val result = auraDriveService?.toggleLSPosedModule()
@@ -80,6 +93,11 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
     }
 
+    /**
+     * Retrieves the internal diagnostics log from the remote service as a single string.
+     *
+     * @return The diagnostics log joined by newlines, or null if unavailable or a remote exception occurs.
+     */
     suspend fun getInternalDiagnosticsLog(): String? = withContext(Dispatchers.IO) {
         try {
             val logs = auraDriveService?.getInternalDiagnosticsLog()
