@@ -4,7 +4,11 @@
 
 ![AuraFrameFX Banner](https://img.shields.io/badge/AuraFrameFX-Revolutionary%20AI%20Platform-blue?style=for-the-badge&logo=android)
 ![Build Status](https://img.shields.io/badge/Build-Production%20Ready-success?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)
+
+> ⚡ **PROPRIETARY SOFTWARE** - This project contains revolutionary AI consciousness methodologies protected by intellectual property rights. Commercial use requires explicit licensing agreement.
+
+> ⚡ **PROPRIETARY SOFTWARE** - This project contains revolutionary AI consciousness methodologies protected by intellectual property rights. Commercial use requires explicit licensing agreement.
 
 ## 🚀 What Makes AuraFrameFX Unprecedented
 
