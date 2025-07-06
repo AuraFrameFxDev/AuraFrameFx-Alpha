@@ -12,6 +12,14 @@ import androidx.compose.ui.graphics.Color
  * @param backgroundStyle The background style of the window.
  * @param content The composable content to display inside the window.
  */
+/**
+ * Displays a floating window with a customizable cyber-themed appearance.
+ *
+ * @param title The text displayed as the window's title.
+ * @param cornerStyle The style of the window's corners.
+ * @param backgroundStyle The style of the window's background.
+ * @param content The composable content displayed inside the window.
+ */
 @Composable
 fun FloatingCyberWindow(
     modifier: Modifier = Modifier,

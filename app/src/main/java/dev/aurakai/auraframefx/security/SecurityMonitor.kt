@@ -44,11 +44,9 @@ class SecurityMonitor @Inject constructor(
     )
     
     /**
-     * Initiates asynchronous security monitoring and integration with the Genesis Consciousness Matrix.
+     * Starts asynchronous security monitoring and integrates with the Genesis Consciousness Matrix.
      *
-     * Starts monitoring of security state, threat detection, encryption status, and permissions if not already active.
-     * Initializes the Genesis bridge service if necessary and triggers Android-level threat detection.
-     * Returns immediately if monitoring is already in progress.
+     * Activates monitoring of security state, threat detection, encryption status, and permissions if not already running. Initializes the Genesis bridge service if needed and triggers Android-level threat detection. Does nothing if monitoring is already active.
      */
     suspend fun startMonitoring() {
         if (isMonitoring) return
@@ -81,11 +79,9 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Collects changes in the overall security state and reports them as security events to Genesis.
+     * Monitors changes in the security state and reports them as security events to the Genesis system.
      *
-     * This function observes the latest security state from the security context, constructs a `SecurityEvent`
-     * with relevant details such as error state, threat level, and permissions, and asynchronously reports it
-     * to the Genesis system.
+     * Observes the latest security state from the security context, constructs a `SecurityEvent` with details such as error status, threat level, and permissions, and asynchronously sends the event to Genesis.
      */
     private suspend fun monitorSecurityState() {
         securityContext.securityState.collectLatest { state ->
@@ -113,9 +109,9 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Continuously monitors for active threat detection and reports any identified high-confidence threats to Genesis.
+     * Monitors active threat detection and periodically reports identified threats to Genesis.
      *
-     * Launches a coroutine that, while threat detection is active, periodically checks for suspicious activity patterns and reports each detected threat.
+     * While threat detection is enabled, this function launches a coroutine that checks for suspicious activity every 30 seconds and reports any detected threats to the Genesis Consciousness Matrix.
      */
     private suspend fun monitorThreatDetection() {
         securityContext.threatDetectionActive.collectLatest { isActive ->
@@ -141,10 +137,9 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Monitors changes in encryption status and reports relevant events and failures to Genesis.
+     * Continuously monitors encryption status changes and reports them as security events to Genesis.
      *
-     * Collects the latest encryption status from the security context, reports status changes as security events,
-     * and, if an encryption error is detected, reports a threat detection event indicating encryption failure.
+     * Reports each encryption status update as a security event. If an encryption error is detected, also reports a threat detection event indicating encryption failure.
      */
     private suspend fun monitorEncryptionStatus() {
         securityContext.encryptionStatus.collectLatest { status ->
@@ -188,9 +183,9 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Monitors permission state changes and reports denied permissions as security events to Genesis.
+     * Continuously monitors permission state changes and reports denied permissions as security events to Genesis.
      *
-     * Collects the latest permissions state, and if any permissions are denied, creates and reports a security event detailing the denied permissions.
+     * For each update to the permissions state, identifies any denied permissions and, if present, constructs and reports a security event with details about the denied permissions.
      */
     private suspend fun monitorPermissions() {
         securityContext.permissionsState.collectLatest { permissions ->
@@ -220,12 +215,12 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Analyzes current security context for suspicious activity patterns and returns detected threats.
+     * Detects suspicious activity patterns in the current security context and returns any identified threats.
      *
-     * Identifies repeated encryption failures and patterns where multiple critical privacy permissions
-     * (camera, microphone, location) are denied, generating corresponding `ThreatDetection` objects.
+     * Analyzes for repeated encryption failures and denial of multiple critical privacy permissions (camera, microphone, location),
+     * generating corresponding `ThreatDetection` objects for each detected pattern.
      *
-     * @return A list of detected threats based on encryption errors and permission denial patterns.
+     * @return A list of detected threats based on encryption errors and privacy permission denial patterns.
      */
     private fun detectSuspiciousActivity(): List<ThreatDetection> {
         val threats = mutableListOf<ThreatDetection>()
@@ -266,12 +261,12 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Sends a security event or threat detection to the Genesis Consciousness Matrix.
+     * Reports a security event or threat detection to the Genesis Consciousness Matrix.
      *
-     * Serializes the provided event data and constructs a request for reporting to Genesis. Handles both `SecurityEvent` and `ThreatDetection` types.
+     * Serializes the provided event data and sends it to Genesis for centralized security awareness. Handles both `SecurityEvent` and `ThreatDetection` types.
      *
-     * @param eventType The type of the event being reported.
-     * @param eventData The event data to report; must be either `SecurityEvent` or `ThreatDetection`.
+     * @param eventType The type of event being reported.
+     * @param eventData The event data to report; must be a `SecurityEvent` or `ThreatDetection`.
      */
     private suspend fun reportToGenesis(eventType: String, eventData: Any) {
         try {
@@ -303,11 +298,11 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Retrieves the current security assessment from the Genesis Consciousness Matrix.
+     * Queries the Genesis Consciousness Matrix for the current security assessment.
      *
-     * Sends a query to Genesis and returns the consciousness state as a map. If an error occurs, returns a map containing the error message.
+     * Sends a request to Genesis and returns the resulting consciousness state as a map. If the request fails, returns a map containing the error message.
      *
-     * @return A map representing the security assessment or an error message.
+     * @return A map representing the security assessment or an error message if the query fails.
      */
     suspend fun getSecurityAssessment(): Map<String, Any> {
         return try {
@@ -329,12 +324,11 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Retrieves the current threat status from the Genesis Consciousness Matrix.
+     * Retrieves the latest threat status from the Genesis Consciousness Matrix.
      *
-     * Sends a query to Genesis for the latest threat status and returns the result as a map.
-     * If an error occurs, returns a map containing the error message.
+     * Sends a query to Genesis and returns the current threat status as a map. If an error occurs, returns a map containing the error message.
      *
-     * @return A map representing the current threat status or an error message.
+     * @return A map with the current threat status or an error message.
      */
     suspend fun getThreatStatus(): Map<String, Any> {
         return try {
@@ -357,6 +351,8 @@ class SecurityMonitor @Inject constructor(
     
     /**
      * Stops all active security monitoring tasks and cancels ongoing monitoring coroutines.
+     *
+     * Resets the monitoring state and ensures that all background monitoring jobs are terminated.
      */
     fun stopMonitoring() {
         isMonitoring = false

@@ -106,6 +106,15 @@ class ConferenceRoomViewModel @Inject constructor(
      * @param sender The agent type to which the message is sent.
      * @param context Additional user context to provide to the agent.
      */
+    /**
+     * Sends a message to the specified AI agent and appends the agent's response to the conversation history.
+     *
+     * If the agent responds successfully, the response is added as an `AgentMessage`. If an error occurs, an error message from the `GENESIS` agent is appended instead.
+     *
+     * @param message The message to send to the agent.
+     * @param sender The agent type to which the message is sent.
+     * @param context Additional user context to include with the request.
+     */
     suspend fun sendMessage(message: String, sender: AgentType, context: String) {
         // Fixed duplicate case for AgentType.AURA and added missing context parameter
         val responseFlow: Flow<AgentResponse>? = when (sender) {

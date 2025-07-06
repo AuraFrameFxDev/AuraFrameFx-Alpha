@@ -11,10 +11,10 @@ object VertexAIUtils {
     private const val TAG = "VertexAIUtils"
 
     /**
-     * Constructs a Vertex AI configuration with default project, location, endpoint, and model name.
+     * Creates a Vertex AI configuration with default project, location, endpoint, and model name.
      *
      * @param apiKey Optional API key to include in the configuration.
-     * @return A [VertexAIConfig] instance populated with default values and the provided API key.
+     * @return A VertexAIConfig instance populated with default values and the provided API key.
      */
     fun createVertexAIConfig(apiKey: String? = null): VertexAIConfig {
         // TODO: Reported as unused. Implement actual config creation or remove.
@@ -39,11 +39,11 @@ object VertexAIUtils {
     }
 
     /**
-     * Logs errors related to Vertex AI.
-     * @param tag Custom tag for logging.
-     * @param message Error message to log.
-     * @param throwable Optional throwable for stack trace.
-     * TODO: Reported as unused. Implement or remove if not needed.
+     * Logs an error message with an optional throwable for stack trace using the specified tag.
+     *
+     * @param _tag The tag to use for logging.
+     * @param _message The error message to log.
+     * @param _throwable An optional throwable whose stack trace will be logged.
      */
     fun logErrors(_tag: String = TAG, _message: String, _throwable: Throwable? = null) {
         // TODO: Reported as unused. Implement actual logging.
@@ -55,9 +55,7 @@ object VertexAIUtils {
     }
 
     /**
-     * Checks whether the provided VertexAIConfig is valid.
-     *
-     * A configuration is considered valid if it is not null and both its projectId and location fields are not blank.
+     * Determines if the given VertexAIConfig is valid by checking that it is non-null and that both its projectId and location fields are not blank.
      *
      * @return `true` if the configuration is valid; `false` otherwise.
      */
@@ -70,13 +68,13 @@ object VertexAIUtils {
     }
 
     /**
-     * Attempts to generate content using Vertex AI with the provided configuration and prompt, returning the result or null if validation fails.
+     * Generates content using Vertex AI with the specified configuration and prompt.
      *
-     * If the configuration is invalid, logs an error and returns null. Otherwise, returns placeholder content simulating a generated response.
+     * Validates the provided configuration before attempting content generation. Returns placeholder content if the configuration is valid, or null if validation fails.
      *
-     * @param _config The VertexAIConfig containing connection and model details.
-     * @param _prompt The prompt to use for content generation.
-     * @return The generated content as a String, or null if the configuration is invalid.
+     * @param _config The configuration containing Vertex AI connection and model details.
+     * @param _prompt The prompt to use for generating content.
+     * @return The generated content as a string, or null if the configuration is invalid.
      */
     suspend fun safeGenerateContent(_config: VertexAIConfig, _prompt: String): String? {
         // TODO: Reported as unused. Implement actual content generation using Vertex AI SDK.

@@ -11,6 +11,11 @@ import android.content.Context
  *
  * @return The name of the application as shown to users.
  */
+/**
+ * Returns the application's display name as defined in the app's manifest.
+ *
+ * @return The app's display name.
+ */
 fun Context.getAppName(): String {
     return this.packageManager.getApplicationLabel(this.applicationInfo).toString()
 }

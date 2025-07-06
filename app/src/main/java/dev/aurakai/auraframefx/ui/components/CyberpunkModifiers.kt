@@ -19,6 +19,14 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
      *
      * Adds an 8.dp shadow and a 1.dp border with 4.dp rounded corners using a neon blue color for a cyberpunk aesthetic.
      */
+    /**
+     * Applies a neon blue edge glow effect to the UI component.
+     *
+     * Adds a shadow and border with rounded corners to create a cyberpunk-inspired glowing appearance.
+     * The effect uses a neon blue color for both the shadow and border, with the border rendered at 60% opacity.
+     *
+     * @return The modifier with the neon blue edge glow effect applied.
+     */
     fun Modifier.cyberEdgeGlow() = this
     .shadow(
         elevation = 8.dp,
@@ -33,9 +41,10 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
     )
 
 /**
-     * Applies a digital glitch visual effect with a neon purple shadow and border to the UI component.
+     * Applies a digital glitch effect with a neon purple shadow and border to the UI component.
      *
-     * Adds a 4.dp elevation shadow and a 2.dp rounded border using a vibrant purple color to create a cyberpunk glitch aesthetic.
+     * This modifier creates a cyberpunk-inspired glitch aesthetic by adding a 4.dp shadow and a 2.dp rounded border in vibrant neon purple.
+     * @return The modified [Modifier] with the digital glitch effect applied.
      */
     fun Modifier.digitalGlitchEffect() = this
     .shadow(
@@ -51,9 +60,11 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
     )
 
 /**
-     * Applies a cyberpunk-inspired pixel effect with a teal neon shadow and thin border to the UI component.
+     * Applies a pixelated cyberpunk effect with a neon teal shadow and border to the UI component.
      *
-     * Adds a subtle shadow and border with minimal corner rounding for a digital pixelated appearance.
+     * Adds a 6.dp neon teal shadow and a 1.dp border with minimal corner rounding for a digital, pixel-inspired appearance.
+     * 
+     * @return The modified [Modifier] with the pixel effect applied.
      */
     fun Modifier.digitalPixelEffect() = this
     .shadow(
