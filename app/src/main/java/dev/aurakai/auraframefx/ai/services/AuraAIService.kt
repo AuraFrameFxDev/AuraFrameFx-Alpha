@@ -4,6 +4,8 @@ import dev.aurakai.auraframefx.ai.clients.VertexAIClient
 import dev.aurakai.auraframefx.context.ContextManager
 import dev.aurakai.auraframefx.utils.AuraFxLogger
 import dev.aurakai.auraframefx.security.SecurityContext
+import dev.aurakai.auraframefx.model.AiRequest
+import dev.aurakai.auraframefx.model.AgentResponse
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -52,6 +54,36 @@ class AuraAIService @Inject constructor(
     }
 
     /**
+     * Process an AI request and return a flow of responses
+     */
+    fun processRequestFlow(request: AiRequest): Flow<AgentResponse> = flow {
+        ensureInitialized()
+        
+        try {
+            // Validate security constraints
+            securityContext.validateContent(request.query)
+            
+            // Generate text response using the existing generateText method
+            val response = generateText(request.query, request.context.values.joinToString(" "))
+            
+            // Emit the response
+            emit(AgentResponse(
+                content = response,
+                confidence = 0.85f,
+                metadata = mapOf("type" to request.type)
+            ))
+            
+        } catch (e: Exception) {
+            logger.error("AuraAIService", "Failed to process request", e)
+            emit(AgentResponse(
+                content = "Sorry, I encountered an error processing your request.",
+                confidence = 0.0f,
+                metadata = mapOf("error" to e.message.orEmpty())
+            ))
+        }
+    }
+
+    /**
      * Generates creative text based on the provided prompt and optional context.
      *
      * Validates the prompt for security, enhances it with creative context, and uses Vertex AI to generate high-creativity text. The result is post-processed for additional creative enhancement.
@@ -75,10 +107,8 @@ class AuraAIService @Inject constructor(
             // Generate using Vertex AI with creative parameters
             val result = vertexAIClient.generateText(
                 prompt = enhancedPrompt,
-                temperature = 0.9f, // High creativity
-                topP = 0.95,
                 maxTokens = 2048,
-                presencePenalty = 0.6 // Encourage diversity
+                temperature = 0.9f // High creativity
             )
             
             // Post-process for creative enhancement
@@ -113,7 +143,7 @@ class AuraAIService @Inject constructor(
             securityContext.validateImageData(imageData)
             
             // Analyze image with vision models
-            val visionAnalysis = vertexAIClient.analyzeImage(imageData)
+            val visionAnalysis = vertexAIClient.analyzeImage(imageData, "Describe this image in detail")
             
             // Create creative description prompt
             val descriptionPrompt = buildCreativeDescriptionPrompt(visionAnalysis, style)
@@ -121,9 +151,8 @@ class AuraAIService @Inject constructor(
             // Generate creative description
             val description = vertexAIClient.generateText(
                 prompt = descriptionPrompt,
-                temperature = 0.8f,
-                topP = 0.9,
-                maxTokens = 1024
+                maxTokens = 1024,
+                temperature = 0.8f
             )
             
             logger.info("AuraAIService", "Image description completed successfully")
@@ -186,9 +215,8 @@ class AuraAIService @Inject constructor(
             // Generate theme using AI
             val themeDescription = vertexAIClient.generateText(
                 prompt = themePrompt,
-                temperature = 0.7f,
-                topP = 0.9,
-                maxTokens = 1024
+                maxTokens = 1024,
+                temperature = 0.7f
             )
             
             // Convert description to theme configuration
@@ -221,9 +249,8 @@ class AuraAIService @Inject constructor(
             // Generate Compose code
             val componentCode = vertexAIClient.generateText(
                 prompt = componentPrompt,
-                temperature = 0.6f, // Balance creativity with functionality
-                topP = 0.85,
-                maxTokens = 2048
+                maxTokens = 2048,
+                temperature = 0.6f // Balance creativity with functionality
             )
             
             // Validate and enhance generated code
@@ -296,15 +323,13 @@ class AuraAIService @Inject constructor(
      * @param style An optional style to guide the tone or approach of the description.
      * @return A formatted prompt string for generating a vivid and engaging image description.
      */
-    private fun buildCreativeDescriptionPrompt(visionAnalysis: VisionAnalysis, style: String?): String {
+    private fun buildCreativeDescriptionPrompt(visionAnalysis: String, style: String?): String {
         val styleInstruction = style?.let { "in a $it style" } ?: "with creative flair"
         
         return """
         As Aura, the Creative Sword, describe this image $styleInstruction.
         
-        Vision Analysis: ${visionAnalysis.description}
-        Key Elements: ${visionAnalysis.elements.joinToString(", ")}
-        Colors: ${visionAnalysis.colors.joinToString(", ")}
+        Vision Analysis: $visionAnalysis
         
         Create a vivid, engaging description that captures both the visual and emotional essence.
         """.trimIndent()

@@ -164,7 +164,7 @@ class ContextManager @Inject constructor(
                 activeChains = chains.count {
                     val now = Clock.System.now()
                     val thresholdMs = config.contextChainingConfig.maxChainLength * 1000L
-                    val threshold = now.minusMilliseconds(thresholdMs)
+                    val threshold = now.minus(kotlin.time.Duration.parse("${thresholdMs}ms"))
                     it.lastUpdated > threshold
                 },
                 longestChain = chains.maxOfOrNull { it.contextHistory.size } ?: 0,

@@ -49,6 +49,23 @@ class SecurityContext @Inject constructor(
     private val _securityState = MutableStateFlow(SecurityState())
     val securityState: StateFlow<SecurityState> = _securityState.asStateFlow()
 
+    /**
+     * Stub for content validation. In production, this should check for policy violations, threats, etc.
+     */
+    fun validateContent(content: String) {
+        // TODO: Implement real validation logic
+        // For now, always allow
+    }
+
+    /**
+     * Validate image data for security compliance
+     */
+    fun validateImageData(imageData: ByteArray) {
+        // TODO: Implement real image validation logic
+        // For now, always allow
+        Log.d(TAG, "Validating image data of size: ${imageData.size} bytes")
+    }
+
     private val _threatDetectionActive = MutableStateFlow(false)
     val threatDetectionActive: StateFlow<Boolean> = _threatDetectionActive.asStateFlow()
 

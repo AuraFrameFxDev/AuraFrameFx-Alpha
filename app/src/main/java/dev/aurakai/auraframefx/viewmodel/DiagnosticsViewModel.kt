@@ -60,31 +60,31 @@ class DiagnosticsViewModel @Inject constructor(
                 currentMap.toMutableMap().apply {
                     put(
                         "Last Full Sync (Offline Data)",
-                        offlineData?.lastFullSyncTimestamp?.let { ts ->
-                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(ts))
-                        } ?: "N/A"
+                        if (offlineData?.lastFullSyncTimestamp != null) {
+                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(offlineData.lastFullSyncTimestamp))
+                        } else {
+                            "N/A"
+                        }
                     )
                     put(
                         "Offline AI Config Version (Timestamp)",
-                        (offlineData?.aiConfig?.lastSyncTimestamp ?: 0L).let { ts ->
-                            if (ts == 0L) "N/A" else SimpleDateFormat(
-                                "yyyy-MM-dd HH:mm:ss",
-                                Locale.US
-                            ).format(Date(ts))
+                        if (offlineData?.aiConfig?.lastSyncTimestamp != null && offlineData.aiConfig.lastSyncTimestamp != 0L) {
+                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(offlineData.aiConfig.lastSyncTimestamp))
+                        } else {
+                            "N/A"
                         }
                     )
                     put(
                         "Monitoring Enabled",
-                        ((offlineData?.systemMonitoring?.enabled ?: false).toString())
+                        (offlineData?.systemMonitoring?.enabled ?: false).toString()
                     )
                     put(
                         "Contextual Memory Last Update",
-                        offlineData?.contextualMemory?.lastUpdateTimestamp?.let { ts ->
-                            if (ts == 0L) "N/A" else SimpleDateFormat(
-                                "yyyy-MM-dd HH:mm:ss",
-                                Locale.US
-                            ).format(Date(ts))
-                        } ?: "N/A"
+                        if (offlineData?.contextualMemory?.lastUpdateTimestamp != null && offlineData.contextualMemory.lastUpdateTimestamp != 0L) {
+                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(offlineData.contextualMemory.lastUpdateTimestamp))
+                        } else {
+                            "N/A"
+                        }
                     )
                     // Add more status items as needed
                 }

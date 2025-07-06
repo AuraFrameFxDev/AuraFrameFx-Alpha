@@ -162,7 +162,7 @@ class KaiAgent @Inject constructor(
                 ThreatLevel.HIGH -> generateHighSecurityResponse(interaction, securityAssessment)
                 ThreatLevel.MEDIUM -> generateMediumSecurityResponse(interaction, securityAssessment)
                 ThreatLevel.LOW -> generateLowSecurityResponse(interaction, securityAssessment)
-                ThreatLevel.NONE -> generateStandardSecurityResponse(interaction)
+                ThreatLevel.LOW -> generateStandardSecurityResponse(interaction)
                 ThreatLevel.CRITICAL -> generateCriticalSecurityResponse(interaction, securityAssessment)
             }
             
@@ -454,8 +454,7 @@ class KaiAgent @Inject constructor(
      */
     private fun generateSecurityRecommendations(threatLevel: ThreatLevel, indicators: List<String>): List<String> {
         return when (threatLevel) {
-            ThreatLevel.NONE -> listOf("No action required", "Continue normal operations")
-            ThreatLevel.LOW -> listOf("Standard monitoring", "Log analysis")
+            ThreatLevel.LOW -> listOf("No action required", "Continue normal operations", "Standard monitoring", "Log analysis")
             ThreatLevel.MEDIUM -> listOf("Enhanced monitoring", "Access review", "Security scan")
             ThreatLevel.HIGH -> listOf("Immediate isolation", "Forensic analysis", "Incident response")
             ThreatLevel.CRITICAL -> listOf("Emergency shutdown", "Full system isolation", "Emergency response")

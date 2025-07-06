@@ -348,10 +348,10 @@ class AuraController @Inject constructor(
     }
 
     /**
- * Returns the current status of all AI agents.
- *
- * @return A map of agent names to their current statuses.
- */
+     * Returns the current status of all AI agents.
+     *
+     * @return A map of agent names to their current statuses.
+     */
     fun getAgentStatuses(): Map<String, AgentStatus> = _agentStates.value
 
     /**
