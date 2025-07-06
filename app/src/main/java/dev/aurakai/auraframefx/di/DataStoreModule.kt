@@ -30,11 +30,11 @@ object DataStoreModule {
     // private val dataStoreDelegate: Any? = null // TODO: Reported as unused. Remove or implement if this was a specific pattern.
 
     /**
-     * Provides a singleton DataStore for storing application preferences.
+     * Provides a singleton DataStore instance for managing application preferences.
      *
-     * The DataStore is backed by a file named "aura_settings" in the application's preferences directory.
+     * The DataStore is backed by a file named "aura_settings" located in the application's preferences directory.
      *
-     * @return A DataStore instance for managing key-value preferences.
+     * @return A DataStore for key-value preference storage.
      */
     @Provides
     @Singleton

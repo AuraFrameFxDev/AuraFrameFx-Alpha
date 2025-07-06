@@ -50,11 +50,11 @@ class SecurityContext @Inject constructor(
     val securityState: StateFlow<SecurityState> = _securityState.asStateFlow()
 
     /**
-     * Placeholder for validating content against security policies or threats.
+     * Accepts content for processing without performing any security validation.
      *
-     * Currently allows all content without performing any checks.
+     * This is a placeholder method; all content is currently allowed without checks.
      *
-     * @param content The content to be validated.
+     * @param content The content to be accepted.
      */
     fun validateContent(content: String) {
         // TODO: Implement real validation logic
@@ -62,11 +62,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Placeholder for validating image data against security policies.
+     * Accepts image data for validation against security policies.
      *
-     * Currently accepts all image data without performing any checks.
+     * Currently allows all image data without performing any validation.
      *
-     * @param imageData The image data to be validated.
+     * @param imageData The image data to validate.
      */
     fun validateImageData(imageData: ByteArray) {
         // TODO: Implement real image validation logic

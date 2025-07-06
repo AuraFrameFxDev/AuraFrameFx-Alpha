@@ -17,6 +17,11 @@ import androidx.compose.ui.unit.dp
  *
  * Arranges the status panel, module manager, and AI command bar in a vertically structured layout within a scaffold.
  */
+/**
+ * Displays the main Oracle Drive control screen with system status, module management, and AI command input sections.
+ *
+ * Arranges the status panel, module manager, and AI command bar vertically within a scaffold layout.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OracleDriveControlScreen() {
@@ -102,6 +107,13 @@ fun ModuleListItem(module: OracleModule) {
     }
 }
 
+/**
+ * Displays an input bar for entering AI commands with a send button.
+ *
+ * Provides a text field for user input and a trailing send icon button. The send action is not implemented.
+ *
+ * @param modifier Modifier to be applied to the input bar.
+ */
 @Composable
 fun AiCommandBar(modifier: Modifier = Modifier) {
     var text by remember { mutableStateOf("") }

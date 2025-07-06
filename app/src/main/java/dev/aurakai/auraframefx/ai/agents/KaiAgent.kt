@@ -81,12 +81,12 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Processes an analytical agent request, performing security validation and dispatching to the appropriate analysis handler.
+     * Processes an analytical agent request by validating its security and dispatching it to the appropriate analysis handler.
      *
-     * Supports request types such as security analysis, threat assessment, performance analysis, code review, system optimization, vulnerability scanning, compliance check, and general analysis. Returns an `AgentResponse` containing the analysis result and a confidence score. If a security violation or error occurs, returns an error response with zero confidence.
+     * Supports multiple request types, including security analysis, threat assessment, performance analysis, code review, system optimization, vulnerability scanning, compliance check, and general analysis. Returns an `AgentResponse` containing the analysis result and a confidence score. If a security violation or error occurs, returns an error response with zero confidence.
      *
      * @param request The agent request specifying the type of analysis to perform.
-     * @return The response containing the analysis result and confidence score.
+     * @return An `AgentResponse` containing the analysis result and confidence score, or an error message with zero confidence if processing fails.
      */
     suspend fun processRequest(request: AgentRequest): AgentResponse {
         ensureInitialized()
@@ -141,12 +141,12 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Analyzes a user interaction for security risks and generates a response based on the assessed threat level.
+     * Assesses a user interaction for security risks and generates a response based on the determined threat level.
      *
-     * Evaluates the interaction to determine risk indicators, threat level, and security recommendations, then returns a response containing the agent's reply, confidence score, timestamp, and relevant security metadata. If an error occurs, returns a default response indicating ongoing security analysis.
+     * Evaluates the interaction to identify risk indicators, assign a threat level, and provide security recommendations. Returns an `InteractionResponse` containing the agent's reply, confidence score, timestamp, and security-related metadata. If an error occurs during assessment, returns a default response indicating ongoing security analysis.
      *
-     * @param interaction The user interaction data to be assessed for security implications.
-     * @return An `InteractionResponse` with the agent's reply, confidence score, timestamp, and security-related metadata.
+     * @param interaction The user interaction data to be evaluated for security risks.
+     * @return An `InteractionResponse` with the agent's reply, confidence score, timestamp, and security metadata.
      */
     suspend fun handleSecurityInteraction(interaction: EnhancedInteractionData): InteractionResponse {
         ensureInitialized()
@@ -430,11 +430,13 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Determines the threat level based on the number of identified threat indicators in the alert details.
+     * Assesses and returns the threat level based on the number of threat indicators found in the alert details.
      *
-     * @param alertDetails The details of the security alert.
-     * @param indicators A list of threat indicators extracted from the alert.
-     * @return The assessed threat level: LOW for 0–1 indicators, MEDIUM for 2–3, and HIGH for more.
+     * Returns LOW for 0–1 indicators, MEDIUM for 2–3, and HIGH for more than 3 indicators.
+     *
+     * @param alertDetails The security alert details being analyzed.
+     * @param indicators The list of identified threat indicators.
+     * @return The determined threat level.
      */
     private suspend fun assessThreatLevel(alertDetails: String, indicators: List<String>): ThreatLevel {
         // Use AI and rules to assess threat level
@@ -446,11 +448,11 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Returns recommended security actions based on the specified threat level.
+     * Provides a list of recommended security actions based on the given threat level.
      *
      * @param threatLevel The severity of the detected threat.
-     * @param indicators The list of threat indicators identified (not used in current logic).
-     * @return A list of recommended actions appropriate for the given threat level.
+     * @param indicators The list of threat indicators identified (currently unused).
+     * @return A list of recommended actions appropriate for the specified threat level.
      */
     private fun generateSecurityRecommendations(threatLevel: ThreatLevel, indicators: List<String>): List<String> {
         return when (threatLevel) {
