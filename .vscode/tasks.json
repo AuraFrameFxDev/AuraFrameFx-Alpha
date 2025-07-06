@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Trinity System - Full Build & Deploy",
+			"type": "shell",
+			"command": "./gradlew build",
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": [
+				"$kotlin",
+				"$java"
+			],
+			"args": []
+		}
+	]
+}
