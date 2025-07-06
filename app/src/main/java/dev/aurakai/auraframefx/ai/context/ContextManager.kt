@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Duration
 import kotlinx.datetime.Instant
 // import kotlinx.serialization.Contextual // No longer needed for Instant here
 import kotlinx.serialization.Serializable
@@ -164,8 +163,10 @@ class ContextManager @Inject constructor(
             current.copy(
                 totalChains = chains.size,
                 activeChains = chains.count {
-                    it.lastUpdated > Clock.System.now()
-                        .minus(Duration.milliseconds(config.contextChainingConfig.maxChainLength.toLong())) // Corrected minus call
+                    val now = Clock.System.now()
+                    val thresholdMs = config.contextChainingConfig.maxChainLength * 1000L
+                    val threshold = now.minusMilliseconds(thresholdMs)
+                    it.lastUpdated > threshold
                 },
                 longestChain = chains.maxOfOrNull { it.contextHistory.size } ?: 0,
                 lastUpdated = Clock.System.now()

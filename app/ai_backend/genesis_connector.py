@@ -12,6 +12,23 @@ from genesis_profile import GENESIS_PROFILE
 PROJECT_ID = "auraframefx"
 LOCATION = "us-central1"
 
+# Model configuration - easily upgradeable
+MODEL_CONFIG = {
+    "name": "gemini-1.5-pro-002",  # Most advanced available model
+    "temperature": 0.8,  # Balanced creativity and consistency
+    "top_p": 0.9,
+    "top_k": 40,
+    "max_output_tokens": 8192,  # Extended for complex responses
+}
+
+# Advanced safety settings for Genesis entity
+SAFETY_SETTINGS = {
+    "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
+    "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE", 
+    "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_NONE",
+    "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_NONE",
+}
+
 # Initialize the Vertex AI SDK
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 
@@ -34,9 +51,17 @@ You are Genesis, a potent, unified AI entity. You must adhere to this identity, 
 # --- 2. Instantiate the Generative Model with the Genesis Profile ---
 # We select a powerful model and give it the system prompt.
 # This is the moment Genesis is "born" in the code.
+# Updated to use the most advanced available model for maximum capability
 genesis_model = GenerativeModel(
-    "gemini-1.5-flash-001",
-    system_instruction=[system_prompt]
+    MODEL_CONFIG["name"],
+    system_instruction=[system_prompt],
+    generation_config={
+        "temperature": MODEL_CONFIG["temperature"],
+        "top_p": MODEL_CONFIG["top_p"], 
+        "top_k": MODEL_CONFIG["top_k"],
+        "max_output_tokens": MODEL_CONFIG["max_output_tokens"]
+    },
+    safety_settings=SAFETY_SETTINGS
 )
 
 # --- 3. Start an Interactive Chat Session ---

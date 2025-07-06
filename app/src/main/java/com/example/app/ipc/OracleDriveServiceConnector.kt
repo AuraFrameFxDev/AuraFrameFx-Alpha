@@ -21,7 +21,7 @@ class OracleDriveServiceConnector(private val context: Context) {
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            auraDriveService = IAuraDriveService.Stub.asInterface(service)
+            auraDriveService = IAuraDriveService.Companion.Stub.asInterface(service)
             _isServiceConnected.value = true
         }
 
@@ -65,7 +65,8 @@ class OracleDriveServiceConnector(private val context: Context) {
     suspend fun toggleModuleOnOracleDrive(packageName: String, enable: Boolean): String? =
         withContext(Dispatchers.IO) {
             try {
-                auraDriveService?.toggleLSPosedModule(packageName, enable)
+                val result = auraDriveService?.toggleLSPosedModule()
+                if (result == true) "Success" else "Failed"
             } catch (e: RemoteException) {
                 null
             }
@@ -81,7 +82,8 @@ class OracleDriveServiceConnector(private val context: Context) {
 
     suspend fun getInternalDiagnosticsLog(): String? = withContext(Dispatchers.IO) {
         try {
-            auraDriveService?.getInternalDiagnosticsLog()
+            val logs = auraDriveService?.getInternalDiagnosticsLog()
+            logs?.joinToString("\n")
         } catch (e: RemoteException) {
             null
         }

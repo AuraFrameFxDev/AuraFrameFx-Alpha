@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.aurakai.auraframefx.ai.agents.GenesisAgent
 import dev.aurakai.auraframefx.ai.task.HistoricalTask
-import dev.aurakai.auraframefx.model.AgentConfig
+import dev.aurakai.auraframefx.model.HierarchyAgentConfig
 import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.utils.AppConstants.STATUS_ERROR
 import dev.aurakai.auraframefx.utils.AppConstants.STATUS_IDLE
@@ -24,8 +24,8 @@ class GenesisAgentViewModel @Inject constructor(
     private val genesisAgent: GenesisAgent,
 ) : ViewModel() {
 
-    private val _agents = MutableStateFlow<List<AgentConfig>>(emptyList()) // Initialize properly
-    val agents: StateFlow<List<AgentConfig>> = _agents.asStateFlow()
+    private val _agents = MutableStateFlow<List<HierarchyAgentConfig>>(emptyList()) // Initialize properly
+    val agents: StateFlow<List<HierarchyAgentConfig>> = _agents.asStateFlow()
 
     // Track agent status
     private val _agentStatus = MutableStateFlow<Map<AgentType, String>>(
@@ -103,7 +103,7 @@ class GenesisAgentViewModel @Inject constructor(
     fun registerAuxiliaryAgent(
         name: String,
         capabilities: Set<String>,
-    ): AgentConfig {
+    ): HierarchyAgentConfig {
         return genesisAgent.registerAuxiliaryAgent(name, capabilities)
     }
 
@@ -113,7 +113,7 @@ class GenesisAgentViewModel @Inject constructor(
      * @param name The name of the agent to retrieve.
      * @return The agent's configuration if found, or null if no agent with the specified name exists.
      */
-    fun getAgentConfig(name: String): AgentConfig? {
+    fun getAgentConfig(name: String): HierarchyAgentConfig? {
         return genesisAgent.getAgentConfig(name)
     }
 
@@ -122,7 +122,7 @@ class GenesisAgentViewModel @Inject constructor(
      *
      * @return The list of agent configurations sorted by priority.
      */
-    fun getAgentsByPriority(): List<AgentConfig> {
+    fun getAgentsByPriority(): List<HierarchyAgentConfig> {
         return genesisAgent.getAgentsByPriority()
     }
 
@@ -134,7 +134,7 @@ class GenesisAgentViewModel @Inject constructor(
      * @param query The query string to process.
      * @return An empty list, as results are handled asynchronously.
      */
-    fun processQuery(query: String): List<AgentConfig> {
+    fun processQuery(query: String): List<HierarchyAgentConfig> {
         viewModelScope.launch {
             genesisAgent.processQuery(query)
         }

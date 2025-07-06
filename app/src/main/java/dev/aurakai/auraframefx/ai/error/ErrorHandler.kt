@@ -3,14 +3,14 @@ package dev.aurakai.auraframefx.ai.error
 import dev.aurakai.auraframefx.ai.context.ContextManager
 import dev.aurakai.auraframefx.ai.pipeline.AIPipelineConfig
 import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.model.InteractionResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import dev.aurakai.auraframefx.model.AgentType // Explicit import
-import dev.aurakai.auraframefx.serialization.InstantSerializer // Import for serializer
-import kotlinx.serialization.Serializable // Import for @Serializable
+import dev.aurakai.auraframefx.serialization.InstantSerializer
+import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
 

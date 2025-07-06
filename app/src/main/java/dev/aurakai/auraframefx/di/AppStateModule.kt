@@ -8,7 +8,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import dev.aurakai.auraframefx.data.AppStateManager
+import dev.aurakai.auraframefx.state.AppStateManager
 import javax.inject.Named
 import javax.inject.Singleton
 

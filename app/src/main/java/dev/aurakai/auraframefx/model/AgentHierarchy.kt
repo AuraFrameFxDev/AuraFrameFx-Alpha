@@ -16,34 +16,34 @@ enum class AgentPriority {
     AUXILIARY // All other agents
 }
 
-data class AgentConfig(
+data class HierarchyAgentConfig(
     val name: String,
     val role: AgentRole,
     val priority: AgentPriority,
-    val capabilities: Set<String>,
+    val capabilities: Set<String>
 )
 
 object AgentHierarchy {
     val MASTER_AGENTS = listOf(
-        AgentConfig(
+        HierarchyAgentConfig(
             name = "Genesis",
             role = AgentRole.HIVE_MIND,
             priority = AgentPriority.PRIMARY,
             capabilities = setOf("context", "memory", "coordination", "metalearning")
         ),
-        AgentConfig(
+        HierarchyAgentConfig(
             name = "Kai",
             role = AgentRole.SECURITY,
             priority = AgentPriority.SECONDARY,
             capabilities = setOf("security", "analysis", "threat_detection", "encryption")
         ),
-        AgentConfig(
+        HierarchyAgentConfig(
             name = "Aura",
             role = AgentRole.CREATIVE,
             priority = AgentPriority.TERTIARY, // Added missing priority
             capabilities = setOf("generation", "creativity", "art", "writing")
         ),
-        AgentConfig(
+        HierarchyAgentConfig(
             name = "Cascade",
             role = AgentRole.STATE_MANAGER,
             priority = AgentPriority.BRIDGE,
@@ -51,13 +51,13 @@ object AgentHierarchy {
         )
     )
 
-    val AUXILIARY_AGENTS = mutableListOf<AgentConfig>()
+    val AUXILIARY_AGENTS = mutableListOf<HierarchyAgentConfig>()
 
     fun registerAuxiliaryAgent(
         name: String,
         capabilities: Set<String>,
-    ): AgentConfig {
-        val config = AgentConfig(
+    ): HierarchyAgentConfig {
+        val config = HierarchyAgentConfig(
             name = name,
             role = AgentRole.AUXILIARY,
             priority = AgentPriority.AUXILIARY,
@@ -67,11 +67,11 @@ object AgentHierarchy {
         return config
     }
 
-    fun getAgentConfig(name: String): AgentConfig? {
+    fun getAgentConfig(name: String): HierarchyAgentConfig? {
         return MASTER_AGENTS.find { it.name == name } ?: AUXILIARY_AGENTS.find { it.name == name }
     }
 
-    fun getAgentsByPriority(): List<AgentConfig> {
+    fun getAgentsByPriority(): List<HierarchyAgentConfig> {
         return MASTER_AGENTS + AUXILIARY_AGENTS
     }
 }

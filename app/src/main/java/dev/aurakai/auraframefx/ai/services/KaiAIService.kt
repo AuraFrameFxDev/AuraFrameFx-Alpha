@@ -10,7 +10,7 @@ import dev.aurakai.auraframefx.ai.task.execution.TaskExecutionManager
 import dev.aurakai.auraframefx.data.logging.AuraFxLogger
 import dev.aurakai.auraframefx.data.network.CloudStatusMonitor
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.api.model.AgentType as ApiAgentType // Corrected import
+import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow // Added import
 import kotlinx.coroutines.flow.flowOf // Added import
@@ -29,7 +29,7 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     override fun getName(): String? = "Kai"
-    override fun getType(): ApiAgentType = ApiAgentType.KAI // Changed to non-nullable ApiAgentType
+    override fun getType(): AgentType = AgentType.KAI
 
     // Not part of Agent interface
     fun getCapabilities(): Map<String, Any> =
