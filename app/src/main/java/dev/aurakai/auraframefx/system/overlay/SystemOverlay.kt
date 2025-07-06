@@ -74,7 +74,6 @@ data class OverlayTransition(
 data class OverlayShape(
     val id: String = "",
     val type: String = "rectangle", // e.g., "rectangle", "circle", "hexagon", "rounded_rectangle"
-    val shapeType: String = type, // Alias for type
     val background: String = "#000000", // Background color
     val cornerRadius: Float = 0f, // For rounded_rectangle
     val sides: Int = 0, // For polygons like hexagon (6), triangle (3)
