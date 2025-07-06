@@ -50,7 +50,11 @@ class SecurityContext @Inject constructor(
     val securityState: StateFlow<SecurityState> = _securityState.asStateFlow()
 
     /**
-     * Stub for content validation. In production, this should check for policy violations, threats, etc.
+     * Placeholder for validating content against security policies or threats.
+     *
+     * Currently allows all content without performing any checks.
+     *
+     * @param content The content to be validated.
      */
     fun validateContent(content: String) {
         // TODO: Implement real validation logic
@@ -58,7 +62,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Validate image data for security compliance
+     * Placeholder for validating image data against security policies.
+     *
+     * Currently accepts all image data without performing any checks.
+     *
+     * @param imageData The image data to be validated.
      */
     fun validateImageData(imageData: ByteArray) {
         // TODO: Implement real image validation logic

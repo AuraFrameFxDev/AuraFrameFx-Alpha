@@ -336,9 +336,9 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Updates the status of the specified agent in the agent states map.
+     * Sets the status of the specified agent in the agent states map.
      *
-     * @param agentType The identifier of the agent whose status is being updated.
+     * @param agentType The name or identifier of the agent to update.
      * @param status The new status to assign to the agent.
      */
     private fun updateAgentStatus(agentType: String, status: AgentStatus) {
@@ -348,10 +348,10 @@ class AuraController @Inject constructor(
     }
 
     /**
-     * Returns the current status of all AI agents.
-     *
-     * @return A map of agent names to their current statuses.
-     */
+ * Returns a map of all AI agent names to their current statuses.
+ *
+ * @return A map where each key is an agent name and each value is the agent's current status.
+ */
     fun getAgentStatuses(): Map<String, AgentStatus> = _agentStates.value
 
     /**
