@@ -1,33 +1,28 @@
-import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+// app/build.gradle.kts
 
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.google.services)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.openapi.generator)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.kotlinCompose)
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.firebaseCrashlytics) // Added based on error log
+    alias(libs.plugins.firebasePerf)        // Added based on error log
+    alias(libs.plugins.openapiGenerator)    // Added based on error log
 }
 
 android {
     namespace = "dev.aurakai.auraframefx"
-    compileSdk = 36
+    compileSdk = 34 // As requested
 
     defaultConfig {
         applicationId = "dev.aurakai.auraframefx"
         minSdk = 33
-        targetSdk = 36
+        targetSdk = 34 // As requested
         versionCode = 1
         versionName = "1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        externalNativeBuild {
-            cmake {
-                cppFlags += ""
-            }
-        }
     }
 
     buildTypes {
@@ -45,54 +40,35 @@ android {
     kotlinOptions {
         jvmTarget = "24"
         freeCompilerArgs = listOf()
-    }
+ 
 
     buildFeatures {
         compose = true
+        aidl = true
     }
 
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
+    sourceSets {
+        main {
+            kotlin.srcDir(project.layout.buildDirectory.dir("generated/kotlin"))
+            // If a Java client is also generated to "build/generated/openapi/src/main/java", add:
+            // java.srcDirs(file("${layout.buildDirectory.get().asFile}/generated/openapi/src/main/java"))
         }
     }
 }
 
-// OpenAPI Generator: Generate Kotlin client
-tasks.register<GenerateTask>("generateKotlinClient") {
-    generatorName.set("kotlin")
-    inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
-    outputDir.set("${layout.buildDirectory.get().asFile}/generated/kotlin")
-    apiPackage.set("dev.aurakai.auraframefx.api.client.apis")
-    modelPackage.set("dev.aurakai.auraframefx.api.client.models")
-    invokerPackage.set("dev.aurakai.auraframefx.api.client.infrastructure")
-    configOptions.set(
-        mapOf(
-            "dateLibrary" to "kotlinx-datetime",
-            "serializationLibrary" to "kotlinx_serialization"
-        )
-    )
-}
-
-// Ensure KSP and compilation tasks depend on the code generation
-tasks.named("preBuild") {
-    dependsOn("generateKotlinClient")
-}
-
 dependencies {
     // Xposed
-    compileOnly(files("Libs/api-82.jar")) // Assuming Libs folder is in app/
-
-    // Hilt
+    compileOnly(files("libs/api-82.jar")) // Changed to local file dependency
+    // Hilt - Already in new base, using new aliases
     implementation(libs.hiltAndroid)
     ksp(libs.hiltCompiler)
-    implementation(libs.hiltNavigationCompose)
-    implementation(libs.androidxHiltWork)
+    implementation(libs.hiltNavigationCompose) // From old, uses new TOML alias
+    implementation(libs.androidxHiltWork)      // From old, uses new TOML alias (depends on hilt version)
+
 
     // Hilt Testing
     androidTestImplementation(libs.daggerHiltAndroidTesting)
@@ -108,16 +84,17 @@ dependencies {
     implementation(libs.androidxAppcompat)
     implementation(libs.androidxLifecycleRuntimeKtx)
     implementation(libs.androidxActivityCompose)
-    implementation(platform(libs.composeBom))
+    implementation(platform(libs.composeBom)) // Platform import for Compose
     implementation(libs.androidxUi)
     implementation(libs.androidxUiGraphics)
     implementation(libs.androidxUiToolingPreview)
-    implementation(libs.androidxMaterial3)
+    implementation(libs.androidxMaterial3) // Version managed by Compose BOM
     implementation(libs.androidxNavigationCompose)
 
-    // Animation
-    implementation(libs.androidxComposeAnimation)
-    debugImplementation(libs.animationTooling)
+    // Animation (version managed by Compose BOM)
+    implementation(libs.androidxComposeAnimation) // Using the new specific animation library alias
+    // For debug/preview features related to animation:
+    debugImplementation(libs.animationTooling) // Alias for androidx.compose.animation:animation-tooling
 
     // Lifecycle
     implementation(libs.lifecycleViewmodelCompose)
@@ -127,11 +104,12 @@ dependencies {
     implementation(libs.lifecycleCommonJava8)
     implementation(libs.androidxLifecycleProcess)
     implementation(libs.androidxLifecycleService)
+    // androidxLifecycleExtensions is deprecated and removed
 
     // Room
     implementation(libs.androidxRoomRuntime)
     implementation(libs.androidxRoomKtx)
-    ksp(libs.androidxRoomCompiler)
+    ksp(libs.androidxRoomCompiler) // Ensure Room compiler uses KSP
 
     // Security
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
@@ -140,23 +118,23 @@ dependencies {
     implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
 
     // Firebase
-    implementation(platform(libs.firebaseBom))
+    implementation(platform(libs.firebaseBom)) // Platform import for Firebase
     implementation(libs.firebaseAnalyticsKtx)
     implementation(libs.firebaseCrashlyticsKtx)
     implementation(libs.firebasePerfKtx)
-    implementation(libs.firebaseConfigKtx)
-    implementation(libs.firebaseStorageKtx)
     implementation(libs.firebaseMessagingKtx)
+    implementation(libs.firebaseConfigKtx)  // Explicit version from TOML
+    implementation(libs.firebaseStorageKtx) // Explicit version from TOML
 
-    // Kotlin
+    // Kotlin Coroutines & Serialization & DateTime
     implementation(libs.kotlinxCoroutinesAndroid)
     implementation(libs.kotlinxCoroutinesPlayServices)
     implementation(libs.kotlinxSerializationJson)
 
     // Network
-    implementation(libs.retrofit)
+    implementation(libs.retrofit) // Using new alias
     implementation(libs.converterGson)
-    implementation(libs.okhttp)
+    implementation(libs.okhttp) // Using new alias
     implementation(libs.okhttpLoggingInterceptor)
     implementation(libs.retrofitKotlinxSerializationConverter)
 
@@ -170,27 +148,53 @@ dependencies {
     // UI Utilities
     implementation(libs.coilCompose)
     implementation(libs.timber)
-    implementation(libs.guava)
+    implementation(libs.guava) // Using new alias
 
-    // Accompanist
+    // Accompanist (review if still needed, versions from new TOML)
     implementation(libs.accompanistSystemuicontroller)
     implementation(libs.accompanistPermissions)
     implementation(libs.accompanistPager)
     implementation(libs.accompanistPagerIndicators)
+    // implementation(libs.accompanistFlowlayout) // Assuming covered by pager or not strictly needed for now
 
-    // WorkManager
+    // WorkManager (already included via androidxHiltWork which pulls in workManager)
     implementation(libs.androidxWorkRuntimeKtx)
+
 
     // Testing
     testImplementation(libs.testJunit)
-    testImplementation(libs.kotlinxCoroutinesTest)
-    testImplementation(libs.mockkAgent)
+    testImplementation(libs.kotlinxCoroutinesTest) // Added from old TOML's list
+    testImplementation(libs.mockkAgent) // For local unit tests
+
+    // Hilt testing dependencies
+    testImplementation("com.google.dagger:hilt-android-testing:2.56.2")
+    kspTest("com.google.dagger:hilt-compiler:2.56.2")
+
     androidTestImplementation(libs.androidxTestExtJunit)
     androidTestImplementation(libs.espressoCore)
-    androidTestImplementation(platform(libs.composeBom))
+    androidTestImplementation(platform(libs.composeBom)) // Compose BOM for tests
     androidTestImplementation(libs.composeUiTestJunit4)
-    androidTestImplementation(libs.mockkAndroid)
-    debugImplementation(libs.composeUiTooling)
-    debugImplementation(libs.composeUiTestManifest)
+    androidTestImplementation(libs.mockkAndroid) // For instrumented tests
+
+    // Hilt instrumentation testing dependencies
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.56.2")
+    kspAndroidTest("com.google.dagger:hilt-compiler:2.56.2")
+    // androidTestImplementation(libs.kotlinxCoroutinesTest) // Already in testImplementation
+
+    debugImplementation(libs.composeUiTooling) // For debug builds
+    debugImplementation(libs.composeUiTestManifest) // For debug builds
+}
+
+// Hilt configuration for better incremental builds
+hilt {
+    enableAggregatingTask = true
+}
+
+// Configure Kotlin compiler options for all Kotlin compile tasks
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        freeCompilerArgs.addAll("-Xopt-in=kotlin.RequiresOptIn")
+    }
 }
 
