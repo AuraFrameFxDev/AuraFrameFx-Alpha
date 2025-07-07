@@ -13,6 +13,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NeuralWhisperModule {
 
+    /**
+     * Provides a singleton instance of the NeuralWhisper class initialized with the application context.
+     *
+     * @param context The application context used to initialize NeuralWhisper.
+     * @return A singleton NeuralWhisper instance.
+     */
     @Provides
     @Singleton
     fun provideNeuralWhisper(@ApplicationContext context: Context): NeuralWhisper {

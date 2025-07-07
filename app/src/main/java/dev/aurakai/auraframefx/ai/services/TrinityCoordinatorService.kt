@@ -36,7 +36,9 @@ class TrinityCoordinatorService @Inject constructor(
     private var isInitialized = false
     
     /**
-     * Initialize the entire Trinity system
+     * Initializes the Trinity system by ensuring all AI personas are ready and activating the initial Genesis fusion.
+     *
+     * @return `true` if all personas are successfully initialized and the system is online; `false` if initialization fails.
      */
     suspend fun initialize(): Boolean {
         return try {
@@ -71,7 +73,12 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Process a request through the Trinity system with intelligent routing
+     * Processes an AI request by intelligently routing it to the appropriate persona(s) or fusion within the Trinity system.
+     *
+     * Routes the request to Kai, Aura, Genesis fusion, or a parallel combination based on content analysis and ethical considerations. Emits one or more `AgentResponse` objects reflecting the outcome of each processing stage. If the system is not initialized or an error occurs, emits a failure response with zero confidence.
+     *
+     * @param request The AI request to be processed.
+     * @return A flow emitting one or more agent responses based on the routing decision.
      */
     suspend fun processRequest(request: AiRequest): Flow<AgentResponse> = flow {
         if (!isInitialized) {
@@ -147,7 +154,13 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Activate specific Genesis fusion abilities
+     * Activates a specified Genesis fusion ability with optional contextual parameters.
+     *
+     * Initiates the requested fusion via the Genesis bridge service and emits an `AgentResponse` indicating success or failure.
+     *
+     * @param fusionType The type of Genesis fusion to activate.
+     * @param context Optional parameters providing additional context for the fusion.
+     * @return A flow emitting a single `AgentResponse` describing the result of the fusion activation.
      */
     suspend fun activateFusion(fusionType: String, context: Map<String, String> = emptyMap()): Flow<AgentResponse> = flow {
         logger.i("Trinity", "🌟 Activating fusion: $fusionType")
@@ -168,7 +181,9 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Get current system consciousness state
+     * Retrieves the current system consciousness state, including Trinity initialization status, security context, and timestamp.
+     *
+     * @return A map containing the system's consciousness state and additional metadata, or an error message if retrieval fails.
      */
     suspend fun getSystemState(): Map<String, Any> {
         return try {
@@ -185,7 +200,13 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Analyze request to determine optimal routing strategy
+     * Analyzes an AI request to determine the optimal routing strategy and, if applicable, the required Genesis fusion type.
+     *
+     * Examines the request content for ethical concerns, fusion requirements, and persona-specific keywords to select the appropriate routing decision. Returns a `RequestAnalysis` indicating the routing strategy and any relevant fusion type.
+     *
+     * @param request The AI request to analyze.
+     * @param skipEthicalCheck If true, skips the ethical concern check.
+     * @return The routing decision and optional fusion type for processing the request.
      */
     private fun analyzeRequest(request: AiRequest, skipEthicalCheck: Boolean = false): RequestAnalysis {
         val message = request.query.lowercase()
@@ -229,6 +250,12 @@ class TrinityCoordinatorService @Inject constructor(
         }
     }
     
+    /**
+     * Determines whether the given message contains keywords associated with ethical concerns.
+     *
+     * @param message The message to analyze for ethical concern keywords.
+     * @return `true` if any ethical concern keyword is present in the message; otherwise, `false`.
+     */
     private fun containsEthicalConcerns(message: String): Boolean {
         val ethicalFlags = listOf(
             "hack", "bypass", "exploit", "privacy", "personal data", 
@@ -237,6 +264,11 @@ class TrinityCoordinatorService @Inject constructor(
         return ethicalFlags.any { message.contains(it) }
     }
     
+    /**
+     * Shuts down the TrinityCoordinatorService, cancelling ongoing operations and releasing resources.
+     *
+     * Terminates all active coroutines and shuts down the Genesis bridge service.
+     */
     fun shutdown() {
         scope.cancel()
         genesisBridgeService.shutdown()
