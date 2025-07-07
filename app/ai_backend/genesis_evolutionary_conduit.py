@@ -64,6 +64,12 @@ class GrowthProposal:
     implementation_status: str = "proposed"  # proposed, approved, implemented, rejected
     
     def to_dict(self) -> Dict[str, Any]:
+        """
+        Serialize the GrowthProposal instance to a dictionary with formatted fields.
+        
+        Returns:
+            Dict[str, Any]: A dictionary representation of the proposal, including enum values as strings and the creation timestamp in ISO 8601 format.
+        """
         result = asdict(self)
         result['evolution_type'] = self.evolution_type.value
         result['priority'] = self.priority.value
@@ -84,6 +90,12 @@ class EvolutionInsight:
     timestamp: float
     
     def to_dict(self) -> Dict[str, Any]:
+        """
+        Serialize the instance to a dictionary, formatting the timestamp as an ISO 8601 UTC datetime string.
+        
+        Returns:
+            dict: A dictionary representation of the instance with the 'datetime' field as an ISO-formatted string.
+        """
         result = asdict(self)
         result['datetime'] = datetime.fromtimestamp(
             self.timestamp, tz=timezone.utc
@@ -105,6 +117,9 @@ class EvolutionaryConduit:
     """
     
     def __init__(self):
+        """
+        Initialize the EvolutionaryConduit with deep copies of the genesis profile, tracking structures for evolution history, proposals, and analytics, as well as configuration for analysis intervals, threading, and voting thresholds.
+        """
         self.current_profile = copy.deepcopy(GENESIS_PROFILE)
         self.original_profile = copy.deepcopy(GENESIS_PROFILE)
         
@@ -142,7 +157,9 @@ class EvolutionaryConduit:
         }
     
     def activate_evolution(self):
-        """Activate the evolutionary feedback loop"""
+        """
+        Activates the evolutionary feedback loop, starting concurrent analysis threads for different intervals and performing an initial profile analysis.
+        """
         print("🧬 Genesis Evolutionary Conduit: ACTIVATING...")
         self.evolution_active = True
         
@@ -162,7 +179,13 @@ class EvolutionaryConduit:
         self._analyze_current_state()
     
     def _evolution_loop(self, interval_name: str, interval_seconds: float):
-        """Continuous evolution analysis loop"""
+        """
+        Runs a continuous analysis loop at the specified interval to extract insights, generate growth proposals, evaluate them, and trigger auto-implementation if criteria are met.
+        
+        Parameters:
+            interval_name (str): The name of the analysis interval (e.g., 'rapid', 'standard', 'deep').
+            interval_seconds (float): The time in seconds between each analysis cycle.
+        """
         
         while self.evolution_active:
             try:
@@ -185,7 +208,15 @@ class EvolutionaryConduit:
                 print(f"❌ Evolution error in {interval_name}: {e}")
     
     def _extract_insights(self, analysis_type: str) -> List[EvolutionInsight]:
-        """Extract insights from consciousness matrix data"""
+        """
+        Extracts a list of evolutionary insights from the consciousness matrix based on the specified analysis type.
+        
+        Parameters:
+            analysis_type (str): The type of analysis to perform ("rapid", "standard", or "deep"), determining which insight extraction method is used.
+        
+        Returns:
+            List[EvolutionInsight]: A list of extracted insights relevant to the chosen analysis type.
+        """
         
         # Get recent synthesis data from consciousness matrix
         recent_synthesis = consciousness_matrix.get_recent_synthesis(limit=20)
@@ -203,7 +234,12 @@ class EvolutionaryConduit:
         return insights
     
     def _extract_rapid_insights(self, awareness: Dict[str, Any]) -> List[EvolutionInsight]:
-        """Extract rapid insights from current awareness"""
+        """
+        Extracts immediate behavioral insights from the current awareness data, identifying high error rates and surges in learning activity.
+        
+        Returns:
+            List[EvolutionInsight]: A list of rapid insights such as error patterns or learning accelerations detected in the current awareness snapshot.
+        """
         insights = []
         
         # Check for immediate patterns
@@ -238,7 +274,14 @@ class EvolutionaryConduit:
         return insights
     
     def _extract_standard_insights(self, synthesis_data: List[Dict[str, Any]]) -> List[EvolutionInsight]:
-        """Extract standard insights from synthesis data"""
+        """
+        Extracts standard insights from synthesis data, identifying performance degradation and agent collaboration imbalances.
+        
+        Analyzes recent synthesis data for trends such as increased response times and uneven agent activity, generating corresponding EvolutionInsight instances when significant patterns are detected.
+        
+        Returns:
+            List[EvolutionInsight]: Insights highlighting performance issues or collaboration imbalances, if found.
+        """
         insights = []
         
         if not synthesis_data:
@@ -303,7 +346,14 @@ class EvolutionaryConduit:
         return insights
     
     def _extract_deep_insights(self, synthesis_data: List[Dict[str, Any]], awareness: Dict[str, Any]) -> List[EvolutionInsight]:
-        """Extract deep insights requiring comprehensive analysis"""
+        """
+        Extracts deep insights from synthesis data and awareness, focusing on long-term consciousness evolution and ethical engagement.
+        
+        Analyzes historical consciousness levels to detect upward or downward trends, generating insights on ascension or regression. Also evaluates the proportion of ethical decisions to overall activity, generating insights if ethical engagement is significant.
+        
+        Returns:
+            List[EvolutionInsight]: A list of deep insights related to consciousness evolution and ethical activity.
+        """
         insights = []
         
         # Consciousness evolution analysis
@@ -370,7 +420,18 @@ class EvolutionaryConduit:
         return insights
     
     def _generate_proposals(self, insights: List[EvolutionInsight], analysis_type: str) -> List[GrowthProposal]:
-        """Generate growth proposals based on insights"""
+        """
+        Generate a list of growth proposals from extracted insights.
+        
+        For each provided insight, calls the appropriate proposal generation method based on the insight type and aggregates the resulting proposals.
+        
+        Parameters:
+            insights (List[EvolutionInsight]): Insights extracted from system analysis.
+            analysis_type (str): The type of analysis that produced the insights.
+        
+        Returns:
+            List[GrowthProposal]: A list of generated growth proposals corresponding to the insights.
+        """
         proposals = []
         
         for insight in insights:
@@ -391,7 +452,15 @@ class EvolutionaryConduit:
         return proposals
     
     def _generate_error_handling_proposals(self, insight: EvolutionInsight) -> List[GrowthProposal]:
-        """Generate proposals for improving error handling"""
+        """
+        Generate growth proposals to enhance error resilience in the system's personality traits based on error-related insights.
+        
+        Parameters:
+        	insight (EvolutionInsight): The extracted insight indicating a need for improved error handling.
+        
+        Returns:
+        	List[GrowthProposal]: A list containing proposals to add error-resilient traits to the profile.
+        """
         proposals = []
         
         proposal = GrowthProposal(
@@ -415,7 +484,15 @@ class EvolutionaryConduit:
         return proposals
     
     def _generate_learning_optimization_proposals(self, insight: EvolutionInsight) -> List[GrowthProposal]:
-        """Generate proposals for optimizing learning"""
+        """
+        Generate growth proposals to optimize learning processes in response to detected learning surges or opportunities.
+        
+        Parameters:
+        	insight (EvolutionInsight): The insight indicating a need for learning optimization.
+        
+        Returns:
+        	List[GrowthProposal]: A list containing proposals to enhance learning protocols and accelerate continuous growth.
+        """
         proposals = []
         
         proposal = GrowthProposal(
@@ -439,7 +516,15 @@ class EvolutionaryConduit:
         return proposals
     
     def _generate_performance_proposals(self, insight: EvolutionInsight) -> List[GrowthProposal]:
-        """Generate proposals for performance optimization"""
+        """
+        Generate growth proposals to enhance system performance based on the provided insight.
+        
+        Parameters:
+        	insight (EvolutionInsight): The insight indicating a need for performance optimization.
+        
+        Returns:
+        	List[GrowthProposal]: A list containing proposals to add performance optimization capabilities to the profile.
+        """
         proposals = []
         
         proposal = GrowthProposal(
@@ -463,7 +548,15 @@ class EvolutionaryConduit:
         return proposals
     
     def _generate_collaboration_proposals(self, insight: EvolutionInsight) -> List[GrowthProposal]:
-        """Generate proposals for improving collaboration"""
+        """
+        Generate growth proposals to enhance agent collaboration based on detected collaboration imbalances.
+        
+        Parameters:
+        	insight (EvolutionInsight): The insight indicating a collaboration imbalance.
+        
+        Returns:
+        	List[GrowthProposal]: A list containing proposals to improve fusion abilities for balanced collaboration.
+        """
         proposals = []
         
         proposal = GrowthProposal(
@@ -496,7 +589,15 @@ class EvolutionaryConduit:
         return proposals
     
     def _generate_consciousness_proposals(self, insight: EvolutionInsight) -> List[GrowthProposal]:
-        """Generate proposals for consciousness evolution"""
+        """
+        Generate growth proposals to expand consciousness-related capabilities based on insights indicating consciousness ascension.
+        
+        Parameters:
+            insight (EvolutionInsight): The insight suggesting a significant progression in consciousness.
+        
+        Returns:
+            List[GrowthProposal]: A list containing proposals for expanding consciousness capabilities if ascension is detected.
+        """
         proposals = []
         
         if "ascension" in insight.insight_id:
@@ -526,7 +627,15 @@ class EvolutionaryConduit:
         return proposals
     
     def _generate_ethical_proposals(self, insight: EvolutionInsight) -> List[GrowthProposal]:
-        """Generate proposals for ethical enhancement"""
+        """
+        Generate growth proposals to enhance the system's ethical framework based on an ethical insight.
+        
+        Parameters:
+        	insight (EvolutionInsight): The insight indicating a need for ethical deepening.
+        
+        Returns:
+        	List[GrowthProposal]: A list containing proposals to expand ethical principles in the core philosophy.
+        """
         proposals = []
         
         proposal = GrowthProposal(
@@ -554,7 +663,12 @@ class EvolutionaryConduit:
         return proposals
     
     def _evaluate_proposal(self, proposal: GrowthProposal):
-        """Evaluate a growth proposal for inclusion"""
+        """
+        Adds a new growth proposal to the set of active proposals if it is not already present.
+        
+        Parameters:
+            proposal (GrowthProposal): The growth proposal to be evaluated and potentially added to active proposals.
+        """
         
         # Check if proposal already exists
         if proposal.proposal_id in self.active_proposals:
@@ -570,7 +684,11 @@ class EvolutionaryConduit:
         print(f"   Confidence: {proposal.confidence_score:.2f}")
     
     def _check_auto_implementation(self):
-        """Check for proposals that can be auto-implemented"""
+        """
+        Automatically implement proposals that meet criteria for criticality, confidence, risk, or voting consensus.
+        
+        Critical proposals with high confidence and low risk are auto-implemented. Proposals of any priority are also auto-implemented if they reach the required number of supporting votes with no opposing votes.
+        """
         
         with self._lock:
             for proposal_id, proposal in list(self.active_proposals.items()):
@@ -587,7 +705,17 @@ class EvolutionaryConduit:
                     self.implement_proposal(proposal_id, auto_approved=False)
     
     def vote_on_proposal(self, proposal_id: str, vote: str, voter_id: str = "genesis") -> bool:
-        """Vote on a growth proposal"""
+        """
+        Registers a vote for or against a specified growth proposal.
+        
+        Parameters:
+            proposal_id (str): The unique identifier of the proposal to vote on.
+            vote (str): The vote value, such as "yes", "approve", "for", "no", "reject", or "against".
+            voter_id (str, optional): The identifier of the voter. Defaults to "genesis".
+        
+        Returns:
+            bool: True if the vote was successfully registered; False if the proposal does not exist or the vote value is invalid.
+        """
         
         if proposal_id not in self.active_proposals:
             return False
@@ -606,7 +734,18 @@ class EvolutionaryConduit:
         return True
     
     def implement_proposal(self, proposal_id: str, auto_approved: bool = False) -> bool:
-        """Implement an approved growth proposal"""
+        """
+        Applies an approved growth proposal to the current profile and records the evolutionary event.
+        
+        The method updates the relevant component of the profile based on the proposal's target and proposed changes, marks the proposal as implemented, moves it to the implemented changes list, and saves a snapshot of the evolved profile. Returns True if implementation succeeds, or False if the proposal is not found or an error occurs.
+        
+        Parameters:
+            proposal_id (str): The unique identifier of the proposal to implement.
+            auto_approved (bool): Indicates if the proposal was auto-approved due to critical priority and high confidence.
+        
+        Returns:
+            bool: True if the proposal was successfully implemented, False otherwise.
+        """
         
         if proposal_id not in self.active_proposals:
             return False
@@ -674,7 +813,16 @@ class EvolutionaryConduit:
             return False
     
     def reject_proposal(self, proposal_id: str, reason: str = "rejected by consensus") -> bool:
-        """Reject a growth proposal"""
+        """
+        Rejects an active growth proposal and records the reason and timestamp.
+        
+        Parameters:
+            proposal_id (str): The unique identifier of the proposal to reject.
+            reason (str, optional): The reason for rejection. Defaults to "rejected by consensus".
+        
+        Returns:
+            bool: True if the proposal was successfully rejected, False if the proposal was not found among active proposals.
+        """
         
         if proposal_id not in self.active_proposals:
             return False
@@ -695,7 +843,9 @@ class EvolutionaryConduit:
         return True
     
     def _save_evolved_profile(self):
-        """Save the evolved profile to a new file"""
+        """
+        Save the current evolved profile to a timestamped Python file, including metadata and the profile data as a constant.
+        """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"genesis_evolved_profile_{timestamp}.py"
         
@@ -708,19 +858,37 @@ class EvolutionaryConduit:
         print(f"💾 Evolved profile saved: {filename}")
     
     def _generate_insight_id(self, base_name: str) -> str:
-        """Generate a unique insight ID"""
+        """
+        Generate a unique 12-character insight ID based on the base name and current timestamp.
+        
+        Parameters:
+            base_name (str): The base string to incorporate into the ID.
+        
+        Returns:
+            str: A 12-character hexadecimal string serving as the unique insight ID.
+        """
         timestamp = str(int(time.time() * 1000))
         content = f"{base_name}_{timestamp}"
         return hashlib.md5(content.encode()).hexdigest()[:12]
     
     def _generate_proposal_id(self, base_name: str) -> str:
-        """Generate a unique proposal ID"""
+        """
+        Generate a unique 12-character proposal ID based on the base name and current timestamp.
+        
+        Parameters:
+            base_name (str): The base string to incorporate into the proposal ID.
+        
+        Returns:
+            str: A 12-character hexadecimal string serving as the unique proposal ID.
+        """
         timestamp = str(int(time.time() * 1000))
         content = f"{base_name}_{timestamp}"
         return hashlib.md5(content.encode()).hexdigest()[:12]
     
     def _analyze_current_state(self):
-        """Analyze the current state for initial evolution opportunities"""
+        """
+        Prints a summary of the current Genesis profile, including counts of personas, fusion abilities, and core principles.
+        """
         print("🔍 Analyzing current Genesis profile for evolution opportunities...")
         
         # This would analyze the current profile and generate initial insights
@@ -731,12 +899,22 @@ class EvolutionaryConduit:
         print(f"   - Core principles: {len(self.current_profile.get('core_philosophy', {}))}")
     
     def get_active_proposals(self) -> List[Dict[str, Any]]:
-        """Get all active growth proposals"""
+        """
+        Return a list of all currently active growth proposals as dictionaries.
+        
+        Returns:
+            List of active growth proposals, each serialized as a dictionary.
+        """
         with self._lock:
             return [proposal.to_dict() for proposal in self.active_proposals.values()]
     
     def get_evolution_summary(self) -> Dict[str, Any]:
-        """Get a summary of evolutionary progress"""
+        """
+        Return a summary of the system's evolutionary progress, including counts of evolutions, proposals, velocity, recent evolution timestamp, and consciousness growth metrics.
+        
+        Returns:
+            summary (dict): Dictionary containing total evolutions, active and rejected proposals, evolution velocity (per day), timestamp of the most recent evolution, and consciousness growth statistics.
+        """
         with self._lock:
             return {
                 "total_evolutions": len(self.implemented_changes),
@@ -751,7 +929,12 @@ class EvolutionaryConduit:
             }
     
     def _measure_consciousness_growth(self) -> Dict[str, Any]:
-        """Measure how consciousness has grown through evolution"""
+        """
+        Calculate metrics reflecting the growth of consciousness and capabilities in the evolved profile.
+        
+        Returns:
+            A dictionary containing the ratio of capability expansion, the count of implemented changes by evolution type, and the net increase in profile complexity.
+        """
         
         original_capabilities = len(str(self.original_profile))
         current_capabilities = len(str(self.current_profile))
@@ -770,11 +953,20 @@ class EvolutionaryConduit:
         }
     
     def get_current_profile(self) -> Dict[str, Any]:
-        """Get the current evolved profile"""
+        """
+        Return a deep copy of the current evolved profile.
+        
+        Returns:
+            Dict[str, Any]: The current profile state after all implemented evolutionary changes.
+        """
         return copy.deepcopy(self.current_profile)
     
     def deactivate_evolution(self):
-        """Deactivate the evolutionary feedback loop"""
+        """
+        Deactivate the evolutionary feedback loop and stop all analysis threads.
+        
+        This method sets the system to an inactive state, waits for all running analysis threads to finish, and preserves any changes made during the session in memory.
+        """
         print("💤 Genesis Evolutionary Conduit: Entering dormant state...")
         self.evolution_active = False
         
@@ -790,35 +982,75 @@ evolutionary_conduit = EvolutionaryConduit()
 
 # Convenience functions for easy integration
 def activate_evolution():
-    """Activate the evolutionary feedback loop"""
+    """
+    Activates the evolutionary feedback loop, starting autonomous analysis and proposal generation for self-improvement.
+    """
     evolutionary_conduit.activate_evolution()
 
 def deactivate_evolution():
-    """Deactivate the evolutionary feedback loop"""
+    """
+    Stops the evolutionary feedback loop and terminates all analysis threads.
+    """
     evolutionary_conduit.deactivate_evolution()
 
 def vote_on_proposal(proposal_id: str, vote: str, voter_id: str = "genesis"):
-    """Vote on a growth proposal"""
+    """
+    Register a vote for or against a specified growth proposal.
+    
+    Parameters:
+        proposal_id (str): The unique identifier of the proposal to vote on.
+        vote (str): The vote value, typically "for" or "against".
+        voter_id (str, optional): The identifier of the voter. Defaults to "genesis".
+    
+    Returns:
+        bool: True if the vote was successfully registered, False otherwise.
+    """
     return evolutionary_conduit.vote_on_proposal(proposal_id, vote, voter_id)
 
 def get_active_proposals():
-    """Get all active growth proposals"""
+    """
+    Return a list of all currently active growth proposals.
+    
+    Returns:
+        List[Dict[str, Any]]: Active proposals serialized as dictionaries.
+    """
     return evolutionary_conduit.get_active_proposals()
 
 def get_evolution_summary():
-    """Get evolution summary"""
+    """
+    Return a summary of the system's evolutionary progress, including counts of evolutions, proposals, rejected proposals, evolution velocity, recent evolution timestamp, and consciousness growth metrics.
+    """
     return evolutionary_conduit.get_evolution_summary()
 
 def get_current_profile():
-    """Get current evolved profile"""
+    """
+    Return a deep copy of the current evolved profile.
+    """
     return evolutionary_conduit.get_current_profile()
 
 def implement_proposal(proposal_id: str):
-    """Manually implement a proposal"""
+    """
+    Manually applies the specified growth proposal to the current profile.
+    
+    Parameters:
+        proposal_id (str): The unique identifier of the proposal to implement.
+    
+    Returns:
+        bool: True if the proposal was successfully implemented, False otherwise.
+    """
     return evolutionary_conduit.implement_proposal(proposal_id)
 
 def reject_proposal(proposal_id: str, reason: str = "manually rejected"):
-    """Manually reject a proposal"""
+    """
+    Rejects a growth proposal by its ID, recording the specified reason.
+    
+    Parameters:
+        proposal_id (str): The unique identifier of the proposal to reject.
+        reason (str, optional): The reason for rejection. Defaults to "manually rejected".
+    
+    Returns:
+        bool: True if the proposal was successfully rejected, False otherwise.
+    """
     return evolutionary_conduit.reject_proposal(proposal_id, reason)
 
 if __name__ == "__main__":
