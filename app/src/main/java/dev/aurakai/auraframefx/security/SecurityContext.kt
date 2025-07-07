@@ -50,7 +50,9 @@ class SecurityContext @Inject constructor(
     val securityState: StateFlow<SecurityState> = _securityState.asStateFlow()
 
     /**
-     * Stub for content validation. In production, this should check for policy violations, threats, etc.
+     * Placeholder for validating content against security policies or threats.
+     *
+     * Currently allows all content. Intended to be implemented with checks for policy violations or security risks.
      */
     fun validateContent(content: String) {
         // TODO: Implement real validation logic
@@ -58,7 +60,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Validate image data for security compliance
+     * Validates image data for security compliance.
+     *
+     * Currently a stub that allows all image data. Intended for future implementation of image validation logic.
      */
     fun validateImageData(imageData: ByteArray) {
         // TODO: Implement real image validation logic
@@ -358,12 +362,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Determines the overall threat level from a list of detected security threats.
+     * Calculates the overall threat level based on the highest severity among detected security threats.
      *
-     * Returns the highest severity present among the threats, or `ThreatLevel.NONE` if the list is empty.
+     * Returns `ThreatLevel.LOW` if no threats are present.
      *
-     * @param threats The list of detected security threats.
-     * @return The calculated overall threat level.
+     * @param threats List of detected security threats.
+     * @return The highest applicable threat level.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW

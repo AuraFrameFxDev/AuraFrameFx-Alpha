@@ -89,12 +89,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Enhances a user interaction by providing relevant context, suggesting an optimal AI agent, and assigning a priority.
+     * Enhances a user interaction by enriching it with relevant context, suggesting an optimal AI agent, and assigning a processing priority.
      *
-     * Analyzes the interaction content to retrieve related memories, determines the most suitable agent based on content patterns, and calculates a priority score for processing.
+     * Retrieves related memories based on the interaction content, determines the most suitable agent, and calculates a priority score. Returns an `EnhancedInteractionData` object containing the enriched information.
      *
-     * @param interaction The user interaction data to enhance.
-     * @return An `EnhancedInteractionData` object containing the original interaction, enhanced context string, suggested agent, and priority.
+     * @param interaction The user interaction data to be enhanced.
+     * @return An `EnhancedInteractionData` object with the original content, relevant context, suggested agent, and priority.
      */
     suspend fun enhanceInteraction(interaction: InteractionData): EnhancedInteractionData {
         logger.debug("ContextManager", "Enhancing interaction")
@@ -113,9 +113,9 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Records a user interaction and agent response into the conversation history for learning and context enrichment.
+     * Records a user interaction and corresponding agent response in the conversation history.
      *
-     * Also extracts and stores high-confidence memories from the interaction for future retrieval.
+     * Also extracts and stores high-confidence memories from the interaction for future retrieval and learning.
      */
     fun recordInteraction(interaction: InteractionData, response: InteractionResponse) {
         logger.debug("ContextManager", "Recording interaction for learning")
@@ -299,10 +299,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Determines the priority level of an interaction based on its type.
+     * Assigns a numeric priority to an interaction based on its type.
      *
-     * @param interaction The interaction whose priority is to be calculated.
-     * @return An integer representing the priority, where higher values indicate higher priority.
+     * Returns 10 for "security", 8 for "analysis", 6 for "creative", 4 for "text", and 2 for any other type.
+     *
+     * @param interaction The interaction for which to determine priority.
+     * @return The priority value as an integer.
      */
     private fun calculatePriority(interaction: InteractionData): Int {
         return when (interaction.type) {

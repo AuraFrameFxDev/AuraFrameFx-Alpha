@@ -12,6 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+/**
+ * Displays the main control screen for the Oracle Drive system, including status, module management, and AI command input.
+ *
+ * Arranges the UI into a scaffold with a top app bar and three primary sections: a status panel, a module manager list, and an AI command bar.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OracleDriveControlScreen() {
@@ -114,6 +119,9 @@ fun AiCommandBar(modifier: Modifier = Modifier) {
 }
 
 
+/**
+ * Displays a preview of the OracleDriveControlScreen composable within a MaterialTheme for design inspection.
+ */
 @Preview(showBackground = true)
 @Composable
 fun OracleDriveControlScreenPreview() {
