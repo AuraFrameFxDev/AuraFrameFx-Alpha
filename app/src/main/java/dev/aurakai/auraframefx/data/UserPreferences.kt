@@ -49,43 +49,19 @@ class UserPreferences(context: Context) {
         prefs[key] = value
     }
 
-    // Properties and methods based on error report (unused declarations)
+    // Properties based on error report (unused declarations)
 
     // TODO: Reported as unused. Implement storage and retrieval if needed.
     var apiKey: String? = null
 
-    // TODO: Reported as unused. Implement if needed.
-    fun setApiKey(_key: String?) {
-        this.apiKey = _key
-        // TODO: Persist API key
-    }
-
     // TODO: Reported as unused. Implement storage and retrieval if needed.
     var userId: String? = null
-
-    // TODO: Reported as unused. Implement if needed.
-    fun setUserId(_id: String?) {
-        this.userId = _id
-        // TODO: Persist User ID
-    }
 
     // TODO: Reported as unused. Implement storage and retrieval if needed.
     var userName: String? = null
 
-    // TODO: Reported as unused. Implement if needed.
-    fun setUserName(_name: String?) {
-        this.userName = _name
-        // TODO: Persist User Name
-    }
-
     // TODO: Reported as unused. Implement storage and retrieval if needed.
     var userEmail: String? = null
-
-    // TODO: Reported as unused. Implement if needed.
-    fun setUserEmail(_email: String?) {
-        this.userEmail = _email
-        // TODO: Persist User Email
-    }
 
     /**
      * Retrieves user data. The original error report mentioned a "NonExistentClass"

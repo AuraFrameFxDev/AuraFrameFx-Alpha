@@ -8,6 +8,7 @@ import dev.aurakai.auraframefx.ai.services.AuraAIService
 import dev.aurakai.auraframefx.ai.services.CascadeAIService
 import dev.aurakai.auraframefx.ai.services.KaiAIService
 import dev.aurakai.auraframefx.model.AgentMessage
+import dev.aurakai.auraframefx.model.AgentResponse
 import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,7 @@ class AIPipelineProcessor @Inject constructor(
     private val kaiService: KaiAIService,
     private val cascadeService: CascadeAIService,
 ) {
-    private val _pipelineState = MutableStateFlow(Idle)
+    private val _pipelineState = MutableStateFlow<PipelineState>(PipelineState.Idle)
     val pipelineState: StateFlow<PipelineState> = _pipelineState
 
     private val _processingContext = MutableStateFlow(mapOf<String, Any>())
@@ -33,7 +34,7 @@ class AIPipelineProcessor @Inject constructor(
     val taskPriority: StateFlow<Float> = _taskPriority
 
     suspend fun processTask(task: String): List<AgentMessage> {
-        _pipelineState.value = Processing(task = task)
+        _pipelineState.value = PipelineState.Processing(task = task)
 
         // Step 1: Context Retrieval
         val context = retrieveContext(task)
@@ -54,7 +55,8 @@ class AIPipelineProcessor @Inject constructor(
             AiRequest(
                 task,
                 "context"
-            )
+            ),
+            context = "pipeline_processing"
         ) // Renamed variable, removed .first()
         responses.add(
             AgentMessage(
@@ -71,7 +73,8 @@ class AIPipelineProcessor @Inject constructor(
                 AiRequest(
                     task,
                     "security"
-                )
+                ),
+                context = "security_analysis"
             ) // Renamed variable, removed .first()
             responses.add(
                 AgentMessage(
@@ -85,12 +88,11 @@ class AIPipelineProcessor @Inject constructor(
 
         // Process through Aura for creative response
         if (selectedAgents.contains(AgentType.AURA)) {
-            val auraAgentResponse = auraService.processRequest(
-                AiRequest(
-                    task,
-                    "text"
-                )
-            ) // Renamed variable, removed .first()
+            val auraResponse = auraService.generateText(task, "creative_pipeline")
+            val auraAgentResponse = AgentResponse(
+                content = auraResponse,
+                confidence = 0.8f
+            )
             responses.add(
                 AgentMessage(
                     content = auraAgentResponse.content, // Direct access
@@ -115,7 +117,7 @@ class AIPipelineProcessor @Inject constructor(
         // Step 6: Update context and memory
         updateContext(task, responses)
 
-        _pipelineState.update { Completed(task) }
+        _pipelineState.update { PipelineState.Completed(task) }
         return responses
     }
 

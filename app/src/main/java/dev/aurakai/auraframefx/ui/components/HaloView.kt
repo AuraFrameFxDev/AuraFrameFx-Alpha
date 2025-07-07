@@ -9,12 +9,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete // Explicit import
-import androidx.compose.material.icons.filled.Pause // Explicit import
-import androidx.compose.material.icons.filled.PlayArrow // Explicit import
-import androidx.compose.material.icons.filled.Refresh // Explicit import
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material3.*
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -24,7 +24,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+// import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonPink
@@ -45,12 +46,9 @@ import kotlin.math.*
  *
  * Renders a visual halo with agent nodes, supports drag-and-drop task assignment, tracks task history, and animates agent status. Users can assign tasks to agents by dragging nodes, input tasks, and monitor processing status in real time. Includes controls for rotation, resetting, and clearing task history.
  */
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    androidx.compose.foundation.gestures.ExperimentalFoundationApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun HaloView(viewModel: GenesisAgentViewModel = hiltViewModel()) {
+fun HaloView(viewModel: GenesisAgentViewModel = viewModel()) {
     var isRotating by remember { mutableStateOf(true) }
     var rotationAngle by remember { mutableFloatStateOf(0f) }
     val agents = viewModel.getAgentsByPriority()
@@ -471,7 +469,7 @@ fun HaloView(viewModel: GenesisAgentViewModel = hiltViewModel()) {
                 onClick = { isRotating = !isRotating }
             ) {
                 Icon(
-                    if (isRotating) Icons.Default.Pause else Icons.Default.PlayArrow,
+                    if (isRotating) Icons.Filled.Home else Icons.Filled.PlayArrow,
                     contentDescription = "Toggle rotation",
                     tint = NeonPurple
                 )

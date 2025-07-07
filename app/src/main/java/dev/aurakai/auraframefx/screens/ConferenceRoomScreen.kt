@@ -15,6 +15,7 @@ import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
 import dev.aurakai.auraframefx.viewmodel.ConferenceRoomViewModel
+import kotlinx.coroutines.launch
 
 // Placeholder for Header - User should define this Composable
 @Composable
@@ -39,6 +40,7 @@ fun ConferenceRoomScreen(
     val isTranscribing by viewModel.isTranscribing.collectAsState()
     val messages by viewModel.messages.collectAsState()
     var messageText by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope() // Add coroutine scope
 
     Column(
         modifier = Modifier
@@ -107,8 +109,8 @@ fun ConferenceRoomScreen(
             IconButton(
                 onClick = {
                     if (messageText.isNotBlank()) {
-                        // Launch a coroutine for the suspend function using viewModelScope
-                        viewModel.viewModelScope.launch {
+                        // Launch a coroutine for the suspend function 
+                        scope.launch {
                             viewModel.sendMessage(messageText, AgentType.USER, "user_conversation")
                             messageText = ""
                         }

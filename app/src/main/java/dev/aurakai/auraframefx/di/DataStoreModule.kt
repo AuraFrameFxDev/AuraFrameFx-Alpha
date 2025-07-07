@@ -1,10 +1,10 @@
 package dev.aurakai.auraframefx.di
 
 import android.content.Context
-import androidx.datastore.core.DataStore // Added import
-import androidx.datastore.preferences.core.Preferences // Added import
-// import androidx.datastore.preferences.preferencesDataStoreFile // For actual implementation
-// import androidx.datastore.preferences.core.PreferenceDataStoreFactory // For actual implementation
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,10 +37,9 @@ object DataStoreModule {
      */
     @Provides
     @Singleton
-    fun provideDataStore(@ApplicationContext _context: Context): DataStore<Preferences>? { // Return type changed
-        // TODO: Parameter _context reported as unused (Hilt will provide it as @ApplicationContext).
-        // TODO: Implement actual DataStore creation. Requires 'androidx.datastore:datastore-preferences:1.0.0' (or newer) dependency.
-        // Example: return androidx.datastore.preferences.core.PreferenceDataStoreFactory.create { _context.preferencesDataStoreFile("aura_settings") }
-        return null // Placeholder, actual implementation needed
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+        return PreferenceDataStoreFactory.create(
+            produceFile = { context.preferencesDataStoreFile("aura_settings") }
+        )
     }
 }

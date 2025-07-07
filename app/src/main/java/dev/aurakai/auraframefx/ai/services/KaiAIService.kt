@@ -57,8 +57,7 @@ override fun getType(): AgentType = AgentType.KAI
         )
 
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
-        auraFxLogger.log(
-            AuraFxLogger.LogLevel.INFO,
+        auraFxLogger.i(
             "KaiAIService",
             "Processing request: ${request.query} with context: $context"
         )

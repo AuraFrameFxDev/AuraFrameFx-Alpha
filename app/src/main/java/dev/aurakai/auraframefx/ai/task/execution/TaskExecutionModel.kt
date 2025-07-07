@@ -11,14 +11,23 @@ data class TaskExecution(
     val id: String = "exec_${Clock.System.now().toEpochMilliseconds()}",
     val taskId: String,
     val agent: AgentType,
+    val type: String,
+    val data: Map<String, String> = emptyMap(),
+    val priority: TaskPriority = TaskPriority.NORMAL,
     @Serializable(with = InstantSerializer::class) val startTime: Instant = Clock.System.now(),
     @Serializable(with = InstantSerializer::class) val endTime: Instant? = null,
+    val startedAt: Long? = null,
+    val completedAt: Long? = null,
+    val errorMessage: String? = null,
     val status: ExecutionStatus = ExecutionStatus.PENDING,
     val progress: Float = 0.0f,
     val result: ExecutionResult? = null,
     val metadata: Map<String, String> = emptyMap(),
     val executionPlan: ExecutionPlan? = null,
     val checkpoints: List<Checkpoint> = emptyList(),
+    val scheduledTime: Long = System.currentTimeMillis(),
+    val agentPreference: String? = null,
+    val createdAt: Long = System.currentTimeMillis()
 )
 
 @Serializable
@@ -92,4 +101,14 @@ enum class CheckpointStatus {
     COMPLETED,
     FAILED,
     SKIPPED
+}
+
+@Serializable
+enum class TaskPriority {
+    LOW,
+    NORMAL,
+    HIGH,
+    URGENT;
+    
+    val value: Int get() = ordinal
 }

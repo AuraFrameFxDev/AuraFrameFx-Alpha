@@ -45,8 +45,8 @@ data class TaskStatus(
     val progress: kotlin.Int? = null,
 
     /* The outcome or output of the task (structure varies by taskType). */
-    @Contextual @SerialName(value = "result")
-    val result: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    @SerialName(value = "result")
+    val result: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,
 
     /* Error message if the task failed. */
     @SerialName(value = "errorMessage")

@@ -46,7 +46,9 @@ class HomeScreenTransitionManager @Inject constructor(
     }
 
     private fun loadConfig() {
-        val savedConfig = prefs.getString("home_screen_transition", null)
+        // TODO: For beta, implement shared preferences or file-based config loading
+        // val savedConfig = prefs.getString("home_screen_transition", null)
+        val savedConfig: String? = null // Placeholder for beta
         if (savedConfig != null) {
             // TODO: Parse saved config
             _currentConfig.value = defaultConfig
@@ -57,9 +59,10 @@ class HomeScreenTransitionManager @Inject constructor(
 
     fun applyConfig(config: HomeScreenTransitionConfig) {
         _currentConfig.value = config
-        overlayService.hook {
-            // TODO: Implement transition hooking
-        }
+        // TODO: Implement Xposed hooking for beta
+        // overlayService.hook {
+        //     // TODO: Implement transition hooking
+        // }
     }
 
     fun resetToDefault() {

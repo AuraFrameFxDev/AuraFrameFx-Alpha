@@ -59,17 +59,6 @@ enum class BasicConversationState {
 }
 
 /**
- * Represents security threat levels
- */
-enum class ThreatLevel {
-    NONE,
-    LOW,
-    MEDIUM,
-    HIGH,
-    CRITICAL
-}
-
-/**
  * Represents vision processing states
  */
 enum class VisionState {

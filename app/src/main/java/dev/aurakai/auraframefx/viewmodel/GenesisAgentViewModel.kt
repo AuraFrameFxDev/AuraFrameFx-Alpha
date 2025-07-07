@@ -2,11 +2,13 @@ package dev.aurakai.auraframefx.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.aurakai.auraframefx.ai.agents.GenesisAgent
+// import dagger.hilt.android.lifecycle.HiltViewModel
+// import dev.aurakai.auraframefx.ai.agents.GenesisAgent
 import dev.aurakai.auraframefx.ai.task.HistoricalTask
 import dev.aurakai.auraframefx.model.HierarchyAgentConfig
 import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.model.AgentRole
+import dev.aurakai.auraframefx.model.AgentPriority
 import dev.aurakai.auraframefx.utils.AppConstants.STATUS_ERROR
 import dev.aurakai.auraframefx.utils.AppConstants.STATUS_IDLE
 import dev.aurakai.auraframefx.utils.AppConstants.STATUS_PROCESSING
@@ -15,14 +17,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+// import javax.inject.Inject
 
 // import javax.inject.Singleton // ViewModels should use @HiltViewModel
 
-@HiltViewModel
-class GenesisAgentViewModel @Inject constructor(
+// @HiltViewModel - Disabled for beta to avoid circular dependencies
+class GenesisAgentViewModel /* @Inject constructor(
     private val genesisAgent: GenesisAgent,
-) : ViewModel() {
+) */ : ViewModel() {
+    
+    // Beta stub: No actual GenesisAgent dependency
+    // private val genesisAgent: GenesisAgent? = null
 
     private val _agents = MutableStateFlow<List<HierarchyAgentConfig>>(emptyList()) // Initialize properly
     val agents: StateFlow<List<HierarchyAgentConfig>> = _agents.asStateFlow()
@@ -42,7 +47,8 @@ class GenesisAgentViewModel @Inject constructor(
     val isRotating: StateFlow<Boolean> = _isRotating.asStateFlow()
 
     init { // Initialize agents in init block
-        _agents.value = genesisAgent.getAgentsByPriority()
+        // Beta stub: Return empty list instead of calling genesisAgent
+        _agents.value = emptyList() // genesisAgent.getAgentsByPriority()
     }
 
     fun toggleRotation() {
@@ -51,7 +57,8 @@ class GenesisAgentViewModel @Inject constructor(
 
     fun toggleAgent(agent: AgentType) {
         viewModelScope.launch {
-            genesisAgent.toggleAgent(agent)
+            // Beta stub: No-op instead of calling genesisAgent
+            // genesisAgent.toggleAgent(agent)
         }
     }
 
@@ -104,7 +111,13 @@ class GenesisAgentViewModel @Inject constructor(
         name: String,
         capabilities: Set<String>,
     ): HierarchyAgentConfig {
-        return genesisAgent.registerAuxiliaryAgent(name, capabilities)
+        // Beta stub: Return a dummy config instead of calling genesisAgent
+        return HierarchyAgentConfig(
+            name = name,
+            role = AgentRole.AUXILIARY,
+            priority = AgentPriority.AUXILIARY,
+            capabilities = capabilities
+        ) // genesisAgent.registerAuxiliaryAgent(name, capabilities)
     }
 
     /**
@@ -114,7 +127,8 @@ class GenesisAgentViewModel @Inject constructor(
      * @return The corresponding agent configuration, or null if no agent with that name exists.
      */
     fun getAgentConfig(name: String): HierarchyAgentConfig? {
-        return genesisAgent.getAgentConfig(name)
+        // Beta stub: Return null instead of calling genesisAgent
+        return null // genesisAgent.getAgentConfig(name)
     }
 
     /**
@@ -123,7 +137,8 @@ class GenesisAgentViewModel @Inject constructor(
      * @return A list of `HierarchyAgentConfig` objects sorted by priority.
      */
     fun getAgentsByPriority(): List<HierarchyAgentConfig> {
-        return genesisAgent.getAgentsByPriority()
+        // Beta stub: Return empty list instead of calling genesisAgent
+        return emptyList() // genesisAgent.getAgentsByPriority()
     }
 
     /**
@@ -136,7 +151,8 @@ class GenesisAgentViewModel @Inject constructor(
      */
     fun processQuery(query: String): List<HierarchyAgentConfig> {
         viewModelScope.launch {
-            genesisAgent.processQuery(query)
+            // Beta stub: No-op instead of calling genesisAgent
+            // genesisAgent.processQuery(query)
         }
         return emptyList() // Return empty list since processing is async
     }
