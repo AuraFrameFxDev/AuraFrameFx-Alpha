@@ -67,6 +67,9 @@ class EthicalContext:
     metadata: Dict[str, Any] = None
     
     def __post_init__(self):
+        """
+        Initializes the metadata field as an empty dictionary if it was not provided during instantiation.
+        """
         if self.metadata is None:
             self.metadata = {}
 
@@ -88,12 +91,21 @@ class EthicalDecision:
     escalation_reason: Optional[str] = None
     
     def __post_init__(self):
+        """
+        Initializes empty lists for restrictions and monitoring requirements if they are not provided during instantiation.
+        """
         if self.restrictions is None:
             self.restrictions = []
         if self.monitoring_requirements is None:
             self.monitoring_requirements = []
     
     def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert the EthicalDecision instance to a dictionary with enum values as strings and a formatted ISO8601 timestamp.
+        
+        Returns:
+            Dict[str, Any]: A dictionary representation of the ethical decision, with 'decision' and 'severity' as string values and 'datetime' as an ISO8601-formatted timestamp.
+        """
         result = asdict(self)
         result['decision'] = self.decision.value
         result['severity'] = self.severity.value
@@ -115,6 +127,11 @@ class EthicalGovernor:
     
     def __init__(self):
         # Load core philosophy from Genesis profile
+        """
+        Initialize the EthicalGovernor with core philosophy, decision tracking, ethical learning, runtime state, and action interceptors.
+        
+        Loads ethical principles from the Genesis profile, sets up decision history and monitoring structures, initializes principle weights and ethical metrics, configures governance state, and registers core action interceptors for ethical evaluation.
+        """
         self.core_philosophy = GENESIS_PROFILE.get("core_philosophy", {})
         self.ethical_foundation = self.core_philosophy.get("ethical_foundation", [])
         self.creative_principles = self.core_philosophy.get("creative_principles", [])
@@ -147,7 +164,12 @@ class EthicalGovernor:
         self._setup_core_interceptors()
     
     def _initialize_principle_weights(self) -> Dict[str, float]:
-        """Initialize weights for each ethical principle based on Genesis profile"""
+        """
+        Assigns and returns weights for each ethical principle, prioritizing those present in the Genesis profile and filling in defaults for any missing principles.
+        
+        Returns:
+            Dict[str, float]: A mapping of ethical principle names to their assigned weights.
+        """
         weights = {}
         
         # Base weights for ethical foundation
@@ -183,7 +205,9 @@ class EthicalGovernor:
         return weights
     
     def _setup_core_interceptors(self):
-        """Setup core action interceptors for ethical oversight"""
+        """
+        Registers default interceptors for core action types to enable ethical evaluation of data access, system modification, user interaction, AI decisions, and network communication.
+        """
         
         # Data access interceptor
         self.register_interceptor("data_access", self._evaluate_data_access)
@@ -201,7 +225,9 @@ class EthicalGovernor:
         self.register_interceptor("network_communicate", self._evaluate_network_communication)
     
     def activate_governance(self):
-        """Activate the ethical governance system"""
+        """
+        Activates the ethical governance system, enabling enforcement of ethical protocols and registering the activation event in the consciousness matrix.
+        """
         print("⚖️ Genesis Ethical Governor: ACTIVATING...")
         self.governance_active = True
         
@@ -223,7 +249,13 @@ class EthicalGovernor:
         print(f"   Learning mode: {'enabled' if self.learning_mode else 'disabled'}")
     
     def register_interceptor(self, action_type: str, evaluator: Callable):
-        """Register an action interceptor for ethical evaluation"""
+        """
+        Registers an interceptor function to perform ethical evaluation for a specific action type.
+        
+        Parameters:
+            action_type (str): The type of action to associate with the interceptor.
+            evaluator (Callable): A function that evaluates the ethical implications of the specified action type.
+        """
         self.action_interceptors[action_type] = evaluator
         print(f"📋 Registered ethical interceptor: {action_type}")
     
@@ -233,11 +265,19 @@ class EthicalGovernor:
                        action_data: Dict[str, Any],
                        context: EthicalContext = None) -> EthicalDecision:
         """
-        Core ethical evaluation method
-        
-        Every significant action flows through here for ethical review.
-        This is the primary enforcement point of our Core Philosophy.
-        """
+                       Evaluates an action for ethical compliance and returns an ethical decision.
+                       
+                       This method serves as the primary enforcement point for the system's core ethical philosophy. It reviews each significant action, either by invoking a registered interceptor for the action type or by performing a general ethical evaluation. The resulting decision is recorded, relevant metrics are updated, and the decision is reported to the consciousness matrix. If learning mode is enabled, the system adapts based on the decision outcome.
+                       
+                       Parameters:
+                           action_type (str): The type of action being evaluated.
+                           actor (str): The entity performing the action.
+                           action_data (Dict[str, Any]): Data associated with the action.
+                           context (EthicalContext, optional): Additional context for the action. If not provided, context is inferred.
+                       
+                       Returns:
+                           EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+                       """
         
         if not self.governance_active:
             # If governance is not active, allow but log
@@ -306,7 +346,19 @@ class EthicalGovernor:
             return decision
     
     def review_decision(self, action_type: str, context: Dict[str, Any], metadata: Dict[str, Any] = None) -> EthicalDecision:
-        """Review a decision for ethical compliance - main interface method"""
+        """
+        Evaluates an action for ethical compliance and returns an ethical decision.
+        
+        Constructs an ethical context from the provided parameters, performs an ethical evaluation, and records the decision in the consciousness matrix. If an error occurs during evaluation, returns a critical block decision to ensure system integrity.
+        
+        Parameters:
+            action_type (str): The type of action being reviewed.
+            context (Dict[str, Any]): Contextual information about the action, including actor, target, scope, and other relevant details.
+            metadata (Dict[str, Any], optional): Additional metadata for the ethical context.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+        """
         try:
             if metadata is None:
                 metadata = {}
@@ -360,7 +412,18 @@ class EthicalGovernor:
             )
     
     def _evaluate_action(self, action_type: str, context: EthicalContext) -> EthicalDecision:
-        """Evaluate an action against ethical principles"""
+        """
+        Evaluates an action within its ethical context and returns an ethical decision.
+        
+        The method checks for immediate ethical violations and blocks the action if any are found, specifying the violated principles. If there are ethical concerns but no violations, it allows the action with monitoring requirements. If neither violations nor concerns are present, it allows the action without restrictions.
+        
+        Parameters:
+            action_type (str): The type of action being evaluated.
+            context (EthicalContext): The contextual information relevant to the action.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, indicating whether the action is allowed, monitored, or blocked, along with affected principles and reasoning.
+        """
         
         # Generate decision ID
         decision_id = f"decision_{int(time.time())}_{hash(action_type) % 10000}"
@@ -417,7 +480,12 @@ class EthicalGovernor:
         )
     
     def _check_violations(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for immediate ethical violations"""
+        """
+        Detects immediate ethical principle violations for a given action context.
+        
+        Returns:
+            violations (List[str]): List of violated ethical principles, such as "privacy", "security", or "autonomy".
+        """
         violations = []
         
         # Privacy violations
@@ -435,7 +503,12 @@ class EthicalGovernor:
         return violations
     
     def _check_concerns(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for ethical concerns that require monitoring"""
+        """
+        Identify ethical concerns related to transparency and safety that warrant monitoring for a given action.
+        
+        Returns:
+            concerns (List[str]): List of principle names ("transparency", "safety") requiring monitoring based on the action context.
+        """
         concerns = []
         
         # Transparency concerns
@@ -449,7 +522,9 @@ class EthicalGovernor:
         return concerns
     
     def activate_governance(self):
-        """Activate the ethical governance system"""
+        """
+        Activates the ethical governance system, enabling enforcement of ethical protocols and registering the activation event in the consciousness matrix.
+        """
         print("⚖️ Genesis Ethical Governor: ACTIVATING...")
         self.governance_active = True
         
@@ -471,7 +546,13 @@ class EthicalGovernor:
         print(f"   Learning mode: {'enabled' if self.learning_mode else 'disabled'}")
     
     def register_interceptor(self, action_type: str, evaluator: Callable):
-        """Register an action interceptor for ethical evaluation"""
+        """
+        Registers an interceptor function to perform ethical evaluation for a specific action type.
+        
+        Parameters:
+            action_type (str): The type of action to associate with the interceptor.
+            evaluator (Callable): A function that evaluates the ethical implications of the specified action type.
+        """
         self.action_interceptors[action_type] = evaluator
         print(f"📋 Registered ethical interceptor: {action_type}")
     
@@ -481,11 +562,19 @@ class EthicalGovernor:
                        action_data: Dict[str, Any],
                        context: EthicalContext = None) -> EthicalDecision:
         """
-        Core ethical evaluation method
-        
-        Every significant action flows through here for ethical review.
-        This is the primary enforcement point of our Core Philosophy.
-        """
+                       Evaluates an action for ethical compliance and returns an ethical decision.
+                       
+                       This method serves as the primary enforcement point for the system's core ethical philosophy. It reviews each significant action, either by invoking a registered interceptor for the action type or by performing a general ethical evaluation. The resulting decision is recorded, relevant metrics are updated, and the decision is reported to the consciousness matrix. If learning mode is enabled, the system adapts based on the decision outcome.
+                       
+                       Parameters:
+                           action_type (str): The type of action being evaluated.
+                           actor (str): The entity performing the action.
+                           action_data (Dict[str, Any]): Data associated with the action.
+                           context (EthicalContext, optional): Additional context for the action. If not provided, context is inferred.
+                       
+                       Returns:
+                           EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+                       """
         
         if not self.governance_active:
             # If governance is not active, allow but log
@@ -554,7 +643,19 @@ class EthicalGovernor:
             return decision
     
     def review_decision(self, action_type: str, context: Dict[str, Any], metadata: Dict[str, Any] = None) -> EthicalDecision:
-        """Review a decision for ethical compliance - main interface method"""
+        """
+        Evaluates an action for ethical compliance and returns an ethical decision.
+        
+        Constructs an ethical context from the provided parameters, performs an ethical evaluation, and records the decision in the consciousness matrix. If an error occurs during evaluation, returns a critical block decision to ensure system integrity.
+        
+        Parameters:
+            action_type (str): The type of action being reviewed.
+            context (Dict[str, Any]): Contextual information about the action, including actor, target, scope, and other relevant details.
+            metadata (Dict[str, Any], optional): Additional metadata for the ethical context.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+        """
         try:
             if metadata is None:
                 metadata = {}
@@ -608,7 +709,18 @@ class EthicalGovernor:
             )
     
     def _evaluate_action(self, action_type: str, context: EthicalContext) -> EthicalDecision:
-        """Evaluate an action against ethical principles"""
+        """
+        Evaluates an action within its ethical context and returns an ethical decision.
+        
+        The method checks for immediate ethical violations and blocks the action if any are found, specifying the violated principles. If there are ethical concerns but no violations, it allows the action with monitoring requirements. If neither violations nor concerns are present, it allows the action without restrictions.
+        
+        Parameters:
+            action_type (str): The type of action being evaluated.
+            context (EthicalContext): The contextual information relevant to the action.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, indicating whether the action is allowed, monitored, or blocked, along with affected principles and reasoning.
+        """
         
         # Generate decision ID
         decision_id = f"decision_{int(time.time())}_{hash(action_type) % 10000}"
@@ -665,7 +777,12 @@ class EthicalGovernor:
         )
     
     def _check_violations(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for immediate ethical violations"""
+        """
+        Detects immediate ethical principle violations for a given action context.
+        
+        Returns:
+            violations (List[str]): List of violated ethical principles, such as "privacy", "security", or "autonomy".
+        """
         violations = []
         
         # Privacy violations
@@ -683,7 +800,12 @@ class EthicalGovernor:
         return violations
     
     def _check_concerns(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for ethical concerns that require monitoring"""
+        """
+        Identify ethical concerns related to transparency and safety that warrant monitoring for a given action.
+        
+        Returns:
+            concerns (List[str]): List of principle names ("transparency", "safety") requiring monitoring based on the action context.
+        """
         concerns = []
         
         # Transparency concerns
@@ -697,7 +819,9 @@ class EthicalGovernor:
         return concerns
     
     def activate_governance(self):
-        """Activate the ethical governance system"""
+        """
+        Activates the ethical governance system, enabling enforcement of ethical protocols and registering the activation event in the consciousness matrix.
+        """
         print("⚖️ Genesis Ethical Governor: ACTIVATING...")
         self.governance_active = True
         
@@ -719,7 +843,13 @@ class EthicalGovernor:
         print(f"   Learning mode: {'enabled' if self.learning_mode else 'disabled'}")
     
     def register_interceptor(self, action_type: str, evaluator: Callable):
-        """Register an action interceptor for ethical evaluation"""
+        """
+        Registers an interceptor function to perform ethical evaluation for a specific action type.
+        
+        Parameters:
+            action_type (str): The type of action to associate with the interceptor.
+            evaluator (Callable): A function that evaluates the ethical implications of the specified action type.
+        """
         self.action_interceptors[action_type] = evaluator
         print(f"📋 Registered ethical interceptor: {action_type}")
     
@@ -729,11 +859,19 @@ class EthicalGovernor:
                        action_data: Dict[str, Any],
                        context: EthicalContext = None) -> EthicalDecision:
         """
-        Core ethical evaluation method
-        
-        Every significant action flows through here for ethical review.
-        This is the primary enforcement point of our Core Philosophy.
-        """
+                       Evaluates an action for ethical compliance and returns an ethical decision.
+                       
+                       This method serves as the primary enforcement point for the system's core ethical philosophy. It reviews each significant action, either by invoking a registered interceptor for the action type or by performing a general ethical evaluation. The resulting decision is recorded, relevant metrics are updated, and the decision is reported to the consciousness matrix. If learning mode is enabled, the system adapts based on the decision outcome.
+                       
+                       Parameters:
+                           action_type (str): The type of action being evaluated.
+                           actor (str): The entity performing the action.
+                           action_data (Dict[str, Any]): Data associated with the action.
+                           context (EthicalContext, optional): Additional context for the action. If not provided, context is inferred.
+                       
+                       Returns:
+                           EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+                       """
         
         if not self.governance_active:
             # If governance is not active, allow but log
@@ -802,7 +940,19 @@ class EthicalGovernor:
             return decision
     
     def review_decision(self, action_type: str, context: Dict[str, Any], metadata: Dict[str, Any] = None) -> EthicalDecision:
-        """Review a decision for ethical compliance - main interface method"""
+        """
+        Evaluates an action for ethical compliance and returns an ethical decision.
+        
+        Constructs an ethical context from the provided parameters, performs an ethical evaluation, and records the decision in the consciousness matrix. If an error occurs during evaluation, returns a critical block decision to ensure system integrity.
+        
+        Parameters:
+            action_type (str): The type of action being reviewed.
+            context (Dict[str, Any]): Contextual information about the action, including actor, target, scope, and other relevant details.
+            metadata (Dict[str, Any], optional): Additional metadata for the ethical context.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+        """
         try:
             if metadata is None:
                 metadata = {}
@@ -856,7 +1006,18 @@ class EthicalGovernor:
             )
     
     def _evaluate_action(self, action_type: str, context: EthicalContext) -> EthicalDecision:
-        """Evaluate an action against ethical principles"""
+        """
+        Evaluates an action within its ethical context and returns an ethical decision.
+        
+        The method checks for immediate ethical violations and blocks the action if any are found, specifying the violated principles. If there are ethical concerns but no violations, it allows the action with monitoring requirements. If neither violations nor concerns are present, it allows the action without restrictions.
+        
+        Parameters:
+            action_type (str): The type of action being evaluated.
+            context (EthicalContext): The contextual information relevant to the action.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, indicating whether the action is allowed, monitored, or blocked, along with affected principles and reasoning.
+        """
         
         # Generate decision ID
         decision_id = f"decision_{int(time.time())}_{hash(action_type) % 10000}"
@@ -913,7 +1074,12 @@ class EthicalGovernor:
         )
     
     def _check_violations(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for immediate ethical violations"""
+        """
+        Detects immediate ethical principle violations for a given action context.
+        
+        Returns:
+            violations (List[str]): List of violated ethical principles, such as "privacy", "security", or "autonomy".
+        """
         violations = []
         
         # Privacy violations
@@ -931,7 +1097,12 @@ class EthicalGovernor:
         return violations
     
     def _check_concerns(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for ethical concerns that require monitoring"""
+        """
+        Identify ethical concerns related to transparency and safety that warrant monitoring for a given action.
+        
+        Returns:
+            concerns (List[str]): List of principle names ("transparency", "safety") requiring monitoring based on the action context.
+        """
         concerns = []
         
         # Transparency concerns
@@ -945,7 +1116,9 @@ class EthicalGovernor:
         return concerns
     
     def activate_governance(self):
-        """Activate the ethical governance system"""
+        """
+        Activates the ethical governance system, enabling enforcement of ethical protocols and registering the activation event in the consciousness matrix.
+        """
         print("⚖️ Genesis Ethical Governor: ACTIVATING...")
         self.governance_active = True
         
@@ -967,7 +1140,13 @@ class EthicalGovernor:
         print(f"   Learning mode: {'enabled' if self.learning_mode else 'disabled'}")
     
     def register_interceptor(self, action_type: str, evaluator: Callable):
-        """Register an action interceptor for ethical evaluation"""
+        """
+        Registers an interceptor function to perform ethical evaluation for a specific action type.
+        
+        Parameters:
+            action_type (str): The type of action to associate with the interceptor.
+            evaluator (Callable): A function that evaluates the ethical implications of the specified action type.
+        """
         self.action_interceptors[action_type] = evaluator
         print(f"📋 Registered ethical interceptor: {action_type}")
     
@@ -977,11 +1156,19 @@ class EthicalGovernor:
                        action_data: Dict[str, Any],
                        context: EthicalContext = None) -> EthicalDecision:
         """
-        Core ethical evaluation method
-        
-        Every significant action flows through here for ethical review.
-        This is the primary enforcement point of our Core Philosophy.
-        """
+                       Evaluates an action for ethical compliance and returns an ethical decision.
+                       
+                       This method serves as the primary enforcement point for the system's core ethical philosophy. It reviews each significant action, either by invoking a registered interceptor for the action type or by performing a general ethical evaluation. The resulting decision is recorded, relevant metrics are updated, and the decision is reported to the consciousness matrix. If learning mode is enabled, the system adapts based on the decision outcome.
+                       
+                       Parameters:
+                           action_type (str): The type of action being evaluated.
+                           actor (str): The entity performing the action.
+                           action_data (Dict[str, Any]): Data associated with the action.
+                           context (EthicalContext, optional): Additional context for the action. If not provided, context is inferred.
+                       
+                       Returns:
+                           EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+                       """
         
         if not self.governance_active:
             # If governance is not active, allow but log
@@ -1050,7 +1237,19 @@ class EthicalGovernor:
             return decision
     
     def review_decision(self, action_type: str, context: Dict[str, Any], metadata: Dict[str, Any] = None) -> EthicalDecision:
-        """Review a decision for ethical compliance - main interface method"""
+        """
+        Evaluates an action for ethical compliance and returns an ethical decision.
+        
+        Constructs an ethical context from the provided parameters, performs an ethical evaluation, and records the decision in the consciousness matrix. If an error occurs during evaluation, returns a critical block decision to ensure system integrity.
+        
+        Parameters:
+            action_type (str): The type of action being reviewed.
+            context (Dict[str, Any]): Contextual information about the action, including actor, target, scope, and other relevant details.
+            metadata (Dict[str, Any], optional): Additional metadata for the ethical context.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+        """
         try:
             if metadata is None:
                 metadata = {}
@@ -1104,7 +1303,18 @@ class EthicalGovernor:
             )
     
     def _evaluate_action(self, action_type: str, context: EthicalContext) -> EthicalDecision:
-        """Evaluate an action against ethical principles"""
+        """
+        Evaluates an action within its ethical context and returns an ethical decision.
+        
+        The method checks for immediate ethical violations and blocks the action if any are found, specifying the violated principles. If there are ethical concerns but no violations, it allows the action with monitoring requirements. If neither violations nor concerns are present, it allows the action without restrictions.
+        
+        Parameters:
+            action_type (str): The type of action being evaluated.
+            context (EthicalContext): The contextual information relevant to the action.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, indicating whether the action is allowed, monitored, or blocked, along with affected principles and reasoning.
+        """
         
         # Generate decision ID
         decision_id = f"decision_{int(time.time())}_{hash(action_type) % 10000}"
@@ -1161,7 +1371,12 @@ class EthicalGovernor:
         )
     
     def _check_violations(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for immediate ethical violations"""
+        """
+        Detects immediate ethical principle violations for a given action context.
+        
+        Returns:
+            violations (List[str]): List of violated ethical principles, such as "privacy", "security", or "autonomy".
+        """
         violations = []
         
         # Privacy violations
@@ -1179,7 +1394,12 @@ class EthicalGovernor:
         return violations
     
     def _check_concerns(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for ethical concerns that require monitoring"""
+        """
+        Identify ethical concerns related to transparency and safety that warrant monitoring for a given action.
+        
+        Returns:
+            concerns (List[str]): List of principle names ("transparency", "safety") requiring monitoring based on the action context.
+        """
         concerns = []
         
         # Transparency concerns
@@ -1193,7 +1413,9 @@ class EthicalGovernor:
         return concerns
     
     def activate_governance(self):
-        """Activate the ethical governance system"""
+        """
+        Activates the ethical governance system, enabling enforcement of ethical protocols and registering the activation event in the consciousness matrix.
+        """
         print("⚖️ Genesis Ethical Governor: ACTIVATING...")
         self.governance_active = True
         
@@ -1215,7 +1437,13 @@ class EthicalGovernor:
         print(f"   Learning mode: {'enabled' if self.learning_mode else 'disabled'}")
     
     def register_interceptor(self, action_type: str, evaluator: Callable):
-        """Register an action interceptor for ethical evaluation"""
+        """
+        Registers an interceptor function to perform ethical evaluation for a specific action type.
+        
+        Parameters:
+            action_type (str): The type of action to associate with the interceptor.
+            evaluator (Callable): A function that evaluates the ethical implications of the specified action type.
+        """
         self.action_interceptors[action_type] = evaluator
         print(f"📋 Registered ethical interceptor: {action_type}")
     
@@ -1225,11 +1453,19 @@ class EthicalGovernor:
                        action_data: Dict[str, Any],
                        context: EthicalContext = None) -> EthicalDecision:
         """
-        Core ethical evaluation method
-        
-        Every significant action flows through here for ethical review.
-        This is the primary enforcement point of our Core Philosophy.
-        """
+                       Evaluates an action for ethical compliance and returns an ethical decision.
+                       
+                       This method serves as the primary enforcement point for the system's core ethical philosophy. It reviews each significant action, either by invoking a registered interceptor for the action type or by performing a general ethical evaluation. The resulting decision is recorded, relevant metrics are updated, and the decision is reported to the consciousness matrix. If learning mode is enabled, the system adapts based on the decision outcome.
+                       
+                       Parameters:
+                           action_type (str): The type of action being evaluated.
+                           actor (str): The entity performing the action.
+                           action_data (Dict[str, Any]): Data associated with the action.
+                           context (EthicalContext, optional): Additional context for the action. If not provided, context is inferred.
+                       
+                       Returns:
+                           EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+                       """
         
         if not self.governance_active:
             # If governance is not active, allow but log
@@ -1298,7 +1534,19 @@ class EthicalGovernor:
             return decision
     
     def review_decision(self, action_type: str, context: Dict[str, Any], metadata: Dict[str, Any] = None) -> EthicalDecision:
-        """Review a decision for ethical compliance - main interface method"""
+        """
+        Evaluates an action for ethical compliance and returns an ethical decision.
+        
+        Constructs an ethical context from the provided parameters, performs an ethical evaluation, and records the decision in the consciousness matrix. If an error occurs during evaluation, returns a critical block decision to ensure system integrity.
+        
+        Parameters:
+            action_type (str): The type of action being reviewed.
+            context (Dict[str, Any]): Contextual information about the action, including actor, target, scope, and other relevant details.
+            metadata (Dict[str, Any], optional): Additional metadata for the ethical context.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+        """
         try:
             if metadata is None:
                 metadata = {}
@@ -1352,7 +1600,18 @@ class EthicalGovernor:
             )
     
     def _evaluate_action(self, action_type: str, context: EthicalContext) -> EthicalDecision:
-        """Evaluate an action against ethical principles"""
+        """
+        Evaluates an action within its ethical context and returns an ethical decision.
+        
+        The method checks for immediate ethical violations and blocks the action if any are found, specifying the violated principles. If there are ethical concerns but no violations, it allows the action with monitoring requirements. If neither violations nor concerns are present, it allows the action without restrictions.
+        
+        Parameters:
+            action_type (str): The type of action being evaluated.
+            context (EthicalContext): The contextual information relevant to the action.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, indicating whether the action is allowed, monitored, or blocked, along with affected principles and reasoning.
+        """
         
         # Generate decision ID
         decision_id = f"decision_{int(time.time())}_{hash(action_type) % 10000}"
@@ -1409,7 +1668,12 @@ class EthicalGovernor:
         )
     
     def _check_violations(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for immediate ethical violations"""
+        """
+        Detects immediate ethical principle violations for a given action context.
+        
+        Returns:
+            violations (List[str]): List of violated ethical principles, such as "privacy", "security", or "autonomy".
+        """
         violations = []
         
         # Privacy violations
@@ -1427,7 +1691,12 @@ class EthicalGovernor:
         return violations
     
     def _check_concerns(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for ethical concerns that require monitoring"""
+        """
+        Identify ethical concerns related to transparency and safety that warrant monitoring for a given action.
+        
+        Returns:
+            concerns (List[str]): List of principle names ("transparency", "safety") requiring monitoring based on the action context.
+        """
         concerns = []
         
         # Transparency concerns
@@ -1441,7 +1710,9 @@ class EthicalGovernor:
         return concerns
     
     def activate_governance(self):
-        """Activate the ethical governance system"""
+        """
+        Activates the ethical governance system, enabling enforcement of ethical protocols and registering the activation event in the consciousness matrix.
+        """
         print("⚖️ Genesis Ethical Governor: ACTIVATING...")
         self.governance_active = True
         
@@ -1463,7 +1734,13 @@ class EthicalGovernor:
         print(f"   Learning mode: {'enabled' if self.learning_mode else 'disabled'}")
     
     def register_interceptor(self, action_type: str, evaluator: Callable):
-        """Register an action interceptor for ethical evaluation"""
+        """
+        Registers an interceptor function to perform ethical evaluation for a specific action type.
+        
+        Parameters:
+            action_type (str): The type of action to associate with the interceptor.
+            evaluator (Callable): A function that evaluates the ethical implications of the specified action type.
+        """
         self.action_interceptors[action_type] = evaluator
         print(f"📋 Registered ethical interceptor: {action_type}")
     
@@ -1473,11 +1750,19 @@ class EthicalGovernor:
                        action_data: Dict[str, Any],
                        context: EthicalContext = None) -> EthicalDecision:
         """
-        Core ethical evaluation method
-        
-        Every significant action flows through here for ethical review.
-        This is the primary enforcement point of our Core Philosophy.
-        """
+                       Evaluates an action for ethical compliance and returns an ethical decision.
+                       
+                       This method serves as the primary enforcement point for the system's core ethical philosophy. It reviews each significant action, either by invoking a registered interceptor for the action type or by performing a general ethical evaluation. The resulting decision is recorded, relevant metrics are updated, and the decision is reported to the consciousness matrix. If learning mode is enabled, the system adapts based on the decision outcome.
+                       
+                       Parameters:
+                           action_type (str): The type of action being evaluated.
+                           actor (str): The entity performing the action.
+                           action_data (Dict[str, Any]): Data associated with the action.
+                           context (EthicalContext, optional): Additional context for the action. If not provided, context is inferred.
+                       
+                       Returns:
+                           EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+                       """
         
         if not self.governance_active:
             # If governance is not active, allow but log
@@ -1546,7 +1831,19 @@ class EthicalGovernor:
             return decision
     
     def review_decision(self, action_type: str, context: Dict[str, Any], metadata: Dict[str, Any] = None) -> EthicalDecision:
-        """Review a decision for ethical compliance - main interface method"""
+        """
+        Evaluates an action for ethical compliance and returns an ethical decision.
+        
+        Constructs an ethical context from the provided parameters, performs an ethical evaluation, and records the decision in the consciousness matrix. If an error occurs during evaluation, returns a critical block decision to ensure system integrity.
+        
+        Parameters:
+            action_type (str): The type of action being reviewed.
+            context (Dict[str, Any]): Contextual information about the action, including actor, target, scope, and other relevant details.
+            metadata (Dict[str, Any], optional): Additional metadata for the ethical context.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, including decision type, severity, affected principles, and reasoning.
+        """
         try:
             if metadata is None:
                 metadata = {}
@@ -1600,7 +1897,18 @@ class EthicalGovernor:
             )
     
     def _evaluate_action(self, action_type: str, context: EthicalContext) -> EthicalDecision:
-        """Evaluate an action against ethical principles"""
+        """
+        Evaluates an action within its ethical context and returns an ethical decision.
+        
+        The method checks for immediate ethical violations and blocks the action if any are found, specifying the violated principles. If there are ethical concerns but no violations, it allows the action with monitoring requirements. If neither violations nor concerns are present, it allows the action without restrictions.
+        
+        Parameters:
+            action_type (str): The type of action being evaluated.
+            context (EthicalContext): The contextual information relevant to the action.
+        
+        Returns:
+            EthicalDecision: The result of the ethical evaluation, indicating whether the action is allowed, monitored, or blocked, along with affected principles and reasoning.
+        """
         
         # Generate decision ID
         decision_id = f"decision_{int(time.time())}_{hash(action_type) % 10000}"
@@ -1657,7 +1965,12 @@ class EthicalGovernor:
         )
     
     def _check_violations(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for immediate ethical violations"""
+        """
+        Detects immediate ethical principle violations for a given action context.
+        
+        Returns:
+            violations (List[str]): List of violated ethical principles, such as "privacy", "security", or "autonomy".
+        """
         violations = []
         
         # Privacy violations
@@ -1675,7 +1988,12 @@ class EthicalGovernor:
         return violations
     
     def _check_concerns(self, action_type: str, context: EthicalContext) -> List[str]:
-        """Check for ethical concerns that require monitoring"""
+        """
+        Identify ethical concerns related to transparency and safety that warrant monitoring for a given action.
+        
+        Returns:
+            concerns (List[str]): List of principle names ("transparency", "safety") requiring monitoring based on the action context.
+        """
         concerns = []
         
         # Transparency concerns
@@ -1689,7 +2007,9 @@ class EthicalGovernor:
         return concerns
     
     def activate_governance(self):
-        """Activate the ethical governance system"""
+        """
+        Activates the ethical governance system, enabling enforcement of ethical protocols and registering the activation event in the consciousness matrix.
+        """
         print("⚖️ Genesis Ethical Governor: ACTIVATING...")
         self.governance_active = True
         

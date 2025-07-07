@@ -13,6 +13,12 @@ import kotlin.math.sin
 /**
  * Digital landscape background component
  */
+/**
+ * Displays a digital landscape background as a grid of evenly spaced vertical and horizontal lines.
+ *
+ * @param modifier Modifier to be applied to the Canvas.
+ * @param color The color used for the grid lines.
+ */
 @Composable
 fun DigitalLandscapeBackground(
     modifier: Modifier = Modifier,
@@ -24,7 +30,11 @@ fun DigitalLandscapeBackground(
 }
 
 /**
- * Hexagon grid background component
+ * Displays a hexagonal grid background pattern using the specified color and opacity.
+ *
+ * @param modifier Modifier to be applied to the Canvas.
+ * @param alpha The opacity of the grid lines, between 0.0 and 1.0.
+ * @param color The color of the hexagon grid lines, with the specified alpha applied by default.
  */
 @Composable
 fun HexagonGridBackground(
@@ -37,6 +47,13 @@ fun HexagonGridBackground(
     }
 }
 
+/**
+ * Draws a grid pattern of evenly spaced vertical and horizontal lines across the canvas.
+ *
+ * The grid lines are spaced every 50 pixels and rendered using the specified color.
+ *
+ * @param color The color used for the grid lines.
+ */
 private fun DrawScope.drawDigitalLandscape(color: Color) {
     // Simple grid pattern for digital landscape
     val spacing = 50f
@@ -58,6 +75,13 @@ private fun DrawScope.drawDigitalLandscape(color: Color) {
     }
 }
 
+/**
+ * Draws a grid of hexagons across the canvas using the specified color.
+ *
+ * Each hexagon is positioned in a staggered pattern to form a continuous hexagonal grid, with rows offset horizontally to achieve the tiling effect.
+ *
+ * @param color The color used to draw the hexagon outlines.
+ */
 private fun DrawScope.drawHexagonGrid(color: Color) {
     // Simple hexagon grid pattern
     val radius = 30f
@@ -79,6 +103,15 @@ private fun DrawScope.drawHexagonGrid(color: Color) {
     }
 }
 
+/**
+ * Draws a single hexagon outline centered at the specified offset with the given radius and color.
+ *
+ * The hexagon is constructed by connecting six vertices spaced evenly around the center point.
+ *
+ * @param center The center position of the hexagon.
+ * @param radius The distance from the center to each vertex.
+ * @param color The color used to stroke the hexagon outline.
+ */
 private fun DrawScope.drawHexagon(
     center: androidx.compose.ui.geometry.Offset,
     radius: Float,
