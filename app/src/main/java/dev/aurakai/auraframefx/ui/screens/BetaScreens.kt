@@ -57,7 +57,7 @@ fun HomeScreen(navController: NavHostController) {
  * Shows a headline and a body text indicating that Trinity AI agents are ready.
  */
 @Composable
-fun AiChatScreen() {
+fun BetaAiChatScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()

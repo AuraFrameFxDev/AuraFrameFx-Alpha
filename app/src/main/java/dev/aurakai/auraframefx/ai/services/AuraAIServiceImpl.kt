@@ -32,15 +32,19 @@ class AuraAIServiceImpl @Inject constructor(
         return null
     }
 
-    override suspend fun generateText(_prompt: String): String {
+    override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         return "Generated text placeholder"
     }
 
-    override fun getAIResponse(_prompt: String, _options: Map<String, Any>?): String? {
+    override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         return "AI response placeholder"
     }
 
     override fun getMemory(_memoryKey: String): String? {
         return null
+    }
+
+    override fun saveMemory(key: String, value: Any) {
+        // TODO: Implement memory saving
     }
 }

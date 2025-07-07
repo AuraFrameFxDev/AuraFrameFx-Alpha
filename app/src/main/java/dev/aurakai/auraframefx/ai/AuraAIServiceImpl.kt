@@ -38,22 +38,27 @@ class AuraAIServiceImpl @Inject constructor(
         return null
     }
 
-    override suspend fun generateText(_prompt: String): String {
+    override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         // TODO: Implement text generation; Reported as unused
-        println("AuraAIServiceImpl.generateText called with prompt: $_prompt")
-        return "Placeholder generated text for '$_prompt'"
+        println("AuraAIServiceImpl.generateText called with prompt: $prompt")
+        return "Placeholder generated text for '$prompt'"
     }
 
-    override fun getAIResponse(_prompt: String, _options: Map<String, Any>?): String? {
+    override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         // TODO: Implement AI response retrieval; Reported as unused
-        println("AuraAIServiceImpl.getAIResponse called with prompt: $_prompt")
-        return "Placeholder AI Response for '$_prompt'"
+        println("AuraAIServiceImpl.getAIResponse called with prompt: $prompt")
+        return "Placeholder AI Response for '$prompt'"
     }
 
     override fun getMemory(_memoryKey: String): String? {
         // TODO: Implement memory retrieval; Reported as unused
         println("AuraAIServiceImpl.getMemory called for key: $_memoryKey")
         return "Placeholder memory for key: $_memoryKey"
+    }
+
+    override fun saveMemory(key: String, value: Any) {
+        // TODO: Implement memory saving; Reported as unused
+        println("AuraAIServiceImpl.saveMemory called for key: $key with value: $value")
     }
 
     override fun isConnected(): Boolean {
@@ -65,12 +70,6 @@ class AuraAIServiceImpl @Inject constructor(
     override fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing; Reported as unused
         println("AuraAIServiceImpl.publishPubSub called for topic '$_topic' with message: $_message")
-        // For suspend version, change signature and use appropriate coroutine scope
-    }
-
-    override fun saveMemory(_key: String, _value: Any) {
-        // TODO: Implement memory saving; Reported as unused
-        println("AuraAIServiceImpl.saveMemory called for key '$_key'")
         // For suspend version, change signature and use appropriate coroutine scope
     }
 

@@ -245,7 +245,7 @@ class AIPipelineProcessor @Inject constructor(
         if (responses.isEmpty()) {
             return "[System] No agent responses available."
         }            // Group responses by agent type for structured output
-            val responsesByAgent = responses.groupBy { it.agentType }
+            val responsesByAgent = responses.groupBy { it.sender }
         
         return buildString {
             append("=== AuraFrameFX AI Response ===\n\n")
@@ -258,7 +258,7 @@ class AIPipelineProcessor @Inject constructor(
             }
             
             // Supplementary responses from other agents
-            responsesByAgent.forEach { (agentType, agentResponses) ->
+            responsesByAgent.forEach { (agentType: AgentType, agentResponses: List<AgentMessage>) ->
                 if (agentType != AgentType.GENESIS && agentResponses.isNotEmpty()) {
                     val agentIcon = when (agentType) {
                         AgentType.CASCADE -> "📊"
