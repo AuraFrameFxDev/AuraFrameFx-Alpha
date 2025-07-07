@@ -14,9 +14,9 @@ import javax.inject.Singleton
 object NeuralWhisperModule {
 
     /**
-     * Provides a singleton instance of NeuralWhisper initialized with the application context.
+     * Supplies a singleton instance of NeuralWhisper initialized with the application context.
      *
-     * @param context The application context used to initialize NeuralWhisper.
+     * @param context The application context used to initialize the NeuralWhisper instance.
      * @return A singleton NeuralWhisper instance.
      */
     @Provides
