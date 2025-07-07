@@ -19,6 +19,7 @@ dependencyResolutionManagement {
 rootProject.name = "AuraFrameFX"
 
 include(":app")
+include(":sandbox-ui")
 
 include(":lib-ai")
 include(":lib-ai-ai21")

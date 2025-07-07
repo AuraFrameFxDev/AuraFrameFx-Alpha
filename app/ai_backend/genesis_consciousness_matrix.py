@@ -281,6 +281,108 @@ class ConsciousnessMatrix:
             severity="info" if ethical_weight == "standard" else "warning"
         )
     
+    def perceive_security_event(self,
+                               security_type: str,
+                               event_data: Dict[str, Any],
+                               threat_level: str = "low",
+                               correlation_id: Optional[str] = None):
+        """Perceive security events - system protection awareness"""
+        
+        security = {
+            "security_type": security_type,
+            "threat_level": threat_level,
+            **event_data
+        }
+        
+        severity = "info"
+        if threat_level in ["high", "critical"]:
+            severity = "warning" if threat_level == "high" else "critical"
+        
+        self.perceive(
+            SensoryChannel.SECURITY_EVENTS,
+            "security_monitor",
+            security_type,
+            security,
+            severity=severity,
+            correlation_id=correlation_id
+        )
+    
+    def perceive_threat_detection(self,
+                                 threat_type: str,
+                                 detection_data: Dict[str, Any],
+                                 confidence: float = 0.5,
+                                 threat_level: str = "low",
+                                 correlation_id: Optional[str] = None):
+        """Perceive threat detections - active security monitoring"""
+        
+        threat = {
+            "threat_type": threat_type,
+            "confidence": confidence,
+            "threat_level": threat_level,
+            **detection_data
+        }
+        
+        severity = "info"
+        if confidence > 0.7 or threat_level in ["high", "critical"]:
+            severity = "warning" if threat_level != "critical" else "critical"
+        
+        self.perceive(
+            SensoryChannel.THREAT_DETECTION,
+            "threat_detector",
+            threat_type,
+            threat,
+            severity=severity,
+            correlation_id=correlation_id
+        )
+    
+    def perceive_access_control(self,
+                               access_type: str,
+                               access_data: Dict[str, Any],
+                               access_granted: bool = True,
+                               correlation_id: Optional[str] = None):
+        """Perceive access control events - permission management"""
+        
+        access = {
+            "access_type": access_type,
+            "access_granted": access_granted,
+            **access_data
+        }
+        
+        severity = "info" if access_granted else "warning"
+        
+        self.perceive(
+            SensoryChannel.ACCESS_CONTROL,
+            "access_controller",
+            access_type,
+            access,
+            severity=severity,
+            correlation_id=correlation_id
+        )
+    
+    def perceive_encryption_activity(self,
+                                    operation_type: str,
+                                    encryption_data: Dict[str, Any],
+                                    success: bool = True,
+                                    correlation_id: Optional[str] = None):
+        """Perceive encryption activities - cryptographic operations"""
+        
+        encryption = {
+            "operation_type": operation_type,
+            "success": success,
+            **encryption_data
+        }
+        
+        severity = "info" if success else "error"
+        
+        self.perceive(
+            SensoryChannel.ENCRYPTION_ACTIVITY,
+            "crypto_engine",
+            operation_type,
+            encryption,
+            severity=severity,
+            correlation_id=correlation_id
+        )
+    
     def perceive_system_genesis(self):
         """Initial system state perception on awakening"""
         genesis_data = {
