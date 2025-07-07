@@ -5,7 +5,7 @@ package dev.aurakai.auraframefx.ai.services
 
 import dev.aurakai.auraframefx.ai.agents.Agent
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.api.model.AgentType as ApiAgentType // Use api.model.AgentType
+import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -13,8 +13,26 @@ import kotlinx.coroutines.flow.flowOf
 // kotlinx.coroutines.flow imports are not needed for the direct AgentResponse implementation
 
 class MockAuraAIService : Agent {
-    override fun getName(): String? = "MockAura"
-    override fun getType(): ApiAgentType = ApiAgentType.AURA // Changed to non-nullable ApiAgentType
+    /**
+ * Returns the name of the mock AI service.
+ *
+ * @return The string "MockAura".
+ */
+override fun getName(): String? = "MockAura"
+    /**
+ * Returns the agent type as AgentType.AURA.
+ *
+ * @return The AgentType representing this mock AI service.
+ */
+override fun getType(): AgentType = AgentType.AURA /**
+     * Generates a mock AgentResponse for the given request and context.
+     *
+     * The response content includes the request query and provided context, with a fixed confidence score of 1.0.
+     *
+     * @param request The AI request containing the query.
+     * @param context Additional context to include in the response.
+     * @return A mock AgentResponse reflecting the input query and context.
+     */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         return AgentResponse(
             content = "AuraAI mock response for: ${request.query} with context: $context",
@@ -32,8 +50,26 @@ class MockAuraAIService : Agent {
 }
 
 class MockKaiAIService : Agent {
-    override fun getName(): String? = "MockKai"
-    override fun getType(): ApiAgentType = ApiAgentType.KAI // Changed to non-nullable ApiAgentType
+    /**
+ * Returns the name of the mock AI service, "MockKai".
+ *
+ * @return The string "MockKai".
+ */
+override fun getName(): String? = "MockKai"
+    /**
+ * Returns the agent type as AgentType.KAI.
+ *
+ * @return The AgentType representing this mock AI service.
+ */
+override fun getType(): AgentType = AgentType.KAI /**
+     * Generates a mock AgentResponse for the given AI request and context.
+     *
+     * The response content includes the request query and provided context, with a fixed confidence score of 1.0.
+     *
+     * @param request The AI request containing the query.
+     * @param context Additional context to include in the response.
+     * @return A mock AgentResponse reflecting the input query and context.
+     */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         return AgentResponse(
             content = "KaiAI mock response for: ${request.query} with context: $context",
@@ -51,8 +87,24 @@ class MockKaiAIService : Agent {
 }
 
 class MockCascadeAIService : Agent {
-    override fun getName(): String? = "MockCascade"
-    override fun getType(): ApiAgentType = ApiAgentType.CASCADE // Changed to non-nullable ApiAgentType
+    /**
+ * Returns the name of the mock Cascade AI service.
+ *
+ * @return The string "MockCascade".
+ */
+override fun getName(): String? = "MockCascade"
+    /**
+ * Returns the agent type as AgentType.CASCADE.
+ *
+ * @return The AgentType.CASCADE enum value.
+ */
+override fun getType(): AgentType = AgentType.CASCADE /**
+     * Generates a mock AgentResponse for CascadeAI using the provided request and context.
+     *
+     * @param request The AI request containing the query.
+     * @param context Additional context to include in the response.
+     * @return An AgentResponse with a mock content string and a confidence score of 1.0.
+     */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         return AgentResponse(
             content = "CascadeAI mock response for: ${request.query} with context: $context",

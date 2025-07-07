@@ -2,10 +2,10 @@ package dev.aurakai.auraframefx.ai.services
 
 import dev.aurakai.auraframefx.ai.agents.Agent
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.api.model.AgentType as ApiAgentType // Corrected import
+import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first // Keep for existing logic if processRequestFlow uses it
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,11 +18,29 @@ class CascadeAIService @Inject constructor(
 
     private val state = mutableMapOf<String, Any>()
 
-    override fun getName(): String? = "Cascade"
+    /**
+ * Returns the name of the agent, which is "Cascade".
+ *
+ * @return The string "Cascade".
+ */
+override fun getName(): String? = "Cascade"
 
-    override fun getType(): ApiAgentType = ApiAgentType.CASCADE // Changed to non-nullable ApiAgentType
+    /**
+ * Returns the agent type as `AgentType.CASCADE`.
+ *
+ * @return The type of this agent.
+ */
+override fun getType(): AgentType = AgentType.CASCADE
 
-    // This is the Agent interface method
+    /**
+     * Processes an AI request and returns a flow of agent responses based on the request type.
+     *
+     * Routes the request to specialized internal handlers for "state", "context", "vision", or "processing" types.
+     * For unrecognized types, emits a default response.
+     *
+     * @param request The AI request to process.
+     * @return A flow emitting one or more agent responses corresponding to the request type.
+     */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // This internal routing can stay if these specific flows are desired for internal logic
         return when (request.type) {

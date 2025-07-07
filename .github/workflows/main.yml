@@ -18,11 +18,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17 # Changed name
+      - name: Set up JDK 24  # Changed name
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17' # Changed to JDK 17
+          java-version: '24' # Changed to JDK 17
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3

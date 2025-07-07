@@ -1,6 +1,7 @@
 package dev.aurakai.auraframefx.ai.error
 
 import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -8,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AIError(
     val id: String = "err_${Clock.System.now().toEpochMilliseconds()}",
-    val timestamp: Instant = Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val agent: AgentType,
     val type: ErrorType,
     val message: String,
@@ -22,7 +23,7 @@ data class AIError(
 @Serializable
 data class RecoveryAction(
     val id: String = "act_${Clock.System.now().toEpochMilliseconds()}",
-    val timestamp: Instant = Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val actionType: RecoveryActionType,
     val description: String,
     val result: RecoveryResult? = null,

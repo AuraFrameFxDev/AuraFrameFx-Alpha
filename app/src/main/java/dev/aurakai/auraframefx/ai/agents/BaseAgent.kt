@@ -1,8 +1,7 @@
 package dev.aurakai.auraframefx.ai.agents
 
 import dev.aurakai.auraframefx.model.AgentResponse
-
-import dev.aurakai.auraframefx.api.model.AgentType // Corrected import
+import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -177,7 +176,7 @@ open class BaseAgent(
      *
      * @return A flow containing a single default `AgentResponse`.
      */
-=
+
     /**
      * Returns a flow emitting a single default [AgentResponse] for the given [request].
      *

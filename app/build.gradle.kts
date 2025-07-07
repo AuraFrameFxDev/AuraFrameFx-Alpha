@@ -33,11 +33,14 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_24
+        targetCompatibility = JavaVersion.VERSION_24
     }
 
-    // kotlinOptions block removed from here, will be configured below
+    kotlinOptions {
+        jvmTarget = "24"
+        freeCompilerArgs = listOf()
+ 
 
     buildFeatures {
         compose = true
@@ -66,7 +69,17 @@ dependencies {
     implementation(libs.hiltNavigationCompose) // From old, uses new TOML alias
     implementation(libs.androidxHiltWork)      // From old, uses new TOML alias (depends on hilt version)
 
-    // AndroidX Core & Compose
+
+    // Hilt Testing
+    androidTestImplementation(libs.daggerHiltAndroidTesting)
+    kspAndroidTest(libs.daggerHiltAndroidCompiler)
+    testImplementation(libs.daggerHiltAndroidTesting)
+    kspTest(libs.daggerHiltAndroidCompiler)
+
+    // Time and Date
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+
+    // AndroidX & Compose
     implementation(libs.androidxCoreKtx)
     implementation(libs.androidxAppcompat)
     implementation(libs.androidxLifecycleRuntimeKtx)
@@ -98,6 +111,12 @@ dependencies {
     implementation(libs.androidxRoomKtx)
     ksp(libs.androidxRoomCompiler) // Ensure Room compiler uses KSP
 
+    // Security
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    // Google AI
+    implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
+
     // Firebase
     implementation(platform(libs.firebaseBom)) // Platform import for Firebase
     implementation(libs.firebaseAnalyticsKtx)
@@ -111,7 +130,6 @@ dependencies {
     implementation(libs.kotlinxCoroutinesAndroid)
     implementation(libs.kotlinxCoroutinesPlayServices)
     implementation(libs.kotlinxSerializationJson)
-    implementation(libs.kotlinxDatetime)
 
     // Network
     implementation(libs.retrofit) // Using new alias
@@ -179,3 +197,4 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
         freeCompilerArgs.addAll("-Xopt-in=kotlin.RequiresOptIn")
     }
 }
+
