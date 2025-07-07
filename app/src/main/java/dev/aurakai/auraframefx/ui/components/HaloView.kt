@@ -469,7 +469,7 @@ fun HaloView(viewModel: GenesisAgentViewModel = viewModel<GenesisAgentViewModel>
                 onClick = { isRotating = !isRotating }
             ) {
                 Icon(
-                    if (isRotating) Icons.Filled.Home else Icons.Filled.PlayArrow,
+                    if (isRotating) Icons.Default.Pause else Icons.Filled.PlayArrow,
                     contentDescription = "Toggle rotation",
                     tint = NeonPurple
                 )
