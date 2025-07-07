@@ -13,7 +13,7 @@ object JsonUtils {
 
     fun <T> toJson(obj: T, serializer: kotlinx.serialization.KSerializer<T>): String? {
         return try {
-            Json.encodeToString(serializer, obj)
+            json.encodeToString(serializer, obj)
         } catch (e: Exception) {
             // Log the exception
             null
