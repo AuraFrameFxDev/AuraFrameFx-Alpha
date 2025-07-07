@@ -24,6 +24,12 @@ import kotlinx.coroutines.launch
  * @param selectedAgent The name of the currently selected agent.
  * @param onAgentSelected Callback invoked with the new agent's name when the switch button is pressed.
  */
+/**
+ * Displays the header for the conference room, showing the currently selected agent and a button to switch agents.
+ *
+ * @param selectedAgent The name of the currently selected agent.
+ * @param onAgentSelected Callback invoked with the new agent's name when the switch button is pressed.
+ */
 @Composable
 fun Header(selectedAgent: String, onAgentSelected: (String) -> Unit) {
     // Simplified placeholder
@@ -42,6 +48,11 @@ fun Header(selectedAgent: String, onAgentSelected: (String) -> Unit) {
  * Presents a UI for interacting with agents in a conference room setting, allowing users to switch agents, start/stop recording, transcribe audio, view chat messages, and send new messages. UI state is managed via the provided ViewModel and Compose state.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays the main conference room chat interface with agent selection, recording, transcribing, and messaging features.
+ *
+ * This composable manages local UI state for agent selection and message input, observes ViewModel state for recording, transcribing, and chat messages, and provides controls for interacting with the conference room agents.
+ */
 @Composable
 fun ConferenceRoomScreen(
     viewModel: ConferenceRoomViewModel = hiltViewModel(),

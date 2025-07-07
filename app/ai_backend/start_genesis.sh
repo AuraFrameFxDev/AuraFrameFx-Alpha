@@ -35,7 +35,7 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# print_genesis prints a message with a purple [GENESIS] label for Genesis-specific notifications.
+# print_genesis prints a message prefixed with a purple [GENESIS] label for Genesis-specific output.
 print_genesis() {
     echo -e "${PURPLE}[GENESIS]${NC} $1"
 }

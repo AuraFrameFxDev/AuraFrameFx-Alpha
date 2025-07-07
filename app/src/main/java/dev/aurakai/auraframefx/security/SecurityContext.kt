@@ -50,9 +50,9 @@ class SecurityContext @Inject constructor(
     val securityState: StateFlow<SecurityState> = _securityState.asStateFlow()
 
     /**
-     * Placeholder for content validation logic.
+     * Accepts all content without validation.
      *
-     * In its current form, this method accepts all content without performing any checks. Intended to be extended to detect policy violations or security threats in production environments.
+     * This placeholder method is intended for future implementation of content validation logic to detect policy violations or security threats.
      */
     fun validateContent(content: String) {
         // TODO: Implement real validation logic
@@ -62,7 +62,7 @@ class SecurityContext @Inject constructor(
     /**
      * Validates image data for security compliance.
      *
-     * Currently a stub that logs the image data size and allows all input. Intended for future implementation of image validation logic.
+     * Currently accepts all image data without performing validation. Intended as a placeholder for future image security checks.
      */
     fun validateImageData(imageData: ByteArray) {
         // TODO: Implement real image validation logic
@@ -282,7 +282,13 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Verify the integrity of the application
+     * Verifies the integrity of the application by retrieving and hashing its signing certificate.
+     *
+     * Computes the SHA-256 hash of the app's signing certificate and returns an [ApplicationIntegrity] object
+     * containing verification status, app version, signature hash, install time, and last update time.
+     * If verification fails, returns an [ApplicationIntegrity] object with error details.
+     *
+     * @return An [ApplicationIntegrity] instance with the results of the integrity check.
      */
     fun verifyApplicationIntegrity(): ApplicationIntegrity {
         try {
@@ -337,9 +343,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Simulates detection of potential security threats for testing purposes.
+     * Simulates the detection of security threats by randomly returning predefined threat objects.
      *
-     * @return A list of simulated `SecurityThreat` objects, randomly included to mimic threat detection during beta testing.
+     * Used for testing and demonstration purposes; does not perform real threat analysis.
+     *
+     * @return A list of simulated `SecurityThreat` instances, which may be empty or contain randomly selected threats.
      */
     private fun detectThreats(): List<SecurityThreat> {
         // In a real implementation, this would perform actual threat analysis
@@ -363,12 +371,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Calculates the overall threat level based on the highest severity among detected security threats.
+     * Determines the overall threat level by evaluating the highest severity among detected security threats.
      *
-     * If the list is empty, returns `ThreatLevel.LOW`.
+     * Returns `ThreatLevel.LOW` if no threats are present.
      *
-     * @param threats List of detected security threats.
-     * @return The highest threat level present in the list, or `ThreatLevel.LOW` if none.
+     * @param threats The list of detected security threats.
+     * @return The highest threat level found, or `ThreatLevel.LOW` if the list is empty.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -386,9 +394,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Generates a random 16-byte hexadecimal string to be used as a secure identifier.
+     * Generates a cryptographically secure 32-character hexadecimal identifier.
      *
-     * @return A securely generated 32-character hexadecimal ID.
+     * @return A random 16-byte (32-character) hexadecimal string suitable for use as a secure ID.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -397,11 +405,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Asynchronously logs a security event for auditing and monitoring purposes.
+     * Asynchronously logs a security event for auditing and monitoring.
      *
-     * The event is serialized and written to the debug log. In production, events should be securely persisted.
+     * Serializes the provided security event and writes it to the debug log. Intended for development; in production, events should be securely persisted.
      *
-     * @param event The security event to log.
+     * @param event The security event to be logged.
      */
     fun logSecurityEvent(event: SecurityEvent) {
         scope.launch {
@@ -412,11 +420,11 @@ class SecurityContext @Inject constructor(
             // In a real implementation, this would store events securely
         }
     }    /**
-     * Records a security validation event for the given request type and data.
+     * Logs a security validation event for the specified request type and data.
      *
-     * This method logs a validation event for auditing purposes. No actual validation of the request is performed.
+     * This method records the validation attempt for auditing purposes but does not perform any actual validation of the request.
      *
-     * @param requestType The type of request being validated.
+     * @param requestType The type of request being logged for validation.
      * @param requestData The data associated with the request.
      */
     fun validateRequest(requestType: String, requestData: String) {
@@ -432,9 +440,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Logs a security-related exception.
+     * Handles security-related exceptions by logging them.
      *
-     * Serves as a placeholder for future exception handling such as user notifications or additional security measures.
+     * This method currently logs the exception and serves as a placeholder for future enhancements such as user notifications or additional security responses.
      */
     private fun handleSecurityException(e: Exception) {
         Log.e(TAG, "Security exception occurred", e)
