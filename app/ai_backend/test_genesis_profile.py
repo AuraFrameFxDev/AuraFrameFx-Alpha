@@ -22,67 +22,91 @@ except ImportError:
     # If the exact imports don't match, we'll create mock classes for testing
     class GenesisProfile:
         def __init__(self, profile_id: str, data: Dict[str, Any]):
+            if not isinstance(profile_id, str):
+                raise TypeError("profile_id must be a string")
+            if not profile_id:
+                raise ValueError("profile_id cannot be empty")
+            if not isinstance(data, dict):
+                raise TypeError("data must be a dict")
             self.profile_id = profile_id
             self.data = data
             self.created_at = datetime.now(timezone.utc)
             self.updated_at = datetime.now(timezone.utc)
-    
+
+        def __str__(self):
+            return f"GenesisProfile(id={self.profile_id})"
+
+        def __eq__(self, other):
+            if not isinstance(other, GenesisProfile):
+                return False
+            return self.profile_id == other.profile_id and self.data == other.data
+
     class ProfileManager:
         def __init__(self):
             self.profiles = {}
-        
+
         def create_profile(self, profile_id: str, data: Dict[str, Any]) -> GenesisProfile:
+            if not isinstance(profile_id, str):
+                raise TypeError("profile_id must be a string")
+            if not profile_id:
+                raise ValueError("profile_id cannot be empty")
+            if not isinstance(data, dict):
+                raise TypeError("data must be a dict")
             profile = GenesisProfile(profile_id, data)
             self.profiles[profile_id] = profile
             return profile
-        
+
         def get_profile(self, profile_id: str) -> Optional[GenesisProfile]:
             return self.profiles.get(profile_id)
-        
+
         def update_profile(self, profile_id: str, data: Dict[str, Any]) -> GenesisProfile:
             if profile_id not in self.profiles:
                 raise ProfileNotFoundError(f"Profile {profile_id} not found")
+            if not isinstance(data, dict):
+                raise TypeError("data must be a dict")
             self.profiles[profile_id].data.update(data)
             self.profiles[profile_id].updated_at = datetime.now(timezone.utc)
             return self.profiles[profile_id]
-        
+
         def delete_profile(self, profile_id: str) -> bool:
             if profile_id in self.profiles:
                 del self.profiles[profile_id]
                 return True
             return False
-    
+
     class ProfileValidator:
         @staticmethod
         def validate_profile_data(data: Dict[str, Any]) -> bool:
+            if not isinstance(data, dict):
+                raise TypeError("Profile data must be a dict")
             required_fields = ['name', 'version', 'settings']
             return all(field in data for field in required_fields)
-    
+
     class ProfileBuilder:
         def __init__(self):
             self.data = {}
-        
+
         def with_name(self, name: str):
             self.data['name'] = name
             return self
-        
+
         def with_version(self, version: str):
             self.data['version'] = version
             return self
-        
+
         def with_settings(self, settings: Dict[str, Any]):
             self.data['settings'] = settings
             return self
-        
+
         def build(self) -> Dict[str, Any]:
             return self.data.copy()
-    
+
     class ProfileError(Exception):
         pass
-    
+
     class ValidationError(ProfileError):
         pass
-    
+
     class ProfileNotFoundError(ProfileError):
         pass
 
