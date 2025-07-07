@@ -46,9 +46,9 @@ class HomeScreenTransitionManager @Inject constructor(
     }
 
     /**
-     * Loads the home screen transition configuration.
+     * Loads the home screen transition configuration, defaulting to the predefined configuration.
      *
-     * Currently sets the configuration to the default values. Placeholder for future implementation of loading from persistent storage.
+     * Currently, this method does not load from persistent storage and always sets the configuration to the default.
      */
     private fun loadConfig() {
         // TODO: For beta, implement shared preferences or file-based config loading
@@ -63,7 +63,9 @@ class HomeScreenTransitionManager @Inject constructor(
     }
 
     /**
-     * Applies the provided home screen transition configuration and updates the current state.
+     * Applies the provided home screen transition configuration.
+     *
+     * Updates the current transition settings to the specified configuration.
      *
      * @param config The new transition configuration to apply.
      */
@@ -76,7 +78,7 @@ class HomeScreenTransitionManager @Inject constructor(
     }
 
     /**
-     * Restores the home screen transition configuration to its default settings.
+     * Resets the home screen transition configuration to the default settings.
      */
     fun resetToDefault() {
         applyConfig(defaultConfig)

@@ -19,10 +19,10 @@ import kotlinx.coroutines.launch
 
 // Placeholder for Header - User should define this Composable
 /**
- * Displays the selected agent's name and provides a button to switch between agents.
+ * Displays the currently selected agent and provides a button to switch between agents.
  *
  * @param selectedAgent The name of the currently selected agent.
- * @param onAgentSelected Callback invoked with the new agent's name when the switch button is pressed.
+ * @param onAgentSelected Callback invoked with the new agent name when the switch button is pressed.
  */
 @Composable
 fun Header(selectedAgent: String, onAgentSelected: (String) -> Unit) {
@@ -37,9 +37,9 @@ fun Header(selectedAgent: String, onAgentSelected: (String) -> Unit) {
 
 
 /**
- * Displays the main conference room chat interface with agent selection, recording/transcribing controls, and message input.
+ * Displays the conference room chat interface with agent selection, recording controls, and messaging.
  *
- * Presents a UI for interacting with agents in a conference room setting, allowing users to switch agents, start/stop recording, transcribe audio, view chat messages, and send new messages. UI state is managed via the provided ViewModel and Compose state.
+ * Provides UI components for toggling between agents, starting/stopping recording, triggering transcription, viewing chat messages, and sending new messages. State is managed via the provided ViewModel and Compose state.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

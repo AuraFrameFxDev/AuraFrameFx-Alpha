@@ -9,14 +9,14 @@ import kotlinx.coroutines.delay
 class VertexAIClientImpl : VertexAIClient {
     
     /**
-     * Simulates text generation using the provided prompt and parameters.
+     * Returns a stubbed text generation response for the given prompt and parameters.
      *
-     * Suspends briefly to mimic API latency and returns a fixed stub response containing the prompt.
+     * This method simulates asynchronous text generation and always returns a fixed response containing the input prompt.
      *
-     * @param prompt The input text prompt.
+     * @param prompt The input prompt for text generation.
      * @param maxTokens The maximum number of tokens to generate.
      * @param temperature The sampling temperature for generation.
-     * @return A stub response string that includes the prompt.
+     * @return A fixed string containing the prompt.
      */
     override suspend fun generateText(prompt: String, maxTokens: Int, temperature: Float): String {
         delay(100) // Simulate API call
@@ -24,13 +24,13 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates image analysis for the given prompt and image data.
+     * Simulates image analysis using the provided image data and prompt.
      *
-     * Always returns a fixed stub response indicating image analysis for the provided prompt.
+     * Always returns a fixed stub response referencing the prompt.
      *
      * @param imageData The image data to analyze.
      * @param prompt The prompt describing the analysis to perform.
-     * @return A stub string indicating image analysis for the prompt.
+     * @return A placeholder string indicating simulated image analysis for the prompt.
      */
     override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String {
         delay(100) // Simulate API call
@@ -40,17 +40,17 @@ class VertexAIClientImpl : VertexAIClient {
     /**
      * Simulates creative model initialization with no actual effect.
      *
-     * This stub implementation is used for testing or development purposes and does not perform any real initialization.
+     * This stub implementation is provided for interface compatibility and does not perform any real initialization.
      */
     override suspend fun initializeCreativeModels() {
         // Stub implementation
     }
     
     /**
-     * Simulates content generation and returns a fixed stub response for the given prompt.
+     * Simulates content generation for the given prompt and returns a fixed stub response.
      *
-     * @param prompt The input prompt for which to generate content.
-     * @return A stub content string incorporating the provided prompt.
+     * @param prompt The input prompt to generate content for.
+     * @return A placeholder content string incorporating the prompt.
      */
     override suspend fun generateContent(prompt: String): String? {
         delay(100)
@@ -60,10 +60,12 @@ class VertexAIClientImpl : VertexAIClient {
     /**
      * Simulates code generation for a given specification, language, and style.
      *
+     * Suspends briefly to mimic an asynchronous API call and returns a placeholder code string in the specified language.
+     *
      * @param specification Description of the code to generate.
      * @param language Programming language for the generated code.
      * @param style Desired coding style.
-     * @return A stub string representing generated code in the specified language.
+     * @return A placeholder string representing generated code in the specified language.
      */
     override suspend fun generateCode(specification: String, language: String, style: String): String? {
         delay(100)
@@ -71,25 +73,25 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates validating the connection to Vertex AI and always returns true.
+     * Simulates validating the connection to Vertex AI and always indicates success.
      *
-     * @return True, indicating a successful connection in this stub implementation.
+     * @return `true` to represent a successful connection in this stub implementation.
      */
     override suspend fun validateConnection(): Boolean {
         return true // Stub always returns true
     }
     
     /**
-     * Performs a no-op initialization for the stub client.
+     * Stub method for initialization with no operational effect.
      */
     fun initialize() {
         // Stub implementation
     }
     
     /**
-     * Checks that the given prompt is not blank.
+     * Checks that the prompt is not blank.
      *
-     * @param prompt The input prompt to validate.
+     * @param prompt The input prompt to check.
      * @throws IllegalArgumentException if the prompt is blank.
      */
     private fun validatePrompt(prompt: String) {

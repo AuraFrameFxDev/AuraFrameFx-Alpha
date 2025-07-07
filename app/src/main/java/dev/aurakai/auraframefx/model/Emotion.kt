@@ -49,7 +49,7 @@ enum class Emotion {
         /**
  * Returns a randomly selected emotion from the available set.
  *
- * Useful for testing or generating unpredictable emotional states.
+ * Useful for testing or generating varied emotional states.
  *
  * @return A random Emotion value.
  */
@@ -58,7 +58,7 @@ enum class Emotion {
         /**
              * Returns the Emotion corresponding to the given string, ignoring case.
              *
-             * If no matching emotion is found, returns NEUTRAL.
+             * If the input does not match any emotion name, returns NEUTRAL.
              *
              * @param name The name of the emotion to look up.
              * @return The matching Emotion, or NEUTRAL if no match is found.

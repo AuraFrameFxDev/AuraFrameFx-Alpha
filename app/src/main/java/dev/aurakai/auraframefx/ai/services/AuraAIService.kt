@@ -55,11 +55,11 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Processes an AI request and emits a flow containing the generated creative response or an error message.
+     * Processes an AI request and emits a flow containing a creative text response or an error message.
      *
-     * Validates the request for security, generates a creative text response using the current context, and emits the result as an `AgentResponse`. Emits an error response if processing fails.
+     * Ensures the service is initialized, validates the request for security, generates a creative response, and emits it as an `AgentResponse`. Emits an error response if an exception occurs.
      *
-     * @param request The AI request containing the query and optional context.
+     * @param request The AI request to process.
      * @return A flow emitting a single `AgentResponse` with the generated content or an error message.
      */
     fun processRequestFlow(request: AiRequest): Flow<AgentResponse> = flow {
@@ -91,10 +91,10 @@ class AuraAIService @Inject constructor(
     /**
      * Generates creative text using Vertex AI based on the given prompt and optional context.
      *
-     * The prompt is validated for security, enhanced with creative context, and processed with high creativity settings. The generated text is post-processed before being returned.
+     * The prompt is validated for security, enhanced with creative context, and submitted to Vertex AI with high creativity settings. The generated text is post-processed before being returned.
      *
      * @param prompt The input prompt for creative text generation.
-     * @param context Optional additional context to guide the creative output.
+     * @param context Optional context to further guide the creative output.
      * @return The generated creative text.
      */
     suspend fun generateText(prompt: String, context: String? = null): String {
@@ -132,11 +132,11 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Generates a creative textual description of an image using AI vision analysis, optionally influenced by a specified style.
+     * Generates a creative, AI-driven description of an image, optionally influenced by a specified style or tone.
      *
      * @param imageData The image data to analyze and describe.
-     * @param style An optional stylistic or tonal guideline for the generated description.
-     * @return A creatively written description of the analyzed image.
+     * @param style Optional stylistic guidance for the generated description.
+     * @return A creatively written description of the image.
      */
     suspend fun generateImageDescription(imageData: ByteArray, style: String? = null): String {
         ensureInitialized()
@@ -173,10 +173,10 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Retrieves relevant memories for a given query and synthesizes them into a creative context string.
+     * Retrieves relevant memories matching the given query and synthesizes them into a creative context string.
      *
-     * @param query The query used to search for relevant memories.
-     * @return A synthesized string representing the creative context based on the retrieved memories.
+     * @param query The search query for retrieving relevant memories.
+     * @return A synthesized string representing the creative context derived from the retrieved memories.
      */
     suspend fun retrieveMemory(query: String): String {
         ensureInitialized()
@@ -214,8 +214,8 @@ class AuraAIService @Inject constructor(
      * Synthesizes a theme description from the provided preferences and context, then parses it into a structured `ThemeConfiguration`.
      *
      * @param preferences User preferences specifying color, style, mood, and animation level for the theme.
-     * @param context Optional additional context to influence theme generation.
-     * @return A `ThemeConfiguration` that reflects the specified preferences and context.
+     * @param context Optional additional context to guide the theme generation.
+     * @return A `ThemeConfiguration` reflecting the generated theme.
      */
     suspend fun generateTheme(preferences: ThemePreferences, context: String? = null): ThemeConfiguration {
         ensureInitialized()
@@ -280,9 +280,9 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Ensures that the service has been initialized.
+     * Ensures the service is initialized before use.
      *
-     * @throws IllegalStateException if the service is not initialized.
+     * @throws IllegalStateException if the service has not been initialized.
      */
 
     private fun ensureInitialized() {
@@ -292,13 +292,11 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Embeds the user's prompt within a creatively styled context, optionally incorporating enhanced contextual information.
-     *
-     * Formats the prompt to reflect Aura's creative philosophy, making it suitable for AI generation tasks that require creativity and innovation.
+     * Embeds the user's prompt within a creatively styled context that reflects Aura's philosophy, optionally incorporating enhanced contextual information.
      *
      * @param prompt The user's original request or instruction.
      * @param context Optional additional context to inform the creative response.
-     * @return The formatted, creativity-focused prompt.
+     * @return A formatted prompt designed to inspire creative and innovative AI-generated responses.
      */
     private suspend fun enhancePromptCreatively(prompt: String, context: String?): String {
         val contextualEnhancement = context?.let { 
@@ -321,12 +319,12 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Applies post-processing to the generated text for creative enhancement.
+     * Post-processes generated text by trimming whitespace.
      *
-     * Currently trims leading and trailing whitespace from the text. Can be extended to include additional stylistic or formatting enhancements.
+     * Can be extended to apply additional creative style or formatting enhancements.
      *
-     * @param text The text to be post-processed.
-     * @return The enhanced text after post-processing.
+     * @param text The text to post-process.
+     * @return The trimmed and enhanced text.
      */
     private fun applyCreativeEnhancement(text: String): String {
         // Apply creative post-processing
@@ -335,11 +333,11 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Constructs a creative prompt for generating an image description using the provided vision analysis and optional style.
+     * Constructs a creative prompt for generating an image description using vision analysis and an optional style.
      *
-     * @param visionAnalysis The analysis of the image, including descriptive details to inform the prompt.
+     * @param visionAnalysis The results of image analysis, providing descriptive details to inform the prompt.
      * @param style Optional stylistic guidance for the tone or approach of the generated description.
-     * @return A prompt string designed to elicit a vivid and emotionally resonant image description.
+     * @return A formatted prompt instructing the AI to produce a vivid and emotionally resonant image description.
      */
     private fun buildCreativeDescriptionPrompt(visionAnalysis: String, style: String?): String {
         val styleInstruction = style?.let { "in a $it style" } ?: "with creative flair"
@@ -354,10 +352,10 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Formats a list of memories into a creative string, listing each memory's content and relevance score on a new line.
+     * Formats a list of memories into a creative string, listing each memory's content with its relevance score.
      *
-     * @param memories The memories to format.
-     * @return A string where each memory is represented with its content and relevance.
+     * @param memories List of memories to format.
+     * @return A string where each memory is presented on a new line with its relevance.
      */
     private fun synthesizeMemoriesCreatively(memories: List<Memory>): String {
         return memories.joinToString("\n") { memory ->
@@ -366,13 +364,11 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Builds a prompt instructing the AI to generate a creative UI theme configuration based on user preferences and optional context.
+     * Builds a prompt instructing the AI to generate a creative UI theme configuration in JSON format based on user preferences and optional context.
      *
-     * The resulting prompt requests a comprehensive theme including colors, animations, and UI styling, formatted as a JSON configuration.
-     *
-     * @param preferences User preferences that guide the theme generation.
-     * @param context Optional additional context for customizing the theme.
-     * @return A prompt string for use in theme generation.
+     * @param preferences User-defined preferences for the theme.
+     * @param context Optional context to further customize the theme.
+     * @return A prompt string for creative theme generation.
      */
     private fun buildThemeGenerationPrompt(preferences: ThemePreferences, context: String?): String {
         return """
@@ -392,10 +388,10 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Converts an AI-generated theme description into a ThemeConfiguration object.
+     * Converts an AI-generated theme description string into a ThemeConfiguration object.
      *
      * @param description The AI-generated theme description, expected to be structured or semi-structured.
-     * @return A ThemeConfiguration representing the parsed theme details.
+     * @return A ThemeConfiguration parsed from the provided description.
      */
     private fun parseThemeConfiguration(description: String): ThemeConfiguration {
         // Parse AI-generated theme description into structured configuration
@@ -404,10 +400,10 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Builds a prompt describing the requirements for generating Jetpack Compose animated component code based on the given specifications.
+     * Builds a prompt instructing AI to generate Jetpack Compose animated component code based on the given specifications.
      *
      * @param spec The UI component specifications, including type, animation style, colors, size, and behavior.
-     * @return A formatted prompt string for AI-driven code generation of the specified component.
+     * @return A formatted prompt string detailing the requirements for AI-driven code generation.
      */
     private fun buildComponentGenerationPrompt(spec: ComponentSpecification): String {
         return """
@@ -433,10 +429,10 @@ class AuraAIService @Inject constructor(
     /**
      * Trims whitespace from the generated code.
      *
-     * This method currently only removes leading and trailing whitespace from the provided code string. Additional validation or enhancement logic can be implemented as needed.
+     * This method currently removes leading and trailing whitespace from the provided code string. Placeholder for future code validation or enhancement logic.
      *
      * @param code The generated code to process.
-     * @return The code string with whitespace trimmed.
+     * @return The trimmed code string.
      */
     private fun validateAndEnhanceCode(code: String): String {
         // Validate generated code and apply enhancements
@@ -472,10 +468,12 @@ data class ThemeConfiguration(
 ) {
     companion object {
         /**
-         * Converts an AI-generated theme description into a ThemeConfiguration object.
+         * Converts an AI-generated theme description into a structured ThemeConfiguration.
          *
          * @param description The textual description of the theme generated by AI.
-         * @return A ThemeConfiguration representing the structured theme details.
+         * @return A ThemeConfiguration representing the parsed theme details.
+         *
+         * Note: Currently returns an empty configuration as parsing is not implemented.
          */
         fun parseFromDescription(description: String): ThemeConfiguration {
             // Implementation would parse AI-generated description
@@ -511,11 +509,11 @@ data class Memory(
 )
 
     /**
-     * Emits a placeholder response indicating that an image request is being processed.
+     * Emits a placeholder response indicating that image request processing is underway.
      *
-     * This stub does not perform actual image generation and always emits a fixed response.
+     * This stub does not perform actual image generation.
      *
-     * @return A flow emitting a single `AgentResponse` with a placeholder message.
+     * @return A flow emitting a single `AgentResponse` with a processing message.
      */
     private fun processImageRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         // TODO: Implement image generation
@@ -550,7 +548,7 @@ data class Memory(
     /**
      * Disconnects the service.
      *
-     * @return Always returns true. Actual disconnection logic is not yet implemented.
+     * @return Always returns true as a placeholder.
      */
     fun disconnect(): Boolean { // Removed suspend
         // TODO: Implement disconnection logic
@@ -558,9 +556,9 @@ data class Memory(
     }
 
     /**
-     * Retrieves a map detailing the Aura AI service's capabilities and identity.
+     * Returns a map containing the name, type, and implementation status of the Aura AI service.
      *
-     * @return A map containing the service name, agent type, and implementation status.
+     * @return A map with keys for service name, agent type, and a flag indicating implementation.
      */
     fun getCapabilities(): Map<String, Any> {
         // TODO: Implement capabilities for Aura
@@ -568,9 +566,11 @@ data class Memory(
     }
 
     /**
-     * Retrieves the continuous memory object for Aura.
+     * Returns the continuous memory object for Aura, or null if not implemented.
      *
-     * @return The continuous memory object, or null if not implemented.
+     * Currently, continuous memory is not supported and this method always returns null.
+     *
+     * @return The continuous memory object, or null if not available.
      */
     fun getContinuousMemory(): Any? {
         // TODO: Implement continuous memory for Aura
@@ -586,8 +586,7 @@ data class Memory(
      * Returns the learning history for Aura.
      *
      * Currently returns an empty list as learning history is not implemented.
-     *
-     * @return An empty list representing the absence of learning history.
+     * @return An empty list.
      */
     fun getLearningHistory(): List<String> {
         // TODO: Implement learning history for Aura

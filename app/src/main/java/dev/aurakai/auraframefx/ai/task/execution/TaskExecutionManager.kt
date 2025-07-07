@@ -55,16 +55,16 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Schedules a new task for background execution, selecting the most suitable agent based on task type or explicit preference.
+     * Schedules a new task for execution, assigning it to the most suitable agent based on task type or explicit preference.
      *
-     * Validates the scheduling request, creates a pending `TaskExecution` with the specified parameters, determines the optimal agent if not provided, and enqueues the task for asynchronous processing.
+     * Validates the scheduling request, creates a pending `TaskExecution` with the specified parameters, determines the optimal agent if not provided, and enqueues the task for background processing.
      *
      * @param type The category or identifier of the task to execute.
      * @param data The input data required for the task.
      * @param priority The execution priority for the task (default is NORMAL).
      * @param agentPreference Optional agent name to explicitly route the task; if null, agent selection is automatic.
      * @param scheduledTime Optional timestamp (in milliseconds) for delayed execution; defaults to immediate scheduling.
-     * @return The initially created `TaskExecution` object representing the scheduled task.
+     * @return The `TaskExecution` object representing the scheduled task.
      */
     suspend fun scheduleTask(
         type: String,
@@ -117,7 +117,7 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Retrieves the current execution status of a task by its unique ID.
+     * Retrieves the current execution status of a task by its unique identifier.
      *
      * Searches active, completed, and queued tasks to determine the status. Returns `null` if the task is not found in any state.
      *
@@ -148,9 +148,9 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Cancels a task that is either queued or currently running.
+     * Cancels a task by its ID if it is queued or currently running.
      *
-     * Removes the task from the queue or marks an active task as cancelled, signaling its execution to terminate. Returns `true` if the task was found and cancelled, or `false` if the task does not exist.
+     * Removes the task from the queue if found, or marks an active task as cancelled to signal termination. Returns `true` if cancellation succeeds, or `false` if the task is not found.
      *
      * @param taskId The unique identifier of the task to cancel.
      * @return `true` if the task was cancelled; `false` otherwise.
@@ -181,7 +181,7 @@ class TaskExecutionManager @Inject constructor(
     /**
      * Retrieves all tasks managed by the system, with optional filtering by execution status and agent type.
      *
-     * Aggregates tasks from the queue, currently active executions, and completed results (converted to `TaskExecution` objects). Filters can be applied to return only tasks with a specific status or executed by a specific agent type.
+     * Aggregates tasks from the queue, active executions, and completed results (converted to `TaskExecution` objects). Filters can be applied to return only tasks with a specific status or executed by a specific agent type.
      *
      * @param status If provided, only tasks with this execution status are included.
      * @param agentType If provided, only tasks executed by this agent type are included.
@@ -220,7 +220,7 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Launches a coroutine that continuously processes tasks from the queue while processing is active.
+     * Launches a background coroutine that continuously processes tasks from the queue as long as processing is enabled.
      *
      * Handles task execution, error logging, and applies delays to manage processing flow and error backoff.
      */
@@ -243,9 +243,9 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Processes the next task in the queue if concurrency limits permit.
+     * Attempts to process the next task in the queue if concurrency limits permit.
      *
-     * Polls the priority queue for the next scheduled task, re-queues it if its scheduled time is in the future, or initiates its execution if ready and concurrency limits allow.
+     * Polls the priority queue for the next task, checks if its scheduled time has arrived, and initiates execution if ready. If the task is scheduled for a future time, it is re-queued.
      */
     private suspend fun processNextTask() {
         // Check if we can process more tasks
@@ -270,7 +270,7 @@ class TaskExecutionManager @Inject constructor(
     /**
      * Executes the specified task asynchronously using its assigned agent and updates its status and result.
      *
-     * Delegates execution to the appropriate agent based on the task's agent assignment. Upon completion or failure, records the result, updates execution statistics, and removes the task from the list of active executions.
+     * Delegates execution to the appropriate agent based on the task's agent assignment. Upon completion, records the result or failure, updates execution statistics, and removes the task from the active executions.
      *
      * @param execution The task to be executed.
      */
@@ -362,12 +362,12 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Executes the specified task using the Aura agent and returns the agent's response.
+     * Executes a task using the Aura agent and returns the agent's response.
      *
      * Constructs an `AiRequest` from the task's type and data, then delegates processing to the Aura agent.
      *
      * @param execution The task execution containing type and input data.
-     * @return The response produced by the Aura agent for the given task.
+     * @return The response produced by the Aura agent.
      */
     private suspend fun executeWithAura(execution: TaskExecution): AgentResponse {
         val request = AiRequest(
@@ -379,11 +379,11 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Executes a task by delegating it to the Kai agent.
+     * Executes a task using the Kai agent and returns the agent's response.
      *
-     * Constructs an `AgentRequest` from the task execution details and returns the Kai agent's response.
+     * Constructs an `AgentRequest` from the task's data and delegates processing to the Kai agent.
      *
-     * @param execution The task execution to be processed.
+     * @param execution The task execution details.
      * @return The response from the Kai agent.
      */
     private suspend fun executeWithKai(execution: TaskExecution): AgentResponse {
@@ -399,7 +399,7 @@ class TaskExecutionManager @Inject constructor(
     /**
      * Executes a task using the Genesis agent and returns the agent's response.
      *
-     * Constructs an `AgentRequest` from the task execution data and delegates processing to the Genesis agent.
+     * Constructs an `AgentRequest` from the task execution details and delegates processing to the Genesis agent.
      *
      * @param execution The task execution to be processed.
      * @return The response from the Genesis agent.
@@ -417,10 +417,10 @@ class TaskExecutionManager @Inject constructor(
     /**
      * Selects the most appropriate agent for a task based on agent preference or task type keywords.
      *
-     * If a valid agent preference is specified in the task, it is used. Otherwise, the agent is chosen by analyzing keywords in the task type, with "creative" or "ui" selecting Aura, "security" or "analysis" selecting Kai, and "complex" or "fusion" selecting Genesis. Defaults to Genesis if no keywords match.
+     * If a valid agent preference is specified in the task, it is used. Otherwise, the agent is determined by analyzing keywords in the task type, with a default to Genesis if no match is found.
      *
-     * @param execution The task execution metadata used for agent selection.
-     * @return The determined agent type for task execution.
+     * @param execution The task execution metadata containing type and optional agent preference.
+     * @return The agent type selected for task execution.
      */
     private fun determineOptimalAgent(execution: TaskExecution): AgentType {
         // Use agent preference if specified and valid
@@ -497,7 +497,7 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Stops all task processing and cancels running coroutines, releasing resources used by the TaskExecutionManager.
+     * Stops all task processing and cancels active coroutines, releasing resources used by the manager.
      */
     fun cleanup() {
         logger.i("TaskExecutionManager", "Cleaning up TaskExecutionManager")
@@ -527,11 +527,11 @@ data class QueueStatus(
 
 class TaskPriorityComparator : Comparator<TaskExecution> {
     /**
-     * Determines the ordering of two TaskExecution objects for use in a priority queue.
+     * Defines the ordering of TaskExecution objects for use in a priority queue.
      *
-     * Tasks with higher priority values are ordered before those with lower priority values. If priorities are equal, tasks scheduled for earlier execution are ordered first.
+     * Tasks with higher priority values are ordered before those with lower priority. If priorities are equal, tasks scheduled for earlier execution are ordered first.
      *
-     * @return A negative integer if t1 should be ordered before t2, a positive integer if t1 should be ordered after t2, or zero if they are considered equal.
+     * @return A negative integer if the first task should precede the second, a positive integer if it should follow, or zero if they are considered equal.
      */
     override fun compare(t1: TaskExecution, t2: TaskExecution): Int {
         // Higher priority first, then earlier scheduled time

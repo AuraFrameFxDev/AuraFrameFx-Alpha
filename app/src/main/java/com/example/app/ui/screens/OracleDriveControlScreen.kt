@@ -43,9 +43,9 @@ import kotlinx.coroutines.launch
  * Provides controls to refresh service status, view diagnostics logs, and enable or disable modules by package name. The screen reflects real-time connection status and displays error messages for failed operations.
  */
 /**
- * Displays the Oracle Drive control screen, providing UI controls and status information for managing the Oracle Drive service.
+ * Displays the Oracle Drive control screen for monitoring service status, viewing diagnostics, and toggling modules.
  *
- * This composable shows the current connection status, service status, detailed status, diagnostics log, and allows enabling or disabling modules by package name. It also provides refresh and toggle actions, reflecting loading and error states as needed.
+ * This composable provides a UI to observe the Oracle Drive service connection, refresh its status, view diagnostic logs, and enable or disable modules by package name. UI elements are enabled or disabled based on the service connection and loading state.
  */
 @Composable
 fun OracleDriveControlScreen(

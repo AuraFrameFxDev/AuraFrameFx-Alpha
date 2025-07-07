@@ -20,22 +20,22 @@ print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
 
-# print_success prints a success message in green color with a [SUCCESS] label.
+# print_success prints a success message in green color to stdout.
 print_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
-# print_warning prints a warning message in yellow color to the terminal.
+# print_warning prints a warning message in yellow color to stdout.
 print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
-# print_error prints an error message in red with an [ERROR] label.
+# print_error prints an error message in red color to stderr.
 print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# print_genesis prints a message prefixed with a colored [GENESIS] label for Genesis-specific output.
+# print_genesis prints a message prefixed with a purple [GENESIS] label for Genesis-specific logs.
 print_genesis() {
     echo -e "${PURPLE}[GENESIS]${NC} $1"
 }
