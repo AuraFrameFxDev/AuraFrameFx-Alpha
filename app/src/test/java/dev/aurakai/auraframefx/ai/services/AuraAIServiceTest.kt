@@ -213,6 +213,23 @@ class AuraAIServiceTest {
     @DisplayName("Context Management Tests")
     inner class ContextManagementTests {
 
+        @ParameterizedTest
+        @MethodSource("dev.aurakai.auraframefx.ai.services.AuraAIServiceTest#provideContextSizes")
+        @DisplayName("Should handle contexts of various sizes")
+        fun `should handle contexts of various sizes`(contextSize: Int, description: String) {
+            // Given
+            val sessionId = "test-session-$contextSize"
+            val context = "A".repeat(contextSize)
+
+            // When
+            auraAIService.storeContext(sessionId, context)
+            val retrieved = auraAIService.getContext(sessionId)
+
+            // Then
+            assertEquals(context, retrieved.joinToString(""), "Should handle $description")
+        }
+
+
         @Test
         @DisplayName("Should maintain conversation context")
         fun `should maintain conversation context`() = runTest {
@@ -278,6 +295,18 @@ class AuraAIServiceTest {
     @Nested
     @DisplayName("Configuration Management Tests")
     inner class ConfigurationManagementTests {
+
+        @ParameterizedTest
+        @MethodSource("dev.aurakai.auraframefx.ai.services.AuraAIServiceTest#provideInvalidConfigurations")
+        @DisplayName("Should reject invalid configurations")
+        fun `should reject invalid configurations`(config: Map<String, String>, description: String) {
+            // When
+            val result = auraAIService.updateConfiguration(config)
+
+            // Then
+            assertFalse(result, "Should reject configuration: $description")
+        }
+
 
         @Test
         @DisplayName("Should update configuration at runtime")
@@ -400,6 +429,24 @@ class AuraAIServiceTest {
     @DisplayName("Error Handling and Recovery Tests")
     inner class ErrorHandlingTests {
 
+        @ParameterizedTest
+        @MethodSource("dev.aurakai.auraframefx.ai.services.AuraAIServiceTest#provideErrorScenarios")
+        @DisplayName("Should handle various error scenarios")
+        fun `should handle various error scenarios`(exception: Exception, description: String) = runTest {
+            // Given
+            val config = mapOf("apiKey" to "test-key", "baseUrl" to "https://test.com")
+            every { mockConfigService.getConfig("ai") } returns config
+            auraAIService.initialize()
+            
+            coEvery { mockApiClient.sendQuery(any()) } throws exception
+
+            // When & Then
+            assertThrows<ServiceException>("Should handle $description") {
+                auraAIService.processQuery("Test query")
+            }
+        }
+
+
         @Test
         @DisplayName("Should handle service not initialized error")
         fun `should handle service not initialized error`() = runTest {
@@ -473,6 +520,70 @@ class AuraAIServiceTest {
     inner class PerformanceTests {
 
         @Test
+        @DisplayName("Should handle thread-safe operations")
+        fun `should handle thread-safe operations`() = runTest {
+            // Given
+            val config = mapOf("apiKey" to "test-key", "baseUrl" to "https://test.com")
+            every { mockConfigService.getConfig("ai") } returns config
+            auraAIService.initialize()
+            
+            val sessionIds = (1..10).map { "session-$it" }
+            val response = AIResponse("Thread-safe response", 0.8, 10)
+            coEvery { mockApiClient.sendQueryWithContext(any(), any()) } returns response
+
+            // When
+            val results = sessionIds.map { sessionId ->
+                kotlinx.coroutines.async {
+                    auraAIService.processQueryWithContext("Query for $sessionId", sessionId)
+                }
+            }.awaitAll()
+
+            // Then
+            assertEquals(10, results.size)
+            results.forEach { result ->
+                assertEquals(response, result)
+            }
+        }
+
+        @Test
+        @DisplayName("Should cleanup resources on shutdown")
+        fun `should cleanup resources on shutdown`() = runTest {
+            // Given
+            val config = mapOf("apiKey" to "test-key", "baseUrl" to "https://test.com")
+            every { mockConfigService.getConfig("ai") } returns config
+            auraAIService.initialize()
+            
+            // Create some contexts
+            repeat(5) { index ->
+                auraAIService.storeContext("session-$index", "Context $index")
+            }
+
+            // When
+            auraAIService.shutdown()
+
+            // Then
+            assertFalse(auraAIService.isInitialized())
+            verify { mockLogger.info(match { it.contains("cleanup") || it.contains("shutdown") }) }
+        }
+
+        @Test
+        @DisplayName("Should handle resource exhaustion gracefully")
+        fun `should handle resource exhaustion gracefully`() = runTest {
+            // Given
+            val config = mapOf("apiKey" to "test-key", "baseUrl" to "https://test.com")
+            every { mockConfigService.getConfig("ai") } returns config
+            auraAIService.initialize()
+            
+            coEvery { mockApiClient.sendQuery(any()) } throws OutOfMemoryError("Memory exhausted")
+
+            // When & Then
+            assertThrows<ServiceException> {
+                auraAIService.processQuery("Test query")
+            }
+        }
+
+
+        @Test
         @DisplayName("Should handle concurrent requests efficiently")
         fun `should handle concurrent requests efficiently`() = runTest {
             // Given
@@ -531,9 +642,381 @@ class AuraAIServiceTest {
         }
     }
 
+
+    @Nested
+    @DisplayName("Advanced Edge Cases and Validation Tests")
+    inner class AdvancedEdgeCaseTests {
+
+        @BeforeEach
+        fun setUpAdvancedTests() {
+            val validConfig = mapOf(
+                "apiKey" to "test-key",
+                "baseUrl" to "https://api.test.com",
+                "timeout" to "30000",
+                "maxRetries" to "3",
+                "maxContextSize" to "10000"
+            )
+            every { mockConfigService.getConfig("ai") } returns validConfig
+            auraAIService.initialize()
+        }
+
+        @Test
+        @DisplayName("Should handle extremely long queries gracefully")
+        fun `should handle extremely long queries gracefully`() = runTest {
+            // Given
+            val longQuery = "A".repeat(10000)
+            val response = AIResponse("Response for long query", 0.8, 1000)
+            coEvery { mockApiClient.sendQuery(any()) } returns response
+
+            // When
+            val result = auraAIService.processQuery(longQuery)
+
+            // Then
+            assertEquals(response, result)
+            coVerify { mockApiClient.sendQuery(longQuery) }
+        }
+
+        @Test
+        @DisplayName("Should handle queries with special Unicode characters")
+        fun `should handle queries with special Unicode characters`() = runTest {
+            // Given
+            val unicodeQuery = "你好世界 🌍 émojis and spëcial chars ñ § ™"
+            val response = AIResponse("Unicode response", 0.9, 20)
+            coEvery { mockApiClient.sendQuery(any()) } returns response
+
+            // When
+            val result = auraAIService.processQuery(unicodeQuery)
+
+            // Then
+            assertEquals(response, result)
+            coVerify { mockApiClient.sendQuery(unicodeQuery) }
+        }
+
+        @Test
+        @DisplayName("Should handle malformed JSON responses")
+        fun `should handle malformed JSON responses`() = runTest {
+            // Given
+            val query = "Test query"
+            coEvery { mockApiClient.sendQuery(any()) } throws IllegalArgumentException("Malformed JSON")
+
+            // When & Then
+            assertThrows<ServiceException> {
+                auraAIService.processQuery(query)
+            }
+        }
+
+        @Test
+        @DisplayName("Should validate API response integrity")
+        fun `should validate API response integrity`() = runTest {
+            // Given
+            val query = "Test query"
+            val invalidResponse = AIResponse("", -1.0, -5) // Invalid confidence and token count
+            coEvery { mockApiClient.sendQuery(any()) } returns invalidResponse
+
+            // When & Then
+            assertThrows<ServiceException> {
+                auraAIService.processQuery(query)
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle concurrent context modifications")
+        fun `should handle concurrent context modifications`() = runTest {
+            // Given
+            val sessionId = "concurrent-test-session"
+            val query = "Test query"
+            val response = AIResponse("Response", 0.8, 10)
+            coEvery { mockApiClient.sendQueryWithContext(any(), any()) } returns response
+
+            // When
+            val results = (1..5).map { index ->
+                auraAIService.processQueryWithContext("Query $index", sessionId)
+            }
+
+            // Then
+            assertEquals(5, results.size)
+            assertTrue(auraAIService.getContext(sessionId).isNotEmpty())
+        }
+
+        @Test
+        @DisplayName("Should enforce context size limits")
+        fun `should enforce context size limits`() {
+            // Given
+            val sessionId = "large-context-session"
+            val largeContext = "A".repeat(15000) // Exceeds max context size
+
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                auraAIService.storeContext(sessionId, largeContext)
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle API key rotation")
+        fun `should handle API key rotation`() = runTest {
+            // Given
+            val query = "Test query"
+            val newConfig = mapOf(
+                "apiKey" to "new-rotated-key",
+                "baseUrl" to "https://api.test.com",
+                "timeout" to "30000"
+            )
+            every { mockConfigService.updateConfig("ai", newConfig) } returns true
+            every { mockConfigService.getConfig("ai") } returns newConfig
+            val response = AIResponse("Response with new key", 0.9, 15)
+            coEvery { mockApiClient.sendQuery(any()) } returns response
+
+            // When
+            auraAIService.updateConfiguration(newConfig)
+            val result = auraAIService.processQuery(query)
+
+            // Then
+            assertEquals(response, result)
+            verify { mockConfigService.updateConfig("ai", newConfig) }
+        }
+
+        @Test
+        @DisplayName("Should handle service degradation gracefully")
+        fun `should handle service degradation gracefully`() = runTest {
+            // Given
+            val query = "Test query"
+            coEvery { mockApiClient.healthCheck() } returns false
+            coEvery { mockApiClient.sendQuery(any()) } throws IOException("Service degraded")
+
+            // When
+            val healthResult = auraAIService.performHealthCheck()
+
+            // Then
+            assertFalse(healthResult)
+            assertThrows<ServiceException> {
+                auraAIService.processQuery(query)
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle null API responses")
+        fun `should handle null API responses`() = runTest {
+            // Given
+            val query = "Test query"
+            coEvery { mockApiClient.sendQuery(any()) } returns null
+
+            // When & Then
+            assertThrows<ServiceException> {
+                auraAIService.processQuery(query)
+            }
+        }
+
+        @Test
+        @DisplayName("Should log all critical operations")
+        fun `should log all critical operations`() = runTest {
+            // Given
+            val query = "Test query"
+            val response = AIResponse("Test response", 0.8, 10)
+            coEvery { mockApiClient.sendQuery(any()) } returns response
+            every { mockLogger.debug(any()) } returns Unit
+            every { mockLogger.info(any()) } returns Unit
+
+            // When
+            auraAIService.processQuery(query)
+
+            // Then
+            verify { mockLogger.debug(match { it.contains("Processing query") }) }
+            verify { mockLogger.info(match { it.contains("Query processed successfully") }) }
+        }
+
+        @Test
+        @DisplayName("Should handle configuration validation edge cases")
+        fun `should handle configuration validation edge cases`() {
+            // Given
+            val edgeCaseConfigs = listOf(
+                mapOf("apiKey" to "", "baseUrl" to "https://test.com"), // Empty API key
+                mapOf("apiKey" to "test", "baseUrl" to ""), // Empty base URL
+                mapOf("apiKey" to "test", "baseUrl" to "invalid-url"), // Invalid URL format
+                mapOf("apiKey" to "test", "baseUrl" to "https://test.com", "timeout" to "invalid"), // Invalid timeout
+                mapOf("apiKey" to "test", "baseUrl" to "https://test.com", "timeout" to "-1") // Negative timeout
+            )
+
+            // When & Then
+            edgeCaseConfigs.forEach { config ->
+                assertFalse(auraAIService.updateConfiguration(config))
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle context cleanup after session timeout")
+        fun `should handle context cleanup after session timeout`() {
+            // Given
+            val sessionId = "timeout-session"
+            val context = "Some context"
+            auraAIService.storeContext(sessionId, context)
+
+            // When
+            auraAIService.cleanupExpiredSessions()
+
+            // Then
+            // Context should be cleaned up based on timeout logic
+            verify { mockLogger.debug(match { it.contains("cleanup") }) }
+        }
+
+        @Test
+        @DisplayName("Should handle batch query processing")
+        fun `should handle batch query processing`() = runTest {
+            // Given
+            val queries = listOf("Query 1", "Query 2", "Query 3")
+            val responses = queries.mapIndexed { index, query ->
+                AIResponse("Response $index", 0.8, 10)
+            }
+            
+            queries.zip(responses).forEach { (query, response) ->
+                coEvery { mockApiClient.sendQuery(query) } returns response
+            }
+
+            // When
+            val results = auraAIService.processBatchQueries(queries)
+
+            // Then
+            assertEquals(3, results.size)
+            results.zip(responses).forEach { (result, expected) ->
+                assertEquals(expected, result)
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle service metrics collection")
+        fun `should handle service metrics collection`() = runTest {
+            // Given
+            val query = "Test query"
+            val response = AIResponse("Response", 0.8, 10)
+            coEvery { mockApiClient.sendQuery(any()) } returns response
+
+            // When
+            repeat(5) { auraAIService.processQuery(query) }
+            val metrics = auraAIService.getServiceMetrics()
+
+            // Then
+            assertEquals(5, metrics.totalQueries)
+            assertTrue(metrics.averageResponseTime > 0)
+            assertEquals(50, metrics.totalTokensUsed) // 5 queries × 10 tokens each
+        }
+
+        @Test
+        @DisplayName("Should handle streaming responses")
+        fun `should handle streaming responses`() = runTest {
+            // Given
+            val query = "Test streaming query"
+            val streamChunks = listOf("Chunk 1", "Chunk 2", "Chunk 3")
+            coEvery { mockApiClient.sendStreamingQuery(any()) } returns streamChunks.asSequence()
+
+            // When
+            val result = auraAIService.processStreamingQuery(query)
+
+            // Then
+            val collectedChunks = result.toList()
+            assertEquals(streamChunks, collectedChunks)
+        }
+
+        @Test
+        @DisplayName("Should handle custom model selection")
+        fun `should handle custom model selection`() = runTest {
+            // Given
+            val query = "Test query"
+            val modelName = "gpt-4-turbo"
+            val response = AIResponse("Response from custom model", 0.9, 20)
+            coEvery { mockApiClient.sendQueryWithModel(any(), any()) } returns response
+
+            // When
+            val result = auraAIService.processQueryWithModel(query, modelName)
+
+            // Then
+            assertEquals(response, result)
+            coVerify { mockApiClient.sendQueryWithModel(query, modelName) }
+        }
+
+        @Test
+        @DisplayName("Should handle response caching")
+        fun `should handle response caching`() = runTest {
+            // Given
+            val query = "Cacheable query"
+            val response = AIResponse("Cached response", 0.8, 10)
+            coEvery { mockApiClient.sendQuery(any()) } returns response
+
+            // When
+            val result1 = auraAIService.processQueryWithCache(query)
+            val result2 = auraAIService.processQueryWithCache(query) // Should use cache
+
+            // Then
+            assertEquals(result1, result2)
+            coVerify(exactly = 1) { mockApiClient.sendQuery(query) } // Only called once due to caching
+        }
+
+        @Test
+        @DisplayName("Should handle API version compatibility")
+        fun `should handle API version compatibility`() = runTest {
+            // Given
+            val query = "Test query"
+            coEvery { mockApiClient.sendQuery(any()) } throws ApiVersionMismatchException("API version not supported")
+
+            // When & Then
+            assertThrows<ServiceException> {
+                auraAIService.processQuery(query)
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle graceful shutdown with pending requests")
+        fun `should handle graceful shutdown with pending requests`() = runTest {
+            // Given
+            val config = mapOf("apiKey" to "test", "baseUrl" to "https://test.com")
+            every { mockConfigService.getConfig("ai") } returns config
+            auraAIService.initialize()
+            
+            val query = "Long running query"
+            coEvery { mockApiClient.sendQuery(any()) } coAnswers {
+                kotlinx.coroutines.delay(1000)
+                AIResponse("Delayed response", 0.8, 10)
+            }
+
+            // When
+            val queryJob = kotlinx.coroutines.async { auraAIService.processQuery(query) }
+            kotlinx.coroutines.delay(100) // Let query start
+            auraAIService.shutdown()
+
+            // Then
+            assertFalse(auraAIService.isInitialized())
+            verify { mockLogger.info(match { it.contains("shutting down") }) }
+        }
+    }
+
     companion object {
         @JvmStatic
         fun provideTestQueries(): Stream<Arguments> = Stream.of(
+
+        @JvmStatic
+        fun provideInvalidConfigurations(): Stream<Arguments> = Stream.of(
+            Arguments.of(mapOf<String, String>(), "Empty configuration"),
+            Arguments.of(mapOf("apiKey" to ""), "Empty API key"),
+            Arguments.of(mapOf("apiKey" to "test", "baseUrl" to ""), "Empty base URL"),
+            Arguments.of(mapOf("apiKey" to "test", "baseUrl" to "invalid-url"), "Invalid URL format"),
+            Arguments.of(mapOf("apiKey" to "test", "baseUrl" to "https://test.com", "timeout" to "invalid"), "Invalid timeout"),
+            Arguments.of(mapOf("apiKey" to "test", "baseUrl" to "https://test.com", "timeout" to "-1"), "Negative timeout")
+        )
+
+        @JvmStatic
+        fun provideErrorScenarios(): Stream<Arguments> = Stream.of(
+            Arguments.of(IOException("Network error"), "Network failure"),
+            Arguments.of(SocketTimeoutException("Timeout"), "Request timeout"),
+            Arguments.of(IllegalArgumentException("Invalid argument"), "Invalid argument"),
+            Arguments.of(RuntimeException("Unknown error"), "Unknown runtime error")
+        )
+
+        @JvmStatic
+        fun provideContextSizes(): Stream<Arguments> = Stream.of(
+            Arguments.of(100, "Small context"),
+            Arguments.of(1000, "Medium context"),
+            Arguments.of(5000, "Large context"),
+            Arguments.of(9999, "Max allowed context")
+        )
+
             Arguments.of("Simple question", "Simple answer"),
             Arguments.of("Complex multi-part question with details", "Detailed response"),
             Arguments.of("Question with special characters !@#$%^&*()", "Response with handling"),
