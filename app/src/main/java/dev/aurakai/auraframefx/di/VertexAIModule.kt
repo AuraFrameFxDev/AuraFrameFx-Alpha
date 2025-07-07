@@ -61,6 +61,11 @@ object VertexAIModule {
         securityContext: SecurityContext,
         logger: AuraFxLogger
     ): VertexAIClient {
-        return VertexAIClientImpl()
+        return VertexAIClientImpl(
+            config = config,
+            context = context,
+            securityContext = securityContext,
+            logger = logger
+        )
     }
 }
