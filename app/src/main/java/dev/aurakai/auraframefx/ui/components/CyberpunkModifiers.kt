@@ -14,7 +14,12 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
  * Cyberpunk-themed modifier extensions for creating digital effects
  */
 
-fun Modifier.cyberEdgeGlow() = this
+/**
+     * Applies a neon blue edge glow effect with a shadow and semi-transparent border to the component.
+     *
+     * Adds an 8.dp elevation shadow and a 1.dp border with rounded corners for a cyberpunk-inspired appearance.
+     */
+    fun Modifier.cyberEdgeGlow() = this
     .shadow(
         elevation = 8.dp,
         shape = RoundedCornerShape(4.dp),
@@ -27,7 +32,12 @@ fun Modifier.cyberEdgeGlow() = this
         shape = RoundedCornerShape(4.dp)
     )
 
-fun Modifier.digitalGlitchEffect() = this
+/**
+     * Applies a digital glitch visual effect with a neon purple shadow and border to the modifier.
+     *
+     * Adds a 4.dp elevation shadow and a 2.dp rounded corner border in neon purple, creating a cyberpunk glitch aesthetic.
+     */
+    fun Modifier.digitalGlitchEffect() = this
     .shadow(
         elevation = 4.dp,
         shape = RoundedCornerShape(2.dp),
@@ -40,7 +50,12 @@ fun Modifier.digitalGlitchEffect() = this
         shape = RoundedCornerShape(2.dp)
     )
 
-fun Modifier.digitalPixelEffect() = this
+/**
+     * Applies a neon teal pixelated effect to the modifier, combining a soft shadow and a semi-transparent border with minimal rounded corners.
+     *
+     * Use this to give UI components a digital, pixel-inspired cyberpunk appearance.
+     */
+    fun Modifier.digitalPixelEffect() = this
     .shadow(
         elevation = 6.dp,
         shape = RoundedCornerShape(1.dp),

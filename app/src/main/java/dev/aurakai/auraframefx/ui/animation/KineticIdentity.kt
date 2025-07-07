@@ -201,7 +201,13 @@ object KineticIdentity {
 
     // ========== UTILITY FUNCTIONS ==========
     
-    /** Create a repeating animation for breathing/pulsing effects */
+    /**
+     * Creates an infinite repeating animation spec for breathing or pulsing effects.
+     *
+     * @param durationMillis The duration of one inhale/exhale cycle in milliseconds.
+     * @param targetValue The target scale or value to animate to during the pulse.
+     * @return An infinite repeatable animation spec with linear easing and reverse repeat mode.
+     */
     fun createBreathingAnimation(
         durationMillis: Int = 2000,
         targetValue: Float = 1.1f
@@ -210,7 +216,13 @@ object KineticIdentity {
         repeatMode = RepeatMode.Reverse
     )
 
-    /** Create a glitch-style shake animation */
+    /**
+     * Creates a tween animation spec for a glitch-style shake effect.
+     *
+     * @param durationMillis Duration of the shake in milliseconds.
+     * @param intensity The intended shake intensity (not directly used in the returned spec).
+     * @return An animation spec with linear easing for use in glitch or shake effects.
+     */
     fun createGlitchShake(
         durationMillis: Int = MICRO_DURATION,
         intensity: Float = 10f
@@ -219,7 +231,15 @@ object KineticIdentity {
         easing = LinearEasing
     )
 
-    /** Create a dramatic pause before action */
+    /**
+     * Creates an animation spec that introduces a dramatic pause before an action.
+     *
+     * The resulting animation combines a pause of the specified duration with the duration of the provided action animation spec. If the action spec is not a tween, a standard duration is used.
+     *
+     * @param pauseDurationMillis The duration of the pause before the action, in milliseconds.
+     * @param actionSpec The animation spec representing the action to follow the pause. Defaults to `DaringEnter`.
+     * @return An animation spec representing the combined pause and action.
+     */
     fun createDramaticPause(
         pauseDurationMillis: Int = 500,
         actionSpec: AnimationSpec<Float> = DaringEnter
@@ -233,7 +253,14 @@ object KineticIdentity {
  * Extension functions for easier animation chaining
  */
 
-/** Chain this animation after a delay */
+/**
+     * Returns a tween animation that starts after the specified delay and lasts for the duration of the original animation.
+     *
+     * For spring specs, the duration is estimated as 1000 ms. For other animation specs, a standard duration is used.
+     *
+     * @param delayMillis The delay in milliseconds before the animation begins.
+     * @return A tween animation spec with the total duration of the delay plus the original animation's duration.
+     */
 fun <T> AnimationSpec<T>.afterDelay(delayMillis: Int): AnimationSpec<T> = 
     tween(
         durationMillis = delayMillis + when(this) {
@@ -243,11 +270,21 @@ fun <T> AnimationSpec<T>.afterDelay(delayMillis: Int): AnimationSpec<T> =
         }
     )
 
-/** Make this animation repeat infinitely */
+/**
+     * Converts this animation spec into an infinite repeatable animation with the specified repeat mode.
+     *
+     * @param repeatMode The mode that determines how the animation repeats (restart or reverse). Defaults to [RepeatMode.Restart].
+     * @return An [InfiniteRepeatableSpec] that repeats this animation indefinitely.
+     */
 fun <T> AnimationSpec<T>.infinite(repeatMode: RepeatMode = RepeatMode.Restart): InfiniteRepeatableSpec<T> = 
     infiniteRepeatable(this as DurationBasedAnimationSpec<T>, repeatMode)
 
-/** Apply easing to any animation spec */
+/**
+ * Returns a copy of this animation spec with the specified easing if it is a tween; otherwise, returns the original spec unchanged.
+ *
+ * @param easing The easing function to apply if this is a tween animation.
+ * @return An animation spec with the new easing if applicable, or the original spec.
+ */
 fun AnimationSpec<Float>.withEasing(easing: Easing): AnimationSpec<Float> = when(this) {
     is TweenSpec -> tween(this.durationMillis, easing = easing)
     else -> this
