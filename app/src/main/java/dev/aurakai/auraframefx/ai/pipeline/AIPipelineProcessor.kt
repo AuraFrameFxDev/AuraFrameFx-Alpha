@@ -33,6 +33,16 @@ class AIPipelineProcessor @Inject constructor(
     private val _taskPriority = MutableStateFlow(0.0f)
     val taskPriority: StateFlow<Float> = _taskPriority
 
+    /**
+     * Processes an AI task through a pipeline of agents, aggregating their responses and updating pipeline state and context.
+     *
+     * The task is sequentially processed by selected agents (Cascade, Kai, Aura) based on priority and agent selection logic.
+     * Each agent's response is collected, and a final aggregated response is generated and appended.
+     * The pipeline state and processing context are updated throughout the process.
+     *
+     * @param task The input task to be processed by the AI pipeline.
+     * @return A list of agent messages representing all responses generated during processing, including the final aggregated response.
+     */
     suspend fun processTask(task: String): List<AgentMessage> {
         _pipelineState.value = PipelineState.Processing(task = task)
 

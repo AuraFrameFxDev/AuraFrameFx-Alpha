@@ -7,104 +7,103 @@ package dev.aurakai.auraframefx.utils
 interface AuraFxLogger {
     
     /**
- * Logs a debug-level message for development and troubleshooting purposes.
+ * Logs a debug-level message for development and troubleshooting.
  *
- * @param tag Identifier for the log source or component.
- * @param message The debug message to log.
- * @param throwable Optional exception or error to include with the log entry.
+ * @param tag Identifies the source or component of the log entry.
+ * @param message The message to log.
+ * @param throwable An optional exception or error to include with the log entry.
  */
     fun debug(tag: String, message: String, throwable: Throwable? = null)
     
     /**
- * Logs an informational message to track normal application operations.
+ * Logs an informational message indicating normal application operations.
  *
  * @param tag Identifier for the log source or component.
- * @param message The informational message to log.
- * @param throwable Optional exception or error to include with the log entry.
+ * @param message The message describing the informational event.
+ * @param throwable Optional exception or error associated with the event.
  */
     fun info(tag: String, message: String, throwable: Throwable? = null)
     
     /**
- * Logs a warning message indicating a potential issue.
+ * Logs a warning message to indicate a potential issue or abnormal condition.
  *
- * @param tag The category or source of the log message.
- * @param message The warning message to log.
- * @param throwable An optional exception or error related to the warning.
+ * @param tag Identifies the source or category of the warning.
+ * @param message The warning message content.
+ * @param throwable An optional exception or error associated with the warning.
  */
     fun warn(tag: String, message: String, throwable: Throwable? = null)
     
     /**
- * Logs an error message indicating a failure or exception.
+ * Logs an error-level message to indicate a failure or exception event.
  *
  * @param tag The category or source of the log entry.
- * @param message The error message to log.
- * @param throwable An optional exception associated with the error.
+ * @param message The error message to record.
+ * @param throwable An optional exception related to the error.
  */
     fun error(tag: String, message: String, throwable: Throwable? = null)
     
     /**
- * Logs a critical security event that requires immediate attention.
+ * Logs a security-related event that may indicate a critical issue or breach.
  *
- * @param tag The category or source of the security event.
- * @param message The security-related message to log.
- * @param throwable An optional exception or error associated with the event.
+ * @param tag Identifies the source or category of the security event.
+ * @param message Describes the security event being logged.
+ * @param throwable An optional exception or error related to the event.
  */
     fun security(tag: String, message: String, throwable: Throwable? = null)
     
     /**
- * Logs performance metrics for a specific operation, including its duration and optional metadata.
+ * Logs a performance event for an operation, recording its duration and optional contextual metadata.
  *
- * @param tag Identifier for the log source or component.
- * @param operation Name or description of the operation being measured.
- * @param durationMs Duration of the operation in milliseconds.
- * @param metadata Optional additional data providing context for the performance event.
+ * @param operation The name or description of the operation being measured.
+ * @param durationMs The duration of the operation in milliseconds.
+ * @param metadata Additional contextual data for the performance event.
  */
     fun performance(tag: String, operation: String, durationMs: Long, metadata: Map<String, Any> = emptyMap())
     
     /**
- * Logs a user interaction event for analytics and user experience optimization.
+ * Records a user interaction event for analytics or behavioral tracking.
  *
- * @param tag A category or component identifier for the event.
- * @param action The specific user action being recorded.
- * @param metadata Optional additional context about the interaction.
+ * @param tag Identifies the category or component associated with the interaction.
+ * @param action Describes the specific user action performed.
+ * @param metadata Optional contextual data providing additional details about the interaction.
  */
     fun userInteraction(tag: String, action: String, metadata: Map<String, Any> = emptyMap())
     
     /**
- * Logs an AI-related operation, including the operation name, confidence score, and optional metadata.
+ * Logs an AI operation event with its name, confidence score, and optional contextual metadata.
  *
- * @param tag The category or component associated with the AI operation.
- * @param operation The name or description of the AI operation performed.
- * @param confidence The confidence score of the AI decision or result.
- * @param metadata Optional additional context or details about the operation.
+ * @param tag Identifies the category or component related to the AI operation.
+ * @param operation Describes the AI operation performed.
+ * @param confidence The confidence score associated with the AI result.
+ * @param metadata Additional context or details about the operation.
  */
     fun aiOperation(tag: String, operation: String, confidence: Float, metadata: Map<String, Any> = emptyMap())
     
     /**
- * Enables or disables logging during runtime.
+ * Toggles logging on or off at runtime.
  *
- * @param enabled If true, logging is enabled; if false, logging is disabled.
+ * @param enabled True to enable logging; false to disable it.
  */
     fun setLoggingEnabled(enabled: Boolean)
     
     /**
- * Sets the minimum log level for logging.
+ * Sets the minimum severity level for log entries to be recorded.
  *
- * Only log entries at or above the specified level will be recorded.
+ * Only log messages at or above the specified log level will be processed and stored.
  *
- * @param level The lowest log level that will be processed.
+ * @param level The minimum log level threshold.
  */
     fun setLogLevel(level: LogLevel)
     
     /**
- * Forces all pending log entries to be written to storage.
+ * Forces all buffered log entries to be written to persistent storage.
  *
- * This is a suspend function and may perform I/O operations.
+ * This suspend function may perform I/O operations and should be called to ensure all logs are saved, especially before shutdown or critical transitions.
  */
     suspend fun flush()
     
     /**
- * Releases resources and terminates logging operations.
+ * Releases all resources and finalizes the logging system, terminating any ongoing logging operations.
  */
     fun cleanup()
 }

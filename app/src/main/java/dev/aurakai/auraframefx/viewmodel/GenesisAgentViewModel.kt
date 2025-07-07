@@ -89,15 +89,18 @@ class GenesisAgentViewModel @Inject constructor(
         _taskHistory.value = updatedHistory
     }
 
+    /**
+     * Removes all entries from the task history.
+     */
     fun clearTaskHistory() {
         _taskHistory.value = emptyList()
     }
 
     /**
-     * Registers a new auxiliary agent with the given name and capabilities.
+     * Registers a new auxiliary agent with the specified name and capabilities.
      *
-     * @param name The unique identifier for the auxiliary agent.
-     * @param capabilities The set of capabilities to assign to the agent.
+     * @param name The unique name for the auxiliary agent.
+     * @param capabilities The set of capabilities assigned to the agent.
      * @return The configuration of the newly registered auxiliary agent.
      */
     fun registerAuxiliaryAgent(
@@ -108,31 +111,31 @@ class GenesisAgentViewModel @Inject constructor(
     }
 
     /**
-     * Returns the configuration for the agent with the specified name, or null if not found.
+     * Retrieves the configuration for an agent by its name.
      *
-     * @param name The name of the agent to look up.
-     * @return The corresponding agent configuration, or null if no agent with that name exists.
+     * @param name The name of the agent to retrieve.
+     * @return The agent's configuration if found, or null if no agent with the specified name exists.
      */
     fun getAgentConfig(name: String): HierarchyAgentConfig? {
         return genesisAgent.getAgentConfig(name)
     }
 
     /**
-     * Retrieves a list of agent configurations ordered by priority, from highest to lowest.
+     * Returns a list of agent configurations sorted by priority, from highest to lowest.
      *
-     * @return A list of `HierarchyAgentConfig` objects sorted by priority.
+     * @return A list of `HierarchyAgentConfig` instances ordered by priority.
      */
     fun getAgentsByPriority(): List<HierarchyAgentConfig> {
         return genesisAgent.getAgentsByPriority()
     }
 
     /**
-     * Initiates asynchronous processing of a query by the GenesisAgent and returns an empty list immediately.
+     * Starts asynchronous processing of a query by the GenesisAgent and immediately returns an empty list.
      *
-     * The query is processed in the background; no results are returned synchronously from this function.
+     * The query is handled in the background; this function does not provide synchronous results.
      *
-     * @param query The query string to be processed.
-     * @return An empty list, as query results are not available synchronously.
+     * @param query The query string to process.
+     * @return An empty list, as results are not available synchronously.
      */
     fun processQuery(query: String): List<HierarchyAgentConfig> {
         viewModelScope.launch {
