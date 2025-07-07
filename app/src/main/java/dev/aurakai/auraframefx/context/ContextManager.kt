@@ -44,12 +44,12 @@ class ContextManager @Inject constructor(
     val currentMood: StateFlow<String> = _currentMood
 
     /**
-     * Creates and registers a new context with the specified ID and optional initial data.
+     * Creates and registers a new context with the given ID and optional initial data.
      *
-     * Initializes context metadata, including creation time and access tracking, and adds the context to the active contexts map.
+     * Initializes context metadata such as creation timestamp, access count, and last access time, and stores the context in the active contexts map.
      *
-     * @param contextId The unique identifier for the new context.
-     * @param initialData Optional key-value pairs to initialize the context's data.
+     * @param contextId Unique identifier for the context.
+     * @param initialData Optional initial key-value data for the context.
      */
     fun createContext(contextId: String, initialData: Map<String, Any> = emptyMap()) {
         logger.info("ContextManager", "Creating context: $contextId")
@@ -66,12 +66,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Returns a detailed summary of the specified context, including its metadata and current system states.
+     * Provides a formatted summary of the specified context, including its metadata and current system states.
      *
-     * Increments the context's access count and updates its last access time if the context exists. If the context does not exist, returns a fallback message.
+     * Increments the access count and updates the last access time for the context if found. Returns a fallback message if the context does not exist.
      *
      * @param contextId The unique identifier of the context to summarize.
-     * @return A formatted string summarizing the context and system states, or a fallback message if the context is not found.
+     * @return A formatted string with context details and system states, or a fallback message if the context is not found.
      */
     suspend fun enhanceContext(contextId: String): String {
         logger.debug("ContextManager", "Enhancing context: $contextId")
@@ -90,12 +90,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Enhances a user interaction by enriching it with relevant context, suggesting an optimal AI agent, and assigning a priority score.
+     * Enhances a user interaction by adding relevant context, suggesting an optimal AI agent, and assigning a priority score.
      *
-     * Analyzes the interaction content to retrieve related memories, determines the most suitable agent based on content patterns, and calculates a processing priority. Returns an `EnhancedInteractionData` object containing the original content, interaction type, timestamp, relevant context, suggested agent, and priority.
+     * Retrieves related memories based on the interaction content, determines the most suitable agent, and calculates a priority for processing. Returns an `EnhancedInteractionData` object containing the enriched information.
      *
-     * @param interaction The user interaction data to enhance.
-     * @return An `EnhancedInteractionData` object with enriched context, agent suggestion, and priority score.
+     * @param interaction The user interaction data to be enhanced.
+     * @return An `EnhancedInteractionData` object with additional context, agent suggestion, and priority score.
      */
     suspend fun enhanceInteraction(interaction: InteractionData): EnhancedInteractionData {
         logger.debug("ContextManager", "Enhancing interaction")
@@ -114,9 +114,9 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Records a user interaction and the corresponding agent response in the conversation history.
+     * Records a user interaction and corresponding agent response in the conversation history.
      *
-     * Extracts and stores high-confidence memories from the interaction for future retrieval and learning.
+     * Also extracts and stores high-confidence memories from the interaction for future retrieval and learning.
      */
     fun recordInteraction(interaction: InteractionData, response: InteractionResponse) {
         logger.debug("ContextManager", "Recording interaction for learning")
@@ -137,12 +137,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Searches stored memories for entries whose content or tags contain the given query string, ignoring case.
+     * Searches stored memories for entries whose content or tags match the given query string, case-insensitively.
      *
      * Returns up to 10 memories with the highest relevance scores that match the query.
      *
-     * @param query The search string to match against memory content and tags.
-     * @return A list of up to 10 matching memories, sorted by descending relevance score.
+     * @param query The string to search for within memory content and tags.
+     * @return A list of up to 10 matching memories, sorted by relevance score in descending order.
      */
     suspend fun searchMemories(query: String): List<Memory> {
         logger.debug("ContextManager", "Searching memories for: $query")
@@ -157,9 +157,13 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Records an insight from a request and response for system learning, and periodically triggers learning processing.
+     * Records an insight from a request and response, storing it for system learning and periodically triggering learning processing.
      *
-     * Creates an `Insight` containing the request, response, complexity, and extracted pattern descriptors, then adds it to the insight store. Initiates asynchronous learning processing every 10 recorded insights.
+     * Creates an `Insight` with the provided request, response, complexity, and extracted pattern descriptors, then adds it to the insight store. Asynchronously initiates learning processing after every 10 recorded insights.
+     *
+     * @param request The input or prompt that generated the response.
+     * @param response The system's output or answer to the request.
+     * @param complexity A descriptor of the request/response complexity.
      */
     fun recordInsight(request: String, response: String, complexity: String) {
         logger.info("ContextManager", "Recording insight for evolution")
@@ -183,9 +187,9 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Enables creative enhancement mode, allowing AI agents to operate with increased creativity.
+     * Enables creative enhancement mode for AI agents.
      *
-     * Sets the system state to creative mode, which may influence agent behavior and responses.
+     * Activates creative mode, which may influence agent behavior and responses to be more creative.
      */
     fun enableCreativeEnhancement() {
         logger.info("ContextManager", "Enabling creative enhancement mode")
@@ -193,7 +197,7 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Activates creative mode, enabling enhanced creative processing capabilities within the system.
+     * Enables creative mode, allowing the system to perform enhanced creative processing.
      */
     fun enableCreativeMode() {
         logger.info("ContextManager", "Enabling creative mode")
@@ -209,9 +213,9 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Updates the system mood and propagates the new mood to all active contexts.
+     * Sets the system mood and updates all active contexts with the new mood.
      *
-     * @param newMood The new mood to set for the system and all active contexts.
+     * @param newMood The mood to apply to the system and propagate to each active context.
      */
     fun updateMood(newMood: String) {
         logger.info("ContextManager", "Updating system mood to: $newMood")
@@ -224,12 +228,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Records a security event as a memory for future analysis and learning.
+     * Records a security event as a memory entry for future analysis and learning.
      *
-     * Stores the event details and threat analysis as a memory entry, assigning relevance based on the threat level and tagging it for security context.
+     * Stores the event details and associated threat analysis as a memory, assigning relevance based on the threat level and tagging it for security context.
      *
      * @param alertDetails Description of the security event.
-     * @param analysis The threat analysis associated with the event.
+     * @param analysis Threat analysis information for the event.
      */
     fun recordSecurityEvent(alertDetails: String, analysis: SecurityAnalysis) {
         logger.security("ContextManager", "Recording security event")
@@ -250,12 +254,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Builds a formatted multi-line string summarizing the metadata and current system states for the given context.
+     * Returns a formatted summary string containing metadata and current system states for the specified context.
      *
-     * The summary includes the context ID, creation time, access count, current mood, creative and unified mode statuses, and context-specific data.
+     * The summary includes context ID, creation timestamp, access count, current mood, creative mode status, unified mode status, and context-specific data.
      *
      * @param context The context data to summarize.
-     * @return A formatted string with enhanced context information.
+     * @return A multi-line string with enhanced context and system information.
      */
 
     private fun buildEnhancedContextString(context: ContextData): String {
@@ -271,12 +275,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Retrieves the most relevant stored memories for the given content as a bullet-pointed string.
+     * Returns a bullet-pointed list of memory contents most relevant to the given input.
      *
-     * Searches stored memories for entries relevant to the input content and returns their contents, each prefixed with a bullet point and separated by newlines.
+     * Searches stored memories for entries related to the provided content and formats their contents as a newline-separated string, each prefixed with a bullet point.
      *
-     * @param content The input string used to find relevant memories.
-     * @return A newline-separated string of relevant memory contents, each prefixed with a bullet point.
+     * @param content The input text used to search for relevant memories.
+     * @return A string containing relevant memory contents, each on a new line with a bullet point.
      */
     private suspend fun findRelevantContext(content: String): String {
         // Find the most relevant context based on content
@@ -285,12 +289,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Suggests the most suitable AI agent for a given interaction based on keywords in the interaction content.
+     * Determines the most appropriate AI agent for an interaction based on keywords in the interaction content.
      *
      * Returns "aura" for creative or artistic topics, "kai" for security-related topics, and "genesis" for complex analysis or as the default.
      *
-     * @param interaction The interaction data to analyze.
-     * @return The suggested AI agent name.
+     * @param interaction The interaction data whose content is analyzed for agent selection.
+     * @return The name of the suggested AI agent.
      */
     private fun suggestOptimalAgent(interaction: InteractionData): String {
         return when {
@@ -302,12 +306,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Calculates a priority score for an interaction based on its type.
+     * Determines the priority score of an interaction based on its type.
      *
-     * Assigns higher scores to interactions related to security or analysis, and lower scores to general or unknown types.
+     * Interactions of type "security" receive the highest priority, followed by "analysis", "creative", and "text". All other types are assigned the lowest priority.
      *
-     * @param interaction The interaction whose priority is being determined.
-     * @return An integer score representing the interaction's priority; higher values indicate greater importance.
+     * @param interaction The interaction to evaluate.
+     * @return An integer representing the priority, where higher values indicate greater importance.
      */
     private fun calculatePriority(interaction: InteractionData): Int {
         return when (interaction.type) {
@@ -320,9 +324,9 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Extracts and stores a high-confidence memory from a conversation entry if its confidence score exceeds 0.8.
+     * Stores a memory from a conversation entry if its confidence score is greater than 0.8.
      *
-     * The stored memory includes the user input, agent response, agent type, and relevant tags for future retrieval.
+     * The memory captures the user input, agent response, agent type, and relevant tags for future retrieval.
      */
     private fun extractMemoriesFromInteraction(entry: ConversationEntry) {
         // Extract important information as memories
@@ -340,11 +344,11 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Generates basic pattern descriptors from the request and response strings for learning purposes.
+     * Extracts simple pattern descriptors from the request and response strings for use in learning models.
      *
-     * The descriptors include the length of the request, the length of the response, and whether the request contains a question mark.
+     * The returned descriptors include the length of the request, the length of the response, and whether the request contains a question mark.
      *
-     * @return A list of strings representing extracted features from the request and response.
+     * @return A list of feature strings describing the request and response.
      */
     private fun extractPatterns(request: String, response: String): List<String> {
         // Extract patterns for learning - simplified implementation
@@ -358,7 +362,7 @@ class ContextManager @Inject constructor(
     /**
      * Asynchronously processes accumulated insights to update internal learning models.
      *
-     * This placeholder function is intended for future implementation of pattern analysis and adaptive learning based on recorded insights.
+     * This is a placeholder for future implementation of pattern analysis and adaptive learning based on recorded insights.
      */
     private suspend fun processInsightsForLearning() {
         logger.info("ContextManager", "Processing insights for learning")
@@ -368,7 +372,7 @@ class ContextManager @Inject constructor(
     /**
      * Cancels all ongoing coroutines and releases resources managed by the ContextManager.
      *
-     * This method should be called to properly shut down the ContextManager and free associated resources.
+     * Call this method to properly shut down the ContextManager and free associated resources.
      */
     fun cleanup() {
         logger.info("ContextManager", "Cleaning up ContextManager")

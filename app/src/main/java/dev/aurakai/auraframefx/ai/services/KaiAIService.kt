@@ -29,24 +29,24 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     /**
- * Gets the name of this agent.
+ * Returns the name of this agent.
  *
- * @return The string "Kai".
+ * @return The agent name, "Kai".
  */
 override fun getName(): String? = "Kai"
     /**
- * Returns the agent type as `AgentType.KAI`.
+ * Returns the type of this agent.
  *
- * @return The type of this agent.
+ * @return `AgentType.KAI`, indicating this agent is of type KAI.
  */
 override fun getType(): AgentType = AgentType.KAI
 
     /**
-         * Returns a map indicating the supported capabilities of the Kai agent.
+         * Returns a map of the Kai agent's supported capabilities.
          *
-         * The map contains feature names as keys and `true` as values for each supported capability.
+         * The returned map includes the keys "security", "analysis", "memory", and "service_implemented", each set to true to indicate support for these features.
          *
-         * @return A map with capability names ("security", "analysis", "memory", "service_implemented") set to true.
+         * @return A map of capability names to their support status.
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
@@ -57,10 +57,10 @@ override fun getType(): AgentType = AgentType.KAI
         )
 
     /**
-     * Processes an AI request using the provided context and returns a response.
+     * Handles an AI request with the given context and returns a response referencing both.
      *
-     * @param request The AI request to handle.
-     * @param context Contextual information relevant to the request.
+     * @param request The AI request to process.
+     * @param context Additional context information for the request.
      * @return An AgentResponse containing a message referencing the request query and context, with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context

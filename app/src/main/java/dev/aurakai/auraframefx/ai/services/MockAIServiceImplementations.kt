@@ -25,7 +25,7 @@ override fun getName(): String? = "MockAura"
  * @return The `AgentType.AURA` enum value.
  */
 override fun getType(): AgentType = AgentType.AURA /**
-     * Generates a mock AgentResponse for testing, echoing the input query and context.
+     * Returns a mock AgentResponse for testing, echoing the input query and context.
      *
      * The response content includes the request's query and the provided context, with a fixed confidence score of 1.0.
      *
@@ -64,11 +64,11 @@ override fun getName(): String? = "MockKai"
 override fun getType(): AgentType = AgentType.KAI /**
      * Generates a mock AgentResponse for the given AI request and context.
      *
-     * The response content includes the request query and provided context, with a fixed confidence score of 1.0.
+     * The response content echoes the input query and context, with a fixed confidence score of 1.0.
      *
      * @param request The AI request containing the query.
-     * @param context Additional context to include in the response.
-     * @return A mock AgentResponse reflecting the input query and context.
+     * @param context The context string to include in the response.
+     * @return A mock AgentResponse reflecting the provided query and context.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         return AgentResponse(
@@ -94,12 +94,12 @@ class MockCascadeAIService : Agent {
  */
 override fun getName(): String? = "MockCascade"
     /**
- * Returns the agent type associated with this mock service.
+ * Gets the agent type for this mock service.
  *
- * @return The AgentType.CASCADE value.
+ * @return The AgentType.CASCADE enum value.
  */
 override fun getType(): AgentType = AgentType.CASCADE /**
-     * Generates a mock AgentResponse for CascadeAI using the provided query and context.
+     * Returns a mock AgentResponse for CascadeAI, echoing the provided query and context.
      *
      * @param request The AI request containing the query.
      * @param context The context string to include in the mock response.
