@@ -11,24 +11,24 @@ object TimeUtils {
     val systemClock: Clock = Clock.systemUTC()
     
     /**
- * Returns the current instant based on the system clock in UTC.
+ * Retrieves the current instant in time using the system UTC clock.
  *
- * @return The current point in time as an [Instant].
+ * @return The current time as an [Instant].
  */
 fun now(): Instant = Instant.now(systemClock)
     
     /**
  * Returns the current system time in milliseconds since the Unix epoch.
  *
- * @return The current timestamp in milliseconds.
+ * @return The number of milliseconds elapsed since January 1, 1970 UTC.
  */
 fun currentTimestamp(): Long = System.currentTimeMillis()
     
     /**
-     * Calculates the duration that has elapsed from the specified instant to the current time.
+     * Returns the duration that has elapsed from the given instant to the current time.
      *
-     * @param instant The starting point in time from which to measure the elapsed duration.
-     * @return The duration between the provided instant and the current moment.
+     * @param instant The starting instant from which to measure elapsed time.
+     * @return The duration between the specified instant and now.
      */
     fun durationSince(instant: Instant): Duration {
         return Duration.between(instant, now())
