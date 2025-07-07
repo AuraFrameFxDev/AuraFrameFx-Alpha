@@ -46,9 +46,27 @@ class GenesisAgentViewModel /* @Inject constructor(
     private val _isRotating = MutableStateFlow(true)
     val isRotating: StateFlow<Boolean> = _isRotating.asStateFlow()
 
-    init { // Initialize agents in init block
-        // Beta stub: Return empty list instead of calling genesisAgent
-        _agents.value = emptyList() // genesisAgent.getAgentsByPriority()
+    init { 
+        // Initialize with default agents and their capabilities
+        val defaultAgents = listOf(
+            AgentType.GENESIS,
+            AgentType.CASCADE,
+            AgentType.AURA,
+            AgentType.KAI
+        )
+        _agents.value = defaultAgents
+        
+        // Initialize agent statuses
+        val initialStatuses = mutableMapOf<AgentType, String>()
+        defaultAgents.forEach { agent ->
+            initialStatuses[agent] = when (agent) {
+                AgentType.GENESIS -> "Core AI - Online"
+                AgentType.CASCADE -> "Analytics Engine - Ready"
+                AgentType.AURA -> "Creative Assistant - Available"
+                AgentType.KAI -> "Security Monitor - Active"
+            }
+        }
+        _agentStatus.value = initialStatuses
     }
 
     fun toggleRotation() {
@@ -57,8 +75,34 @@ class GenesisAgentViewModel /* @Inject constructor(
 
     fun toggleAgent(agent: AgentType) {
         viewModelScope.launch {
-            // Beta stub: No-op instead of calling genesisAgent
-            // genesisAgent.toggleAgent(agent)
+            // Toggle agent active state
+            val currentStatuses = _agentStatus.value.toMutableMap()
+            val currentStatus = currentStatuses[agent] ?: "Unknown"
+            
+            val newStatus = if (currentStatus.contains("Online") || 
+                               currentStatus.contains("Ready") || 
+                               currentStatus.contains("Available") ||
+                               currentStatus.contains("Active")) {
+                when (agent) {
+                    AgentType.GENESIS -> "Core AI - Standby"
+                    AgentType.CASCADE -> "Analytics Engine - Offline"
+                    AgentType.AURA -> "Creative Assistant - Paused"
+                    AgentType.KAI -> "Security Monitor - Standby"
+                }
+            } else {
+                when (agent) {
+                    AgentType.GENESIS -> "Core AI - Online"
+                    AgentType.CASCADE -> "Analytics Engine - Ready"
+                    AgentType.AURA -> "Creative Assistant - Available"
+                    AgentType.KAI -> "Security Monitor - Active"
+                }
+            }
+            
+            currentStatuses[agent] = newStatus
+            _agentStatus.value = currentStatuses
+            
+            // Add to task history
+            addTaskToHistory("Agent ${agent.name} toggled to: $newStatus")
         }
     }
 

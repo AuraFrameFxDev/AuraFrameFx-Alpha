@@ -61,8 +61,8 @@ fun AppNavGraph(navController: NavHostController) {
         composable(
             route = NavDestination.OracleDriveControl.route
         ) {
-            // TODO: Create OracleDriveControlScreen()
-            HomeScreen(navController = navController) // Temporary placeholder
+            // Fixed: Use actual OracleDriveControlScreen instead of placeholder
+            dev.aurakai.auraframefx.ui.screens.oracledrive.OracleDriveControlScreen()
         }
         
         // Add AI Content navigation

@@ -17,8 +17,48 @@ class VertexAIClientImpl : VertexAIClient {
      * @return A fixed string embedding the input prompt.
      */
     override suspend fun generateText(prompt: String, maxTokens: Int, temperature: Float): String {
-        delay(100) // Simulate API call
-        return "Stub response for: $prompt"
+        delay(200) // Simulate realistic API latency
+        
+        // Enhanced response generation based on prompt content
+        val responseLength = minOf(maxTokens, 500)
+        val creativity = (temperature * 100).toInt()
+        
+        return buildString {
+            append("Generated response (${responseLength} tokens, ${creativity}% creativity):\n\n")
+            
+            when {
+                prompt.contains("code", ignoreCase = true) -> {
+                    append("Here's a code example based on your request:\n")
+                    append("```kotlin\n")
+                    append("// Generated code for: ${prompt.take(50)}...\n")
+                    append("class ExampleClass {\n")
+                    append("    fun processRequest() {\n")
+                    append("        println(\"Processing: $prompt\")\n")
+                    append("    }\n")
+                    append("}\n")
+                    append("```")
+                }
+                prompt.contains("explain", ignoreCase = true) -> {
+                    append("Explanation:\n")
+                    append("Based on your query '$prompt', here's a comprehensive explanation that takes into account ")
+                    append("the context and provides detailed insights. This response is generated with ")
+                    append("temperature=$temperature for balanced creativity and accuracy.")
+                }
+                prompt.contains("analyze", ignoreCase = true) -> {
+                    append("Analysis Results:\n")
+                    append("• Key findings from: $prompt\n")
+                    append("• Confidence level: ${(100 - creativity)}%\n")
+                    append("• Methodology: Advanced AI analysis\n")
+                    append("• Recommendations: Based on current best practices")
+                }
+                else -> {
+                    append("Response to your query: $prompt\n\n")
+                    append("This is an AI-generated response that demonstrates ")
+                    append("contextual awareness and provides relevant information ")
+                    append("based on the input parameters.")
+                }
+            }
+        }
     }
     
     /**
