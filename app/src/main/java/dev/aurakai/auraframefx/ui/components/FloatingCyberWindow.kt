@@ -4,6 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Displays a floating window UI component with a customizable title, corner style, background style, and content.
+ *
+ * @param modifier Modifier to be applied to the window.
+ * @param title The title displayed at the top of the window.
+ * @param cornerStyle The style of the window's corners.
+ * @param backgroundStyle The background appearance of the window.
+ * @param content The composable content displayed inside the window.
+ */
 @Composable
 fun FloatingCyberWindow(
     modifier: Modifier = Modifier,

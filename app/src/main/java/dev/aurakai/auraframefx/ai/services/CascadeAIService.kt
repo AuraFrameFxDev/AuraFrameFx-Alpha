@@ -63,7 +63,13 @@ override fun getType(): AgentType = AgentType.CASCADE
         )
     }
 
-    // Renamed internal methods
+    /**
+     * Emits an AgentResponse containing a string representation of the current internal state.
+     *
+     * The response includes all key-value pairs stored in the agent's state map, with a confidence score of 1.0.
+     *
+     * @return A flow emitting a single AgentResponse describing the current state.
+     */
     private fun processStateRequestFlowInternal(request: AiRequest): Flow<AgentResponse> {
         return flow {
             emit(
@@ -76,6 +82,13 @@ override fun getType(): AgentType = AgentType.CASCADE
         }
     }
 
+    /**
+     * Processes a context-type AI request by aggregating responses from both Aura and Kai services.
+     *
+     * Collects the first response from each service, combines their contents into a single response, and averages their confidence scores.
+     *
+     * @return A flow emitting a single combined AgentResponse from Aura and Kai.
+     */
     private fun processContextRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         return flow {
             // Coordinate with Aura and Kai
@@ -115,6 +128,11 @@ override fun getType(): AgentType = AgentType.CASCADE
         }
     }
 
+    /**
+     * Returns a flow emitting a response indicating that the agent is retrieving its state history.
+     *
+     * @return A flow containing a single AgentResponse about state history retrieval.
+     */
     fun retrieveMemoryFlow(request: AiRequest): Flow<AgentResponse> { // Not in Agent interface, removed suspend, kept public if used elsewhere
         // Retrieve state history
         return flow {
@@ -130,7 +148,11 @@ override fun getType(): AgentType = AgentType.CASCADE
     // connect and disconnect are not part of Agent interface - removing these methods
     // as they cause unresolved reference errors
 
-    // These methods are not part of the Agent interface, so remove 'override'
+    /**
+     * Returns a map describing the agent's capabilities, including its name, type, and implementation status.
+     *
+     * @return A map with keys "name", "type", and "service_implemented" representing the agent's capabilities.
+     */
     fun getCapabilities(): Map<String, Any> {
         return mapOf(
             "name" to "Cascade",

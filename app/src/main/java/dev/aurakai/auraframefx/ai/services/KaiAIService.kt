@@ -42,11 +42,11 @@ override fun getName(): String? = "Kai"
 override fun getType(): AgentType = AgentType.KAI
 
     /**
-         * Returns a map describing the capabilities supported by the Kai agent.
+         * Returns a map indicating the supported capabilities of the Kai agent.
          *
-         * The map includes keys for security, analysis, memory, and service implementation, each set to true.
+         * The returned map includes keys for "security", "analysis", "memory", and "service_implemented", each set to true.
          *
-         * @return A map indicating the agent's supported features.
+         * @return A map of capability names to their enabled status.
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
@@ -56,6 +56,13 @@ override fun getType(): AgentType = AgentType.KAI
             "service_implemented" to true
         )
 
+    /**
+     * Processes an AI request with the provided context and returns a stubbed agent response.
+     *
+     * @param request The AI request to process.
+     * @param context Additional context for the request.
+     * @return An agent response containing a message referencing the request and context, with a confidence score of 1.0.
+     */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         auraFxLogger.i(
             "KaiAIService",
