@@ -615,47 +615,36 @@ class GenesisBridgeServiceTest {
     }
 }
     @Nested
-    @DisplayName("Additional Comprehensive Tests")
-    inner class AdditionalComprehensiveTests {
+    @DisplayName("Additional Edge Cases and Boundary Tests")
+    inner class AdditionalEdgeCases {
 
         @Test
-        @DisplayName("Should handle null HttpResponse gracefully")
-        fun `should handle null HttpResponse gracefully`() = runTest {
+        @DisplayName("Should handle extremely large response payloads")
+        fun `should handle extremely large response payloads`() = runTest {
             // Given
-            val prompt = "Test prompt"
-            coEvery { mockHttpClient.post(any(), any()) } returns null
-
-            // When
-            val result = genesisBridgeService.generateText(prompt)
-
-            // Then
-            assertTrue(result.isFailure)
-            verify { mockLogger.error("Received null response from Genesis AI") }
-        }
-
-        @Test
-        @DisplayName("Should handle empty response body")
-        fun `should handle empty response body`() = runTest {
-            // Given
-            val prompt = "Test prompt"
+            val prompt = "Generate a large response"
+            val largeResponse = "x".repeat(1000000) // 1MB response
+            
             coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
                 every { isSuccessful } returns true
-                every { body } returns ""
+                every { body } returns """{"response":"$largeResponse","tokens_used":10000}"""
             }
 
             // When
             val result = genesisBridgeService.generateText(prompt)
 
             // Then
-            assertTrue(result.isFailure)
-            verify { mockLogger.error("Received empty response body from Genesis AI") }
+            assertTrue(result.isSuccess)
+            assertEquals(largeResponse, result.getOrNull())
+            verify { mockLogger.info("Processing large response payload") }
         }
 
         @Test
-        @DisplayName("Should handle response with null body")
-        fun `should handle response with null body`() = runTest {
+        @DisplayName("Should handle null response bodies")
+        fun `should handle null response bodies`() = runTest {
             // Given
             val prompt = "Test prompt"
+            
             coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
                 every { isSuccessful } returns true
                 every { body } returns null
@@ -666,302 +655,12 @@ class GenesisBridgeServiceTest {
 
             // Then
             assertTrue(result.isFailure)
-            verify { mockLogger.error("Received null response body from Genesis AI") }
+            verify { mockLogger.error("Received null response body") }
         }
 
         @Test
-        @DisplayName("Should handle configuration with null values")
-        fun `should handle configuration with null values`() = runTest {
-            // Given
-            val configWithNulls = mapOf(
-                "temperature" to null,
-                "max_tokens" to 1000,
-                "model" to null
-            )
-
-            // When & Then
-            assertThrows<IllegalArgumentException> {
-                runBlocking { genesisBridgeService.updateConfiguration(configWithNulls) }
-            }
-            verify { mockLogger.error("Configuration contains null values") }
-        }
-
-        @Test
-        @DisplayName("Should handle empty configuration map")
-        fun `should handle empty configuration map`() = runTest {
-            // Given
-            val emptyConfig = emptyMap<String, Any>()
-
-            // When & Then
-            assertThrows<IllegalArgumentException> {
-                runBlocking { genesisBridgeService.updateConfiguration(emptyConfig) }
-            }
-            verify { mockLogger.error("Configuration cannot be empty") }
-        }
-
-        @Test
-        @DisplayName("Should validate model names in configuration")
-        fun `should validate model names in configuration`() = runTest {
-            // Given
-            val configWithInvalidModel = mapOf(
-                "model" to "invalid-model-name-with-special-chars@#$"
-            )
-
-            // When & Then
-            assertThrows<IllegalArgumentException> {
-                runBlocking { genesisBridgeService.updateConfiguration(configWithInvalidModel) }
-            }
-            verify { mockLogger.error("Invalid model name in configuration") }
-        }
-
-        @Test
-        @DisplayName("Should handle HTTP client throwing unexpected exceptions")
-        fun `should handle HTTP client throwing unexpected exceptions`() = runTest {
-            // Given
-            val prompt = "Test prompt"
-            coEvery { mockHttpClient.post(any(), any()) } throws RuntimeException("Unexpected error")
-
-            // When
-            val result = genesisBridgeService.generateText(prompt)
-
-            // Then
-            assertTrue(result.isFailure)
-            verify { mockLogger.error("Unexpected error occurred: Unexpected error") }
-        }
-
-        @Test
-        @DisplayName("Should handle SSL/TLS connection failures")
-        fun `should handle SSL TLS connection failures`() = runTest {
-            // Given
-            every { mockConfigService.getApiKey() } returns "valid-key"
-            every { mockConfigService.getEndpoint() } returns "https://api.genesis.ai/v1"
-            coEvery { mockHttpClient.get(any()) } throws SSLException("SSL handshake failed")
-
-            // When
-            val result = genesisBridgeService.connect()
-
-            // Then
-            assertTrue(result.isFailure)
-            verify { mockLogger.error("SSL/TLS connection failed: SSL handshake failed") }
-        }
-
-        @Test
-        @DisplayName("Should handle DNS resolution failures")
-        fun `should handle DNS resolution failures`() = runTest {
-            // Given
-            every { mockConfigService.getApiKey() } returns "valid-key"
-            every { mockConfigService.getEndpoint() } returns "https://nonexistent.domain.com/v1"
-            coEvery { mockHttpClient.get(any()) } throws UnknownHostException("Host not found")
-
-            // When
-            val result = genesisBridgeService.connect()
-
-            // Then
-            assertTrue(result.isFailure)
-            verify { mockLogger.error("DNS resolution failed: Host not found") }
-        }
-
-        @Test
-        @DisplayName("Should handle extremely large response payloads")
-        fun `should handle extremely large response payloads`() = runTest {
-            // Given
-            val prompt = "Test prompt"
-            val largeResponse = "x".repeat(1000000) // 1MB response
-            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
-                every { isSuccessful } returns true
-                every { body } returns """{"response":"$largeResponse","tokens_used":50000}"""
-            }
-
-            // When
-            val result = genesisBridgeService.generateText(prompt)
-
-            // Then
-            assertTrue(result.isSuccess)
-            assertEquals(largeResponse, result.getOrNull())
-            verify { mockLogger.info("Received large response payload") }
-        }
-
-        @Test
-        @DisplayName("Should handle concurrent connections attempts")
-        fun `should handle concurrent connection attempts`() = runTest {
-            // Given
-            every { mockConfigService.getApiKey() } returns "valid-key"
-            every { mockConfigService.getEndpoint() } returns "https://api.genesis.ai/v1"
-            coEvery { mockHttpClient.get(any()) } returns mockk<HttpResponse> {
-                every { isSuccessful } returns true
-                every { body } returns """{"status":"connected","version":"1.0.0"}"""
-            }
-
-            // When
-            val connections = (1..5).map {
-                async { genesisBridgeService.connect() }
-            }.awaitAll()
-
-            // Then
-            assertTrue(connections.all { it.isSuccess })
-            coVerify(exactly = 5) { mockHttpClient.get(any()) }
-        }
-
-        @Test
-        @DisplayName("Should handle response with missing required fields")
-        fun `should handle response with missing required fields`() = runTest {
-            // Given
-            val prompt = "Test prompt"
-            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
-                every { isSuccessful } returns true
-                every { body } returns """{"tokens_used":100}""" // Missing response field
-            }
-
-            // When
-            val result = genesisBridgeService.generateText(prompt)
-
-            // Then
-            assertTrue(result.isFailure)
-            verify { mockLogger.error("Response missing required fields") }
-        }
-
-        @Test
-        @DisplayName("Should handle response with extra unexpected fields")
-        fun `should handle response with extra unexpected fields`() = runTest {
-            // Given
-            val prompt = "Test prompt"
-            val expectedResponse = "Test response"
-            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
-                every { isSuccessful } returns true
-                every { body } returns """{"response":"$expectedResponse","tokens_used":50,"unexpected_field":"value","another_field":123}"""
-            }
-
-            // When
-            val result = genesisBridgeService.generateText(prompt)
-
-            // Then
-            assertTrue(result.isSuccess)
-            assertEquals(expectedResponse, result.getOrNull())
-            verify { mockLogger.debug("Response contains unexpected fields") }
-        }
-
-        @Test
-        @DisplayName("Should handle configuration service throwing exceptions")
-        fun `should handle configuration service throwing exceptions`() = runTest {
-            // Given
-            every { mockConfigService.getApiKey() } throws RuntimeException("Config service error")
-            every { mockConfigService.getEndpoint() } returns "https://api.genesis.ai/v1"
-
-            // When & Then
-            assertThrows<RuntimeException> {
-                runBlocking { genesisBridgeService.connect() }
-            }
-            verify { mockLogger.error("Configuration service error: Config service error") }
-        }
-
-        @Test
-        @DisplayName("Should handle logger throwing exceptions")
-        fun `should handle logger throwing exceptions`() = runTest {
-            // Given
-            val prompt = "Test prompt"
-            every { mockLogger.info(any()) } throws RuntimeException("Logger error")
-            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
-                every { isSuccessful } returns true
-                every { body } returns """{"response":"Test response","tokens_used":50}"""
-            }
-
-            // When
-            val result = genesisBridgeService.generateText(prompt)
-
-            // Then
-            assertTrue(result.isSuccess) // Should still succeed despite logger error
-            verify { mockLogger.info(any()) }
-        }
-
-        @Test
-        @DisplayName("Should handle retry policy throwing exceptions")
-        fun `should handle retry policy throwing exceptions`() = runTest {
-            // Given
-            val prompt = "Test prompt"
-            every { mockRetryPolicy.shouldRetry(any(), any()) } throws RuntimeException("Retry policy error")
-            coEvery { mockHttpClient.post(any(), any()) } throws Exception("Network error")
-
-            // When
-            val result = genesisBridgeService.generateText(prompt)
-
-            // Then
-            assertTrue(result.isFailure)
-            verify { mockLogger.error("Retry policy error: Retry policy error") }
-        }
-
-        @Test
-        @DisplayName("Should handle multiple rapid disconnect/reconnect cycles")
-        fun `should handle multiple rapid disconnect reconnect cycles`() = runTest {
-            // Given
-            every { mockConfigService.getApiKey() } returns "valid-key"
-            every { mockConfigService.getEndpoint() } returns "https://api.genesis.ai/v1"
-            coEvery { mockHttpClient.get(any()) } returns mockk<HttpResponse> {
-                every { isSuccessful } returns true
-                every { body } returns """{"status":"connected"}"""
-            }
-
-            // When
-            repeat(10) {
-                genesisBridgeService.connect()
-                genesisBridgeService.disconnect()
-            }
-
-            // Then
-            assertFalse(genesisBridgeService.isConnected())
-            verify(exactly = 10) { mockLogger.info("Disconnected from Genesis AI") }
-        }
-
-        @Test
-        @DisplayName("Should handle statistics overflow scenarios")
-        fun `should handle statistics overflow scenarios`() = runTest {
-            // Given
-            val prompt = "Test prompt"
-            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
-                every { isSuccessful } returns true
-                every { body } returns """{"response":"Test response","tokens_used":${Long.MAX_VALUE}}"""
-            }
-
-            // When
-            repeat(1000) {
-                genesisBridgeService.generateText(prompt)
-            }
-            val stats = genesisBridgeService.getUsageStats()
-
-            // Then
-            assertNotNull(stats)
-            assertTrue(stats.requestCount >= 1000)
-            verify { mockLogger.warn("Usage statistics may have overflowed") }
-        }
-
-        @ParameterizedTest
-        @ValueSource(ints = [0, -1, -100, Int.MIN_VALUE])
-        @DisplayName("Should handle invalid max_tokens values")
-        fun `should handle invalid max_tokens values`(maxTokens: Int) = runTest {
-            // Given
-            val config = mapOf("max_tokens" to maxTokens)
-
-            // When & Then
-            assertThrows<IllegalArgumentException> {
-                runBlocking { genesisBridgeService.updateConfiguration(config) }
-            }
-        }
-
-        @ParameterizedTest
-        @ValueSource(doubles = [-0.1, 1.1, 2.0, Double.NaN, Double.POSITIVE_INFINITY])
-        @DisplayName("Should handle invalid temperature values")
-        fun `should handle invalid temperature values`(temperature: Double) = runTest {
-            // Given
-            val config = mapOf("temperature" to temperature)
-
-            // When & Then
-            assertThrows<IllegalArgumentException> {
-                runBlocking { genesisBridgeService.updateConfiguration(config) }
-            }
-        }
-
-        @Test
-        @DisplayName("Should handle graceful shutdown scenarios")
-        fun `should handle graceful shutdown scenarios`() = runTest {
+        @DisplayName("Should handle connection state during service shutdown")
+        fun `should handle connection state during service shutdown`() = runTest {
             // Given
             every { mockConfigService.getApiKey() } returns "valid-key"
             every { mockConfigService.getEndpoint() } returns "https://api.genesis.ai/v1"
@@ -973,29 +672,508 @@ class GenesisBridgeServiceTest {
             // When
             genesisBridgeService.connect()
             genesisBridgeService.shutdown()
+            val isConnected = genesisBridgeService.isConnected()
 
             // Then
-            assertFalse(genesisBridgeService.isConnected())
+            assertFalse(isConnected)
             verify { mockLogger.info("GenesisBridgeService shutdown completed") }
         }
 
-        @Test
-        @DisplayName("Should handle partial response streaming scenarios")
-        fun `should handle partial response streaming scenarios`() = runTest {
+        @ParameterizedTest
+        @ValueSource(ints = [100, 401, 403, 404, 408, 429, 500, 502, 503, 504])
+        @DisplayName("Should handle various HTTP status codes appropriately")
+        fun `should handle various HTTP status codes appropriately`(statusCode: Int) = runTest {
             // Given
             val prompt = "Test prompt"
+            
             coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
-                every { isSuccessful } returns true
-                every { body } returns """{"response":"Partial response...","streaming":true,"tokens_used":25}"""
+                every { isSuccessful } returns statusCode in 200..299
+                every { statusCode } returns statusCode
+                every { body } returns """{"error":"HTTP $statusCode"}"""
             }
 
             // When
             val result = genesisBridgeService.generateText(prompt)
 
             // Then
+            if (statusCode in 200..299) {
+                assertTrue(result.isSuccess)
+            } else {
+                assertTrue(result.isFailure)
+                verify { mockLogger.error(match { it.contains("HTTP $statusCode") }) }
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle interrupted connection attempts")
+        fun `should handle interrupted connection attempts`() = runTest {
+            // Given
+            every { mockConfigService.getApiKey() } returns "valid-key"
+            every { mockConfigService.getEndpoint() } returns "https://api.genesis.ai/v1"
+            coEvery { mockHttpClient.get(any()) } throws InterruptedException("Connection interrupted")
+
+            // When
+            val result = genesisBridgeService.connect()
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.warn("Connection attempt was interrupted") }
+        }
+
+        @Test
+        @DisplayName("Should handle SSL/TLS certificate errors")
+        fun `should handle SSL TLS certificate errors`() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            
+            coEvery { mockHttpClient.post(any(), any()) } throws SSLException("Certificate validation failed")
+
+            // When
+            val result = genesisBridgeService.generateText(prompt)
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.error("SSL certificate validation failed") }
+        }
+
+        @Test
+        @DisplayName("Should handle DNS resolution failures")
+        fun `should handle DNS resolution failures`() = runTest {
+            // Given
+            every { mockConfigService.getApiKey() } returns "valid-key"
+            every { mockConfigService.getEndpoint() } returns "https://invalid.genesis.ai/v1"
+            coEvery { mockHttpClient.get(any()) } throws UnknownHostException("DNS resolution failed")
+
+            // When
+            val result = genesisBridgeService.connect()
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.error("DNS resolution failed for Genesis AI endpoint") }
+        }
+
+        @Test
+        @DisplayName("Should handle configuration with extreme values")
+        fun `should handle configuration with extreme values`() = runTest {
+            // Given
+            val extremeConfig = mapOf(
+                "temperature" to Double.MAX_VALUE,
+                "max_tokens" to Int.MAX_VALUE,
+                "timeout" to Long.MAX_VALUE
+            )
+
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                runBlocking { genesisBridgeService.updateConfiguration(extremeConfig) }
+            }
+            verify { mockLogger.error("Configuration values exceed allowed limits") }
+        }
+
+        @Test
+        @DisplayName("Should handle memory pressure during large requests")
+        fun `should handle memory pressure during large requests`() = runTest {
+            // Given
+            val largePrompt = "A".repeat(100000)
+            
+            coEvery { mockHttpClient.post(any(), any()) } throws OutOfMemoryError("Java heap space")
+
+            // When
+            val result = genesisBridgeService.generateText(largePrompt)
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.error("Memory pressure detected during request processing") }
+        }
+
+        @Test
+        @DisplayName("Should handle concurrent access to usage statistics")
+        fun `should handle concurrent access to usage statistics`() = runTest {
+            // Given
+            val prompts = (1..100).map { "Prompt $it" }
+            
+            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
+                every { isSuccessful } returns true
+                every { body } returns """{"response":"Response","tokens_used":10}"""
+            }
+
+            // When
+            val jobs = prompts.map { prompt ->
+                async { genesisBridgeService.generateText(prompt) }
+            }
+            jobs.awaitAll()
+            val stats = genesisBridgeService.getUsageStats()
+
+            // Then
+            assertNotNull(stats)
+            assertEquals(100, stats.requestCount)
+            assertEquals(1000, stats.tokensUsed)
+        }
+
+        @Test
+        @DisplayName("Should handle configuration rollback on partial failures")
+        fun `should handle configuration rollback on partial failures`() = runTest {
+            // Given
+            val originalConfig = mapOf("temperature" to 0.5, "max_tokens" to 1000)
+            val newConfig = mapOf("temperature" to 0.8, "max_tokens" to 2000, "invalid_param" to "invalid")
+            
+            every { mockConfigService.getConfig() } returns originalConfig
+            every { mockConfigService.updateConfig(any()) } throws IllegalArgumentException("Invalid parameter")
+
+            // When
+            val result = genesisBridgeService.updateConfiguration(newConfig)
+
+            // Then
+            assertFalse(result)
+            verify { mockLogger.warn("Configuration rollback initiated due to validation failure") }
+            verify { mockConfigService.updateConfig(originalConfig) }
+        }
+
+        @Test
+        @DisplayName("Should handle request cancellation gracefully")
+        fun `should handle request cancellation gracefully`() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            
+            coEvery { mockHttpClient.post(any(), any()) } throws CancellationException("Request cancelled")
+
+            // When
+            val result = genesisBridgeService.generateText(prompt)
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.info("Request was cancelled") }
+        }
+
+        @Test
+        @DisplayName("Should handle response streaming interruption")
+        fun `should handle response streaming interruption`() = runTest {
+            // Given
+            val prompt = "Test prompt for streaming"
+            
+            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
+                every { isSuccessful } returns true
+                every { body } throws IOException("Stream interrupted")
+            }
+
+            // When
+            val result = genesisBridgeService.generateText(prompt)
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.error("Response stream was interrupted") }
+        }
+
+        @Test
+        @DisplayName("Should handle API quota exceeded scenarios")
+        fun `should handle API quota exceeded scenarios`() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            
+            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
+                every { isSuccessful } returns false
+                every { statusCode } returns 429
+                every { body } returns """{"error":"Quota exceeded","quota_reset":"2024-01-01T00:00:00Z"}"""
+            }
+
+            // When
+            val result = genesisBridgeService.generateText(prompt)
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.warn("API quota exceeded, resets at 2024-01-01T00:00:00Z") }
+        }
+
+        @Test
+        @DisplayName("Should handle service maintenance mode")
+        fun `should handle service maintenance mode`() = runTest {
+            // Given
+            every { mockConfigService.getApiKey() } returns "valid-key"
+            every { mockConfigService.getEndpoint() } returns "https://api.genesis.ai/v1"
+            
+            coEvery { mockHttpClient.get(any()) } returns mockk<HttpResponse> {
+                every { isSuccessful } returns false
+                every { statusCode } returns 503
+                every { body } returns """{"error":"Service under maintenance","estimated_duration":"30 minutes"}"""
+            }
+
+            // When
+            val result = genesisBridgeService.connect()
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.warn("Genesis AI service is under maintenance (estimated duration: 30 minutes)") }
+        }
+
+        @Test
+        @DisplayName("Should handle partial response corruption")
+        fun `should handle partial response corruption`() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            
+            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
+                every { isSuccessful } returns true
+                every { body } returns """{"response":"Valid start... \u0000\u0001\u0002 corrupted data"}"""
+            }
+
+            // When
+            val result = genesisBridgeService.generateText(prompt)
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.error("Response contains corrupted data") }
+        }
+
+        @Test
+        @DisplayName("Should handle connection pool exhaustion")
+        fun `should handle connection pool exhaustion`() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            
+            coEvery { mockHttpClient.post(any(), any()) } throws PoolTimeoutException("Connection pool exhausted")
+
+            // When
+            val result = genesisBridgeService.generateText(prompt)
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.error("Connection pool exhausted, consider increasing pool size") }
+        }
+
+        @Test
+        @DisplayName("Should handle configuration validation with nested objects")
+        fun `should handle configuration validation with nested objects`() = runTest {
+            // Given
+            val nestedConfig = mapOf(
+                "model_params" to mapOf(
+                    "temperature" to 0.7,
+                    "top_p" to 0.9,
+                    "frequency_penalty" to 0.5
+                ),
+                "generation_params" to mapOf(
+                    "max_tokens" to 1000,
+                    "stop_sequences" to listOf(".", "!", "?")
+                )
+            )
+            
+            every { mockConfigService.updateConfig(any()) } returns true
+
+            // When
+            val result = genesisBridgeService.updateConfiguration(nestedConfig)
+
+            // Then
+            assertTrue(result)
+            verify { mockConfigService.updateConfig(nestedConfig) }
+            verify { mockLogger.info("Nested configuration validated and updated successfully") }
+        }
+
+        @Test
+        @DisplayName("Should handle response with missing required fields")
+        fun `should handle response with missing required fields`() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            
+            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
+                every { isSuccessful } returns true
+                every { body } returns """{"partial_response":"text","missing_tokens_field":true}"""
+            }
+
+            // When
+            val result = genesisBridgeService.generateText(prompt)
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.error("Response missing required fields: tokens_used") }
+        }
+
+        @Test
+        @DisplayName("Should handle API version mismatch")
+        fun `should handle API version mismatch`() = runTest {
+            // Given
+            every { mockConfigService.getApiKey() } returns "valid-key"
+            every { mockConfigService.getEndpoint() } returns "https://api.genesis.ai/v1"
+            
+            coEvery { mockHttpClient.get(any()) } returns mockk<HttpResponse> {
+                every { isSuccessful } returns false
+                every { statusCode } returns 426
+                every { body } returns """{"error":"API version mismatch","supported_versions":["v2","v3"]}"""
+            }
+
+            // When
+            val result = genesisBridgeService.connect()
+
+            // Then
+            assertTrue(result.isFailure)
+            verify { mockLogger.error("API version mismatch, supported versions: [v2, v3]") }
+        }
+
+        @Test
+        @DisplayName("Should handle resource cleanup on service disposal")
+        fun `should handle resource cleanup on service disposal`() = runTest {
+            // Given
+            every { mockConfigService.getApiKey() } returns "valid-key"
+            every { mockConfigService.getEndpoint() } returns "https://api.genesis.ai/v1"
+            
+            // When
+            genesisBridgeService.dispose()
+
+            // Then
+            verify { mockHttpClient.close() }
+            verify { mockLogger.info("GenesisBridgeService resources cleaned up") }
+        }
+    }
+
+    @Nested
+    @DisplayName("Performance and Load Testing")
+    inner class PerformanceTests {
+
+        @Test
+        @DisplayName("Should handle high-frequency requests within rate limits")
+        fun `should handle high frequency requests within rate limits`() = runTest {
+            // Given
+            val requestCount = 50
+            val requests = (1..requestCount).map { "Request $it" }
+            
+            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
+                every { isSuccessful } returns true
+                every { body } returns """{"response":"Response","tokens_used":10}"""
+            }
+
+            // When
+            val startTime = System.currentTimeMillis()
+            val results = requests.map { request ->
+                async { genesisBridgeService.generateText(request) }
+            }.awaitAll()
+            val endTime = System.currentTimeMillis()
+
+            // Then
+            assertTrue(results.all { it.isSuccess })
+            assertTrue(endTime - startTime < 5000) // Should complete within 5 seconds
+            verify { mockLogger.info("Processed $requestCount requests in ${endTime - startTime}ms") }
+        }
+
+        @Test
+        @DisplayName("Should handle request queue saturation gracefully")
+        fun `should handle request queue saturation gracefully`() = runTest {
+            // Given
+            val overloadRequests = (1..1000).map { "Overload request $it" }
+            
+            coEvery { mockHttpClient.post(any(), any()) } throws RejectedExecutionException("Queue full")
+
+            // When
+            val results = overloadRequests.take(10).map { request ->
+                genesisBridgeService.generateText(request)
+            }
+
+            // Then
+            assertTrue(results.all { it.isFailure })
+            verify { mockLogger.warn("Request queue is saturated, consider reducing load") }
+        }
+
+        @Test
+        @DisplayName("Should handle memory efficient processing of large batches")
+        fun `should handle memory efficient processing of large batches`() = runTest {
+            // Given
+            val batchSize = 100
+            val batch = (1..batchSize).map { "Batch item $it" }
+            
+            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
+                every { isSuccessful } returns true
+                every { body } returns """{"response":"Batch response","tokens_used":5}"""
+            }
+
+            // When
+            val results = genesisBridgeService.processBatch(batch)
+
+            // Then
+            assertEquals(batchSize, results.size)
+            assertTrue(results.all { it.isSuccess })
+            verify { mockLogger.info("Processed batch of $batchSize items efficiently") }
+        }
+    }
+
+    @Nested
+    @DisplayName("Security and Validation Tests")
+    inner class SecurityTests {
+
+        @Test
+        @DisplayName("Should sanitize sensitive data in logs")
+        fun `should sanitize sensitive data in logs`() = runTest {
+            // Given
+            val sensitivePrompt = "My API key is sk-1234567890abcdef and my password is secret123"
+            
+            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
+                every { isSuccessful } returns true
+                every { body } returns """{"response":"Sanitized response","tokens_used":25}"""
+            }
+
+            // When
+            val result = genesisBridgeService.generateText(sensitivePrompt)
+
+            // Then
             assertTrue(result.isSuccess)
-            assertEquals("Partial response...", result.getOrNull())
-            verify { mockLogger.info("Received streaming response") }
+            verify { mockLogger.info(match { !it.contains("sk-1234567890abcdef") && !it.contains("secret123") }) }
+        }
+
+        @Test
+        @DisplayName("Should validate API key format")
+        fun `should validate API key format`() = runTest {
+            // Given
+            val invalidApiKey = "invalid-key-format"
+            every { mockConfigService.getApiKey() } returns invalidApiKey
+            every { mockConfigService.getEndpoint() } returns "https://api.genesis.ai/v1"
+
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                runBlocking { genesisBridgeService.connect() }
+            }
+            verify { mockLogger.error("Invalid API key format") }
+        }
+
+        @Test
+        @DisplayName("Should handle potential injection attacks in prompts")
+        fun `should handle potential injection attacks in prompts`() = runTest {
+            // Given
+            val maliciousPrompt = "'; DROP TABLE users; --"
+            
+            coEvery { mockHttpClient.post(any(), any()) } returns mockk<HttpResponse> {
+                every { isSuccessful } returns true
+                every { body } returns """{"response":"Safe response","tokens_used":15}"""
+            }
+
+            // When
+            val result = genesisBridgeService.generateText(maliciousPrompt)
+
+            // Then
+            assertTrue(result.isSuccess)
+            verify { mockLogger.warn("Potentially malicious content detected and sanitized") }
+        }
+
+        @Test
+        @DisplayName("Should enforce request size limits")
+        fun `should enforce request size limits`() = runTest {
+            // Given
+            val oversizedPrompt = "A".repeat(1000000) // 1MB prompt
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                runBlocking { genesisBridgeService.generateText(oversizedPrompt) }
+            }
+            verify { mockLogger.error("Request exceeds maximum allowed size") }
+        }
+
+        @Test
+        @DisplayName("Should validate endpoint URL format")
+        fun `should validate endpoint URL format`() = runTest {
+            // Given
+            val invalidEndpoint = "not-a-valid-url"
+            every { mockConfigService.getApiKey() } returns "valid-key"
+            every { mockConfigService.getEndpoint() } returns invalidEndpoint
+
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                runBlocking { genesisBridgeService.connect() }
+            }
+            verify { mockLogger.error("Invalid endpoint URL format") }
         }
     }
 }
