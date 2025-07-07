@@ -19,11 +19,11 @@ import javax.inject.Singleton
 object LoggingModule {
 
     /**
-     * Supplies a singleton instance of `AuraFxLogger` for use throughout the application.
+     * Provides a singleton implementation of `AuraFxLogger` for application-wide logging.
      *
-     * @param context The application context required by the logger implementation.
-     * @param kaiService The KaiAIService dependency used by the logger.
-     * @return A singleton `AuraFxLogger` implementation.
+     * @param context The application context used by the logger implementation.
+     * @param kaiService The KaiAIService dependency required by the logger.
+     * @return An instance of `AuraFxLogger`.
      */
     @Provides
     @Singleton

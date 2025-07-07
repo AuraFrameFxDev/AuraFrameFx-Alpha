@@ -21,9 +21,9 @@ class OracleDriveServiceConnector(private val context: Context) {
 
     private val serviceConnection = object : ServiceConnection {
         /**
-         * Called when the remote AuraDrive service is connected.
+         * Handles the event when the AuraDrive service is connected.
          *
-         * Obtains the remote `IAuraDriveService` interface from the provided binder and updates the connection state to true.
+         * Retrieves the remote `IAuraDriveService` interface from the provided binder and marks the service as connected.
          *
          * @param name The component name of the connected service.
          * @param service The binder interface to the connected service.
@@ -39,6 +39,11 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
     }
 
+    /**
+     * Initiates a connection to the remote AuraDrive service using an explicit intent.
+     *
+     * Sets the service connection state to false if a SecurityException occurs during binding.
+     */
     fun bindService() {
         val intent = Intent().apply {
             component = ComponentName(
@@ -54,9 +59,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Unbinds from the AuraDrive service and updates the connection state to disconnected.
+     * Unbinds from the AuraDrive service and marks the connection as disconnected.
      *
-     * Silently ignores any exceptions that occur during unbinding.
+     * Any exceptions during unbinding are ignored. Clears the remote service reference and updates the connection state.
      */
     fun unbindService() {
         try {
@@ -68,9 +73,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Retrieves the current status from the remote AuraDrive service.
+     * Retrieves the current status string from the remote AuraDrive service.
      *
-     * @return The status string reported by the remote service, or null if the service is unavailable or a RemoteException occurs.
+     * @return The status reported by the remote service, or null if the service is unavailable or a RemoteException occurs.
      */
     suspend fun getStatusFromOracleDrive(): String? = withContext(Dispatchers.IO) {
         try {
@@ -81,9 +86,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-         * Attempts to toggle the LSPosed module on the connected Oracle Drive service.
+         * Toggles the LSPosed module on the connected Oracle Drive service.
          *
-         * The `packageName` and `enable` parameters are ignored; the toggle operation is performed using the remote service's default logic.
+         * The `packageName` and `enable` parameters are ignored; the toggle operation is performed according to the remote service's internal logic.
          *
          * @return "Success" if the module was toggled successfully, "Failed" if the operation did not succeed, or null if the service is unavailable or a remote exception occurs.
          */
@@ -111,9 +116,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Retrieves the internal diagnostics log from the remote AuraDrive service as a single string.
+     * Retrieves the internal diagnostics log from the remote AuraDrive service as a single newline-separated string.
      *
-     * The log entries are joined with newline characters. Returns null if the service is unavailable or a remote exception occurs.
+     * Returns null if the service is unavailable or a remote exception occurs.
      *
      * @return The diagnostics log as a newline-separated string, or null if unavailable.
      */
