@@ -54,13 +54,13 @@ object AgentHierarchy {
     val AUXILIARY_AGENTS = mutableListOf<HierarchyAgentConfig>()
 
     /**
-     * Creates and registers a new auxiliary agent with the given name and capabilities.
+     * Registers a new auxiliary agent with the specified name and capabilities.
      *
      * The agent is assigned the AUXILIARY role and priority, added to the auxiliary agents list, and its configuration is returned.
      *
-     * @param name The unique identifier for the auxiliary agent.
-     * @param capabilities The set of capabilities describing the agent's functions.
-     * @return The configuration object for the newly registered auxiliary agent.
+     * @param name The unique name for the auxiliary agent.
+     * @param capabilities The set of capabilities assigned to the agent.
+     * @return The configuration of the newly registered auxiliary agent.
      */
     fun registerAuxiliaryAgent(
         name: String,
@@ -77,19 +77,19 @@ object AgentHierarchy {
     }
 
     /**
-     * Returns the configuration for an agent with the specified name, searching both master and auxiliary agents.
+     * Retrieves the configuration for an agent by name from both master and auxiliary agents.
      *
-     * @param name The name of the agent to retrieve.
-     * @return The corresponding agent configuration, or null if no agent with the given name exists.
+     * @param name The name of the agent to look up.
+     * @return The agent's configuration if found, or null if no agent with the specified name exists.
      */
     fun getAgentConfig(name: String): HierarchyAgentConfig? {
         return MASTER_AGENTS.find { it.name == name } ?: AUXILIARY_AGENTS.find { it.name == name }
     }
 
     /**
-     * Retrieves all registered agent configurations, including both master and auxiliary agents.
+     * Returns a list of all registered agent configurations, including both master and auxiliary agents.
      *
-     * @return A list containing the configurations of all master and auxiliary agents.
+     * @return A list of all agent configurations in the hierarchy.
      */
     fun getAgentsByPriority(): List<HierarchyAgentConfig> {
         return MASTER_AGENTS + AUXILIARY_AGENTS

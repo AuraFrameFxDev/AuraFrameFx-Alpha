@@ -19,26 +19,26 @@ class CascadeAIService @Inject constructor(
     private val state = mutableMapOf<String, Any>()
 
     /**
- * Returns the name of this agent.
+ * Returns the name of the agent.
  *
- * @return The agent name, "Cascade".
+ * @return The string "Cascade".
  */
 override fun getName(): String? = "Cascade"
 
     /**
- * Returns the type of this agent.
+ * Returns the agent type as `AgentType.CASCADE`.
  *
- * @return `AgentType.CASCADE`, indicating this agent is a Cascade agent.
+ * @return The type of this agent.
  */
 override fun getType(): AgentType = AgentType.CASCADE
 
     /**
-     * Processes an AI request and emits agent responses as a flow, routing by request type.
+     * Processes an AI request and emits agent responses as a flow, routing based on the request type.
      *
-     * Delegates to specialized internal handlers for "state", "context", "vision", or "processing" request types. Emits a default response for unrecognized types.
+     * Delegates handling to internal methods for "state", "context", "vision", or "processing" request types. Emits a default response for unrecognized types.
      *
-     * @param request The AI request to handle.
-     * @return A flow emitting agent responses relevant to the request type.
+     * @param request The AI request to process.
+     * @return A flow emitting agent responses corresponding to the request type.
      */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // This internal routing can stay if these specific flows are desired for internal logic
@@ -53,7 +53,13 @@ override fun getType(): AgentType = AgentType.CASCADE
         }
     }
 
-    // Implemented Agent interface method
+    /**
+     * Processes an AI request with the provided context and returns a direct response.
+     *
+     * @param request The AI request to process.
+     * @param context Additional context information for the request.
+     * @return An [AgentResponse] containing the response content and confidence score.
+     */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         // Example: collect from the flow, or implement separate direct logic
         return AgentResponse(
@@ -63,9 +69,11 @@ override fun getType(): AgentType = AgentType.CASCADE
     }
 
     /**
-     * Emits a response containing a string representation of the agent's current internal state.
+     * Returns a flow emitting the agent's current internal state as a formatted string.
      *
-     * @return A flow emitting a single AgentResponse with the current state details and full confidence.
+     * The response contains a string representation of all key-value pairs in the internal state map with full confidence.
+     *
+     * @return A flow emitting a single AgentResponse describing the current state.
      */
     private fun processStateRequestFlowInternal(request: AiRequest): Flow<AgentResponse> {
         return flow {
@@ -80,9 +88,9 @@ override fun getType(): AgentType = AgentType.CASCADE
     }
 
     /**
-     * Processes a context-type AI request by aggregating responses from both Aura and Kai AI services.
+     * Aggregates responses from Aura and Kai AI services for a context-type AI request.
      *
-     * Emits a single AgentResponse that combines the content from Aura and Kai, with the confidence set as the average of their individual confidences.
+     * Emits a single AgentResponse that combines the content from both services and averages their confidence scores.
      *
      * @return A flow emitting the combined AgentResponse.
      */
@@ -113,6 +121,11 @@ override fun getType(): AgentType = AgentType.CASCADE
         }
     }
 
+    /**
+     * Emits a response indicating that a state transition is being processed.
+     *
+     * @return A flow emitting a single AgentResponse about state transition processing with confidence 0.9.
+     */
     private fun processProcessingRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         // Process state transitions
         return flow {
@@ -126,9 +139,9 @@ override fun getType(): AgentType = AgentType.CASCADE
     }
 
     /**
-     * Returns a flow emitting a response indicating retrieval of the agent's state history.
+     * Emits a flow containing a response about retrieving the agent's state history.
      *
-     * @return A flow that emits a single [AgentResponse] with a message about retrieving state history and a confidence score of 0.95.
+     * @return A flow that emits a single [AgentResponse] indicating state history retrieval with a confidence score of 0.95.
      */
     fun retrieveMemoryFlow(request: AiRequest): Flow<AgentResponse> { // Not in Agent interface, removed suspend, kept public if used elsewhere
         // Retrieve state history
@@ -146,9 +159,9 @@ override fun getType(): AgentType = AgentType.CASCADE
     // as they cause unresolved reference errors
 
     /**
-     * Returns a map describing the agent's capabilities, including its name, type, and implementation status.
+     * Returns a map containing the agent's capabilities, including its name, type, and implementation status.
      *
-     * @return A map with keys "name", "type", and "service_implemented" representing the agent's capabilities.
+     * @return A map with the keys "name", "type", and "service_implemented" describing the agent's capabilities.
      */
     fun getCapabilities(): Map<String, Any> {
         return mapOf(
