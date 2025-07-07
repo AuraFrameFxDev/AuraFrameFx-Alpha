@@ -8,6 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 
+/**
+ * Displays the home screen with app titles, status messages, and navigation buttons.
+ *
+ * Shows the main app title, a subtitle, and a status message, along with buttons to navigate to the AI chat screen or (in the future) the settings screen.
+ */
 @Composable
 fun HomeScreen(navController: NavHostController) {
     Column(
@@ -46,6 +51,9 @@ fun HomeScreen(navController: NavHostController) {
     }
 }
 
+/**
+ * Displays the AI chat interface screen with a centered title and status message.
+ */
 @Composable
 fun AiChatScreen() {
     Column(

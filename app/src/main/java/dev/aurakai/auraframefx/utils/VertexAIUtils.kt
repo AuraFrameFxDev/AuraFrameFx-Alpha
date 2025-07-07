@@ -11,10 +11,10 @@ object VertexAIUtils {
     private const val TAG = "VertexAIUtils"
 
     /**
-     * Creates a Vertex AI configuration object.
-     * @param apiKey Optional API key.
-     * @return A [VertexAIConfig] object.
-     * TODO: Reported as unused. Implement or remove if not needed.
+     * Creates a Vertex AI configuration object with default project, location, endpoint, and model name.
+     *
+     * @param apiKey Optional API key to include in the configuration.
+     * @return A [VertexAIConfig] instance populated with default values and the provided API key.
      */
     fun createVertexAIConfig(apiKey: String? = null): VertexAIConfig {
         // TODO: Reported as unused. Implement actual config creation or remove.
@@ -55,10 +55,10 @@ object VertexAIUtils {
     }
 
     /**
-     * Validates a [VertexAIConfig].
-     * @param config The configuration to validate.
-     * @return True if valid, false otherwise.
-     * TODO: Reported as unused. Implement or remove if not needed.
+     * Checks whether the provided [VertexAIConfig] is valid by ensuring it is not null and that its project ID and location are not blank.
+     *
+     * @param _config The configuration to validate.
+     * @return `true` if the configuration is valid; `false` otherwise.
      */
     fun validate(_config: VertexAIConfig?): Boolean {
         // TODO: Reported as unused. Implement actual validation logic.
@@ -69,11 +69,11 @@ object VertexAIUtils {
     }
 
     /**
-     * Safely generates content using Vertex AI, with error handling.
-     * @param config The [VertexAIConfig] to use.
-     * @param prompt The prompt for content generation.
-     * @return Generated content as a String, or null on failure.
-     * TODO: Reported as unused. Implement or remove if not needed.
+     * Attempts to generate content using Vertex AI with the provided configuration and prompt, returning a placeholder string or null if the configuration is invalid.
+     *
+     * @param _config The Vertex AI configuration to use for content generation.
+     * @param _prompt The prompt text to generate content from.
+     * @return A placeholder string simulating generated content, or null if the configuration is invalid.
      */
     suspend fun safeGenerateContent(_config: VertexAIConfig, _prompt: String): String? {
         // TODO: Reported as unused. Implement actual content generation using Vertex AI SDK.
