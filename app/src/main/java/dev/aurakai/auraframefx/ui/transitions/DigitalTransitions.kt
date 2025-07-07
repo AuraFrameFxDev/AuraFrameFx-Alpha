@@ -1,5 +1,6 @@
 package dev.aurakai.auraframefx.ui.transitions
 
+<<<<<<< HEAD
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 
@@ -55,4 +56,25 @@ object DigitalTransitions {
         ),
         targetScale = 1.2f
     )
+=======
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+
+/**
+ * Digital transition effects for navigation
+ */
+object DigitalTransitions {
+    
+    val EnterDigitalMaterialization: EnterTransition = slideInHorizontally(
+        initialOffsetX = { it }
+    ) + fadeIn()
+    
+    val ExitDigitalDematerialization: ExitTransition = slideOutHorizontally(
+        targetOffsetX = { -it }
+    ) + fadeOut()
+>>>>>>> f692b48 (Pending changes exported from your codespace)
 }

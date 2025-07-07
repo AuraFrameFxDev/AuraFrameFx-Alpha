@@ -9,10 +9,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Delete // Explicit import
+import androidx.compose.material.icons.filled.Pause // Explicit import
+import androidx.compose.material.icons.filled.PlayArrow // Explicit import
+import androidx.compose.material.icons.filled.Refresh // Explicit import
 import androidx.compose.runtime.*
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.*
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.Alignment

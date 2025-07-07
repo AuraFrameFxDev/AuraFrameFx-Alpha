@@ -9,14 +9,12 @@ import kotlinx.coroutines.delay
 class VertexAIClientImpl : VertexAIClient {
     
     /**
-     * Simulates text generation using the provided prompt and parameters.
+     * Simulates text generation by returning a fixed response containing the provided prompt.
      *
-     * Suspends briefly to mimic API latency and returns a fixed stub response containing the prompt.
+     * This stub implementation introduces artificial latency and does not use the `maxTokens` or `temperature` parameters.
      *
-     * @param prompt The input text prompt.
-     * @param maxTokens The maximum number of tokens to generate.
-     * @param temperature The sampling temperature for generation.
-     * @return A stub response string that includes the prompt.
+     * @param prompt The input prompt to include in the stubbed response.
+     * @return A fixed string containing the prompt.
      */
     override suspend fun generateText(prompt: String, maxTokens: Int, temperature: Float): String {
         delay(100) // Simulate API call
@@ -24,9 +22,9 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates image analysis for the given prompt and image data.
+     * Simulates image analysis for the given image data and prompt.
      *
-     * Always returns a fixed stub response indicating image analysis for the provided prompt.
+     * Always returns a fixed stub response indicating analysis for the specified prompt.
      *
      * @param imageData The image data to analyze.
      * @param prompt The prompt describing the analysis to perform.
@@ -38,19 +36,17 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates creative model initialization with no actual effect.
-     *
-     * This stub implementation is used for testing or development purposes and does not perform any real initialization.
+     * Simulates creative model initialization as a no-op for testing or development purposes.
      */
     override suspend fun initializeCreativeModels() {
         // Stub implementation
     }
     
     /**
-     * Simulates content generation and returns a fixed stub response for the given prompt.
+     * Simulates content generation by returning a fixed placeholder string containing the provided prompt.
      *
      * @param prompt The input prompt for which to generate content.
-     * @return A stub content string incorporating the provided prompt.
+     * @return A stub string including the prompt.
      */
     override suspend fun generateContent(prompt: String): String? {
         delay(100)
@@ -58,7 +54,7 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates code generation for a given specification, language, and style.
+     * Simulates code generation by returning a placeholder string for the given specification, language, and style.
      *
      * @param specification Description of the code to generate.
      * @param language Programming language for the generated code.
@@ -71,25 +67,24 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates validating the connection to Vertex AI and always returns true.
+     * Simulates validating the connection to Vertex AI and always indicates success.
      *
-     * @return True, indicating a successful connection in this stub implementation.
+     * @return `true` to represent a successful connection in this stub implementation.
      */
     override suspend fun validateConnection(): Boolean {
         return true // Stub always returns true
     }
     
     /**
-     * Performs a no-op initialization for the stub client.
+     * Performs no initialization; present only to satisfy interface requirements.
      */
     fun initialize() {
         // Stub implementation
     }
     
     /**
-     * Checks that the given prompt is not blank.
+     * Checks that the prompt string is not blank.
      *
-     * @param prompt The input prompt to validate.
      * @throws IllegalArgumentException if the prompt is blank.
      */
     private fun validatePrompt(prompt: String) {

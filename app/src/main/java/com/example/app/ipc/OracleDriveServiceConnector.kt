@@ -21,9 +21,9 @@ class OracleDriveServiceConnector(private val context: Context) {
 
     private val serviceConnection = object : ServiceConnection {
         /**
-         * Handles the event when the remote service is connected.
+         * Handles the event when the AuraDrive service is connected.
          *
-         * Assigns the remote `IAuraDriveService` interface from the provided binder and updates the connection state to true.
+         * Retrieves the remote `IAuraDriveService` interface from the provided binder and marks the service as connected.
          *
          * @param name The component name of the connected service.
          * @param service The binder interface to the connected service.
@@ -39,6 +39,11 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
     }
 
+    /**
+     * Attempts to bind to the remote AuraDrive service.
+     *
+     * Initiates a connection to the AuraDrive service using an explicit intent. If a SecurityException occurs during binding, the connection state is set to false.
+     */
     fun bindService() {
         val intent = Intent().apply {
             component = ComponentName(
@@ -53,6 +58,11 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
     }
 
+    /**
+     * Unbinds from the AuraDrive service and marks the connection as disconnected.
+     *
+     * Any exceptions during unbinding are silently ignored.
+     */
     fun unbindService() {
         try {
             context.unbindService(serviceConnection)
@@ -65,7 +75,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Retrieves the current status string from the remote AuraDrive service.
      *
-     * @return The status string reported by the remote service, or null if the service is unavailable or a remote exception occurs.
+     * @return The status reported by the remote service, or null if the service is unavailable or a RemoteException occurs.
      */
     suspend fun getStatusFromOracleDrive(): String? = withContext(Dispatchers.IO) {
         try {
@@ -78,9 +88,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
          * Toggles the LSPosed module on the connected Oracle Drive service.
          *
-         * The parameters `packageName` and `enable` are currently ignored; the method always attempts to toggle the module using the remote service's default behavior.
+         * The `packageName` and `enable` parameters are ignored; the toggle operation is performed according to the remote service's internal logic.
          *
-         * @return "Success" if the module was toggled successfully, "Failed" if the operation did not succeed, or null if a remote exception occurred or the service is unavailable.
+         * @return "Success" if the module was toggled successfully, "Failed" if the operation did not succeed, or null if the service is unavailable or a remote exception occurs.
          */
         suspend fun toggleModuleOnOracleDrive(packageName: String, enable: Boolean): String? =
         withContext(Dispatchers.IO) {
@@ -95,7 +105,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Retrieves a detailed internal status report from the remote AuraDrive service.
      *
-     * @return The detailed status string, or null if the service is unavailable or a remote exception occurs.
+     * @return The detailed status string, or null if the service is unavailable or a RemoteException occurs.
      */
     suspend fun getDetailedInternalStatus(): String? = withContext(Dispatchers.IO) {
         try {
@@ -108,7 +118,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Retrieves the internal diagnostics log from the remote AuraDrive service as a single newline-separated string.
      *
-     * @return The diagnostics log as a single string, or null if unavailable or if a remote exception occurs.
+     * Returns null if the service is unavailable or a remote exception occurs.
+     *
+     * @return The diagnostics log as a single string, or null if unavailable.
      */
     suspend fun getInternalDiagnosticsLog(): String? = withContext(Dispatchers.IO) {
         try {
