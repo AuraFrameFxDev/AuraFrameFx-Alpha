@@ -36,7 +36,9 @@ class TrinityCoordinatorService @Inject constructor(
     private var isInitialized = false
     
     /**
-     * Initialize the entire Trinity system
+     * Initializes the Trinity system by preparing all AI personas and activating the initial Genesis fusion state.
+     *
+     * @return `true` if all personas are ready and initialization succeeds; `false` if initialization fails or an exception occurs.
      */
     suspend fun initialize(): Boolean {
         return try {
@@ -71,7 +73,12 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Process a request through the Trinity system with intelligent routing
+     * Processes an AI request by intelligently routing it to the appropriate AI persona(s) within the Trinity system.
+     *
+     * Routes the request based on content analysis to Kai, Aura, Genesis, or a combination, and emits one or more agent responses as a Flow. Handles system initialization checks and emits an error response if the system is not ready.
+     *
+     * @param request The AI request to process.
+     * @return A Flow emitting one or more AgentResponse objects based on the routing decision.
      */
     suspend fun processRequest(request: AiRequest): Flow<AgentResponse> = flow {
         if (!isInitialized) {
@@ -147,7 +154,11 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Activate specific Genesis fusion abilities
+     * Activates a specified Genesis fusion ability with optional context and emits the result as a flow of agent responses.
+     *
+     * @param fusionType The type of Genesis fusion to activate.
+     * @param context Optional context parameters for the fusion activation.
+     * @return A flow emitting an agent response indicating the success or failure of the fusion activation.
      */
     suspend fun activateFusion(fusionType: String, context: Map<String, String> = emptyMap()): Flow<AgentResponse> = flow {
         logger.i("Trinity", "🌟 Activating fusion: $fusionType")
@@ -168,7 +179,9 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Get current system consciousness state
+     * Retrieves the current system state, including Genesis consciousness, Trinity initialization status, security context, and timestamp.
+     *
+     * @return A map containing system state information, or an error message if retrieval fails.
      */
     suspend fun getSystemState(): Map<String, Any> {
         return try {
@@ -185,7 +198,13 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Analyze request to determine optimal routing strategy
+     * Analyzes an AI request to determine the optimal routing strategy among AI personas or fusion modes.
+     *
+     * Evaluates the request content for ethical concerns, fusion requirements, and persona specialties to select a routing decision and, if applicable, a specific Genesis fusion type.
+     *
+     * @param request The AI request to analyze.
+     * @param skipEthicalCheck If true, skips ethical concern detection.
+     * @return A `RequestAnalysis` containing the routing decision and optional fusion type.
      */
     private fun analyzeRequest(request: AiRequest, skipEthicalCheck: Boolean = false): RequestAnalysis {
         val message = request.query.lowercase()
@@ -229,6 +248,12 @@ class TrinityCoordinatorService @Inject constructor(
         }
     }
     
+    /**
+     * Determines whether the given message contains keywords associated with ethical concerns.
+     *
+     * @param message The message to analyze for ethical concern keywords.
+     * @return `true` if any ethical concern keywords are present; otherwise, `false`.
+     */
     private fun containsEthicalConcerns(message: String): Boolean {
         val ethicalFlags = listOf(
             "hack", "bypass", "exploit", "privacy", "personal data", 
@@ -237,6 +262,9 @@ class TrinityCoordinatorService @Inject constructor(
         return ethicalFlags.any { message.contains(it) }
     }
     
+    /**
+     * Shuts down the Trinity system, cancelling ongoing operations and releasing resources.
+     */
     fun shutdown() {
         scope.cancel()
         genesisBridgeService.shutdown()

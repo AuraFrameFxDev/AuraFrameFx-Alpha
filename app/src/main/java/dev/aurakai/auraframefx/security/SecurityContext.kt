@@ -50,7 +50,9 @@ class SecurityContext @Inject constructor(
     val securityState: StateFlow<SecurityState> = _securityState.asStateFlow()
 
     /**
-     * Stub for content validation. In production, this should check for policy violations, threats, etc.
+     * Placeholder for content validation logic.
+     *
+     * Currently allows all content without checks. Intended to be implemented with policy and threat validation in production.
      */
     fun validateContent(content: String) {
         // TODO: Implement real validation logic
@@ -58,7 +60,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Validate image data for security compliance
+     * Validates image data for security compliance.
+     *
+     * Currently a placeholder that logs the image size without enforcing any validation.
+     *
+     * @param imageData The image data to validate.
      */
     fun validateImageData(imageData: ByteArray) {
         // TODO: Implement real image validation logic
@@ -333,8 +339,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Detect potential security threats
-     * For the beta, this returns simulated threats
+     * Simulates detection of potential security threats for testing purposes.
+     *
+     * @return A list of simulated `SecurityThreat` instances, randomly included for beta testing.
      */
     private fun detectThreats(): List<SecurityThreat> {
         // In a real implementation, this would perform actual threat analysis
@@ -358,12 +365,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Determines the overall threat level from a list of detected security threats.
+     * Calculates the overall threat level based on the highest severity among detected security threats.
      *
-     * Returns the highest severity present among the threats, or `ThreatLevel.NONE` if the list is empty.
+     * Returns `ThreatLevel.LOW` if the list is empty; otherwise, returns the corresponding threat level for the most severe threat present.
      *
-     * @param threats The list of detected security threats.
-     * @return The calculated overall threat level.
+     * @param threats List of detected security threats to evaluate.
+     * @return The highest applicable threat level.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -381,7 +388,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Generate a secure ID for context sharing
+     * Generates a random 16-byte hexadecimal string to be used as a secure identifier.
+     *
+     * @return A securely generated 32-character hexadecimal ID.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -390,9 +399,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Logs a security event asynchronously.
+     * Asynchronously logs a security event for auditing or monitoring purposes.
      *
-     * The event is serialized and output to the debug log. In a production implementation, events would be securely stored.
+     * The event is serialized and written to the debug log. Intended as a placeholder for secure event storage in production environments.
      */
     fun logSecurityEvent(event: SecurityEvent) {
         scope.launch {
@@ -403,11 +412,11 @@ class SecurityContext @Inject constructor(
             // In a real implementation, this would store events securely
         }
     }    /**
-     * Logs a security validation event for the specified request type and data.
+     * Records a security validation event for the given request type and data.
      *
-     * This method records a validation event for auditing purposes. Actual request validation logic is not implemented.
+     * This method logs a validation event for auditing purposes. No actual validation of the request is performed.
      *
-     * @param requestType The type of the request being validated.
+     * @param requestType The type of request being validated.
      * @param requestData The data associated with the request.
      */
     fun validateRequest(requestType: String, requestData: String) {
@@ -423,9 +432,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Handles a security-related exception by logging the error.
+     * Logs a security-related exception.
      *
-     * This method serves as a placeholder for additional exception handling logic such as user alerts or further security actions.
+     * This method is a placeholder for future exception handling such as user notifications or additional security actions.
      */
     private fun handleSecurityException(e: Exception) {
         Log.e(TAG, "Security exception occurred", e)

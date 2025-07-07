@@ -27,8 +27,9 @@ class OracleDriveControlViewModel : ViewModel() {
     val diagnosticsLog: StateFlow<String> = _diagnosticsLog.asStateFlow()
     
     /**
-     * Stub method to bind to Oracle Drive service
-     * In beta, this is a no-op
+     * Simulates binding to the Oracle Drive service in beta mode.
+     *
+     * Updates the connection status and status message to reflect that service binding is disabled during beta testing.
      */
     fun bindService() {
         // Beta stub: No actual binding
@@ -37,8 +38,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Stub method to unbind from Oracle Drive service
-     * In beta, this is a no-op
+     * Simulates unbinding from the Oracle Drive service in beta mode.
+     *
+     * Updates the service connection state and status message to reflect a simulated unbind action. No actual service interaction occurs.
      */
     fun unbindService() {
         // Beta stub: No actual unbinding
@@ -47,8 +49,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Stub method to refresh Oracle Drive status
-     * In beta, this updates with placeholder data
+     * Updates the Oracle Drive status state flows with placeholder data for beta testing.
+     *
+     * This method simulates a status refresh by setting hardcoded beta-mode messages for status, detailed status, and diagnostics log.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -58,11 +61,12 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Stub method to toggle module state
-     * In beta, this is a no-op that just logs the action
-     * 
-     * @param packageName The package name of the module to toggle
-     * @param enable Whether to enable or disable the module
+     * Simulates toggling the enabled state of a module by updating the diagnostics log with a placeholder message.
+     *
+     * In beta mode, this method does not perform any real action.
+     *
+     * @param packageName The package name of the module to simulate enabling or disabling.
+     * @param enable Indicates whether the module would be enabled (`true`) or disabled (`false`).
      */
     fun toggleModule(packageName: String, enable: Boolean) {
         // Beta stub: Just log the action without actually doing anything

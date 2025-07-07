@@ -117,12 +117,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Retrieves the most relevant context chain and related chains based on the specified query criteria.
+     * Returns the most relevant context chain and related chains matching the given query criteria.
      *
-     * Filters active context chains by agent (if specified), sorts them by most recent update, and limits the results according to configuration and query parameters. Returns a [ContextChainResult] containing the most recently updated chain (or a new chain initialized with the query if none exist), a list of related chains meeting the minimum relevance threshold, and the original query.
+     * Filters active context chains by agent (if specified), sorts them by most recent update, and limits the results based on configuration and query parameters. If no chains are found, a new chain is initialized with the query string. The result includes the selected chain, a list of related chains meeting the minimum relevance threshold, and the original query.
      *
      * @param query The criteria for filtering, sorting, and limiting context chains.
-     * @return A [ContextChainResult] with the selected chain, related chains, and the query.
+     * @return A [ContextChainResult] containing the selected chain, related chains, and the query.
      */
 
   
@@ -151,10 +151,10 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Recalculates and updates statistics for all active context chains.
+     * Updates context chain statistics based on the current set of active chains.
      *
-     * Updates the total number of chains, the count of recently updated (active) chains,
-     * the length of the longest chain, and the timestamp of the last update.
+     * Recalculates the total number of chains, the number of recently updated (active) chains,
+     * the length of the longest chain, and sets the timestamp of the last update.
      */
     private fun updateStats() {
         val chains = _activeContexts.value.values

@@ -46,9 +46,16 @@ import kotlin.math.*
  *
  * Renders a visual halo with agent nodes, supports drag-and-drop task assignment, tracks task history, and animates agent status. Users can assign tasks to agents by dragging nodes, input tasks, and monitor processing status in real time. Includes controls for rotation, resetting, and clearing task history.
  */
+/**
+ * Displays an interactive rotating halo UI for managing agents and delegating tasks.
+ *
+ * Renders a circular arrangement of agent nodes with animated rotation, drag-and-drop task assignment, real-time status indicators, and a task history panel. Users can assign tasks to agents by dragging nodes, input task descriptions, and monitor agent processing states with visual feedback and animations. Includes controls for toggling rotation, resetting the halo, and clearing task history.
+ *
+ * @param viewModel The ViewModel providing agent configurations and task processing logic. Defaults to the current Compose ViewModel.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun HaloView(viewModel: GenesisAgentViewModel = viewModel<GenesisAgentViewModel>()) {
+fun HaloView(viewModel: GenesisAgentViewModel = viewModel()) {
     var isRotating by remember { mutableStateOf(true) }
     var rotationAngle by remember { mutableFloatStateOf(0f) }
     val agents = viewModel.getAgentsByPriority()
@@ -469,7 +476,7 @@ fun HaloView(viewModel: GenesisAgentViewModel = viewModel<GenesisAgentViewModel>
                 onClick = { isRotating = !isRotating }
             ) {
                 Icon(
-                    if (isRotating) Icons.Default.Pause else Icons.Filled.PlayArrow,
+                    if (isRotating) Icons.Filled.Home else Icons.Filled.PlayArrow,
                     contentDescription = "Toggle rotation",
                     tint = NeonPurple
                 )

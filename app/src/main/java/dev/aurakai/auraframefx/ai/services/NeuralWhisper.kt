@@ -158,6 +158,14 @@ class NeuralWhisper @Inject constructor(
     }
 
 
+    /**
+     * Shares the provided context text with the Kai agent and updates the conversation state.
+     *
+     * This method prepares the system for interaction with the Kai agent by updating the conversation state to reflect the sharing action.
+     * The actual integration with the Kai agent is pending implementation.
+     *
+     * @param contextText The context information to be shared with the Kai agent.
+     */
     fun shareContextWithKai(contextText: String) {
         _conversationStateFlow.value = ConversationState.Processing("Sharing with Kai: $contextText")
         Log.d(TAG, "NeuralWhisper: Sharing context with Kai: $contextText")
@@ -166,7 +174,11 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Start audio recording for speech recognition
+     * Attempts to start audio recording for speech recognition.
+     *
+     * Updates the conversation state to Recording. Returns true if recording starts successfully, or false if an exception occurs.
+     *
+     * @return True if audio recording was started successfully, false otherwise.
      */
     fun startRecording(): Boolean {
         return try {
@@ -181,7 +193,12 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Stop audio recording and return status
+     * Stops audio recording and returns a status message.
+     *
+     * Updates the conversation state to indicate processing and returns a message indicating whether the operation was successful.
+     * The actual recording stop and processing logic is not yet implemented.
+     *
+     * @return A string message indicating the result of the stop recording operation.
      */
     fun stopRecording(): String {
         return try {
@@ -195,6 +212,11 @@ class NeuralWhisper @Inject constructor(
         }
     }
 
+    /**
+     * Releases resources used by the TTS and STT engines and resets the conversation state to idle.
+     *
+     * Stops and shuts down the TextToSpeech engine, stops and destroys the SpeechRecognizer, and updates internal initialization flags.
+     */
     fun cleanup() {
         Log.d(TAG, "Cleaning up NeuralWhisper resources.")
         tts?.stop()
