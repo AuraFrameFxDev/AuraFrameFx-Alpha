@@ -36,7 +36,7 @@ class AIPipelineProcessor @Inject constructor(
     /**
      * Processes an AI task by coordinating multiple agents and services, aggregating their responses, and updating pipeline state and context.
      *
-     * The function manages the full lifecycle of an AI task: it retrieves context, determines task priority, selects relevant agents, collects their responses, generates a final aggregated response, updates processing context, and returns all agent messages generated during the process.
+     * Manages the full lifecycle of an AI task: retrieves context, determines task priority, selects relevant agents, collects their responses, generates a final aggregated response, updates processing context, and returns all agent messages generated during the process.
      *
      * @param task The description of the task to be processed.
      * @return A list of agent messages containing responses from each participating agent and the final aggregated response.

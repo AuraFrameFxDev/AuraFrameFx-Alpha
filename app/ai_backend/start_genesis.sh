@@ -20,7 +20,7 @@ print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
 
-# print_success prints a message in green with a [SUCCESS] label for successful operations.
+# print_success prints a message in green with a [SUCCESS] label to indicate successful operations.
 print_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
@@ -35,7 +35,7 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# print_genesis displays a message with a purple [GENESIS] label for Genesis-specific notifications.
+# print_genesis prints a message prefixed with a purple [GENESIS] label for Genesis Layer notifications.
 print_genesis() {
     echo -e "${PURPLE}[GENESIS]${NC} $1"
 }
