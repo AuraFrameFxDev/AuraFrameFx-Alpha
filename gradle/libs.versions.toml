@@ -79,9 +79,6 @@ toolchainsFoojayResolver = "1.0.0" # Updated plugin version
 
 
 [libraries]
-# Xposed - REMOVING - Will be a local file dependency
-# xposedApi = { group = "de.robv.android.xposed", name = "api", version.ref = "xposedApi" }
-
 # Hilt (Core)
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hiltCompiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" } # KSP
