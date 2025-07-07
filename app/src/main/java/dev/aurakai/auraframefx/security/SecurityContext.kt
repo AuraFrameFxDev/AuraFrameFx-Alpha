@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.model.ThreatLevel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -47,6 +48,23 @@ class SecurityContext @Inject constructor(
 
     private val _securityState = MutableStateFlow(SecurityState())
     val securityState: StateFlow<SecurityState> = _securityState.asStateFlow()
+
+    /**
+     * Stub for content validation. In production, this should check for policy violations, threats, etc.
+     */
+    fun validateContent(content: String) {
+        // TODO: Implement real validation logic
+        // For now, always allow
+    }
+
+    /**
+     * Validate image data for security compliance
+     */
+    fun validateImageData(imageData: ByteArray) {
+        // TODO: Implement real image validation logic
+        // For now, always allow
+        Log.d(TAG, "Validating image data of size: ${imageData.size} bytes")
+    }
 
     private val _threatDetectionActive = MutableStateFlow(false)
     val threatDetectionActive: StateFlow<Boolean> = _threatDetectionActive.asStateFlow()
@@ -340,10 +358,15 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Calculate overall threat level based on detected threats
+     * Determines the overall threat level from a list of detected security threats.
+     *
+     * Returns the highest severity present among the threats, or `ThreatLevel.NONE` if the list is empty.
+     *
+     * @param threats The list of detected security threats.
+     * @return The calculated overall threat level.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
-        if (threats.isEmpty()) return ThreatLevel.SAFE
+        if (threats.isEmpty()) return ThreatLevel.LOW
 
         val hasCritical = threats.any { it.severity == ThreatSeverity.CRITICAL }
         val hasHigh = threats.any { it.severity == ThreatSeverity.HIGH }
@@ -352,7 +375,7 @@ class SecurityContext @Inject constructor(
         return when {
             hasCritical -> ThreatLevel.CRITICAL
             hasHigh -> ThreatLevel.HIGH
-            hasMedium -> ThreatLevel.MODERATE
+            hasMedium -> ThreatLevel.MEDIUM
             else -> ThreatLevel.LOW
         }
     }
@@ -367,7 +390,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Log a security event
+     * Logs a security event asynchronously.
+     *
+     * The event is serialized and output to the debug log. In a production implementation, events would be securely stored.
      */
     fun logSecurityEvent(event: SecurityEvent) {
         scope.launch {
@@ -377,6 +402,34 @@ class SecurityContext @Inject constructor(
             )
             // In a real implementation, this would store events securely
         }
+    }    /**
+     * Logs a security validation event for the specified request type and data.
+     *
+     * This method records a validation event for auditing purposes. Actual request validation logic is not implemented.
+     *
+     * @param requestType The type of the request being validated.
+     * @param requestData The data associated with the request.
+     */
+    fun validateRequest(requestType: String, requestData: String) {
+        // Log the security validation event
+        logSecurityEvent(SecurityEvent(
+            type = SecurityEventType.VALIDATION,
+            details = "Request validation: $requestType",
+            severity = EventSeverity.INFO
+        ))
+        
+        // For now, we'll just log the validation - can be extended with actual validation logic
+        Log.d(TAG, "Validating request of type: $requestType")
+    }
+
+    /**
+     * Handles a security-related exception by logging the error.
+     *
+     * This method serves as a placeholder for additional exception handling logic such as user alerts or further security actions.
+     */
+    private fun handleSecurityException(e: Exception) {
+        Log.e(TAG, "Security exception occurred", e)
+        // In a real implementation, take appropriate actions like alerting the user, logging, etc.
     }
 }
 
@@ -386,7 +439,7 @@ class SecurityContext @Inject constructor(
 @Serializable
 data class SecurityState(
     val detectedThreats: List<SecurityThreat> = emptyList(),
-    val threatLevel: ThreatLevel = ThreatLevel.UNKNOWN,
+    val threatLevel: ThreatLevel = ThreatLevel.LOW,
     val lastScanTime: Long = 0,
     val errorState: Boolean = false,
     val errorMessage: String? = null,
@@ -423,18 +476,6 @@ enum class ThreatSeverity {
     MEDIUM,
     HIGH,
     CRITICAL
-}
-
-/**
- * Overall threat levels for the system
- */
-enum class ThreatLevel {
-    SAFE,
-    LOW,
-    MODERATE,
-    HIGH,
-    CRITICAL,
-    UNKNOWN
 }
 
 /**
@@ -516,7 +557,8 @@ enum class SecurityEventType {
     THREAT_DETECTED,
     ENCRYPTION_EVENT,
     AUTHENTICATION_EVENT,
-    INTEGRITY_CHECK
+    INTEGRITY_CHECK,
+    VALIDATION
 }
 
 /**

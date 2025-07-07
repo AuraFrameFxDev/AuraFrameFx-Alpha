@@ -10,7 +10,7 @@ import dev.aurakai.auraframefx.ai.task.execution.TaskExecutionManager
 import dev.aurakai.auraframefx.data.logging.AuraFxLogger
 import dev.aurakai.auraframefx.data.network.CloudStatusMonitor
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.api.model.AgentType as ApiAgentType // Corrected import
+import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow // Added import
 import kotlinx.coroutines.flow.flowOf // Added import
@@ -28,10 +28,26 @@ class KaiAIService @Inject constructor(
     private val cloudStatusMonitor: CloudStatusMonitor,
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
-    override fun getName(): String? = "Kai"
-    override fun getType(): ApiAgentType = ApiAgentType.KAI // Changed to non-nullable ApiAgentType
+    /**
+ * Returns the name of the agent, "Kai".
+ *
+ * @return The agent's name.
+ */
+override fun getName(): String? = "Kai"
+    /**
+ * Returns the agent type as `AgentType.KAI`.
+ *
+ * @return The type of this agent.
+ */
+override fun getType(): AgentType = AgentType.KAI
 
-    // Not part of Agent interface
+    /**
+         * Returns a map describing the capabilities supported by the Kai agent.
+         *
+         * The map includes keys for security, analysis, memory, and service implementation, each set to true.
+         *
+         * @return A map indicating the agent's supported features.
+         */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
             "security" to true,
@@ -41,8 +57,7 @@ class KaiAIService @Inject constructor(
         )
 
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
-        auraFxLogger.log(
-            AuraFxLogger.LogLevel.INFO,
+        auraFxLogger.i(
             "KaiAIService",
             "Processing request: ${request.query} with context: $context"
         )

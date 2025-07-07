@@ -165,6 +165,36 @@ class NeuralWhisper @Inject constructor(
         // Example: kaiAgent?.processSharedContext(contextText)
     }
 
+    /**
+     * Start audio recording for speech recognition
+     */
+    fun startRecording(): Boolean {
+        return try {
+            Log.d(TAG, "Starting audio recording...")
+            _conversationStateFlow.value = ConversationState.Recording
+            // TODO: Implement actual recording start logic
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start recording", e)
+            false
+        }
+    }
+
+    /**
+     * Stop audio recording and return status
+     */
+    fun stopRecording(): String {
+        return try {
+            Log.d(TAG, "Stopping audio recording...")
+            _conversationStateFlow.value = ConversationState.Processing("Processing audio...")
+            // TODO: Implement actual recording stop and processing logic
+            "Recording stopped successfully"
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to stop recording", e)
+            "Failed to stop recording: ${e.message}"
+        }
+    }
+
     fun cleanup() {
         Log.d(TAG, "Cleaning up NeuralWhisper resources.")
         tts?.stop()

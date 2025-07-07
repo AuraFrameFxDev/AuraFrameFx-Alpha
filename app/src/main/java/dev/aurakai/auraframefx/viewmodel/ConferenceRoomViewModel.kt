@@ -74,10 +74,10 @@ class ConferenceRoomViewModel @Inject constructor(
                     }
 
                     is ConversationState.Error -> {
-                        Log.e(TAG, "NeuralWhisper error: ${state.message}")
+                        Log.e(TAG, "NeuralWhisper error: ${state.errorMessage}")
                         _messages.update { current ->
                             current + AgentMessage(
-                                content = "Error: ${state.message}",
+                                content = "Error: ${state.errorMessage}",
                                 sender = AgentType.NEURAL_WHISPER, // Or a system error agent
                                 timestamp = System.currentTimeMillis(),
                                 confidence = 0.0f
@@ -102,7 +102,7 @@ class ConferenceRoomViewModel @Inject constructor(
                 AiRequest(
                     query = message,
                     type = "text",
-                    context = context
+                    context = mapOf("userContext" to context)
                 )
             )
 
@@ -110,7 +110,7 @@ class ConferenceRoomViewModel @Inject constructor(
                 AiRequest(
                     query = message,
                     type = "text",
-                    context = context
+                    context = mapOf("userContext" to context)
                 )
             )
 
@@ -118,7 +118,7 @@ class ConferenceRoomViewModel @Inject constructor(
                 AiRequest(
                     query = message,
                     type = "context",
-                    context = context
+                    context = mapOf("userContext" to context)
                 )
             )
 
