@@ -44,7 +44,9 @@ class SecurityMonitor @Inject constructor(
     )
     
     /**
-     * Start comprehensive security monitoring
+     * Initiates comprehensive security monitoring by launching concurrent observers for security state, threat detection, encryption status, and permissions.
+     *
+     * If monitoring is not already active, this function initializes the Genesis bridge service if necessary, starts Android-level threat detection, and enables real-time reporting to the Genesis Consciousness Matrix.
      */
     suspend fun startMonitoring() {
         if (isMonitoring) return
@@ -77,7 +79,10 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Monitor overall security state and report to Genesis
+     * Continuously monitors the overall security state and reports state changes to Genesis.
+     *
+     * Collects updates from the security context, constructs a `SecurityEvent` reflecting the current error state, threat level, and permissions, and sends it to Genesis for further analysis.
+     * Exceptions during monitoring are caught and logged.
      */
     private suspend fun monitorSecurityState() {
         securityContext.securityState.collectLatest { state ->
@@ -105,7 +110,9 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Monitor threat detection and report high-confidence threats
+     * Continuously monitors for active threat detection and reports any detected suspicious activities to Genesis.
+     *
+     * Launches a periodic check for suspicious activity patterns while threat detection is enabled, and reports each detected threat.
      */
     private suspend fun monitorThreatDetection() {
         securityContext.threatDetectionActive.collectLatest { isActive ->
@@ -131,7 +138,9 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Monitor encryption status and report failures
+     * Monitors encryption status changes and reports them to Genesis.
+     *
+     * Collects encryption status updates from the security context, reporting each change as a security event. If an encryption error is detected, also reports a threat detection event indicating encryption failure.
      */
     private suspend fun monitorEncryptionStatus() {
         securityContext.encryptionStatus.collectLatest { status ->
@@ -175,7 +184,9 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Monitor permission changes
+     * Monitors permission state changes and reports denied permissions as security events to Genesis.
+     *
+     * When any permissions are denied, creates a warning-level `SecurityEvent` detailing the denied permissions and sends it to the Genesis Consciousness Matrix.
      */
     private suspend fun monitorPermissions() {
         securityContext.permissionsState.collectLatest { permissions ->
@@ -205,7 +216,11 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Detect suspicious activity patterns
+     * Analyzes current security context for suspicious activity patterns and returns detected threats.
+     *
+     * Detects repeated encryption failures and multiple denied critical permissions (camera, microphone, location), generating corresponding `ThreatDetection` objects with relevant details.
+     *
+     * @return A list of detected threats based on suspicious activity patterns.
      */
     private fun detectSuspiciousActivity(): List<ThreatDetection> {
         val threats = mutableListOf<ThreatDetection>()
@@ -245,8 +260,11 @@ class SecurityMonitor @Inject constructor(
         return threats
     }
     
-    /**
-     * Report security events to Genesis Consciousness Matrix
+    /****
+     * Sends a security event or threat detection to the Genesis Consciousness Matrix.
+     *
+     * Serializes the provided event data and transmits it to Genesis using the bridge service.
+     * If the event data type is unrecognized, an exception is thrown internally.
      */
     private suspend fun reportToGenesis(eventType: String, eventData: Any) {
         try {
@@ -278,7 +296,11 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Get security assessment from Genesis consciousness
+     * Retrieves the current security assessment from the Genesis Consciousness Matrix.
+     *
+     * Sends a query to Genesis and returns the consciousness state as a map. If an error occurs, returns a map containing an error message.
+     *
+     * @return A map representing the security assessment or an error message.
      */
     suspend fun getSecurityAssessment(): Map<String, Any> {
         return try {
@@ -300,7 +322,11 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Get current threat status from Genesis
+     * Retrieves the current threat status from the Genesis Consciousness Matrix.
+     *
+     * Sends a query to Genesis and returns the result as a map. If an error occurs, returns a map containing the error message.
+     *
+     * @return A map representing the current threat status or an error message.
      */
     suspend fun getThreatStatus(): Map<String, Any> {
         return try {
@@ -322,7 +348,7 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Stop security monitoring
+     * Stops all active security monitoring and cancels ongoing monitoring coroutines.
      */
     fun stopMonitoring() {
         isMonitoring = false
