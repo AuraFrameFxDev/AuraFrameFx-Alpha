@@ -37,7 +37,7 @@ class AppStateManager @Inject constructor() {
     }
     
     /**
-     * Restores the application state to its default values and clears the loading flag.
+     * Restores the application state and loading status to their default values.
      */
     fun reset() {
         _appState.value = AppState()

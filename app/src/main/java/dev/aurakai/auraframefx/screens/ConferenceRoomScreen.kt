@@ -37,9 +37,9 @@ fun Header(selectedAgent: String, onAgentSelected: (String) -> Unit) {
 
 
 /**
- * Displays the main conference room chat interface with agent selection, recording/transcribing controls, and message input.
+ * Displays the main conference room chat interface with agent selection, recording controls, and message input.
  *
- * Presents a UI for interacting with agents in a conference room setting, allowing users to switch agents, start/stop recording, transcribe audio, view chat messages, and send new messages. UI state is managed via the provided ViewModel and Compose state.
+ * Presents a UI for interacting with AI agents, sending messages, viewing chat history, and controlling audio recording and transcription. State is managed via the provided ViewModel and Compose state.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

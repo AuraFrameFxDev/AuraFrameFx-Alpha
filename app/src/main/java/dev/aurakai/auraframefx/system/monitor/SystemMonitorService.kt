@@ -36,9 +36,9 @@ class SystemMonitorService : Service() {
     }
 
     /**
-     * Continuously monitors system metrics such as CPU, memory, battery, and network status while the service is active.
+     * Periodically monitors system metrics while the service is active.
      *
-     * Intended to run in a background coroutine, gathering and processing system information at regular intervals.
+     * This suspend function runs in a loop, intended to collect and process system information such as CPU usage, memory usage, battery status, network activity, and logs at regular intervals, until the service's coroutine scope is no longer active.
      */
     private suspend fun monitorSystem() {
         // Loop indefinitely (or until service is stopped) to perform monitoring

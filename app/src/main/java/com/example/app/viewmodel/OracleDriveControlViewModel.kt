@@ -40,7 +40,7 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates unbinding from the Oracle Drive service in beta mode.
      *
-     * Updates internal state to reflect a disconnected status without performing any real unbinding.
+     * Updates internal state to reflect a service unbound status without performing any real unbinding.
      */
     fun unbindService() {
         // Beta stub: No actual unbinding
@@ -49,9 +49,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Updates the status, detailed status, and diagnostics log with placeholder values for beta mode.
+     * Updates the Oracle Drive status state flows with placeholder beta-mode messages.
      *
-     * This method simulates a status refresh without performing any real operations.
+     * Intended for UI testing; does not perform any real status refresh or backend communication.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -61,12 +61,12 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Simulates toggling the state of a module by updating the diagnostics log with a placeholder message.
+     * Simulates toggling the state of a module for beta testing purposes.
      *
-     * In beta mode, this method does not perform any real action and only records the intended operation for UI feedback.
+     * Updates the diagnostics log with a message indicating the intended action, but does not perform any real operation.
      *
-     * @param packageName The package name of the module to simulate enabling or disabling.
-     * @param enable Indicates whether the module should be enabled (`true`) or disabled (`false`).
+     * @param packageName The identifier of the module to simulate enabling or disabling.
+     * @param enable If true, simulates enabling the module; if false, simulates disabling it.
      */
     fun toggleModule(packageName: String, enable: Boolean) {
         // Beta stub: Just log the action without actually doing anything

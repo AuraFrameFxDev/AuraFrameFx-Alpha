@@ -46,9 +46,9 @@ class UserPreferences(context: Context) {
     }
 
     /**
-     * Stores a string value associated with the specified key in the in-memory preferences map.
+     * Sets the value for a given preference key in memory.
      *
-     * Overwrites any existing value for the given key.
+     * Overwrites the existing value if the key already exists.
      */
     fun setPreference(key: String, value: String) {
         prefs[key] = value

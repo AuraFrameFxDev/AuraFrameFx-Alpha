@@ -52,7 +52,7 @@ class SecurityContext @Inject constructor(
     /**
      * Placeholder for content validation logic.
      *
-     * In its current form, this method accepts all content without performing any checks. Intended to be extended to detect policy violations or security threats in production environments.
+     * Accepts all content without validation. Intended to be replaced with checks for policy violations or security threats in production.
      */
     fun validateContent(content: String) {
         // TODO: Implement real validation logic
@@ -62,7 +62,7 @@ class SecurityContext @Inject constructor(
     /**
      * Validates image data for security compliance.
      *
-     * Currently a stub that logs the image data size and allows all input. Intended for future implementation of image validation logic.
+     * Currently accepts all image data without performing any checks. Intended as a placeholder for future implementation of image validation logic.
      */
     fun validateImageData(imageData: ByteArray) {
         // TODO: Implement real image validation logic
@@ -339,7 +339,7 @@ class SecurityContext @Inject constructor(
     /**
      * Simulates detection of potential security threats for testing purposes.
      *
-     * @return A list of simulated `SecurityThreat` objects, randomly included to mimic threat detection during beta testing.
+     * @return A list of simulated security threats, randomly included for beta testing.
      */
     private fun detectThreats(): List<SecurityThreat> {
         // In a real implementation, this would perform actual threat analysis
@@ -365,10 +365,10 @@ class SecurityContext @Inject constructor(
     /**
      * Calculates the overall threat level based on the highest severity among detected security threats.
      *
-     * If the list is empty, returns `ThreatLevel.LOW`.
+     * Returns `ThreatLevel.LOW` if no threats are present.
      *
      * @param threats List of detected security threats.
-     * @return The highest threat level present in the list, or `ThreatLevel.LOW` if none.
+     * @return The highest threat level found, or `ThreatLevel.LOW` if the list is empty.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -399,9 +399,7 @@ class SecurityContext @Inject constructor(
     /**
      * Asynchronously logs a security event for auditing and monitoring purposes.
      *
-     * The event is serialized and written to the debug log. In production, events should be securely persisted.
-     *
-     * @param event The security event to log.
+     * The event is serialized and written to the debug log. In production, events should be securely stored instead of logged.
      */
     fun logSecurityEvent(event: SecurityEvent) {
         scope.launch {
@@ -412,7 +410,7 @@ class SecurityContext @Inject constructor(
             // In a real implementation, this would store events securely
         }
     }    /**
-     * Records a security validation event for the given request type and data.
+     * Records a security validation event for the specified request type and data.
      *
      * This method logs a validation event for auditing purposes. No actual validation of the request is performed.
      *
@@ -432,9 +430,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Logs a security-related exception.
+     * Logs a security-related exception for diagnostic purposes.
      *
-     * Serves as a placeholder for future exception handling such as user notifications or additional security measures.
+     * This method is a placeholder for implementing additional exception handling actions such as user notifications or security responses.
      */
     private fun handleSecurityException(e: Exception) {
         Log.e(TAG, "Security exception occurred", e)

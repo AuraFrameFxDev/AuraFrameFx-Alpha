@@ -117,12 +117,12 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Finds the most relevant context chain and related chains matching the given query criteria.
+     * Returns the most relevant context chain and related chains matching the given query criteria.
      *
-     * Filters active context chains by agent if specified, sorts them by most recent update, and limits the results based on configuration and query parameters. Returns a [ContextChainResult] containing the most recently updated chain (or a new chain initialized with the query if none exist), a list of related chains meeting the minimum relevance threshold, and the original query.
+     * Filters active context chains by agent (if specified), sorts them by most recent update, and limits the results based on configuration and query parameters. If no chains are found, a new chain is initialized with the query string. Related chains are included if they meet the minimum relevance threshold.
      *
      * @param query Criteria for filtering, sorting, and limiting context chains.
-     * @return A [ContextChainResult] with the selected chain, related chains, and the query.
+     * @return A [ContextChainResult] containing the selected chain, related chains, and the original query.
      */
 
   
@@ -151,10 +151,9 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Updates the context chain statistics based on the current state of all active chains.
+     * Updates context chain statistics, including total count, number of active chains, longest chain length, and last update time.
      *
-     * Recalculates and sets the total number of chains, the number of recently updated (active) chains,
-     * the length of the longest chain, and the timestamp of the last update.
+     * Recalculates statistics for all active context chains and updates the internal state accordingly.
      */
     private fun updateStats() {
         val chains = _activeContexts.value.values

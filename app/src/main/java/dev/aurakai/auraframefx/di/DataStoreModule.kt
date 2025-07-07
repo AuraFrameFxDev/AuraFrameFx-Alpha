@@ -32,7 +32,7 @@ object DataStoreModule {
     /**
      * Provides a singleton DataStore instance for storing application preferences.
      *
-     * The DataStore is configured to use a file named "aura_settings" within the application's context.
+     * The DataStore is configured to use a preferences file named "aura_settings".
      *
      * @return A DataStore instance for managing preferences.
      */

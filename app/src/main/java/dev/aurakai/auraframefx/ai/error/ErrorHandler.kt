@@ -33,7 +33,7 @@ class ErrorHandler @Inject constructor(
      * @param error The exception or error that occurred.
      * @param agent The agent associated with the error.
      * @param context A string describing the context in which the error occurred.
-     * @param metadata Additional metadata related to the error; all values are converted to strings.
+     * @param metadata Additional metadata related to the error; all values are stringified.
      * @return The created and recorded AIError instance.
      */
     fun handleError(

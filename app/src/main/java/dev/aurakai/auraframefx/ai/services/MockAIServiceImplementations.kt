@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.flowOf
 
 class MockAuraAIService : Agent {
     /**
- * Returns the fixed name of this mock AI service.
+ * Returns the name of this mock AI service.
  *
  * @return The string "MockAura".
  */
@@ -22,16 +22,16 @@ override fun getName(): String? = "MockAura"
     /**
  * Gets the agent type for this mock AI service.
  *
- * @return The AgentType.AURA enum value.
+ * @return The AgentType representing Aura AI.
  */
 override fun getType(): AgentType = AgentType.AURA /**
-     * Returns a mock AgentResponse containing the input query and context for testing purposes.
+     * Returns a mock AgentResponse containing the request query and context for testing purposes.
      *
-     * The response content includes both the request query and the provided context, with a fixed confidence score of 1.0.
+     * The response content includes the provided query and context, with a fixed confidence score of 1.0.
      *
-     * @param request The AI request with the query to echo in the response.
-     * @param context Context string to include in the response content.
-     * @return A mock AgentResponse reflecting the input query and context.
+     * @param request The AI request to process.
+     * @param context The context string to include in the response.
+     * @return A mock AgentResponse with the query and context.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         return AgentResponse(
@@ -51,7 +51,7 @@ override fun getType(): AgentType = AgentType.AURA /**
 
 class MockKaiAIService : Agent {
     /**
- * Returns the name of this mock AI service.
+ * Returns the name of the mock AI service, "MockKai".
  *
  * @return The string "MockKai".
  */
@@ -59,12 +59,12 @@ override fun getName(): String? = "MockKai"
     /**
  * Gets the agent type for this mock AI service.
  *
- * @return The AgentType.KAI value representing this mock agent.
+ * @return The AgentType.KAI value.
  */
 override fun getType(): AgentType = AgentType.KAI /**
-     * Generates a mock AgentResponse for the given AI request and context.
+     * Returns a mock AgentResponse for the given AI request and context.
      *
-     * The response content includes the request query and provided context, with a fixed confidence score of 1.0.
+     * The response content includes the request's query and the provided context, with a fixed confidence score of 1.0.
      *
      * @param request The AI request containing the query.
      * @param context Additional context to include in the response.
@@ -88,22 +88,22 @@ override fun getType(): AgentType = AgentType.KAI /**
 
 class MockCascadeAIService : Agent {
     /**
- * Returns the fixed name identifier for the mock Cascade AI service.
+ * Returns the name of the mock Cascade AI service.
  *
  * @return The string "MockCascade".
  */
 override fun getName(): String? = "MockCascade"
     /**
- * Gets the agent type for this mock service.
+ * Returns the agent type for this mock service.
  *
  * @return The AgentType.CASCADE enum value.
  */
 override fun getType(): AgentType = AgentType.CASCADE /**
-     * Returns a mock AgentResponse for CascadeAI, incorporating the provided query and context.
+     * Returns a mock AgentResponse for CascadeAI based on the provided request and context.
      *
      * @param request The AI request containing the query.
-     * @param context The context string to include in the response.
-     * @return An AgentResponse with mock content referencing the query and context, and a confidence score of 1.0.
+     * @param context The context string to include in the mock response.
+     * @return An AgentResponse with mock content and a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         return AgentResponse(
