@@ -923,7 +923,7 @@ class TestProfileIntegrationScenariosEnhanced(unittest.TestCase):
                            'temperature': 0.7,
                            'max_tokens': 1000
                        })
-                       .with_metadata({'environment': 'test'})
+                       .with_metadata({'environment': 'test'}) 
                        .with_tags(['lifecycle', 'integration'])
                        .build())
         
