@@ -13,6 +13,12 @@ import kotlin.math.sin
 /**
  * Digital landscape background component
  */
+/**
+ * Displays a digital landscape background pattern composed of evenly spaced vertical and horizontal lines.
+ *
+ * @param modifier Modifier to be applied to the Canvas.
+ * @param color The color used for the grid lines, defaulting to semi-transparent cyan.
+ */
 @Composable
 fun DigitalLandscapeBackground(
     modifier: Modifier = Modifier,
@@ -24,7 +30,11 @@ fun DigitalLandscapeBackground(
 }
 
 /**
- * Hexagon grid background component
+ * Displays a hexagon grid pattern as a background using a Canvas.
+ *
+ * @param modifier Modifier to apply to the Canvas.
+ * @param alpha Opacity of the hexagon grid lines.
+ * @param color Color of the hexagon grid lines, with alpha applied.
  */
 @Composable
 fun HexagonGridBackground(
@@ -37,6 +47,13 @@ fun HexagonGridBackground(
     }
 }
 
+/**
+ * Draws a grid pattern resembling a digital landscape on the current canvas.
+ *
+ * Vertical and horizontal lines are rendered at fixed intervals to create a uniform grid effect.
+ *
+ * @param color The color used for the grid lines.
+ */
 private fun DrawScope.drawDigitalLandscape(color: Color) {
     // Simple grid pattern for digital landscape
     val spacing = 50f
@@ -58,6 +75,13 @@ private fun DrawScope.drawDigitalLandscape(color: Color) {
     }
 }
 
+/**
+ * Draws a grid of hexagons across the canvas using the specified color.
+ *
+ * Each hexagon is positioned in a staggered pattern to form a continuous hexagonal grid.
+ *
+ * @param color The color used to stroke the hexagon outlines.
+ */
 private fun DrawScope.drawHexagonGrid(color: Color) {
     // Simple hexagon grid pattern
     val radius = 30f
@@ -79,6 +103,13 @@ private fun DrawScope.drawHexagonGrid(color: Color) {
     }
 }
 
+/**
+ * Draws a single hexagon outline centered at the specified position.
+ *
+ * @param center The center point of the hexagon.
+ * @param radius The distance from the center to each vertex of the hexagon.
+ * @param color The color used to stroke the hexagon outline.
+ */
 private fun DrawScope.drawHexagon(
     center: androidx.compose.ui.geometry.Offset,
     radius: Float,

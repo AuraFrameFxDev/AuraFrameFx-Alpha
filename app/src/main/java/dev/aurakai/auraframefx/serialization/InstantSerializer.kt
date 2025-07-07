@@ -14,10 +14,22 @@ import kotlinx.serialization.encoding.Encoder
 object InstantSerializer : KSerializer<Instant> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
     
+    /**
+     * Serializes an [Instant] value as its ISO-8601 string representation.
+     *
+     * @param encoder The encoder used to write the serialized data.
+     * @param value The [Instant] to serialize.
+     */
     override fun serialize(encoder: Encoder, value: Instant) {
         encoder.encodeString(value.toString())
     }
     
+    /**
+     * Decodes a string from the input and parses it into an [Instant].
+     *
+     * @param decoder The decoder to read the string value from.
+     * @return The parsed [Instant] instance.
+     */
     override fun deserialize(decoder: Decoder): Instant {
         return Instant.parse(decoder.decodeString())
     }

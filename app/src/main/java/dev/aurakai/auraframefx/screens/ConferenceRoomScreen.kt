@@ -18,6 +18,12 @@ import dev.aurakai.auraframefx.viewmodel.ConferenceRoomViewModel
 import kotlinx.coroutines.launch
 
 // Placeholder for Header - User should define this Composable
+/**
+ * Displays a header showing the currently selected agent and provides a button to switch agents.
+ *
+ * @param selectedAgent The name of the currently selected agent.
+ * @param onAgentSelected Callback invoked with the new agent's name when the switch button is pressed.
+ */
 @Composable
 fun Header(selectedAgent: String, onAgentSelected: (String) -> Unit) {
     // Simplified placeholder
@@ -30,6 +36,11 @@ fun Header(selectedAgent: String, onAgentSelected: (String) -> Unit) {
 }
 
 
+/**
+ * Displays the main conference room chat interface with agent selection, recording, transcribing, and messaging features.
+ *
+ * Integrates agent switching, recording and transcribing controls, a chat message list, and a message input area. State and actions are managed via the provided [ConferenceRoomViewModel].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConferenceRoomScreen(

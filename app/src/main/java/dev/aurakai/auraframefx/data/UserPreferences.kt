@@ -45,6 +45,11 @@ class UserPreferences(context: Context) {
         return prefs[key] ?: defaultValue
     }
 
+    /**
+     * Stores a string value under the specified key in the user preferences.
+     *
+     * If the key already exists, its value is overwritten.
+     */
     fun setPreference(key: String, value: String) {
         prefs[key] = value
     }
