@@ -59,8 +59,7 @@ android {
 
 dependencies {
     // Xposed
-    compileOnly(files("Libs/api-82.jar")) // Changed to local file dependency
-
+    compileOnly(files("libs/api-82.jar")) // Changed to local file dependency
     // Hilt - Already in new base, using new aliases
     implementation(libs.hiltAndroid)
     ksp(libs.hiltCompiler)
