@@ -1,5 +1,5 @@
-<<<<<<< HEAD
-=======
+
+
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.layout.*
@@ -218,4 +218,4 @@ fun ConferenceRoomScreenPreview() {
         ConferenceRoomScreen()
     }
 }
->>>>>>> f692b48 (Pending changes exported from your codespace)
+

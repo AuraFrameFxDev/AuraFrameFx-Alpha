@@ -13,6 +13,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.unit.IntOffset
 
 /**
  * KineticIdentity ⚡
@@ -247,7 +248,7 @@ object KineticIdentity {
         pauseDurationMillis: Int = 500,
         actionSpec: AnimationSpec<Float> = DaringEnter
     ): AnimationSpec<Float> = tween(
-        durationMillis = pauseDurationMillis + (actionSpec as? TweenSpec)?.durationMillis ?: STANDARD_DURATION,
+        durationMillis = pauseDurationMillis + ((actionSpec as? TweenSpec<*>)?.durationMillis ?: STANDARD_DURATION),
         easing = CubicBezierEasing(0f, 0f, 0.2f, 1f)
     )
 }
@@ -267,8 +268,8 @@ object KineticIdentity {
 fun <T> AnimationSpec<T>.afterDelay(delayMillis: Int): AnimationSpec<T> = 
     tween(
         durationMillis = delayMillis + when(this) {
-            is TweenSpec -> this.durationMillis
-            is SpringSpec -> 1000 // Estimate for spring
+            is TweenSpec<*> -> this.durationMillis
+            is SpringSpec<*> -> 1000 // Estimate for spring
             else -> KineticIdentity.STANDARD_DURATION
         }
     )

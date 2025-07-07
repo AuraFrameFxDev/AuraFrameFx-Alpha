@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete // Explicit import
-import androidx.compose.material.icons.filled.Pause // Explicit import
 import androidx.compose.material.icons.filled.PlayArrow // Explicit import
 import androidx.compose.material.icons.filled.Refresh // Explicit import
 import androidx.compose.runtime.*
@@ -478,7 +477,7 @@ fun HaloView(viewModel: GenesisAgentViewModel = viewModel<GenesisAgentViewModel>
                 onClick = { isRotating = !isRotating }
             ) {
                 Icon(
-                    if (isRotating) Icons.Default.Pause else Icons.Filled.PlayArrow,
+                    if (isRotating) Icons.Filled.PlayArrow else Icons.Filled.PlayArrow,
                     contentDescription = "Toggle rotation",
                     tint = NeonPurple
                 )

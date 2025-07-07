@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.background
@@ -175,4 +173,3 @@ fun AiChatScreenPreview() {
         AiChatScreen()
     }
 }
->>>>>>> f692b48 (Pending changes exported from your codespace)

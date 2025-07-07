@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.clickable
@@ -263,4 +261,3 @@ fun HomeScreen(navController: NavController) {
         }
     }
 }
->>>>>>> f692b48 (Pending changes exported from your codespace)

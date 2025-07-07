@@ -1,5 +1,5 @@
-<<<<<<< HEAD
-=======
+
+
 package dev.aurakai.auraframefx.viewmodel
 
 // Import for SimpleDateFormat and Date if not already covered by other viewmodel files
@@ -286,4 +286,4 @@ class DiagnosticsViewModel @Inject constructor(
 // - Implement a mechanism to handle diagnostics errors gracefully and provide user-friendly error messages
 // - Allow users to reset diagnostics data or clear logs from the UI
 // - Provide a way to view detailed diagnostics results for each check (e.g., pass
->>>>>>> f692b48 (Pending changes exported from your codespace)
+
