@@ -37,7 +37,7 @@ class SystemMonitorService : Service() {
 
     private suspend fun monitorSystem() {
         // Loop indefinitely (or until service is stopped) to perform monitoring
-        while (isActive) {
+        while (serviceScope.isActive) {
             // TODO: Implement CPU usage monitoring
             // Log.d(TAG, "Current CPU Usage: ...")
 

@@ -40,8 +40,8 @@ data class TaskScheduleRequest(
     val agentType: AgentType,
 
     /* Specific parameters for the task, varying by taskType. */
-    @Contextual @SerialName(value = "details")
-    val details: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+    @SerialName(value = "details")
+    val details: kotlin.collections.Map<kotlin.String, kotlin.String>,
 
     @SerialName(value = "priority")
     val priority: TaskScheduleRequest.Priority? = Priority.NORMAL,

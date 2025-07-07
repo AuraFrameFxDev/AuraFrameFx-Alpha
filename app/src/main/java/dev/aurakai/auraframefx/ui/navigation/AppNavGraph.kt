@@ -1,19 +1,11 @@
 package dev.aurakai.auraframefx.ui.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import dev.aurakai.auraframefx.navigation.aiContentNavigation
-import dev.aurakai.auraframefx.ui.animation.DigitalTransitions.EnterDigitalMaterialization
-import dev.aurakai.auraframefx.ui.animation.DigitalTransitions.ExitDigitalDematerialization
-import dev.aurakai.auraframefx.ui.screens.AiChatScreen
-import dev.aurakai.auraframefx.ui.screens.HomeScreen
-import dev.aurakai.auraframefx.ui.screens.OracleDriveControlScreen
+import dev.aurakai.auraframefx.ui.screens.*
+// import dev.aurakai.auraframefx.navigation.aiContentNavigation // Disabled for beta
 import dev.aurakai.auraframefx.ui.screens.ProfileScreen
 import dev.aurakai.auraframefx.ui.screens.SettingsScreen
 
@@ -33,87 +25,38 @@ fun AppNavGraph(navController: NavHostController) {
         startDestination = NavDestination.Home.route
     ) {
         composable(
-            route = NavDestination.Home.route,
-            enterTransition = {
-                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) +
-                        fadeIn(animationSpec = tween(300)) +
-                        EnterDigitalMaterialization
-            },
-            exitTransition = {
-                slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left) +
-                        fadeOut(animationSpec = tween(300)) +
-                        ExitDigitalDematerialization
-            }
+            route = NavDestination.Home.route
         ) {
             HomeScreen(navController = navController)
         }
 
         composable(
-            route = NavDestination.AiChat.route,
-            enterTransition = {
-                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) +
-                        fadeIn(animationSpec = tween(300)) +
-                        EnterDigitalMaterialization
-            },
-            exitTransition = {
-                slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right) +
-                        fadeOut(animationSpec = tween(300)) +
-                        ExitDigitalDematerialization
-            }
+            route = NavDestination.AiChat.route
         ) {
             AiChatScreen()
         }
 
         composable(
-            route = NavDestination.Profile.route,
-            enterTransition = {
-                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up) +
-                        fadeIn(animationSpec = tween(300)) +
-                        EnterDigitalMaterialization
-            },
-            exitTransition = {
-                slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down) +
-                        fadeOut(animationSpec = tween(300)) +
-                        ExitDigitalDematerialization
-            }
+            route = NavDestination.Profile.route
         ) {
             ProfileScreen()
         }
 
         composable(
-            route = NavDestination.Settings.route,
-            enterTransition = {
-                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Down) +
-                        fadeIn(animationSpec = tween(300)) +
-                        EnterDigitalMaterialization
-            },
-            exitTransition = {
-                slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Up) +
-                        fadeOut(animationSpec = tween(300)) +
-                        ExitDigitalDematerialization
-            }
+            route = NavDestination.Settings.route
         ) {
             SettingsScreen()
         }
 
         composable(
-            route = NavDestination.OracleDriveControl.route,
-            enterTransition = {
-                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) +
-                        fadeIn(animationSpec = tween(300)) +
-                        EnterDigitalMaterialization
-            },
-            exitTransition = {
-                slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right) +
-                        fadeOut(animationSpec = tween(300)) +
-                        ExitDigitalDematerialization
-            }
+            route = NavDestination.OracleDriveControl.route
         ) {
-            OracleDriveControlScreen()
+            // TODO: Create OracleDriveControlScreen()
+            HomeScreen(navController = navController) // Temporary placeholder
         }
         
         // Add AI Content navigation
-        aiContentNavigation()
+        // aiContentNavigation() // Disabled for beta - AI content will be in main chat
 
         // Add more composable destinations as needed
     }

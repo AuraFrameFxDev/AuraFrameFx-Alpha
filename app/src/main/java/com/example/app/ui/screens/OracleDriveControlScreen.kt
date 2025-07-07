@@ -32,7 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app.viewmodel.OracleDriveControlViewModel
 import dev.aurakai.auraframefx.R
 import kotlinx.coroutines.launch
@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun OracleDriveControlScreen(
-    viewModel: OracleDriveControlViewModel = hiltViewModel(),
+    viewModel: OracleDriveControlViewModel = viewModel(),
 ) {
     val context = LocalContext.current
     val isConnected by viewModel.isServiceConnected.collectAsState()

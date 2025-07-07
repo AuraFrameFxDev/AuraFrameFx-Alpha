@@ -1,8 +1,10 @@
 package dev.aurakai.auraframefx.di
 
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.aurakai.auraframefx.ai.services.NeuralWhisper
 import javax.inject.Singleton
@@ -13,7 +15,7 @@ object NeuralWhisperModule {
 
     @Provides
     @Singleton
-    fun provideNeuralWhisper(): NeuralWhisper {
-        return NeuralWhisper()
+    fun provideNeuralWhisper(@ApplicationContext context: Context): NeuralWhisper {
+        return NeuralWhisper(context)
     }
 }

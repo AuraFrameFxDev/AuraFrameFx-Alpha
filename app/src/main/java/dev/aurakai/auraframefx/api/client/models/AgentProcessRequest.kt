@@ -35,8 +35,8 @@ data class AgentProcessRequest(
     val prompt: kotlin.String,
 
     /* Additional context (e.g., previous messages, data references). */
-    @Contextual @SerialName(value = "context")
-    val context: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    @SerialName(value = "context")
+    val context: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,
 
     )
 

@@ -59,7 +59,7 @@ class GenesisAgent @Inject constructor(
     val context: StateFlow<Map<String, Any>> = _context
     
     private val _agentRegistry = mutableMapOf<String, Agent>()
-    private val _history = mutableListOf<String>()
+    private val _history = mutableListOf<Map<String, Any>>()
     
     val agentRegistry: Map<String, Agent> get() = _agentRegistry
     

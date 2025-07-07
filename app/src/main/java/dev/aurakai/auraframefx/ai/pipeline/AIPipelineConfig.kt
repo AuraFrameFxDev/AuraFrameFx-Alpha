@@ -7,6 +7,10 @@ data class AIPipelineConfig(
     val timeoutSeconds: Int = 30,
     val contextWindowSize: Int = 5,
     val priorityThreshold: Float = 0.7f,
+    val priorityWeight: Float = 0.4f,
+    val urgencyWeight: Float = 0.4f,
+    val importanceWeight: Float = 0.2f,
+    val maxActiveTasks: Int = 10,
     val agentPriorities: Map<AgentType, Float> = mapOf(
         AgentType.GENESIS to 1.0f,
         AgentType.KAI to 0.9f,

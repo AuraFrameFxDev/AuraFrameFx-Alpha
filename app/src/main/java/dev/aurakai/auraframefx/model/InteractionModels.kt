@@ -50,14 +50,6 @@ enum class CreativeIntent {
     EMOTIONAL
 }
 
-@Serializable
-data class SecurityAnalysis(
-    val threatLevel: ThreatLevel,
-    val description: String,
-    val recommendedActions: List<String>,
-    val confidence: Float
-)
-
 /**
  * Represents interaction types
  */

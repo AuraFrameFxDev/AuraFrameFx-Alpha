@@ -4,6 +4,8 @@ import android.content.Context
 
 /**
  * Extension function to provide access to the YukiHookModulePrefs from a Context
+ * Simplified version without parasitic dependencies
  */
-val Context.hook: com.highcapable.yukihookapi.hook.xposed.parasitic.activity.base.ModuleAppCompatActivity
-    get() = this as com.highcapable.yukihookapi.hook.xposed.parasitic.activity.base.ModuleAppCompatActivity
+fun Context.getAppName(): String {
+    return this.packageManager.getApplicationLabel(this.applicationInfo).toString()
+}
