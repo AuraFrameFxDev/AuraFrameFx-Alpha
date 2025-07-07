@@ -45,6 +45,12 @@ class UserPreferences(context: Context) {
         return prefs[key] ?: defaultValue
     }
 
+    /**
+     * Stores a string value associated with the specified key in the preferences.
+     *
+     * @param key The preference key.
+     * @param value The value to store.
+     */
     fun setPreference(key: String, value: String) {
         prefs[key] = value
     }

@@ -35,6 +35,11 @@ class SystemMonitorService : Service() {
         return START_STICKY
     }
 
+    /**
+     * Periodically performs system monitoring tasks while the service is active.
+     *
+     * This suspend function runs in a loop, intended to collect and process system metrics such as CPU usage, memory usage, battery status, and network activity at regular intervals.
+     */
     private suspend fun monitorSystem() {
         // Loop indefinitely (or until service is stopped) to perform monitoring
         while (serviceScope.isActive) {
