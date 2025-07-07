@@ -49,6 +49,23 @@ class SecurityContext @Inject constructor(
     private val _securityState = MutableStateFlow(SecurityState())
     val securityState: StateFlow<SecurityState> = _securityState.asStateFlow()
 
+    /**
+     * Stub for content validation. In production, this should check for policy violations, threats, etc.
+     */
+    fun validateContent(content: String) {
+        // TODO: Implement real validation logic
+        // For now, always allow
+    }
+
+    /**
+     * Validate image data for security compliance
+     */
+    fun validateImageData(imageData: ByteArray) {
+        // TODO: Implement real image validation logic
+        // For now, always allow
+        Log.d(TAG, "Validating image data of size: ${imageData.size} bytes")
+    }
+
     private val _threatDetectionActive = MutableStateFlow(false)
     val threatDetectionActive: StateFlow<Boolean> = _threatDetectionActive.asStateFlow()
 
@@ -349,7 +366,7 @@ class SecurityContext @Inject constructor(
      * @return The calculated overall threat level.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
-        if (threats.isEmpty()) return ThreatLevel.NONE
+        if (threats.isEmpty()) return ThreatLevel.LOW
 
         val hasCritical = threats.any { it.severity == ThreatSeverity.CRITICAL }
         val hasHigh = threats.any { it.severity == ThreatSeverity.HIGH }
@@ -422,7 +439,7 @@ class SecurityContext @Inject constructor(
 @Serializable
 data class SecurityState(
     val detectedThreats: List<SecurityThreat> = emptyList(),
-    val threatLevel: ThreatLevel = ThreatLevel.NONE,
+    val threatLevel: ThreatLevel = ThreatLevel.LOW,
     val lastScanTime: Long = 0,
     val errorState: Boolean = false,
     val errorMessage: String? = null,

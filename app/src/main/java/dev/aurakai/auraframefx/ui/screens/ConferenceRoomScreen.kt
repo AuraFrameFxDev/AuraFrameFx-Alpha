@@ -1,7 +1,7 @@
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn // Added import
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -10,8 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.aurakai.auraframefx.R // Added import
+import dev.aurakai.auraframefx.R
 import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonPurple
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
@@ -115,7 +116,7 @@ fun ConferenceRoomScreen() {
             TextField(
                 value = "",
                 onValueChange = { /* TODO: Handle input */ },
-                placeholder = { Text(stringResource(R.string.type_your_message)) },
+                placeholder = { Text("Type your message...") },
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp),
@@ -169,7 +170,7 @@ fun RecordingButton(
     isRecording: Boolean,
     onClick: () -> Unit,
 ) {
-    val icon = if (isRecording) Icons.Default.Stop else Icons.Default.FiberManualRecord
+    val icon = if (isRecording) Icons.Default.Stop else Icons.Default.Circle
     val color = if (isRecording) Color.Red else NeonPurple
 
     IconButton(
@@ -191,7 +192,7 @@ fun TranscribeButton(
     isTranscribing: Boolean,
     onClick: () -> Unit,
 ) {
-    val icon = if (isTranscribing) Icons.Default.Stop else Icons.Default.VoiceChat
+    val icon = if (isTranscribing) Icons.Default.Stop else Icons.Default.Phone
     val color = if (isTranscribing) Color.Red else NeonBlue
 
     IconButton(

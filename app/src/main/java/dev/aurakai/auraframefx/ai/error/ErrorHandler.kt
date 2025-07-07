@@ -39,7 +39,7 @@ class ErrorHandler @Inject constructor(
             type = errorType,
             message = errorMessage,
             context = context,
-            metadata = metadata
+            metadata = metadata.mapValues { it.value.toString() }
         )
 
         _errors.update { current ->

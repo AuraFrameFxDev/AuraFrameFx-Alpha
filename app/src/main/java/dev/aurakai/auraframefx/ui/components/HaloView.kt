@@ -13,8 +13,11 @@ import androidx.compose.material.icons.filled.Delete // Explicit import
 import androidx.compose.material.icons.filled.Pause // Explicit import
 import androidx.compose.material.icons.filled.PlayArrow // Explicit import
 import androidx.compose.material.icons.filled.Refresh // Explicit import
+import androidx.compose.runtime.*
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset

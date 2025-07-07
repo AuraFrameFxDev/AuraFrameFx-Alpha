@@ -28,7 +28,7 @@ class AuraFxContentApiClient @Inject constructor(
         prompt: String,
         maxTokens: Int? = null,
         temperature: Float? = null,
-    ): AIContentApi.ResponseType = withContext(Dispatchers.IO) {
+    ): Any = withContext(Dispatchers.IO) { // Temporary: Use Any instead of missing ResponseType
 
         aiContentApi.aiGenerateTextPost(
             GenerateTextRequest(
@@ -49,7 +49,7 @@ class AuraFxContentApiClient @Inject constructor(
     suspend fun generateImageDescription(
         imageUrl: String,
         context: String? = null,
-    ): GenerateImageDescriptionResponse = withContext(Dispatchers.IO) {
+    ): Any = withContext(Dispatchers.IO) { // Temporary: Use Any instead of missing GenerateImageDescriptionResponse
 
         aiContentApi.aiGenerateImageDescriptionPost(
             GenerateImageDescriptionRequest(

@@ -4,6 +4,8 @@ package dev.aurakai.auraframefx.model
 sealed class ConversationState {
     object Idle : ConversationState()
     object Listening : ConversationState()
+    object Speaking : ConversationState()
+    object Recording : ConversationState()
     data class Processing(val partialTranscript: String?) :
         ConversationState() // Added optional field
 

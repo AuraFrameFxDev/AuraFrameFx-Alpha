@@ -19,7 +19,13 @@ object VertexAIUtils {
     fun createVertexAIConfig(apiKey: String? = null): VertexAIConfig {
         // TODO: Reported as unused. Implement actual config creation or remove.
         Log.d(TAG, "createVertexAIConfig called. API Key present: ${apiKey != null}")
-        return VertexAIConfig(apiKey = apiKey)
+        return VertexAIConfig(
+            projectId = "default-project",
+            location = "us-central1",
+            endpoint = "us-central1-aiplatform.googleapis.com",
+            modelName = "gemini-pro",
+            apiKey = apiKey
+        )
     }
 
     /**
@@ -57,7 +63,7 @@ object VertexAIUtils {
     fun validate(_config: VertexAIConfig?): Boolean {
         // TODO: Reported as unused. Implement actual validation logic.
         val isValid =
-            _config != null && _config.projectId.isNotBlank() && _config.region?.isNotBlank() == true // Safe call for nullable region
+            _config != null && _config.projectId.isNotBlank() && _config.location.isNotBlank()
         Log.d(TAG, "Validating config: ${isValid}")
         return isValid
     }
@@ -74,7 +80,7 @@ object VertexAIUtils {
         // This would involve initializing VertexAI with the config, creating a GenerativeModel,
         // and calling generateContent with error handling.
         if (!validate(_config)) {
-            logErrors(message = "Invalid VertexAIConfig for prompt: $_prompt")
+            logErrors(_message = "Invalid VertexAIConfig for prompt: $_prompt")
             return null
         }
         Log.d(TAG, "safeGenerateContent called with prompt: $_prompt")

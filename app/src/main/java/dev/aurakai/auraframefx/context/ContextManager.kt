@@ -2,9 +2,16 @@ package dev.aurakai.auraframefx.context
 
 import dev.aurakai.auraframefx.utils.AuraFxLogger
 import dev.aurakai.auraframefx.ai.*
+import dev.aurakai.auraframefx.model.InteractionData
+import dev.aurakai.auraframefx.model.EnhancedInteractionData
+import dev.aurakai.auraframefx.model.InteractionResponse
+import dev.aurakai.auraframefx.model.InteractionType
+import dev.aurakai.auraframefx.model.SecurityAnalysis
+import dev.aurakai.auraframefx.model.ThreatLevel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.json.Json
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -98,10 +105,11 @@ class ContextManager @Inject constructor(
         val suggestedAgent = suggestOptimalAgent(interaction)
         
         return EnhancedInteractionData(
-            original = interaction,
-            enhancedContext = relevantContext,
-            suggestedAgent = suggestedAgent,
-            priority = calculatePriority(interaction)
+            content = interaction.content,
+            type = InteractionType.TEXT,
+            timestamp = System.currentTimeMillis().toString(),
+            context = mapOf("relevant" to relevantContext),
+            enrichmentData = mapOf("suggested_agent" to suggestedAgent, "priority" to calculatePriority(interaction).toString())
         )
     }
 
@@ -116,10 +124,10 @@ class ContextManager @Inject constructor(
         val entry = ConversationEntry(
             timestamp = System.currentTimeMillis(),
             userInput = interaction.content,
-            agentResponse = response.response,
+            agentResponse = response.content,
             agentType = response.agent,
             confidence = response.confidence,
-            metadata = interaction.metadata + response.metadata
+            metadata = mapOf("interaction_data" to interaction.content)
         )
         
         conversationHistory.add(entry)
@@ -299,10 +307,11 @@ class ContextManager @Inject constructor(
      */
     private fun calculatePriority(interaction: InteractionData): Int {
         return when (interaction.type) {
-            InteractionType.SECURITY_QUERY -> 10
-            InteractionType.COMPLEX_ANALYSIS -> 8
-            InteractionType.CREATIVE_REQUEST -> 6
-            InteractionType.GENERAL -> 4
+            "security" -> 10
+            "analysis" -> 8  
+            "creative" -> 6
+            "text" -> 4
+            else -> 2
         }
     }
 
@@ -366,7 +375,7 @@ class ContextManager @Inject constructor(
 data class ContextData(
     val id: String,
     val createdAt: Long,
-    val data: MutableMap<String, Any>,
+    @Contextual val data: MutableMap<String, Any>,
     var accessCount: Int,
     var lastAccessTime: Long
 )
@@ -378,7 +387,7 @@ data class ConversationEntry(
     val agentResponse: String,
     val agentType: String,
     val confidence: Float,
-    val metadata: Map<String, Any>
+    @Contextual val metadata: Map<String, Any>
 )
 
 @Serializable
