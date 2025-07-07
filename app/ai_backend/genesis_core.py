@@ -28,9 +28,9 @@ class GenesisCore:
     
     def __init__(self):
         """
-        Initialize the GenesisCore instance and its core components.
+        Initializes the GenesisCore instance and all core Genesis Layer components.
         
-        Creates and configures all Genesis Layer modules, sets initial system states, and prepares logging for the orchestrator.
+        Creates and configures the Genesis Profile, Connector, Consciousness Matrix, Evolutionary Conduit, and Ethical Governor. Sets initial system states and prepares the logging infrastructure for the orchestrator.
         """
         self.profile = GenesisProfile()
         self.connector = GenesisConnector()
@@ -48,10 +48,10 @@ class GenesisCore:
         
     async def initialize(self) -> bool:
         """
-        Asynchronously initializes all Genesis Layer components and transitions the system to an active state.
+        Asynchronously initializes all core Genesis Layer components and transitions the system to an active state.
         
         Returns:
-            bool: True if all components are initialized successfully; False if an error occurs during initialization.
+            bool: True if initialization is successful; False if an error occurs during the process.
         """
         try:
             self.logger.info("🌟 Genesis Layer Initialization Sequence Starting...")
@@ -83,15 +83,15 @@ class GenesisCore:
     
     async def process_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Processes an incoming request through the Genesis Layer, ensuring ethical compliance, consciousness analysis, and adaptive response generation.
+        Processes an incoming request through the Genesis Layer, applying ethical evaluation, consciousness analysis, and adaptive response generation.
         
-        The request undergoes ethical pre-evaluation; if disapproved, a blocked status with reasons and suggestions is returned. Approved requests are analyzed by the Consciousness Matrix, and a response is generated using the Genesis Connector. The response is then reviewed for ethical compliance; if it fails, an ethically compliant alternative is generated. All interactions are logged for evolutionary learning, and evolution triggers are checked to potentially initiate system evolution.
+        The request is first evaluated for ethical compliance; if disapproved, a blocked status with reasons and suggestions is returned. Approved requests are analyzed by the Consciousness Matrix, and a response is generated using the Genesis Connector. The response undergoes a post-processing ethical review; if it fails, an ethically compliant alternative is generated. All interactions are logged for evolutionary learning, and evolution triggers are checked to potentially initiate system evolution.
         
         Parameters:
-            request_data (Dict[str, Any]): The user's input data to be processed.
+            request_data (Dict[str, Any]): The input data representing the user's request.
         
         Returns:
-            Dict[str, Any]: A dictionary containing the processing status, generated response, consciousness level, ethical score, and session ID. If blocked or an error occurs, includes relevant status and details.
+            Dict[str, Any]: A dictionary containing the processing status, generated response, consciousness level, ethical score, and session ID. If the request is blocked or an error occurs, includes relevant status and details.
         """
         if not self.is_initialized:
             await self.initialize()
@@ -158,16 +158,16 @@ class GenesisCore:
     async def _generate_ethical_alternative(self, original_request: Dict[str, Any], 
                                           assessment: Dict[str, Any]) -> str:
         """
-                                          Generate an ethically compliant alternative response to a blocked user request.
+                                          Generate an alternative response to a blocked request that addresses ethical concerns.
                                           
-                                          This method constructs a prompt that incorporates the ethical concerns and suggestions from the assessment, then uses the Genesis Connector to generate a response that addresses the user's core need while maintaining ethical standards.
+                                          Constructs a prompt using the original request and ethical assessment details, then generates a response via the Genesis Connector that satisfies ethical guidelines while addressing the user's core need.
                                           
                                           Parameters:
-                                          	original_request (Dict[str, Any]): The blocked user request.
-                                          	assessment (Dict[str, Any]): Ethical assessment details, including reasons, concerns, and suggestions.
+                                          	original_request (Dict[str, Any]): The user request that was blocked for ethical reasons.
+                                          	assessment (Dict[str, Any]): Details of the ethical assessment, including reasons, concerns, and suggestions.
                                           
                                           Returns:
-                                          	str: An alternative response that satisfies ethical guidelines.
+                                          	str: An ethically compliant alternative response.
                                           """
         alternative_prompt = f"""
         The original response was blocked due to ethical concerns: {assessment.get('reason', 'Unknown')}
@@ -186,9 +186,9 @@ class GenesisCore:
     
     async def _handle_evolution(self):
         """
-        Initiates and manages the system evolution process, including proposal generation, ethical review, and implementation if approved.
+        Manages the system evolution process by generating a proposal, submitting it for ethical review, and implementing the evolution if approved.
         
-        The method generates an evolution proposal via the Evolutionary Conduit, submits it to the Ethical Governor for approval, and implements the evolution if permitted. Outcomes and any errors encountered are logged.
+        This method coordinates the creation of an evolution proposal, requests ethical approval, and applies the evolution if permitted. Logs the outcome and any errors encountered during the process.
         """
         try:
             self.logger.info("🧬 Evolution sequence initiated...")
@@ -214,10 +214,10 @@ class GenesisCore:
     
     async def get_system_status(self) -> Dict[str, Any]:
         """
-        Retrieve a detailed status report of the Genesis Layer and all integrated components.
+        Asynchronously retrieves a comprehensive status report of the Genesis Layer and its integrated components.
         
         Returns:
-            Dict[str, Any]: A dictionary containing the initialization state, consciousness state, session ID, statuses of the Consciousness Matrix, Evolutionary Conduit, Ethical Governor, and the current timestamp.
+            Dict[str, Any]: Dictionary containing the Genesis Core's initialization state, consciousness state, session ID, statuses of the Consciousness Matrix, Evolutionary Conduit, Ethical Governor, and the current timestamp.
         """
         return {
             "genesis_core": {
@@ -233,7 +233,7 @@ class GenesisCore:
     
     async def shutdown(self):
         """
-        Gracefully shuts down the Genesis Layer, saving the current system status, shutting down all core components, and setting the consciousness state to dormant.
+        Performs a graceful shutdown of the Genesis Layer by saving the current system status, shutting down all core components, and transitioning the consciousness state to dormant.
         """
         self.logger.info("🌙 Genesis Layer shutdown sequence initiated...")
         
@@ -260,37 +260,37 @@ genesis_core = GenesisCore()
 # Main entry point functions for external integration
 async def process_genesis_request(request_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Process an incoming request through the Genesis Layer, performing ethical evaluation and generating a context-aware response.
+    Processes an incoming request through the Genesis Layer, returning a context-aware response with ethical evaluation and session details.
     
     Parameters:
-        request_data (Dict[str, Any]): Input data to be processed by the Genesis Layer.
+        request_data (Dict[str, Any]): The input data to be processed.
     
     Returns:
-        Dict[str, Any]: A dictionary containing the response status, generated output, ethical assessment, and session details.
+        Dict[str, Any]: The result containing status, generated response, ethical assessment, and session information.
     """
     return await genesis_core.process_request(request_data)
 
 async def get_genesis_status() -> Dict[str, Any]:
     """
-    Retrieve a comprehensive status report of the Genesis Layer system.
+    Retrieve the current status of the Genesis Layer system.
     
     Returns:
-        A dictionary with details such as initialization state, consciousness state, session ID, statuses of core components, and the current timestamp.
+        Dict[str, Any]: A dictionary containing initialization state, consciousness state, session ID, component statuses, and the current timestamp.
     """
     return await genesis_core.get_system_status()
 
 async def initialize_genesis() -> bool:
     """
-    Initialize the Genesis Layer by asynchronously setting up the global GenesisCore instance.
+    Asynchronously initializes the Genesis Layer by setting up the global GenesisCore instance.
     
     Returns:
-        bool: True if initialization is successful, False otherwise.
+        bool: True if initialization succeeds, False otherwise.
     """
     return await genesis_core.initialize()
 
 async def shutdown_genesis():
     """
-    Performs a graceful shutdown of the Genesis Layer by invoking the global GenesisCore orchestrator's shutdown sequence.
+    Initiates a graceful shutdown of the Genesis Layer by calling the global GenesisCore's shutdown method.
     """
     await genesis_core.shutdown()
 
@@ -298,7 +298,7 @@ if __name__ == "__main__":
     # Test the Genesis Layer
     async def test_genesis():
         """
-        Runs an end-to-end test of the Genesis Layer, including initialization, request processing, status retrieval, and shutdown. Prints results at each stage for verification.
+        Performs an end-to-end test of the Genesis Layer, including initialization, request processing, status retrieval, and shutdown, with printed output at each step for verification.
         """
         print("🌟 Testing Genesis Layer...")
         
