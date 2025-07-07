@@ -4,8 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import dev.aurakai.auraframefx.ui.screens.*
-// import dev.aurakai.auraframefx.navigation.aiContentNavigation // Disabled for beta
+import dev.aurakai.auraframefx.navigation.aiContentNavigation
+import dev.aurakai.auraframefx.ui.transitions.DigitalTransitions.EnterDigitalMaterialization
+import dev.aurakai.auraframefx.ui.transitions.DigitalTransitions.ExitDigitalDematerialization
+import dev.aurakai.auraframefx.ui.screens.AiChatScreen
+import dev.aurakai.auraframefx.ui.screens.HomeScreen
+import dev.aurakai.auraframefx.ui.screens.OracleDriveControlScreen
 import dev.aurakai.auraframefx.ui.screens.ProfileScreen
 import dev.aurakai.auraframefx.ui.screens.SettingsScreen
 
