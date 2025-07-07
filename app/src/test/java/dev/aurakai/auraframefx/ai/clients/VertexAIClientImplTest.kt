@@ -820,7 +820,7 @@ class VertexAIClientImplTest {
             coVerify(exactly = locations.size) { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) }
         }
     }
-}
+
     @Nested
     @DisplayName("Advanced Error Handling Tests")
     inner class AdvancedErrorHandlingTests {
@@ -969,8 +969,6 @@ class VertexAIClientImplTest {
             val invalidModels = listOf("invalid/model", "model with spaces", "model@special")
             
             invalidModels.forEach { invalidModel ->
-                // Assuming the implementation validates model names
-                // This would need to be adjusted based on actual validation logic
                 assertDoesNotThrow {
                     runBlocking { vertexAIClient.generateContent(prompt, invalidModel) }
                 }
@@ -1414,7 +1412,6 @@ class VertexAIClientImplTest {
                 runBlocking { secureClient.generateContent(prompt, validModel) }
             }
 
-            // Verify that sensitive information is not exposed in the exception message
             assertFalse(exception.message?.contains(sensitiveApiKey) == true)
         }
 
@@ -1517,13 +1514,11 @@ class VertexAIClientImplTest {
             every { mockResponse.body() } returns expectedResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
 
-            // Create a new client instance for cleanup testing
             val disposableClient = VertexAIClientImpl(httpClient, validApiKey, validProjectId, validLocation)
             
             val result = disposableClient.generateContent(prompt, validModel)
             assertEquals("Cleanup test response", result)
             
-            // Verify the client can be used normally
             coVerify { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) }
         }
 

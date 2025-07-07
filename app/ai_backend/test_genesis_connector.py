@@ -6,6 +6,7 @@ import json
 from datetime import datetime, timedelta
 import logging
 from typing import Dict, List, Optional, Any
+import sys
 
 # Import the module under test
 try:
@@ -677,13 +678,6 @@ class TestGenesisConnectorIntegration(unittest.TestCase):
             self.assertEqual(result['data'], 'test')
 
 
-if __name__ == '__main__':
-    # Run tests with unittest
-    unittest.main(verbosity=2)
-    
-    # Alternative: Run with pytest if available
-    # pytest.main([__file__, '-v'])
-
 class TestGenesisConnectorEdgeCases(unittest.TestCase):
     """
     Additional edge case tests for GenesisConnector class.
@@ -1198,8 +1192,6 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         
         This test formats a series of large payloads and checks that the reference count for the connector remains within a reasonable range, indicating no significant memory leaks.
         """
-        import sys
-        
         # Get initial memory usage
         initial_refs = sys.getrefcount(self.connector)
         
@@ -1228,7 +1220,6 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         This test spawns several threads, each updating the connector's configuration, and asserts that all updates complete successfully.
         """
         import threading
-        import time
         
         results = []
         
@@ -1373,7 +1364,6 @@ class TestGenesisConnectorPerformance(unittest.TestCase):
         Checks for memory leaks by performing repeated payload formatting and header generation, ensuring object count does not increase significantly after garbage collection.
         """
         import gc
-        import sys
         
         # Force garbage collection
         gc.collect()
@@ -1538,8 +1528,6 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
         """
         Tests payload formatting with numeric edge cases, including extreme integer and floating-point values, to ensure correct handling or appropriate exceptions.
         """
-        import sys
-        
         numeric_test_cases = [
             0,
             1,
@@ -1564,10 +1552,6 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
                     # Expected for some boundary cases
                     pass
 
-
-if __name__ == '__main__':
-    # Run all test classes
-    unittest.main(verbosity=2)
 
 class TestGenesisConnectorAdvancedSecurity(unittest.TestCase):
     """
@@ -1759,7 +1743,6 @@ class TestGenesisConnectorAsyncOperations(unittest.TestCase):
                 return self.connector.send_request(payload)
         
         # Run the async operation
-        import asyncio
         try:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
@@ -1793,7 +1776,6 @@ class TestGenesisConnectorAsyncOperations(unittest.TestCase):
             tasks = [make_async_request(i) for i in range(10)]
             return await asyncio.gather(*tasks)
         
-        import asyncio
         try:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
@@ -2223,5 +2205,8 @@ class TestGenesisConnectorObservability(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # Run all test classes including the new ones
+    # Run tests with unittest
     unittest.main(verbosity=2)
+    
+    # Alternative: Run with pytest if available
+    # pytest.main([__file__, '-v'])
