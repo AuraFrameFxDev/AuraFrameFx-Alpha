@@ -53,7 +53,7 @@ android {
 
     sourceSets {
         main {
-            kotlin.srcDirs(file("${layout.buildDirectory.get().asFile}/generated/kotlin"))
+            kotlin.srcDir(project.layout.buildDirectory.dir("generated/kotlin"))
             // If a Java client is also generated to "build/generated/openapi/src/main/java", add:
             // java.srcDirs(file("${layout.buildDirectory.get().asFile}/generated/openapi/src/main/java"))
         }
