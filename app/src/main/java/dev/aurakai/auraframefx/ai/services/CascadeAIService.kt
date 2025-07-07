@@ -77,11 +77,11 @@ override fun getType(): AgentType = AgentType.CASCADE
     }
 
     private fun processContextRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
-        // Coordinate with Aura and Kai
-        val auraResponse = auraService.processRequestFlow(request).first() // Assumes AuraAIService has this method matching Agent iface
-        val kaiResponse = kaiService.processRequestFlow(request).first()   // Assumes KaiAIService has this method matching Agent iface
-
         return flow {
+            // Coordinate with Aura and Kai
+            val auraResponse = auraService.processRequestFlow(request).first() // Assumes AuraAIService has this method matching Agent iface
+            val kaiResponse = kaiService.processRequestFlow(request).first()   // Assumes KaiAIService has this method matching Agent iface
+            
             emit(
                 AgentResponse(
                     content = "Aura: ${auraResponse.content}, Kai: ${kaiResponse.content}",
@@ -127,22 +127,14 @@ override fun getType(): AgentType = AgentType.CASCADE
         }
     }
 
-    // connect and disconnect are not part of Agent interface
-    fun connect(): Boolean { // Removed suspend
-        // Assuming auraService and kaiService have connect methods
-        return auraService.connect() && kaiService.connect()
-    }
-
-    fun disconnect(): Boolean { // Removed suspend
-        // Assuming auraService and kaiService have disconnect methods
-        return auraService.disconnect() && kaiService.disconnect()
-    }
+    // connect and disconnect are not part of Agent interface - removing these methods
+    // as they cause unresolved reference errors
 
     // These methods are not part of the Agent interface, so remove 'override'
     fun getCapabilities(): Map<String, Any> {
         return mapOf(
             "name" to "Cascade",
-            "type" to ApiAgentType.CASCADE,
+            "type" to "CASCADE",
             "service_implemented" to true
         )
     }

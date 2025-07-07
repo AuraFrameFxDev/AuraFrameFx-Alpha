@@ -102,7 +102,7 @@ class ConferenceRoomViewModel @Inject constructor(
                 AiRequest(
                     query = message,
                     type = "text",
-                    context = context
+                    context = mapOf("userContext" to context)
                 )
             )
 
@@ -110,7 +110,7 @@ class ConferenceRoomViewModel @Inject constructor(
                 AiRequest(
                     query = message,
                     type = "text",
-                    context = context
+                    context = mapOf("userContext" to context)
                 )
             )
 
@@ -118,7 +118,7 @@ class ConferenceRoomViewModel @Inject constructor(
                 AiRequest(
                     query = message,
                     type = "context",
-                    context = context
+                    context = mapOf("userContext" to context)
                 )
             )
 

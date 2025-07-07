@@ -24,17 +24,17 @@ data class BottomNavItem(
 val bottomNavItems = listOf(
     BottomNavItem(
         title = "Home",
-        icon = android.R.drawable.ic_menu_home,
+        icon = android.R.drawable.ic_dialog_info,
         route = Routes.Home
     ),
     BottomNavItem(
         title = "AI",
-        icon = android.R.drawable.ic_menu_search,
+        icon = android.R.drawable.ic_dialog_info,
         route = Routes.AIContent
     ),
     BottomNavItem(
         title = "Conference",
-        icon = android.R.drawable.ic_menu_call,
+        icon = android.R.drawable.ic_dialog_info,
         route = Routes.ConferenceRoom
     ),
     BottomNavItem(

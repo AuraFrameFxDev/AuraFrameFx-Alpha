@@ -5,7 +5,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 object JsonUtils {
-    private val json = Json {
+    internal val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
         prettyPrint = true

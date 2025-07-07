@@ -3,10 +3,14 @@ package dev.aurakai.auraframefx.ai.task.execution
 import dev.aurakai.auraframefx.ai.agents.AuraAgent
 import dev.aurakai.auraframefx.ai.agents.KaiAgent
 import dev.aurakai.auraframefx.ai.agents.GenesisAgent
-import dev.aurakai.auraframefx.utils.AuraFxLogger
+import dev.aurakai.auraframefx.ai.task.TaskResult
+import dev.aurakai.auraframefx.ai.task.TaskStatus
+import dev.aurakai.auraframefx.data.logging.AuraFxLogger
 import dev.aurakai.auraframefx.security.SecurityContext
 import dev.aurakai.auraframefx.model.AgentType
-import dev.aurakai.auraframefx.ai.*
+import dev.aurakai.auraframefx.model.AgentResponse
+import dev.aurakai.auraframefx.model.AgentRequest
+import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.serialization.Serializable
@@ -28,13 +32,13 @@ class TaskExecutionManager @Inject constructor(
     private val genesisAgent: GenesisAgent,
     private val securityContext: SecurityContext,
     private val logger: AuraFxLogger
-) {
+                                         ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
     // Task management
     private val taskQueue = PriorityBlockingQueue<TaskExecution>(100, TaskPriorityComparator())
     private val activeExecutions = ConcurrentHashMap<String, TaskExecution>()
-    private val completedExecutions = ConcurrentHashMap<String, TaskResult>()
+    private val completedExecutions = ConcurrentHashMap<String, dev.aurakai.auraframefx.ai.task.TaskResult>()
     
     // State management
     private val _executionStats = MutableStateFlow(ExecutionStats())
@@ -69,7 +73,7 @@ class TaskExecutionManager @Inject constructor(
         agentPreference: String? = null,
         scheduledTime: Long? = null
     ): TaskExecution {
-        logger.info("TaskExecutionManager", "Scheduling task: $type")
+        logger.i("TaskExecutionManager", "Scheduling task: $type")
         
         // Security validation
         securityContext.validateRequest("task_schedule", data.toString())
@@ -78,8 +82,20 @@ class TaskExecutionManager @Inject constructor(
         val execution = TaskExecution(
             id = UUID.randomUUID().toString(),
             taskId = UUID.randomUUID().toString(),
-            agent = agentPreference ?: AgentType.GENESIS,
+               agent = agentPreference?.let { 
+                when (it.lowercase()) {
+                    "aura" -> AgentType.AURA
+                    "kai" -> AgentType.KAI
+                    "genesis" -> AgentType.GENESIS
+                    else -> AgentType.GENESIS
+                }
+            } ?: AgentType.GENESIS,
+            type = type,
+            data = data.mapValues { it.value.toString() },
+            priority = priority,
             status = ExecutionStatus.PENDING,
+            scheduledTime = scheduledTime ?: System.currentTimeMillis(),
+            agentPreference = agentPreference,
             metadata = mapOf(
                 "type" to type,
                 "priority" to priority.toString(),
@@ -96,7 +112,7 @@ class TaskExecutionManager @Inject constructor(
         taskQueue.offer(updatedExecution)
         updateQueueStatus()
         
-        logger.info("TaskExecutionManager", "Task scheduled: ${execution.id} -> $optimalAgent")
+        logger.i("TaskExecutionManager", "Task scheduled: ${execution.id} -> $optimalAgent")
         return execution
     }
 
@@ -127,7 +143,7 @@ class TaskExecutionManager @Inject constructor(
      * @param taskId The unique identifier of the task.
      * @return The TaskResult if the task has completed, or null if not found or not completed.
      */
-    fun getTaskResult(taskId: String): TaskResult? {
+    fun getTaskResult(taskId: String): dev.aurakai.auraframefx.ai.task.TaskResult? {
         return completedExecutions[taskId]
     }
 
@@ -140,7 +156,7 @@ class TaskExecutionManager @Inject constructor(
      * @return `true` if the task was cancelled; `false` otherwise.
      */
     suspend fun cancelTask(taskId: String): Boolean {
-        logger.info("TaskExecutionManager", "Cancelling task: $taskId")
+        logger.i("TaskExecutionManager", "Cancelling task: $taskId")
         
         // Try to remove from queue first
         val queuedTask = taskQueue.find { it.id == taskId }
@@ -171,7 +187,7 @@ class TaskExecutionManager @Inject constructor(
      * @param agentType Optional filter to include only tasks executed by the specified agent type.
      * @return A list of tasks matching the provided filters.
      */
-    fun getTasks(status: ExecutionStatus? = null, agentType: String? = null): List<TaskExecution> {
+    fun getTasks(status: ExecutionStatus? = null, agentType: AgentType? = null): List<TaskExecution> {
         val allTasks = mutableListOf<TaskExecution>()
         
         // Add queued tasks
@@ -184,11 +200,12 @@ class TaskExecutionManager @Inject constructor(
         allTasks.addAll(completedExecutions.values.map { result ->
             TaskExecution(
                 id = result.taskId,
+                taskId = result.taskId,
+                agent = result.executedBy,
                 type = result.type,
                 data = result.originalData,
                 priority = TaskPriority.NORMAL, // We don't store original priority in result
                 status = ExecutionStatus.COMPLETED,
-                agent = result.executedBy,
                 createdAt = result.startTime,
                 startedAt = result.startTime,
                 completedAt = result.endTime
@@ -211,14 +228,14 @@ class TaskExecutionManager @Inject constructor(
     private fun startTaskProcessor() {
         scope.launch {
             isProcessing = true
-            logger.info("TaskExecutionManager", "Starting task processor")
+            logger.i("TaskExecutionManager", "Starting task processor")
             
             while (isProcessing) {
                 try {
                     processNextTask()
                     delay(100) // Small delay to prevent busy waiting
                 } catch (e: Exception) {
-                    logger.error("TaskExecutionManager", "Task processor error", e)
+                    logger.e("TaskExecutionManager", "Task processor error", e)
                     delay(1000) // Longer delay on error
                 }
             }
@@ -256,51 +273,82 @@ class TaskExecutionManager @Inject constructor(
      * Delegates execution to the appropriate agent based on the task's agent assignment. On completion, records the result or failure, updates execution statistics, and removes the task from the active executions list.
      */
     private suspend fun executeTask(execution: TaskExecution) {
-        val runningExecution = execution.copy(status = ExecutionStatus.RUNNING)
-        execution.startedAt = System.currentTimeMillis()
-        activeExecutions[execution.id] = execution
+        val startTime = System.currentTimeMillis()
+        val runningExecution = execution.copy(
+            status = ExecutionStatus.RUNNING,
+            startedAt = startTime
+        )
+        activeExecutions[execution.id] = runningExecution
         
-        logger.info("TaskExecutionManager", "Executing task: ${execution.id}")
+        logger.i("TaskExecutionManager", "Executing task: ${execution.id}")
         
         scope.launch {
             try {
                 // Execute based on assigned agent
                 val result = when (execution.agent) {
-                    "aura" -> executeWithAura(execution)
-                    "kai" -> executeWithKai(execution)
-                    "genesis" -> executeWithGenesis(execution)
+                    AgentType.AURA -> executeWithAura(execution)
+                    AgentType.KAI -> executeWithKai(execution)
+                    AgentType.GENESIS -> executeWithGenesis(execution)
                     else -> throw IllegalArgumentException("Unknown agent: ${execution.agent}")
                 }
                 
+                val endTime = System.currentTimeMillis()
+                
                 // Mark as completed
-                val completedExecution = execution.copy(status = ExecutionStatus.COMPLETED)
-                execution.completedAt = System.currentTimeMillis()
+                val completedExecution = execution.copy(
+                    status = ExecutionStatus.COMPLETED,
+                    completedAt = endTime
+                )
                 
                 // Store result
                 val taskResult = TaskResult(
                     taskId = execution.id,
-                    type = execution.type,
-                    success = result.success,
-                    data = result.data,
-                    message = result.message,
+                    status = TaskStatus.COMPLETED,
+                    message = result.content,
+                    timestamp = endTime,
+                    durationMs = endTime - startTime,
+                    startTime = startTime,
+                    endTime = endTime,
                     executedBy = execution.agent,
-                    startTime = execution.startedAt!!,
-                    endTime = execution.completedAt!!,
-                    executionTimeMs = execution.completedAt!! - execution.startedAt!!,
-                    originalData = execution.data
+                    originalData = execution.data,
+                    success = true,
+                    executionTimeMs = endTime - startTime,
+                    type = execution.type
                 )
                 
                 completedExecutions[execution.id] = taskResult
                 
-                logger.info("TaskExecutionManager", "Task completed: ${execution.id}")
+                logger.i("TaskExecutionManager", "Task completed: ${execution.id}")
                 
             } catch (e: Exception) {
-                // Handle task failure
-                val failedExecution = execution.copy(status = ExecutionStatus.FAILED)
-                execution.completedAt = System.currentTimeMillis()
-                execution.errorMessage = e.message
+                val endTime = System.currentTimeMillis()
                 
-                logger.error("TaskExecutionManager", "Task failed: ${execution.id}", e)
+                // Handle task failure
+                val failedExecution = execution.copy(
+                    status = ExecutionStatus.FAILED,
+                    completedAt = endTime,
+                    errorMessage = e.message
+                )
+                
+                // Store failed result
+                val taskResult = TaskResult(
+                    taskId = execution.id,
+                    status = TaskStatus.FAILED,
+                    message = e.message,
+                    timestamp = endTime,
+                    durationMs = endTime - startTime,
+                    startTime = startTime,
+                    endTime = endTime,
+                    executedBy = execution.agent,
+                    originalData = execution.data,
+                    success = false,
+                    executionTimeMs = endTime - startTime,
+                    type = execution.type
+                )
+                
+                completedExecutions[execution.id] = taskResult
+                
+                logger.e("TaskExecutionManager", "Task failed: ${execution.id}", e)
                 
             } finally {
                 // Remove from active executions
@@ -318,10 +366,10 @@ class TaskExecutionManager @Inject constructor(
      * @return The response from the Aura agent after processing the request.
      */
     private suspend fun executeWithAura(execution: TaskExecution): AgentResponse {
-        val request = AgentRequest(
+        val request = AiRequest(
+            query = execution.data["query"] ?: execution.type,
             type = execution.type,
-            data = execution.data,
-            priority = execution.priority.value
+            context = execution.data
         )
         return auraAgent.processRequest(request)
     }
@@ -334,9 +382,10 @@ class TaskExecutionManager @Inject constructor(
      */
     private suspend fun executeWithKai(execution: TaskExecution): AgentResponse {
         val request = AgentRequest(
+            query = execution.data["query"] ?: execution.type,
             type = execution.type,
-            data = execution.data,
-            priority = execution.priority.value
+            context = execution.data,
+            metadata = mapOf("priority" to execution.priority.value.toString())
         )
         return kaiAgent.processRequest(request)
     }
@@ -349,9 +398,10 @@ class TaskExecutionManager @Inject constructor(
      */
     private suspend fun executeWithGenesis(execution: TaskExecution): AgentResponse {
         val request = AgentRequest(
+            query = execution.data["query"] ?: execution.type,
             type = execution.type,
-            data = execution.data,
-            priority = execution.priority.value
+            context = execution.data,
+            metadata = mapOf("priority" to execution.priority.value.toString())
         )
         return genesisAgent.processRequest(request)
     }
@@ -367,25 +417,28 @@ class TaskExecutionManager @Inject constructor(
      * - Defaults to "genesis" if no keywords match.
      *
      * @param execution The task execution metadata used for routing.
-     * @return The name of the selected agent.
+     * @return The selected agent type.
      */
-    private fun determineOptimalAgent(execution: TaskExecution): String {
+    private fun determineOptimalAgent(execution: TaskExecution): AgentType {
         // Use agent preference if specified and valid
         execution.agentPreference?.let { preference ->
-            if (listOf("aura", "kai", "genesis").contains(preference)) {
-                return preference
+            return when (preference.lowercase()) {
+                "aura" -> AgentType.AURA
+                "kai" -> AgentType.KAI
+                "genesis" -> AgentType.GENESIS
+                else -> AgentType.GENESIS
             }
         }
         
         // Intelligent routing based on task type
         return when {
-            execution.type.contains("creative", ignoreCase = true) -> "aura"
-            execution.type.contains("ui", ignoreCase = true) -> "aura"
-            execution.type.contains("security", ignoreCase = true) -> "kai"
-            execution.type.contains("analysis", ignoreCase = true) -> "kai"
-            execution.type.contains("complex", ignoreCase = true) -> "genesis"
-            execution.type.contains("fusion", ignoreCase = true) -> "genesis"
-            else -> "genesis" // Default to Genesis for intelligent routing
+            execution.type.contains("creative", ignoreCase = true) -> AgentType.AURA
+            execution.type.contains("ui", ignoreCase = true) -> AgentType.AURA
+            execution.type.contains("security", ignoreCase = true) -> AgentType.KAI
+            execution.type.contains("analysis", ignoreCase = true) -> AgentType.KAI
+            execution.type.contains("complex", ignoreCase = true) -> AgentType.GENESIS
+            execution.type.contains("fusion", ignoreCase = true) -> AgentType.GENESIS
+            else -> AgentType.GENESIS // Default to Genesis for intelligent routing
         }
     }
 
@@ -436,34 +489,13 @@ class TaskExecutionManager @Inject constructor(
      * Stops task processing and cancels all running coroutines, releasing resources used by the manager.
      */
     fun cleanup() {
-        logger.info("TaskExecutionManager", "Cleaning up TaskExecutionManager")
+        logger.i("TaskExecutionManager", "Cleaning up TaskExecutionManager")
         isProcessing = false
         scope.cancel()
     }
 }
 
 // Supporting data classes and enums
-@Serializable
-data class TaskResult(
-    val taskId: String,
-    val type: String,
-    val success: Boolean,
-    val data: Map<String, Any>,
-    val message: String,
-    val executedBy: String,
-    val startTime: Long,
-    val endTime: Long,
-    val executionTimeMs: Long,
-    val originalData: Map<String, Any>
-)
-
-enum class TaskPriority(val value: Int) {
-    LOW(1),
-    NORMAL(5),
-    HIGH(8),
-    CRITICAL(10)
-}
-
 @Serializable
 data class ExecutionStats(
     val totalTasks: Int = 0,
