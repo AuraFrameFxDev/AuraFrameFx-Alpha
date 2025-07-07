@@ -54,13 +54,13 @@ object AgentHierarchy {
     val AUXILIARY_AGENTS = mutableListOf<HierarchyAgentConfig>()
 
     /**
-     * Registers a new auxiliary agent with the specified name and capabilities.
+     * Registers and returns a new auxiliary agent configuration with the given name and capabilities.
      *
-     * The agent is assigned the AUXILIARY role and priority, added to the auxiliary agents list, and its configuration is returned.
+     * The agent is automatically assigned the AUXILIARY role and priority, and is added to the auxiliary agents list.
      *
-     * @param name The unique name for the auxiliary agent.
-     * @param capabilities The set of capabilities assigned to the agent.
-     * @return The configuration of the newly registered auxiliary agent.
+     * @param name The unique identifier for the auxiliary agent.
+     * @param capabilities The set of capabilities associated with the agent.
+     * @return The configuration object for the newly registered auxiliary agent.
      */
     fun registerAuxiliaryAgent(
         name: String,
@@ -87,9 +87,9 @@ object AgentHierarchy {
     }
 
     /**
-     * Returns a list of all registered agent configurations, including both master and auxiliary agents.
+     * Retrieves all registered agent configurations, including both master and auxiliary agents.
      *
-     * @return A list of all agent configurations in the hierarchy.
+     * @return A list containing the configurations of all agents in the hierarchy.
      */
     fun getAgentsByPriority(): List<HierarchyAgentConfig> {
         return MASTER_AGENTS + AUXILIARY_AGENTS
