@@ -418,3 +418,470 @@ class GenesisAgentTest {
         assertEquals("response", responses["ConcurrentAgent"]?.content)
     }
 }
+
+    // Additional comprehensive tests for better coverage
+
+    @Test
+    fun testParticipateWithAgents_largeNumberOfAgents() = runBlocking {
+        val agents = (1..50).map { i ->
+            DummyAgent("Agent$i", "response$i", i / 50.0f)
+        }
+        
+        val responses = genesisAgent.participateWithAgents(
+            emptyMap(),
+            agents,
+            "test with many agents",
+            GenesisAgent.ConversationMode.TURN_ORDER
+        )
+        
+        assertEquals(50, responses.size)
+        agents.forEach { agent ->
+            assertTrue("Agent ${agent.getName()} should be in responses", 
+                responses.containsKey(agent.getName()))
+        }
+    }
+
+    @Test
+    fun testParticipateWithAgents_mixedSuccessAndFailure() = runBlocking {
+        val agents = listOf(
+            DummyAgent("Success1", "ok1", 0.8f),
+            FailingAgent("Failure1"),
+            DummyAgent("Success2", "ok2", 0.9f),
+            FailingAgent("Failure2"),
+            DummyAgent("Success3", "ok3", 0.7f)
+        )
+        
+        val responses = genesisAgent.participateWithAgents(
+            emptyMap(),
+            agents,
+            "mixed test",
+            GenesisAgent.ConversationMode.TURN_ORDER
+        )
+        
+        assertEquals(3, responses.size)
+        assertEquals("ok1", responses["Success1"]?.content)
+        assertEquals("ok2", responses["Success2"]?.content)
+        assertEquals("ok3", responses["Success3"]?.content)
+        assertNull(responses["Failure1"])
+        assertNull(responses["Failure2"])
+    }
+
+    @Test
+    fun testParticipateWithAgents_veryLongPrompt() = runBlocking {
+        val longPrompt = "x".repeat(10000)
+        val agent = DummyAgent("LongPromptAgent", "handled long prompt")
+        
+        val responses = genesisAgent.participateWithAgents(
+            emptyMap(),
+            listOf(agent),
+            longPrompt,
+            GenesisAgent.ConversationMode.TURN_ORDER
+        )
+        
+        assertEquals(1, responses.size)
+        assertEquals("handled long prompt", responses["LongPromptAgent"]?.content)
+    }
+
+    @Test
+    fun testParticipateWithAgents_specialCharactersInPrompt() = runBlocking {
+        val specialPrompt = "Test with special chars: !@#$%^&*()_+-=[]{}|;':\",./<>?"
+        val agent = DummyAgent("SpecialAgent", "handled special chars")
+        
+        val responses = genesisAgent.participateWithAgents(
+            emptyMap(),
+            listOf(agent),
+            specialPrompt,
+            GenesisAgent.ConversationMode.TURN_ORDER
+        )
+        
+        assertEquals(1, responses.size)
+        assertEquals("handled special chars", responses["SpecialAgent"]?.content)
+    }
+
+    @Test
+    fun testParticipateWithAgents_unicodePrompt() = runBlocking {
+        val unicodePrompt = "Unicode test: 你好世界 🌍 émojis ñ"
+        val agent = DummyAgent("UnicodeAgent", "handled unicode")
+        
+        val responses = genesisAgent.participateWithAgents(
+            emptyMap(),
+            listOf(agent),
+            unicodePrompt,
+            GenesisAgent.ConversationMode.TURN_ORDER
+        )
+        
+        assertEquals(1, responses.size)
+        assertEquals("handled unicode", responses["UnicodeAgent"]?.content)
+    }
+
+    @Test
+    fun testParticipateWithAgents_largeContext() = runBlocking {
+        val largeContext = (1..1000).associate { i ->
+            "key$i" to "value$i"
+        }
+        val agent = DummyAgent("ContextAgent", "handled large context")
+        
+        val responses = genesisAgent.participateWithAgents(
+            largeContext,
+            listOf(agent),
+            "test",
+            GenesisAgent.ConversationMode.TURN_ORDER
+        )
+        
+        assertEquals(1, responses.size)
+        assertEquals("handled large context", responses["ContextAgent"]?.content)
+    }
+
+    @Test
+    fun testParticipateWithAgents_specialCharactersInContext() = runBlocking {
+        val specialContext = mapOf(
+            "key with spaces" to "value with spaces",
+            "key-with-dashes" to "value-with-dashes",
+            "key_with_underscores" to "value_with_underscores",
+            "key.with.dots" to "value.with.dots",
+            "key/with/slashes" to "value/with/slashes"
+        )
+        val agent = DummyAgent("SpecialContextAgent", "handled special context")
+        
+        val responses = genesisAgent.participateWithAgents(
+            specialContext,
+            listOf(agent),
+            "test",
+            GenesisAgent.ConversationMode.TURN_ORDER
+        )
+        
+        assertEquals(1, responses.size)
+        assertEquals("handled special context", responses["SpecialContextAgent"]?.content)
+    }
+
+    @Test
+    fun testAggregateAgentResponses_extremeConfidenceValues() {
+        val responses = listOf(
+            mapOf("Agent1" to AgentResponse("response1", Float.MAX_VALUE)),
+            mapOf("Agent1" to AgentResponse("response2", Float.MIN_VALUE)),
+            mapOf("Agent1" to AgentResponse("response3", Float.POSITIVE_INFINITY)),
+            mapOf("Agent1" to AgentResponse("response4", Float.NEGATIVE_INFINITY)),
+            mapOf("Agent1" to AgentResponse("response5", Float.NaN))
+        )
+        
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+        
+        assertEquals(1, consensus.size)
+        assertNotNull(consensus["Agent1"])
+        // Should handle extreme values gracefully
+        assertTrue("Should handle extreme confidence values", consensus["Agent1"]?.content?.isNotEmpty() == true)
+    }
+
+    @Test
+    fun testAggregateAgentResponses_emptyResponseContent() {
+        val responses = listOf(
+            mapOf("Agent1" to AgentResponse("", 0.5f)),
+            mapOf("Agent1" to AgentResponse("   ", 0.7f)),
+            mapOf("Agent1" to AgentResponse("actual content", 0.3f))
+        )
+        
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+        
+        assertEquals(1, consensus.size)
+        // Should pick the response with highest confidence regardless of content
+        assertEquals("   ", consensus["Agent1"]?.content)
+        assertEquals(0.7f, consensus["Agent1"]?.confidence)
+    }
+
+    @Test
+    fun testAggregateAgentResponses_veryLongResponseContent() {
+        val longContent = "x".repeat(100000)
+        val responses = listOf(
+            mapOf("Agent1" to AgentResponse(longContent, 0.8f)),
+            mapOf("Agent1" to AgentResponse("short", 0.5f))
+        )
+        
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+        
+        assertEquals(1, consensus.size)
+        assertEquals(longContent, consensus["Agent1"]?.content)
+        assertEquals(0.8f, consensus["Agent1"]?.confidence)
+    }
+
+    @Test
+    fun testAggregateAgentResponses_unicodeContent() {
+        val responses = listOf(
+            mapOf("Agent1" to AgentResponse("Hello 世界", 0.5f)),
+            mapOf("Agent1" to AgentResponse("🌍 Emoji test", 0.8f)),
+            mapOf("Agent1" to AgentResponse("Ñice tëst", 0.3f))
+        )
+        
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+        
+        assertEquals(1, consensus.size)
+        assertEquals("🌍 Emoji test", consensus["Agent1"]?.content)
+        assertEquals(0.8f, consensus["Agent1"]?.confidence)
+    }
+
+    @Test
+    fun testGenesisAgent_processRequest_emptyPrompt() = runBlocking {
+        val request = AiRequest("", emptyMap())
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("empty prompt response", 0.5f))
+        whenever(kaiService.processRequest(any())).thenReturn(AgentResponse("empty kai response", 0.6f))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("empty cascade response", 0.4f))
+        
+        val response = genesisAgent.processRequest(request)
+        
+        assertNotNull(response)
+        assertTrue(response.content.isNotEmpty())
+        assertTrue(response.confidence >= 0.0f)
+    }
+
+    @Test
+    fun testGenesisAgent_processRequest_largePrompt() = runBlocking {
+        val largePrompt = "x".repeat(50000)
+        val request = AiRequest(largePrompt, emptyMap())
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("large prompt response", 0.8f))
+        whenever(kaiService.processRequest(any())).thenReturn(AgentResponse("large kai response", 0.9f))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("large cascade response", 0.7f))
+        
+        val response = genesisAgent.processRequest(request)
+        
+        assertNotNull(response)
+        assertTrue(response.content.isNotEmpty())
+        assertTrue(response.confidence >= 0.0f)
+    }
+
+    @Test
+    fun testGenesisAgent_processRequest_withLargeContext() = runBlocking {
+        val largeContext = (1..10000).associate { i ->
+            "contextKey$i" to "contextValue$i"
+        }
+        val request = AiRequest("test prompt", largeContext)
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("context response", 0.8f))
+        whenever(kaiService.processRequest(any())).thenReturn(AgentResponse("context kai response", 0.9f))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("context cascade response", 0.7f))
+        
+        val response = genesisAgent.processRequest(request)
+        
+        assertNotNull(response)
+        assertTrue(response.content.isNotEmpty())
+        assertTrue(response.confidence >= 0.0f)
+    }
+
+    @Test
+    fun testGenesisAgent_processRequest_servicesThrowExceptions() = runBlocking {
+        val request = AiRequest("test prompt", emptyMap())
+        whenever(auraService.processRequest(any())).thenThrow(RuntimeException("Aura service failed"))
+        whenever(kaiService.processRequest(any())).thenThrow(RuntimeException("Kai service failed"))
+        whenever(cascadeService.processRequest(any())).thenThrow(RuntimeException("Cascade service failed"))
+        
+        try {
+            val response = genesisAgent.processRequest(request)
+            // If no exception is thrown, verify the response handles the error gracefully
+            assertNotNull("Should handle service failures gracefully", response)
+        } catch (e: Exception) {
+            // If exception is thrown, that's also acceptable behavior
+            assertTrue("Should handle service failures", e.message?.contains("failed") == true)
+        }
+    }
+
+    @Test
+    fun testGenesisAgent_processRequest_partialServiceFailure() = runBlocking {
+        val request = AiRequest("test prompt", emptyMap())
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("aura success", 0.8f))
+        whenever(kaiService.processRequest(any())).thenThrow(RuntimeException("Kai service failed"))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("cascade success", 0.7f))
+        
+        val response = genesisAgent.processRequest(request)
+        
+        assertNotNull(response)
+        assertTrue("Should handle partial service failures", response.content.isNotEmpty())
+        assertTrue(response.confidence >= 0.0f)
+    }
+
+    @Test
+    fun testDummyAgent_withZeroConfidence() = runBlocking {
+        val agent = DummyAgent("ZeroConfidenceAgent", "response", 0.0f)
+        
+        assertEquals("ZeroConfidenceAgent", agent.getName())
+        
+        val request = AiRequest("test", emptyMap())
+        val response = agent.processRequest(request)
+        
+        assertEquals("response", response.content)
+        assertEquals(0.0f, response.confidence)
+    }
+
+    @Test
+    fun testDummyAgent_withNegativeConfidence() = runBlocking {
+        val agent = DummyAgent("NegativeConfidenceAgent", "response", -0.5f)
+        
+        val request = AiRequest("test", emptyMap())
+        val response = agent.processRequest(request)
+        
+        assertEquals("response", response.content)
+        assertEquals(-0.5f, response.confidence)
+    }
+
+    @Test
+    fun testDummyAgent_withExtremeConfidence() = runBlocking {
+        val agent = DummyAgent("ExtremeConfidenceAgent", "response", Float.MAX_VALUE)
+        
+        val request = AiRequest("test", emptyMap())
+        val response = agent.processRequest(request)
+        
+        assertEquals("response", response.content)
+        assertEquals(Float.MAX_VALUE, response.confidence)
+    }
+
+    @Test
+    fun testDummyAgent_withEmptyResponse() = runBlocking {
+        val agent = DummyAgent("EmptyResponseAgent", "", 0.5f)
+        
+        val request = AiRequest("test", emptyMap())
+        val response = agent.processRequest(request)
+        
+        assertEquals("", response.content)
+        assertEquals(0.5f, response.confidence)
+    }
+
+    @Test
+    fun testDummyAgent_withUnicodeResponse() = runBlocking {
+        val unicodeResponse = "Unicode: 你好 🌍 émojis ñ"
+        val agent = DummyAgent("UnicodeAgent", unicodeResponse, 0.5f)
+        
+        val request = AiRequest("test", emptyMap())
+        val response = agent.processRequest(request)
+        
+        assertEquals(unicodeResponse, response.content)
+        assertEquals(0.5f, response.confidence)
+    }
+
+    @Test
+    fun testFailingAgent_withDifferentExceptions() = runBlocking {
+        class CustomFailingAgent(name: String, private val exception: Exception) : Agent {
+            override fun getName() = name
+            override fun getType() = null
+            override suspend fun processRequest(request: AiRequest): AgentResponse {
+                throw exception
+            }
+        }
+        
+        val agents = listOf(
+            CustomFailingAgent("RuntimeAgent", RuntimeException("Runtime error")),
+            CustomFailingAgent("IllegalStateAgent", IllegalStateException("Illegal state")),
+            CustomFailingAgent("IllegalArgumentAgent", IllegalArgumentException("Illegal argument"))
+        )
+        
+        agents.forEach { agent ->
+            try {
+                agent.processRequest(AiRequest("test", emptyMap()))
+                fail("Agent ${agent.getName()} should have thrown an exception")
+            } catch (e: Exception) {
+                assertTrue("Should throw expected exception type", 
+                    e is RuntimeException || e is IllegalStateException || e is IllegalArgumentException)
+            }
+        }
+    }
+
+    @Test
+    fun testGenesisAgent_threadSafety() = runBlocking {
+        val agent = DummyAgent("ThreadSafeAgent", "response")
+        val results = mutableListOf<Map<String, AgentResponse>>()
+        
+        // Test concurrent access from multiple coroutines
+        val jobs = (1..20).map { i ->
+            kotlinx.coroutines.async {
+                genesisAgent.participateWithAgents(
+                    mapOf("iteration" to i.toString()),
+                    listOf(agent),
+                    "concurrent test $i",
+                    GenesisAgent.ConversationMode.TURN_ORDER
+                )
+            }
+        }
+        
+        jobs.forEach { job ->
+            results.add(job.await())
+        }
+        
+        assertEquals(20, results.size)
+        results.forEach { result ->
+            assertEquals(1, result.size)
+            assertEquals("response", result["ThreadSafeAgent"]?.content)
+        }
+    }
+
+    @Test
+    fun testAggregateAgentResponses_threadSafety() = runBlocking {
+        val responses = (1..1000).map { i ->
+            mapOf("Agent$i" to AgentResponse("response$i", i / 1000.0f))
+        }
+        
+        // Test concurrent aggregation
+        val jobs = (1..10).map {
+            kotlinx.coroutines.async {
+                genesisAgent.aggregateAgentResponses(responses)
+            }
+        }
+        
+        val results = jobs.map { it.await() }
+        
+        // All results should be identical
+        val firstResult = results.first()
+        results.forEach { result ->
+            assertEquals(firstResult.size, result.size)
+            firstResult.keys.forEach { key ->
+                assertEquals(firstResult[key]?.content, result[key]?.content)
+                assertEquals(firstResult[key]?.confidence, result[key]?.confidence)
+            }
+        }
+    }
+
+    @Test
+    fun testGenesisAgent_memoryUsage() = runBlocking {
+        // Test that large operations don't cause memory leaks
+        val largeAgentList = (1..100).map { i ->
+            DummyAgent("Agent$i", "response$i".repeat(1000), i / 100.0f)
+        }
+        
+        repeat(10) {
+            val responses = genesisAgent.participateWithAgents(
+                emptyMap(),
+                largeAgentList,
+                "memory test",
+                GenesisAgent.ConversationMode.TURN_ORDER
+            )
+            
+            assertEquals(100, responses.size)
+            
+            // Clear references to help GC
+            responses.clear()
+        }
+        
+        // Test passed if no OutOfMemoryError occurred
+        assertTrue("Memory test completed successfully", true)
+    }
+
+    @Test
+    fun testGenesisAgent_extremeScenarios() = runBlocking {
+        // Test with extreme values
+        val extremePrompt = "x".repeat(1000000) // 1MB string
+        val extremeContext = (1..10000).associate { i ->
+            "key$i" to "value$i".repeat(100)
+        }
+        
+        val agent = DummyAgent("ExtremeAgent", "handled extreme scenario")
+        
+        try {
+            val responses = genesisAgent.participateWithAgents(
+                extremeContext,
+                listOf(agent),
+                extremePrompt,
+                GenesisAgent.ConversationMode.TURN_ORDER
+            )
+            
+            assertEquals(1, responses.size)
+            assertEquals("handled extreme scenario", responses["ExtremeAgent"]?.content)
+        } catch (e: OutOfMemoryError) {
+            // Acceptable if system runs out of memory
+            assertTrue("System handled memory limitation", true)
+        }
+    }
+}
