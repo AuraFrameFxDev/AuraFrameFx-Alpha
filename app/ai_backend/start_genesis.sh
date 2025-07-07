@@ -15,23 +15,27 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Function to print colored output
+# print_status prints an informational message in blue color to stdout.
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
 
+# print_success prints a success message in green color to stdout.
 print_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
+# print_warning prints a warning message in yellow to stdout.
 print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
+# print_error prints an error message in red color to stderr.
 print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# print_genesis prints a message prefixed with [GENESIS] in purple color for Genesis-specific logs.
 print_genesis() {
     echo -e "${PURPLE}[GENESIS]${NC} $1"
 }
