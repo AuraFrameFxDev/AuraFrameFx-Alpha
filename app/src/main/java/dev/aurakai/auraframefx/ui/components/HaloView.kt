@@ -48,7 +48,7 @@ import kotlin.math.*
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun HaloView(viewModel: GenesisAgentViewModel = viewModel()) {
+fun HaloView(viewModel: GenesisAgentViewModel = viewModel<GenesisAgentViewModel>()) {
     var isRotating by remember { mutableStateOf(true) }
     var rotationAngle by remember { mutableFloatStateOf(0f) }
     val agents = viewModel.getAgentsByPriority()
