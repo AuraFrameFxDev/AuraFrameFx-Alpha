@@ -45,6 +45,11 @@ class UserPreferences(context: Context) {
         return prefs[key] ?: defaultValue
     }
 
+    /**
+     * Stores a key-value pair in the in-memory preferences map.
+     *
+     * Overwrites the value if the key already exists.
+     */
     fun setPreference(key: String, value: String) {
         prefs[key] = value
     }

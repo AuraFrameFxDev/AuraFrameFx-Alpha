@@ -45,6 +45,11 @@ class HomeScreenTransitionManager @Inject constructor(
         loadConfig()
     }
 
+    /**
+     * Loads the home screen transition configuration, setting it to the default configuration.
+     *
+     * This method currently does not load from persistent storage and always applies the default configuration.
+     */
     private fun loadConfig() {
         // TODO: For beta, implement shared preferences or file-based config loading
         // val savedConfig = prefs.getString("home_screen_transition", null)
@@ -57,6 +62,11 @@ class HomeScreenTransitionManager @Inject constructor(
         }
     }
 
+    /**
+     * Applies the provided home screen transition configuration and updates the current state.
+     *
+     * @param config The new home screen transition configuration to apply.
+     */
     fun applyConfig(config: HomeScreenTransitionConfig) {
         _currentConfig.value = config
         // TODO: Implement Xposed hooking for beta
@@ -65,6 +75,9 @@ class HomeScreenTransitionManager @Inject constructor(
         // }
     }
 
+    /**
+     * Resets the home screen transition configuration to the default settings.
+     */
     fun resetToDefault() {
         applyConfig(defaultConfig)
     }

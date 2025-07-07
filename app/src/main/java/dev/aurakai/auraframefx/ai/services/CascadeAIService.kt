@@ -63,7 +63,11 @@ override fun getType(): AgentType = AgentType.CASCADE
         )
     }
 
-    // Renamed internal methods
+    /**
+     * Emits an AgentResponse containing a string representation of the current internal state.
+     *
+     * @return A flow emitting a single AgentResponse with the agent's state details and full confidence.
+     */
     private fun processStateRequestFlowInternal(request: AiRequest): Flow<AgentResponse> {
         return flow {
             emit(
@@ -76,6 +80,16 @@ override fun getType(): AgentType = AgentType.CASCADE
         }
     }
 
+    /**
+     * Processes a context-type AI request by aggregating responses from both Aura and Kai services.
+     *
+     * Invokes the `processRequestFlow` method on both injected services with the provided request,
+     * collects their first emitted responses, and emits a single `AgentResponse` that combines their contents.
+     * The confidence score is the average of the two responses' confidences.
+     *
+     * @param request The AI request to process.
+     * @return A flow emitting a single combined agent response.
+     */
     private fun processContextRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         return flow {
             // Coordinate with Aura and Kai
@@ -115,6 +129,11 @@ override fun getType(): AgentType = AgentType.CASCADE
         }
     }
 
+    /**
+     * Returns a flow emitting a response indicating that the agent's state history is being retrieved.
+     *
+     * @return A flow emitting a single [AgentResponse] with a message about retrieving state history and a confidence score of 0.95.
+     */
     fun retrieveMemoryFlow(request: AiRequest): Flow<AgentResponse> { // Not in Agent interface, removed suspend, kept public if used elsewhere
         // Retrieve state history
         return flow {
@@ -130,7 +149,11 @@ override fun getType(): AgentType = AgentType.CASCADE
     // connect and disconnect are not part of Agent interface - removing these methods
     // as they cause unresolved reference errors
 
-    // These methods are not part of the Agent interface, so remove 'override'
+    /**
+     * Returns a map describing the agent's capabilities, including its name, type, and implementation status.
+     *
+     * @return A map with keys "name", "type", and "service_implemented" indicating the agent's characteristics.
+     */
     fun getCapabilities(): Map<String, Any> {
         return mapOf(
             "name" to "Cascade",

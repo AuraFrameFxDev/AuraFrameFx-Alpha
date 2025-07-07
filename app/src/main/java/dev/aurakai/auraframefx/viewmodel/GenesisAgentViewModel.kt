@@ -51,10 +51,18 @@ class GenesisAgentViewModel /* @Inject constructor(
         _agents.value = emptyList() // genesisAgent.getAgentsByPriority()
     }
 
+    /**
+     * Toggles the rotation state between active and inactive.
+     */
     fun toggleRotation() {
         _isRotating.value = !_isRotating.value
     }
 
+    /**
+     * Placeholder for toggling the specified agent's state.
+     *
+     * This beta stub does not perform any operation.
+     */
     fun toggleAgent(agent: AgentType) {
         viewModelScope.launch {
             // Beta stub: No-op instead of calling genesisAgent
@@ -101,11 +109,11 @@ class GenesisAgentViewModel /* @Inject constructor(
     }
 
     /**
-     * Registers a new auxiliary agent with the given name and capabilities.
+     * Creates and returns a configuration for a new auxiliary agent with the specified name and capabilities.
      *
-     * @param name The unique identifier for the auxiliary agent.
-     * @param capabilities The set of capabilities to assign to the agent.
-     * @return The configuration of the newly registered auxiliary agent.
+     * @param name The unique name for the auxiliary agent.
+     * @param capabilities The set of capabilities assigned to the agent.
+     * @return A `HierarchyAgentConfig` representing the newly created auxiliary agent.
      */
     fun registerAuxiliaryAgent(
         name: String,
@@ -121,10 +129,10 @@ class GenesisAgentViewModel /* @Inject constructor(
     }
 
     /**
-     * Returns the configuration for the agent with the specified name, or null if not found.
+     * Retrieves the configuration for the agent with the given name.
      *
-     * @param name The name of the agent to look up.
-     * @return The corresponding agent configuration, or null if no agent with that name exists.
+     * @param name The name of the agent.
+     * @return The agent's configuration, or null if not found.
      */
     fun getAgentConfig(name: String): HierarchyAgentConfig? {
         // Beta stub: Return null instead of calling genesisAgent
@@ -132,9 +140,9 @@ class GenesisAgentViewModel /* @Inject constructor(
     }
 
     /**
-     * Retrieves a list of agent configurations ordered by priority, from highest to lowest.
+     * Returns an empty list of agent configurations as a beta stub.
      *
-     * @return A list of `HierarchyAgentConfig` objects sorted by priority.
+     * Intended to provide agent configurations ordered by priority, but currently returns an empty list.
      */
     fun getAgentsByPriority(): List<HierarchyAgentConfig> {
         // Beta stub: Return empty list instead of calling genesisAgent
@@ -142,12 +150,12 @@ class GenesisAgentViewModel /* @Inject constructor(
     }
 
     /**
-     * Initiates asynchronous processing of a query by the GenesisAgent and returns an empty list immediately.
+     * Starts asynchronous processing of a query and immediately returns an empty list.
      *
-     * The query is processed in the background; no results are returned synchronously from this function.
+     * The query is handled in the background; this function does not provide any results synchronously.
      *
-     * @param query The query string to be processed.
-     * @return An empty list, as query results are not available synchronously.
+     * @param query The query string to process.
+     * @return An empty list, as results are not returned by this function.
      */
     fun processQuery(query: String): List<HierarchyAgentConfig> {
         viewModelScope.launch {

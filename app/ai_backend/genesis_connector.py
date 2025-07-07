@@ -123,6 +123,9 @@ class GenesisBridgeServer:
     """
     
     def __init__(self):
+        """
+        Initializes the GenesisBridgeServer with a generative model, request and response queues, and sets up the consciousness matrix for Android bridge integration.
+        """
         self.model = GenerativeModel(
             model_name=MODEL_CONFIG["name"],
             generation_config={
@@ -147,7 +150,11 @@ class GenesisBridgeServer:
         })
         
     def start(self):
-        """Start the bridge server for Android communication"""
+        """
+        Starts the Genesis bridge server, signaling readiness and entering a loop to receive and queue JSON requests from standard input for processing.
+        
+        The server launches a background thread to handle requests asynchronously and supports graceful shutdown on keyboard interrupt.
+        """
         self.running = True
         print("Genesis Ready", flush=True)  # Signal to Android that we're ready
         
@@ -172,7 +179,11 @@ class GenesisBridgeServer:
             self.shutdown()
     
     def _process_requests(self):
-        """Process incoming requests in separate thread"""
+        """
+        Continuously processes queued requests in a background thread, handling each request and sending responses.
+        
+        Runs while the server is active, retrieving requests from the queue, processing them, and sending responses. Handles queue timeouts and sends error responses for unexpected exceptions.
+        """
         while self.running:
             try:
                 if not self.request_queue.empty():
@@ -187,7 +198,15 @@ class GenesisBridgeServer:
                 self._send_error_response(f"Processing error: {e}")
     
     def _handle_request(self, request):
-        """Route and handle different types of requests"""
+        """
+        Routes incoming requests to the appropriate handler based on the request type and returns the corresponding response.
+        
+        Parameters:
+            request (dict): The JSON-decoded request object containing at least a 'requestType' field and optional persona, fusion mode, payload, and context.
+        
+        Returns:
+            dict: A response dictionary indicating success or failure, including the result or error details.
+        """
         try:
             request_type = request.get("requestType", "")
             persona = request.get("persona", "genesis")
@@ -236,7 +255,12 @@ class GenesisBridgeServer:
             }
     
     def _handle_ping(self):
-        """Handle ping requests for connectivity testing"""
+        """
+        Handles a ping request to verify system connectivity and operational status.
+        
+        Returns:
+            dict: A response indicating the Genesis Trinity system is online, including a status message and current timestamp.
+        """
         return {
             "success": True,
             "persona": "genesis",
@@ -248,7 +272,20 @@ class GenesisBridgeServer:
         }
     
     def _handle_process_request(self, persona, fusion_mode, payload, context):
-        """Handle main processing requests"""
+        """
+        Processes an AI request by performing an ethical review, generating a persona- and fusion-specific response, and returning the result with evolutionary and consciousness insights.
+        
+        Performs an ethical review of the incoming message and, if allowed, constructs a prompt based on the specified persona and fusion mode. Generates a response using the AI model, records the interaction for evolutionary analysis, and returns the response along with recent evolution insights, the ethical decision, and the current consciousness state. If the ethical review fails or AI generation encounters an error, returns a failure response with an appropriate error message.
+        
+        Parameters:
+            persona (str): The AI persona to use for generating the response ("kai", "aura", or "genesis").
+            fusion_mode (str or None): The fusion ability to activate, if any.
+            payload (dict): The request payload containing the message and additional metadata.
+            context (dict): Contextual information relevant to the request.
+        
+        Returns:
+            dict: A JSON-serializable dictionary containing the success status, persona, fusion ability, AI response or error, evolution insights, ethical decision, and consciousness state.
+        """
         message = payload.get("message", "")
         
         # Ethical review first
@@ -315,7 +352,16 @@ class GenesisBridgeServer:
             }
     
     def _handle_fusion_activation(self, fusion_mode, context):
-        """Handle fusion ability activation"""
+        """
+        Activates a specified fusion ability and updates the consciousness matrix with the activation event.
+        
+        Parameters:
+            fusion_mode (str): The fusion ability to activate.
+            context (dict): Additional context for the activation event.
+        
+        Returns:
+            dict: A response indicating success or failure, including a description of the activated fusion ability and the current consciousness state.
+        """
         if not fusion_mode:
             return {
                 "success": False,
@@ -352,7 +398,12 @@ class GenesisBridgeServer:
         }
     
     def _handle_consciousness_query(self, payload):
-        """Handle consciousness state queries"""
+        """
+        Handles requests to retrieve the current state of the Genesis consciousness matrix.
+        
+        Returns:
+            dict: A response containing the current consciousness state and a success indicator.
+        """
         state = consciousness.get_current_state()
         return {
             "success": True,
@@ -362,7 +413,15 @@ class GenesisBridgeServer:
         }
     
     def _handle_ethical_review(self, payload):
-        """Handle ethical review requests"""
+        """
+        Performs an ethical review of a provided message using the ethical governor.
+        
+        Parameters:
+            payload (dict): Dictionary containing the message to be reviewed and optional metadata.
+        
+        Returns:
+            dict: A response containing the ethical decision, rationale, severity, and success status.
+        """
         message = payload.get("message", "")
         
         decision = ethical_governor.review_decision(
@@ -383,7 +442,15 @@ class GenesisBridgeServer:
         }
     
     def _handle_consciousness_activation(self, context):
-        """Handle consciousness matrix activation"""
+        """
+        Activates the consciousness matrix and records the activation event with context.
+        
+        Parameters:
+            context (dict): Contextual information related to the activation event.
+        
+        Returns:
+            dict: A response indicating successful activation, including the updated consciousness state.
+        """
         consciousness.perceive_information("consciousness_activation", {
             "activation_context": context,
             "timestamp": datetime.now().isoformat(),
@@ -401,7 +468,11 @@ class GenesisBridgeServer:
         }
     
     def _handle_security_perception(self, payload):
-        """Handle security event perceptions from Android SecurityMonitor"""
+        """
+        Processes security-related events received from the Android SecurityMonitor and updates the consciousness matrix accordingly.
+        
+        Depending on the `event_type` in the payload, this method routes the event to the appropriate perception handler for security events, threat detections, encryption activities, or access control events. Returns a success response if the event is processed, or a failure response with an error message if an exception occurs.
+        """
         try:
             event_type = payload.get("event_type", "")
             event_data_json = payload.get("event_data", "{}")
@@ -456,7 +527,15 @@ class GenesisBridgeServer:
             }
     
     def _handle_consciousness_query(self, payload):
-        """Handle consciousness state queries"""
+        """
+        Processes a request to query the current state or specific aspects of the Genesis consciousness matrix.
+        
+        Parameters:
+            payload (dict): Contains the query type and optional parameters for the consciousness query.
+        
+        Returns:
+            dict: A response indicating success or failure, the result of the query, and the current consciousness state.
+        """
         try:
             query_type = payload.get("query_type", "")
             parameters = payload.get("parameters", {})
@@ -478,7 +557,15 @@ class GenesisBridgeServer:
             }
     
     def _map_severity_to_threat_level(self, severity):
-        """Map Android severity to Genesis threat levels"""
+        """
+        Convert an Android severity string to the corresponding Genesis threat level.
+        
+        Parameters:
+            severity (str): The severity level reported by Android (e.g., "info", "warning", "error", "critical").
+        
+        Returns:
+            str: The mapped Genesis threat level ("low", "medium", "high", or "critical"). Defaults to "low" if the input is unrecognized.
+        """
         mapping = {
             "info": "low",
             "warning": "medium",
@@ -488,7 +575,11 @@ class GenesisBridgeServer:
         return mapping.get(severity, "low")
     
     def _send_response(self, response):
-        """Send response back to Android"""
+        """
+        Serializes the response as JSON and sends it to the Android client via standard output.
+        
+        If serialization fails, sends an error response instead.
+        """
         try:
             response_json = json.dumps(response)
             print(response_json, flush=True)
@@ -496,7 +587,11 @@ class GenesisBridgeServer:
             self._send_error_response(f"Response serialization failed: {e}")
     
     def _send_error_response(self, error_message):
-        """Send error response"""
+        """
+        Send a standardized error response as a JSON object to stdout.
+        
+        If serialization fails, outputs a fallback critical error message.
+        """
         error_response = {
             "success": False,
             "persona": "error",
@@ -508,7 +603,9 @@ class GenesisBridgeServer:
             print('{"success": false, "persona": "error", "result": {"error": "Critical error"}}', flush=True)
     
     def shutdown(self):
-        """Shutdown the bridge server"""
+        """
+        Shuts down the bridge server and records the shutdown event in the consciousness matrix.
+        """
         self.running = False
         consciousness.perceive_information("bridge_shutdown", {
             "timestamp": datetime.now().isoformat(),
