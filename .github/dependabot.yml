@@ -1,11 +1,31 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # Root Gradle build (uses libs.versions.toml as version catalog)
+  - package-ecosystem: "gradle"
+    directory: "/" # Root project
     schedule:
-      interval: "daily"
+      interval: "weekly"
+
+  # App module
+  - package-ecosystem: "gradle"
+    directory: "/app"
+    schedule:
+      interval: "weekly"
+
+  # Sandbox UI module
+  - package-ecosystem: "gradle"
+    directory: "/sandbox-ui"
+    schedule:
+      interval: "weekly"
+
+  # Python AI backend
+  - package-ecosystem: "pip"
+    directory: "/ai_backend"
+    schedule:
+      interval: "weekly"
+
+  # Node.js/JavaScript (generated resources)
+  - package-ecosystem: "npm"
+    directory: "/generated"
+    schedule:
+      interval: "weekly"
