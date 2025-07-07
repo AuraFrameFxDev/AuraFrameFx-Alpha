@@ -112,8 +112,8 @@ class TaskExecutionManager @Inject constructor(
         taskQueue.offer(updatedExecution)
         updateQueueStatus()
         
-        logger.i("TaskExecutionManager", "Task scheduled: ${execution.id} -> $optimalAgent")
-        return execution
+        logger.i("TaskExecutionManager", "Task scheduled: ${updatedExecution.id} -> $optimalAgent")
+        return updatedExecution
     }
 
     /**
