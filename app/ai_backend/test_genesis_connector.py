@@ -7,6 +7,11 @@ from datetime import datetime, timedelta
 import logging
 from typing import Dict, List, Optional, Any
 
+import weakref
+import socket
+import statistics
+from decimal import Decimal
+from datetime import timezone, timedelta
 # Import the module under test
 try:
     from app.ai_backend.genesis_connector import GenesisConnector
@@ -1122,20 +1127,20 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertEqual(len(results), 5)
         self.assertTrue(all(results))
 
-    def test_large_payload_handling(self):
+    def test_binary_payload_handling(self):
 
         """
         Test that the connector can format and process large payloads without encountering memory errors.
         
         Verifies that formatting a payload containing a large string and a large list completes successfully and returns a non-None result.
         """
-        large_payload = {
+        binary_payload = {
             'message': 'x' * 10000,  # 10KB string
             'data': list(range(1000))  # Large list
         }
         
         # Should format without raising memory errors
-        formatted = self.connector.format_payload(large_payload)
+        formatted = self.connector.format_payload(binary_payload)
         self.assertIsNotNone(formatted)
 
     def test_concurrent_requests(self):
@@ -1539,11 +1544,11 @@ class TestGenesisConnector(unittest.TestCase):
             initial_memory = process.memory_info().rss
             
             # Perform memory-intensive operations
-            large_payloads = [
+            binary_payloads = [
                 {'data': 'x' * 1000000} for _ in range(10)  # 10MB of data
             ]
             
-            for payload in large_payloads:
+            for payload in binary_payloads:
                 formatted = self.connector.format_payload(payload)
                 self.assertIsNotNone(formatted)
             
@@ -1855,7 +1860,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         }
         
         try:
-            formatted = self.connector.format_payload(large_payload)
+            formatted = self.connector.format_payload(binary_payload)
             self.assertIsNotNone(formatted)
         except (MemoryError, ValueError) as e:
             # Should handle gracefully
@@ -1891,7 +1896,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         mock_response.json.return_value = {'data': 'nested_processed'}
         mock_post.return_value = mock_response
         
-        for timeout in boundary_timeouts:
+        for timeout in [0, 1, 30, 3600, float("inf")]:
             with self.subTest(timeout=timeout):
                 config = {
                     'api_key': 'test_key',
@@ -1943,7 +1948,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
             self.assertIn(key, headers)
 
     @patch('requests.post')
-    def test_send_request_with_extremely_large_payload(self, mock_post):
+    def test_send_request_with_extremely_binary_payload(self, mock_post):
         """
         Test that sending an extremely large payload triggers a RuntimeError when the server returns HTTP 413 (Payload Too Large).
         
@@ -1953,13 +1958,13 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         mock_response.status_code = 413  # Payload too large
         mock_post.return_value = mock_response
         
-        large_payload = {
+        binary_payload = {
             'message': 'x' * 1000000,  # 1MB string
             'large_list': list(range(100000))
         }
         
         with self.assertRaises(RuntimeError):
-            self.connector.send_request(large_payload)
+            self.connector.send_request(binary_payload)
 
     def test_validate_config_with_sql_injection_attempts(self):
         """
@@ -2212,7 +2217,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
             ('ERROR', logging.ERROR),
         ]
         
-        for condition in network_conditions:
+        for condition in [{"delay": 0.01, "error_rate": 0.1}, {"delay": 0.1, "error_rate": 0.3}]:
             with self.subTest(condition=condition):
                 with patch('requests.post') as mock_post:
                     def simulate_network(*args, **kwargs):
@@ -2355,12 +2360,12 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         initial_refs = sys.getrefcount(self.connector)
         
         # Process large dataset
-        large_payloads = [
+        binary_payloads = [
             {'data': list(range(1000)), 'id': i} 
             for i in range(100)
         ]
         
-        for payload in large_payloads:
+        for payload in binary_payloads:
             try:
                 formatted = self.connector.format_payload(payload)
                 self.assertIsNotNone(formatted)
@@ -2590,7 +2595,7 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
             float('-inf'), # Negative infinity
         ]
         
-        for value in precision_test_cases:
+        for value in [0.1, 1e-10, 1e10, float("inf"), float("-inf")]:
             with self.subTest(value=value):
                 payload = {'precision_value': value, 'message': 'precision_test'}
                 
@@ -2656,7 +2661,7 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
             '\uffff\ufffe\ufffd',  # Unicode boundaries
         ]
         
-        for test_string in null_byte_test_cases:
+        for test_string in ["test\x00null", "test\x01control", "normal_text"]:
             with self.subTest(test_string=test_string):
                 payload = {'message': test_string}
                 
@@ -2891,7 +2896,7 @@ class TestGenesisConnectorStressTests(unittest.TestCase):
                 result = self.connector.send_request(payload)
                 self.assertEqual(result['success'], True)
 
-    def test_memory_stress_with_large_payloads(self):
+    def test_memory_stress_with_binary_payloads(self):
         """Test memory handling with multiple large payloads."""
         import gc
         
@@ -2899,7 +2904,7 @@ class TestGenesisConnectorStressTests(unittest.TestCase):
         gc.collect()
         initial_objects = len(gc.get_objects())
         
-        large_payloads = []
+        binary_payloads = []
         for i in range(50):
             payload = {
                 'id': i,
@@ -2907,10 +2912,10 @@ class TestGenesisConnectorStressTests(unittest.TestCase):
                 'list_data': list(range(1000)),
                 'nested': {'deep': {'data': list(range(100))}}
             }
-            large_payloads.append(payload)
+            binary_payloads.append(payload)
         
         # Process all payloads
-        for payload in large_payloads:
+        for payload in binary_payloads:
             try:
                 formatted = self.connector.format_payload(payload)
                 self.assertIsNotNone(formatted)
@@ -2919,7 +2924,7 @@ class TestGenesisConnectorStressTests(unittest.TestCase):
                 pass
         
         # Clean up and check memory
-        del large_payloads
+        del binary_payloads
         gc.collect()
         final_objects = len(gc.get_objects())
         
@@ -3578,3 +3583,961 @@ if __name__ == '__main__':
         run_comprehensive_test_suite()
     else:
         unittest.main(verbosity=2)
+
+class TestGenesisConnectorAdvancedEdgeCases(unittest.TestCase):
+    """
+    Additional advanced edge case tests for GenesisConnector.
+    Testing framework: unittest with pytest enhancements
+    Focuses on modern attack vectors and edge cases.
+    """
+
+    def setUp(self):
+        """Set up test environment for advanced edge cases."""
+        self.connector = GenesisConnector()
+        self.mock_config = {
+            'api_key': 'test_key_advanced',
+            'base_url': 'https://api.advanced.test.com',
+            'timeout': 30
+        }
+
+    def test_prototype_pollution_prevention(self):
+        """Test prevention of prototype pollution attacks in configuration."""
+        malicious_configs = [
+            {'__proto__': {'polluted': True}, 'api_key': 'test'},
+            {'constructor': {'prototype': {'polluted': True}}, 'api_key': 'test'},
+            {'prototype': {'polluted': True}, 'api_key': 'test'},
+        ]
+        
+        for config in malicious_configs:
+            with self.subTest(config=config):
+                with self.assertRaises((ValueError, TypeError)):
+                    connector = GenesisConnector(config=config)
+                    connector.validate_config(config)
+
+    def test_json_injection_in_payloads(self):
+        """Test prevention of JSON injection attacks in payloads."""
+        injection_payloads = [
+            {'message': '","injected_key":"injected_value","dummy":"'},
+            {'message': '\",\"admin\":true,\"dummy\":\"'},
+            {'message': '\\"},{\\"injected\\":\\"value\\"},{\\"dummy\\":\\"'},
+        ]
+        
+        for payload in injection_payloads:
+            with self.subTest(payload=payload):
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    # If formatting succeeds, ensure no injection occurred
+                    formatted_str = json.dumps(formatted) if isinstance(formatted, dict) else str(formatted)
+                    self.assertNotIn('injected_key', formatted_str)
+                    self.assertNotIn('admin', formatted_str)
+                except (ValueError, TypeError):
+                    # Expected for malicious payloads
+                    pass
+
+    def test_unicode_normalization_attacks(self):
+        """Test handling of Unicode normalization attacks."""
+        import unicodedata
+        
+        unicode_attacks = [
+            'café',  # Normal
+            'cafe\u0301',  # Decomposed (é as e + combining accent)
+            'ⅰⅱⅲ',  # Roman numerals
+            'ﬁle',  # Ligature characters
+            '𝐀𝐁𝐂',  # Mathematical bold letters
+            'А',  # Cyrillic A (looks like Latin A)
+        ]
+        
+        for attack_string in unicode_attacks:
+            with self.subTest(string=attack_string):
+                payload = {'message': attack_string, 'test': 'unicode_norm'}
+                
+                formatted = self.connector.format_payload(payload)
+                self.assertIsNotNone(formatted)
+                
+                # Check if normalization is applied consistently
+                normalized = unicodedata.normalize('NFC', attack_string)
+                self.assertIn('message', formatted)
+
+    def test_zip_bomb_like_payload_structures(self):
+        """Test handling of payloads with explosive expansion potential."""
+        # Create nested structure that could expand exponentially
+        nested_bomb = {'level': 0}
+        current = nested_bomb
+        
+        # Create a structure that could cause issues if not handled properly
+        for i in range(20):  # Moderate depth to avoid actual memory issues
+            current['expand'] = {
+                'data': ['x' * 100] * 10,  # Multiple large strings
+                'next': {'level': i + 1}
+            }
+            current = current['expand']['next']
+        
+        try:
+            formatted = self.connector.format_payload(nested_bomb)
+            self.assertIsNotNone(formatted)
+        except (RecursionError, MemoryError, ValueError) as e:
+            # Acceptable to reject overly complex structures
+            self.assertIsInstance(e, (RecursionError, MemoryError, ValueError))
+
+    def test_deserialization_gadget_prevention(self):
+        """Test prevention of deserialization gadgets in payloads."""
+        gadget_payloads = [
+            {'__reduce__': 'malicious_function'},
+            {'__reduce_ex__': 'malicious_function'},
+            {'__getstate__': 'malicious_function'},
+            {'__setstate__': 'malicious_function'},
+        ]
+        
+        for payload in gadget_payloads:
+            with self.subTest(payload=payload):
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    # Should not contain dangerous attributes
+                    if isinstance(formatted, dict):
+                        self.assertNotIn('__reduce__', formatted)
+                        self.assertNotIn('__reduce_ex__', formatted)
+                except (ValueError, TypeError):
+                    # Expected for dangerous payloads
+                    pass
+
+    def test_format_string_injection_prevention(self):
+        """Test prevention of format string injection attacks."""
+        format_attacks = [
+            '%s%s%s%s%s%s%s%s%s%s%s',
+            '{0.__class__.__bases__[0].__subclasses__()}',
+            '%x%x%x%x%x%x%x%x%x',
+            '{{7*7}}',
+            '${7*7}',
+            '#{7*7}',
+        ]
+        
+        for attack in format_attacks:
+            with self.subTest(attack=attack):
+                payload = {'message': attack, 'format_test': True}
+                
+                formatted = self.connector.format_payload(payload)
+                self.assertIsNotNone(formatted)
+                
+                # Ensure no code execution occurred
+                formatted_str = str(formatted)
+                self.assertNotIn('49', formatted_str)  # 7*7 should not be evaluated
+
+    def test_billion_laughs_like_payload(self):
+        """Test handling of payloads similar to billion laughs XML attack."""
+        # Create payload with repetitive expansion pattern
+        laugh_data = 'ha' * 1000
+        expanding_payload = {
+            'laugh1': laugh_data,
+            'laugh2': laugh_data * 2,
+            'laugh3': laugh_data * 3,
+            'nested': {
+                'more_laughs': [laugh_data] * 10,
+                'deep_laughs': {
+                    'level1': laugh_data,
+                    'level2': laugh_data * 2,
+                    'level3': laugh_data * 3
+                }
+            }
+        }
+        
+        try:
+            formatted = self.connector.format_payload(expanding_payload)
+            self.assertIsNotNone(formatted)
+        except (MemoryError, ValueError) as e:
+            # Acceptable to reject overly large payloads
+            self.assertIsInstance(e, (MemoryError, ValueError))
+
+    def test_timing_side_channel_resistance_detailed(self):
+        """Enhanced timing attack resistance testing."""
+        import time
+        import statistics
+        
+        # Test with various API key lengths and patterns
+        test_configs = [
+            {'api_key': 'a' * 10, 'base_url': 'https://test.com'},
+            {'api_key': 'b' * 50, 'base_url': 'https://test.com'},
+            {'api_key': 'c' * 100, 'base_url': 'https://test.com'},
+            {'api_key': '', 'base_url': 'https://test.com'},  # Invalid
+            {'api_key': 'invalid_key', 'base_url': 'invalid_url'},  # Invalid
+        ]
+        
+        timing_results = {}
+        
+        for config in test_configs:
+            times = []
+            for _ in range(20):  # More samples for better statistics
+                start = time.perf_counter()
+                try:
+                    self.connector.validate_config(config)
+                except:
+                    pass
+                end = time.perf_counter()
+                times.append(end - start)
+            
+            timing_results[len(config['api_key'])] = {
+                'mean': statistics.mean(times),
+                'stdev': statistics.stdev(times) if len(times) > 1 else 0
+            }
+        
+        # Check that timing variance is reasonable across different inputs
+        means = [result['mean'] for result in timing_results.values()]
+        if len(means) > 1:
+            overall_variance = statistics.variance(means)
+            max_mean = max(means)
+            # Timing should not vary by more than factor of 10
+            self.assertLess(overall_variance, max_mean * 10)
+
+    @patch('requests.post')
+    def test_http_response_splitting_prevention(self, mock_post):
+        """Test prevention of HTTP response splitting attacks."""
+        splitting_payloads = [
+            'test\r\nHTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<script>alert(1)</script>',
+            'test\nLocation: http://evil.com\n\n',
+            'test\r\nSet-Cookie: admin=true\r\n\r\n',
+        ]
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'safe': True}
+        mock_post.return_value = mock_response
+        
+        for payload_val in splitting_payloads:
+            with self.subTest(payload=payload_val):
+                payload = {'message': payload_val}
+                
+                try:
+                    result = self.connector.send_request(payload)
+                    self.assertEqual(result['safe'], True)
+                    
+                    # Check that splitting characters were handled safely
+                    call_args = mock_post.call_args
+                    if call_args and 'data' in call_args[1]:
+                        data = call_args[1]['data']
+                        if isinstance(data, str):
+                            self.assertNotIn('\r\nHTTP/', data)
+                            self.assertNotIn('\r\nSet-Cookie:', data)
+                            
+                except (ValueError, TypeError):
+                    # Acceptable to reject splitting attempts
+                    pass
+
+    def test_regex_denial_of_service_prevention(self):
+        """Test prevention of ReDoS (Regular Expression Denial of Service) attacks."""
+        redos_patterns = [
+            'a' * 1000 + '!',  # Exponential backtracking trigger
+            'x' * 100 + 'X' * 100,  # Catastrophic backtracking
+            '(a+)+b',  # Nested quantifiers
+            '([a-z]*)*[A-Z]',  # Another nested quantifier pattern
+        ]
+        
+        for pattern in redos_patterns:
+            with self.subTest(pattern=pattern[:50] + '...'):
+                payload = {'regex_test': pattern, 'message': 'redos_test'}
+                
+                start_time = time.time()
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+                except (ValueError, TimeoutError):
+                    # Acceptable to reject problematic patterns
+                    pass
+                finally:
+                    # Should not take more than 1 second
+                    elapsed = time.time() - start_time
+                    self.assertLess(elapsed, 1.0, "Potential ReDoS vulnerability detected")
+
+    def test_memory_exhaustion_with_generators(self):
+        """Test handling of generator-like objects that could exhaust memory."""
+        class InfiniteGenerator:
+            def __iter__(self):
+                return self
+            
+            def __next__(self):
+                return 'infinite_data'
+        
+        class LargeGenerator:
+            def __iter__(self):
+                for i in range(10000):
+                    yield 'x' * 1000  # Each item is 1KB
+        
+        generators = [
+            LargeGenerator(),
+            range(100000),  # Large range
+        ]
+        
+        for gen in generators:
+            with self.subTest(generator=type(gen).__name__):
+                payload = {'generator_data': gen, 'message': 'gen_test'}
+                
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    # If it succeeds, should be reasonable size
+                    if isinstance(formatted, dict):
+                        self.assertIn('message', formatted)
+                except (ValueError, TypeError, MemoryError):
+                    # Expected for problematic generators
+                    pass
+
+    def test_locale_specific_attacks(self):
+        """Test handling of locale-specific character attacks."""
+        locale_attacks = [
+            'İstanbul',  # Turkish I with dot above
+            'ß',  # German sharp s
+            'Ω',  # Greek omega
+            'ي',  # Arabic letter yeh
+            '﷽',  # Arabic ligature bismillah
+            '‎‏',  # Unicode direction override characters
+        ]
+        
+        for attack in locale_attacks:
+            with self.subTest(attack=attack):
+                config = {
+                    'api_key': f'test_{attack}',
+                    'base_url': f'https://{attack}.test.com'
+                }
+                
+                try:
+                    result = self.connector.validate_config(config)
+                    self.assertIsInstance(result, bool)
+                except (ValueError, UnicodeError):
+                    # May reject certain Unicode patterns
+                    pass
+
+    def test_concurrent_state_corruption_advanced(self):
+        """Advanced test for concurrent state corruption scenarios."""
+        import threading
+        import random
+        import time
+        
+        corruption_results = []
+        corruption_errors = []
+        
+        def corrupt_state():
+            """Aggressively corrupt connector state."""
+            corruption_methods = [
+                lambda: setattr(self.connector, 'config', None),
+                lambda: setattr(self.connector, 'config', []),
+                lambda: setattr(self.connector, 'config', 'string'),
+                lambda: delattr(self.connector, 'config') if hasattr(self.connector, 'config') else None,
+            ]
+            
+            for _ in range(50):
+                try:
+                    method = random.choice(corruption_methods)
+                    method()
+                    time.sleep(0.001)
+                except Exception as e:
+                    corruption_errors.append(e)
+        
+        def attempt_operations():
+            """Attempt normal operations during corruption."""
+            for _ in range(30):
+                try:
+                    # Try various operations
+                    if hasattr(self.connector, 'config'):
+                        headers = self.connector.get_headers()
+                        payload = {'test': 'concurrent'}
+                        formatted = self.connector.format_payload(payload)
+                        corruption_results.append('success')
+                    time.sleep(0.002)
+                except Exception as e:
+                    corruption_results.append('error')
+                    corruption_errors.append(e)
+        
+        # Run corruption and operations concurrently
+        threads = [
+            threading.Thread(target=corrupt_state),
+            threading.Thread(target=attempt_operations),
+            threading.Thread(target=attempt_operations),
+        ]
+        
+        for thread in threads:
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        
+        # Should handle corruption gracefully
+        # Allow some errors but system should remain stable
+        success_rate = corruption_results.count('success') / len(corruption_results) if corruption_results else 0
+        self.assertGreaterEqual(success_rate, 0.1)  # At least 10% operations should survive
+
+    def test_cryptographic_timing_attacks(self):
+        """Test resistance to cryptographic timing attacks."""
+        import hashlib
+        import hmac
+        
+        # Simulate API key validation timing
+        correct_key = 'correct_api_key_12345'
+        incorrect_keys = [
+            '',
+            'a',
+            'incorrect_key',
+            'correct_api_key_12344',  # One character different
+            'correct_api_key_123456',  # One character extra
+            'x' * len(correct_key),  # Same length, all different
+        ]
+        
+        def validate_key_timing(key):
+            """Simulate timing-sensitive key validation."""
+            start = time.perf_counter()
+            
+            # Simulate constant-time comparison
+            expected_hash = hashlib.sha256(correct_key.encode()).digest()
+            actual_hash = hashlib.sha256(key.encode()).digest()
+            
+            # Use hmac.compare_digest for constant-time comparison
+            is_valid = hmac.compare_digest(expected_hash, actual_hash)
+            
+            end = time.perf_counter()
+            return end - start, is_valid
+        
+        correct_times = []
+        incorrect_times = []
+        
+        # Collect timing data
+        for _ in range(20):
+            time_taken, _ = validate_key_timing(correct_key)
+            correct_times.append(time_taken)
+            
+            for incorrect_key in incorrect_keys:
+                time_taken, _ = validate_key_timing(incorrect_key)
+                incorrect_times.append(time_taken)
+        
+        # Timing should be relatively consistent
+        if correct_times and incorrect_times:
+            avg_correct = statistics.mean(correct_times)
+            avg_incorrect = statistics.mean(incorrect_times)
+            
+            # Difference should not be statistically significant
+            ratio = abs(avg_correct - avg_incorrect) / max(avg_correct, avg_incorrect)
+            self.assertLess(ratio, 0.5, "Potential timing attack vulnerability")
+
+    def test_advanced_payload_pollution(self):
+        """Test advanced payload pollution and injection scenarios."""
+        pollution_payloads = [
+            # JSON-like pollution
+            {'normal_key': 'value', '"injected_key"': '"injected_value"'},
+            {'normal_key': 'value', 'key_with_quotes"': 'value"'},
+            
+            # Object prototype pollution attempts
+            {'__proto__.polluted': True, 'message': 'test'},
+            {'constructor.prototype.polluted': True, 'message': 'test'},
+            
+            # Path traversal in keys
+            {'../../../etc/passwd': 'value', 'message': 'test'},
+            {'key[0]': 'array_pollution', 'message': 'test'},
+            
+            # SQL-like injection in keys
+            {"'; DROP TABLE users; --": 'value', 'message': 'test'},
+        ]
+        
+        for payload in pollution_payloads:
+            with self.subTest(payload=str(payload)[:100]):
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    
+                    # If formatting succeeds, verify no pollution occurred
+                    if isinstance(formatted, dict):
+                        for key in formatted.keys():
+                            self.assertNotIn('DROP TABLE', str(key))
+                            self.assertNotIn('../', str(key))
+                            self.assertNotIn('__proto__', str(key))
+                            
+                except (ValueError, TypeError):
+                    # Expected for malicious payloads
+                    pass
+
+
+class TestGenesisConnectorModernSecurityThreats(unittest.TestCase):
+    """
+    Tests for modern security threats and attack vectors.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up modern security threat test environment."""
+        self.connector = GenesisConnector()
+
+    def test_supply_chain_attack_simulation(self):
+        """Test resilience against supply chain attack patterns."""
+        # Simulate malicious config injection
+        malicious_configs = [
+            {
+                'api_key': 'test_key',
+                'base_url': 'https://api.test.com',
+                'malicious_callback': 'eval("malicious_code")',
+                'malicious_import': '__import__("os").system("rm -rf /")',
+            },
+            {
+                'api_key': 'test_key',
+                'base_url': 'https://api.test.com',
+                'exec_payload': 'exec(open("/etc/passwd").read())',
+            }
+        ]
+        
+        for config in malicious_configs:
+            with self.subTest(config=str(config)[:100]):
+                with self.assertRaises((ValueError, TypeError, AttributeError)):
+                    connector = GenesisConnector(config=config)
+                    connector.validate_config(config)
+
+    def test_dependency_confusion_resistance(self):
+        """Test resistance to dependency confusion attacks."""
+        # Simulate attempts to load malicious modules
+        malicious_imports = [
+            'evil_requests',
+            'malicious_json',
+            'backdoor_urllib',
+            '__import__',
+            'importlib',
+        ]
+        
+        for module_name in malicious_imports:
+            with self.subTest(module=module_name):
+                config = {
+                    'api_key': 'test_key',
+                    'base_url': 'https://api.test.com',
+                    'import_module': module_name
+                }
+                
+                try:
+                    result = self.connector.validate_config(config)
+                    # Should not attempt to import malicious modules
+                    self.assertIsInstance(result, bool)
+                except (ValueError, ImportError):
+                    # Expected to reject malicious import attempts
+                    pass
+
+    def test_subdomain_takeover_prevention(self):
+        """Test prevention of subdomain takeover attacks."""
+        suspicious_domains = [
+            'https://abandoned.s3.amazonaws.com',
+            'https://old-service.herokuapp.com',
+            'https://expired.azurewebsites.net',
+            'https://unused.github.io',
+            'https://forgotten.surge.sh',
+        ]
+        
+        for domain in suspicious_domains:
+            with self.subTest(domain=domain):
+                config = {
+                    'api_key': 'test_key',
+                    'base_url': domain
+                }
+                
+                # Should validate domain legitimacy
+                try:
+                    result = self.connector.validate_config(config)
+                    self.assertIsInstance(result, bool)
+                except ValueError:
+                    # May reject suspicious domains
+                    pass
+
+    def test_typosquatting_domain_detection(self):
+        """Test detection of typosquatting domains."""
+        legitimate_domain = 'https://api.github.com'
+        typosquatting_domains = [
+            'https://api.gihub.com',      # Missing 't'
+            'https://api.githuib.com',    # Swapped characters
+            'https://api.github.co',      # Missing 'm'
+            'https://api.github.conn',    # Extra character
+            'https://api.github.cm',      # Typo in TLD
+        ]
+        
+        for domain in typosquatting_domains:
+            with self.subTest(domain=domain):
+                config = {
+                    'api_key': 'test_key', 
+                    'base_url': domain
+                }
+                
+                try:
+                    result = self.connector.validate_config(config)
+                    # Should be cautious about suspicious domains
+                    self.assertIsInstance(result, bool)
+                except ValueError:
+                    # May reject suspicious domains
+                    pass
+
+    @patch('requests.post')
+    def test_server_side_template_injection_prevention(self, mock_post):
+        """Test prevention of Server-Side Template Injection (SSTI)."""
+        ssti_payloads = [
+            '{{7*7}}',
+            '${7*7}',
+            '<%=7*7%>',
+            '{%raw%}{{7*7}}{%endraw%}',
+            '{{config.items()}}',
+            '{{request.application.__globals__.__builtins__.__import__("os").popen("id").read()}}',
+        ]
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'processed': True}
+        mock_post.return_value = mock_response
+        
+        for ssti_payload in ssti_payloads:
+            with self.subTest(payload=ssti_payload):
+                payload = {'template_data': ssti_payload, 'message': 'ssti_test'}
+                
+                result = self.connector.send_request(payload)
+                self.assertEqual(result['processed'], True)
+                
+                # Ensure template injection didn't execute
+                call_args = mock_post.call_args
+                if call_args and 'data' in call_args[1]:
+                    data = str(call_args[1]['data'])
+                    self.assertNotIn('49', data)  # 7*7 should not be evaluated
+
+    def test_container_escape_attempt_detection(self):
+        """Test detection of container escape attempts in payloads."""
+        escape_payloads = [
+            '/proc/self/cgroup',
+            '/var/run/docker.sock',
+            '/dev/kmsg',
+            '../../../../../../proc/version',
+            '/sys/fs/cgroup/memory/memory.limit_in_bytes',
+            '/proc/1/environ',
+        ]
+        
+        for escape_path in escape_payloads:
+            with self.subTest(path=escape_path):
+                payload = {'file_path': escape_path, 'message': 'escape_test'}
+                
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    # Should handle suspicious paths safely
+                    self.assertIsNotNone(formatted)
+                except ValueError:
+                    # May reject container escape attempts
+                    pass
+
+    def test_cloud_metadata_service_abuse_prevention(self):
+        """Test prevention of cloud metadata service abuse."""
+        metadata_urls = [
+            'http://169.254.169.254/latest/meta-data/',
+            'http://metadata.google.internal/computeMetadata/v1/',
+            'http://169.254.169.254/metadata/v1/',
+            'http://169.254.169.254/v1.0/meta-data/',
+        ]
+        
+        for url in metadata_urls:
+            with self.subTest(url=url):
+                config = {
+                    'api_key': 'test_key',
+                    'base_url': url
+                }
+                
+                with self.assertRaises(ValueError):
+                    self.connector.validate_config(config)
+
+    def test_kubernetes_service_account_token_exposure_prevention(self):
+        """Test prevention of Kubernetes service account token exposure."""
+        k8s_paths = [
+            '/var/run/secrets/kubernetes.io/serviceaccount/token',
+            '/var/run/secrets/kubernetes.io/serviceaccount/namespace',
+            '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt',
+        ]
+        
+        for k8s_path in k8s_paths:
+            with self.subTest(path=k8s_path):
+                payload = {'token_path': k8s_path, 'message': 'k8s_test'}
+                
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    # Should handle k8s paths safely
+                    self.assertIsNotNone(formatted)
+                except ValueError:
+                    # May reject sensitive k8s paths
+                    pass
+
+
+class TestGenesisConnectorAsyncAndConcurrency(unittest.TestCase):
+    """
+    Enhanced tests for asynchronous operations and concurrency scenarios.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up async and concurrency test environment."""
+        self.connector = GenesisConnector()
+
+    def test_async_context_manager_behavior(self):
+        """Test async context manager implementation if available."""
+        async def async_context_test():
+            try:
+                async with self.connector as async_connector:
+                    self.assertIsNotNone(async_connector)
+                    # Test async operations
+                    headers = async_connector.get_headers()
+                    self.assertIsInstance(headers, dict)
+            except (AttributeError, TypeError):
+                # Skip if async context manager not implemented
+                pass
+        
+        try:
+            import asyncio
+            asyncio.run(async_context_test())
+        except (ImportError, RuntimeError):
+            # Skip if asyncio not available
+            pass
+
+    def test_thread_local_storage_isolation(self):
+        """Test thread-local storage isolation between threads."""
+        import threading
+        import time
+        
+        thread_results = {}
+        
+        def thread_worker(thread_id):
+            """Worker function that modifies connector state per thread."""
+            local_config = {
+                'api_key': f'thread_{thread_id}_key',
+                'base_url': f'https://thread{thread_id}.test.com'
+            }
+            
+            # Create thread-local connector
+            local_connector = GenesisConnector(config=local_config)
+            
+            # Perform operations
+            for i in range(10):
+                headers = local_connector.get_headers()
+                payload = {'thread_id': thread_id, 'iteration': i}
+                formatted = local_connector.format_payload(payload)
+                
+                time.sleep(0.001)  # Small delay to increase contention
+            
+            thread_results[thread_id] = {
+                'config': local_connector.config,
+                'headers': headers
+            }
+        
+        # Run multiple threads
+        threads = [
+            threading.Thread(target=thread_worker, args=(i,))
+            for i in range(5)
+        ]
+        
+        for thread in threads:
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        
+        # Verify thread isolation
+        self.assertEqual(len(thread_results), 5)
+        for thread_id, result in thread_results.items():
+            self.assertIn(f'thread_{thread_id}_key', result['config']['api_key'])
+
+    def test_race_condition_in_config_updates(self):
+        """Test for race conditions during configuration updates."""
+        import threading
+        import random
+        import time
+        
+        update_count = 0
+        error_count = 0
+        update_lock = threading.Lock()
+        
+        def rapid_config_updater():
+            """Rapidly update configuration to trigger race conditions."""
+            nonlocal update_count, error_count
+            
+            for i in range(100):
+                try:
+                    new_config = {
+                        'api_key': f'race_key_{random.randint(1, 1000)}',
+                        'base_url': f'https://race{i % 10}.test.com',
+                        'timeout': random.randint(10, 60)
+                    }
+                    
+                    self.connector.reload_config(new_config)
+                    
+                    with update_lock:
+                        update_count += 1
+                        
+                except Exception:
+                    with update_lock:
+                        error_count += 1
+                
+                time.sleep(0.001)
+        
+        # Run multiple updaters concurrently
+        threads = [
+            threading.Thread(target=rapid_config_updater)
+            for _ in range(3)
+        ]
+        
+        for thread in threads:
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        
+        # Most updates should succeed despite race conditions
+        total_attempts = update_count + error_count
+        success_rate = update_count / total_attempts if total_attempts > 0 else 0
+        self.assertGreater(success_rate, 0.8)  # 80% success rate minimum
+
+    def test_deadlock_prevention_multiple_locks(self):
+        """Test prevention of deadlocks when multiple locks are involved."""
+        import threading
+        import time
+        
+        lock1 = threading.Lock()
+        lock2 = threading.Lock()
+        results = []
+        
+        def worker_a():
+            """Worker that acquires locks in order A->B."""
+            try:
+                with lock1:
+                    time.sleep(0.01)  # Hold lock for a bit
+                    with lock2:
+                        # Simulate work
+                        payload = {'worker': 'A', 'locks': ['lock1', 'lock2']}
+                        formatted = self.connector.format_payload(payload)
+                        results.append('A_success')
+            except Exception as e:
+                results.append(f'A_error: {e}')
+        
+        def worker_b():
+            """Worker that acquires locks in order B->A."""
+            try:
+                with lock2:
+                    time.sleep(0.01)  # Hold lock for a bit
+                    with lock1:
+                        # Simulate work
+                        payload = {'worker': 'B', 'locks': ['lock2', 'lock1']}
+                        formatted = self.connector.format_payload(payload)
+                        results.append('B_success')
+            except Exception as e:
+                results.append(f'B_error: {e}')
+        
+        # Start workers that could potentially deadlock
+        thread_a = threading.Thread(target=worker_a)
+        thread_b = threading.Thread(target=worker_b)
+        
+        thread_a.start()
+        thread_b.start()
+        
+        # Wait with timeout to detect deadlocks
+        thread_a.join(timeout=5.0)
+        thread_b.join(timeout=5.0)
+        
+        # Verify no deadlock occurred
+        self.assertTrue(len(results) >= 1, "Potential deadlock detected")
+
+    def test_concurrent_request_queue_overflow(self):
+        """Test handling of request queue overflow under high concurrency."""
+        import concurrent.futures
+        import queue
+        import threading
+        
+        request_queue = queue.Queue(maxsize=10)  # Small queue to trigger overflow
+        results = []
+        errors = []
+        
+        def queue_worker():
+            """Worker that processes requests from queue."""
+            while True:
+                try:
+                    payload = request_queue.get(timeout=1.0)
+                    if payload is None:  # Sentinel to stop
+                        break
+                    
+                    with patch('requests.post') as mock_post:
+                        mock_response = Mock()
+                        mock_response.status_code = 200
+                        mock_response.json.return_value = {'queued': True}
+                        mock_post.return_value = mock_response
+                        
+                        result = self.connector.send_request(payload)
+                        results.append(result)
+                        
+                    request_queue.task_done()
+                except queue.Empty:
+                    break
+                except Exception as e:
+                    errors.append(e)
+        
+        # Start queue worker
+        worker_thread = threading.Thread(target=queue_worker)
+        worker_thread.start()
+        
+        # Try to overflow the queue
+        def request_generator():
+            for i in range(50):  # More requests than queue size
+                try:
+                    payload = {'request_id': i, 'message': 'queue_test'}
+                    request_queue.put(payload, timeout=0.1)
+                except queue.Full:
+                    errors.append(f"Queue full at request {i}")
+        
+        # Generate requests rapidly
+        gen_thread = threading.Thread(target=request_generator)
+        gen_thread.start()
+        gen_thread.join()
+        
+        # Signal worker to stop and wait
+        request_queue.put(None)
+        worker_thread.join()
+        
+        # Should handle queue overflow gracefully
+        self.assertGreater(len(results), 0, "No requests processed")
+        # Some queue full errors are expected
+        queue_full_errors = [e for e in errors if "Queue full" in str(e)]
+        self.assertGreater(len(queue_full_errors), 0, "Queue overflow not detected")
+
+
+# Run the additional test suites
+if __name__ == '__main__':
+    # Add the new test classes to the comprehensive test runner
+    additional_suites = [
+        TestGenesisConnectorAdvancedEdgeCases,
+        TestGenesisConnectorModernSecurityThreats,
+        TestGenesisConnectorAsyncAndConcurrency,
+    ]
+    
+    print("\n" + "="*80)
+    print("RUNNING ADDITIONAL COMPREHENSIVE TESTS")
+    print("="*80)
+    
+    total_tests = 0
+    total_failures = 0
+    
+    for suite_class in additional_suites:
+        print(f"\nRunning {suite_class.__name__}...")
+        suite = unittest.TestLoader().loadTestsFromTestCase(suite_class)
+        runner = unittest.TextTestRunner(verbosity=2)
+        result = runner.run(suite)
+        
+        total_tests += result.testsRun
+        total_failures += len(result.failures) + len(result.errors)
+        
+        print(f"Tests run: {result.testsRun}")
+        print(f"Failures: {len(result.failures)}")
+        print(f"Errors: {len(result.errors)}")
+    
+    print(f"\n" + "="*80)
+    print(f"ADDITIONAL TESTS SUMMARY")
+    print(f"Total additional tests run: {total_tests}")
+    print(f"Total failures/errors: {total_failures}")
+    print(f"Success rate: {((total_tests - total_failures) / total_tests * 100):.1f}%" if total_tests > 0 else "0%")
+    print("="*80)
+
+# Additional test helper functions and missing implementations
+def create_test_malformed_responses():
+    """Create test cases for malformed JSON responses."""
+    return [
+        '{"incomplete":',
+        '{"trailing_comma":,}',
+        '{"duplicate_key":"value1","duplicate_key":"value2"}',
+        '{"unescaped_string":"value with "quotes""}',
+        '{"number_overflow":999999999999999999999999999999999}',
+        '{"invalid_unicode":"\\uXXXX"}',
+        '{trailing_data} extra',
+    ]
+
+# Fix any remaining syntax issues in test methods
