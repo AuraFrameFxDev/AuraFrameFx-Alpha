@@ -165,6 +165,12 @@ fun AgentButton(
     }
 }
 
+/**
+ * Displays a button for toggling the recording state with an appropriate icon and color.
+ *
+ * @param isRecording Whether recording is currently active.
+ * @param onClick Called when the button is pressed to toggle recording.
+ */
 @Composable
 fun RecordingButton(
     isRecording: Boolean,
@@ -209,6 +215,9 @@ fun TranscribeButton(
     }
 }
 
+/**
+ * Displays a design-time preview of the ConferenceRoomScreen composable within a MaterialTheme.
+ */
 @Composable
 @Preview(showBackground = true)
 fun ConferenceRoomScreenPreview() {

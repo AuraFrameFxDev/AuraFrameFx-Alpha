@@ -16,13 +16,22 @@ class AmbientMusicService @Inject constructor() : Service() {
         return null
     }
 
+    /**
+     * Handles requests to start the service and specifies that the service should not be recreated if terminated by the system.
+     *
+     * @return `START_NOT_STICKY`, indicating the service will not restart automatically if killed.
+     */
     override fun onStartCommand(_intent: Intent?, _flags: Int, _startId: Int): Int {
         // TODO: Implement service logic for starting the service.
         // TODO: Utilize parameters (_intent, _flags, _startId) or remove if not needed by actual implementation.
         return START_NOT_STICKY
     }
 
-    // Example methods that might be relevant for a music service
+    /**
+     * Pauses music playback.
+     *
+     * This method is intended to halt the current audio stream if playback is active.
+     */
     fun pause() {
         // TODO: Implement pause logic. Reported as unused. Implement or remove.
     }

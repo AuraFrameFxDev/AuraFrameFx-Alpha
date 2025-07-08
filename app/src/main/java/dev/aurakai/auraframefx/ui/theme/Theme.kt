@@ -58,16 +58,14 @@ val LocalMoodGlow = compositionLocalOf { Color.Transparent }
 val LocalMoodState = compositionLocalOf { Emotion.NEUTRAL }
 
 /**
- * Applies the AuraFrameFX theme to the provided composable content.
+ * Applies the AuraFrameFX theme and mood-based dynamic theming to the given composable content.
  *
- * Chooses a color scheme (dark, light, or dynamic based on device support and parameters),
- * updates the status bar color and icon appearance to match the theme, supplies the app's typography,
- * and integrates Aura's mood-based dynamic theming system.
+ * Selects a color scheme (dark, light, or dynamic based on device support and parameters), updates the status bar color and icon appearance to match the theme, and provides mood-driven glow color and emotion state throughout the Compose hierarchy. Integrates the app's typography and Material3 theming.
  *
- * @param darkTheme Whether to use the dark theme. Defaults to the system setting.
- * @param dynamicColor Whether to use dynamic color schemes on supported devices (Android 12+). Defaults to true.
- * @param moodViewModel The ViewModel managing Aura's mood state. Automatically injected.
- * @param content The composable content to which the theme is applied.
+ * @param darkTheme If true, applies the dark theme; otherwise, uses the light theme. Defaults to the system setting.
+ * @param dynamicColor If true, enables dynamic color schemes on supported devices (Android 12+). Defaults to true.
+ * @param moodViewModel ViewModel supplying Aura's current mood state.
+ * @param content The composable content to which the theme and mood effects are applied.
  */
 @Composable
 fun AuraFrameFXTheme(
@@ -113,7 +111,15 @@ fun AuraFrameFXTheme(
 }
 
 /**
- * Get the mood-appropriate glow color based on Aura's current emotion
+ * Returns a glow color corresponding to the given emotion and intensity.
+ *
+ * The color is selected based on the emotion and its transparency is adjusted according to the intensity.
+ * If the emotion is not recognized, the primary color from the provided color scheme is used with reduced alpha.
+ *
+ * @param emotion The current emotion to represent.
+ * @param intensity The strength of the emotion, affecting the alpha transparency (clamped between 0.1 and 0.5).
+ * @param baseColorScheme The color scheme to use as a fallback for unrecognized emotions.
+ * @return The computed glow color with appropriate alpha.
  */
 private fun getMoodGlowColor(
     emotion: Emotion,

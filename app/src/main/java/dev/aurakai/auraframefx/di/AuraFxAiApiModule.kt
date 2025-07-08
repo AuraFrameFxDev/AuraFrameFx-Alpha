@@ -19,9 +19,9 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides a singleton OkHttpClient configured to log full HTTP request and response bodies.
+     * Creates a singleton OkHttpClient with HTTP request and response body logging enabled.
      *
-     * @return An OkHttpClient instance with detailed logging enabled for debugging network interactions.
+     * @return An OkHttpClient instance configured for detailed network logging.
      */
     @Provides
     @Singleton
@@ -52,10 +52,12 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton instance of AIContentApi configured to interact with the AuraFrameFx AI API using the specified OkHttpClient.
+     * Creates a singleton AIContentApi instance configured for the AuraFrameFx AI API.
      *
-     * @param okHttpClient The HTTP client used for making API requests.
-     * @return A configured AIContentApi instance for AuraFrameFx AI API communication.
+     * Uses the provided OkHttpClient for HTTP communication with the API.
+     *
+     * @param okHttpClient The HTTP client used for API requests.
+     * @return An AIContentApi instance targeting the AuraFrameFx AI API.
      */
     @Provides
     @Singleton
