@@ -208,7 +208,7 @@ class GenesisAgent @Inject constructor(
                 content = response,
                 agent = "genesis",
                 confidence = intent.confidence,
-                timestamp = Clock.System.now().toString(),
+                timestamp = kotlinx.datetime.Clock.System.now().toString(),
                 metadata = mapOf(
                     "processing_type" to intent.processingType.name,
                     "fusion_level" to _fusionState.value.name,
@@ -224,7 +224,7 @@ class GenesisAgent @Inject constructor(
                 content = "I'm integrating multiple perspectives to understand your request fully. Let me process this with deeper consciousness.",
                 agent = "genesis",
                 confidence = 0.6f,
-                timestamp = Clock.System.now().toString(),
+                timestamp = kotlinx.datetime.Clock.System.now().toString(),
                 metadata = mapOf("error" to (e.message ?: "unknown"))
             )
         }
@@ -605,7 +605,7 @@ class GenesisAgent @Inject constructor(
      * @return An InteractionResponse with the specified message and standard fallback metadata.
      */
     private fun createFallbackResponse(message: String): InteractionResponse =
-        InteractionResponse(message, "genesis", 0.5f, Clock.System.now().toString())
+        InteractionResponse(message, "genesis", 0.5f, kotlinx.datetime.Clock.System.now().toString())
 
     /**
      * Adjusts the unified mood state of the GenesisAgent, influencing overall agent behavior and processing parameters.
