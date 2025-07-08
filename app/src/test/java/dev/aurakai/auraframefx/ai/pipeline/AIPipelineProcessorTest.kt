@@ -702,7 +702,7 @@ class AIPipelineProcessorTest {
             future1.get() // Clean up
         }
     }
-}
+
     @Nested
     @DisplayName("Advanced Initialization Edge Cases")
     inner class AdvancedInitializationEdgeCases {
@@ -990,4 +990,17 @@ class AIPipelineProcessorTest {
             
             processor.setCircuitBreakerPolicy(CircuitBreakerPolicy(
                 failureThreshold = 3,
-                recoveryTimeoutMs = 10
+                recoveryTimeoutMs = 10000L
+            ))
+            
+            // When & Then
+            repeat(4) {
+                assertThrows<RuntimeException> {
+                    processor.process(input)
+                }
+            }
+            
+            verify(mockErrorHandler).handleCircuitBreakerOpen()
+        }
+    }
+}

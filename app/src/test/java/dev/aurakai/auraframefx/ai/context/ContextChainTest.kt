@@ -1,12 +1,11 @@
 package dev.aurakai.auraframefx.ai.context
 
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Assertions.*
-import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.*
 import java.util.concurrent.CompletableFuture
@@ -96,7 +95,7 @@ class ContextChainTest {
         fun testRemoveContext() {
             contextChain.add(mockContext1)
             contextChain.add(mockContext2)
-            
+
             val removed = contextChain.remove(mockContext1)
             assertTrue(removed)
             assertEquals(1, contextChain.size())
@@ -150,10 +149,10 @@ class ContextChainTest {
         fun testExecuteSingleContext() {
             val expectedResult = "context1_result"
             whenever(mockContext1.execute()).thenReturn(CompletableFuture.completedFuture(expectedResult))
-            
+
             contextChain.add(mockContext1)
             val result = contextChain.execute()
-            
+
             assertEquals(expectedResult, result.get())
             verify(mockContext1).execute()
         }
@@ -164,17 +163,17 @@ class ContextChainTest {
             val result1 = "result1"
             val result2 = "result2"
             val result3 = "result3"
-            
+
             whenever(mockContext1.execute()).thenReturn(CompletableFuture.completedFuture(result1))
             whenever(mockContext2.execute()).thenReturn(CompletableFuture.completedFuture(result2))
             whenever(mockContext3.execute()).thenReturn(CompletableFuture.completedFuture(result3))
-            
+
             contextChain.add(mockContext1)
             contextChain.add(mockContext2)
             contextChain.add(mockContext3)
-            
+
             val result = contextChain.execute()
-            
+
             assertNotNull(result.get())
             verify(mockContext1).execute()
             verify(mockContext2).execute()
@@ -186,10 +185,10 @@ class ContextChainTest {
         fun testExecuteWithFailure() {
             val exception = RuntimeException("Context execution failed")
             whenever(mockContext1.execute()).thenReturn(CompletableFuture.failedFuture(exception))
-            
+
             contextChain.add(mockContext1)
             val result = contextChain.execute()
-            
+
             assertThrows<ExecutionException> {
                 result.get()
             }
@@ -201,13 +200,14 @@ class ContextChainTest {
         fun testExecuteWithTimeout() {
             val slowFuture = CompletableFuture<String>()
             whenever(mockContext1.execute()).thenReturn(slowFuture)
-            
+
             contextChain.add(mockContext1)
             val result = contextChain.executeWithTimeout(100) // 100ms timeout
-            
-            assertThrows<java.util.concurrent.TimeoutException> {
+
+            val ex = assertThrows<ExecutionException> {
                 result.get()
             }
+            assertTrue(ex.cause is java.util.concurrent.TimeoutException)
         }
 
         @Test
@@ -215,10 +215,10 @@ class ContextChainTest {
         fun testCancelExecution() {
             val slowFuture = CompletableFuture<String>()
             whenever(mockContext1.execute()).thenReturn(slowFuture)
-            
+
             contextChain.add(mockContext1)
             val result = contextChain.execute()
-            
+
             result.cancel(true)
             assertTrue(result.isCancelled)
         }
@@ -232,13 +232,13 @@ class ContextChainTest {
         @DisplayName("should report correct chain size")
         fun testChainSize() {
             assertEquals(0, contextChain.size())
-            
+
             contextChain.add(mockContext1)
             assertEquals(1, contextChain.size())
-            
+
             contextChain.add(mockContext2)
             assertEquals(2, contextChain.size())
-            
+
             contextChain.remove(mockContext1)
             assertEquals(1, contextChain.size())
         }
@@ -247,10 +247,10 @@ class ContextChainTest {
         @DisplayName("should report empty state correctly")
         fun testIsEmpty() {
             assertTrue(contextChain.isEmpty())
-            
+
             contextChain.add(mockContext1)
             assertFalse(contextChain.isEmpty())
-            
+
             contextChain.clear()
             assertTrue(contextChain.isEmpty())
         }
@@ -259,7 +259,7 @@ class ContextChainTest {
         @DisplayName("should check context containment")
         fun testContains() {
             assertFalse(contextChain.contains(mockContext1))
-            
+
             contextChain.add(mockContext1)
             assertTrue(contextChain.contains(mockContext1))
             assertFalse(contextChain.contains(mockContext2))
@@ -271,12 +271,12 @@ class ContextChainTest {
             contextChain.add(mockContext1)
             contextChain.add(mockContext2)
             contextChain.add(mockContext3)
-            
+
             val contexts = mutableListOf<Context>()
             for (context in contextChain) {
                 contexts.add(context)
             }
-            
+
             assertEquals(3, contexts.size)
             assertTrue(contexts.contains(mockContext1))
             assertTrue(contexts.contains(mockContext2))
@@ -293,10 +293,10 @@ class ContextChainTest {
         fun testValidateChain() {
             contextChain.add(mockContext1)
             contextChain.add(mockContext2)
-            
+
             whenever(mockContext1.isValid()).thenReturn(true)
             whenever(mockContext2.isValid()).thenReturn(true)
-            
+
             assertTrue(contextChain.isValid())
         }
 
@@ -305,10 +305,10 @@ class ContextChainTest {
         fun testInvalidChainValidation() {
             contextChain.add(mockContext1)
             contextChain.add(mockContext2)
-            
+
             whenever(mockContext1.isValid()).thenReturn(true)
             whenever(mockContext2.isValid()).thenReturn(false)
-            
+
             assertFalse(contextChain.isValid())
         }
 
@@ -329,15 +329,15 @@ class ContextChainTest {
             val highPriorityContext = mock<Context>()
             val mediumPriorityContext = mock<Context>()
             val lowPriorityContext = mock<Context>()
-            
+
             whenever(highPriorityContext.priority).thenReturn(1)
             whenever(mediumPriorityContext.priority).thenReturn(2)
             whenever(lowPriorityContext.priority).thenReturn(3)
-            
+
             contextChain.add(lowPriorityContext)
             contextChain.add(highPriorityContext)
             contextChain.add(mediumPriorityContext)
-            
+
             val sortedContexts = contextChain.getSortedByPriority()
             assertEquals(highPriorityContext, sortedContexts[0])
             assertEquals(mediumPriorityContext, sortedContexts[1])
@@ -349,13 +349,13 @@ class ContextChainTest {
         fun testSamePriorityContexts() {
             val context1 = mock<Context>()
             val context2 = mock<Context>()
-            
+
             whenever(context1.priority).thenReturn(1)
             whenever(context2.priority).thenReturn(1)
-            
+
             contextChain.add(context1)
             contextChain.add(context2)
-            
+
             val sortedContexts = contextChain.getSortedByPriority()
             assertEquals(2, sortedContexts.size)
             assertTrue(sortedContexts.contains(context1))
@@ -372,10 +372,10 @@ class ContextChainTest {
         fun testSerializeToJson() {
             contextChain.add(mockContext1)
             contextChain.add(mockContext2)
-            
+
             whenever(mockContext1.toJson()).thenReturn("""{"type":"context1"}""")
             whenever(mockContext2.toJson()).thenReturn("""{"type":"context2"}""")
-            
+
             val json = contextChain.toJson()
             assertNotNull(json)
             assertTrue(json.contains("context1"))
@@ -386,7 +386,7 @@ class ContextChainTest {
         @DisplayName("should deserialize chain from JSON")
         fun testDeserializeFromJson() {
             val json = """{"contexts":[{"type":"context1"},{"type":"context2"}]}"""
-            
+
             val chain = ContextChain.fromJson(json)
             assertNotNull(chain)
             assertEquals(2, chain.size())
@@ -396,7 +396,6 @@ class ContextChainTest {
         @DisplayName("should handle malformed JSON gracefully")
         fun testMalformedJsonHandling() {
             val malformedJson = """{"contexts":[{"type":"context1"}"""
-            
             assertThrows<IllegalArgumentException> {
                 ContextChain.fromJson(malformedJson)
             }
@@ -417,13 +416,13 @@ class ContextChainTest {
                 contexts.add(context)
                 contextChain.add(context)
             }
-            
+
             assertEquals(1000, contextChain.size())
-            
+
             val startTime = System.currentTimeMillis()
             val result = contextChain.execute()
             val endTime = System.currentTimeMillis()
-            
+
             assertNotNull(result.get())
             assertTrue(endTime - startTime < 5000) // Should complete within 5 seconds
         }
@@ -432,7 +431,7 @@ class ContextChainTest {
         @DisplayName("should handle concurrent modifications safely")
         fun testConcurrentModifications() {
             val threads = mutableListOf<Thread>()
-            
+
             repeat(10) { threadIndex ->
                 val thread = Thread {
                     repeat(100) {
@@ -446,9 +445,9 @@ class ContextChainTest {
                 threads.add(thread)
                 thread.start()
             }
-            
+
             threads.forEach { it.join() }
-            
+
             assertTrue(contextChain.size() >= 0)
             assertTrue(contextChain.size() <= 500)
         }
@@ -470,23 +469,25 @@ class ContextChainTest {
         @DisplayName("should handle context with null execution result")
         fun testContextWithNullResult() {
             whenever(mockContext1.execute()).thenReturn(CompletableFuture.completedFuture(null))
-            
+
             contextChain.add(mockContext1)
             val result = contextChain.execute()
-            
+
             assertNull(result.get())
         }
 
         @Test
-        @DisplayName("should handle context throwing unchecked exception")
+        @DisplayName("should handle context throwing unchecked exception")  
         fun testContextThrowingException() {
             whenever(mockContext1.execute()).thenThrow(RuntimeException("Unexpected error"))
-            
+
             contextChain.add(mockContext1)
-            
-            assertThrows<RuntimeException> {
-                contextChain.execute()
+            val result = contextChain.execute()
+
+            val ex = assertThrows<ExecutionException> {
+                result.get()
             }
+            assertTrue(ex.cause is RuntimeException)
         }
 
         @Test
@@ -499,7 +500,7 @@ class ContextChainTest {
                 whenever(context.execute()).thenReturn(CompletableFuture.completedFuture(largeData))
                 contextChain.add(context)
             }
-            
+
             // Should not throw OutOfMemoryError
             assertDoesNotThrow {
                 contextChain.execute()

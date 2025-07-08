@@ -1,6 +1,6 @@
 package dev.aurakai.auraframefx.ai.error
 
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -8,8 +8,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.junit.jupiter.params.provider.EnumSource
-import org.junit.jupiter.params.provider.NullSource
-import org.junit.jupiter.params.provider.EmptySource
 import org.junit.jupiter.params.provider.NullAndEmptySource
 import java.time.LocalDateTime
 
@@ -84,7 +82,7 @@ class ErrorModelTest {
 
         @ParameterizedTest
         @NullAndEmptySource
-        @ValueSource(strings = ["", " ", "   "])
+        @ValueSource(strings = [" ", "   "])
         @DisplayName("Should handle empty and whitespace messages")
         fun shouldHandleEmptyAndWhitespaceMessages(message: String?) {
             val errorModel = ErrorModel(

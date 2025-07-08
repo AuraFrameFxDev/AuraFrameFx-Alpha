@@ -353,6 +353,7 @@ class GenesisAgentTest {
     @Test
     fun testGenesisAgent_processRequest_nullRequest() = runBlocking {
         try {
+            @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
             genesisAgent.processRequest(null)
             fail("Should throw exception for null request")
         } catch (e: Exception) {

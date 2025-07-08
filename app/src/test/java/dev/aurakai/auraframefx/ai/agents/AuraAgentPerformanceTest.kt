@@ -2,14 +2,12 @@ package dev.aurakai.auraframefx.ai.agents
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Timeout
-import org.mockito.junit.jupiter.MockitoExtension
-import org.junit.jupiter.api.Assertions.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -17,7 +15,6 @@ import java.util.concurrent.TimeUnit
  * Tests throughput, latency, resource usage, and scalability.
  */
 @ExperimentalCoroutinesApi
-@ExtendWith(MockitoExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuraAgentPerformanceTest {
 
