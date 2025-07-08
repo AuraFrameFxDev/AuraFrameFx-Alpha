@@ -569,3 +569,512 @@ class JsonParseException(message: String) : Exception(message)
 
 // Mock data classes
 data class HealthCheckResult(val isHealthy: Boolean, val message: String)
+    @Nested
+    @DisplayName("Retry Logic Tests")
+    inner class RetryLogicTests {
+        
+        @Test
+        @DisplayName("Should retry on transient failures")
+        fun shouldRetryOnTransientFailures() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            val expectedResponse = "Success after retry"
+            val failureResponse = mockHttpResponse(503, "Service Temporarily Unavailable")
+            val successResponse = mockHttpResponse(200, expectedResponse)
+            
+            whenever(mockHttpClient.post(any()))
+                .thenReturn(failureResponse)
+                .thenReturn(failureResponse)
+                .thenReturn(successResponse)
+            
+            // When
+            val result = auraAIService.generateResponse(prompt)
+            
+            // Then
+            assertEquals(expectedResponse, result)
+            verify(mockHttpClient, times(3)).post(any())
+            verify(mockLogger).warn("Retrying request after transient failure")
+        }
+        
+        @Test
+        @DisplayName("Should fail after max retries exceeded")
+        fun shouldFailAfterMaxRetriesExceeded() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            val failureResponse = mockHttpResponse(503, "Service Temporarily Unavailable")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(failureResponse)
+            
+            // When & Then
+            assertThrows<MaxRetriesExceededException> {
+                auraAIService.generateResponse(prompt)
+            }
+            verify(mockLogger).error("Max retries exceeded for request")
+        }
+        
+        @Test
+        @DisplayName("Should not retry on client errors")
+        fun shouldNotRetryOnClientErrors() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            val clientErrorResponse = mockHttpResponse(400, "Bad Request")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(clientErrorResponse)
+            
+            // When & Then
+            assertThrows<ClientErrorException> {
+                auraAIService.generateResponse(prompt)
+            }
+            verify(mockHttpClient, times(1)).post(any())
+            verify(mockLogger).error("Client error, not retrying: 400 - Bad Request")
+        }
+    }
+    
+    @Nested
+    @DisplayName("Request Validation Tests")
+    inner class RequestValidationTests {
+        
+        @Test
+        @DisplayName("Should validate prompt length limits")
+        fun shouldValidatePromptLengthLimits() = runTest {
+            // Given
+            val tooLongPrompt = "A".repeat(100001) // Assuming 100k character limit
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                auraAIService.generateResponse(tooLongPrompt)
+            }
+            verify(mockLogger).error("Prompt exceeds maximum length limit")
+        }
+        
+        @Test
+        @DisplayName("Should validate prompt contains only allowed characters")
+        fun shouldValidatePromptContainsOnlyAllowedCharacters() = runTest {
+            // Given
+            val promptWithControlCharacters = "Valid text\u0000\u0001\u0002"
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                auraAIService.generateResponse(promptWithControlCharacters)
+            }
+            verify(mockLogger).error("Prompt contains invalid characters")
+        }
+        
+        @Test
+        @DisplayName("Should validate batch size limits")
+        fun shouldValidateBatchSizeLimits() = runTest {
+            // Given
+            val tooManyPrompts = (1..1001).map { "Prompt $it" } // Assuming 1000 limit
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                auraAIService.generateBatchResponses(tooManyPrompts)
+            }
+            verify(mockLogger).error("Batch size exceeds maximum limit")
+        }
+        
+        @Test
+        @DisplayName("Should validate batch prompts are not null")
+        fun shouldValidateBatchPromptsAreNotNull() = runTest {
+            // Given
+            val promptsWithNull = listOf("Valid prompt", null, "Another valid prompt")
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                auraAIService.generateBatchResponses(promptsWithNull as List<String>)
+            }
+            verify(mockLogger).error("Batch contains null prompts")
+        }
+    }
+    
+    @Nested
+    @DisplayName("Threading and Concurrency Tests")
+    inner class ThreadingAndConcurrencyTests {
+        
+        @Test
+        @DisplayName("Should handle thread interruption gracefully")
+        fun shouldHandleThreadInterruptionGracefully() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            
+            whenever(mockHttpClient.post(any())).thenAnswer {
+                Thread.currentThread().interrupt()
+                throw InterruptedException("Thread interrupted")
+            }
+            
+            // When & Then
+            assertThrows<InterruptedException> {
+                auraAIService.generateResponse(prompt)
+            }
+            verify(mockLogger).warn("Thread was interrupted during request")
+        }
+        
+        @Test
+        @DisplayName("Should handle concurrent modifications to configuration")
+        fun shouldHandleConcurrentModificationsToConfiguration() = runTest {
+            // Given
+            val newApiKey = "new-key"
+            val newTimeout = 45000L
+            
+            // When
+            val updateApiKeyJob = async { auraAIService.updateApiKey(newApiKey) }
+            val updateTimeoutJob = async { auraAIService.updateTimeout(newTimeout) }
+            
+            // Then
+            updateApiKeyJob.await()
+            updateTimeoutJob.await()
+            
+            verify(mockConfigurationService).updateApiKey(newApiKey)
+            verify(mockConfigurationService).updateTimeout(newTimeout)
+        }
+        
+        @Test
+        @DisplayName("Should maintain thread safety during bulk operations")
+        fun shouldMaintainThreadSafetyDuringBulkOperations() = runTest {
+            // Given
+            val prompts = (1..50).map { "Prompt $it" }
+            val mockHttpResponse = mockHttpResponse(200, "Response")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            
+            // When
+            val results = prompts.chunked(10).map { chunk ->
+                async { auraAIService.generateBatchResponses(chunk) }
+            }.awaitAll()
+            
+            // Then
+            assertEquals(5, results.size)
+            verify(mockHttpClient, atLeast(5)).post(any())
+        }
+    }
+    
+    @Nested
+    @DisplayName("Performance and Resource Tests")
+    inner class PerformanceAndResourceTests {
+        
+        @Test
+        @DisplayName("Should handle memory pressure gracefully")
+        fun shouldHandleMemoryPressureGracefully() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            
+            whenever(mockHttpClient.post(any())).thenThrow(OutOfMemoryError("Java heap space"))
+            
+            // When & Then
+            assertThrows<OutOfMemoryError> {
+                auraAIService.generateResponse(prompt)
+            }
+            verify(mockLogger).error("Out of memory during request processing")
+        }
+        
+        @Test
+        @DisplayName("Should cleanup resources on service destruction")
+        fun shouldCleanupResourcesOnServiceDestruction() {
+            // Given
+            val service = AuraAIServiceImpl(mockHttpClient, mockConfigurationService, mockLogger)
+            
+            // When
+            service.close()
+            
+            // Then
+            verify(mockHttpClient).close()
+            verify(mockLogger).info("AuraAI service closed")
+        }
+        
+        @Test
+        @DisplayName("Should handle large response payloads")
+        fun shouldHandleLargeResponsePayloads() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            val largeResponse = "A".repeat(1000000) // 1MB response
+            val mockHttpResponse = mockHttpResponse(200, largeResponse)
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            
+            // When
+            val result = auraAIService.generateResponse(prompt)
+            
+            // Then
+            assertEquals(largeResponse, result)
+            verify(mockLogger).info("Processing large response payload")
+        }
+    }
+    
+    @Nested
+    @DisplayName("Configuration Edge Cases")
+    inner class ConfigurationEdgeCasesTests {
+        
+        @Test
+        @DisplayName("Should handle configuration service failures")
+        fun shouldHandleConfigurationServiceFailures() {
+            // Given
+            whenever(mockConfigurationService.getApiKey()).thenThrow(RuntimeException("Config service unavailable"))
+            
+            // When & Then
+            assertThrows<RuntimeException> {
+                AuraAIServiceImpl(mockHttpClient, mockConfigurationService, mockLogger)
+            }
+            verify(mockLogger).error("Failed to initialize configuration")
+        }
+        
+        @Test
+        @DisplayName("Should handle extremely long timeouts")
+        fun shouldHandleExtremelyLongTimeouts() {
+            // Given
+            val extremeTimeout = Long.MAX_VALUE
+            
+            // When
+            auraAIService.updateTimeout(extremeTimeout)
+            
+            // Then
+            verify(mockConfigurationService).updateTimeout(extremeTimeout)
+            verify(mockLogger).warn("Extremely long timeout configured: $extremeTimeout ms")
+        }
+        
+        @Test
+        @DisplayName("Should handle zero timeout")
+        fun shouldHandleZeroTimeout() {
+            // Given
+            val zeroTimeout = 0L
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                auraAIService.updateTimeout(zeroTimeout)
+            }
+            verify(mockLogger).error("Timeout must be positive: $zeroTimeout")
+        }
+        
+        @Test
+        @DisplayName("Should handle base URL with trailing slash")
+        fun shouldHandleBaseUrlWithTrailingSlash() {
+            // Given
+            val urlWithTrailingSlash = "https://api.test.com/"
+            
+            // When
+            auraAIService.updateBaseUrl(urlWithTrailingSlash)
+            
+            // Then
+            verify(mockConfigurationService).updateBaseUrl("https://api.test.com")
+            verify(mockLogger).info("Base URL normalized: removed trailing slash")
+        }
+        
+        @Test
+        @DisplayName("Should handle localhost URLs")
+        fun shouldHandleLocalhostUrls() {
+            // Given
+            val localhostUrl = "http://localhost:8080"
+            
+            // When
+            auraAIService.updateBaseUrl(localhostUrl)
+            
+            // Then
+            verify(mockConfigurationService).updateBaseUrl(localhostUrl)
+            verify(mockLogger).warn("Using localhost URL for base URL")
+        }
+    }
+    
+    @Nested
+    @DisplayName("Network Edge Cases")
+    inner class NetworkEdgeCasesTests {
+        
+        @Test
+        @DisplayName("Should handle DNS resolution failures")
+        fun shouldHandleDnsResolutionFailures() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            
+            whenever(mockHttpClient.post(any())).thenThrow(UnknownHostException("DNS resolution failed"))
+            
+            // When & Then
+            assertThrows<UnknownHostException> {
+                auraAIService.generateResponse(prompt)
+            }
+            verify(mockLogger).error("DNS resolution failed")
+        }
+        
+        @Test
+        @DisplayName("Should handle SSL certificate errors")
+        fun shouldHandleSslCertificateErrors() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            
+            whenever(mockHttpClient.post(any())).thenThrow(SSLHandshakeException("SSL certificate validation failed"))
+            
+            // When & Then
+            assertThrows<SSLHandshakeException> {
+                auraAIService.generateResponse(prompt)
+            }
+            verify(mockLogger).error("SSL certificate validation failed")
+        }
+        
+        @Test
+        @DisplayName("Should handle connection reset by peer")
+        fun shouldHandleConnectionResetByPeer() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            
+            whenever(mockHttpClient.post(any())).thenThrow(SocketException("Connection reset by peer"))
+            
+            // When & Then
+            assertThrows<SocketException> {
+                auraAIService.generateResponse(prompt)
+            }
+            verify(mockLogger).error("Connection reset by peer")
+        }
+        
+        @Test
+        @DisplayName("Should handle slow network responses")
+        fun shouldHandleSlowNetworkResponses() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            val expectedResponse = "Slow response"
+            val mockHttpResponse = mockHttpResponse(200, expectedResponse)
+            
+            whenever(mockHttpClient.post(any())).thenAnswer {
+                Thread.sleep(5000) // Simulate slow response
+                mockHttpResponse
+            }
+            
+            // When
+            val result = auraAIService.generateResponse(prompt)
+            
+            // Then
+            assertEquals(expectedResponse, result)
+            verify(mockLogger).warn("Slow network response detected")
+        }
+    }
+    
+    @Nested
+    @DisplayName("Response Format Tests")
+    inner class ResponseFormatTests {
+        
+        @Test
+        @DisplayName("Should handle empty response body")
+        fun shouldHandleEmptyResponseBody() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            val mockHttpResponse = mockHttpResponse(200, "")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            
+            // When & Then
+            assertThrows<EmptyResponseException> {
+                auraAIService.generateResponse(prompt)
+            }
+            verify(mockLogger).error("Received empty response body")
+        }
+        
+        @Test
+        @DisplayName("Should handle response with only whitespace")
+        fun shouldHandleResponseWithOnlyWhitespace() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            val mockHttpResponse = mockHttpResponse(200, "   \n\t   ")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            
+            // When & Then
+            assertThrows<EmptyResponseException> {
+                auraAIService.generateResponse(prompt)
+            }
+            verify(mockLogger).error("Received response with only whitespace")
+        }
+        
+        @Test
+        @DisplayName("Should handle response with unexpected content type")
+        fun shouldHandleResponseWithUnexpectedContentType() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            val mockHttpResponse = mockHttpResponse(200, "<html><body>Error</body></html>")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            
+            // When & Then
+            assertThrows<UnexpectedContentTypeException> {
+                auraAIService.generateResponse(prompt)
+            }
+            verify(mockLogger).error("Received unexpected content type")
+        }
+        
+        @Test
+        @DisplayName("Should handle partial JSON response")
+        fun shouldHandlePartialJsonResponse() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            val mockHttpResponse = mockHttpResponse(200, "{\"response\":\"Partial")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            
+            // When & Then
+            assertThrows<JsonParseException> {
+                auraAIService.generateResponse(prompt)
+            }
+            verify(mockLogger).error("Received partial JSON response")
+        }
+    }
+    
+    @Nested
+    @DisplayName("Logging and Monitoring Tests")
+    inner class LoggingAndMonitoringTests {
+        
+        @Test
+        @DisplayName("Should log request metrics")
+        fun shouldLogRequestMetrics() = runTest {
+            // Given
+            val prompt = "Test prompt"
+            val expectedResponse = "Test response"
+            val mockHttpResponse = mockHttpResponse(200, expectedResponse)
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            
+            // When
+            auraAIService.generateResponse(prompt)
+            
+            // Then
+            verify(mockLogger).info("Request processed in {} ms", any<Long>())
+            verify(mockLogger).info("Response size: {} bytes", any<Int>())
+        }
+        
+        @Test
+        @DisplayName("Should log batch processing metrics")
+        fun shouldLogBatchProcessingMetrics() = runTest {
+            // Given
+            val prompts = listOf("Prompt 1", "Prompt 2", "Prompt 3")
+            val expectedResponses = listOf("Response 1", "Response 2", "Response 3")
+            val mockHttpResponse = mockHttpResponse(200, expectedResponses.toString())
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            
+            // When
+            auraAIService.generateBatchResponses(prompts)
+            
+            // Then
+            verify(mockLogger).info("Batch processing completed: {} prompts in {} ms", eq(3), any<Long>())
+            verify(mockLogger).info("Average response time per prompt: {} ms", any<Long>())
+        }
+        
+        @Test
+        @DisplayName("Should log health check results")
+        fun shouldLogHealthCheckResults() = runTest {
+            // Given
+            val mockHttpResponse = mockHttpResponse(200, "OK")
+            whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse)
+            
+            // When
+            auraAIService.healthCheck()
+            
+            // Then
+            verify(mockLogger).info("Health check completed successfully")
+            verify(mockLogger).info("Service response time: {} ms", any<Long>())
+        }
+    }
+}
+
+// Additional exception classes for comprehensive testing
+class MaxRetriesExceededException(message: String) : Exception(message)
+class ClientErrorException(message: String) : Exception(message)
+class EmptyResponseException(message: String) : Exception(message)
+class UnexpectedContentTypeException(message: String) : Exception(message)
+class UnknownHostException(message: String) : Exception(message)
+class SSLHandshakeException(message: String) : Exception(message)
+class SocketException(message: String) : Exception(message)
