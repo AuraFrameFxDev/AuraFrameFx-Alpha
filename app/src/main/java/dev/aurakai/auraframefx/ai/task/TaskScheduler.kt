@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.Clock.System
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -180,7 +181,7 @@ class TaskScheduler @Inject constructor(
                 activeTasks = _activeTasks.size,
                 completedTasks = _completedTasks.size,
                 pendingTasks = _taskQueue.size,
-                lastUpdated = kotlinx.datetime.Clock.System.now(),
+                lastUpdated = Clock.System.now(),
                 taskCounts = current.taskCounts + (task.status to (current.taskCounts[task.status]
                     ?: 0) + 1)
             )
@@ -195,5 +196,5 @@ data class TaskStats(
     val completedTasks: Int = 0,
     val pendingTasks: Int = 0,
     val taskCounts: Map<TaskStatus, Int> = emptyMap(),
-    @kotlinx.serialization.Serializable(with = InstantSerializer::class) val lastUpdated: Instant = kotlinx.datetime.Clock.System.now(),
+    @kotlinx.serialization.Serializable(with = InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
 )

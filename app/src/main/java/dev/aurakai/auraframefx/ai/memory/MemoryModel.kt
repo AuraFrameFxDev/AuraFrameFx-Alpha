@@ -4,13 +4,14 @@ import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.Clock.System
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class MemoryItem(
-    val id: String = "mem_${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "mem_${System.now().toEpochMilliseconds()}",
     val content: String,
-    @Serializable(with = InstantSerializer::class) val timestamp: Instant = kotlinx.datetime.Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val timestamp: Instant = System.now(),
     val agent: AgentType,
     val context: String? = null,
     val priority: Float = 0.5f,

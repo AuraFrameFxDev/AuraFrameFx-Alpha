@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.Clock.System
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -48,7 +49,7 @@ class MemoryManager @Inject constructor(
     fun getContextWindow(task: String): List<MemoryItem> {
         val recentItems = memoryStore.values
             .filter {
-                it.timestamp > kotlinx.datetime.Clock.System.now()
+                it.timestamp > Clock.System.now()
                     .minus(config.contextChainingConfig.maxChainLength.seconds)
             }
             .sortedByDescending { it.timestamp }
@@ -67,7 +68,7 @@ class MemoryManager @Inject constructor(
                 totalItems = memoryStore.size,
                 recentItems = memoryStore.values
                     .filter {
-                        it.timestamp > kotlinx.datetime.Clock.System.now()
+                        it.timestamp > Clock.System.now()
                             .minus(config.contextChainingConfig.maxChainLength.seconds)
                     }
                     .size,
@@ -92,5 +93,5 @@ data class MemoryStats(
     val totalItems: Int = 0,
     val recentItems: Int = 0,
     val memorySize: Int = 0,
-    val lastUpdated: Instant = kotlinx.datetime.Clock.System.now(),
+    val lastUpdated: Instant = Clock.System.now(),
 )
