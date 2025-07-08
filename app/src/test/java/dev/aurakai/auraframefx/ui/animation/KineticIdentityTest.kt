@@ -1,28 +1,25 @@
 package dev.aurakai.auraframefx.ui.animation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.test.runTest
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.unit.IntOffset
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.junit.runners.JUnit4
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
-/**
- * Comprehensive unit tests for KineticIdentity composable.
- * Testing framework: JUnit 4 with Compose Testing utilities and Robolectric
- */
-@RunWith(RobolectricTestRunner::class)
+@RunWith(JUnit4::class)
 class KineticIdentityTest {
 
     @get:Rule
@@ -30,98 +27,104 @@ class KineticIdentityTest {
 
     @Test
     fun kineticIdentity_rendersWithoutCrashing() {
-        // Test basic rendering without any crashes
-        composeTestRule.setContent {
-            KineticIdentity()
-        }
-        
-        // Verify the component renders successfully
-        composeTestRule.waitForIdle()
-    }
-
-    @Test
-    fun kineticIdentity_acceptsModifierParameter() {
-        // Test that the component properly accepts and applies modifiers
+        // Given
         composeTestRule.setContent {
             KineticIdentity(
-                modifier = Modifier
-                    .size(100.dp)
-                    .testTag("kinetic-identity")
+                modifier = Modifier.testTag("kinetic_identity")
             )
         }
-        
-        // Verify the test tag is applied (indicating modifier is working)
-        composeTestRule.onNodeWithTag("kinetic-identity").assertExists()
+
+        // When & Then
+        composeTestRule.onNodeWithTag("kinetic_identity").assertIsDisplayed()
     }
 
     @Test
-    fun kineticIdentity_callsOnPositionChangeCallback() = runTest {
+    fun kineticIdentity_defaultModifier_appliesCorrectly() {
+        // Given
+        composeTestRule.setContent {
+            KineticIdentity(
+                modifier = Modifier.testTag("kinetic_identity")
+            )
+        }
+
+        // When & Then
+        composeTestRule.onNodeWithTag("kinetic_identity").assertIsDisplayed()
+    }
+
+    @Test
+    fun kineticIdentity_customModifier_appliesCorrectly() {
+        // Given
+        val customModifier = Modifier.testTag("custom_kinetic_identity")
+        
+        composeTestRule.setContent {
+            KineticIdentity(
+                modifier = customModifier
+            )
+        }
+
+        // When & Then
+        composeTestRule.onNodeWithTag("custom_kinetic_identity").assertIsDisplayed()
+    }
+
+    @Test
+    fun kineticIdentity_onPositionChangeCallback_triggersOnPointerInput() {
+        // Given
         var capturedPosition: Offset? = null
-        var callbackInvoked = false
-        
-        composeTestRule.setContent {
-            Box(modifier = Modifier.size(200.dp)) {
-                KineticIdentity(
-                    modifier = Modifier.testTag("kinetic-identity"),
-                    onPositionChange = { offset ->
-                        capturedPosition = offset
-                        callbackInvoked = true
-                    }
-                )
-            }
+        val onPositionChange: (Offset) -> Unit = { position ->
+            capturedPosition = position
         }
-        
-        // Simulate a pointer event
-        composeTestRule.onNodeWithTag("kinetic-identity")
-            .performTouchInput {
-                down(Offset(50f, 50f))
-                up()
-            }
-        
+
+        composeTestRule.setContent {
+            KineticIdentity(
+                modifier = Modifier.testTag("kinetic_identity"),
+                onPositionChange = onPositionChange
+            )
+        }
+
+        // When
+        composeTestRule.onNodeWithTag("kinetic_identity").performTouchInput {
+            down(Offset(100f, 200f))
+            up()
+        }
+
+        // Then
         composeTestRule.waitForIdle()
-        
-        // Verify the callback was invoked
-        assertTrue(callbackInvoked, "onPositionChange callback should be invoked")
-        assertNotNull(capturedPosition, "Position should be captured")
+        assertNotNull(capturedPosition)
     }
 
     @Test
-    fun kineticIdentity_handlesMultiplePointerEvents() = runTest {
+    fun kineticIdentity_multiplePointerEvents_callsOnPositionChangeMultipleTimes() {
+        // Given
         val capturedPositions = mutableListOf<Offset>()
-        
-        composeTestRule.setContent {
-            Box(modifier = Modifier.size(200.dp)) {
-                KineticIdentity(
-                    modifier = Modifier.testTag("kinetic-identity"),
-                    onPositionChange = { offset ->
-                        capturedPositions.add(offset)
-                    }
-                )
-            }
+        val onPositionChange: (Offset) -> Unit = { position ->
+            capturedPositions.add(position)
         }
-        
-        // Simulate multiple pointer events
-        composeTestRule.onNodeWithTag("kinetic-identity")
-            .performTouchInput {
-                down(Offset(25f, 25f))
-                up()
-            }
-        
-        composeTestRule.onNodeWithTag("kinetic-identity")
-            .performTouchInput {
-                down(Offset(75f, 75f))
-                up()
-            }
-        
+
+        composeTestRule.setContent {
+            KineticIdentity(
+                modifier = Modifier.testTag("kinetic_identity"),
+                onPositionChange = onPositionChange
+            )
+        }
+
+        // When
+        composeTestRule.onNodeWithTag("kinetic_identity").performTouchInput {
+            down(Offset(50f, 100f))
+            up()
+        }
+        composeTestRule.onNodeWithTag("kinetic_identity").performTouchInput {
+            down(Offset(150f, 250f))
+            up()
+        }
+
+        // Then
         composeTestRule.waitForIdle()
-        
-        // Verify multiple positions were captured
-        assertTrue(capturedPositions.size >= 1, "At least one position should be captured")
+        assertEquals(2, capturedPositions.size)
     }
 
     @Test
-    fun kineticIdentity_worksWithEmptyCallback() {
-        // Test that component works even when no callback is provided
+    fun kineticIdentity_defaultOnPositionChange_doesNotCrash() {
+    
         composeTestRule.setContent {
             KineticIdentity(
                 modifier = Modifier.testTag("kinetic-identity")

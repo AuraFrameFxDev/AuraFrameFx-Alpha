@@ -1261,3 +1261,986 @@ try:
     import math
 except ImportError:
     math = None
+
+
+class TestGenesisEvolutionaryConduitRobustness(unittest.TestCase):
+    """Additional robustness tests for GenesisEvolutionaryConduit."""
+    
+    def setUp(self):
+        """Set up robustness test fixtures."""
+        self.conduit = GenesisEvolutionaryConduit(
+            population_size=10,
+            generation_limit=5,
+            mutation_rate=0.1,
+            crossover_rate=0.8
+        )
+        
+    def test_initialization_with_float_parameters(self):
+        """Test initialization with float parameters that should be converted to int."""
+        conduit = GenesisEvolutionaryConduit(
+            population_size=10.7,  # Should handle float to int conversion
+            generation_limit=5.3
+        )
+        # Test depends on implementation - either should work or raise appropriate error
+        self.assertIsInstance(conduit.population_size, (int, float))
+        self.assertIsInstance(conduit.generation_limit, (int, float))
+        
+    def test_mutation_rate_boundary_values(self):
+        """Test mutation rate exactly at boundary values."""
+        # Test exactly at boundaries
+        conduit_zero = GenesisEvolutionaryConduit(mutation_rate=0.0)
+        conduit_one = GenesisEvolutionaryConduit(mutation_rate=1.0)
+        
+        self.assertEqual(conduit_zero.mutation_rate, 0.0)
+        self.assertEqual(conduit_one.mutation_rate, 1.0)
+        
+    def test_crossover_rate_boundary_values(self):
+        """Test crossover rate exactly at boundary values."""
+        # Test exactly at boundaries
+        conduit_zero = GenesisEvolutionaryConduit(crossover_rate=0.0)
+        conduit_one = GenesisEvolutionaryConduit(crossover_rate=1.0)
+        
+        self.assertEqual(conduit_zero.crossover_rate, 0.0)
+        self.assertEqual(conduit_one.crossover_rate, 1.0)
+        
+    def test_population_size_boundary_values(self):
+        """Test population size at minimum boundary."""
+        conduit_min = GenesisEvolutionaryConduit(population_size=1)
+        self.assertEqual(conduit_min.population_size, 1)
+        
+    def test_generation_limit_boundary_values(self):
+        """Test generation limit at minimum boundary."""
+        conduit_min = GenesisEvolutionaryConduit(generation_limit=1)
+        self.assertEqual(conduit_min.generation_limit, 1)
+        
+    def test_string_parameter_inputs(self):
+        """Test handling of string inputs that should be numeric."""
+        with self.assertRaises((ValueError, TypeError, ConduitInitializationError)):
+            GenesisEvolutionaryConduit(population_size="invalid")
+            
+        with self.assertRaises((ValueError, TypeError, ConduitInitializationError)):
+            GenesisEvolutionaryConduit(mutation_rate="invalid")
+            
+    def test_none_parameter_inputs(self):
+        """Test handling of None parameter inputs."""
+        with self.assertRaises((ValueError, TypeError, ConduitInitializationError)):
+            GenesisEvolutionaryConduit(population_size=None)
+            
+        with self.assertRaises((ValueError, TypeError, ConduitInitializationError)):
+            GenesisEvolutionaryConduit(mutation_rate=None)
+            
+    def test_negative_zero_parameters(self):
+        """Test handling of negative zero parameters."""
+        with self.assertRaises(ConduitInitializationError):
+            GenesisEvolutionaryConduit(population_size=-0)
+            
+    def test_infinity_parameters(self):
+        """Test handling of infinity parameters."""
+        with self.assertRaises((ValueError, ConduitInitializationError)):
+            GenesisEvolutionaryConduit(mutation_rate=float('inf'))
+            
+        with self.assertRaises((ValueError, ConduitInitializationError)):
+            GenesisEvolutionaryConduit(crossover_rate=float('-inf'))
+            
+    def test_nan_parameters(self):
+        """Test handling of NaN parameters."""
+        with self.assertRaises((ValueError, ConduitInitializationError)):
+            GenesisEvolutionaryConduit(mutation_rate=float('nan'))
+            
+    @patch('genesis_evolutionary_conduit.random.random')
+    def test_mutate_agent_with_edge_probability(self, mock_random):
+        """Test mutation with edge case probability values."""
+        mock_agent = Mock()
+        mock_agent.mutate = Mock()
+        
+        # Test with probability exactly at mutation rate
+        mock_random.return_value = self.conduit.mutation_rate
+        result = self.conduit.mutate_agent(mock_agent)
+        
+        self.assertEqual(result, mock_agent)
+        # Behavior depends on implementation (< vs <=)
+        
+    def test_crossover_agents_with_identical_parents(self):
+        """Test crossover with identical parent agents."""
+        mock_parent = Mock()
+        mock_parent.genome = [1, 0, 1, 0, 1]
+        
+        with patch('genesis_evolutionary_conduit.CrossoverOperator') as mock_crossover:
+            mock_offspring = Mock()
+            mock_crossover.return_value.crossover.return_value = mock_offspring
+            
+            result = self.conduit.crossover_agents(mock_parent, mock_parent)
+            
+            self.assertEqual(result, mock_offspring)
+            mock_crossover.assert_called_once()
+            
+    def test_select_parents_with_exact_population_size(self):
+        """Test parent selection when population size equals selection size."""
+        mock_population = [Mock(), Mock()]
+        mock_selector = Mock()
+        mock_selector.select.return_value = mock_population
+        
+        with patch('genesis_evolutionary_conduit.SelectionOperator', return_value=mock_selector):
+            result = self.conduit.select_parents(mock_population)
+            
+            self.assertEqual(len(result), 2)
+            mock_selector.select.assert_called_once_with(mock_population, 2)
+            
+    def test_evolve_generation_with_minimum_population(self):
+        """Test evolution with minimum viable population size."""
+        mock_population = [Mock(), Mock()]  # Minimum size for crossover
+        mock_new_agent = Mock()
+        
+        with patch.object(self.conduit, 'select_parents') as mock_select:
+            with patch.object(self.conduit, 'crossover_agents') as mock_crossover:
+                with patch.object(self.conduit, 'mutate_agent') as mock_mutate:
+                    mock_select.return_value = mock_population
+                    mock_crossover.return_value = mock_new_agent
+                    mock_mutate.side_effect = lambda x: x
+                    
+                    result = self.conduit.evolve_generation(mock_population)
+                    
+                    self.assertEqual(len(result), 2)
+                    
+    def test_evaluate_fitness_with_none_agent(self):
+        """Test fitness evaluation with None agent."""
+        with self.assertRaises((AgentEvolutionError, AttributeError)):
+            self.conduit.evaluate_fitness(None)
+            
+    def test_check_convergence_with_none_fitness_values(self):
+        """Test convergence check with agents having None fitness."""
+        mock_agents = [Mock() for _ in range(3)]
+        mock_agents[0].fitness = None
+        mock_agents[1].fitness = 0.5
+        mock_agents[2].fitness = 0.6
+        
+        try:
+            result = self.conduit.check_convergence(mock_agents)
+            self.assertIsInstance(result, bool)
+        except (TypeError, AttributeError):
+            pass  # Acceptable behavior for None fitness
+            
+    def test_get_best_agent_with_tied_fitness(self):
+        """Test getting best agent when multiple agents have same fitness."""
+        mock_agents = [Mock() for _ in range(3)]
+        for agent in mock_agents:
+            agent.fitness = 0.8  # All have same fitness
+            
+        result = self.conduit.get_best_agent(mock_agents)
+        
+        self.assertIn(result, mock_agents)
+        self.assertEqual(result.fitness, 0.8)
+        
+    def test_get_best_agent_with_negative_fitness(self):
+        """Test getting best agent with negative fitness values."""
+        mock_agents = [Mock() for _ in range(3)]
+        mock_agents[0].fitness = -0.5
+        mock_agents[1].fitness = -0.1
+        mock_agents[2].fitness = -0.8
+        
+        result = self.conduit.get_best_agent(mock_agents)
+        
+        self.assertEqual(result, mock_agents[1])  # Highest (least negative)
+        
+    def test_save_evolution_state_with_invalid_path(self):
+        """Test saving evolution state with invalid file path."""
+        mock_population = [Mock()]
+        
+        with self.assertRaises((IOError, OSError, PermissionError)):
+            self.conduit.save_evolution_state(mock_population, 1, "/invalid/path/file.json")
+            
+    def test_load_evolution_state_with_corrupted_file(self):
+        """Test loading evolution state with corrupted JSON file."""
+        import tempfile
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            f.write("{invalid json content")
+            corrupted_file = f.name
+            
+        try:
+            with self.assertRaises((json.JSONDecodeError, ValueError)):
+                self.conduit.load_evolution_state(corrupted_file)
+        finally:
+            if os.path.exists(corrupted_file):
+                os.unlink(corrupted_file)
+                
+    def test_load_evolution_state_with_empty_file(self):
+        """Test loading evolution state with empty file."""
+        import tempfile
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            f.write("")
+            empty_file = f.name
+            
+        try:
+            with self.assertRaises((json.JSONDecodeError, ValueError)):
+                self.conduit.load_evolution_state(empty_file)
+        finally:
+            if os.path.exists(empty_file):
+                os.unlink(empty_file)
+                
+    def test_reset_evolution_state_multiple_times(self):
+        """Test resetting evolution state multiple times."""
+        self.conduit.current_generation = 10
+        self.conduit.best_fitness = 0.9
+        
+        # First reset
+        self.conduit.reset_evolution_state()
+        self.assertEqual(self.conduit.current_generation, 0)
+        self.assertEqual(self.conduit.best_fitness, 0.0)
+        
+        # Second reset should not cause issues
+        self.conduit.reset_evolution_state()
+        self.assertEqual(self.conduit.current_generation, 0)
+        self.assertEqual(self.conduit.best_fitness, 0.0)
+        
+    def test_get_evolution_statistics_with_empty_population(self):
+        """Test getting evolution statistics with empty population."""
+        with self.assertRaises((PopulationEvolutionError, ValueError, ZeroDivisionError)):
+            self.conduit.get_evolution_statistics([])
+            
+    def test_get_evolution_statistics_with_single_agent(self):
+        """Test getting evolution statistics with single agent."""
+        mock_agent = Mock()
+        mock_agent.fitness = 0.7
+        
+        stats = self.conduit.get_evolution_statistics([mock_agent])
+        
+        self.assertEqual(stats['population_size'], 1)
+        self.assertEqual(stats['best_fitness'], 0.7)
+        self.assertEqual(stats['worst_fitness'], 0.7)
+        self.assertEqual(stats['average_fitness'], 0.7)
+        
+    def test_validate_parameters_after_modification(self):
+        """Test parameter validation after runtime modification."""
+        # Modify parameters at runtime
+        self.conduit.population_size = -5
+        
+        with self.assertRaises(ConduitInitializationError):
+            self.conduit.validate_parameters()
+            
+        # Fix parameter
+        self.conduit.population_size = 10
+        # Should not raise exception
+        self.conduit.validate_parameters()
+
+
+class TestEvolutionaryAgentRobustness(unittest.TestCase):
+    """Additional robustness tests for EvolutionaryAgent."""
+    
+    def setUp(self):
+        """Set up robustness test fixtures."""
+        self.agent = EvolutionaryAgent()
+        
+    def test_initialization_with_none_genome(self):
+        """Test agent initialization with None genome."""
+        try:
+            agent = EvolutionaryAgent(genome=None)
+            self.assertIsNotNone(agent)
+        except (TypeError, ValueError):
+            pass  # Acceptable behavior
+            
+    def test_initialization_with_nested_genome(self):
+        """Test agent initialization with nested genome structure."""
+        nested_genome = [[1, 0], [0, 1], [1, 1]]
+        agent = EvolutionaryAgent(genome=nested_genome)
+        self.assertEqual(agent.genome, nested_genome)
+        
+    def test_initialization_with_mixed_type_genome(self):
+        """Test agent initialization with mixed data types in genome."""
+        mixed_genome = [1, 0.5, "gene", True, None]
+        agent = EvolutionaryAgent(genome=mixed_genome)
+        self.assertEqual(agent.genome, mixed_genome)
+        
+    def test_mutate_with_zero_rate(self):
+        """Test mutation with zero mutation rate."""
+        original_genome = self.agent.genome.copy()
+        self.agent.mutate(mutation_rate=0.0)
+        self.assertEqual(self.agent.genome, original_genome)
+        
+    def test_mutate_with_invalid_rate(self):
+        """Test mutation with invalid mutation rate."""
+        with self.assertRaises((ValueError, TypeError)):
+            self.agent.mutate(mutation_rate=-0.1)
+            
+        with self.assertRaises((ValueError, TypeError)):
+            self.agent.mutate(mutation_rate=1.5)
+            
+    def test_mutate_with_string_rate(self):
+        """Test mutation with string mutation rate."""
+        with self.assertRaises((ValueError, TypeError)):
+            self.agent.mutate(mutation_rate="0.5")
+            
+    def test_mutate_with_none_rate(self):
+        """Test mutation with None mutation rate."""
+        with self.assertRaises((ValueError, TypeError)):
+            self.agent.mutate(mutation_rate=None)
+            
+    def test_crossover_with_self(self):
+        """Test crossover with self as parent."""
+        try:
+            offspring = self.agent.crossover(self.agent)
+            self.assertIsInstance(offspring, EvolutionaryAgent)
+        except AgentEvolutionError:
+            pass  # Acceptable behavior
+            
+    def test_crossover_with_different_genome_types(self):
+        """Test crossover with agents having different genome types."""
+        other_agent = EvolutionaryAgent(genome=["string", "genes"])
+        
+        try:
+            offspring = self.agent.crossover(other_agent)
+            self.assertIsInstance(offspring, EvolutionaryAgent)
+        except AgentEvolutionError:
+            pass  # Acceptable behavior for incompatible types
+            
+    def test_crossover_with_empty_genome_agent(self):
+        """Test crossover with agent having empty genome."""
+        empty_agent = EvolutionaryAgent(genome=[])
+        
+        try:
+            offspring = self.agent.crossover(empty_agent)
+            self.assertIsInstance(offspring, EvolutionaryAgent)
+        except AgentEvolutionError:
+            pass  # Acceptable behavior
+            
+    def test_evaluate_fitness_with_none_evaluator(self):
+        """Test fitness evaluation with None evaluator."""
+        with self.assertRaises((AttributeError, TypeError)):
+            self.agent.evaluate_fitness(None)
+            
+    def test_evaluate_fitness_with_invalid_evaluator(self):
+        """Test fitness evaluation with invalid evaluator."""
+        invalid_evaluator = "not an evaluator"
+        
+        with self.assertRaises(AttributeError):
+            self.agent.evaluate_fitness(invalid_evaluator)
+            
+    def test_evaluate_fitness_with_failing_evaluator(self):
+        """Test fitness evaluation with evaluator that raises exception."""
+        mock_evaluator = Mock()
+        mock_evaluator.evaluate.side_effect = Exception("Evaluation failed")
+        
+        with self.assertRaises(Exception):
+            self.agent.evaluate_fitness(mock_evaluator)
+            
+    def test_clone_with_complex_genome(self):
+        """Test cloning agent with complex genome structure."""
+        self.agent.genome = {"genes": [1, 0, 1], "metadata": {"type": "test"}}
+        self.agent.fitness = 0.8
+        
+        clone = self.agent.clone()
+        
+        self.assertIsNot(clone, self.agent)
+        self.assertEqual(clone.genome, self.agent.genome)
+        self.assertEqual(clone.fitness, self.agent.fitness)
+        self.assertNotEqual(clone.id, self.agent.id)
+        
+    def test_clone_preservation_of_fitness(self):
+        """Test that cloning preserves fitness value."""
+        self.agent.fitness = 0.123456789
+        clone = self.agent.clone()
+        
+        self.assertEqual(clone.fitness, 0.123456789)
+        
+    def test_to_dict_with_complex_genome(self):
+        """Test converting agent with complex genome to dictionary."""
+        self.agent.genome = {"nested": {"data": [1, 2, 3]}}
+        self.agent.fitness = 0.75
+        
+        agent_dict = self.agent.to_dict()
+        
+        self.assertIn('genome', agent_dict)
+        self.assertIn('fitness', agent_dict)
+        self.assertEqual(agent_dict['genome'], self.agent.genome)
+        
+    def test_to_dict_with_none_values(self):
+        """Test converting agent with None values to dictionary."""
+        self.agent.genome = None
+        self.agent.fitness = None
+        
+        agent_dict = self.agent.to_dict()
+        
+        self.assertIn('genome', agent_dict)
+        self.assertIn('fitness', agent_dict)
+        self.assertIsNone(agent_dict['genome'])
+        self.assertIsNone(agent_dict['fitness'])
+        
+    def test_from_dict_with_missing_id(self):
+        """Test creating agent from dictionary missing ID."""
+        agent_dict = {
+            'genome': [1, 0, 1, 0],
+            'fitness': 0.5
+        }
+        
+        with self.assertRaises(AgentEvolutionError):
+            EvolutionaryAgent.from_dict(agent_dict)
+            
+    def test_from_dict_with_missing_genome(self):
+        """Test creating agent from dictionary missing genome."""
+        agent_dict = {
+            'id': 'test_id',
+            'fitness': 0.5
+        }
+        
+        with self.assertRaises(AgentEvolutionError):
+            EvolutionaryAgent.from_dict(agent_dict)
+            
+    def test_from_dict_with_missing_fitness(self):
+        """Test creating agent from dictionary missing fitness."""
+        agent_dict = {
+            'id': 'test_id',
+            'genome': [1, 0, 1, 0]
+        }
+        
+        with self.assertRaises(AgentEvolutionError):
+            EvolutionaryAgent.from_dict(agent_dict)
+            
+    def test_from_dict_with_invalid_types(self):
+        """Test creating agent from dictionary with invalid types."""
+        agent_dict = {
+            'id': 123,  # Should be string
+            'genome': "not a list",  # Should be list
+            'fitness': "not a number"  # Should be number
+        }
+        
+        try:
+            agent = EvolutionaryAgent.from_dict(agent_dict)
+            # If it succeeds, verify the types were handled
+            self.assertIsNotNone(agent)
+        except (AgentEvolutionError, TypeError, ValueError):
+            pass  # Acceptable behavior
+            
+    def test_from_dict_with_extra_fields(self):
+        """Test creating agent from dictionary with extra fields."""
+        agent_dict = {
+            'id': 'test_id',
+            'genome': [1, 0, 1, 0],
+            'fitness': 0.5,
+            'extra_field': 'should be ignored'
+        }
+        
+        agent = EvolutionaryAgent.from_dict(agent_dict)
+        
+        self.assertEqual(agent.id, 'test_id')
+        self.assertEqual(agent.genome, [1, 0, 1, 0])
+        self.assertEqual(agent.fitness, 0.5)
+        
+    def test_id_immutability(self):
+        """Test that agent ID cannot be easily modified."""
+        original_id = self.agent.id
+        
+        # Attempt to modify ID
+        try:
+            self.agent.id = "new_id"
+            # If modification succeeded, verify it worked
+            self.assertEqual(self.agent.id, "new_id")
+        except AttributeError:
+            # If ID is immutable, it should remain unchanged
+            self.assertEqual(self.agent.id, original_id)
+            
+    def test_fitness_boundary_values(self):
+        """Test agent fitness with boundary values."""
+        boundary_values = [0.0, 1.0, -1.0, float('inf'), float('-inf')]
+        
+        for value in boundary_values:
+            self.agent.fitness = value
+            
+            if value in [float('inf'), float('-inf')]:
+                # Should handle infinite values
+                self.assertTrue(
+                    self.agent.fitness == value or 
+                    isinstance(self.agent.fitness, (int, float))
+                )
+            else:
+                self.assertEqual(self.agent.fitness, value)
+
+
+class TestOperatorRobustness(unittest.TestCase):
+    """Additional robustness tests for genetic operators."""
+    
+    def setUp(self):
+        """Set up operator test fixtures."""
+        self.mutation_operator = MutationOperator()
+        self.crossover_operator = CrossoverOperator()
+        self.selection_operator = SelectionOperator()
+        
+    def test_mutation_operator_with_empty_genome(self):
+        """Test mutation operator with empty genome."""
+        mock_agent = Mock()
+        mock_agent.genome = []
+        
+        try:
+            result = self.mutation_operator.mutate(mock_agent)
+            self.assertEqual(result, mock_agent)
+        except (IndexError, ValueError):
+            pass  # Acceptable behavior
+            
+    def test_mutation_operator_with_single_gene(self):
+        """Test mutation operator with single gene."""
+        mock_agent = Mock()
+        mock_agent.genome = [1]
+        
+        result = self.mutation_operator.mutate(mock_agent)
+        self.assertEqual(result, mock_agent)
+        
+    def test_mutation_operator_with_large_genome(self):
+        """Test mutation operator with very large genome."""
+        mock_agent = Mock()
+        mock_agent.genome = list(range(10000))
+        
+        result = self.mutation_operator.mutate(mock_agent)
+        self.assertEqual(result, mock_agent)
+        
+    def test_mutation_operator_with_zero_mutation_rate(self):
+        """Test mutation operator with zero mutation rate."""
+        mock_agent = Mock()
+        mock_agent.genome = [1, 0, 1, 0]
+        
+        result = self.mutation_operator.mutate(mock_agent, mutation_rate=0.0)
+        self.assertEqual(result, mock_agent)
+        
+    def test_mutation_operator_with_max_mutation_rate(self):
+        """Test mutation operator with maximum mutation rate."""
+        mock_agent = Mock()
+        mock_agent.genome = [1, 0, 1, 0]
+        
+        result = self.mutation_operator.mutate(mock_agent, mutation_rate=1.0)
+        self.assertEqual(result, mock_agent)
+        
+    def test_crossover_operator_with_empty_genomes(self):
+        """Test crossover operator with empty genomes."""
+        mock_parent1 = Mock()
+        mock_parent2 = Mock()
+        mock_parent1.genome = []
+        mock_parent2.genome = []
+        
+        try:
+            offspring = self.crossover_operator.crossover(mock_parent1, mock_parent2)
+            self.assertIsNotNone(offspring)
+        except (IndexError, ValueError, AgentEvolutionError):
+            pass  # Acceptable behavior
+            
+    def test_crossover_operator_with_single_gene_genomes(self):
+        """Test crossover operator with single gene genomes."""
+        mock_parent1 = Mock()
+        mock_parent2 = Mock()
+        mock_parent1.genome = [1]
+        mock_parent2.genome = [0]
+        
+        offspring = self.crossover_operator.crossover(mock_parent1, mock_parent2)
+        self.assertIsNotNone(offspring)
+        
+    def test_crossover_operator_with_mismatched_genome_lengths(self):
+        """Test crossover operator with different genome lengths."""
+        mock_parent1 = Mock()
+        mock_parent2 = Mock()
+        mock_parent1.genome = [1, 0, 1]
+        mock_parent2.genome = [0, 1, 0, 1, 1]
+        
+        try:
+            offspring = self.crossover_operator.crossover(mock_parent1, mock_parent2)
+            self.assertIsNotNone(offspring)
+        except (AgentEvolutionError, ValueError):
+            pass  # Acceptable behavior for incompatible lengths
+            
+    def test_selection_operator_with_single_agent(self):
+        """Test selection operator with single agent population."""
+        mock_agent = Mock()
+        mock_agent.fitness = 0.5
+        
+        with self.assertRaises(PopulationEvolutionError):
+            self.selection_operator.select([mock_agent], 2)
+            
+    def test_selection_operator_with_identical_fitness(self):
+        """Test selection operator with agents having identical fitness."""
+        mock_agents = [Mock() for _ in range(5)]
+        for agent in mock_agents:
+            agent.fitness = 0.5
+            
+        selected = self.selection_operator.select(mock_agents, 2)
+        
+        self.assertEqual(len(selected), 2)
+        self.assertTrue(all(agent in mock_agents for agent in selected))
+        
+    def test_selection_operator_with_negative_fitness(self):
+        """Test selection operator with negative fitness values."""
+        mock_agents = [Mock() for _ in range(5)]
+        for i, agent in enumerate(mock_agents):
+            agent.fitness = -0.5 - i * 0.1
+            
+        selected = self.selection_operator.select(mock_agents, 2)
+        
+        self.assertEqual(len(selected), 2)
+        self.assertTrue(all(agent in mock_agents for agent in selected))
+        
+    def test_selection_operator_with_zero_fitness(self):
+        """Test selection operator with zero fitness values."""
+        mock_agents = [Mock() for _ in range(5)]
+        for agent in mock_agents:
+            agent.fitness = 0.0
+            
+        selected = self.selection_operator.select(mock_agents, 2)
+        
+        self.assertEqual(len(selected), 2)
+        self.assertTrue(all(agent in mock_agents for agent in selected))
+        
+    def test_selection_operator_with_extreme_fitness_values(self):
+        """Test selection operator with extreme fitness values."""
+        mock_agents = [Mock() for _ in range(3)]
+        mock_agents[0].fitness = float('-inf')
+        mock_agents[1].fitness = 0.5
+        mock_agents[2].fitness = float('inf')
+        
+        try:
+            selected = self.selection_operator.select(mock_agents, 2)
+            self.assertEqual(len(selected), 2)
+        except (ValueError, OverflowError):
+            pass  # Acceptable behavior for extreme values
+
+
+class TestFitnessEvaluatorRobustness(unittest.TestCase):
+    """Additional robustness tests for FitnessEvaluator."""
+    
+    def setUp(self):
+        """Set up fitness evaluator test fixtures."""
+        self.evaluator = FitnessEvaluator()
+        
+    def test_evaluate_with_empty_genome(self):
+        """Test evaluation with empty genome."""
+        mock_agent = Mock()
+        mock_agent.genome = []
+        
+        fitness = self.evaluator.evaluate(mock_agent)
+        
+        self.assertIsInstance(fitness, (int, float))
+        self.assertGreaterEqual(fitness, 0.0)
+        self.assertLessEqual(fitness, 1.0)
+        
+    def test_evaluate_with_single_gene(self):
+        """Test evaluation with single gene."""
+        mock_agent = Mock()
+        mock_agent.genome = [1]
+        
+        fitness = self.evaluator.evaluate(mock_agent)
+        
+        self.assertIsInstance(fitness, (int, float))
+        
+    def test_evaluate_with_large_genome(self):
+        """Test evaluation with very large genome."""
+        mock_agent = Mock()
+        mock_agent.genome = list(range(10000))
+        
+        fitness = self.evaluator.evaluate(mock_agent)
+        
+        self.assertIsInstance(fitness, (int, float))
+        
+    def test_evaluate_with_mixed_type_genome(self):
+        """Test evaluation with mixed data types in genome."""
+        mock_agent = Mock()
+        mock_agent.genome = [1, 0.5, "gene", True, None]
+        
+        try:
+            fitness = self.evaluator.evaluate(mock_agent)
+            self.assertIsInstance(fitness, (int, float))
+        except (TypeError, ValueError):
+            pass  # Acceptable behavior for mixed types
+            
+    def test_evaluate_with_nested_genome(self):
+        """Test evaluation with nested genome structure."""
+        mock_agent = Mock()
+        mock_agent.genome = [[1, 0], [0, 1], [1, 1]]
+        
+        try:
+            fitness = self.evaluator.evaluate(mock_agent)
+            self.assertIsInstance(fitness, (int, float))
+        except (TypeError, ValueError):
+            pass  # Acceptable behavior for nested structures
+            
+    def test_evaluate_with_agent_missing_genome(self):
+        """Test evaluation with agent missing genome attribute."""
+        mock_agent = Mock()
+        del mock_agent.genome
+        
+        with self.assertRaises(AttributeError):
+            self.evaluator.evaluate(mock_agent)
+            
+    def test_evaluate_population_with_mixed_genomes(self):
+        """Test population evaluation with mixed genome types."""
+        mock_agents = [Mock() for _ in range(3)]
+        mock_agents[0].genome = [1, 0, 1]
+        mock_agents[1].genome = [0.5, 0.3, 0.8]
+        mock_agents[2].genome = ["A", "B", "C"]
+        
+        try:
+            fitness_scores = self.evaluator.evaluate_population(mock_agents)
+            self.assertEqual(len(fitness_scores), 3)
+        except (TypeError, ValueError):
+            pass  # Acceptable behavior for mixed types
+            
+    def test_evaluate_population_with_invalid_agents(self):
+        """Test population evaluation with invalid agents."""
+        mock_agents = [Mock(), None, Mock()]
+        mock_agents[0].genome = [1, 0, 1]
+        mock_agents[2].genome = [0, 1, 0]
+        
+        with self.assertRaises((AgentEvolutionError, AttributeError)):
+            self.evaluator.evaluate_population(mock_agents)
+            
+    def test_evaluate_population_performance(self):
+        """Test performance of population evaluation with large population."""
+        mock_agents = [Mock() for _ in range(1000)]
+        for agent in mock_agents:
+            agent.genome = [1, 0, 1, 0, 1] * 100  # Large genome
+            
+        import time
+        start_time = time.time()
+        fitness_scores = self.evaluator.evaluate_population(mock_agents)
+        end_time = time.time()
+        
+        self.assertEqual(len(fitness_scores), 1000)
+        # Performance should be reasonable (adjust threshold as needed)
+        self.assertLess(end_time - start_time, 10.0)
+
+
+class TestPopulationManagerRobustness(unittest.TestCase):
+    """Additional robustness tests for PopulationManager."""
+    
+    def setUp(self):
+        """Set up population manager test fixtures."""
+        self.manager = PopulationManager(size=10)
+        
+    def test_initialization_with_zero_size(self):
+        """Test initialization with zero population size."""
+        with self.assertRaises(PopulationEvolutionError):
+            PopulationManager(size=0)
+            
+    def test_initialization_with_negative_size(self):
+        """Test initialization with negative population size."""
+        with self.assertRaises(PopulationEvolutionError):
+            PopulationManager(size=-5)
+            
+    def test_initialization_with_large_size(self):
+        """Test initialization with very large population size."""
+        large_manager = PopulationManager(size=10000)
+        self.assertEqual(large_manager.size, 10000)
+        
+    def test_generate_population_consistency(self):
+        """Test that generated populations are consistent."""
+        population1 = self.manager.generate_population()
+        population2 = self.manager.generate_population()
+        
+        self.assertEqual(len(population1), len(population2))
+        self.assertEqual(len(population1), 10)
+        
+        # Agents should be different instances
+        self.assertNotEqual(population1[0], population2[0])
+        
+    def test_generate_population_with_size_one(self):
+        """Test population generation with size one."""
+        single_manager = PopulationManager(size=1)
+        population = single_manager.generate_population()
+        
+        self.assertEqual(len(population), 1)
+        self.assertIsInstance(population[0], EvolutionaryAgent)
+        
+    def test_evaluate_population_with_none_agents(self):
+        """Test population evaluation with None agents."""
+        mock_population = [Mock(), None, Mock()]
+        
+        with self.assertRaises(AttributeError):
+            self.manager.evaluate_population(mock_population)
+            
+    def test_evaluate_population_with_invalid_agents(self):
+        """Test population evaluation with invalid agents."""
+        mock_population = [Mock(), "not an agent", Mock()]
+        
+        with self.assertRaises(AttributeError):
+            self.manager.evaluate_population(mock_population)
+            
+    def test_sort_population_by_fitness_with_none_fitness(self):
+        """Test sorting population with None fitness values."""
+        mock_population = [Mock() for _ in range(3)]
+        mock_population[0].fitness = 0.5
+        mock_population[1].fitness = None
+        mock_population[2].fitness = 0.8
+        
+        try:
+            sorted_population = self.manager.sort_population_by_fitness(mock_population)
+            self.assertEqual(len(sorted_population), 3)
+        except (TypeError, AttributeError):
+            pass  # Acceptable behavior for None fitness
+            
+    def test_sort_population_by_fitness_with_mixed_types(self):
+        """Test sorting population with mixed fitness types."""
+        mock_population = [Mock() for _ in range(3)]
+        mock_population[0].fitness = 0.5
+        mock_population[1].fitness = "high"
+        mock_population[2].fitness = 0.8
+        
+        try:
+            sorted_population = self.manager.sort_population_by_fitness(mock_population)
+            self.assertEqual(len(sorted_population), 3)
+        except (TypeError, ValueError):
+            pass  # Acceptable behavior for mixed types
+            
+    def test_sort_population_by_fitness_stability(self):
+        """Test sorting stability with identical fitness values."""
+        mock_population = [Mock() for _ in range(5)]
+        for i, agent in enumerate(mock_population):
+            agent.fitness = 0.5
+            agent.id = f"agent_{i}"
+            
+        sorted_population = self.manager.sort_population_by_fitness(mock_population)
+        
+        # All agents should still be present
+        self.assertEqual(len(sorted_population), 5)
+        self.assertTrue(all(agent.fitness == 0.5 for agent in sorted_population))
+        
+    def test_get_population_statistics_with_extreme_values(self):
+        """Test population statistics with extreme fitness values."""
+        mock_population = [Mock() for _ in range(3)]
+        mock_population[0].fitness = float('-inf')
+        mock_population[1].fitness = 0.5
+        mock_population[2].fitness = float('inf')
+        
+        try:
+            stats = self.manager.get_population_statistics(mock_population)
+            self.assertIn('size', stats)
+            self.assertEqual(stats['size'], 3)
+        except (ValueError, OverflowError):
+            pass  # Acceptable behavior for extreme values
+            
+    def test_get_population_statistics_with_nan_values(self):
+        """Test population statistics with NaN fitness values."""
+        mock_population = [Mock() for _ in range(3)]
+        mock_population[0].fitness = float('nan')
+        mock_population[1].fitness = 0.5
+        mock_population[2].fitness = 0.8
+        
+        try:
+            stats = self.manager.get_population_statistics(mock_population)
+            self.assertIn('size', stats)
+        except (ValueError, TypeError):
+            pass  # Acceptable behavior for NaN values
+
+
+class TestConcurrencyAndThreadSafety(unittest.TestCase):
+    """Tests for concurrency and thread safety."""
+    
+    def test_multiple_conduit_instances(self):
+        """Test multiple conduit instances running simultaneously."""
+        conduits = [GenesisEvolutionaryConduit(population_size=5) for _ in range(3)]
+        
+        results = []
+        for conduit in conduits:
+            with patch.object(conduit, 'initialize_population') as mock_init:
+                with patch.object(conduit, 'evolve_generation') as mock_evolve:
+                    mock_population = [Mock() for _ in range(5)]
+                    mock_init.return_value = mock_population
+                    mock_evolve.return_value = mock_population
+                    
+                    result = conduit.run_evolution()
+                    results.append(result)
+                    
+        self.assertEqual(len(results), 3)
+        self.assertTrue(all(result is not None for result in results))
+        
+    def test_agent_id_uniqueness_across_populations(self):
+        """Test that agent IDs are unique across multiple populations."""
+        managers = [PopulationManager(size=50) for _ in range(3)]
+        
+        all_ids = []
+        for manager in managers:
+            population = manager.generate_population()
+            population_ids = [agent.id for agent in population]
+            all_ids.extend(population_ids)
+            
+        # All IDs should be unique
+        self.assertEqual(len(all_ids), len(set(all_ids)))
+        
+    def test_fitness_evaluator_consistency(self):
+        """Test that fitness evaluator produces consistent results."""
+        evaluator = FitnessEvaluator()
+        
+        # Test same agent multiple times
+        mock_agent = Mock()
+        mock_agent.genome = [1, 0, 1, 0, 1]
+        
+        fitness_scores = []
+        for _ in range(10):
+            fitness = evaluator.evaluate(mock_agent)
+            fitness_scores.append(fitness)
+            
+        # All scores should be identical for same agent
+        self.assertTrue(all(score == fitness_scores[0] for score in fitness_scores))
+
+
+class TestBoundaryConditionsAndEdgeCases(unittest.TestCase):
+    """Tests for boundary conditions and edge cases."""
+    
+    def test_evolution_with_single_agent_population(self):
+        """Test evolution with single agent population."""
+        conduit = GenesisEvolutionaryConduit(population_size=1)
+        
+        with patch.object(conduit, 'initialize_population') as mock_init:
+            with patch.object(conduit, 'evolve_generation') as mock_evolve:
+                mock_population = [Mock()]
+                mock_init.return_value = mock_population
+                mock_evolve.return_value = mock_population
+                
+                result = conduit.run_evolution()
+                
+                self.assertEqual(len(result), 1)
+                
+    def test_evolution_with_zero_generations(self):
+        """Test evolution with zero generation limit."""
+        conduit = GenesisEvolutionaryConduit(generation_limit=1)
+        
+        with patch.object(conduit, 'initialize_population') as mock_init:
+            with patch.object(conduit, 'check_convergence') as mock_converge:
+                mock_population = [Mock() for _ in range(5)]
+                mock_init.return_value = mock_population
+                mock_converge.return_value = True  # Immediate convergence
+                
+                result = conduit.run_evolution()
+                
+                self.assertEqual(result, mock_population)
+                
+    def test_genome_with_extreme_sizes(self):
+        """Test agents with extremely large and small genomes."""
+        # Very large genome
+        large_genome = list(range(100000))
+        large_agent = EvolutionaryAgent(genome=large_genome)
+        self.assertEqual(len(large_agent.genome), 100000)
+        
+        # Empty genome
+        empty_agent = EvolutionaryAgent(genome=[])
+        self.assertEqual(len(empty_agent.genome), 0)
+        
+    def test_fitness_with_special_float_values(self):
+        """Test fitness handling with special float values."""
+        agent = EvolutionaryAgent()
+        
+        special_values = [
+            0.0, -0.0, 1.0, -1.0,
+            float('inf'), float('-inf'), float('nan'),
+            1e-10, 1e10, -1e10
+        ]
+        
+        for value in special_values:
+            agent.fitness = value
+            
+            if value == float('nan'):
+                self.assertTrue(str(agent.fitness) == 'nan' or agent.fitness != agent.fitness)
+            elif value == float('inf'):
+                self.assertTrue(agent.fitness == float('inf') or str(agent.fitness) == 'inf')
+            elif value == float('-inf'):
+                self.assertTrue(agent.fitness == float('-inf') or str(agent.fitness) == '-inf')
+            else:
+                self.assertEqual(agent.fitness, value)
+
+
+# Run additional tests if file is executed directly
+if __name__ == '__main__':
+    unittest.main()

