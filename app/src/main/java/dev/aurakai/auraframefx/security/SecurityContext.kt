@@ -363,12 +363,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Calculates the overall threat level based on the highest severity among detected security threats.
+     * Determines the overall threat level by evaluating the highest severity among a list of detected security threats.
      *
-     * If the list is empty, returns `ThreatLevel.LOW`.
+     * Returns `ThreatLevel.LOW` if the list is empty.
      *
-     * @param threats List of detected security threats.
-     * @return The highest threat level present in the list, or `ThreatLevel.LOW` if none.
+     * @param threats The list of detected security threats to evaluate.
+     * @return The highest threat level found, or `ThreatLevel.LOW` if no threats are present.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -386,9 +386,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Generates a random 16-byte hexadecimal string to be used as a secure identifier.
+     * Generates a secure random 16-byte identifier as a 32-character hexadecimal string.
      *
-     * @return A securely generated 32-character hexadecimal ID.
+     * @return A 32-character hexadecimal string suitable for use as a secure ID.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -397,9 +397,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Asynchronously records a security event for auditing and monitoring.
+     * Records a security event asynchronously for auditing and monitoring purposes.
      *
-     * The event is serialized and written to the debug log. In production environments, events should be securely persisted.
+     * The event is serialized and written to the debug log. In production, events should be securely persisted.
      *
      * @param event The security event to record.
      */

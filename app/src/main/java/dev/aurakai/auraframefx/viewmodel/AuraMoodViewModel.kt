@@ -40,7 +40,9 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Set Aura's current mood manually
+     * Sets Aura's current mood to the specified emotion and intensity.
+     *
+     * The intensity value is clamped between 0 and 1. The new mood is also added to the mood history.
      */
     fun setMood(emotion: Emotion, intensity: Float = 0.5f) {
         val newMood = MoodState(
@@ -53,7 +55,13 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Transition to a new mood gradually
+     * Gradually transitions Aura's mood to the specified emotion and intensity over a given duration.
+     *
+     * The transition interpolates intensity in multiple steps and switches emotion halfway through the process. The final mood is set precisely to the target values and added to the mood history.
+     *
+     * @param targetEmotion The emotion to transition to.
+     * @param targetIntensity The target intensity for the new emotion, clamped between 0 and 1.
+     * @param durationMs The duration of the transition in milliseconds.
      */
     fun transitionToMood(
         targetEmotion: Emotion,
@@ -97,7 +105,12 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * React to user interactions - this affects Aura's mood
+     * Adjusts Aura's mood in response to a user interaction.
+     *
+     * The mood transition depends on the interaction type and whether it was successful.
+     *
+     * @param interactionType The type of user interaction (e.g., "chat", "task_completion").
+     * @param success Indicates if the interaction was successful; affects the resulting mood.
      */
     fun reactToInteraction(interactionType: String, success: Boolean = true) {
         when (interactionType.lowercase()) {
@@ -142,7 +155,7 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Natural mood evolution over time
+     * Initiates continuous, autonomous mood evolution for Aura, gradually reducing mood intensity over time and occasionally triggering spontaneous mood shifts.
      */
     private fun startMoodEvolution() {
         viewModelScope.launch {
@@ -177,7 +190,12 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Get mood-appropriate greeting
+     * Returns a greeting message tailored to Aura's current emotional state.
+     *
+     * The greeting reflects the current mood and provides a unique message for each emotion.
+     * If the emotion is unrecognized, a default greeting is returned.
+     *
+     * @return A mood-appropriate greeting string.
      */
     fun getMoodGreeting(): String {
         return when (_moodState.value.emotion) {
@@ -196,7 +214,12 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Get current mood descriptor for UI
+     * Returns a descriptive string summarizing the current mood's intensity and emotion.
+     *
+     * The descriptor combines an intensity qualifier (e.g., "Very", "Quite") with the current emotion for UI display.
+     * If the emotion is unrecognized, "Balanced" is used as the default.
+     *
+     * @return A string describing the current mood's intensity and emotion.
      */
     fun getCurrentMoodDescriptor(): String {
         val mood = _moodState.value
@@ -224,6 +247,11 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
         return "$intensityDesc $emotionDesc"
     }
 
+    /**
+     * Adds a mood state to the mood history, maintaining a maximum of 50 entries.
+     *
+     * Removes the oldest entry if the history exceeds the size limit.
+     */
     private fun addToHistory(mood: MoodState) {
         val currentHistory = _moodHistory.value.toMutableList()
         currentHistory.add(mood)

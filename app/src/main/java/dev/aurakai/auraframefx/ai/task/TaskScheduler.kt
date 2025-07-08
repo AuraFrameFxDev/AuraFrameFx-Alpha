@@ -166,19 +166,28 @@ class TaskScheduler @Inject constructor(
         return task.priority.value * config.priorityWeight
     }
 
+    /**
+     * Calculates the urgency score for a task using its urgency value and the configured urgency weight.
+     *
+     * @return The weighted urgency score for the given task.
+     */
     private fun calculateUrgencyScore(task: Task): Float {
         return task.urgency.value * config.urgencyWeight
     }
 
+    /**
+     * Calculates the importance score for a task based on its importance value and the configured importance weight.
+     *
+     * @return The weighted importance score for the given task.
+     */
     private fun calculateImportanceScore(task: Task): Float {
         return task.importance.value * config.importanceWeight
     }
 
     /**
-     * Updates the task statistics to reflect the current state after a task change.
+     * Updates task statistics to reflect the current state after a task is created or its status changes.
      *
-     * Increments the total task count, updates counts for active, completed, and pending tasks,
-     * refreshes the per-status task counts, and sets the last updated timestamp.
+     * Adjusts total, active, completed, and pending task counts, updates per-status counts, and sets the last updated timestamp.
      */
     private fun updateStats(task: Task) {
         _taskStats.update { current ->

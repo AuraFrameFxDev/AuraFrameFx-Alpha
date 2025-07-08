@@ -37,6 +37,11 @@ import dev.aurakai.auraframefx.ui.theme.*
  *
  * The screen features a digital landscape and hexagon grid background, a stylized title header, a main navigation menu with selectable items and AI chat access, action buttons for system functions, and a status panel showing neural and quantum system states. Navigation actions are triggered based on user interaction with menu items and buttons.
  */
+/**
+ * Displays the main home screen UI for the AuraFrameFX app with a cyberpunk theme.
+ *
+ * Presents a layered digital landscape and hexagon grid background, a stylized title header, a navigation menu, action buttons, and a status panel. Navigation to other screens is triggered by menu and button selections.
+ */
 @Composable
 fun HomeScreen(navController: NavController) {
     // Track selected menu item
