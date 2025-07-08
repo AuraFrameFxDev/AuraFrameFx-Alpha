@@ -66,6 +66,11 @@ import kotlinx.coroutines.launch
  *
  * @param viewModel The ViewModel supplying service state and handling control actions.
  */
+/**
+ * Displays the Oracle Drive control screen, providing UI controls and status information for managing the Oracle Drive service.
+ *
+ * This composable allows users to view connection and service status, inspect diagnostics logs, and enable or disable modules by package name. It manages service binding and unbinding based on the composable lifecycle and handles user actions asynchronously.
+ */
 @Composable
 fun OracleDriveControlScreen(
     viewModel: OracleDriveControlViewModel = viewModel(),
