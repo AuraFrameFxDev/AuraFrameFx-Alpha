@@ -23,10 +23,10 @@ class MemoryManager @Inject constructor(
     val memoryStats: StateFlow<MemoryStats> = _memoryStats
 
     /**
-     * Stores a canonical memory item in the memory store and updates related statistics and recent access tracking.
+     * Stores a canonical memory item in the memory store, updating memory statistics and recent access tracking.
      *
-     * @param item The canonical memory item to store.
-     * @return The unique ID of the stored memory item.
+     * @param item The canonical memory item to be stored.
+     * @return The unique identifier of the stored memory item.
      */
     fun storeMemory(item: CanonicalMemoryItem): String { // Changed MemoryItem to CanonicalMemoryItem
         memoryStore[item.id] = item
@@ -36,11 +36,11 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Retrieves memory items that match the specified query, applying agent filters and limiting the result count.
+     * Retrieves memory items matching the specified query, with optional agent filtering and result limiting.
      *
-     * Filters stored memory items by agent IDs if provided in the query, sorts them by descending timestamp, and returns up to the configured maximum number of items.
+     * Filters stored canonical memory items by agent IDs if provided in the query, sorts them by descending timestamp, and returns up to the configured maximum number of items.
      *
-     * @param query The memory retrieval criteria, including optional agent filtering.
+     * @param query The criteria for memory retrieval, including optional agent filters.
      * @return A `MemoryRetrievalResult` containing the filtered memory items, their count, and the original query.
      */
     fun retrieveMemory(query: MemoryQuery): MemoryRetrievalResult {
@@ -60,11 +60,11 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Returns a list of the most recent canonical memory items within the configured context window.
+     * Retrieves the most recent canonical memory items within the configured context window.
      *
-     * Filters memory items to those whose timestamps are within the maximum chain length duration from the current time, sorts them by descending timestamp, and limits the result to the configured maximum chain length. The `task` parameter is currently ignored.
+     * Filters memory items to those with timestamps within the maximum chain length duration from the current time, sorts them by descending timestamp, and limits the result to the configured maximum chain length. The `task` parameter is accepted but not used in filtering.
      *
-     * @param task The task identifier (not used in filtering).
+     * @param task The task identifier (currently unused).
      * @return A list of recent `CanonicalMemoryItem` objects within the context window.
      */
     fun getContextWindow(task: String): List<CanonicalMemoryItem> { // Changed MemoryItem to CanonicalMemoryItem
@@ -80,18 +80,18 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Retrieves the latest snapshot of memory statistics.
+     * Returns the current memory statistics snapshot.
      *
-     * @return The current `MemoryStats` reflecting the state of the memory store.
+     * @return The latest `MemoryStats` representing the state of the memory store.
      */
     fun getMemoryStats(): MemoryStats {
         return _memoryStats.value
     }
 
     /**
-     * Updates the memory statistics to reflect the current state of the memory store.
+     * Recalculates and updates memory statistics based on the current contents of the memory store.
      *
-     * Recalculates the total number of stored items, the number of recent items within the configured context window, the aggregate size of all memory contents, and sets the last updated timestamp to the current time.
+     * Updates include the total number of stored items, the count of recent items within the configured context window, the aggregate size of all memory contents, and the timestamp of the update.
      */
     private fun updateStats() {
         _memoryStats.update { current ->

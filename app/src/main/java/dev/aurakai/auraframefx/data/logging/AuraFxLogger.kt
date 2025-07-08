@@ -167,9 +167,9 @@ class AuraFxLogger @Inject constructor(
         loggerScope.launch { writeLogEntry("VERBOSE", tag, message, throwable) }
 
     /**
-     * Reads and returns the contents of all log files in the internal logs directory.
+     * Retrieves the contents of all log files in the internal logs directory.
      *
-     * @return A map where each key is a log filename and the value is its content. Only files matching the log filename prefix are included. The map is sorted with the newest files first.
+     * @return A map where each key is a log filename (matching the log filename prefix) and the value is its content, sorted with the newest files first.
      */
     suspend fun readAllLogs(): Map<String, String> = withContext(Dispatchers.IO) {
         val logs = mutableMapOf<String, String>()
@@ -201,9 +201,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Retrieves the contents of the current day's log file.
+     * Returns the contents of the current day's log file as a string.
      *
-     * @return The contents of today's log file, or an empty string if the file is missing or unreadable.
+     * @return The log contents for today, or an empty string if the file does not exist or cannot be read.
      */
     suspend fun readCurrentDayLogs(): String = withContext(Dispatchers.IO) {
         val fileName = getCurrentLogFileName()
@@ -213,9 +213,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Deletes log files older than the retention period from the internal logs directory.
+     * Removes log files from the internal logs directory that are older than the configured retention period.
      *
-     * Scans the log directory for files with the designated log filename prefix and removes those whose last modified time exceeds the configured retention period.
+     * Only files with the designated log filename prefix are considered for deletion. Logs the outcome of the cleanup process.
      */
     private suspend fun cleanupOldLogs() = withContext(Dispatchers.IO) {
         // Use injected context
@@ -255,10 +255,10 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Retrieves log entries for the specified date as a list of lines.
+     * Returns the log entries for a specific date as a list of lines.
      *
      * @param date The date in `yyyyMMdd` format for which to retrieve log entries.
-     * @return A list of log lines for the given date, or an empty list if the log file is missing or an error occurs.
+     * @return A list of log lines for the specified date, or an empty list if the log file does not exist or an error occurs.
      */
     suspend fun getLogsForDate(date: String): List<String> {
         return try {
@@ -272,7 +272,7 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Retrieves all log files and their contents, sorted with the newest files first.
+     * Returns all log files and their contents, sorted with the newest files first.
      *
      * @return A map where each key is a log filename and each value is the content of that file.
      */
@@ -281,9 +281,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Deletes all log files with the designated prefix from the internal logs directory.
+     * Removes all log files with the designated prefix from the internal logs directory.
      *
-     * Logs any errors encountered during the deletion process to Android Logcat.
+     * Any errors encountered during deletion are logged to Android Logcat.
      */
     suspend fun clearAllLogs() {
         try {
@@ -301,10 +301,10 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Writes text content to a file in the app's internal storage, creating parent directories if needed.
+     * Writes text content to a file in the app's internal storage, creating parent directories if necessary.
      *
      * @param filePath The relative path to the target file within internal storage.
-     * @param content The text content to write to the file.
+     * @param content The text content to write.
      * @param append If true, appends the content to the file; if false, overwrites the file.
      * @return True if the write operation succeeds; false otherwise.
      */
