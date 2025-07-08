@@ -221,11 +221,11 @@ object KineticIdentity {
     )
 
     /**
-     * Creates a tween animation spec suitable for glitch-style shake effects.
+     * Returns a tween animation spec with linear easing for use in glitch or shake effects.
      *
      * @param durationMillis Duration of the shake animation in milliseconds. Defaults to [MICRO_DURATION].
-     * @param intensity The intended shake intensity (not directly used in the returned spec).
-     * @return An [AnimationSpec] with linear easing for use in glitch or shake animations.
+     * @param intensity Intended shake intensity (not directly used in the animation spec).
+     * @return An [AnimationSpec] suitable for glitch or shake animations.
      */
     fun createGlitchShake(
         durationMillis: Int = MICRO_DURATION,
@@ -236,13 +236,13 @@ object KineticIdentity {
     )
 
     /**
-     * Creates an animation spec that introduces a dramatic pause before executing an action.
+     * Creates an animation spec that introduces a pause before executing the specified action animation.
      *
-     * The resulting animation combines a pause of the specified duration with the duration of the provided action animation spec, using a cubic bezier easing for dramatic effect.
+     * The resulting animation delays the start by the given pause duration, then performs the action using a combined duration and a dramatic cubic bezier easing curve.
      *
-     * @param pauseDurationMillis The duration of the pause before the action, in milliseconds. Defaults to 500 ms.
-     * @param actionSpec The animation spec representing the action to follow the pause. Defaults to `DaringEnter`.
-     * @return An animation spec with the combined pause and action duration, using dramatic easing.
+     * @param pauseDurationMillis The length of the pause before the action begins, in milliseconds.
+     * @param actionSpec The animation spec to execute after the pause.
+     * @return An animation spec with the total duration of the pause and action, using dramatic easing.
      */
     fun createDramaticPause(
         pauseDurationMillis: Int = 500,
@@ -258,9 +258,9 @@ object KineticIdentity {
  */
 
 /**
-     * Returns a tween animation that starts after the specified delay, with total duration equal to the delay plus the original animation's duration.
+     * Returns a tween animation spec that delays the start of the original animation by the specified number of milliseconds.
      *
-     * For spring-based specs, the duration is estimated as 1000 ms; for other types, a standard duration is used.
+     * The total duration is the sum of the delay and the original animation's duration. For spring specs, the duration is estimated as 1000 ms; for other types, a standard duration is used.
      *
      * @param delayMillis The delay in milliseconds before the animation begins.
      * @return A tween animation spec with the combined delay and duration.

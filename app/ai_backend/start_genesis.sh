@@ -15,27 +15,27 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# print_status prints an informational message to stdout, prefixed with a blue [INFO] label.
+# print_status prints an informational message to stdout with a blue [INFO] prefix.
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
 
-# print_success prints a message prefixed with a green [SUCCESS] label to indicate a successful operation.
+# print_success prints a message to stdout with a green [SUCCESS] prefix to indicate a successful operation.
 print_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
-# print_warning prints a message to stdout prefixed with a yellow [WARNING] label to indicate a warning.
+# print_warning prints a warning message to stdout with a yellow [WARNING] prefix.
 print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
-# print_error prints a message to stdout prefixed with a red [ERROR] label to indicate an error.
+# print_error prints a message to stdout with a red [ERROR] prefix.
 print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# print_genesis prints a message prefixed with a purple [GENESIS] label for Genesis Layer notifications.
+# print_genesis prints a message to stdout with a purple [GENESIS] prefix for Genesis Layer notifications.
 print_genesis() {
     echo -e "${PURPLE}[GENESIS]${NC} $1"
 }

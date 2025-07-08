@@ -20,65 +20,80 @@ class AuraAIServiceImpl @Inject constructor(
     private val cloudStatusMonitor: CloudStatusMonitor,
     private val auraFxLogger: AuraFxLogger,
 ) : AuraAIService {
+    /**
+     * Returns a fixed placeholder string for any analytics query.
+     *
+     * This method does not perform analytics processing and always returns "Analytics response placeholder".
+     *
+     * @return The placeholder analytics response string.
+     */
     override fun analyticsQuery(_query: String): String {
         return "Analytics response placeholder"
     }
 
+    /**
+     * Returns null to indicate that file download is not supported in this implementation.
+     *
+     * @param _fileId The identifier of the file to download.
+     * @return Always null.
+     */
     override suspend fun downloadFile(_fileId: String): File? {
         return null
     }
 
     /**
-     * Generates an image based on the provided prompt.
+     * Returns null to indicate that image generation is not supported.
      *
-     * @param _prompt The description or prompt for image generation.
-     * @return A byte array representing the generated image, or null if not available.
+     * This method serves as a placeholder and does not perform any image generation.
+     *
+     * @return Always null.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         return null
     }
 
     /**
-     * Returns a placeholder string for generated text based on the provided prompt and options.
+     * Returns a fixed placeholder string for any text generation request.
      *
-     * @param prompt The input text prompt for text generation.
-     * @param options Optional parameters that may influence text generation.
-     * @return A fixed placeholder string indicating generated text.
+     * This method does not perform actual text generation and always returns "Generated text placeholder" regardless of the input.
+     *
+     * @param prompt The input prompt for text generation.
+     * @param options Optional parameters for text generation.
+     * @return The string "Generated text placeholder".
      */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         return "Generated text placeholder"
     }
 
     /**
-     * Returns a placeholder AI response string for the given prompt and options.
+     * Returns a fixed placeholder string for any AI response request.
      *
-     * @param prompt The input prompt for the AI.
-     * @param options Optional parameters for customizing the AI response.
-     * @return A fixed placeholder string representing the AI response.
+     * Always returns "AI response placeholder" regardless of the input prompt or options.
+     *
+     * @return The placeholder string "AI response placeholder".
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         return "AI response placeholder"
     }
 
     /**
-     * Retrieves a memory value for the given key.
+     * Retrieves the memory value for the specified key.
      *
-     * Always returns null in this implementation.
+     * This stub implementation always returns null, indicating that memory retrieval is not supported.
      *
-     * @param _memoryKey The key identifying the memory entry.
-     * @return The memory value associated with the key, or null if not found.
+     * @return Always null.
      */
     override fun getMemory(_memoryKey: String): String? {
         return null
     }
 
     /**
-     * Stores a value in memory associated with the specified key.
+     * Placeholder method for saving a value in memory associated with a key.
      *
-     * The actual memory saving functionality is not yet implemented.
+     * This implementation does nothing and does not persist any data.
      *
      * @param key The identifier for the memory entry.
-     * @param value The value to be stored.
+     * @param value The value to associate with the key.
      */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement memory saving

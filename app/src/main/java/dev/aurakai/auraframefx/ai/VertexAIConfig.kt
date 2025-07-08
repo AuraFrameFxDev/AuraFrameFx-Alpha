@@ -50,7 +50,7 @@ data class VertexAIConfig(
     val enableFunctionCalling: Boolean = true
 ) {
     /**
-     * Validates the configuration fields and returns a list of error messages for any missing or invalid values.
+     * Validates the configuration and returns a list of error messages for any missing or invalid values.
      *
      * Checks that required string fields are not blank and that numeric parameters are within valid ranges.
      *
@@ -80,31 +80,31 @@ data class VertexAIConfig(
     }
     
     /**
-     * Returns the base URL for Vertex AI API requests based on the configured endpoint, API version, project ID, and location.
+     * Returns the base URL for Vertex AI API requests, constructed from the configured endpoint, API version, project ID, and location.
      *
-     * @return The constructed base endpoint URL.
+     * @return The base endpoint URL as a string.
      */
     fun getFullEndpoint(): String {
         return "https://$endpoint/$apiVersion/projects/$projectId/locations/$location"
     }
     
     /**
-     * Returns the complete URL for the content generation API endpoint of the configured model.
+     * Returns the full URL for the content generation API endpoint of the configured model.
      *
      * The URL includes the base endpoint, API version, project ID, location, and model name.
      *
-     * @return The full URL for invoking content generation with the specified model.
+     * @return The complete URL for invoking content generation with the specified model.
      */
     fun getModelEndpoint(): String {
         return "${getFullEndpoint()}/publishers/google/models/$modelName:generateContent"
     }
     
     /**
-     * Returns a copy of the configuration with settings optimized for production use.
+     * Returns a copy of the configuration optimized for production environments.
      *
-     * Enables safety filters, increases retry count and timeout, and configures caching, metrics, logging, and log level for production reliability and security.
+     * The returned configuration enables safety filters, increases retry count and timeout, and sets caching, metrics, logging, and log level to values suitable for production reliability and security.
      *
-     * @return A new `VertexAIConfig` instance with production-optimized parameters.
+     * @return A new `VertexAIConfig` instance with production-ready settings.
      */
     fun forProduction(): VertexAIConfig {
         return copy(
@@ -119,11 +119,11 @@ data class VertexAIConfig(
     }
     
     /**
-     * Returns a configuration copy tailored for development environments.
+     * Returns a copy of the configuration with settings tailored for development environments.
      *
-     * The development configuration disables safety filters and caching, reduces retries and timeout for faster iteration, and enables verbose logging and metrics.
+     * The development configuration disables safety filters and caching, reduces retries and timeout for faster iteration, and enables detailed logging and metrics.
      *
-     * @return A new `VertexAIConfig` instance with settings optimized for development use.
+     * @return A new `VertexAIConfig` instance optimized for development use.
      */
     fun forDevelopment(): VertexAIConfig {
         return copy(
