@@ -1,5 +1,3 @@
-
-
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.layout.*
@@ -211,6 +209,9 @@ fun TranscribeButton(
     }
 }
 
+/**
+ * Displays a preview of the ConferenceRoomScreen composable within a MaterialTheme for design-time inspection.
+ */
 @Composable
 @Preview(showBackground = true)
 fun ConferenceRoomScreenPreview() {
