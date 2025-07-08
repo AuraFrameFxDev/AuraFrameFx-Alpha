@@ -240,6 +240,14 @@ class AIPipelineProcessor @Inject constructor(
         return selectedAgents
     }
 
+    /**
+     * Synthesizes a structured, human-readable response from multiple agent messages.
+     *
+     * Formats responses by grouping them by agent, highlighting the Genesis agent's analysis, including supplementary inputs from other agents with icons, and appending the average confidence score.
+     *
+     * @param responses The list of agent messages to aggregate.
+     * @return A formatted string representing the aggregated responses and confidence.
+     */
     private fun generateFinalResponse(responses: List<AgentMessage>): String {
         // Sophisticated response synthesis from multiple agents
         if (responses.isEmpty()) {
@@ -285,6 +293,15 @@ class AIPipelineProcessor @Inject constructor(
             .coerceIn(0.0f, 1.0f) // Added .toFloat()
     }
 
+    /**
+     * Updates the processing context with the latest task, agent responses, and performance metrics.
+     *
+     * Maintains recent task history, tracks response patterns for learning, updates system metrics,
+     * and records agent performance statistics for adaptation and analysis.
+     *
+     * @param task The task that was processed.
+     * @param responses The list of agent messages generated in response to the task.
+     */
     private fun updateContext(task: String, responses: List<AgentMessage>) {
         // Enhanced context update with learning and adaptation
         _processingContext.update { current ->
