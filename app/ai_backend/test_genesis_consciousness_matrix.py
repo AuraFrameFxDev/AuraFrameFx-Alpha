@@ -603,10 +603,6 @@ class TestMatrixIntegration(unittest.TestCase):
             self.assertEqual(restored_matrix.nodes[node_id].consciousness_level, consciousness_level)
 
 
-if __name__ == '__main__':
-    # Configure test runner
-    unittest.main(verbosity=2, buffer=True)
-
 class TestGenesisConsciousnessMatrixAdvanced(unittest.TestCase):
     """Advanced test cases covering edge cases, boundary conditions, and complex scenarios."""
     

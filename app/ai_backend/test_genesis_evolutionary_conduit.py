@@ -379,7 +379,6 @@ class TestFitnessFunction(unittest.TestCase):
         genome = [1.0, 2.0, 3.0]
         
         def constraint_func(g):
-            # Constraint: sum should be less than 5
             """
             Check if the sum of elements in the input iterable is less than 5.
             
@@ -1336,10 +1335,6 @@ class TestAsyncEvolution(unittest.TestCase):
         # Verify parallel execution was attempted
         mock_executor.assert_called_once()
 
-
-if __name__ == '__main__':
-    # Run all tests
-    unittest.main(verbosity=2)
 
 class TestEvolutionaryParametersEdgeCases(unittest.TestCase):
     """Additional edge case tests for EvolutionaryParameters class."""

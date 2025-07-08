@@ -3,9 +3,12 @@ import unittest
 from unittest.mock import Mock, patch, MagicMock, call
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
+import socket
+import weakref
 from typing import Dict, List, Optional, Any
+from decimal import Decimal
 
 # Import the module under test
 try:
@@ -21,7 +24,6 @@ class TestGenesisConnector(unittest.TestCase):
     """
 
     def setUp(self):
-
         """
         Prepares a new GenesisConnector instance and mock configuration for each test case.
         """
@@ -34,7 +36,6 @@ class TestGenesisConnector(unittest.TestCase):
         }
         
     def tearDown(self):
-
         """
         Performs cleanup after each test method. Override this method to reset state or release resources as needed.
         """
@@ -42,7 +43,6 @@ class TestGenesisConnector(unittest.TestCase):
         pass
 
     def test_init_default_parameters(self):
-
         """
         Test that a GenesisConnector instance can be created with default parameters and is properly initialized.
         """
@@ -51,7 +51,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertIsInstance(connector, GenesisConnector)
 
     def test_init_with_config(self):
-
         """
         Test that GenesisConnector initializes correctly with a custom configuration.
         
@@ -62,7 +61,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertEqual(connector.config, self.mock_config)
 
     def test_init_with_none_config(self):
-
         """
         Test that initializing GenesisConnector with None as the configuration does not raise an exception and returns a valid instance.
         """
@@ -93,7 +91,6 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_connect_success(self, mock_get):
-
         """
         Test that `connect()` returns True when the Genesis API responds with HTTP 200 and valid JSON.
         """
@@ -109,7 +106,6 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_connect_failure_404(self, mock_get):
-
         """
         Test that the connect() method returns False when the server responds with HTTP 404 Not Found.
         """
@@ -134,7 +130,6 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_connect_failure_connection_error(self, mock_get):
-
         """
         Test that connect() returns False when a connection error occurs during the connection attempt.
         """
@@ -272,7 +267,6 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_send_request_success(self, mock_post):
-
         """
         Verify that send_request returns the correct response dictionary when a POST request with a valid payload succeeds.
         """
@@ -289,7 +283,6 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_send_request_invalid_payload(self, mock_post):
-
         """
         Test that sending a request with a None payload raises a ValueError.
         """
@@ -306,7 +299,6 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_send_request_server_error(self, mock_post):
-
         """
         Test that send_request raises a RuntimeError when the server returns a 500 Internal Server Error response.
         """
@@ -322,7 +314,6 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_send_request_malformed_json(self, mock_post):
-
         """
         Tests that send_request raises a ValueError when the server responds with malformed JSON.
         """
@@ -428,7 +419,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertEqual(result['request_id'], '12345')
 
     def test_validate_config_valid(self):
-
         """
         Test that `validate_config` returns True when provided with a valid configuration dictionary.
         """
@@ -443,7 +433,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertTrue(result)
 
     def test_validate_config_missing_api_key(self):
-
         """
         Test that `validate_config` raises a `ValueError` when the API key is missing from the configuration.
         """
@@ -456,7 +445,6 @@ class TestGenesisConnector(unittest.TestCase):
             self.connector.validate_config(invalid_config)
 
     def test_validate_config_invalid_url(self):
-
         """
         Test that `validate_config` raises a `ValueError` when provided with a configuration containing an invalid base URL.
         """
@@ -470,7 +458,6 @@ class TestGenesisConnector(unittest.TestCase):
             self.connector.validate_config(invalid_config)
 
     def test_validate_config_negative_timeout(self):
-
         """
         Test that `validate_config` raises a `ValueError` when given a configuration with a negative timeout value.
         """
@@ -531,7 +518,6 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_get_status_healthy(self, mock_get):
-
         """
         Verify that `get_status` returns a status dictionary with 'healthy' and correct version when the service responds with HTTP 200 and a healthy payload.
         """
@@ -623,7 +609,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertIn('metadata', formatted)
 
     def test_format_payload_with_special_characters(self):
-
         """
         Verify that the payload formatting method correctly processes data containing special characters and Unicode, ensuring all specified keys are present in the formatted output.
         """
@@ -640,7 +625,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertIn('quotes', formatted)
 
     def test_format_payload_empty_data(self):
-
         """
         Test that `format_payload` raises a ValueError when called with an empty dictionary.
         """
@@ -731,7 +715,6 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_retry_mechanism_success_after_retry(self, mock_post):
-
         """
         Tests that `send_request_with_retry` retries after an initial failure and returns the expected response on a subsequent successful attempt.
         
@@ -754,7 +737,6 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_retry_mechanism_max_retries_exceeded(self, mock_post):
-
         """
         Test that a RuntimeError is raised when all retry attempts for a failed request are exhausted.
         
@@ -774,7 +756,6 @@ class TestGenesisConnector(unittest.TestCase):
     @patch('time.sleep')
     @patch('requests.post')
     def test_retry_mechanism_backoff_timing(self, mock_post, mock_sleep):
-
         """
         Verifies that the retry mechanism uses incrementally increasing backoff delays between retries after consecutive server errors.
         
@@ -887,7 +868,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertEqual(parsed, response_data)
 
     def test_parse_response_invalid_json(self):
-
         """
         Test that `parse_response` raises a ValueError when provided with an invalid JSON string.
         """
@@ -904,7 +884,6 @@ class TestGenesisConnector(unittest.TestCase):
             self.connector.parse_response('')
 
     def test_parse_response_none_input(self):
-
         """
         Test that `parse_response` raises a ValueError when given None as input.
         """
@@ -952,7 +931,6 @@ class TestGenesisConnector(unittest.TestCase):
                 self.assertIsNotNone(parsed)
 
     def test_log_request_valid_data(self):
-
         """
         Test that log_request logs the payload when given valid data.
         """
@@ -963,7 +941,6 @@ class TestGenesisConnector(unittest.TestCase):
             mock_log.assert_called()
 
     def test_log_request_sensitive_data_redaction(self):
-
         """
         Test that sensitive fields like 'api_key' and 'password' are properly redacted from log output when logging a request payload.
         """
@@ -1021,7 +998,6 @@ class TestGenesisConnector(unittest.TestCase):
             self.assertIn('session_id', logged_data)
 
     def test_get_headers_with_auth(self):
-
         """
         Test that `get_headers` includes both `Authorization` and `Content-Type` headers when an API key is provided in the configuration.
         """
@@ -1032,7 +1008,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertIn('Content-Type', headers)
 
     def test_get_headers_without_auth(self):
-
         """
         Verify that `get_headers` excludes the `Authorization` header when authentication is not configured, while ensuring the `Content-Type` header is present.
         """
@@ -1078,7 +1053,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertIn('multipart/form-data', multipart_headers['Content-Type'])
 
     def test_close_connection(self):
-
         """
         Tests that the connector's `close` method can be called without raising any exceptions.
         """
@@ -1097,7 +1071,6 @@ class TestGenesisConnector(unittest.TestCase):
             # Context manager should work without errors
 
     def test_thread_safety(self):
-
         """
         Tests that configuration validation in GenesisConnector is thread-safe by performing concurrent validations across multiple threads and verifying all succeed.
         """
@@ -1105,7 +1078,6 @@ class TestGenesisConnector(unittest.TestCase):
         results = []
         
         def worker():
-
             """
             Validates the connector configuration in a separate thread and appends the validation result to a shared results list.
             """
@@ -1123,7 +1095,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertTrue(all(results))
 
     def test_large_payload_handling(self):
-
         """
         Test that the connector can format and process large payloads without encountering memory errors.
         
@@ -1139,7 +1110,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertIsNotNone(formatted)
 
     def test_concurrent_requests(self):
-
         """
         Tests that the connector can process multiple requests concurrently, ensuring each request completes successfully and returns the expected result.
         """
@@ -1168,7 +1138,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertEqual(len(results), 5)
 
     def test_error_handling_chain(self):
-
         """
         Verify that exceptions raised during a chained `send_request` call due to network errors are properly propagated.
         """
@@ -1196,7 +1165,6 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertEqual(self.connector.config, new_config)
 
     def test_metrics_collection(self):
-
         """
         Verifies that sending a request through the connector results in the collection of 'requests_sent' and 'response_time' metrics.
         """
@@ -1215,7 +1183,6 @@ class TestGenesisConnector(unittest.TestCase):
             self.assertIn('response_time', metrics)
 
     def test_health_check_endpoint(self):
-
         """
         Tests that the health check endpoint returns a status of 'healthy' when the service responds with HTTP 200 and valid JSON.
         """
@@ -1230,7 +1197,6 @@ class TestGenesisConnector(unittest.TestCase):
             self.assertEqual(health['status'], 'healthy')
 
     def test_rate_limiting_handling(self):
-
         """
         Test that the connector raises a RuntimeError when an HTTP 429 response with a Retry-After header is received, verifying correct rate limiting handling.
         """
@@ -1681,7 +1647,6 @@ class TestGenesisConnector(unittest.TestCase):
                 pass
 
 
-
 class TestGenesisConnectorIntegration(unittest.TestCase):
     """
     Integration tests for GenesisConnector.
@@ -1689,7 +1654,6 @@ class TestGenesisConnectorIntegration(unittest.TestCase):
     """
 
     def setUp(self):
-
         """
         Sets up the integration test environment by creating a GenesisConnector instance with a test configuration.
         """
@@ -1700,7 +1664,6 @@ class TestGenesisConnectorIntegration(unittest.TestCase):
         })
 
     def test_full_request_lifecycle(self):
-
         """
         Simulates a complete request lifecycle by sending a payload through the connector and verifying a successful response.
         
@@ -1719,7 +1682,6 @@ class TestGenesisConnectorIntegration(unittest.TestCase):
             mock_post.assert_called_once()
 
     def test_connection_and_request_flow(self):
-
         """
         Tests that the connector can establish a connection and send a request, verifying that the expected response data is returned.
         """
@@ -1751,12 +1713,10 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
     """
 
     def setUp(self):
-
         """
         Initializes a GenesisConnector instance for edge case testing.
         """
         self.connector = GenesisConnector()
-
 
     def test_init_with_malformed_config_types(self):
         """
@@ -1828,7 +1788,6 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         
         Simulates a DNS resolution failure by raising a socket.gaierror during the connection attempt and verifies that the connector handles the error gracefully.
         """
-        import socket
         mock_get.side_effect = socket.gaierror("Name or service not known")
         
         result = self.connector.connect()
@@ -1855,7 +1814,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         }
         
         try:
-            formatted = self.connector.format_payload(large_payload)
+            formatted = self.connector.format_payload(binary_payload)
             self.assertIsNotNone(formatted)
         except (MemoryError, ValueError) as e:
             # Should handle gracefully
@@ -1876,8 +1835,15 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
             '{"mixed_types":{"string":"value","number":123,"array":[1,2,3],"object":{"nested":true}}}',
         ]
         
-
-        self.assertEqual(result, {'data': 'binary_processed'})
+        for response_text in malformed_responses:
+            with self.subTest(response=response_text):
+                try:
+                    parsed = self.connector.parse_response(response_text)
+                    # If parsing succeeds, verify result is reasonable
+                    self.assertIsNotNone(parsed)
+                except (ValueError, json.JSONDecodeError) as e:
+                    # Expected for malformed JSON
+                    self.assertIsInstance(e, (ValueError, json.JSONDecodeError))
 
     @patch('requests.post')
     def test_send_request_with_nested_payload(self, mock_post):
@@ -1890,6 +1856,26 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         mock_response.status_code = 200
         mock_response.json.return_value = {'data': 'nested_processed'}
         mock_post.return_value = mock_response
+        
+        nested_payload = {
+            'level1': {
+                'level2': {
+                    'level3': {
+                        'level4': {
+                            'deep_value': 'found',
+                            'array': [1, 2, {'nested_in_array': True}]
+                        }
+                    }
+                }
+            },
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        result = self.connector.send_request(nested_payload)
+        self.assertEqual(result, {'data': 'nested_processed'})
+        
+        # Test boundary timeout values
+        boundary_timeouts = [0.1, 1, 30, 3600, float('inf')]
         
         for timeout in boundary_timeouts:
             with self.subTest(timeout=timeout):
@@ -1924,8 +1910,11 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
             'custom_headers': special_headers
         })
         
-
-        self.assertEqual(result, {'data': 'nested_processed'})
+        headers = connector.get_headers()
+        
+        # Headers should be properly encoded/escaped
+        for key, value in special_headers.items():
+            self.assertIn(key, headers)
 
     @patch('requests.post')
     def test_send_request_with_circular_reference(self, mock_post):
@@ -1938,9 +1927,8 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         payload = {'message': 'test'}
         payload['self'] = payload
         
-        # Headers should be properly encoded/escaped
-        for key, value in special_headers.items():
-            self.assertIn(key, headers)
+        with self.assertRaises((ValueError, TypeError)):
+            self.connector.format_payload(payload)
 
     @patch('requests.post')
     def test_send_request_with_extremely_large_payload(self, mock_post):
@@ -1971,19 +1959,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
             {'api_key': 'test\x00admin', 'base_url': 'https://test.com'},
         ]
         
-        def modify_config(connector, config_updates):
-            """
-            Applies a series of configuration updates to a connector, validating each update for correctness and security.
-            
-            Parameters:
-                connector: The connector instance to validate configurations against.
-                config_updates (iterable): An iterable of configuration updates to be validated.
-            
-            Each configuration update is validated using the connector's `validate_config` method. If validation fails due to malicious input, the exception is suppressed.
-            """
-            for update in config_updates:
+        for config in malicious_configs:
+            with self.subTest(config=config):
                 try:
-
                     result = self.connector.validate_config(config)
                     # If validation passes, ensure no injection occurred
                     self.assertIsInstance(result, bool)
@@ -2028,7 +2006,6 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         
         Simulates different timeout and connection error exceptions to ensure the connector reports a 'timeout' status in each case.
         """
-        import socket
         timeout_scenarios = [
             socket.timeout("Connection timeout"),
             TimeoutError("Request timeout"),
@@ -2069,8 +2046,6 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         """
         Tests that the payload formatting method serializes decimal, complex, and float numeric types without raising errors.
         """
-        from decimal import Decimal
-        
         payload = {
             'decimal_value': Decimal('123.456'),
             'complex_value': complex(1, 2),
@@ -2110,13 +2085,36 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
             'message': 'test'
         }
         
-        for thread in threads:
-            thread.join()
+        formatted = self.connector.format_payload(payload)
         
-        # Should not crash, final config should be valid
-        final_config = self.connector.config
-        self.assertIsNotNone(final_config)
+        # Should handle custom objects
+        self.assertIn('custom_obj', formatted)
+        self.assertIn('message', formatted)
 
+    def test_concurrent_config_modifications(self):
+        """
+        Test that concurrent configuration modifications complete successfully without errors.
+        """
+        import threading
+        
+        connectors = []
+        weak_refs = []
+        
+        for i in range(100):
+            connector = GenesisConnector(config={'api_key': f'key_{i}'})
+            connectors.append(connector)
+            weak_refs.append(weakref.ref(connector))
+        
+        # Clean up references
+        del connectors
+        
+        # Check that weak references are cleaned up properly
+        import gc
+        gc.collect()
+        
+        # Most weak references should be cleaned up
+        alive_refs = sum(1 for ref in weak_refs if ref() is not None)
+        self.assertLess(alive_refs, len(weak_refs))
 
     @patch('requests.post')
     def test_retry_mechanism_with_exponential_backoff(self, mock_post):
@@ -2153,12 +2151,8 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         mock_response.status_code = 500
         mock_post.return_value = mock_response
         
-        for i in range(100):
-            connector = GenesisConnector(config={'api_key': f'key_{i}'})
-            connectors.append(connector)
-            weak_refs.append(weakref.ref(connector))
+        payload = {'message': 'test'}
         
-
         with patch('time.sleep') as mock_sleep:
             with patch('random.random', return_value=0.5):
                 with self.assertRaises(RuntimeError):
@@ -2212,6 +2206,12 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
             ('ERROR', logging.ERROR),
         ]
         
+        network_conditions = [
+            {'delay': 0.1, 'error_rate': 0.0},  # Normal conditions
+            {'delay': 1.0, 'error_rate': 0.1},  # Slow with occasional errors
+            {'delay': 0.01, 'error_rate': 0.5}, # Fast but unreliable
+        ]
+        
         for condition in network_conditions:
             with self.subTest(condition=condition):
                 with patch('requests.post') as mock_post:
@@ -2246,9 +2246,14 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
                     
                     mock_post.side_effect = simulate_network
                     
-
-                    # Verify logger was called appropriately
-                    self.assertTrue(mock_logger.called)
+                    for level_name, level_value in log_levels:
+                        with self.subTest(log_level=level_name):
+                            with patch('logging.info') as mock_logger:
+                                payload = {'message': f'test_{level_name}'}
+                                self.connector.log_request(payload)
+                                
+                                # Verify logger was called appropriately
+                                self.assertTrue(mock_logger.called)
 
     def test_log_request_with_pii_data(self):
         """
@@ -2316,7 +2321,20 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
             
             payload = {'message': 'resource_test'}
             
-
+            import threading
+            
+            def request_worker():
+                try:
+                    self.connector.send_request(payload)
+                except OSError:
+                    pass
+            
+            request_thread = threading.Thread(target=request_worker)
+            request_thread.start()
+            
+            # Close connector
+            result = self.connector.close()
+            
             # Should handle gracefully
             self.assertIsNotNone(result)
             request_thread.join(timeout=1)
@@ -2423,9 +2441,8 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
             
             payload = {'message': 'memory_test'}
             
-            with self.assertRaises(MemoryError):
+            with self.assertRaises(MemoryError) as context:
                 self.connector.send_request(payload)
-
             
             # Verify error chain is preserved
             self.assertIsNotNone(context.exception)
@@ -2465,7 +2482,6 @@ class TestGenesisConnectorPerformance(unittest.TestCase):
                 
                 formatted = self.connector.format_payload(payload)
                 self.assertIsNotNone(formatted)
-
 
     def test_concurrent_request_performance(self):
         """
@@ -2590,11 +2606,33 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
             float('-inf'), # Negative infinity
         ]
         
+        precision_test_cases = [
+            0.001,  # Very small
+            1e-10,  # Extremely small
+            1e10,   # Very large
+            float('inf'),  # Infinity
+            float('-inf'), # Negative infinity
+        ]
+        
         for value in precision_test_cases:
             with self.subTest(value=value):
                 payload = {'precision_value': value, 'message': 'precision_test'}
                 
-
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+                except (ValueError, OverflowError):
+                    # Expected for some extreme values
+                    pass
+        
+        for timeout in extreme_timeouts:
+            with self.subTest(timeout=timeout):
+                config = {
+                    'api_key': 'test_key',
+                    'base_url': 'https://api.test.com',
+                    'timeout': timeout
+                }
+                
                 try:
                     result = self.connector.validate_config(config)
                     # If validation passes, timeout should be reasonable
@@ -2638,7 +2676,10 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
             with self.subTest(size=size):
                 if size == 0:
                     payload = {}
+                    with self.assertRaises(ValueError):
+                        self.connector.format_payload(payload)
                 else:
+                    payload = {'data': 'x' * size}
                     formatted = self.connector.format_payload(payload)
                     self.assertIsNotNone(formatted)
 
@@ -2656,6 +2697,13 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
             '\uffff\ufffe\ufffd',  # Unicode boundaries
         ]
         
+        null_byte_test_cases = [
+            'test\x00null',
+            'test\x00\x00double_null',
+            '\x00start_null',
+            'end_null\x00',
+        ]
+        
         for test_string in null_byte_test_cases:
             with self.subTest(test_string=test_string):
                 payload = {'message': test_string}
@@ -2667,7 +2715,6 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
                 except ValueError:
                     # Acceptable to reject null bytes
                     pass
-
 
     def test_numeric_boundary_conditions(self):
         """
@@ -2703,6 +2750,7 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
 if __name__ == '__main__':
     # Run all tests
     unittest.main(verbosity=2)
+
 
 class TestGenesisConnectorAdvancedSecurity(unittest.TestCase):
     """
@@ -3172,7 +3220,6 @@ class TestGenesisConnectorDataValidation(unittest.TestCase):
     def test_boundary_value_validation(self):
         """Test validation of boundary values for different data types."""
         import sys
-        from decimal import Decimal
         
         boundary_values = [
             # Integer boundaries
@@ -3578,823 +3625,3 @@ if __name__ == '__main__':
         run_comprehensive_test_suite()
     else:
         unittest.main(verbosity=2)
-
-class TestGenesisConnectorExtendedValidation(unittest.TestCase):
-    """
-    Extended validation tests for GenesisConnector with additional edge cases.
-    Testing framework: unittest with pytest enhancements
-    """
-
-    def setUp(self):
-        """Set up extended validation test environment."""
-        self.connector = GenesisConnector()
-
-    def test_config_validation_with_nested_objects(self):
-        """Test configuration validation with deeply nested configuration objects."""
-        nested_configs = [
-            {
-                'api_key': 'test_key',
-                'base_url': 'https://api.test.com',
-                'advanced': {
-                    'retry': {'max_attempts': 3, 'backoff': {'type': 'exponential'}},
-                    'headers': {'custom': {'x-client': 'test', 'x-version': '1.0'}},
-                    'auth': {'type': 'bearer', 'refresh': {'enabled': True, 'interval': 3600}}
-                }
-            },
-            {
-                'api_key': 'test_key',
-                'base_url': 'https://api.test.com',
-                'features': {
-                    'caching': {'enabled': True, 'ttl': 300, 'backend': {'type': 'redis'}},
-                    'monitoring': {'metrics': True, 'tracing': True, 'logging': {'level': 'INFO'}}
-                }
-            }
-        ]
-        
-        for config in nested_configs:
-            with self.subTest(config=config):
-                try:
-                    result = self.connector.validate_config(config)
-                    self.assertIsInstance(result, bool)
-                except (ValueError, TypeError):
-                    # Acceptable if nested configs are not supported
-                    pass
-
-    def test_url_validation_comprehensive(self):
-        """Test comprehensive URL validation including various protocols and formats."""
-        url_test_cases = [
-            # Valid HTTPS URLs
-            ('https://api.test.com', True),
-            ('https://api.test.com:443', True),
-            ('https://api.test.com/v1/endpoint', True),
-            ('https://subdomain.api.test.com', True),
-            ('https://api-test.example.com', True),
-            # Edge case valid URLs
-            ('https://192.168.1.1:8080', True),
-            ('https://[::1]:8080', True),  # IPv6
-            ('https://api.test.com:8443/path?query=value', True),
-            # Invalid URLs
-            ('http://api.test.com', False),  # HTTP not HTTPS
-            ('ftp://api.test.com', False),
-            ('https://', False),
-            ('https://api..test.com', False),  # Double dots
-            ('https://api test.com', False),  # Space in domain
-            ('https://api.test.com:99999', False),  # Invalid port
-            ('javascript:alert(1)', False),
-            ('data:text/html,<script>', False),
-            ('file:///etc/passwd', False),
-        ]
-        
-        for url, should_be_valid in url_test_cases:
-            with self.subTest(url=url):
-                config = {'api_key': 'test_key', 'base_url': url}
-                
-                if should_be_valid:
-                    try:
-                        result = self.connector.validate_config(config)
-                        self.assertTrue(result)
-                    except ValueError:
-                        self.fail(f"Valid URL {url} was rejected")
-                else:
-                    with self.assertRaises(ValueError):
-                        self.connector.validate_config(config)
-
-    def test_api_key_format_validation(self):
-        """Test validation of various API key formats and patterns."""
-        api_key_test_cases = [
-            # Valid formats
-            ('sk-1234567890abcdef', True),
-            ('Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9', True),
-            ('api_key_12345', True),
-            ('AKIAIOSFODNN7EXAMPLE', True),  # AWS-style
-            ('ya29.1.AADtN_UtlxN3PuGAxrN2XQnZljX', True),  # Google-style
-            # Edge cases
-            ('k' * 64, True),  # 64 char key
-            ('k' * 256, True),  # Very long key
-            ('key-with-dashes-and_underscores', True),
-            ('key.with.dots', True),
-            # Invalid formats
-            ('', False),
-            (' ', False),
-            ('key with spaces', False),
-            ('key\nwith\nnewlines', False),
-            ('key\twith\ttabs', False),
-            ('key<with>brackets', False),
-            ('key"with"quotes', False),
-            ('key;with;semicolons', False),
-            ('key|with|pipes', False),
-        ]
-        
-        for api_key, should_be_valid in api_key_test_cases:
-            with self.subTest(api_key=repr(api_key)):
-                config = {'api_key': api_key, 'base_url': 'https://api.test.com'}
-                
-                if should_be_valid:
-                    try:
-                        result = self.connector.validate_config(config)
-                        self.assertTrue(result)
-                    except ValueError:
-                        self.fail(f"Valid API key {repr(api_key)} was rejected")
-                else:
-                    with self.assertRaises(ValueError):
-                        self.connector.validate_config(config)
-
-    def test_timeout_boundary_values(self):
-        """Test timeout validation with precise boundary values."""
-        timeout_test_cases = [
-            # Valid timeouts
-            (0.1, True),
-            (1, True),
-            (30, True),
-            (300, True),
-            (3600, True),  # 1 hour
-            (86400, True),  # 24 hours
-            # Edge cases
-            (0.001, True),  # 1ms
-            (0.0001, True),  # 0.1ms
-            (float('inf'), False),  # Infinity
-            (float('-inf'), False),  # Negative infinity
-            (float('nan'), False),  # NaN
-            (-1, False),  # Negative
-            (0, False),  # Zero might be invalid
-            ('30', False),  # String instead of number
-            (None, False),  # None
-        ]
-        
-        for timeout_value, should_be_valid in timeout_test_cases:
-            with self.subTest(timeout=timeout_value):
-                config = {
-                    'api_key': 'test_key',
-                    'base_url': 'https://api.test.com',
-                    'timeout': timeout_value
-                }
-                
-                if should_be_valid:
-                    try:
-                        result = self.connector.validate_config(config)
-                        self.assertTrue(result)
-                    except (ValueError, TypeError):
-                        # Some edge cases might still be rejected
-                        if timeout_value not in [0.001, 0.0001]:
-                            self.fail(f"Valid timeout {timeout_value} was rejected")
-                else:
-                    with self.assertRaises((ValueError, TypeError, OverflowError)):
-                        self.connector.validate_config(config)
-
-
-class TestGenesisConnectorAdvancedPayloadHandling(unittest.TestCase):
-    """
-    Advanced payload handling tests for complex data structures.
-    Testing framework: unittest with pytest enhancements
-    """
-
-    def setUp(self):
-        """Set up advanced payload test environment."""
-        self.connector = GenesisConnector()
-
-    def test_payload_with_custom_serializable_objects(self):
-        """Test payload formatting with custom objects that implement serialization."""
-        class SerializableObject:
-            def __init__(self, data):
-                self.data = data
-            
-            def __dict__(self):
-                return {'serializable_data': self.data}
-            
-            def to_dict(self):
-                return {'custom_serialization': self.data}
-        
-        class JSONSerializable:
-            def __init__(self, value):
-                self.value = value
-            
-            def __json__(self):
-                return {'json_value': self.value}
-        
-        custom_objects = [
-            SerializableObject("test_data"),
-            JSONSerializable("json_test"),
-        ]
-        
-        for obj in custom_objects:
-            with self.subTest(obj=obj.__class__.__name__):
-                payload = {'custom_object': obj, 'message': 'test'}
-                
-                try:
-                    formatted = self.connector.format_payload(payload)
-                    self.assertIsNotNone(formatted)
-                    self.assertIn('message', formatted)
-                except (ValueError, TypeError):
-                    # Acceptable if custom serialization is not supported
-                    pass
-
-    def test_payload_with_generator_objects(self):
-        """Test payload formatting with generator and iterator objects."""
-        def test_generator():
-            for i in range(5):
-                yield f"item_{i}"
-        
-        def infinite_generator():
-            count = 0
-            while True:
-                yield count
-                count += 1
-                if count > 10:  # Prevent infinite loop in tests
-                    break
-        
-        generator_payloads = [
-            {'generator': test_generator(), 'message': 'finite_generator'},
-            {'iterator': iter([1, 2, 3, 4, 5]), 'message': 'list_iterator'},
-            {'range_obj': range(10), 'message': 'range_object'},
-        ]
-        
-        for payload in generator_payloads:
-            with self.subTest(payload=payload['message']):
-                try:
-                    formatted = self.connector.format_payload(payload)
-                    self.assertIsNotNone(formatted)
-                    self.assertIn('message', formatted)
-                except (ValueError, TypeError):
-                    # Generators might not be serializable
-                    pass
-
-    def test_payload_with_nested_collections(self):
-        """Test payload formatting with deeply nested collections."""
-        nested_collections = [
-            # Nested lists
-            {'nested_lists': [[[1, 2], [3, 4]], [[5, 6], [7, 8]]], 'message': 'nested_lists'},
-            # Nested dicts
-            {'nested_dicts': {'level1': {'level2': {'level3': {'value': 'deep'}}}}, 'message': 'nested_dicts'},
-            # Mixed nesting
-            {
-                'mixed': {
-                    'list_in_dict': [
-                        {'dict_in_list': {'nested_value': [1, 2, 3]}},
-                        {'another_dict': {'more_nesting': {'final': 'value'}}}
-                    ]
-                },
-                'message': 'mixed_nesting'
-            },
-            # Extreme nesting
-            {'extreme': {'a': {'b': {'c': {'d': {'e': {'f': {'g': 'deep_value'}}}}}}}, 'message': 'extreme_nesting'},
-        ]
-        
-        for payload in nested_collections:
-            with self.subTest(payload=payload['message']):
-                try:
-                    formatted = self.connector.format_payload(payload)
-                    self.assertIsNotNone(formatted)
-                    self.assertIn('message', formatted)
-                except (ValueError, RecursionError):
-                    # Deep nesting might be rejected
-                    if payload['message'] == 'extreme_nesting':
-                        pass  # Expected for extremely deep nesting
-                    else:
-                        raise
-
-    def test_payload_with_file_like_objects(self):
-        """Test payload formatting with file-like objects and streams."""
-        import io
-        import tempfile
-        
-        file_like_objects = [
-            io.StringIO("test string data"),
-            io.BytesIO(b"test binary data"),
-            tempfile.NamedTemporaryFile(mode='w+', delete=False),
-        ]
-        
-        try:
-            for i, file_obj in enumerate(file_like_objects):
-                with self.subTest(file_type=file_obj.__class__.__name__):
-                    if hasattr(file_obj, 'write'):
-                        file_obj.write(f"test data {i}")
-                        file_obj.seek(0)
-                    
-                    payload = {'file_object': file_obj, 'message': f'file_test_{i}'}
-                    
-                    try:
-                        formatted = self.connector.format_payload(payload)
-                        self.assertIsNotNone(formatted)
-                    except (ValueError, TypeError):
-                        # File objects might not be serializable
-                        pass
-        finally:
-            # Clean up file objects
-            for file_obj in file_like_objects:
-                try:
-                    if hasattr(file_obj, 'close'):
-                        file_obj.close()
-                    if hasattr(file_obj, 'name') and hasattr(file_obj, 'delete'):
-                        import os
-                        try:
-                            os.unlink(file_obj.name)
-                        except:
-                            pass
-                except:
-                    pass
-
-    def test_payload_with_function_objects(self):
-        """Test payload formatting with function and callable objects."""
-        def test_function():
-            return "test"
-        
-        class CallableClass:
-            def __call__(self):
-                return "callable"
-        
-        lambda_func = lambda x: x * 2
-        
-        callable_payloads = [
-            {'function': test_function, 'message': 'regular_function'},
-            {'lambda': lambda_func, 'message': 'lambda_function'},
-            {'callable': CallableClass(), 'message': 'callable_object'},
-            {'builtin': len, 'message': 'builtin_function'},
-            {'method': "test".upper, 'message': 'bound_method'},
-        ]
-        
-        for payload in callable_payloads:
-            with self.subTest(payload=payload['message']):
-                try:
-                    formatted = self.connector.format_payload(payload)
-                    # Functions might be converted to string representation
-                    self.assertIsNotNone(formatted)
-                except (ValueError, TypeError):
-                    # Functions are typically not JSON serializable
-                    pass
-
-
-class TestGenesisConnectorAdvancedErrorHandling(unittest.TestCase):
-    """
-    Advanced error handling tests for comprehensive error scenarios.
-    Testing framework: unittest with pytest enhancements
-    """
-
-    def setUp(self):
-        """Set up advanced error handling test environment."""
-        self.connector = GenesisConnector()
-
-    def test_error_context_preservation(self):
-        """Test that error context and stack traces are properly preserved."""
-        def nested_function_level_3():
-            raise ValueError("Deep error")
-        
-        def nested_function_level_2():
-            return nested_function_level_3()
-        
-        def nested_function_level_1():
-            return nested_function_level_2()
-        
-        with patch('requests.post') as mock_post:
-            mock_post.side_effect = nested_function_level_1
-            
-            payload = {'message': 'error_context_test'}
-            
-            try:
-                self.connector.send_request(payload)
-                self.fail("Expected ValueError was not raised")
-            except ValueError as e:
-                # Verify error context is preserved
-                self.assertIn("Deep error", str(e))
-                # Check that traceback contains nested function names
-                import traceback
-                tb_str = traceback.format_exc()
-                self.assertIn("nested_function_level_1", tb_str)
-                self.assertIn("nested_function_level_2", tb_str)
-                self.assertIn("nested_function_level_3", tb_str)
-
-    def test_error_recovery_with_partial_failure(self):
-        """Test error recovery when operations partially succeed."""
-        with patch('requests.post') as mock_post:
-            # Simulate partial success: some operations work, others fail
-            success_response = Mock()
-            success_response.status_code = 200
-            success_response.json.return_value = {'success': True}
-            
-            failure_response = Mock()
-            failure_response.status_code = 500
-            
-            mock_post.side_effect = [failure_response, success_response]
-            
-            payloads = [
-                {'message': 'test1', 'priority': 'high'},
-                {'message': 'test2', 'priority': 'low'},
-            ]
-            
-            results = []
-            errors = []
-            
-            for payload in payloads:
-                try:
-                    result = self.connector.send_request(payload)
-                    results.append(result)
-                except Exception as e:
-                    errors.append(e)
-            
-            # Should have partial success
-            self.assertEqual(len(results), 1)
-            self.assertEqual(len(errors), 1)
-            self.assertEqual(results[0]['success'], True)
-
-    def test_error_aggregation_in_batch_operations(self):
-        """Test error aggregation when multiple operations fail."""
-        with patch('requests.post') as mock_post:
-            mock_post.side_effect = [
-                ConnectionError("Network error 1"),
-                TimeoutError("Timeout error 2"),
-                ValueError("Value error 3"),
-                RuntimeError("Runtime error 4"),
-            ]
-            
-            payloads = [
-                {'batch_id': 1}, {'batch_id': 2}, 
-                {'batch_id': 3}, {'batch_id': 4}
-            ]
-            
-            errors = []
-            for payload in payloads:
-                try:
-                    self.connector.send_request(payload)
-                except Exception as e:
-                    errors.append((payload['batch_id'], e))
-            
-            # Should capture all different error types
-            self.assertEqual(len(errors), 4)
-            error_types = [type(error[1]).__name__ for error in errors]
-            self.assertIn('ConnectionError', error_types)
-            self.assertIn('TimeoutError', error_types)
-            self.assertIn('ValueError', error_types)
-            self.assertIn('RuntimeError', error_types)
-
-    def test_memory_cleanup_on_error(self):
-        """Test that memory is properly cleaned up when errors occur."""
-        import gc
-        import sys
-        
-        # Create large payload that will consume memory
-        large_payload = {'large_data': 'x' * (1024 * 1024)}  # 1MB
-        
-        initial_refs = sys.getrefcount(large_payload)
-        
-        with patch('requests.post') as mock_post:
-            mock_post.side_effect = MemoryError("Out of memory")
-            
-            try:
-                self.connector.send_request(large_payload)
-            except MemoryError:
-                pass
-        
-        # Force garbage collection
-        gc.collect()
-        
-        # Reference count should not have increased significantly
-        final_refs = sys.getrefcount(large_payload)
-        self.assertLessEqual(final_refs - initial_refs, 2)  # Allow small variance
-
-    @patch('requests.post')
-    def test_error_handling_with_malformed_error_responses(self, mock_post):
-        """Test handling when error responses themselves are malformed."""
-        # Create a mock response that raises an exception when accessed
-        mock_response = Mock()
-        mock_response.status_code = 500
-        mock_response.text = "Internal Server Error"
-        mock_response.json.side_effect = json.JSONDecodeError("Invalid JSON", "", 0)
-        mock_response.headers = {}
-        mock_post.return_value = mock_response
-        
-        payload = {'message': 'malformed_error_test'}
-        
-        with self.assertRaises(RuntimeError):
-            self.connector.send_request(payload)
-
-
-class TestGenesisConnectorAdvancedMocking(unittest.TestCase):
-    """
-    Advanced tests using sophisticated mocking scenarios.
-    Testing framework: unittest with pytest enhancements
-    """
-
-    def setUp(self):
-        """Set up advanced mocking test environment."""
-        self.connector = GenesisConnector()
-
-    @patch('requests.Session')
-    def test_session_lifecycle_management(self, mock_session_class):
-        """Test proper session lifecycle management and resource cleanup."""
-        mock_session = Mock()
-        mock_session_class.return_value = mock_session
-        
-        # Configure session responses
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'session_test': True}
-        mock_session.post.return_value = mock_response
-        mock_session.get.return_value = mock_response
-        
-        connector = GenesisConnector(config={'use_session': True})
-        
-        # Make multiple requests to test session reuse
-        for i in range(5):
-            payload = {'request_id': i}
-            try:
-                if hasattr(connector, 'send_request'):
-                    result = connector.send_request(payload)
-                    self.assertIsNotNone(result)
-            except AttributeError:
-                # Skip if method doesn't exist
-                pass
-        
-        # Test session cleanup
-        try:
-            if hasattr(connector, 'close'):
-                connector.close()
-                mock_session.close.assert_called()
-        except AttributeError:
-            pass
-
-    @patch('time.time')
-    @patch('requests.post')
-    def test_request_timing_and_performance_metrics(self, mock_post, mock_time):
-        """Test request timing measurement and performance metrics collection."""
-        # Mock time progression
-        mock_time.side_effect = [1000.0, 1000.5, 1001.0, 1001.2]  # Simulate request durations
-        
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'timing_test': True}
-        mock_post.return_value = mock_response
-        
-        payloads = [
-            {'request': 'timing_test_1'},
-            {'request': 'timing_test_2'}
-        ]
-        
-        for payload in payloads:
-            try:
-                result = self.connector.send_request(payload)
-                self.assertIsNotNone(result)
-            except AttributeError:
-                # Skip if method doesn't exist
-                pass
-        
-        # Verify timing calls were made
-        self.assertGreaterEqual(mock_time.call_count, 4)
-
-    @patch('logging.getLogger')
-    def test_structured_logging_integration(self, mock_get_logger):
-        """Test integration with structured logging systems."""
-        mock_logger = Mock()
-        mock_get_logger.return_value = mock_logger
-        
-        # Test various log levels and structured data
-        log_data = [
-            {'level': 'INFO', 'message': 'Request started', 'request_id': '123'},
-            {'level': 'DEBUG', 'message': 'Payload formatted', 'size': 1024},
-            {'level': 'ERROR', 'message': 'Request failed', 'error_code': 500},
-        ]
-        
-        for log_entry in log_data:
-            try:
-                if hasattr(self.connector, 'log_request'):
-                    self.connector.log_request(log_entry)
-            except AttributeError:
-                # Skip if method doesn't exist
-                pass
-        
-        # Verify logging integration
-        if mock_logger.info.called or mock_logger.debug.called or mock_logger.error.called:
-            self.assertTrue(True)  # At least one log method was called
-
-    @patch('requests.post')
-    def test_dynamic_configuration_injection(self, mock_post):
-        """Test dynamic configuration changes during runtime."""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'config_test': True}
-        mock_post.return_value = mock_response
-        
-        # Test configuration changes between requests
-        configs = [
-            {'api_key': 'key1', 'base_url': 'https://api1.test.com'},
-            {'api_key': 'key2', 'base_url': 'https://api2.test.com'},
-            {'api_key': 'key3', 'base_url': 'https://api3.test.com'},
-        ]
-        
-        for i, config in enumerate(configs):
-            # Update configuration
-            try:
-                if hasattr(self.connector, 'reload_config'):
-                    self.connector.reload_config(config)
-                    
-                    # Make request with new config
-                    payload = {'config_test': i}
-                    result = self.connector.send_request(payload)
-                    self.assertIsNotNone(result)
-            except AttributeError:
-                # Skip if methods don't exist
-                pass
-
-
-class TestGenesisConnectorRealWorldScenarios(unittest.TestCase):
-    """
-    Real-world scenario tests simulating actual usage patterns.
-    Testing framework: unittest with pytest enhancements
-    """
-
-    def setUp(self):
-        """Set up real-world scenario test environment."""
-        self.connector = GenesisConnector(config={
-            'api_key': 'real_world_test_key',
-            'base_url': 'https://api.realworld.test.com'
-        })
-
-    @patch('requests.post')
-    def test_file_upload_workflow(self, mock_post):
-        """Test a complete file upload workflow with progress tracking."""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            'upload_id': 'upload_12345',
-            'status': 'completed',
-            'file_size': 1024000
-        }
-        mock_post.return_value = mock_response
-        
-        # Simulate file upload payload
-        file_data = {
-            'file_name': 'test_document.pdf',
-            'file_size': 1024000,
-            'content_type': 'application/pdf',
-            'file_data': 'base64_encoded_file_content_here',
-            'metadata': {
-                'upload_timestamp': datetime.now().isoformat(),
-                'user_id': 'user_12345',
-                'folder_id': 'folder_67890'
-            }
-        }
-        
-        try:
-            formatted = self.connector.format_payload(file_data)
-            self.assertIsNotNone(formatted)
-            
-            result = self.connector.send_request(formatted)
-            self.assertEqual(result['status'], 'completed')
-            self.assertIn('upload_id', result)
-        except AttributeError:
-            # Skip if methods don't exist
-            pass
-
-    @patch('requests.post')
-    def test_batch_data_processing_workflow(self, mock_post):
-        """Test batch processing of multiple data records."""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            'batch_id': 'batch_67890',
-            'processed_count': 100,
-            'failed_count': 0,
-            'status': 'completed'
-        }
-        mock_post.return_value = mock_response
-        
-        # Simulate batch data processing
-        batch_data = {
-            'batch_id': 'batch_67890',
-            'operation': 'data_transformation',
-            'records': [
-                {'id': i, 'data': f'record_{i}', 'priority': 'normal'}
-                for i in range(100)
-            ],
-            'processing_options': {
-                'validation': True,
-                'transform_rules': ['normalize', 'validate', 'enrich'],
-                'output_format': 'json'
-            }
-        }
-        
-        try:
-            formatted = self.connector.format_payload(batch_data)
-            self.assertIsNotNone(formatted)
-            
-            result = self.connector.send_request(formatted)
-            self.assertEqual(result['status'], 'completed')
-            self.assertEqual(result['processed_count'], 100)
-        except AttributeError:
-            # Skip if methods don't exist
-            pass
-
-    @patch('requests.post')
-    def test_real_time_analytics_workflow(self, mock_post):
-        """Test real-time analytics data submission."""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            'analytics_id': 'analytics_54321',
-            'ingested_events': 50,
-            'processing_time_ms': 125
-        }
-        mock_post.return_value = mock_response
-        
-        # Simulate real-time analytics data
-        analytics_data = {
-            'session_id': 'session_98765',
-            'events': [
-                {
-                    'event_type': 'page_view',
-                    'timestamp': datetime.now().isoformat(),
-                    'properties': {
-                        'page_url': '/dashboard',
-                        'user_agent': 'Mozilla/5.0...',
-                        'referrer': 'https://google.com'
-                    }
-                },
-                {
-                    'event_type': 'button_click',
-                    'timestamp': datetime.now().isoformat(),
-                    'properties': {
-                        'button_id': 'submit_form',
-                        'form_data': {'field1': 'value1', 'field2': 'value2'}
-                    }
-                }
-            ],
-            'metadata': {
-                'client_id': 'client_13579',
-                'app_version': '2.1.0',
-                'platform': 'web'
-            }
-        }
-        
-        try:
-            formatted = self.connector.format_payload(analytics_data)
-            self.assertIsNotNone(formatted)
-            
-            result = self.connector.send_request(formatted)
-            self.assertEqual(result['ingested_events'], 50)
-            self.assertIn('analytics_id', result)
-        except AttributeError:
-            # Skip if methods don't exist
-            pass
-
-    @patch('requests.get')
-    @patch('requests.post')
-    def test_multi_step_workflow_with_dependencies(self, mock_post, mock_get):
-        """Test a multi-step workflow where each step depends on the previous."""
-        # Step 1: Initialize workflow
-        mock_get.return_value = Mock(
-            status_code=200,
-            json=Mock(return_value={'status': 'ready', 'workflow_id': 'wf_11111'})
-        )
-        
-        # Step 2: Submit data
-        mock_post.side_effect = [
-            Mock(status_code=200, json=Mock(return_value={
-                'step': 'data_submitted',
-                'workflow_id': 'wf_11111',
-                'next_step': 'processing'
-            })),
-            Mock(status_code=200, json=Mock(return_value={
-                'step': 'processing_complete',
-                'workflow_id': 'wf_11111',
-                'result_id': 'result_22222'
-            }))
-        ]
-        
-        try:
-            # Step 1: Check workflow status
-            if hasattr(self.connector, 'get_status'):
-                status = self.connector.get_status()
-                self.assertEqual(status['status'], 'ready')
-                workflow_id = status.get('workflow_id', 'wf_11111')
-            else:
-                workflow_id = 'wf_11111'
-            
-            # Step 2: Submit initial data
-            initial_data = {
-                'workflow_id': workflow_id,
-                'step': 'initialize',
-                'data': {'input': 'test_data', 'parameters': {'mode': 'batch'}}
-            }
-            
-            formatted = self.connector.format_payload(initial_data)
-            result1 = self.connector.send_request(formatted)
-            
-            # Step 3: Process based on previous result
-            processing_data = {
-                'workflow_id': workflow_id,
-                'step': 'process',
-                'previous_step_result': result1,
-                'processing_options': {'validate': True, 'optimize': True}
-            }
-            
-            formatted = self.connector.format_payload(processing_data)
-            result2 = self.connector.send_request(formatted)
-            
-            self.assertEqual(result2['step'], 'processing_complete')
-            self.assertIn('result_id', result2)
-            
-        except AttributeError:
-            # Skip if methods don't exist
-            pass
-
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)

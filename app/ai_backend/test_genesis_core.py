@@ -17,6 +17,8 @@ except ImportError:
     # Create mock classes and functions for testing when genesis_core doesn't exist
     class MockGenesisCore:
         def __init__(self, config=None):
+            if config is not None and not isinstance(config, dict):
+                raise TypeError("Config must be a dict or None")
             self.config = config or {}
             self.initialized = True
             
@@ -32,13 +34,17 @@ except ImportError:
         def validate_input(self, data):
             if data is None or data == "":
                 return False
-            if isinstance(data, dict) and "sql_injection" in str(data):
-                return False
+            if isinstance(data, dict):
+                value_str = str(data)
+                if "sql_injection" in value_str or "<script>" in value_str or "</script>" in value_str:
+                    return False
             return True
             
         def sanitize_input(self, data):
             if isinstance(data, str):
-                return data.replace("<script>", "").replace("</script>", "")
+                sanitized = data.replace("<script>", "").replace("</script>", "")
+                sanitized = sanitized.replace("DROP TABLE", "")
+                return sanitized
             return data
 
     # Mock the imported functions/classes if they don't exist
