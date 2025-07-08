@@ -6,9 +6,9 @@ data class OfflineData(
 
 class OfflineDataManager {
     /**
-     * Asynchronously loads essential offline data for the application.
+     * Attempts to load critical offline data asynchronously.
      *
-     * @return An [OfflineData] object if available, or `null` if no offline data exists.
+     * @return An [OfflineData] instance if available, or `null` if no offline data exists.
      */
     suspend fun loadCriticalOfflineData(): OfflineData? {
         return null // Stub implementation

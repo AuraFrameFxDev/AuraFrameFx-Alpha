@@ -10,9 +10,9 @@ import android.util.Log // Added import for Log
 class AppInitializerInitializer : Initializer<Unit> {
 
     /**
-     * Performs application initialization logic during app startup.
+     * Executes application initialization logic at startup.
      *
-     * Called on the main thread when the app starts. Currently, this method only logs its invocation; actual initialization logic should be implemented as needed.
+     * Called on the main thread when the app launches. Currently logs its invocation; place additional initialization logic here as needed.
      */
     override fun create(context: Context) {
         Log.d("AppInitializer", "AppInitializerInitializer - create called.")
@@ -22,7 +22,7 @@ class AppInitializerInitializer : Initializer<Unit> {
     }
 
     /**
-     * Returns an empty list, indicating that this initializer has no dependencies on other initializers.
+     * Returns an empty list to indicate that this initializer has no dependencies on other initializers.
      *
      * @return An empty list of initializer dependencies.
      */

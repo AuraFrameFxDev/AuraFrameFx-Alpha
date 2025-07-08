@@ -44,9 +44,9 @@ class CascadeDebugViewModel @Inject constructor(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays a debug UI for inspecting and updating the vision and processing states of a CascadeAgent.
+ * Composable debug UI for viewing and updating the vision and processing states of a CascadeAgent.
  *
- * Provides controls to view the current vision and processing states, input new states, trigger state updates via the ViewModel, and review the history of state changes.
+ * Displays the current vision and processing states, allows input of new states, and provides controls to trigger state updates via the ViewModel. Also shows the history of state changes for both vision and processing states.
  *
  * @param viewModel The ViewModel managing the CascadeAgent's states. Uses Hilt to provide a default instance.
  */

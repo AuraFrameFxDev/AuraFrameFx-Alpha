@@ -29,7 +29,7 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates binding to the Oracle Drive service in beta mode.
      *
-     * Updates internal state to indicate that service binding is disabled. No actual service connection is performed.
+     * Updates internal state to reflect that service binding is disabled. No real service connection occurs.
      */
     fun bindService() {
         // Beta stub: No actual binding
@@ -40,7 +40,7 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates unbinding from the Oracle Drive service in beta mode.
      *
-     * Updates the service connection state and status message without performing any real unbinding operation.
+     * Updates the service connection state and status message with placeholder values. No actual unbinding or service interaction occurs.
      */
     fun unbindService() {
         // Beta stub: No actual unbinding
@@ -49,9 +49,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
 
     /**
-     * Updates the status, detailed status, and diagnostics log with static messages indicating Oracle Drive features are disabled in beta mode.
+     * Simulates a status refresh by updating status-related state flows with static messages indicating Oracle Drive features are disabled in beta mode.
      *
-     * This method does not perform any real status or diagnostics retrieval.
+     * No actual status or diagnostics retrieval is performed.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -63,7 +63,7 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates toggling a module's enabled state by updating the diagnostics log with a placeholder message.
      *
-     * Intended for UI testing in beta mode; does not alter any actual module state.
+     * This method does not change any actual module state and is intended solely for UI testing in beta mode.
      *
      * @param packageName The name of the module to simulate toggling.
      * @param enable If `true`, simulates enabling the module; if `false`, simulates disabling it.
