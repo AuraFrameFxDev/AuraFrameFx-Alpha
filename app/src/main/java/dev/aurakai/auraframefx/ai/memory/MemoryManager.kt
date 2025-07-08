@@ -22,6 +22,12 @@ class MemoryManager @Inject constructor(
     private val _memoryStats = MutableStateFlow(MemoryStats())
     val memoryStats: StateFlow<MemoryStats> = _memoryStats
 
+    /**
+     * Stores a canonical memory item and updates memory statistics and recent access tracking.
+     *
+     * @param item The memory item to store.
+     * @return The ID of the stored memory item.
+     */
     fun storeMemory(item: CanonicalMemoryItem): String { // Changed MemoryItem to CanonicalMemoryItem
         memoryStore[item.id] = item
         updateStats()
@@ -29,6 +35,14 @@ class MemoryManager @Inject constructor(
         return item.id
     }
 
+    /**
+     * Retrieves memory items matching the specified query, applying agent filters and limiting the number of results.
+     *
+     * The returned items are sorted by descending timestamp and limited to the maximum number configured.
+     *
+     * @param query The criteria used to filter and retrieve memory items.
+     * @return A result containing the filtered memory items, their count, and the original query.
+     */
     fun retrieveMemory(query: MemoryQuery): MemoryRetrievalResult {
         val items = memoryStore.values
             .filter { item ->
@@ -45,6 +59,14 @@ class MemoryManager @Inject constructor(
         )
     }
 
+    /**
+     * Retrieves the most recent memory items within the configured context window.
+     *
+     * Filters stored memory items to include only those whose timestamps fall within the time window defined by the maximum chain length in the configuration. The returned list is sorted by descending timestamp and limited to the maximum chain length.
+     *
+     * @param task The task identifier (currently unused in filtering).
+     * @return A list of recent canonical memory items within the context window.
+     */
     fun getContextWindow(task: String): List<CanonicalMemoryItem> { // Changed MemoryItem to CanonicalMemoryItem
         val recentItems = memoryStore.values
             .filter {
