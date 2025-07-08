@@ -81,9 +81,9 @@ class TrinityCoordinatorService @Inject constructor(
     }
 
     /**
-     * Processes an AI request by routing it to the appropriate persona(s) or fusion mode and emits one or more responses as a Flow.
+     * Routes an AI request to the appropriate persona(s) or fusion mode and emits one or more responses as a Flow.
      *
-     * Determines the routing based on request analysis, which may result in handling by Kai, Aura, Genesis fusion, ethical review, or parallel processing with synthesis. Emits a failure response if the system is not initialized or if an error occurs.
+     * Analyzes the request to determine whether it should be handled by Kai, Aura, Genesis fusion, ethical review, or parallel processing with synthesis. If the system is not initialized or an error occurs, emits a failure response.
      *
      * @param request The AI request to process.
      * @return A Flow emitting one or more AgentResponse objects representing the results of the routed processing.
