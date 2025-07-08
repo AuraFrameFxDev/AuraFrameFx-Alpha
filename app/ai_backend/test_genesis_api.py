@@ -913,11 +913,6 @@ class TestPerformance:
                 assert result.usage.total_tokens == 2500
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short"])
-
-# Additional comprehensive test cases to enhance coverage
-
 class TestGenesisAPIClientAdvanced:
     """Advanced test scenarios for GenesisAPIClient."""
     
