@@ -362,6 +362,9 @@ class AIPipelineProcessor @Inject constructor(
      * Updates the processing context with recent task history, response patterns, system metrics, and agent performance statistics.
      *
      * Maintains a capped history of recent tasks, tracks response confidence and agent participation by task type, updates system-level metrics, and records rolling confidence scores for each agent.
+     *
+     * @param task The task string that was processed.
+     * @param responses The list of agent messages generated for the task.
      */
     private fun updateContext(task: String, responses: List<AgentMessage>) {
         // Enhanced context update with learning and adaptation
