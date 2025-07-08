@@ -45,6 +45,15 @@ class MemoryManager @Inject constructor(
         )
     }
 
+    /**
+     * Retrieves a list of recent memory items within the configured context window.
+     *
+     * Filters memory items whose timestamps fall within the most recent time window defined by `maxChainLength` seconds,
+     * sorts them in descending order by timestamp, and returns up to `maxChainLength` items.
+     *
+     * @param task The task identifier (currently unused in filtering).
+     * @return A list of recent memory items within the context window.
+     */
     fun getContextWindow(task: String): List<MemoryItem> {
         val recentItems = memoryStore.values
             .filter {
@@ -58,18 +67,18 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Returns the current memory statistics snapshot.
+     * Retrieves the latest snapshot of memory statistics.
      *
-     * @return The latest `MemoryStats` reflecting the state of the memory store.
+     * @return The current `MemoryStats` representing the state of the memory store.
      */
     fun getMemoryStats(): MemoryStats {
         return _memoryStats.value
     }
 
     /**
-     * Refreshes the memory statistics to reflect the current state of the memory store.
+     * Updates the memory statistics to reflect the current contents of the memory store.
      *
-     * Updates include the total number of items, the count of recent items within the configured chain length, the aggregate size of all memory content, and the timestamp of the update.
+     * Calculates and sets the total number of memory items, the number of recent items within the configured chain length, the total size of all memory content, and the current timestamp as the last update time.
      */
     private fun updateStats() {
         _memoryStats.update { current ->

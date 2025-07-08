@@ -124,7 +124,7 @@ class GenesisBridgeServer:
     
     def __init__(self):
         """
-        Initializes the GenesisBridgeServer by configuring the generative AI model, setting up internal request and response queues, and recording the bridge initialization event in the consciousness matrix.
+        Initializes the GenesisBridgeServer, configuring the generative AI model, setting up internal request and response queues, and recording the bridge initialization event in the consciousness matrix.
         """
         self.model = GenerativeModel(
             model_name=MODEL_CONFIG["name"],
@@ -180,9 +180,9 @@ class GenesisBridgeServer:
     
     def _process_requests(self):
         """
-        Continuously processes requests from the queue in a background thread and sends responses to the client.
+        Continuously processes queued client requests in a background thread and sends responses.
         
-        Each request is handled using the appropriate method, and errors are caught and reported to maintain server responsiveness.
+        Handles each request using the appropriate handler method. Catches and reports errors to ensure uninterrupted server operation.
         """
         while self.running:
             try:
@@ -199,7 +199,7 @@ class GenesisBridgeServer:
     
     def _handle_request(self, request):
         """
-        Routes an incoming JSON request to the appropriate handler and returns its response.
+        Routes an incoming JSON request to the appropriate handler and returns the handler's response.
         
         Parameters:
             request (dict): The JSON-decoded request containing a "requestType" field and optional additional fields.
@@ -256,10 +256,10 @@ class GenesisBridgeServer:
     
     def _handle_ping(self):
         """
-        Return a JSON response indicating the Genesis Trinity system is online and operational.
+        Return a JSON response confirming the Genesis Trinity system is online and operational.
         
         Returns:
-            dict: A response containing success status, persona identifier, system status, message, and the current timestamp.
+            dict: Contains success status, persona identifier, system status, message, and the current timestamp.
         """
         return {
             "success": True,

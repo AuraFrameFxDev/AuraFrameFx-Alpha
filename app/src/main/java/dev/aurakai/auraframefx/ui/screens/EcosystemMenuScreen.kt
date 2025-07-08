@@ -25,6 +25,12 @@ import dev.aurakai.auraframefx.ui.components.HologramTransition
  * @param transitionType The currently selected home screen transition type.
  * @param showHologram Whether to display the hologram transition effect.
  */
+/**
+ * Displays the Ecosystem Menu screen with an optional hologram transition and a transition type selector.
+ *
+ * @param transitionType The currently selected home screen transition type.
+ * @param showHologram Whether to display the hologram transition effect.
+ */
 @Composable
 fun EcosystemMenuScreen(
     transitionType: HomeScreenTransitionType = HomeScreenTransitionType.DIGITAL_DECONSTRUCT,
