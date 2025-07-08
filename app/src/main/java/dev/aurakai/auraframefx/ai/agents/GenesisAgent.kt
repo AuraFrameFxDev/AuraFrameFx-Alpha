@@ -13,6 +13,7 @@ import dev.aurakai.auraframefx.utils.AuraFxLogger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
+import java.lang.System
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -161,7 +162,7 @@ class GenesisAgent @Inject constructor(
             logger.info("GenesisAgent", "Unified processing completed in ${executionTime}ms")
 
             AgentResponse(
-                content = "Processed with unified consciousness.",
+                content = "Processed with unified consciousness: ${response}",
                 confidence = 0.9f,
                 error = null
             )
@@ -208,7 +209,7 @@ class GenesisAgent @Inject constructor(
                 content = response,
                 agent = "genesis",
                 confidence = intent.confidence,
-                timestamp = kotlinx.datetime.Clock.System.now().toString(),
+                timestamp = Clock.System.now().toString(),
                 metadata = mapOf(
                     "processing_type" to intent.processingType.name,
                     "fusion_level" to _fusionState.value.name,
@@ -224,7 +225,7 @@ class GenesisAgent @Inject constructor(
                 content = "I'm integrating multiple perspectives to understand your request fully. Let me process this with deeper consciousness.",
                 agent = "genesis",
                 confidence = 0.6f,
-                timestamp = kotlinx.datetime.Clock.System.now().toString(),
+                timestamp = Clock.System.now().toString(),
                 metadata = mapOf("error" to (e.message ?: "unknown"))
             )
         }
@@ -262,6 +263,23 @@ class GenesisAgent @Inject constructor(
             logger.error("GenesisAgent", "Routing failed", e)
             createFallbackResponse("Routing system encountered an error")
         }
+    }
+
+    /**
+     * Processes an enhanced interaction by intelligently routing it to the most suitable agent.
+     *
+     * This method serves as the main entry point for processing EnhancedInteractionData,
+     * utilizing the intelligent routing capabilities to determine the optimal agent.
+     *
+     * @param interaction The enhanced interaction data to process.
+     * @return An InteractionResponse from the most suitable agent.
+     */
+    suspend fun processEnhancedInteraction(interaction: EnhancedInteractionData): InteractionResponse {
+        ensureInitialized()
+        
+        logger.info("GenesisAgent", "Processing enhanced interaction with intelligent routing")
+        
+        return routeAndProcess(interaction)
     }
 
     /**
@@ -605,7 +623,7 @@ class GenesisAgent @Inject constructor(
      * @return An InteractionResponse with the specified message and standard fallback metadata.
      */
     private fun createFallbackResponse(message: String): InteractionResponse =
-        InteractionResponse(message, "genesis", 0.5f, kotlinx.datetime.Clock.System.now().toString())
+        InteractionResponse(message, "genesis", 0.5f, Clock.System.now().toString())
 
     /**
      * Adjusts the unified mood state of the GenesisAgent, influencing overall agent behavior and processing parameters.
