@@ -153,7 +153,7 @@ class AuraAgent @Inject constructor(
                 content = creativeResponse,
                 agent = "AURA",
                 confidence = 0.9f,
-                timestamp = Clock.System.now().toString(),
+                timestamp = kotlinx.datetime.Clock.System.now().toString(),
                 metadata = mapOf(
                     "creative_intent" to creativeIntent.name,
                     "mood_influence" to _currentMood.value,
@@ -168,7 +168,7 @@ class AuraAgent @Inject constructor(
                 content = "My creative energies are temporarily scattered. Let me refocus and try again.",
                 agent = "AURA",
                 confidence = 0.3f,
-                timestamp = Clock.System.now().toString(),
+                timestamp = kotlinx.datetime.Clock.System.now().toString(),
                 metadata = mapOf("error" to (e.message ?: "unknown"))
             )
         }

@@ -48,7 +48,7 @@ class MemoryManager @Inject constructor(
     fun getContextWindow(task: String): List<MemoryItem> {
         val recentItems = memoryStore.values
             .filter {
-                it.timestamp > Clock.System.now()
+                it.timestamp > kotlinx.datetime.Clock.System.now()
                     .minus(config.contextChainingConfig.maxChainLength.seconds)
             }
             .sortedByDescending { it.timestamp }
@@ -67,7 +67,7 @@ class MemoryManager @Inject constructor(
                 totalItems = memoryStore.size,
                 recentItems = memoryStore.values
                     .filter {
-                        it.timestamp > Clock.System.now()
+                        it.timestamp > kotlinx.datetime.Clock.System.now()
                             .minus(config.contextChainingConfig.maxChainLength.seconds)
                     }
                     .size,
@@ -92,5 +92,5 @@ data class MemoryStats(
     val totalItems: Int = 0,
     val recentItems: Int = 0,
     val memorySize: Int = 0,
-    val lastUpdated: Instant = Clock.System.now(),
+    val lastUpdated: Instant = kotlinx.datetime.Clock.System.now(),
 )

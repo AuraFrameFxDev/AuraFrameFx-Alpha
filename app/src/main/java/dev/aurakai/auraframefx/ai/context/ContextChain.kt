@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ContextChain(
-    val id: String = "ctx_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "ctx_${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}",
     val rootContext: String,
     val currentContext: String,
     val contextHistory: List<ContextNode> = emptyList(),
@@ -17,7 +17,7 @@ data class ContextChain(
     val metadata: Map<String, String> = emptyMap(),
     val priority: Float = 0.5f,
     val relevanceScore: Float = 0.0f,
-    @Serializable(with = InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val lastUpdated: Instant = kotlinx.datetime.Clock.System.now(),
     val agentContext: Map<AgentType, String> = emptyMap(),
 )
 
@@ -25,7 +25,7 @@ data class ContextChain(
 data class ContextNode(
     val id: String,
     val content: String,
-    @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val timestamp: Instant = kotlinx.datetime.Clock.System.now(),
     val agent: AgentType,
     val metadata: Map<String, String> = emptyMap(),
     val relevance: Float = 0.0f,

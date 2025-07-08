@@ -169,7 +169,7 @@ class ErrorHandler @Inject constructor(
                 lastError = error,
                 errorTypes = current.errorTypes + (error.type to (current.errorTypes[error.type]
                     ?: 0) + 1),
-                lastUpdated = Clock.System.now()
+                lastUpdated = kotlinx.datetime.Clock.System.now()
             )
         }
     }
@@ -181,7 +181,7 @@ data class ErrorStats(
     val activeErrors: Int = 0,
     val lastError: AIError? = null, // AIError would also need to be @Serializable if ErrorStats is
     val errorTypes: Map<ErrorType, Int> = emptyMap(), // ErrorType would also need to be @Serializable
-    @Serializable(with = InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val lastUpdated: Instant = kotlinx.datetime.Clock.System.now(),
 )
 
 // Assuming AIError and ErrorType will be made serializable if ErrorStats is used in a serializable context.

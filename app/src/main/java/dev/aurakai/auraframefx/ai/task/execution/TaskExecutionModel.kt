@@ -8,13 +8,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TaskExecution(
-    val id: String = "exec_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "exec_${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}",
     val taskId: String,
     val agent: AgentType,
     val type: String,
     val data: Map<String, String> = emptyMap(),
     val priority: TaskPriority = TaskPriority.NORMAL,
-    @Serializable(with = InstantSerializer::class) val startTime: Instant = Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val startTime: Instant = kotlinx.datetime.Clock.System.now(),
     @Serializable(with = InstantSerializer::class) val endTime: Instant? = null,
     val startedAt: Long? = null,
     val completedAt: Long? = null,
@@ -32,7 +32,7 @@ data class TaskExecution(
 
 @Serializable
 data class ExecutionPlan(
-    val id: String = "plan_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "plan_${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}",
     val steps: List<ExecutionStep>,
     val estimatedDuration: Long,
     val requiredResources: Set<String>,
@@ -41,7 +41,7 @@ data class ExecutionPlan(
 
 @Serializable
 data class ExecutionStep(
-    val id: String = "step_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "step_${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}",
     val description: String,
     val type: StepType,
     val priority: Float = 0.5f,
@@ -52,8 +52,8 @@ data class ExecutionStep(
 
 @Serializable
 data class Checkpoint(
-    val id: String = "chk_${Clock.System.now().toEpochMilliseconds()}",
-    @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
+    val id: String = "chk_${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}",
+    @Serializable(with = InstantSerializer::class) val timestamp: Instant = kotlinx.datetime.Clock.System.now(),
     val stepId: String,
     val status: CheckpointStatus,
     val progress: Float = 0.0f,
