@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.junit.jupiter.MockitoExtension
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertTrue
 
 /**
  * Boundary and edge case tests for AuraAgent.
@@ -21,24 +21,24 @@ import org.junit.jupiter.api.Assertions.*
 class AuraAgentBoundaryTest {
 
     @ParameterizedTest
-    @ValueSource(ints = [0, 1, Integer.MAX_VALUE, -1])
+    @ValueSource(ints = [0, 1, Int.MAX_VALUE, -1])
     @DisplayName("Should handle extreme message ID lengths")
-    fun shouldHandleExtremeMessageIdLengths(length: Int) = runTest {
+    fun shouldHandleExtremeMessageIdLengths(messageIdLength: Int) = runTest {
         // Test boundary conditions for message ID lengths
-        assertTrue(true) // Placeholder
+        assertTrue(true) // TODO: implement actual assertion
     }
 
     @Test
     @DisplayName("Should handle message at exact memory limits")
     fun shouldHandleMessageAtExactMemoryLimits() = runTest {
         // Test processing messages at memory boundaries
-        assertTrue(true) // Placeholder
+        assertTrue(true) // TODO: implement actual assertion
     }
 
     @Test
     @DisplayName("Should handle timestamp edge cases")
     fun shouldHandleTimestampEdgeCases() = runTest {
         // Test with various timestamp edge cases
-        assertTrue(true) // Placeholder
+        assertTrue(true) // TODO: implement actual assertion
     }
 }

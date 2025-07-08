@@ -17,11 +17,10 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.times
 import org.mockito.kotlin.never
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.Dispatchers
@@ -37,22 +36,22 @@ class AIPipelineProcessorTest {
 
     @Mock
     private lateinit var mockPipelineStage: PipelineStage
-    
+
     @Mock
     private lateinit var mockInputProcessor: InputProcessor
-    
+
     @Mock
     private lateinit var mockOutputProcessor: OutputProcessor
-    
+
     @Mock
     private lateinit var mockErrorHandler: ErrorHandler
-    
+
     @Mock
     private lateinit var mockMetricsCollector: MetricsCollector
-    
+
     private lateinit var processor: AIPipelineProcessor
     private val testDispatcher = StandardTestDispatcher()
-    
+
     @BeforeEach
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
@@ -63,7 +62,7 @@ class AIPipelineProcessorTest {
             metricsCollector = mockMetricsCollector
         )
     }
-    
+
     @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
@@ -73,7 +72,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Pipeline Initialization Tests")
     inner class PipelineInitializationTests {
-        
+
         @Test
         @DisplayName("should initialize pipeline with valid configuration")
         fun shouldInitializePipelineWithValidConfiguration() {
@@ -139,7 +138,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Pipeline Processing Tests")
     inner class PipelineProcessingTests {
-        
+
         @BeforeEach
         fun setUpProcessor() {
             val config = PipelineConfiguration(
@@ -149,7 +148,7 @@ class AIPipelineProcessorTest {
             )
             processor.initialize(config)
         }
-        
+
         @Test
         @DisplayName("should process valid input successfully")
         fun shouldProcessValidInputSuccessfully() = runTest {
@@ -170,7 +169,7 @@ class AIPipelineProcessorTest {
             verify(mockOutputProcessor).process(expectedOutput)
             verify(mockMetricsCollector).recordProcessingTime(any())
         }
-        
+
         @Test
         @DisplayName("should handle null input gracefully")
         fun shouldHandleNullInputGracefully() = runTest {
@@ -180,7 +179,7 @@ class AIPipelineProcessorTest {
             }
             verify(mockInputProcessor, never()).process(any())
         }
-        
+
         @Test
         @DisplayName("should handle empty input")
         fun shouldHandleEmptyInput() = runTest {
@@ -197,7 +196,7 @@ class AIPipelineProcessorTest {
             assertEquals("", result)
             verify(mockInputProcessor).process(input)
         }
-        
+
         @Test
         @DisplayName("should process without initialization should throw exception")
         fun shouldProcessWithoutInitializationShouldThrowException() = runTest {
@@ -211,7 +210,7 @@ class AIPipelineProcessorTest {
                 uninitializedProcessor.process("test")
             }
         }
-        
+
         @Test
         @DisplayName("should handle processing timeout")
         fun shouldHandleProcessingTimeout() = runTest {
@@ -241,7 +240,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Error Handling Tests")
     inner class ErrorHandlingTests {
-        
+
         @BeforeEach
         fun setUpProcessor() {
             val config = PipelineConfiguration(
@@ -251,7 +250,7 @@ class AIPipelineProcessorTest {
             )
             processor.initialize(config)
         }
-        
+
         @Test
         @DisplayName("should handle input processing exception")
         fun shouldHandleInputProcessingException() = runTest {
@@ -267,7 +266,7 @@ class AIPipelineProcessorTest {
             verify(mockErrorHandler).handleProcessingError(exception)
             verify(mockPipelineStage, never()).execute(any())
         }
-        
+
         @Test
         @DisplayName("should handle pipeline stage exception")
         fun shouldHandlePipelineStageException() = runTest {
@@ -284,7 +283,7 @@ class AIPipelineProcessorTest {
             verify(mockErrorHandler).handleProcessingError(exception)
             verify(mockOutputProcessor, never()).process(any())
         }
-        
+
         @Test
         @DisplayName("should handle output processing exception")
         fun shouldHandleOutputProcessingException() = runTest {
@@ -302,7 +301,7 @@ class AIPipelineProcessorTest {
             }
             verify(mockErrorHandler).handleProcessingError(exception)
         }
-        
+
         @Test
         @DisplayName("should retry on transient failures")
         fun shouldRetryOnTransientFailures() = runTest {
@@ -330,7 +329,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Parallel Processing Tests")
     inner class ParallelProcessingTests {
-        
+
         @Test
         @DisplayName("should process multiple stages in parallel")
         fun shouldProcessMultipleStagesInParallel() = runTest {
@@ -359,7 +358,7 @@ class AIPipelineProcessorTest {
             verify(stage2).execute(any())
             verify(mockMetricsCollector).recordParallelExecution(2)
         }
-        
+
         @Test
         @DisplayName("should handle partial parallel stage failures")
         fun shouldHandlePartialParallelStageFailures() = runTest {
@@ -390,7 +389,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Metrics and Monitoring Tests")
     inner class MetricsAndMonitoringTests {
-        
+
         @BeforeEach
         fun setUpProcessor() {
             val config = PipelineConfiguration(
@@ -400,7 +399,7 @@ class AIPipelineProcessorTest {
             )
             processor.initialize(config)
         }
-        
+
         @Test
         @DisplayName("should collect processing metrics")
         fun shouldCollectProcessingMetrics() = runTest {
@@ -418,7 +417,7 @@ class AIPipelineProcessorTest {
             verify(mockMetricsCollector).recordThroughput(1)
             verify(mockMetricsCollector).recordStageExecution(any())
         }
-        
+
         @Test
         @DisplayName("should collect error metrics")
         fun shouldCollectErrorMetrics() = runTest {
@@ -434,7 +433,7 @@ class AIPipelineProcessorTest {
             verify(mockMetricsCollector).recordError(exception::class.java.simpleName)
             verify(mockMetricsCollector).recordFailureRate(any())
         }
-        
+
         @Test
         @DisplayName("should provide processing statistics")
         fun shouldProvideProcessingStatistics() {
@@ -450,7 +449,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Lifecycle Management Tests")
     inner class LifecycleManagementTests {
-        
+
         @Test
         @DisplayName("should shutdown gracefully")
         fun shouldShutdownGracefully() = runTest {
@@ -470,7 +469,7 @@ class AIPipelineProcessorTest {
             verify(mockPipelineStage).cleanup()
             verify(mockMetricsCollector).shutdown()
         }
-        
+
         @Test
         @DisplayName("should handle shutdown timeout")
         fun shouldHandleShutdownTimeout() = runTest {
@@ -493,7 +492,7 @@ class AIPipelineProcessorTest {
             assertFalse(shutdownResult)
             verify(mockErrorHandler).handleShutdownTimeout()
         }
-        
+
         @Test
         @DisplayName("should restart processor after shutdown")
         fun shouldRestartProcessorAfterShutdown() {
@@ -518,7 +517,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Configuration Validation Tests")
     inner class ConfigurationValidationTests {
-        
+
         @Test
         @DisplayName("should validate stage dependencies")
         fun shouldValidateStageDependencies() {
@@ -541,7 +540,7 @@ class AIPipelineProcessorTest {
             // Then
             assertTrue(result)
         }
-        
+
         @Test
         @DisplayName("should fail on circular dependencies")
         fun shouldFailOnCircularDependencies() {
@@ -564,7 +563,7 @@ class AIPipelineProcessorTest {
                 processor.initialize(config)
             }
         }
-        
+
         @Test
         @DisplayName("should validate stage configuration")
         fun shouldValidateStageConfiguration() {
@@ -587,7 +586,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Resource Management Tests")
     inner class ResourceManagementTests {
-        
+
         @Test
         @DisplayName("should manage memory usage effectively")
         fun shouldManageMemoryUsageEffectively() = runTest {
@@ -612,7 +611,7 @@ class AIPipelineProcessorTest {
             assertEquals("processed", result)
             verify(mockMetricsCollector).recordMemoryUsage(any())
         }
-        
+
         @Test
         @DisplayName("should handle memory pressure")
         fun shouldHandleMemoryPressure() = runTest {
@@ -638,7 +637,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Concurrent Processing Tests")
     inner class ConcurrentProcessingTests {
-        
+
         @Test
         @DisplayName("should handle concurrent processing requests")
         fun shouldHandleConcurrentProcessingRequests() = runTest {
@@ -669,7 +668,7 @@ class AIPipelineProcessorTest {
             results.forEach { assertEquals("final output", it) }
             verify(mockMetricsCollector, times(3)).recordConcurrentRequest()
         }
-        
+
         @Test
         @DisplayName("should reject requests when at capacity")
         fun shouldRejectRequestsWhenAtCapacity() = runTest {
@@ -706,7 +705,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Advanced Initialization Edge Cases")
     inner class AdvancedInitializationEdgeCases {
-        
+
         @Test
         @DisplayName("should handle zero timeout configuration")
         fun shouldHandleZeroTimeoutConfiguration() {
@@ -722,7 +721,7 @@ class AIPipelineProcessorTest {
                 processor.initialize(config)
             }
         }
-        
+
         @Test
         @DisplayName("should handle extremely large timeout values")
         fun shouldHandleExtremelyLargeTimeoutValues() {
@@ -740,7 +739,7 @@ class AIPipelineProcessorTest {
             assertTrue(result)
             assertTrue(processor.isInitialized())
         }
-        
+
         @Test
         @DisplayName("should detect duplicate stages by name")
         fun shouldDetectDuplicateStagesByName() {
@@ -761,7 +760,7 @@ class AIPipelineProcessorTest {
                 processor.initialize(config)
             }
         }
-        
+
         @Test
         @DisplayName("should validate stage ordering for dependencies")
         fun shouldValidateStageOrderingForDependencies() {
@@ -774,7 +773,7 @@ class AIPipelineProcessorTest {
             whenever(stage2.getDependencies()).thenReturn(emptySet())
             
             val config = PipelineConfiguration(
-                stages = listOf(stage1, stage2), // Wrong order - stage1 depends on stage2 but comes first
+                stages = listOf(stage1, stage2), // Wrong order
                 parallelExecution = false,
                 timeoutMs = 5000L
             )
@@ -784,7 +783,7 @@ class AIPipelineProcessorTest {
                 processor.initialize(config)
             }
         }
-        
+
         @Test
         @DisplayName("should re-initialize with different configuration")
         fun shouldReinitializeWithDifferentConfiguration() {
@@ -815,7 +814,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Advanced Input Processing Edge Cases")
     inner class AdvancedInputProcessingEdgeCases {
-        
+
         @BeforeEach
         fun setUpProcessor() {
             val config = PipelineConfiguration(
@@ -825,7 +824,7 @@ class AIPipelineProcessorTest {
             )
             processor.initialize(config)
         }
-        
+
         @Test
         @DisplayName("should handle unicode and special characters")
         fun shouldHandleUnicodeAndSpecialCharacters() = runTest {
@@ -842,7 +841,7 @@ class AIPipelineProcessorTest {
             assertEquals(unicodeInput, result)
             verify(mockInputProcessor).process(unicodeInput)
         }
-        
+
         @Test
         @DisplayName("should handle extremely large input strings")
         fun shouldHandleExtremelyLargeInputStrings() = runTest {
@@ -859,7 +858,7 @@ class AIPipelineProcessorTest {
             assertEquals("final", result)
             verify(mockMetricsCollector).recordLargeInputProcessing(largeInput.length)
         }
-        
+
         @Test
         @DisplayName("should handle input with only whitespace")
         fun shouldHandleInputWithOnlyWhitespace() = runTest {
@@ -876,7 +875,7 @@ class AIPipelineProcessorTest {
             assertEquals("", result)
             verify(mockInputProcessor).process(whitespaceInput)
         }
-        
+
         @Test
         @DisplayName("should handle input with control characters")
         fun shouldHandleInputWithControlCharacters() = runTest {
@@ -893,7 +892,7 @@ class AIPipelineProcessorTest {
             assertEquals("final", result)
             verify(mockInputProcessor).process(controlCharsInput)
         }
-        
+
         @Test
         @DisplayName("should handle malformed input gracefully")
         fun shouldHandleMalformedInputGracefully() = runTest {
@@ -912,7 +911,7 @@ class AIPipelineProcessorTest {
     @Nested
     @DisplayName("Advanced Error Recovery and Resilience Tests")
     inner class AdvancedErrorRecoveryTests {
-        
+
         @BeforeEach
         fun setUpProcessor() {
             val config = PipelineConfiguration(
@@ -922,7 +921,7 @@ class AIPipelineProcessorTest {
             )
             processor.initialize(config)
         }
-        
+
         @Test
         @DisplayName("should handle cascading failures across multiple stages")
         fun shouldHandleCascadingFailuresAcrossMultipleStages() = runTest {
@@ -950,7 +949,7 @@ class AIPipelineProcessorTest {
             }
             verify(mockErrorHandler, times(3)).handleProcessingError(any())
         }
-        
+
         @Test
         @DisplayName("should recover from intermittent network failures")
         fun shouldRecoverFromIntermittentNetworkFailures() = runTest {
@@ -978,7 +977,7 @@ class AIPipelineProcessorTest {
             verify(mockPipelineStage, times(3)).execute(any())
             verify(mockErrorHandler, times(2)).handleRetryableError(networkException)
         }
-        
+
         @Test
         @DisplayName("should implement circuit breaker pattern for repeated failures")
         fun shouldImplementCircuitBreakerPatternForRepeatedFailures() = runTest {

@@ -23,9 +23,9 @@ class ContextChainTest {
     fun setup() {
         MockitoAnnotations.openMocks(this)
         contextChain = ContextChain()
-        mockContext1 = mock<Context>()
-        mockContext2 = mock<Context>()
-        mockContext3 = mock<Context>()
+        mockContext1 = mock()
+        mockContext2 = mock()
+        mockContext3 = mock()
     }
 
     @Nested
@@ -477,7 +477,7 @@ class ContextChainTest {
         }
 
         @Test
-        @DisplayName("should handle context throwing unchecked exception")  
+        @DisplayName("should handle context throwing unchecked exception")
         fun testContextThrowingException() {
             whenever(mockContext1.execute()).thenThrow(RuntimeException("Unexpected error"))
 
