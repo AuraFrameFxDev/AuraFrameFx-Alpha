@@ -19,10 +19,10 @@ import dev.aurakai.auraframefx.data.logging.AuraFxLogger as AuraFxLoggerImpl
 object LoggingModule {
 
     /**
-     * Provides a singleton instance of `AuraFxLogger` for application-wide logging.
+     * Provides a singleton instance of `AuraFxLogger` for use throughout the application.
      *
-     * @param context The application context used by the logger implementation.
-     * @param kaiService The KaiAIService dependency required by the logger.
+     * @param context The application context required for logger initialization.
+     * @param kaiService The KaiAIService dependency used by the logger.
      * @return A singleton implementation of `AuraFxLogger`.
      */
     @Provides

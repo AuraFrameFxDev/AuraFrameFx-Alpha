@@ -173,6 +173,14 @@ class TaskScheduler @Inject constructor(
         return task.importance.value * config.importanceWeight
     }
 
+    /**
+     * Updates the task statistics to reflect the addition or status change of the given task.
+     *
+     * Increments the total task count, updates counts for active, completed, and pending tasks,
+     * refreshes the last updated timestamp, and adjusts the count for the task's current status.
+     *
+     * @param task The task whose status or addition triggers the statistics update.
+     */
     private fun updateStats(task: Task) {
         _taskStats.update { current ->
             current.copy(

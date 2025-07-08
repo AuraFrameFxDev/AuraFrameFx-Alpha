@@ -40,12 +40,12 @@ class AuraFxContentApiClient @Inject constructor(
     }
 
     /**
-     * Requests an AI-generated description for the specified image URL, optionally using additional context to guide the output.
-     *
-     * @param imageUrl The URL of the image to be described.
-     * @param context Optional context to influence the generated description.
-     * @return The API response containing the generated image description.
-     */
+         * Generates an AI-powered description for an image at the given URL, optionally using additional context to refine the output.
+         *
+         * @param imageUrl The URL of the image to describe.
+         * @param context Optional text to provide context or guidance for the generated description.
+         * @return The API response containing the generated image description.
+         */
     suspend fun generateImageDescription(
         imageUrl: String,
         context: String? = null,

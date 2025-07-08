@@ -28,22 +28,55 @@ class AuraAIServiceImpl @Inject constructor(
         return null
     }
 
+    /**
+     * Placeholder for image generation based on the provided prompt.
+     *
+     * @param _prompt The prompt describing the desired image.
+     * @return Always returns null, as image generation is not implemented.
+     */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         return null
     }
 
+    /**
+     * Returns a placeholder string for generated text based on the provided prompt and options.
+     *
+     * @param prompt The input text prompt for text generation.
+     * @param options Optional parameters for text generation.
+     * @return A fixed placeholder string indicating text generation is not implemented.
+     */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         return "Generated text placeholder"
     }
 
+    /**
+     * Returns a placeholder AI response string for the given prompt and options.
+     *
+     * @param prompt The input text for which an AI response is requested.
+     * @param options Optional parameters that may influence the AI response.
+     * @return A fixed placeholder string representing the AI response.
+     */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         return "AI response placeholder"
     }
 
+    /**
+     * Retrieves a memory value for the given key.
+     *
+     * Always returns null as memory retrieval is not implemented.
+     *
+     * @param _memoryKey The key identifying the memory entry.
+     * @return Always null.
+     */
     override fun getMemory(_memoryKey: String): String? {
         return null
     }
 
+    /**
+     * Placeholder for saving a value to memory with the specified key.
+     *
+     * Currently not implemented.
+     */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement memory saving
     }

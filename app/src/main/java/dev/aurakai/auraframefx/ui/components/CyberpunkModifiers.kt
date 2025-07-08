@@ -19,7 +19,12 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
  * Adds a shadow with 8.dp elevation and a rounded 4.dp corner, along with a semi-transparent neon blue border.
  * Use to give UI elements a distinctive cyber edge highlight.
  */
-fun Modifier.cyberEdgeGlow() = this
+/**
+     * Applies a neon blue edge glow effect with rounded corners to the component.
+     *
+     * Adds an 8.dp elevation shadow and a semi-transparent neon blue border with a 4.dp corner radius for a cyberpunk visual style.
+     */
+    fun Modifier.cyberEdgeGlow() = this
     .shadow(
         elevation = 8.dp,
         shape = RoundedCornerShape(4.dp),
@@ -33,10 +38,10 @@ fun Modifier.cyberEdgeGlow() = this
     )
 
 /**
- * Applies a digital glitch visual effect with a neon purple shadow and border to the modifier.
- *
- * The effect includes a 4.dp elevation shadow and a 2.dp border, both using a neon purple color and rounded corners.
- */
+     * Applies a digital glitch effect with a neon purple shadow and border to the modifier.
+     *
+     * The effect features a 4.dp elevation shadow and a 2.dp border in neon purple, both with 2.dp rounded corners, creating a cyberpunk-inspired glitch appearance.
+     */
 fun Modifier.digitalGlitchEffect() = this
     .shadow(
         elevation = 4.dp,
@@ -51,11 +56,10 @@ fun Modifier.digitalGlitchEffect() = this
     )
 
 /**
- * Applies a cyberpunk-inspired pixel effect with a teal neon shadow and border to the modifier.
- *
- * Adds a 6.dp shadow and a 1.dp border using a NeonTeal color with 70% opacity and slightly rounded corners.
- * Intended for creating a digital pixelated visual style in Compose UI components.
- */
+     * Applies a pixelated cyberpunk effect with a neon teal shadow and border to the modifier.
+     *
+     * Adds a 6.dp elevation shadow and a 1.dp border in neon teal at 70% opacity, both with slightly rounded corners, to create a digital pixel visual style for Compose UI components.
+     */
 fun Modifier.digitalPixelEffect() = this
     .shadow(
         elevation = 6.dp,

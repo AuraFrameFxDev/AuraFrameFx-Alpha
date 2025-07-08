@@ -26,6 +26,13 @@ import dev.aurakai.auraframefx.ui.screens.oracledrive.OracleDriveControlScreen
  *
  * @param navController The navigation controller used to manage app navigation.
  */
+/**
+ * Defines the main navigation graph for the AuraFrameFX app using Jetpack Compose Navigation.
+ *
+ * Maps navigation routes to their corresponding composable screens, setting up the structure for in-app navigation.
+ *
+ * @param navController The navigation controller used to manage navigation between destinations.
+ */
 @Composable
 fun AppNavGraph(navController: NavHostController) {
     NavHost(

@@ -258,13 +258,13 @@ object KineticIdentity {
     )
 
     /**
-     * Creates an animation spec that introduces a dramatic pause before executing an action.
+     * Returns an animation spec that adds a dramatic pause before an action animation.
      *
-     * The resulting animation combines a pause of the specified duration with the duration of the provided action animation spec, using a cubic bezier easing for dramatic effect.
+     * The resulting animation delays the start of the action by the specified pause duration, then plays the action animation using a dramatic cubic bezier easing. If the action spec is a tween, its duration is used; otherwise, a standard duration is applied.
      *
-     * @param pauseDurationMillis The duration of the pause before the action, in milliseconds. Defaults to 500 ms.
-     * @param actionSpec The animation spec representing the action to follow the pause. Defaults to `DaringEnter`.
-     * @return An animation spec with the combined pause and action duration, using dramatic easing.
+     * @param pauseDurationMillis Duration of the pause before the action, in milliseconds.
+     * @param actionSpec The animation spec for the action following the pause.
+     * @return An animation spec combining the pause and action durations with dramatic easing.
      */
     fun createDramaticPause(
         pauseDurationMillis: Int = 500,
@@ -281,13 +281,13 @@ object KineticIdentity {
  */
 
 /**
- * Returns a tween animation that starts after the specified delay, with total duration equal to the delay plus the original animation's duration.
- *
- * For spring-based specs, the duration is estimated as 1000 ms; for other types, a standard duration is used.
- *
- * @param delayMillis The delay in milliseconds before the animation begins.
- * @return A tween animation spec with the combined delay and duration.
- */
+     * Creates a tween animation spec that introduces a delay before starting the original animation.
+     *
+     * The resulting animation has a total duration equal to the specified delay plus the duration of the original animation spec. For spring-based specs, the duration is estimated as 1000 ms; for other types, a standard duration is used.
+     *
+     * @param delayMillis The delay in milliseconds before the animation begins.
+     * @return A tween animation spec with the combined delay and duration.
+     */
 fun <T> AnimationSpec<T>.afterDelay(delayMillis: Int): AnimationSpec<T> =
     tween(
         durationMillis = delayMillis + when (this) {
@@ -298,21 +298,19 @@ fun <T> AnimationSpec<T>.afterDelay(delayMillis: Int): AnimationSpec<T> =
     )
 
 /**
- * Converts this animation spec into an infinite repeatable animation.
- *
- * @param repeatMode The mode in which the animation repeats (restart or reverse). Defaults to [RepeatMode.Restart].
- * @return An [InfiniteRepeatableSpec] that repeats this animation indefinitely.
- */
+     * Returns an infinite repeatable animation spec based on this animation spec.
+     *
+     * @param repeatMode The repeat mode, either [RepeatMode.Restart] or [RepeatMode.Reverse]. Defaults to [RepeatMode.Restart].
+     * @return An [InfiniteRepeatableSpec] that repeats this animation indefinitely.
+     */
 fun <T> AnimationSpec<T>.infinite(repeatMode: RepeatMode = RepeatMode.Restart): InfiniteRepeatableSpec<T> =
     infiniteRepeatable(this as DurationBasedAnimationSpec<T>, repeatMode)
 
 /**
- * Returns a copy of this tween animation spec with the specified easing applied.
- *
- * If this animation spec is not a tween, returns the original spec unchanged.
+ * Returns a tween animation spec with the given easing if this spec is a tween; otherwise, returns the original spec unchanged.
  *
  * @param easing The easing function to apply if this is a tween animation.
- * @return A tween animation spec with the new easing, or the original spec if not a tween.
+ * @return A tween animation spec with the specified easing, or the original spec if not a tween.
  */
 fun AnimationSpec<Float>.withEasing(easing: Easing): AnimationSpec<Float> = when (this) {
     is TweenSpec -> tween(this.durationMillis, easing = easing)

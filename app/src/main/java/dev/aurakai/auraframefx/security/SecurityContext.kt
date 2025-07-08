@@ -397,11 +397,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Asynchronously logs a security event for auditing and monitoring purposes.
+     * Logs a security event asynchronously for auditing and monitoring.
      *
-     * The event is serialized and written to the debug log. In production, events should be securely persisted.
-     *
-     * @param event The security event to log.
+     * The event is serialized and written to the debug log. In production environments, events should be securely persisted.
      */
     fun logSecurityEvent(event: SecurityEvent) {
         scope.launch {
@@ -414,11 +412,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Records a security validation event for the given request type and data.
+     * Logs a security validation event for the specified request type and data.
      *
-     * This method logs a validation event for auditing purposes. No actual validation of the request is performed.
+     * This function records a validation event for auditing purposes but does not perform any actual validation of the request.
      *
-     * @param requestType The type of request being validated.
+     * @param requestType The type of request to be logged.
      * @param requestData The data associated with the request.
      */
     fun validateRequest(requestType: String, requestData: String) {
