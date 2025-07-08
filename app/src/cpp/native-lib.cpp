@@ -9,9 +9,9 @@
 extern "C" /**
  * @brief Returns a greeting string from native C++ code to Java via JNI.
  *
- * Creates and returns a Java UTF string containing "Hello from Genesis C++ Core" to the calling Java method.
+ * Creates a Java UTF string containing "Hello from Genesis C++ Core" and returns it to the calling Java method.
  *
- * @return jstring Java string with the greeting message.
+ * @return jstring A Java string with the greeting message.
  */
 JNIEXPORT jstring JNICALL
 Java_com_auraframes_fx_MainActivity_stringFromJNI(JNIEnv *env, jobject /* this */) {

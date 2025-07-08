@@ -18,10 +18,10 @@ object TimeUtils {
     fun now(): Instant = Instant.now(systemClock)
 
     /**
- * Returns the current time in milliseconds since the Unix epoch.
- *
- * @return The current timestamp in milliseconds.
- */
+     * Returns the current time in milliseconds since the Unix epoch.
+     *
+     * @return The current timestamp in milliseconds.
+     */
     fun currentTimestamp(): Long = System.currentTimeMillis()
 
     /**

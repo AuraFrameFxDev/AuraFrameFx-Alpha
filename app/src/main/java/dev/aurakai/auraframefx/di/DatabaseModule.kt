@@ -20,9 +20,9 @@ object DatabaseModule {
      * Provides a singleton instance of the application's Room database.
      *
      * Creates and configures the `AppDatabase` using the application context and a fixed database name.
-     * Uses destructive migration as a fallback; implement proper migration strategies for production environments.
+     * Currently uses destructive migration as a fallback; proper migration strategies should be implemented for production use.
      *
-     * @return The singleton `AppDatabase` instance.
+     * @return The singleton instance of `AppDatabase`.
      */
     @Provides
     @Singleton
@@ -39,9 +39,9 @@ object DatabaseModule {
     }
 
     /**
-     * Provides an instance of AgentMemoryDao from the specified AppDatabase.
+     * Provides an instance of AgentMemoryDao from the given AppDatabase.
      *
-     * @return The AgentMemoryDao used to access agent memory data.
+     * @return The AgentMemoryDao for accessing agent memory data.
      */
     @Provides
     fun provideAgentMemoryDao(database: AppDatabase): AgentMemoryDao {

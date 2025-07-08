@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AiRequest(
     val query: String,
-    val context: Map<String, String>? = null, // Changed from contextId to context: Map
+    val type: String? = null, // Added type back, made nullable
+    val context: Map<String, String>? = null,
     val data: Map<String, String>? = null,
     val agentType: AgentType? = null
 )
