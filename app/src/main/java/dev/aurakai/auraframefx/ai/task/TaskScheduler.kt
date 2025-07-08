@@ -174,7 +174,7 @@ class TaskScheduler @Inject constructor(
     }
 
     /**
-     * Updates the task statistics to reflect the current state after a task change.
+     * Updates the task statistics to reflect the addition or status change of the given task.
      *
      * Increments the total task count, updates counts for active, completed, and pending tasks,
      * refreshes the per-status task counts, and sets the last updated timestamp.

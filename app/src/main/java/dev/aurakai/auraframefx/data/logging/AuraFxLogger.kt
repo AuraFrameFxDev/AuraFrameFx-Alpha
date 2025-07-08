@@ -245,9 +245,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Cancels all ongoing logging and maintenance operations, stopping the logger.
+     * Cancels all ongoing logging and maintenance coroutines, stopping the logger.
      *
-     * After this method is called, no further log entries will be processed or written.
+     * After calling this method, no further log entries will be processed or written.
      */
     fun shutdown() {
         Log.d(TAG, "AuraFxLogger shutting down loggerScope.")
@@ -255,9 +255,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Retrieves the log entries for a specific date.
+     * Retrieves the log entries for a specific date as a list of lines.
      *
-     * @param date The date in `yyyyMMdd` format for which to retrieve logs.
+     * @param date The date for which to retrieve logs, formatted as yyyyMMdd.
      * @return A list of log lines for the specified date, or an empty list if the log file does not exist or an error occurs.
      */
     suspend fun getLogsForDate(date: String): List<String> {
@@ -301,9 +301,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Writes content to a file in the app's internal storage, creating parent directories if needed.
+     * Writes content to a file in the app's internal storage, creating parent directories if necessary.
      *
-     * @param filePath Relative path to the file within internal storage.
+     * @param filePath Relative path to the target file within the internal files directory.
      * @param content The text content to write.
      * @param append If true, appends to the file; otherwise, overwrites it.
      * @return True if the write operation succeeds, false otherwise.

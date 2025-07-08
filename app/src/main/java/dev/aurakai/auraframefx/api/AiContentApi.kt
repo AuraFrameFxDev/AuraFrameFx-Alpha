@@ -7,7 +7,7 @@ interface AiContentApi {
     /**
  * Generates AI-powered text content according to the specified request parameters.
  *
- * @param request The configuration and input for text generation.
+ * @param request The input containing instructions and options for text generation.
  * @return The generated text content and related metadata.
  */
     suspend fun generateText(request: GenerateTextRequest): GenerateTextResponse

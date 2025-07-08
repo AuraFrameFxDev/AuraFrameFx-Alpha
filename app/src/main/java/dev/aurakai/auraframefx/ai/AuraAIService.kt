@@ -19,7 +19,7 @@ interface AuraAIService {
      * Generates an image based on the provided prompt.
      *
      * @param _prompt The textual description used to generate the image.
-     * @return A byte array representing the generated image, or null if not implemented.
+     * @return A byte array containing the generated image data, or null if not implemented.
      */
     suspend fun generateImage(_prompt: String): ByteArray? { // Returns URL or path to image -> ByteArray?
         // TODO: Implement image generation
@@ -27,11 +27,13 @@ interface AuraAIService {
     }
 
     /**
-     * Generates text based on the provided prompt and optional configuration options.
+     * Generates AI-generated text based on the provided prompt and optional configuration.
+     *
+     * Uses the given prompt and configurable options such as `temperature` and `max_tokens` to produce a structured response string. Returns an error message if text generation fails.
      *
      * @param prompt The input text prompt for AI text generation.
-     * @param options Optional configuration map supporting keys such as "temperature" (Double) and "max_tokens" (Int).
-     * @return A structured string containing the generated text, configuration details, and status, or an error message if generation fails.
+     * @param options Optional configuration map supporting `temperature` (Double) and `max_tokens` (Int).
+     * @return A string containing the generated text and configuration details, or an error message if generation fails.
      */
     suspend fun generateText(prompt: String, options: Map<String, Any>? = null): String {
         try {
@@ -53,11 +55,11 @@ interface AuraAIService {
     /**
      * Generates an AI response string based on the provided prompt and optional context and system instructions.
      *
-     * If options are provided, the "context" and "system_prompt" keys are used to influence the response. Returns a formatted string containing the prompt, context, system prompt, and a generic AI-generated message. If an error occurs, returns an error message.
+     * If options are provided, extracts `context` and `system_prompt` to influence the response. Returns a structured string incorporating the prompt, context, and system prompt. If an error occurs, returns an error message string.
      *
      * @param prompt The input prompt for the AI.
-     * @param options Optional map containing "context" and "system_prompt" to customize the response.
-     * @return A formatted AI response string, or an error message if an exception occurs.
+     * @param options Optional map containing `context` and `system_prompt` keys to customize the response.
+     * @return A string containing the AI-generated response, or an error message if an exception occurs.
      */
     fun getAIResponse(
         prompt: String,
@@ -91,7 +93,7 @@ interface AuraAIService {
 fun getMemory(memoryKey: String): String?
 
     /**
- * Saves a value in memory under the specified key.
+ * Saves a value associated with the specified memory key.
  *
  * Implementations should persist the value so it can be retrieved later using the same key.
  */
@@ -109,8 +111,8 @@ fun saveMemory(key: String, value: Any)
     /**
      * Publishes a message to the specified Pub/Sub topic.
      *
-     * @param _topic The name of the topic to publish to.
-     * @param _message The message to be published.
+     * @param _topic The name of the Pub/Sub topic.
+     * @param _message The message to publish.
      */
     fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing

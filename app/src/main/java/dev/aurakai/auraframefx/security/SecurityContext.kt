@@ -397,9 +397,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Asynchronously records a security event for auditing and monitoring.
+     * Records a security event asynchronously for auditing and monitoring.
      *
-     * The event is serialized and written to the debug log. In production environments, events should be securely persisted.
+     * The event is serialized and written to the debug log. Intended for use as an audit trail; in production, events should be securely persisted.
      *
      * @param event The security event to record.
      */
@@ -416,7 +416,7 @@ class SecurityContext @Inject constructor(
     /**
      * Records a security validation event for the specified request type and data.
      *
-     * This function logs a validation event for auditing purposes but does not perform any actual validation of the request.
+     * This method logs a validation event for auditing purposes but does not perform any actual validation of the request.
      *
      * @param requestType The type of request being recorded.
      * @param requestData The data associated with the request.

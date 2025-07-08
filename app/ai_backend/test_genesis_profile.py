@@ -23,9 +23,9 @@ except ImportError:
     class GenesisProfile:
         def __init__(self, profile_id: str, data: Dict[str, Any]):
             """
-            Initialize a GenesisProfile with a unique identifier and associated data.
+            Initialize a GenesisProfile with a unique profile ID and associated data.
             
-            Creates a new profile instance, assigning the provided profile ID and data, and sets creation and update timestamps to the current UTC time.
+            Creates a new profile instance, recording the creation and update timestamps in UTC.
             """
             self.profile_id = profile_id
             self.data = data
@@ -41,11 +41,11 @@ except ImportError:
         
         def create_profile(self, profile_id: str, data: Dict[str, Any]) -> GenesisProfile:
             """
-            Creates and stores a new profile with the specified ID and data.
+            Create and store a new profile with the specified ID and data.
             
             Parameters:
                 profile_id (str): Unique identifier for the profile.
-                data (dict): Profile data containing required fields.
+                data (dict): Dictionary containing profile attributes.
             
             Returns:
                 GenesisProfile: The newly created profile instance.
@@ -83,10 +83,13 @@ except ImportError:
         
         def delete_profile(self, profile_id: str) -> bool:
             """
-            Delete a profile with the specified ID.
+            Delete a profile with the specified ID from the manager.
+            
+            Parameters:
+                profile_id (str): The unique identifier of the profile to delete.
             
             Returns:
-                bool: True if the profile existed and was deleted; False if no profile with the given ID was found.
+                bool: True if the profile was found and deleted; False if no profile with the given ID exists.
             """
             if profile_id in self.profiles:
                 del self.profiles[profile_id]
@@ -99,8 +102,11 @@ except ImportError:
             """
             Check whether the profile data dictionary includes the required fields: 'name', 'version', and 'settings'.
             
+            Parameters:
+                data (dict): Profile data to validate.
+            
             Returns:
-                True if all required fields are present in the data; False otherwise.
+                bool: True if all required fields are present; False otherwise.
             """
             required_fields = ['name', 'version', 'settings']
             return all(field in data for field in required_fields)
@@ -108,7 +114,7 @@ except ImportError:
     class ProfileBuilder:
         def __init__(self):
             """
-            Initialize a ProfileBuilder instance with an empty data dictionary for accumulating profile fields.
+            Initialize a ProfileBuilder instance with an empty internal data dictionary for accumulating profile fields.
             """
             self.data = {}
         
@@ -117,10 +123,10 @@ except ImportError:
             Set the 'name' field in the profile data and return the builder instance for chaining.
             
             Parameters:
-                name (str): The profile name to assign.
+                name (str): The profile's name to set.
             
             Returns:
-                ProfileBuilder: This builder instance for method chaining.
+                ProfileBuilder: This builder instance, allowing for method chaining.
             """
             self.data['name'] = name
             return self
@@ -130,7 +136,7 @@ except ImportError:
             Set the 'version' field in the profile data and return the builder instance for chaining.
             
             Parameters:
-                version (str): The version identifier to assign to the profile.
+                version (str): The version identifier to assign to the profile data.
             
             Returns:
                 ProfileBuilder: This builder instance with the updated 'version' field.
@@ -140,13 +146,13 @@ except ImportError:
         
         def with_settings(self, settings: Dict[str, Any]):
             """
-            Assigns the provided settings dictionary to the profile and returns the builder for method chaining.
+            Assigns the provided settings dictionary to the 'settings' field of the profile data and returns the builder for method chaining.
             
             Parameters:
-            	settings (dict): Dictionary containing profile settings.
+                settings (dict): Dictionary containing profile settings.
             
             Returns:
-            	ProfileBuilder: The builder instance with updated settings.
+                ProfileBuilder: The builder instance with updated settings.
             """
             self.data['settings'] = settings
             return self
@@ -194,9 +200,9 @@ class TestGenesisProfile(unittest.TestCase):
     
     def test_genesis_profile_initialization(self):
         """
-        Tests that a GenesisProfile is correctly initialized with a valid profile ID and data.
+        Test that GenesisProfile initializes correctly with a valid profile ID and data.
         
-        Verifies that the profile's ID and data match the provided values, and that the created_at and updated_at attributes are datetime instances.
+        Verifies that the profile's ID and data match the input values, and that the creation and update timestamps are instances of datetime.
         """
         profile = GenesisProfile(self.profile_id, self.sample_data)
         
@@ -207,7 +213,7 @@ class TestGenesisProfile(unittest.TestCase):
     
     def test_genesis_profile_initialization_empty_data(self):
         """
-        Test initialization of a GenesisProfile with an empty data dictionary, verifying correct assignment of profile ID and data attributes.
+        Test that initializing a GenesisProfile with an empty data dictionary sets the profile ID and data attributes as expected.
         """
         profile = GenesisProfile(self.profile_id, {})
         
@@ -233,9 +239,9 @@ class TestGenesisProfile(unittest.TestCase):
     
     def test_genesis_profile_data_immutability(self):
         """
-        Test that a copied snapshot of a GenesisProfile's data remains unchanged after the profile's data is modified.
+        Verify that a copied snapshot of a GenesisProfile's data remains unchanged after the profile's data is modified.
         
-        Ensures that changes to the profile's data do not retroactively alter previously copied data, verifying data immutability.
+        Ensures that changes to the profile's internal data do not retroactively alter previously copied data dictionaries.
         """
         profile = GenesisProfile(self.profile_id, self.sample_data)
         original_data = profile.data.copy()
@@ -259,7 +265,7 @@ class TestGenesisProfile(unittest.TestCase):
     
     def test_genesis_profile_equality(self):
         """
-        Test that GenesisProfile instances are considered equal if they share the same profile ID and equivalent data, and unequal if their profile IDs differ.
+        Test that GenesisProfile instances are equal if they share the same profile ID and data, and unequal if their IDs differ.
         """
         profile1 = GenesisProfile(self.profile_id, self.sample_data)
         profile2 = GenesisProfile(self.profile_id, self.sample_data.copy())
@@ -277,9 +283,7 @@ class TestProfileManager(unittest.TestCase):
     
     def setUp(self):
         """
-        Set up a new ProfileManager instance and sample profile data for each test.
-        
-        Resets the manager, profile data, and profile ID to ensure test isolation and consistent conditions.
+        Initializes a new ProfileManager and sample profile data before each test to ensure test isolation.
         """
         self.manager = ProfileManager()
         self.sample_data = {
@@ -307,9 +311,9 @@ class TestProfileManager(unittest.TestCase):
     
     def test_create_profile_duplicate_id(self):
         """
-        Test creation of a profile with a duplicate ID to verify whether the system raises an exception or overwrites the existing profile.
+        Test creating a profile with a duplicate ID to verify whether the system raises an exception or overwrites the existing profile.
         
-        Asserts that either a specific exception is raised or the returned profile matches the duplicate ID, ensuring correct handling of duplicate profile creation.
+        Asserts that the implementation either raises an appropriate exception or replaces the existing profile, and checks that the resulting behavior matches expectations.
         """
         self.manager.create_profile(self.profile_id, self.sample_data)
         
@@ -371,7 +375,7 @@ class TestProfileManager(unittest.TestCase):
     
     def test_update_profile_nonexistent(self):
         """
-        Test that attempting to update a profile with an ID that does not exist raises a ProfileNotFoundError.
+        Verify that attempting to update a profile with an ID that does not exist raises a ProfileNotFoundError.
         """
         with self.assertRaises(ProfileNotFoundError):
             self.manager.update_profile('nonexistent_id', {'name': 'updated'})
@@ -463,9 +467,7 @@ class TestProfileValidator(unittest.TestCase):
     
     def test_validate_profile_data_empty_values(self):
         """
-        Test that validating profile data with empty required fields returns a boolean result.
-        
-        This test checks that the `validate_profile_data` method consistently returns a boolean value when required fields are present but empty, regardless of whether the data is considered valid.
+        Test that validating profile data with empty required fields returns a boolean result, regardless of field content.
         """
         empty_data_cases = [
             {'name': '', 'version': '1.0.0', 'settings': {}},
@@ -489,7 +491,7 @@ class TestProfileValidator(unittest.TestCase):
     
     def test_validate_profile_data_invalid_types(self):
         """
-        Test that `ProfileValidator.validate_profile_data` raises a `TypeError` or `AttributeError` when provided with non-dictionary input types.
+        Test that `ProfileValidator.validate_profile_data` raises a `TypeError` or `AttributeError` when given input types other than a dictionary.
         """
         invalid_type_cases = [
             "string_instead_of_dict",
@@ -505,7 +507,7 @@ class TestProfileValidator(unittest.TestCase):
     
     def test_validate_profile_data_extra_fields(self):
         """
-        Test that profile data validation succeeds when required fields are present alongside additional, non-required fields.
+        Test that profile data validation succeeds when required fields are present along with additional, non-required fields.
         """
         data_with_extra = self.valid_data.copy()
         data_with_extra.update({
@@ -529,7 +531,7 @@ class TestProfileBuilder(unittest.TestCase):
     
     def test_builder_chain_methods(self):
         """
-        Verify that ProfileBuilder allows chaining of setter methods to build a profile data dictionary with the specified fields.
+        Verify that ProfileBuilder allows chaining of setter methods to build a complete profile data dictionary with the specified fields.
         """
         result = (self.builder
                  .with_name('test_profile')
@@ -547,7 +549,7 @@ class TestProfileBuilder(unittest.TestCase):
     
     def test_builder_individual_methods(self):
         """
-        Test that each setter method in ProfileBuilder assigns the correct value and that the built profile data contains the expected 'name', 'version', and 'settings' fields.
+        Test that each setter method in ProfileBuilder assigns the correct field and that the built profile data contains the expected values for 'name', 'version', and 'settings'.
         """
         self.builder.with_name('individual_test')
         self.builder.with_version('2.0.0')
@@ -563,7 +565,7 @@ class TestProfileBuilder(unittest.TestCase):
         """
         Test that setting the same field multiple times in the builder overwrites previous values.
         
-        Verifies that the most recently assigned value for a field is retained in the built profile data.
+        Verifies that the builder retains only the most recently assigned value for a field when building the profile data.
         """
         self.builder.with_name('first_name')
         self.builder.with_name('second_name')
@@ -581,7 +583,7 @@ class TestProfileBuilder(unittest.TestCase):
     
     def test_builder_partial_build(self):
         """
-        Test that the profile builder produces a dictionary containing only explicitly set fields, omitting any unset fields.
+        Verify that the profile builder produces a dictionary containing only explicitly set fields, excluding any fields that were not set.
         """
         result = self.builder.with_name('partial').build()
         
@@ -591,7 +593,7 @@ class TestProfileBuilder(unittest.TestCase):
     
     def test_builder_complex_settings(self):
         """
-        Test that ProfileBuilder preserves complex nested structures in the 'settings' field when building profile data.
+        Verify that ProfileBuilder preserves complex nested structures in the 'settings' field when building profile data.
         """
         complex_settings = {
             'ai_model': 'gpt-4',
@@ -610,7 +612,7 @@ class TestProfileBuilder(unittest.TestCase):
     
     def test_builder_immutability(self):
         """
-        Verify that each call to ProfileBuilder.build() produces a distinct copy of the profile data, so modifications to one built result do not impact others.
+        Verify that each call to ProfileBuilder.build() produces a distinct copy of the profile data, so modifications to one built result do not affect others.
         """
         self.builder.with_name('test')
         result1 = self.builder.build()
@@ -625,7 +627,7 @@ class TestProfileBuilder(unittest.TestCase):
     
     def test_builder_none_values(self):
         """
-        Verify that ProfileBuilder correctly retains None values for the name, version, and settings fields when building profile data.
+        Verify that ProfileBuilder correctly retains None values for the 'name', 'version', and 'settings' fields when building profile data.
         """
         result = (self.builder
                  .with_name(None)
@@ -660,7 +662,7 @@ class TestProfileExceptions(unittest.TestCase):
     
     def test_profile_not_found_error_inheritance(self):
         """
-        Verify that ProfileNotFoundError inherits from ProfileError and Exception, and that its string representation matches the provided message.
+        Tests that ProfileNotFoundError is a subclass of ProfileError and Exception, and that its string representation matches the provided message.
         """
         error = ProfileNotFoundError("Profile not found")
         self.assertIsInstance(error, ProfileError)
@@ -669,7 +671,7 @@ class TestProfileExceptions(unittest.TestCase):
     
     def test_exception_with_no_message(self):
         """
-        Test that custom exceptions can be instantiated without a message and verify their inheritance from the appropriate base classes.
+        Verify that custom exceptions can be instantiated without a message and that they inherit from the correct base classes.
         """
         error = ProfileError()
         self.assertIsInstance(error, Exception)
@@ -725,7 +727,7 @@ class TestIntegrationScenarios(unittest.TestCase):
     
     def test_builder_with_manager_integration(self):
         """
-        Tests that profiles created using ProfileBuilder and stored with ProfileManager retain all specified fields and values.
+        Verify that profiles created using ProfileBuilder and stored via ProfileManager retain all specified fields and values.
         """
         profile_data = (self.builder
                        .with_name('builder_manager_test')
@@ -741,9 +743,9 @@ class TestIntegrationScenarios(unittest.TestCase):
     
     def test_validator_with_manager_integration(self):
         """
-        Test that ProfileValidator and ProfileManager work together to allow creation of profiles only with valid data.
+        Test that ProfileValidator and ProfileManager work together to allow creation of profiles only with validated data.
         
-        Ensures that profile data validated by ProfileValidator is accepted by ProfileManager for profile creation, and that the resulting profile is successfully created.
+        Ensures that profile data is validated before creation and that ProfileManager rejects unvalidated data.
         """
         valid_data = (self.builder
                      .with_name('validator_test')
@@ -761,7 +763,9 @@ class TestIntegrationScenarios(unittest.TestCase):
     
     def test_error_handling_integration(self):
         """
-        Test integration of profile validation and error handling by ensuring invalid profile data is rejected and updating a non-existent profile raises the appropriate exception.
+        Test that invalid profile data is correctly rejected and that updating a non-existent profile raises a ProfileNotFoundError.
+        
+        This integration test ensures that the profile validation mechanism identifies incomplete data and that the profile manager enforces error handling for missing profiles.
         """
         # Test validation error
         invalid_data = {'name': 'test'}  # Missing required fields
@@ -774,7 +778,7 @@ class TestIntegrationScenarios(unittest.TestCase):
     
     def test_concurrent_operations_simulation(self):
         """
-        Simulates multiple sequential updates to a profile and verifies that all updated fields and the updated timestamp are correctly maintained after each update.
+        Simulates multiple sequential updates to a profile and verifies that all updated fields and the updated timestamp are correctly maintained.
         """
         profile_id = 'concurrent_test'
         
@@ -804,7 +808,7 @@ class TestEdgeCasesAndBoundaryConditions(unittest.TestCase):
     
     def test_very_large_profile_data(self):
         """
-        Test creation and storage of a profile with very large data fields, verifying that long strings and large nested dictionaries are processed without errors.
+        Test that the system can create and store a profile with very large data fields, including long strings and large nested dictionaries, without errors.
         """
         large_data = {
             'name': 'large_profile',
@@ -821,7 +825,7 @@ class TestEdgeCasesAndBoundaryConditions(unittest.TestCase):
     
     def test_unicode_and_special_characters(self):
         """
-        Verify that profiles containing Unicode and special characters in their data fields are created and retrieved accurately, ensuring no data loss or corruption occurs.
+        Verify that profiles containing Unicode and special characters in their data fields can be created and retrieved without data loss or corruption.
         """
         unicode_data = {
             'name': 'プロファイル_測試_🚀',
@@ -838,9 +842,9 @@ class TestEdgeCasesAndBoundaryConditions(unittest.TestCase):
     
     def test_deeply_nested_data_structures(self):
         """
-        Verify that profiles with deeply nested dictionaries in the 'settings' field are created and retrieved with their structure fully preserved.
+        Verify that profiles with deeply nested dictionaries in the 'settings' field retain their full structure after creation and retrieval.
         
-        Ensures all levels of nesting remain intact and accessible after profile creation.
+        Ensures that all levels of nested data remain accessible and unchanged within the profile.
         """
         nested_data = {
             'name': 'nested_test',
@@ -866,7 +870,7 @@ class TestEdgeCasesAndBoundaryConditions(unittest.TestCase):
     
     def test_circular_reference_handling(self):
         """
-        Test creation of a profile with data containing a circular reference, verifying that the profile manager either accepts the data or raises a ValueError or TypeError.
+        Test that the profile manager correctly handles profile data containing a circular reference, either by accepting the data or raising a ValueError or TypeError.
         """
         # Create data with potential circular reference
         data = {
@@ -886,7 +890,7 @@ class TestEdgeCasesAndBoundaryConditions(unittest.TestCase):
     
     def test_extremely_long_profile_ids(self):
         """
-        Test creation of a profile with an extremely long profile ID, asserting successful creation or correct exception handling if length limits are enforced.
+        Test creation of a profile with an extremely long profile ID, ensuring either successful creation or correct exception handling if length limits are enforced.
         """
         long_id = 'x' * 1000
         data = {
@@ -932,7 +936,7 @@ class TestEdgeCasesAndBoundaryConditions(unittest.TestCase):
     
     def test_memory_efficiency_with_many_profiles(self):
         """
-        Test that the profile manager can create, store, and retrieve a large number of profiles efficiently while preserving data integrity and correct access for each profile.
+        Verify that the profile manager can create, store, and retrieve a large number of profiles efficiently while preserving data integrity and correct access for each profile.
         """
         num_profiles = 100
         
@@ -968,10 +972,10 @@ class TestEdgeCasesAndBoundaryConditions(unittest.TestCase):
 ])
 def test_profile_id_validation_parametrized(profile_id, expected_valid):
     """
-    Parametrized test that checks whether profile creation correctly accepts or rejects various profile IDs based on validity expectations.
+    Parametrized test that checks whether profile creation correctly accepts or rejects various profile IDs based on expected validity.
     
     Parameters:
-        profile_id: The profile ID to be tested.
+        profile_id: The profile ID to test.
         expected_valid: True if the profile ID should be accepted; False if it should be rejected.
     """
     manager = ProfileManager()
@@ -1005,11 +1009,11 @@ def test_profile_id_validation_parametrized(profile_id, expected_valid):
 ])
 def test_profile_validation_parametrized(data, should_validate):
     """
-    Parametrized test that checks whether profile data passes validation as expected for different input cases.
+    Parametrized test that checks whether profile data validation produces the expected result for a variety of input cases.
     
     Parameters:
-        data (dict): The profile data to be validated.
-        should_validate (bool): The expected result of the validation.
+        data (dict): The profile data to validate.
+        should_validate (bool): The expected outcome of the validation.
     """
     result = ProfileValidator.validate_profile_data(data)
     assert result == should_validate
@@ -1023,7 +1027,9 @@ class TestSerializationAndPersistence(unittest.TestCase):
     
     def setUp(self):
         """
-        Initializes a new ProfileManager and sample profile data before each test to ensure test isolation.
+        Set up a new ProfileManager instance and sample profile data before each test.
+        
+        Ensures test isolation by providing a fresh manager and consistent profile data for every test case.
         """
         self.manager = ProfileManager()
         self.sample_data = {
@@ -1041,7 +1047,7 @@ class TestSerializationAndPersistence(unittest.TestCase):
     
     def test_profile_json_serialization(self):
         """
-        Test that a profile's data can be serialized to JSON and deserialized back, preserving all fields and nested values.
+        Test that a profile's data can be serialized to JSON and deserialized back without loss of fields or nested values.
         """
         profile = self.manager.create_profile('json_test', self.sample_data)
         
@@ -1056,7 +1062,7 @@ class TestSerializationAndPersistence(unittest.TestCase):
     
     def test_profile_data_deep_copy(self):
         """
-        Test that deep copying a profile's data produces an independent copy, so changes to nested structures in the original do not affect the copy.
+        Verify that deep copying a profile's data produces an independent copy, so changes to nested structures in the original do not affect the copy.
         """
         import copy
         
@@ -1072,9 +1078,9 @@ class TestSerializationAndPersistence(unittest.TestCase):
     
     def test_profile_data_with_datetime_objects(self):
         """
-        Test that datetime fields in profile data remain as datetime objects after profile creation.
+        Verify that datetime fields in profile data remain as datetime objects after profile creation.
         
-        Ensures that when profile data contains datetime values, these fields are not converted to other types and are preserved as datetime instances in the stored profile.
+        Ensures that when profile data contains datetime values, these fields are preserved as datetime instances in the stored profile.
         """
         data_with_datetime = self.sample_data.copy()
         data_with_datetime['created_at'] = datetime.now(timezone.utc)
@@ -1126,9 +1132,9 @@ class TestPerformanceAndScalability(unittest.TestCase):
     
     def test_bulk_profile_creation_performance(self):
         """
-        Benchmark the creation of 1,000 profiles and assert that the operation completes within 10 seconds.
+        Benchmark the creation of 1,000 profiles and assert completion within 10 seconds.
         
-        Verifies that all profiles are successfully created and present in the manager, ensuring both correctness and acceptable performance for bulk profile creation.
+        Verifies that all profiles are correctly created and present in the manager, ensuring both functional correctness and acceptable bulk creation performance.
         """
         import time
         
@@ -1154,7 +1160,7 @@ class TestPerformanceAndScalability(unittest.TestCase):
     
     def test_profile_lookup_performance(self):
         """
-        Benchmark the retrieval speed of multiple profiles, asserting all lookups complete in under one second.
+        Benchmark the retrieval speed of multiple profiles to ensure all lookups complete in under one second.
         
         Creates 500 profiles, retrieves every 10th profile, verifies successful retrieval, and asserts the total lookup duration is less than one second.
         """
@@ -1186,7 +1192,7 @@ class TestPerformanceAndScalability(unittest.TestCase):
         """
         Test creation of a profile containing large data structures to verify correct handling and assess memory usage.
         
-        Creates a profile with a large list, dictionary, and string in its settings, then checks that the profile is created successfully and that the large data structures have the expected sizes.
+        Creates a profile with a large list, dictionary, and string in its settings, then asserts successful creation and checks that the large data structures have the expected sizes.
         """
         import sys
         
@@ -1250,7 +1256,7 @@ class TestAdvancedValidationScenarios(unittest.TestCase):
     
     def test_schema_validation_complex_nested_structures(self):
         """
-        Test that the profile validator accepts profile data containing deeply nested and complex structures within the settings field.
+        Verify that the profile validator accepts profile data containing deeply nested and complex structures within the 'settings' field.
         """
         complex_data = {
             'name': 'complex_test',
@@ -1318,7 +1324,7 @@ class TestAdvancedValidationScenarios(unittest.TestCase):
         """
         Test that the profile data validator correctly accepts or rejects various types for the 'settings' field.
         
-        Verifies that dictionaries and None are accepted as valid 'settings' values, while strings, integers, and lists are rejected. Asserts that the validator either returns True for valid types or raises an error for invalid types.
+        Verifies that dictionaries and None are accepted as valid 'settings' values, while strings, integers, and lists are rejected. Asserts that the validator returns the expected result or raises an error only for invalid types.
         """
         settings_cases = [
             ({'temperature': 0.7}, True),
@@ -1354,9 +1360,9 @@ class TestAdvancedValidationScenarios(unittest.TestCase):
     
     def test_profile_name_validation(self):
         """
-        Tests profile name validation for acceptance and rejection across diverse input cases.
+        Validates that profile names are accepted or rejected according to expected rules for various input cases.
         
-        Verifies that the validator correctly handles standard names, names with spaces, dashes, underscores, dots, Unicode characters, empty strings, whitespace-only names, very long names, and invalid types, ensuring comprehensive coverage of profile name validation logic.
+        Tests profile name validation with standard names, names containing spaces, dashes, underscores, dots, Unicode characters, empty strings, whitespace-only names, very long names, and invalid types to ensure comprehensive and robust validation.
         """
         name_cases = [
             ('valid_name', True),
@@ -1416,7 +1422,7 @@ class TestErrorHandlingAndExceptionScenarios(unittest.TestCase):
     
     def test_exception_context_preservation(self):
         """
-        Verify that wrapping an exception preserves the original exception's message in the new exception's message.
+        Verify that wrapping an exception in a new exception includes the original exception's message in the new exception's message.
         """
         def nested_function():
             """
@@ -1476,9 +1482,9 @@ class TestErrorHandlingAndExceptionScenarios(unittest.TestCase):
     
     def test_error_logging_and_debugging_info(self):
         """
-        Verify that custom exceptions return the correct message and are subclasses of Exception.
+        Verify that custom profile exceptions return the correct message and are subclasses of Exception.
         
-        Checks that the string representation of each custom exception matches the provided message and that each exception is an instance of Exception.
+        This test checks that the string representation of each custom exception matches the provided message and that each exception is an instance of Exception.
         """
         # Test with various error scenarios
         error_scenarios = [
@@ -1532,9 +1538,9 @@ class TestProfileBuilderAdvancedScenarios(unittest.TestCase):
     
     def test_builder_template_pattern(self):
         """
-        Verifies that a ProfileBuilder template can be duplicated and modified to create multiple distinct profile data variations.
+        Tests the template pattern for profile builders by duplicating a base builder and modifying fields to generate distinct profile data variations.
         
-        This test ensures that copying a builder's data and altering specific fields produces independent profiles with the intended differences, supporting template-based profile creation patterns.
+        This test verifies that copying a builder's data and altering specific fields produces independent profile variations while preserving unmodified fields from the template.
         """
         # Create a base template
         base_template = (ProfileBuilder()
@@ -1562,9 +1568,9 @@ class TestProfileBuilderAdvancedScenarios(unittest.TestCase):
     
     def test_builder_validation_integration(self):
         """
-        Test the integration of ProfileBuilder and ProfileValidator for both valid and invalid profile data.
+        Test the integration of ProfileBuilder and ProfileValidator by validating both complete and incomplete profiles.
         
-        Builds a complete profile and verifies it passes validation, then builds an incomplete profile and verifies it fails validation.
+        Builds a profile with all required fields and asserts it passes validation, then builds a profile missing required fields and asserts it fails validation.
         """
         # Build a profile and validate it
         profile_data = (self.builder
@@ -1587,9 +1593,9 @@ class TestProfileBuilderAdvancedScenarios(unittest.TestCase):
     
     def test_builder_immutability_and_reuse(self):
         """
-        Test that ProfileBuilder instances can be reused to create multiple independent profiles.
+        Verify that ProfileBuilder instances can be reused to create multiple independent profiles without shared mutable state.
         
-        Ensures that modifying a builder for one profile does not affect others, and that base properties remain consistent across derived profiles.
+        Ensures that modifying a builder for one profile does not affect others and that base properties remain consistent across derived profiles.
         """
         # Create base builder
         base_builder = (ProfileBuilder()
@@ -1658,11 +1664,11 @@ def test_profile_creation_performance_parametrized(data_size, expected_performan
 ])
 def test_profile_validation_error_types_parametrized(invalid_data, expected_error):
     """
-    Parametrized test verifying that `ProfileValidator.validate_profile_data` either raises the expected exception for invalid profile data or returns a boolean for valid but incomplete data.
+    Parametrized test that verifies `ProfileValidator.validate_profile_data` either raises the expected exception for invalid input types or returns a boolean for valid but incomplete profile data.
     
     Parameters:
-        invalid_data: Profile data to be validated.
-        expected_error: Exception type expected to be raised for invalid input, or `False` if validation should return a boolean result.
+        invalid_data: Input to be validated, which may be of an incorrect type or missing required fields.
+        expected_error: Exception type expected for invalid input types, or `False` if validation should return a boolean without raising an exception.
     """
     if expected_error is False:
         # Valid case - should return False but not raise exception
@@ -1687,7 +1693,7 @@ def test_profile_validation_error_types_parametrized(invalid_data, expected_erro
 ])
 def test_profile_manager_operations_parametrized(operation, profile_id, data, expected_outcome):
     """
-    Parametrized test that checks `ProfileManager` operations (`create`, `get`, `update`, `delete`) yield the correct outcomes for a variety of input scenarios.
+    Parametrized test that verifies `ProfileManager` operations (`create`, `get`, `update`, `delete`) yield the correct outcomes for a variety of input scenarios.
     
     Parameters:
         operation (str): The operation to perform ("create", "get", "update", or "delete").
@@ -1743,9 +1749,9 @@ class TestPerformanceBenchmarks(unittest.TestCase):
     
     def test_profile_creation_benchmark(self):
         """
-        Benchmark the creation of 1,000 profiles, asserting performance thresholds and verifying correct storage.
+        Benchmark the creation of 1,000 profiles and verify performance and correctness.
         
-        Asserts that total and average profile creation times do not exceed specified limits, and confirms that all profiles are present in the manager after creation.
+        Measures total and average creation times, asserting they are within acceptable thresholds, and confirms that all profiles are stored after creation.
         """
         import time
         
@@ -1774,7 +1780,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
     
     def test_profile_lookup_benchmark(self):
         """
-        Benchmark the retrieval speed of 10,000 random profiles from a pool of 1,000 created profiles.
+        Benchmark the retrieval speed of 10,000 random profile lookups from a pool of 1,000 created profiles.
         
         Asserts that both the total and average lookup times remain below specified thresholds to validate efficient large-scale profile access.
         """
@@ -1828,15 +1834,15 @@ class TestProfileManagerConcurrencySimulation(unittest.TestCase):
     
     def setUp(self):
         """
-        Initializes a new ProfileManager instance for use in concurrency simulation tests.
+        Set up a new ProfileManager instance before each concurrency simulation test.
         """
         self.manager = ProfileManager()
         
     def test_rapid_creation_and_deletion_cycles(self):
         """
-        Simulates rapid cycles of profile creation and deletion to test manager consistency under high-frequency operations.
+        Test rapid creation and deletion of profiles in succession to simulate high-frequency operations.
         
-        Verifies that profiles can be created and deleted in quick succession without leaving residual state or inconsistencies.
+        Verifies that the ProfileManager remains consistent and does not retain stale state when profiles are repeatedly created and deleted in quick cycles.
         """
         profile_id = 'rapid_cycle_test'
         data = {
@@ -1863,9 +1869,9 @@ class TestProfileManagerConcurrencySimulation(unittest.TestCase):
     
     def test_overlapping_profile_operations(self):
         """
-        Test that overlapping updates to multiple profiles do not cause data contamination between profiles.
+        Test that overlapping updates to multiple profiles do not cause data cross-contamination.
         
-        Creates several profiles, updates a subset, and verifies that only the intended profiles are modified while others remain unchanged.
+        Creates several profiles, performs updates on a subset, and verifies that only the intended profiles are modified while others remain unchanged.
         """
         profiles = []
         
@@ -1899,15 +1905,15 @@ class TestProfileDataTypeHandling(unittest.TestCase):
     
     def setUp(self):
         """
-        Set up a new ProfileManager instance and prepare test data for tests involving various data types.
+        Set up a new ProfileManager instance and prepare test data for each test case.
         """
         self.manager = ProfileManager()
         
     def test_complex_data_type_preservation(self):
         """
-        Test that complex Python data types such as Decimal, date, time, tuple, set, and frozenset are correctly preserved in profile data.
+        Test that complex Python data types are preserved accurately in profile data.
         
-        Verifies that these types, including nested and mixed structures, remain intact after profile creation and storage.
+        This test verifies that when a profile is created with data containing types such as Decimal, date, time, tuple, set, frozenset, and nested structures, these types are retained or appropriately represented in the stored profile data.
         """
         from decimal import Decimal
         from datetime import date, time
@@ -1955,7 +1961,7 @@ class TestProfileDataTypeHandling(unittest.TestCase):
     
     def test_data_type_conversion_edge_cases(self):
         """
-        Test that the profile system correctly preserves and handles edge cases in data types, including special float values, very large and small numbers, empty containers, and special string formats.
+        Test that the profile system correctly preserves and handles edge cases in data types, including special float values, large numbers, empty containers, and special string formats.
         """
         edge_case_data = {
             'name': 'edge_cases',
@@ -1996,7 +2002,7 @@ class TestProfileValidatorExtended(unittest.TestCase):
         """
         Simulates cross-field validation scenarios by testing profile data where field relationships could affect validity.
         
-        This test checks that the current validator accepts profiles regardless of inter-field dependencies, ensuring that profiles with potentially inconsistent or related fields still pass validation under the present logic.
+        This test checks that the validator accepts profiles with various interdependent field values, even though the current implementation does not enforce cross-field constraints.
         """
         validation_scenarios = [
             {
@@ -2035,9 +2041,9 @@ class TestProfileValidatorExtended(unittest.TestCase):
     
     def test_validation_with_dynamic_schemas(self):
         """
-        Test validation of profile data against dynamically varying schema requirements.
+        Validates profile data against dynamically varying schema requirements.
         
-        Simulates scenarios where the set of required fields and nested settings differ based on profile type or version, ensuring the validator correctly accepts or rejects data according to the current schema.
+        Simulates scenarios where the required fields and settings differ based on profile type or version, ensuring that the validator correctly enforces these dynamic rules.
         """
         schema_variants = [
             {
@@ -2086,16 +2092,16 @@ class TestProfileBuilderFactoryPatterns(unittest.TestCase):
     
     def test_profile_builder_factory_method(self):
         """
-        Tests factory method patterns for creating specialized profile builders with predefined configurations.
+        Test factory methods that produce specialized profile builders for distinct use cases.
         
-        Verifies that factory methods can generate builders for distinct use cases (e.g., AI model profiles, API configuration profiles), and that the resulting profiles contain the expected pre-configured fields and values.
+        Simulates creation of pre-configured builders for AI model and API configuration profiles, then verifies that the resulting profile data matches the expected structure and values.
         """
         def create_ai_model_builder():
             """
-            Creates a ProfileBuilder preconfigured for an AI model profile with default version and settings.
+            Creates a ProfileBuilder preconfigured for an AI model profile.
             
             Returns:
-                ProfileBuilder: A builder instance with version '1.0.0' and AI model-specific settings.
+                ProfileBuilder: A builder instance with version '1.0.0' and default AI model settings.
             """
             return (ProfileBuilder()
                    .with_version('1.0.0')
@@ -2150,7 +2156,7 @@ class TestProfileBuilderFactoryPatterns(unittest.TestCase):
         """
         Tests that multiple specialized builders can be composed to collaboratively construct a single profile.
         
-        Simulates scenarios where different profile aspects, such as security and performance settings, are added by separate builder functions and verifies that the resulting profile contains all composed settings.
+        Verifies that distinct builder functions can incrementally add different aspects (such as security and performance settings) to a profile, resulting in a correctly merged profile data structure.
         """
         # Base profile builder
         base_builder = ProfileBuilder().with_name('composed_profile').with_version('1.0.0')
@@ -2158,9 +2164,12 @@ class TestProfileBuilderFactoryPatterns(unittest.TestCase):
         # Specialized builders for different aspects
         def add_security_settings(builder):
             """
-            Adds predefined security-related settings to a profile builder and returns the updated builder.
+            Adds predefined security-related settings to a profile builder.
             
-            The security settings include encryption type, authentication requirement, and access control roles and permissions.
+            This function updates the builder's current 'settings' field with security configurations, including encryption type, authentication requirement, and access control roles and permissions. Returns a new builder instance with the updated settings.
+            
+            Returns:
+                Updated profile builder with security settings applied.
             """
             current_settings = builder.data.get('settings', {})
             security_settings = {
@@ -2176,12 +2185,13 @@ class TestProfileBuilderFactoryPatterns(unittest.TestCase):
         
         def add_performance_settings(builder):
             """
-            Add predefined performance-related settings to a profile builder.
+            Adds predefined performance-related settings to a profile builder and returns the updated builder.
             
-            Updates the builder's current 'settings' with caching and connection pool configurations, then returns the builder for further chaining.
+            Parameters:
+            	builder: A profile builder instance to which performance settings will be added.
             
             Returns:
-                ProfileBuilder: The builder instance with updated performance settings.
+            	The builder instance with updated performance-related settings.
             """
             current_settings = builder.data.get('settings', {})
             performance_settings = {
@@ -2217,7 +2227,9 @@ class TestProfileManagerAdvancedQueries(unittest.TestCase):
     
     def setUp(self):
         """
-        Initializes a ProfileManager instance and populates it with a set of diverse sample profiles for use in advanced query tests.
+        Initializes a ProfileManager instance and populates it with a diverse set of sample profiles for use in advanced query tests.
+        
+        The sample profiles represent various types, including AI models, workflows, and API configurations, each with distinct settings and metadata.
         """
         self.manager = ProfileManager()
         
@@ -2280,7 +2292,7 @@ class TestProfileManagerAdvancedQueries(unittest.TestCase):
         """
         Simulates advanced filtering of profiles by type within the ProfileManager.
         
-        This test verifies that profiles can be filtered based on the 'type' field in their settings, ensuring correct identification and grouping of profiles by category.
+        This test verifies that profiles can be filtered based on the 'type' field in their settings, ensuring correct grouping and retrieval for different profile categories.
         """
         # Simulate filtering by type
         def filter_by_type(manager, profile_type):
@@ -2288,7 +2300,7 @@ class TestProfileManagerAdvancedQueries(unittest.TestCase):
             Return a list of profiles from the manager whose settings specify the given profile type.
             
             Parameters:
-                profile_type (str): The type value to filter profiles by.
+                profile_type (str): The type to filter profiles by.
             
             Returns:
                 list: Profiles whose 'settings.type' field matches the specified profile_type.
@@ -2311,19 +2323,19 @@ class TestProfileManagerAdvancedQueries(unittest.TestCase):
     
     def test_profile_search_simulation(self):
         """
-        Simulates and tests a text-based search feature for profiles by matching search terms against profile names and settings.
+        Tests simulated text-based search functionality for profiles by matching search terms against profile names and settings.
         
-        Verifies that searching for specific keywords returns the expected profiles based on their name or settings content.
+        Verifies that searching for specific keywords returns the expected profiles based on their data content.
         """
         def search_profiles(manager, search_term):
             """
-            Searches for profiles whose name or settings contain the specified search term.
+            Search for profiles whose name or settings contain the specified search term.
             
             Parameters:
-                search_term (str): The term to search for within profile names and settings.
+                search_term (str): The term to search for within profile names or settings.
             
             Returns:
-                list: A list of profiles matching the search criteria.
+                list: A list of profiles where the search term is found in the name or settings.
             """
             matching_profiles = []
             search_term = search_term.lower()
@@ -2353,16 +2365,19 @@ class TestProfileManagerAdvancedQueries(unittest.TestCase):
     
     def test_profile_statistics_simulation(self):
         """
-        Simulates statistical analysis of a profile collection, verifying computation of total profiles, profile type distribution, version distribution, and average settings complexity.
-        
-        Asserts that the computed statistics match expected values for the test dataset.
+        Simulates and verifies statistical analysis of a profile collection, including total count, type distribution, version distribution, and average settings complexity.
         """
         def compute_profile_statistics(manager):
             """
-            Compute aggregate statistics for all profiles managed by the given manager.
+            Compute aggregate statistics for all profiles managed by the given ProfileManager.
+            
+            Calculates the total number of profiles, counts of each profile type (based on the 'type' field in settings), distribution of profile versions, and the average number of keys in the 'settings' dictionary across all profiles.
+            
+            Parameters:
+                manager: The ProfileManager instance containing the profiles to analyze.
             
             Returns:
-                dict: A dictionary containing the total number of profiles, counts of each profile type, version distribution, and the average number of keys in the settings of each profile.
+                dict: A dictionary with keys 'total_profiles', 'profile_types', 'version_distribution', and 'average_settings_complexity'.
             """
             stats = {
                 'total_profiles': len(manager.profiles),
@@ -2412,9 +2427,9 @@ class TestProfileSystemIntegration(unittest.TestCase):
     @patch('builtins.open')
     def test_profile_import_from_external_format(self, mock_open, mock_json_load):
         """
-        Tests importing a profile from an external JSON format, validating and converting it to the internal schema.
+        Test importing a profile from an external JSON format, including schema conversion and validation.
         
-        Simulates reading a profile from an external system with a different schema, mapping its fields to the internal format, validating the converted data, and creating a new profile in the system. Verifies that the imported profile contains the expected fields and metadata.
+        Simulates reading a profile from an external system with a different schema, converting it to the internal format, validating the converted data, and importing it into the profile manager. Asserts that the imported profile contains the expected fields and structure.
         """
         # Mock external profile format
         external_profile_data = {
@@ -2441,17 +2456,17 @@ class TestProfileSystemIntegration(unittest.TestCase):
         
         def import_external_profile(file_path, profile_id):
             """
-            Imports a profile from an external JSON file, converts it to the internal format, validates it, and creates a new profile with the specified ID.
+            Imports a profile from an external file, converts it to the internal format, and creates a new profile.
             
             Parameters:
-                file_path (str): Path to the external JSON profile file.
+                file_path (str): Path to the external profile file.
                 profile_id (str): Unique identifier for the new profile.
             
             Returns:
                 GenesisProfile: The newly created profile instance.
             
             Raises:
-                ValidationError: If the external profile data does not conform to the required internal format.
+                ValidationError: If the external profile data does not meet validation requirements.
             """
             with open(file_path, 'r') as f:
                 external_data = json.load(f)
@@ -2486,9 +2501,9 @@ class TestProfileSystemIntegration(unittest.TestCase):
     @patch('builtins.open')
     def test_profile_export_to_external_format(self, mock_open, mock_json_dump):
         """
-        Tests exporting a profile to an external JSON format with schema transformation for compatibility with external systems.
+        Test exporting a profile to an external JSON format with schema transformation.
         
-        Simulates the export process by transforming the internal profile structure to a required external schema, writing it to a file, and verifying the output format and serialization behavior.
+        Simulates exporting a profile for use in external systems by transforming the internal profile structure to a required external schema and writing it to a file. Verifies the correctness of the exported format and ensures the export operation is performed.
         """
         # Create a profile to export
         profile_data = {
@@ -2512,14 +2527,16 @@ class TestProfileSystemIntegration(unittest.TestCase):
         
         def export_profile_to_external_format(profile, file_path):
             """
-            Export a profile to an external JSON format and save it to a file.
+            Export a profile to an external JSON format and write it to a file.
+            
+            Transforms the internal profile representation into a standardized external format, including metadata and system information, and saves it as a JSON file at the specified path.
             
             Parameters:
-                profile: The profile object to export.
+                profile (GenesisProfile): The profile instance to export.
                 file_path (str): The file path where the exported JSON will be saved.
             
             Returns:
-                dict: The exported profile data in the external format.
+                dict: The external format dictionary that was written to the file.
             """
             # Transform internal format to external format
             external_format = {
@@ -2568,9 +2585,9 @@ class TestProfileVersioning(unittest.TestCase):
     
     def test_profile_version_migration_simulation(self):
         """
-        Simulates migration of a profile from an older schema version to a newer one and verifies correct transformation of fields and metadata.
+        Simulates migration of a profile from an older schema version to a newer one and verifies that all required fields are correctly transformed and preserved.
         
-        This test ensures that profile data originally in version 1.0 format is properly migrated to version 2.0, including renaming fields, adding new required fields, and attaching migration metadata.
+        This test creates a legacy profile in version 1.0 format, applies a migration function to convert it to version 2.0, and asserts that the migrated profile contains updated field names, new required fields, and migration metadata.
         """
         # Old format profile (version 1.0)
         old_profile_data = {
@@ -2587,7 +2604,7 @@ class TestProfileVersioning(unittest.TestCase):
             """
             Migrate a profile data dictionary from version 1.x format to version 2.0.0 format.
             
-            If the input profile's version starts with '1.', returns a new dictionary with updated field names, default values for new fields, and migration metadata. If the profile is not version 1.x, returns the original data unchanged.
+            If the input profile's version starts with '1.', returns a new dictionary in the updated 2.0.0 schema with renamed fields, default values for new fields, and migration metadata. If the profile is not version 1.x, returns the original data unchanged.
             
             Parameters:
                 profile_data (dict): The profile data dictionary to migrate.
@@ -2636,9 +2653,9 @@ class TestProfileVersioning(unittest.TestCase):
     
     def test_backward_compatibility_validation(self):
         """
-        Validate that profiles from older and newer schema versions are accepted by the current validation logic, ensuring backward compatibility.
+        Validate that profiles from multiple historical versions are accepted by the current validation logic, ensuring backward compatibility.
         
-        Tests multiple profile data scenarios representing different version formats to confirm that validation and creation succeed as expected for each version.
+        Simulates validation and creation of profiles with data structures from different schema versions, asserting that all are correctly recognized as valid and can be created without error.
         """
         version_scenarios = [
             {
@@ -2708,9 +2725,9 @@ class TestProfileSystemStress(unittest.TestCase):
     
     def test_extreme_data_volume_handling(self):
         """
-        Test system stability and performance when handling profiles with extremely large data volumes.
+        Test the system's ability to handle profiles containing extremely large data volumes.
         
-        Creates a profile containing massive lists, large dictionaries, and deeply nested structures to verify that profile creation and retrieval succeed and complete within reasonable time constraints.
+        Creates a profile with massive nested data structures and verifies successful creation, retrieval, and acceptable performance under extreme data volume conditions.
         """
         # Create profile with extremely large data
         extreme_data = {
@@ -2756,9 +2773,9 @@ class TestProfileSystemStress(unittest.TestCase):
     
     def test_rapid_fire_operations(self):
         """
-        Simulates rapid-fire create, read, update, and delete operations to test system stability and performance.
+        Simulates rapid-fire profile operations to test system stability and performance.
         
-        Performs a high volume of sequential profile operations, checks for errors, verifies the expected number of remaining profiles, and asserts that the system maintains a minimum throughput.
+        Performs a sequence of create, read, update, and conditional delete operations on profiles in quick succession, verifying data integrity, absence of errors, and that the system maintains acceptable throughput under high-frequency usage.
         """
         import threading
         import time
@@ -2770,7 +2787,7 @@ class TestProfileSystemStress(unittest.TestCase):
             """
             Performs a sequence of rapid create, read, update, and conditional delete operations on profiles in a loop.
             
-            This function is intended for stress or concurrency testing of the profile management system. Any errors encountered during operations are appended to the `errors` list.
+            This function is intended for stress testing or concurrency simulation, executing multiple profile operations in quick succession. Any errors encountered during execution are appended to the `errors` list.
             """
             try:
                 for i in range(operation_count):

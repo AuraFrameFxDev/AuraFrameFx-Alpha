@@ -17,9 +17,9 @@ class AmbientMusicService @Inject constructor() : Service() {
     }
 
     /**
-     * Handles requests to start the service and specifies that the service should not be recreated if terminated by the system.
+     * Handles the request to start the service and specifies that the service should not be recreated if terminated by the system.
      *
-     * @return `START_NOT_STICKY`, indicating the service will not restart automatically if killed.
+     * @return `START_NOT_STICKY`, indicating the service will not be restarted automatically after being killed.
      */
     override fun onStartCommand(_intent: Intent?, _flags: Int, _startId: Int): Int {
         // TODO: Implement service logic for starting the service.
@@ -30,7 +30,7 @@ class AmbientMusicService @Inject constructor() : Service() {
     /**
      * Pauses music playback.
      *
-     * This method is intended to halt the current audio stream if playback is active.
+     * This method is a placeholder and currently unimplemented.
      */
     fun pause() {
         // TODO: Implement pause logic. Reported as unused. Implement or remove.

@@ -31,17 +31,19 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Generates an image based on the provided prompt.
      *
-     * @param _prompt The description or prompt for image generation.
-     * @return A byte array representing the generated image, or null if not available.
+     * Currently returns null, indicating image generation is not implemented.
+     *
+     * @param _prompt The prompt describing the desired image.
+     * @return Always returns null.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         return null
     }
 
     /**
-     * Returns a placeholder string for generated text based on the provided prompt and options.
+     * Returns a placeholder string representing generated text.
      *
-     * @param prompt The input text prompt for text generation.
+     * @param prompt The input prompt for text generation.
      * @param options Optional parameters for text generation.
      * @return A fixed placeholder string.
      */
@@ -52,26 +54,30 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Returns a placeholder AI response string for the given prompt and options.
      *
-     * @return A fixed placeholder string regardless of input.
+     * @param prompt The input prompt for the AI.
+     * @param options Optional parameters for customizing the AI response.
+     * @return A fixed placeholder string representing the AI response.
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         return "AI response placeholder"
     }
 
     /**
-     * Retrieves a memory value for the given key.
+     * Retrieves a stored memory value by key.
      *
-     * @param _memoryKey The key identifying the memory entry to retrieve.
-     * @return The memory value as a string, or null if not found.
+     * Always returns null, as memory retrieval is not implemented.
+     *
+     * @param _memoryKey The key identifying the memory entry.
+     * @return Always null.
      */
     override fun getMemory(_memoryKey: String): String? {
         return null
     }
 
     /**
-     * Saves a value associated with the specified key to memory.
+     * Saves a value to memory under the specified key.
      *
-     * Currently not implemented.
+     * This method is not yet implemented.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to be stored.

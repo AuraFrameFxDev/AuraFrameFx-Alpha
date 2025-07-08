@@ -11,12 +11,12 @@ class VertexAIClientImpl : VertexAIClient {
     /**
      * Simulates text generation by returning a context-aware stub response based on the input prompt.
      *
-     * The response format varies depending on keywords in the prompt, such as "code", "explain", or "analyze", and includes the prompt, maxTokens, and temperature values in the output. This method suspends briefly to mimic API latency.
+     * The response format varies depending on keywords in the prompt, such as "code", "explain", or "analyze", and includes metadata reflecting the `maxTokens` and `temperature` parameters. Suspends briefly to mimic API latency.
      *
      * @param prompt The input prompt to generate a simulated response for.
-     * @param maxTokens The maximum number of tokens to reflect in the response metadata.
-     * @param temperature The creativity level to reflect in the response metadata.
-     * @return A multi-line string simulating an AI-generated response tailored to the prompt.
+     * @param maxTokens The maximum number of tokens to simulate in the response.
+     * @param temperature The simulated creativity level for the response.
+     * @return A multi-line string representing a simulated AI-generated response tailored to the prompt.
      */
     override suspend fun generateText(prompt: String, maxTokens: Int, temperature: Float): String {
         delay(200) // Simulate realistic API latency
@@ -69,9 +69,8 @@ class VertexAIClientImpl : VertexAIClient {
     /**
      * Simulates image analysis and returns a fixed response referencing the provided prompt.
      *
-     * @param imageData The image data to be analyzed (not processed in this stub).
-     * @param prompt The prompt describing the analysis request.
-     * @return A stub string indicating simulated image analysis for the given prompt.
+     * @param prompt The prompt describing the intended analysis.
+     * @return A stub string indicating simulated image analysis for the prompt.
      */
     override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String {
         delay(100) // Simulate API call
@@ -79,7 +78,7 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Simulates initialization of creative models without performing any real actions.
+     * Simulates the initialization of creative models without performing any real operation.
      *
      * This stub method is intended for testing or development and does not interact with actual AI models.
      */
@@ -99,12 +98,12 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Returns a stub string representing generated code for the given specification, language, and style.
+     * Returns a simulated code snippet as a stub response for the given specification, language, and style.
      *
-     * @param specification The description of the code to generate.
-     * @param language The programming language for the generated code.
-     * @param style The desired coding style.
-     * @return A placeholder string simulating generated code in the specified language.
+     * @param specification Description of the code to generate.
+     * @param language Programming language for the generated code.
+     * @param style Desired coding style.
+     * @return A placeholder string representing generated code in the specified language.
      */
     override suspend fun generateCode(
         specification: String,
@@ -116,7 +115,7 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Simulates a connection check to Vertex AI and always returns `true`.
+     * Simulates a successful connection validation to Vertex AI.
      *
      * @return Always returns `true` to indicate a successful connection in this stub implementation.
      */
@@ -125,9 +124,9 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * No-op initialization method included to satisfy interface requirements.
+     * Initializes the stub Vertex AI client.
      *
-     * This method performs no actions in the stub implementation.
+     * This method is included to satisfy interface requirements and performs no operations.
      */
     fun initialize() {
         // Stub implementation

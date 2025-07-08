@@ -62,7 +62,7 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Updates the memory statistics with the current total item count, recent item count, total memory size, and the timestamp of the update.
+     * Updates the memory statistics state with the current total item count, recent item count, total memory size, and the timestamp of the update.
      */
     private fun updateStats() {
         _memoryStats.update { current ->

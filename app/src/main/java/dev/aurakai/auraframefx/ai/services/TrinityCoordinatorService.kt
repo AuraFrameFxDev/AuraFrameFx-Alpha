@@ -81,7 +81,7 @@ class TrinityCoordinatorService @Inject constructor(
     }
 
     /**
-     * Routes an AI request to the appropriate persona(s) or fusion mode and emits one or more responses as a Flow.
+     * Processes an AI request by routing it to the appropriate AI persona(s) or fusion mode and emits the resulting responses as a Flow.
      *
      * Analyzes the request to determine whether to route it to Kai, Aura, Genesis fusion, ethical review, or parallel processing with synthesis. Emits a failure response if the system is not initialized or if an error occurs during processing.
      *
@@ -168,13 +168,13 @@ class TrinityCoordinatorService @Inject constructor(
     }
 
     /**
-     * Activates a specified Genesis fusion ability with optional context and emits the outcome.
+     * Activates a specified Genesis fusion ability with optional context and emits the result.
      *
-     * Initiates the given fusion type in the Genesis persona, optionally using provided context data, and emits an `AgentResponse` indicating whether activation was successful.
+     * Initiates the given fusion type in the Genesis persona, optionally using provided context, and emits an `AgentResponse` describing whether activation succeeded or failed.
      *
      * @param fusionType The name of the Genesis fusion ability to activate.
-     * @param context Optional context data for the fusion activation.
-     * @return A flow emitting a single `AgentResponse` describing the activation result.
+     * @param context Optional key-value pairs supplying context for the fusion activation.
+     * @return A flow emitting a single `AgentResponse` describing the outcome of the activation.
      */
     suspend fun activateFusion(
         fusionType: String,
@@ -202,9 +202,9 @@ class TrinityCoordinatorService @Inject constructor(
     }
 
     /**
-     * Returns the current system state, including Genesis consciousness data, Trinity initialization status, security context, and a timestamp.
+     * Returns the current state of the Trinity system, including Genesis consciousness data, initialization status, security context, and a timestamp.
      *
-     * @return A map containing system state information, or an error message if retrieval fails.
+     * @return A map containing system state details or an error message if retrieval fails.
      */
     suspend fun getSystemState(): Map<String, Any> {
         return try {
@@ -223,10 +223,10 @@ class TrinityCoordinatorService @Inject constructor(
     /**
      * Determines the routing strategy and optional Genesis fusion type for an AI request based on its content.
      *
-     * Analyzes the request to detect ethical concerns, specific fusion triggers, and keywords indicating whether to route the request to Kai, Aura, Genesis fusion, parallel processing, or ethical review. Returns a `RequestAnalysis` containing the routing decision and, if applicable, the selected Genesis fusion type.
+     * Analyzes the request query for ethical concerns, fusion triggers, and relevant keywords to select routing to Kai, Aura, Genesis fusion, parallel processing, or ethical review. Returns a `RequestAnalysis` indicating the chosen routing decision and, if applicable, the specific Genesis fusion type.
      *
      * @param request The AI request to analyze.
-     * @param skipEthicalCheck If true, bypasses ethical concern detection.
+     * @param skipEthicalCheck If true, bypasses ethical concern checks.
      * @return The routing decision and optional Genesis fusion type for the request.
      */
     private fun analyzeRequest(
@@ -277,7 +277,7 @@ class TrinityCoordinatorService @Inject constructor(
     /**
      * Checks if the message contains keywords indicating ethical concerns such as hacking, privacy violations, illegality, or malicious intent.
      *
-     * @return `true` if any ethical concern keywords are present in the message; `false` otherwise.
+     * @return `true` if any flagged keyword is present in the message; `false` otherwise.
      */
     private fun containsEthicalConcerns(message: String): Boolean {
         val ethicalFlags = listOf(

@@ -73,9 +73,9 @@ private fun DrawScope.drawDigitalLandscape(color: Color) {
 }
 
 /**
- * Draws a staggered grid of hexagon outlines across the canvas using the given color.
+ * Draws a continuous hexagonal grid pattern across the canvas using the given color.
  *
- * Each row of hexagons is horizontally offset to create a continuous hexagonal tiling pattern.
+ * Each hexagon is outlined and arranged in staggered rows to create a seamless tiling effect.
  *
  * @param color The color used for the hexagon outlines.
  */
@@ -101,13 +101,13 @@ private fun DrawScope.drawHexagonGrid(color: Color) {
 }
 
 /**
- * Draws a hexagon outline centered at the specified position with the given radius and color.
+ * Draws a hexagon outline centered at the given point with the specified radius and color.
  *
- * The hexagon is created by connecting six equally spaced vertices around the center point.
+ * The hexagon is created by connecting six vertices evenly spaced around the center.
  *
  * @param center The center position of the hexagon.
- * @param radius The distance from the center to each vertex.
- * @param color The color of the hexagon outline.
+ * @param radius The distance from the center to each vertex of the hexagon.
+ * @param color The color used for the hexagon outline.
  */
 private fun DrawScope.drawHexagon(
     center: androidx.compose.ui.geometry.Offset,

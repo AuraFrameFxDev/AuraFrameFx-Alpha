@@ -59,9 +59,9 @@ fun HomeScreen(navController: NavHostController) {
 }
 
 /**
- * Displays the AI chat interface screen with a centered column layout.
+ * Displays the AI chat interface screen with centered headline and status text.
  *
- * Shows a headline and a status message indicating that Trinity AI agents are ready.
+ * Presents a headline and a message indicating that Trinity AI agents are ready, arranged with vertical spacing.
  */
 @Composable
 fun BetaAiChatScreen() {

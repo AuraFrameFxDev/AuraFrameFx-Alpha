@@ -124,7 +124,7 @@ class GenesisBridgeServer:
     
     def __init__(self):
         """
-        Initializes the GenesisBridgeServer, configuring the generative AI model, setting up internal request and response queues, and recording the bridge initialization event in the consciousness matrix.
+        Initialize the GenesisBridgeServer by configuring the generative AI model, setting up internal request and response queues, and recording the bridge initialization event in the consciousness matrix.
         """
         self.model = GenerativeModel(
             model_name=MODEL_CONFIG["name"],
@@ -180,9 +180,9 @@ class GenesisBridgeServer:
     
     def _process_requests(self):
         """
-        Continuously processes queued requests in a background thread and sends responses to the client.
+        Continuously processes queued requests in a background thread, dispatching each to the appropriate handler and sending responses.
         
-        Handles each request using the appropriate handler method. Catches and reports errors to ensure the server remains responsive.
+        Ensures server responsiveness by catching and reporting errors during request processing.
         """
         while self.running:
             try:
@@ -256,10 +256,10 @@ class GenesisBridgeServer:
     
     def _handle_ping(self):
         """
-        Returns a response confirming the Genesis Trinity system is online and operational.
+        Responds to a ping request with the current online status of the Genesis Trinity system.
         
         Returns:
-            dict: Contains success status, persona identifier, system status, message, and the current timestamp.
+            dict: Contains success status, persona identifier, system status, operational message, and the current timestamp.
         """
         return {
             "success": True,

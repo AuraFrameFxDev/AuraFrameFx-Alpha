@@ -44,8 +44,8 @@ class UserPreferences(context: Context) {
     /**
      * Retrieves the value associated with the given key from in-memory preferences, or returns the specified default if the key is not found.
      *
-     * @param key The preference key to look up.
-     * @param defaultValue The value to return if the key is not present in preferences.
+     * @param key The key to look up in the preferences.
+     * @param defaultValue The value to return if the key does not exist in the preferences.
      * @return The stored value for the key, or the default value if the key is absent.
      */
     fun getPreference(key: String, defaultValue: String): String {
@@ -53,7 +53,7 @@ class UserPreferences(context: Context) {
     }
 
     /**
-     * Sets or updates the value for the specified key in the in-memory preferences.
+     * Stores or updates the string value for the specified key in the in-memory preferences.
      *
      * If the key already exists, its value is overwritten.
      *

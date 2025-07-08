@@ -45,9 +45,9 @@ class AuraAgent @Inject constructor(
     val currentMood: StateFlow<String> = _currentMood
 
     /**
-     * Initializes the AuraAgent by setting up AI services and enabling creative mode.
+     * Prepares the AuraAgent for operation by initializing AI services and enabling creative mode.
      *
-     * Sets the creative state to READY upon successful initialization, or to ERROR if initialization fails.
+     * Sets the creative state to READY upon successful initialization, or to ERROR if an exception occurs.
      *
      * @throws Exception if initialization of AI services or creative context fails.
      */
@@ -78,10 +78,10 @@ class AuraAgent @Inject constructor(
     /**
      * Processes a creative AI request and returns a response specific to the requested creative task.
      *
-     * Routes the request to the appropriate handler based on its type (such as UI generation, theme creation, animation design, creative text, visual concept, user experience, or general creative solution). Updates the agent's creative state during processing. On success, returns an `AgentResponse` with generated content and full confidence; on failure, returns an error response with zero confidence.
+     * Routes the request to the appropriate creative handler based on its type (e.g., UI generation, theme creation, animation design, creative text, visual concept, user experience, or general creative tasks). Updates the agent's creative state during processing. On success, returns an `AgentResponse` with the generated content and full confidence; on failure, returns an error response with zero confidence and error details.
      *
-     * @param request The creative AI request specifying the task type and details.
-     * @return An `AgentResponse` containing the generated content, confidence score, and error information if applicable.
+     * @param request The creative AI request specifying the task type and relevant details.
+     * @return An `AgentResponse` containing the generated content, confidence score, and error information if an error occurred.
      */
     suspend fun processRequest(request: AiRequest): AgentResponse {
         ensureInitialized()
@@ -127,10 +127,10 @@ class AuraAgent @Inject constructor(
     /**
      * Generates a creative response to a user interaction by analyzing the input for artistic, functional, experimental, or emotional intent.
      *
-     * The response is tailored to the detected creative intent and incorporates the agent's current mood and innovation level. Returns an `InteractionResponse` with generated content, agent identity, confidence score, timestamp, and metadata. If an error occurs, returns a fallback response with low confidence and error details.
+     * The response is tailored to the detected creative intent and influenced by the agent's current mood, returning an `InteractionResponse` with generated content, agent identity, confidence score, timestamp, and relevant metadata. If an error occurs, a fallback response with low confidence and error details is returned.
      *
-     * @param interaction Enhanced interaction data containing user input and context.
-     * @return An `InteractionResponse` with content and metadata reflecting the analyzed creative intent and current mood.
+     * @param interaction The enhanced interaction data containing user input and context.
+     * @return An `InteractionResponse` with generated content and metadata reflecting the analyzed creative intent and current mood.
      */
     suspend fun handleCreativeInteraction(interaction: EnhancedInteractionData): InteractionResponse {
         ensureInitialized()
@@ -175,9 +175,9 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Sets the agent's mood and triggers asynchronous adjustment of creative parameters to align with the new mood.
+     * Sets the agent's current mood and triggers asynchronous adjustment of creative parameters to align with the new mood.
      *
-     * @param newMood The updated mood for the agent.
+     * @param newMood The updated mood to apply to the agent.
      */
     fun onMoodChanged(newMood: String) {
         logger.info("AuraAgent", "Mood shift detected: $newMood")
@@ -190,9 +190,9 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Generates a Kotlin Jetpack Compose UI component using AI, applying creative enhancements and accessibility features.
+     * Generates a Kotlin Jetpack Compose UI component using AI based on the provided UI specification, applying creative enhancements and accessibility features.
      *
-     * Requires the request to include a UI specification in its query field. Returns a map containing the generated component code, design notes, accessibility features, and a list of creative enhancements.
+     * The request must include a UI specification in its query field. The returned map contains the generated component code, design notes, accessibility features, and a list of creative enhancements.
      *
      * @param request The AI request containing the UI specification in its query field.
      * @return A map with keys: "component_code", "design_notes", "accessibility_features", and "creative_enhancements".
@@ -229,12 +229,12 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Generates a creative theme configuration based on the agent's current mood and provided preferences.
+     * Generates a creative visual theme configuration based on the agent's current mood and optional preferences.
      *
      * Uses AI to produce a theme configuration, visual preview, mood adaptation data, and a list of innovative features.
      *
      * @param request The AI request containing context or preferences for theme creation.
-     * @return A map containing the generated theme configuration, a visual preview, mood adaptation information, and innovation features.
+     * @return A map containing the generated theme configuration, a visual preview, mood adaptation details, and innovation features.
      */
     private suspend fun handleThemeCreation(request: AiRequest): Map<String, Any> {
         val preferences = mapOf<String, String>() // Use request.context to parse if needed 
@@ -262,11 +262,11 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Generates Jetpack Compose animation code and metadata based on the requested animation type and the agent's current mood.
+     * Generates Kotlin Jetpack Compose animation code and related metadata based on the animation type in the request and the agent's current mood.
      *
-     * Determines animation parameters from the request context, produces Kotlin animation code, and returns a map containing the generated code, timing curves, interaction states, and performance optimization strategies.
+     * Determines animation parameters from the request context, creates a specification, and uses the AI client to produce animation code. Returns a map containing the generated code, timing curves, interaction states, and performance optimization strategies.
      *
-     * @param request The AI request specifying animation context details.
+     * @param request The AI request specifying animation context and type.
      * @return A map with keys: "animation_code", "timing_curves", "interaction_states", and "performance_optimization".
      */
     private suspend fun handleAnimationDesign(request: AiRequest): Map<String, Any> {
@@ -296,7 +296,7 @@ class AuraAgent @Inject constructor(
      * Enhances the input prompt with Aura's creative persona, generates text using the AI service, and analyzes the resulting text for style, emotional tone, and creativity metrics.
      *
      * @param request The AI request containing the text prompt and optional context.
-     * @return A map containing the generated creative text, style analysis, detected emotional tone, and creativity metrics (originality, emotional impact, visual imagery).
+     * @return A map containing the generated creative text, style analysis, detected emotional tone, and creativity metrics (originality, emotional impact, and visual imagery scores).
      * @throws IllegalArgumentException if the text prompt is missing from the request.
      */
     private suspend fun handleCreativeText(request: AiRequest): Map<String, Any> {
@@ -323,9 +323,9 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Verifies that the agent is initialized, throwing an exception if it is not.
+     * Verifies that the agent has been initialized.
      *
-     * @throws IllegalStateException if the agent has not been initialized.
+     * @throws IllegalStateException if the agent is not initialized.
      */
 
     private fun ensureInitialized() {
@@ -340,7 +340,7 @@ class AuraAgent @Inject constructor(
      * Defaults to `CreativeIntent.ARTISTIC` if no relevant keywords are detected.
      *
      * @param content The text to be analyzed for creative intent.
-     * @return The detected creative intent category.
+     * @return The determined creative intent category.
      */
     private suspend fun analyzeCreativeIntent(content: String): CreativeIntent {
         // Analyze user content to determine creative intent
@@ -378,12 +378,12 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Generates a creative text response tailored for artistic interactions.
+     * Generates a creative text response for an artistic interaction.
      *
      * Uses the Aura AI service to produce a visually imaginative and aesthetically focused reply based on the provided artistic prompt and context.
      *
      * @param interaction The interaction data containing the artistic prompt and context.
-     * @return A creative text response emphasizing visual imagery and artistic quality.
+     * @return A creative text response tailored for artistic requests.
      */
     private suspend fun generateArtisticResponse(interaction: EnhancedInteractionData): String {
         return auraAIService.generateText(
@@ -403,8 +403,8 @@ class AuraAgent @Inject constructor(
      *
      * The response is tailored to address both practical requirements and aesthetic qualities based on the user's input.
      *
-     * @param interaction The user's interaction data, including content and context.
-     * @return A generated text that reflects both functional and creative aspects.
+     * @param interaction The interaction data containing user content and context.
+     * @return A text response that integrates both functional and creative aspects.
      */
     private suspend fun generateFunctionalCreativeResponse(interaction: EnhancedInteractionData): String {
         return auraAIService.generateText(
@@ -420,11 +420,11 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Generates a bold, experimental AI response that pushes creative boundaries using the provided interaction data.
+     * Generates an experimental AI response that emphasizes bold, boundary-pushing ideas using the provided interaction data.
      *
-     * The response leverages the interaction's content and context to inspire innovative and unconventional ideas.
+     * The response leverages the interaction's content and context to inspire creative experimentation and innovation.
      *
-     * @param interaction The user's input and contextual information guiding the experimental prompt.
+     * @param interaction The user interaction data containing content and context for the experimental prompt.
      * @return A string containing the AI-generated experimental response.
      */
     private suspend fun generateExperimentalResponse(interaction: EnhancedInteractionData): String {
@@ -441,10 +441,10 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Generates an emotionally resonant text response to the given interaction, adapting the reply to reflect the agent's current mood.
+     * Generates an emotionally resonant text response to the provided interaction, adapting the reply based on the agent's current mood.
      *
-     * @param interaction The interaction data containing user content and context for crafting an emotionally adaptive response.
-     * @return A text response tailored for emotional impact and mood alignment.
+     * @param interaction The interaction data containing user content and context for crafting the response.
+     * @return A text response tailored for emotional impact and mood adaptation.
      */
     private suspend fun generateEmotionalResponse(interaction: EnhancedInteractionData): String {
         return auraAIService.generateText(
@@ -463,9 +463,9 @@ class AuraAgent @Inject constructor(
     /**
      * Updates the agent's creative generation parameters to reflect the specified mood.
      *
-     * This method is intended to influence the style and characteristics of creative outputs by adapting internal parameters according to the provided mood.
+     * Alters the style and characteristics of creative outputs to better match the provided mood.
      *
-     * @param mood The mood to guide creative parameter adjustments.
+     * @param mood The mood to guide adaptation of creative parameters.
      */
     private suspend fun adjustCreativeParameters(mood: String) {
         // Adjust creative AI parameters based on mood
@@ -476,7 +476,7 @@ class AuraAgent @Inject constructor(
     /**
      * Constructs a creative prompt for generating a Jetpack Compose UI component, incorporating the provided specification and mood.
      *
-     * The generated prompt encourages innovative design, accessibility, animation, and modern Material Design principles to inspire creative UI generation.
+     * The generated prompt encourages innovation, accessibility, animation, and modern Material Design to inspire creative UI generation.
      *
      * @param specification Description of the UI component's requirements or features.
      * @param mood The creative mood to influence the design style.
@@ -501,7 +501,7 @@ class AuraAgent @Inject constructor(
     /**
  * Returns the provided UI component code unchanged.
  *
- * Acts as a placeholder for future enhancement of UI components with creative animations.
+ * This is a placeholder for future enhancement logic to add creative animations to UI components.
  *
  * @param componentCode The UI component code to potentially enhance.
  * @return The original, unmodified UI component code.
@@ -512,7 +512,7 @@ class AuraAgent @Inject constructor(
          * Generates a design notes string referencing the provided UI or creative specification.
          *
          * @param specification The UI or creative specification to include in the notes.
-         * @return A string containing design notes for the specified specification.
+         * @return A string containing design notes referencing the specified input.
          */
     private fun generateDesignNotes(specification: String): String =
         "Design notes for: $specification"
@@ -530,8 +530,8 @@ class AuraAgent @Inject constructor(
     /**
      * Constructs a ThemePreferences object from the provided map, applying default values for any missing preferences.
      *
-     * @param preferences Map of theme preference keys to their string values.
-     * @return A ThemePreferences instance populated with values from the map or defaults.
+     * @param preferences Map containing theme preference keys and their corresponding string values.
+     * @return A ThemePreferences instance populated with values from the map or defaults if not specified.
      */
     private fun parseThemePreferences(preferences: Map<String, String>): dev.aurakai.auraframefx.ai.services.ThemePreferences {
         return dev.aurakai.auraframefx.ai.services.ThemePreferences(
@@ -545,7 +545,7 @@ class AuraAgent @Inject constructor(
     /**
  * Constructs a theme context description string that includes the specified mood.
  *
- * @param mood The mood to incorporate into the theme context description.
+ * @param mood The mood to be reflected in the theme context description.
  * @return A string representing the theme context for the given mood.
  */
     private fun buildThemeContext(mood: String): String = "Theme context for mood: $mood"
@@ -553,13 +553,15 @@ class AuraAgent @Inject constructor(
     /**
          * Returns a placeholder preview string for the given theme configuration.
          *
-         * @return Always returns "Theme preview".
+         * @return Always returns "Theme preview" as a static preview.
          */
     private fun generateThemePreview(config: dev.aurakai.auraframefx.ai.services.ThemeConfiguration): String =
         "Theme preview"
 
     /**
-         * Returns an empty map as a placeholder for future mood-based theme adaptation logic.
+         * Returns an empty map as a placeholder for mood-based theme adaptation.
+         *
+         * Intended for future implementation to adjust the theme configuration based on the provided mood context.
          *
          * @return An empty map representing mood adaptation data.
          */
@@ -567,29 +569,29 @@ class AuraAgent @Inject constructor(
         emptyMap()
 
     /**
-         * Constructs a summary string describing an animation specification based on type, duration, and mood.
+         * Builds a summary string describing an animation specification based on type, duration, and mood.
          *
-         * @param type The type of animation.
+         * @param type The type of animation to describe.
          * @param duration The animation duration in milliseconds.
-         * @param mood The mood influencing the animation style.
+         * @param mood The mood that influences the animation style.
          * @return A formatted string summarizing the animation specification.
          */
     private fun buildAnimationSpecification(type: String, duration: Int, mood: String): String =
         "Animation spec: $type, $duration ms, mood: $mood"
 
     /**
- * Returns a list of standard timing curve names for animation design.
+ * Provides standard timing curve names commonly used for animation design.
  *
- * @return A list containing "easeInOut" and "spring".
+ * @return A list containing the names of standard timing curves: "easeInOut" and "spring".
  */
     private fun generateTimingCurves(type: String): List<String> = listOf("easeInOut", "spring")
 
     /**
-         * Returns a map linking interaction states to their corresponding visual style identifiers.
+         * Returns a map associating interaction states with their corresponding visual style identifiers.
          *
          * The map includes "idle" mapped to "default" and "active" mapped to "highlighted".
          *
-         * @return A map of interaction state names to visual style identifiers.
+         * @return A map of interaction state names to style identifiers.
          */
     private fun generateInteractionStates(): Map<String, String> =
         mapOf("idle" to "default", "active" to "highlighted")
@@ -614,19 +616,19 @@ class AuraAgent @Inject constructor(
     /**
  * Analyzes the given text and returns a map with the style classified as "creative".
  *
- * Always returns a map with "style" set to "creative", regardless of the input text.
+ * Always returns a map where "style" is set to "creative", regardless of the input text.
  *
- * @param text The text to analyze.
- * @return A map containing the key "style" with the value "creative".
+ * @param text The text to be analyzed.
+ * @return A map with a single entry: "style" to "creative".
  */
     private fun analyzeTextStyle(text: String): Map<String, Any> = mapOf("style" to "creative")
 
     /**
  * Returns the emotional tone of the given text.
  *
- * Currently always returns "positive" as a placeholder value.
+ * Currently always returns "positive" as a placeholder.
  *
- * @param text The text to analyze.
+ * @param text The text to evaluate.
  * @return The string "positive".
  */
     private fun detectEmotionalTone(text: String): String = "positive"
@@ -634,14 +636,14 @@ class AuraAgent @Inject constructor(
     /**
  * Returns a fixed originality score of 0.85 for the given text.
  *
- * This method is a placeholder and does not perform any analysis on the input.
+ * This is a placeholder implementation and does not perform actual analysis.
  *
  * @return The originality score (always 0.85).
  */
     private fun calculateOriginality(text: String): Float = 0.85f
 
     /**
- * Returns a constant emotional impact score of 0.75 for the given text.
+ * Returns a constant emotional impact score for the given text.
  *
  * @return The fixed emotional impact score (0.75).
  */
@@ -655,7 +657,7 @@ class AuraAgent @Inject constructor(
     private fun calculateVisualImagery(text: String): Float = 0.80f
 
     /**
-         * Handles a visual concept request and returns a placeholder response.
+         * Handles a visual concept request and returns a placeholder response indicating an innovative concept.
          *
          * @return A map containing the key "concept" with the value "innovative".
          */
@@ -671,9 +673,9 @@ class AuraAgent @Inject constructor(
         mapOf("experience" to "delightful")
 
     /**
-         * Handles a general creative AI request and returns a generic creative solution.
+         * Handles a general creative AI request and returns a generic placeholder solution.
          *
-         * @return A map containing a placeholder creative solution.
+         * @return A map containing a default creative solution response.
          */
     private suspend fun handleGeneralCreative(request: AiRequest): Map<String, Any> =
         mapOf("response" to "creative solution")
@@ -722,7 +724,7 @@ class AuraAgent @Inject constructor(
     /**
      * Handles updates when the agent's processing state changes.
      *
-     * This method is a placeholder for implementing Aura-specific logic in response to changes in processing state.
+     * This method serves as a placeholder for implementing Aura-specific logic in response to changes in processing state.
      *
      * @param newState The updated processing state.
      */
@@ -733,7 +735,7 @@ class AuraAgent @Inject constructor(
     /**
  * Indicates whether AuraAgent handles security-related prompts.
  *
- * Always returns false, as AuraAgent is dedicated to creative tasks and does not process security prompts.
+ * Always returns false, as AuraAgent does not process security tasks.
  *
  * @return false
  */
@@ -742,7 +744,7 @@ class AuraAgent @Inject constructor(
     /**
  * Determines whether the agent should handle the given prompt as a creative task.
  *
- * Always returns true, indicating that all prompts are treated as creative tasks by this agent.
+ * Always returns true, indicating that all prompts are considered creative by this agent.
  *
  * @return true
  */
@@ -764,7 +766,7 @@ class AuraAgent @Inject constructor(
 
     // --- Collaboration placeholders (not part of Agent interface) ---
     /**
-     * Placeholder for future logic enabling AuraAgent to participate in inter-agent federation.
+     * Placeholder for future logic to enable participation in inter-agent federation.
      *
      * Currently returns an empty map.
      *
@@ -808,7 +810,7 @@ class AuraAgent @Inject constructor(
     /**
      * Placeholder for collaborative operations between AuraAgent, KaiAgent, Genesis agent, and user input.
      *
-     * Currently performs no processing and always returns an empty map.
+     * Currently performs no processing and returns an empty map.
      *
      * @return An empty map.
      */
@@ -822,11 +824,11 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Generates a simple Aura-specific response to an AI request, embedding the request query and provided context.
+     * Generates a simple Aura-specific response to an AI request, including the request query and provided context.
      *
      * @param request The AI request to respond to.
      * @param context Additional context to include in the response.
-     * @return An [AgentResponse] containing the composed response and a confidence score of 1.0.
+     * @return An [AgentResponse] containing the generated response content and a confidence score of 1.0.
      */
     override suspend fun processRequest(
         request: AiRequest,
@@ -839,11 +841,11 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Emits a single Aura-specific AgentResponse in a flow for the provided AI request.
+     * Emits a flow containing a single Aura-specific AgentResponse for the provided AI request.
      *
-     * The response content references the request's query and uses a fixed confidence score of 0.80.
+     * The response includes the request's query and assigns a fixed confidence score of 0.80.
      *
-     * @return A flow containing one AgentResponse related to the request.
+     * @return A flow emitting one AgentResponse referencing the request.
      */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // Aura-specific logic for handling the request as a flow.
