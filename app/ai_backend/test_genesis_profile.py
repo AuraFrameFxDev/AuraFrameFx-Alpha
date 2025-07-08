@@ -2822,3 +2822,1007 @@ class TestProfileSystemStress(unittest.TestCase):
 if __name__ == '__main__':
     # Run comprehensive test suite
     unittest.main(argv=[''], exit=False, verbosity=2)
+
+class TestProfileManagerThreadSafety(unittest.TestCase):
+    """Test thread safety aspects of ProfileManager"""
+    
+    def setUp(self):
+        """Initialize ProfileManager for thread safety tests"""
+        self.manager = ProfileManager()
+        self.errors = []
+        
+    def test_concurrent_profile_creation_simulation(self):
+        """
+        Simulate concurrent profile creation to test thread safety and data consistency.
+        
+        Creates multiple profiles concurrently using threading to identify potential race conditions
+        and verify that all profiles are created successfully without data corruption.
+        """
+        import threading
+        import time
+        
+        num_threads = 10
+        profiles_per_thread = 50
+        threads = []
+        created_profiles = []
+        
+        def create_profiles_worker(thread_id):
+            """Worker function to create profiles in a separate thread"""
+            thread_profiles = []
+            try:
+                for i in range(profiles_per_thread):
+                    profile_id = f'thread_{thread_id}_profile_{i}'
+                    data = {
+                        'name': f'concurrent_profile_{thread_id}_{i}',
+                        'version': '1.0.0',
+                        'settings': {
+                            'thread_id': thread_id,
+                            'profile_index': i,
+                            'created_at': time.time()
+                        }
+                    }
+                    profile = self.manager.create_profile(profile_id, data)
+                    thread_profiles.append(profile)
+                    
+                # Small delay to increase chance of race conditions
+                time.sleep(0.001)
+                    
+            except Exception as e:
+                self.errors.append(f"Thread {thread_id} error: {str(e)}")
+            
+            created_profiles.extend(thread_profiles)
+        
+        # Start all threads
+        start_time = time.time()
+        for thread_id in range(num_threads):
+            thread = threading.Thread(target=create_profiles_worker, args=(thread_id,))
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+        
+        end_time = time.time()
+        
+        # Verify results
+        self.assertEqual(len(self.errors), 0, f"Errors during concurrent creation: {self.errors}")
+        
+        expected_total = num_threads * profiles_per_thread
+        self.assertEqual(len(self.manager.profiles), expected_total)
+        self.assertEqual(len(created_profiles), expected_total)
+        
+        # Verify all profiles are accessible and valid
+        for profile in created_profiles:
+            retrieved = self.manager.get_profile(profile.profile_id)
+            self.assertIsNotNone(retrieved)
+            self.assertEqual(retrieved.profile_id, profile.profile_id)
+        
+        # Performance check
+        total_time = end_time - start_time
+        self.assertLess(total_time, 30.0, "Concurrent creation took too long")
+    
+    def test_concurrent_mixed_operations(self):
+        """
+        Test concurrent mixed operations (create, read, update, delete) for data consistency.
+        
+        Simulates a realistic scenario with multiple threads performing different operations
+        simultaneously to verify system stability and data integrity.
+        """
+        import threading
+        import random
+        import time
+        
+        # Pre-populate with some profiles
+        for i in range(100):
+            self.manager.create_profile(f'base_profile_{i}', {
+                'name': f'base_{i}',
+                'version': '1.0.0',
+                'settings': {'index': i}
+            })
+        
+        operation_results = {'create': 0, 'read': 0, 'update': 0, 'delete': 0}
+        operation_lock = threading.Lock()
+        
+        def mixed_operations_worker(worker_id):
+            """Worker performing mixed operations"""
+            operations_performed = {'create': 0, 'read': 0, 'update': 0, 'delete': 0}
+            
+            try:
+                for i in range(50):  # 50 operations per worker
+                    operation = random.choice(['create', 'read', 'update', 'delete'])
+                    
+                    if operation == 'create':
+                        profile_id = f'worker_{worker_id}_new_{i}'
+                        data = {
+                            'name': f'worker_profile_{worker_id}_{i}',
+                            'version': '1.0.0',
+                            'settings': {'worker_id': worker_id, 'operation_index': i}
+                        }
+                        self.manager.create_profile(profile_id, data)
+                        operations_performed['create'] += 1
+                        
+                    elif operation == 'read':
+                        # Read a random existing profile
+                        all_profiles = list(self.manager.profiles.keys())
+                        if all_profiles:
+                            random_id = random.choice(all_profiles)
+                            profile = self.manager.get_profile(random_id)
+                            if profile:
+                                operations_performed['read'] += 1
+                                
+                    elif operation == 'update':
+                        # Update a random existing profile
+                        all_profiles = list(self.manager.profiles.keys())
+                        if all_profiles:
+                            random_id = random.choice(all_profiles)
+                            try:
+                                self.manager.update_profile(random_id, {
+                                    'settings': {'updated_by': worker_id, 'update_time': time.time()}
+                                })
+                                operations_performed['update'] += 1
+                            except ProfileNotFoundError:
+                                pass  # Profile was deleted by another thread
+                                
+                    elif operation == 'delete':
+                        # Delete a profile that might exist
+                        profile_id = f'base_profile_{random.randint(0, 99)}'
+                        if self.manager.delete_profile(profile_id):
+                            operations_performed['delete'] += 1
+                    
+                    # Small random delay
+                    time.sleep(random.uniform(0.001, 0.005))
+                    
+            except Exception as e:
+                self.errors.append(f"Worker {worker_id} error: {str(e)}")
+            
+            # Update global counters
+            with operation_lock:
+                for op, count in operations_performed.items():
+                    operation_results[op] += count
+        
+        # Start worker threads
+        num_workers = 8
+        threads = []
+        
+        for worker_id in range(num_workers):
+            thread = threading.Thread(target=mixed_operations_worker, args=(worker_id,))
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for completion
+        for thread in threads:
+            thread.join()
+        
+        # Verify no errors occurred
+        self.assertEqual(len(self.errors), 0, f"Errors during mixed operations: {self.errors}")
+        
+        # Verify operation counts
+        total_operations = sum(operation_results.values())
+        expected_operations = num_workers * 50
+        self.assertEqual(total_operations, expected_operations)
+        
+        # Verify manager is still in valid state
+        self.assertIsInstance(self.manager.profiles, dict)
+        
+        # All remaining profiles should be accessible
+        for profile_id in self.manager.profiles:
+            profile = self.manager.get_profile(profile_id)
+            self.assertIsNotNone(profile)
+
+
+class TestProfileDataValidationExtensive(unittest.TestCase):
+    """Extensive validation tests for edge cases and security concerns"""
+    
+    def test_sql_injection_resistance(self):
+        """
+        Test that profile data with SQL injection patterns is handled safely.
+        
+        Verifies that malicious SQL patterns in profile data don't cause security issues
+        and are treated as regular string data.
+        """
+        sql_injection_patterns = [
+            "'; DROP TABLE profiles; --",
+            "1' OR '1'='1",
+            "1; DELETE FROM profiles WHERE id=1; --",
+            "UNION SELECT * FROM users --",
+            "1' UNION SELECT password FROM users WHERE username='admin'--"
+        ]
+        
+        for pattern in sql_injection_patterns:
+            with self.subTest(pattern=pattern):
+                data = {
+                    'name': f'sql_test_{pattern[:10]}',
+                    'version': '1.0.0',
+                    'settings': {
+                        'malicious_input': pattern,
+                        'description': f'Test pattern: {pattern}'
+                    }
+                }
+                
+                # Should validate successfully (treated as regular string data)
+                result = ProfileValidator.validate_profile_data(data)
+                self.assertTrue(result)
+                
+                # Should create profile without issues
+                manager = ProfileManager()
+                profile = manager.create_profile(f'sql_test_{len(pattern)}', data)
+                self.assertIsNotNone(profile)
+                self.assertEqual(profile.data['settings']['malicious_input'], pattern)
+    
+    def test_xss_pattern_handling(self):
+        """
+        Test handling of Cross-Site Scripting (XSS) patterns in profile data.
+        
+        Ensures that XSS patterns are stored as regular data without causing execution
+        or security vulnerabilities in the profile system.
+        """
+        xss_patterns = [
+            '<script>alert("XSS")</script>',
+            'javascript:alert("XSS")',
+            '<img src="x" onerror="alert(\'XSS\')" />',
+            '<svg onload="alert(\'XSS\')" />',
+            '"><script>alert("XSS")</script>',
+            "';alert('XSS');//"
+        ]
+        
+        manager = ProfileManager()
+        
+        for i, pattern in enumerate(xss_patterns):
+            with self.subTest(pattern=pattern):
+                data = {
+                    'name': f'xss_test_{i}',
+                    'version': '1.0.0',
+                    'settings': {
+                        'user_input': pattern,
+                        'description': f'XSS test pattern {i}'
+                    }
+                }
+                
+                # Validation should pass (treated as string data)
+                result = ProfileValidator.validate_profile_data(data)
+                self.assertTrue(result)
+                
+                # Profile creation should succeed
+                profile = manager.create_profile(f'xss_test_{i}', data)
+                self.assertIsNotNone(profile)
+                self.assertEqual(profile.data['settings']['user_input'], pattern)
+                
+                # Retrieval should return exact data
+                retrieved = manager.get_profile(f'xss_test_{i}')
+                self.assertEqual(retrieved.data['settings']['user_input'], pattern)
+    
+    def test_unicode_normalization_handling(self):
+        """
+        Test handling of various Unicode normalization forms and special characters.
+        
+        Verifies that the profile system correctly handles different Unicode normalization
+        forms and preserves character encoding without corruption.
+        """
+        unicode_test_cases = [
+            # Different normalization forms of the same string
+            ('café', 'NFC form'),
+            ('cafe\u0301', 'NFD form'),  # e + combining acute accent
+            ('café', 'Different normalization'),
+            
+            # Various scripts and languages
+            ('Здравствуй мир', 'Cyrillic'),
+            ('こんにちは世界', 'Japanese'),
+            ('안녕하세요 세계', 'Korean'),
+            ('مرحبا بالعالم', 'Arabic'),
+            ('שלום עולם', 'Hebrew'),
+            ('Γεια σας κόσμος', 'Greek'),
+            
+            # Special Unicode characters
+            ('Zero\u200bWidth\u200bSpace', 'Zero-width characters'),
+            ('Right\u202eto\u202dLeft', 'Bidirectional text'),
+            ('Text\uFEFFwith\uFEFFBOM', 'Byte order marks'),
+            
+            # Emoji and symbols
+            ('🚀🌟✨🎉🔥💡', 'Emoji sequence'),
+            ('™©®€£¥₹₿', 'Special symbols'),
+            ('♠♣♥♦♪♫☀☁⚡', 'Miscellaneous symbols')
+        ]
+        
+        manager = ProfileManager()
+        
+        for i, (text, description) in enumerate(unicode_test_cases):
+            with self.subTest(text=text, description=description):
+                data = {
+                    'name': f'unicode_test_{i}',
+                    'version': '1.0.0',
+                    'settings': {
+                        'unicode_text': text,
+                        'description': description,
+                        'length': len(text),
+                        'byte_length': len(text.encode('utf-8'))
+                    }
+                }
+                
+                # Validation should pass
+                result = ProfileValidator.validate_profile_data(data)
+                self.assertTrue(result)
+                
+                # Profile creation should preserve Unicode
+                profile = manager.create_profile(f'unicode_test_{i}', data)
+                self.assertIsNotNone(profile)
+                self.assertEqual(profile.data['settings']['unicode_text'], text)
+                
+                # Verify character preservation
+                retrieved = manager.get_profile(f'unicode_test_{i}')
+                self.assertEqual(retrieved.data['settings']['unicode_text'], text)
+                self.assertEqual(len(retrieved.data['settings']['unicode_text']), len(text))
+
+
+class TestProfileBuilderAdvancedPatterns(unittest.TestCase):
+    """Advanced builder pattern tests for complex scenarios"""
+    
+    def test_conditional_builder_pattern(self):
+        """
+        Test conditional builder pattern with complex branching logic.
+        
+        Verifies that the builder can handle complex conditional logic for creating
+        different profile configurations based on runtime conditions.
+        """
+        class ConditionalProfileBuilder(ProfileBuilder):
+            def __init__(self):
+                super().__init__()
+                self.conditions = {}
+            
+            def when(self, condition_name, condition_value):
+                """Add a condition to the builder"""
+                self.conditions[condition_name] = condition_value
+                return self
+            
+            def with_conditional_name(self, default_name, conditions_map):
+                """Set name based on conditions"""
+                for condition_key, condition_value in self.conditions.items():
+                    if condition_key in conditions_map:
+                        condition_options = conditions_map[condition_key]
+                        if condition_value in condition_options:
+                            return self.with_name(condition_options[condition_value])
+                return self.with_name(default_name)
+            
+            def with_conditional_settings(self, base_settings, condition_overrides):
+                """Apply conditional settings overrides"""
+                final_settings = base_settings.copy()
+                
+                for condition_key, condition_value in self.conditions.items():
+                    if condition_key in condition_overrides:
+                        override_map = condition_overrides[condition_key]
+                        if condition_value in override_map:
+                            final_settings.update(override_map[condition_value])
+                
+                return self.with_settings(final_settings)
+        
+        # Test different conditional scenarios
+        scenarios = [
+            {
+                'conditions': {'environment': 'production', 'region': 'us-east'},
+                'expected_name': 'prod_us_profile',
+                'expected_model': 'gpt-4-production'
+            },
+            {
+                'conditions': {'environment': 'development', 'region': 'us-west'},
+                'expected_name': 'dev_us_profile',
+                'expected_model': 'gpt-3.5-turbo'
+            },
+            {
+                'conditions': {'environment': 'staging', 'region': 'eu-west'},
+                'expected_name': 'staging_eu_profile',
+                'expected_model': 'gpt-4-staging'
+            }
+        ]
+        
+        for scenario in scenarios:
+            with self.subTest(conditions=scenario['conditions']):
+                builder = ConditionalProfileBuilder()
+                
+                # Apply conditions
+                for key, value in scenario['conditions'].items():
+                    builder.when(key, value)
+                
+                # Build with conditional logic
+                profile_data = (builder
+                    .with_conditional_name('default_profile', {
+                        'environment': {
+                            'production': 'prod_us_profile',
+                            'development': 'dev_us_profile',
+                            'staging': 'staging_eu_profile'
+                        }
+                    })
+                    .with_version('1.0.0')
+                    .with_conditional_settings(
+                        {'temperature': 0.7, 'max_tokens': 1000},
+                        {
+                            'environment': {
+                                'production': {'ai_model': 'gpt-4-production', 'temperature': 0.5},
+                                'development': {'ai_model': 'gpt-3.5-turbo', 'temperature': 0.9},
+                                'staging': {'ai_model': 'gpt-4-staging', 'temperature': 0.7}
+                            }
+                        }
+                    )
+                    .build())
+                
+                # Verify conditional results
+                self.assertEqual(profile_data['name'], scenario['expected_name'])
+                self.assertEqual(profile_data['settings']['ai_model'], scenario['expected_model'])
+    
+    def test_builder_validation_integration(self):
+        """
+        Test deep integration between builder and validation with error recovery.
+        
+        Verifies that the builder can work with validation to incrementally build
+        valid profiles and recover from validation errors.
+        """
+        class ValidatingProfileBuilder(ProfileBuilder):
+            def __init__(self, validator=None):
+                super().__init__()
+                self.validator = validator or ProfileValidator()
+                self.validation_errors = []
+            
+            def validate_current_state(self):
+                """Validate the current builder state"""
+                if ProfileValidator.validate_profile_data(self.data):
+                    return True, []
+                else:
+                    errors = []
+                    required_fields = ['name', 'version', 'settings']
+                    for field in required_fields:
+                        if field not in self.data:
+                            errors.append(f"Missing required field: {field}")
+                    return False, errors
+            
+            def build_with_validation(self):
+                """Build only if validation passes"""
+                is_valid, errors = self.validate_current_state()
+                if is_valid:
+                    return self.build()
+                else:
+                    self.validation_errors = errors
+                    raise ValidationError(f"Validation failed: {', '.join(errors)}")
+            
+            def build_with_defaults(self, defaults):
+                """Build with default values for missing fields"""
+                current_data = self.data.copy()
+                
+                # Apply defaults for missing fields
+                for field, default_value in defaults.items():
+                    if field not in current_data:
+                        current_data[field] = default_value
+                
+                # Temporarily update data for validation
+                original_data = self.data
+                self.data = current_data
+                
+                try:
+                    return self.build_with_validation()
+                finally:
+                    self.data = original_data
+        
+        # Test successful validation
+        builder = ValidatingProfileBuilder()
+        profile_data = (builder
+            .with_name('validated_profile')
+            .with_version('1.0.0')
+            .with_settings({'temperature': 0.7})
+            .build_with_validation())
+        
+        self.assertEqual(profile_data['name'], 'validated_profile')
+        self.assertTrue(ProfileValidator.validate_profile_data(profile_data))
+        
+        # Test validation failure
+        incomplete_builder = ValidatingProfileBuilder()
+        incomplete_builder.with_name('incomplete')
+        
+        with self.assertRaises(ValidationError):
+            incomplete_builder.build_with_validation()
+        
+        self.assertGreater(len(incomplete_builder.validation_errors), 0)
+        
+        # Test building with defaults
+        profile_with_defaults = incomplete_builder.build_with_defaults({
+            'version': '1.0.0',
+            'settings': {'default': True}
+        })
+        
+        self.assertEqual(profile_with_defaults['name'], 'incomplete')
+        self.assertEqual(profile_with_defaults['version'], '1.0.0')
+        self.assertTrue(profile_with_defaults['settings']['default'])
+
+
+class TestProfileManagerAdvancedFeatures(unittest.TestCase):
+    """Test advanced ProfileManager features and patterns"""
+    
+    def setUp(self):
+        """Set up ProfileManager for advanced feature tests"""
+        self.manager = ProfileManager()
+    
+    def test_profile_cloning_and_templating(self):
+        """
+        Test profile cloning functionality for creating templates and variants.
+        
+        Verifies that profiles can be cloned with modifications to create
+        template-based profile families.
+        """
+        # Create a base template profile
+        template_data = {
+            'name': 'base_template',
+            'version': '1.0.0',
+            'settings': {
+                'ai_model': 'gpt-4',
+                'temperature': 0.7,
+                'max_tokens': 1000,
+                'template_metadata': {
+                    'is_template': True,
+                    'template_version': '1.0',
+                    'template_category': 'ai_models'
+                }
+            }
+        }
+        
+        template_profile = self.manager.create_profile('base_template', template_data)
+        
+        def clone_profile_with_modifications(source_profile, new_id, modifications):
+            """
+            Clone a profile and apply modifications to create a new variant.
+            
+            Args:
+                source_profile: The profile to clone
+                new_id: ID for the new profile
+                modifications: Dict of modifications to apply
+                
+            Returns:
+                New cloned and modified profile
+            """
+            import copy
+            
+            # Deep copy the source data
+            cloned_data = copy.deepcopy(source_profile.data)
+            
+            # Apply modifications
+            for key_path, new_value in modifications.items():
+                keys = key_path.split('.')
+                current = cloned_data
+                
+                # Navigate to the nested location
+                for key in keys[:-1]:
+                    if key not in current:
+                        current[key] = {}
+                    current = current[key]
+                
+                # Set the final value
+                current[keys[-1]] = new_value
+            
+            return self.manager.create_profile(new_id, cloned_data)
+        
+        # Create variants from the template
+        variants = [
+            {
+                'id': 'high_creativity_variant',
+                'modifications': {
+                    'name': 'high_creativity_model',
+                    'settings.temperature': 0.9,
+                    'settings.template_metadata.variant_type': 'high_creativity'
+                }
+            },
+            {
+                'id': 'conservative_variant',
+                'modifications': {
+                    'name': 'conservative_model',
+                    'settings.temperature': 0.3,
+                    'settings.max_tokens': 500,
+                    'settings.template_metadata.variant_type': 'conservative'
+                }
+            },
+            {
+                'id': 'code_specialist_variant',
+                'modifications': {
+                    'name': 'code_specialist_model',
+                    'settings.ai_model': 'gpt-4-code',
+                    'settings.temperature': 0.1,
+                    'settings.template_metadata.variant_type': 'code_specialist'
+                }
+            }
+        ]
+        
+        cloned_profiles = []
+        for variant in variants:
+            cloned_profile = clone_profile_with_modifications(
+                template_profile,
+                variant['id'],
+                variant['modifications']
+            )
+            cloned_profiles.append(cloned_profile)
+        
+        # Verify cloning results
+        self.assertEqual(len(cloned_profiles), 3)
+        
+        # Verify each variant has correct modifications
+        high_creativity = self.manager.get_profile('high_creativity_variant')
+        self.assertEqual(high_creativity.data['settings']['temperature'], 0.9)
+        self.assertEqual(high_creativity.data['settings']['template_metadata']['variant_type'], 'high_creativity')
+        
+        conservative = self.manager.get_profile('conservative_variant')
+        self.assertEqual(conservative.data['settings']['temperature'], 0.3)
+        self.assertEqual(conservative.data['settings']['max_tokens'], 500)
+        
+        code_specialist = self.manager.get_profile('code_specialist_variant')
+        self.assertEqual(code_specialist.data['settings']['ai_model'], 'gpt-4-code')
+        self.assertEqual(code_specialist.data['settings']['temperature'], 0.1)
+        
+        # Verify all variants maintain template heritage
+        for profile in cloned_profiles:
+            self.assertTrue(profile.data['settings']['template_metadata']['is_template'])
+            self.assertEqual(profile.data['settings']['template_metadata']['template_version'], '1.0')
+    
+    def test_profile_dependency_tracking(self):
+        """
+        Test profile dependency tracking and relationship management.
+        
+        Simulates a system where profiles can depend on other profiles and
+        verifies dependency resolution and circular dependency detection.
+        """
+        # Create profiles with dependencies
+        profiles_with_deps = [
+            {
+                'id': 'base_config',
+                'data': {
+                    'name': 'base_configuration',
+                    'version': '1.0.0',
+                    'settings': {
+                        'type': 'base',
+                        'shared_settings': {
+                            'timeout': 30,
+                            'retry_count': 3
+                        }
+                    }
+                }
+            },
+            {
+                'id': 'api_config',
+                'data': {
+                    'name': 'api_configuration',
+                    'version': '1.0.0',
+                    'settings': {
+                        'type': 'api',
+                        'dependencies': ['base_config'],
+                        'api_specific': {
+                            'rate_limit': 1000,
+                            'endpoints': ['users', 'posts']
+                        }
+                    }
+                }
+            },
+            {
+                'id': 'auth_config',
+                'data': {
+                    'name': 'auth_configuration',
+                    'version': '1.0.0',
+                    'settings': {
+                        'type': 'auth',
+                        'dependencies': ['base_config'],
+                        'auth_specific': {
+                            'method': 'oauth2',
+                            'token_expiry': 3600
+                        }
+                    }
+                }
+            },
+            {
+                'id': 'full_stack_config',
+                'data': {
+                    'name': 'full_stack_configuration',
+                    'version': '1.0.0',
+                    'settings': {
+                        'type': 'composite',
+                        'dependencies': ['api_config', 'auth_config'],
+                        'composite_settings': {
+                            'environment': 'production',
+                            'monitoring': True
+                        }
+                    }
+                }
+            }
+        ]
+        
+        # Create all profiles
+        for profile_spec in profiles_with_deps:
+            self.manager.create_profile(profile_spec['id'], profile_spec['data'])
+        
+        def resolve_dependencies(profile_id, visited=None):
+            """
+            Recursively resolve profile dependencies.
+            
+            Args:
+                profile_id: ID of the profile to resolve
+                visited: Set of already visited profiles (for cycle detection)
+                
+            Returns:
+                List of profiles in dependency order
+                
+            Raises:
+                ValueError: If circular dependency is detected
+            """
+            if visited is None:
+                visited = set()
+            
+            if profile_id in visited:
+                raise ValueError(f"Circular dependency detected involving profile: {profile_id}")
+            
+            visited.add(profile_id)
+            resolved = []
+            
+            profile = self.manager.get_profile(profile_id)
+            if not profile:
+                raise ValueError(f"Profile not found: {profile_id}")
+            
+            # Get dependencies
+            dependencies = profile.data.get('settings', {}).get('dependencies', [])
+            
+            # Resolve each dependency first
+            for dep_id in dependencies:
+                dep_resolved = resolve_dependencies(dep_id, visited.copy())
+                for dep_profile in dep_resolved:
+                    if dep_profile not in resolved:
+                        resolved.append(dep_profile)
+            
+            # Add current profile
+            if profile not in resolved:
+                resolved.append(profile)
+            
+            return resolved
+        
+        # Test dependency resolution
+        full_stack_deps = resolve_dependencies('full_stack_config')
+        
+        # Verify resolution order (dependencies should come before dependents)
+        profile_names = [p.data['name'] for p in full_stack_deps]
+        
+        self.assertIn('base_configuration', profile_names)
+        self.assertIn('api_configuration', profile_names)
+        self.assertIn('auth_configuration', profile_names)
+        self.assertIn('full_stack_configuration', profile_names)
+        
+        # Base config should come before others
+        base_index = profile_names.index('base_configuration')
+        api_index = profile_names.index('api_configuration')
+        auth_index = profile_names.index('auth_configuration')
+        full_index = profile_names.index('full_stack_configuration')
+        
+        self.assertLess(base_index, api_index)
+        self.assertLess(base_index, auth_index)
+        self.assertLess(api_index, full_index)
+        self.assertLess(auth_index, full_index)
+        
+        # Test circular dependency detection
+        # Create a circular dependency
+        circular_profile = {
+            'name': 'circular_test',
+            'version': '1.0.0',
+            'settings': {
+                'dependencies': ['full_stack_config'],  # This creates a cycle
+                'circular': True
+            }
+        }
+        self.manager.create_profile('circular_test', circular_profile)
+        
+        # Update full_stack_config to depend on circular_test
+        self.manager.update_profile('full_stack_config', {
+            'settings': {
+                'type': 'composite',
+                'dependencies': ['api_config', 'auth_config', 'circular_test'],
+                'composite_settings': {
+                    'environment': 'production',
+                    'monitoring': True
+                }
+            }
+        })
+        
+        # Should detect circular dependency
+        with self.assertRaises(ValueError) as context:
+            resolve_dependencies('full_stack_config')
+        
+        self.assertIn("Circular dependency", str(context.exception))
+
+
+class TestProfileSystemRobustness(unittest.TestCase):
+    """Test system robustness under various failure conditions"""
+    
+    def setUp(self):
+        """Set up for robustness tests"""
+        self.manager = ProfileManager()
+    
+    def test_memory_pressure_handling(self):
+        """
+        Test system behavior under memory pressure conditions.
+        
+        Creates profiles with increasingly large data to test memory handling
+        and garbage collection behavior.
+        """
+        import gc
+        import sys
+        
+        # Force garbage collection before test
+        gc.collect()
+        initial_objects = len(gc.get_objects())
+        
+        # Create profiles with increasing memory footprint
+        memory_test_profiles = []
+        
+        for size_factor in [1, 10, 100, 1000]:
+            data_size = 1000 * size_factor
+            profile_data = {
+                'name': f'memory_test_{size_factor}',
+                'version': '1.0.0',
+                'settings': {
+                    'large_list': list(range(data_size)),
+                    'large_dict': {f'key_{i}': f'value_{i}' * 100 for i in range(data_size // 10)},
+                    'metadata': {
+                        'size_factor': size_factor,
+                        'expected_memory_mb': (data_size * 100) // (1024 * 1024)
+                    }
+                }
+            }
+            
+            try:
+                profile = self.manager.create_profile(f'memory_test_{size_factor}', profile_data)
+                memory_test_profiles.append(profile)
+                
+                # Verify profile was created successfully
+                self.assertIsNotNone(profile)
+                self.assertEqual(len(profile.data['settings']['large_list']), data_size)
+                
+            except MemoryError:
+                # If we hit memory limits, that's acceptable for very large profiles
+                break
+        
+        # Verify all created profiles are still accessible
+        for profile in memory_test_profiles:
+            retrieved = self.manager.get_profile(profile.profile_id)
+            self.assertIsNotNone(retrieved)
+            self.assertEqual(retrieved.profile_id, profile.profile_id)
+        
+        # Clean up large profiles
+        for profile in memory_test_profiles:
+            self.manager.delete_profile(profile.profile_id)
+        
+        # Force garbage collection
+        del memory_test_profiles
+        gc.collect()
+        
+        # Verify memory cleanup (object count should not have grown significantly)
+        final_objects = len(gc.get_objects())
+        object_growth = final_objects - initial_objects
+        
+        # Allow for some growth but not excessive
+        self.assertLess(object_growth, 10000, "Excessive object growth detected")
+    
+    def test_exception_recovery_patterns(self):
+        """
+        Test system recovery from various exception scenarios.
+        
+        Simulates different types of exceptions and verifies that the system
+        maintains consistency and can recover gracefully.
+        """
+        # Test recovery from profile creation failures
+        invalid_scenarios = [
+            {
+                'name': 'none_data_test',
+                'profile_id': 'none_test',
+                'data': None,
+                'expected_exception': TypeError
+            },
+            {
+                'name': 'invalid_type_test',
+                'profile_id': 'type_test',
+                'data': "invalid_string_data",
+                'expected_exception': (TypeError, AttributeError)
+            },
+            {
+                'name': 'none_id_test',
+                'profile_id': None,
+                'data': {'name': 'test', 'version': '1.0.0', 'settings': {}},
+                'expected_exception': (TypeError, ValueError)
+            }
+        ]
+        
+        # Verify system state before testing
+        initial_profile_count = len(self.manager.profiles)
+        
+        for scenario in invalid_scenarios:
+            with self.subTest(scenario=scenario['name']):
+                # Attempt invalid operation
+                with self.assertRaises(scenario['expected_exception']):
+                    self.manager.create_profile(scenario['profile_id'], scenario['data'])
+                
+                # Verify system state is unchanged
+                self.assertEqual(len(self.manager.profiles), initial_profile_count)
+                
+                # Verify system can still create valid profiles
+                valid_data = {
+                    'name': f"recovery_test_{scenario['name']}",
+                    'version': '1.0.0',
+                    'settings': {'test': True}
+                }
+                recovery_profile = self.manager.create_profile(f"recovery_{scenario['name']}", valid_data)
+                self.assertIsNotNone(recovery_profile)
+        
+        # Test recovery from update failures
+        # Create a profile for update testing
+        self.manager.create_profile('update_test', {
+            'name': 'update_test_profile',
+            'version': '1.0.0',
+            'settings': {'original': True}
+        })
+        
+        original_data = self.manager.get_profile('update_test').data.copy()
+        
+        # Attempt invalid updates
+        update_scenarios = [
+            {'data': None, 'exception': (TypeError, AttributeError)},
+            {'data': "invalid_string", 'exception': (TypeError, AttributeError)},
+            {'data': 123, 'exception': (TypeError, AttributeError)}
+        ]
+        
+        for scenario in update_scenarios:
+            with self.subTest(update_data=scenario['data']):
+                try:
+                    self.manager.update_profile('update_test', scenario['data'])
+                except scenario['exception']:
+                    # Expected exception occurred
+                    pass
+                
+                # Verify original data is preserved
+                current_profile = self.manager.get_profile('update_test')
+                self.assertIsNotNone(current_profile)
+                
+                # Original settings should be preserved (basic check)
+                self.assertTrue(current_profile.data['settings']['original'])
+        
+        # Test deletion robustness
+        deletion_scenarios = [
+            {'profile_id': None, 'should_raise': False},  # Should return False, not raise
+            {'profile_id': '', 'should_raise': False},    # Should return False, not raise
+            {'profile_id': 'nonexistent', 'should_raise': False}  # Should return False, not raise
+        ]
+        
+        for scenario in deletion_scenarios:
+            with self.subTest(delete_id=scenario['profile_id']):
+                if scenario['should_raise']:
+                    with self.assertRaises(Exception):
+                        self.manager.delete_profile(scenario['profile_id'])
+                else:
+                    # Should not raise exception, just return False
+                    result = self.manager.delete_profile(scenario['profile_id'])
+                    self.assertFalse(result)
+                
+                # System should remain functional
+                test_profile = self.manager.create_profile(f"deletion_recovery_{hash(str(scenario['profile_id']))}", {
+                    'name': 'deletion_recovery',
+                    'version': '1.0.0',
+                    'settings': {'recovery': True}
+                })
+                self.assertIsNotNone(test_profile)
+
+
+if __name__ == '__main__':
+    # Run the comprehensive test suite with both unittest and pytest
+    import sys
+    
+    print("Running comprehensive profile system tests...")
+    print("=" * 70)
+    
+    # Run unittest tests with high verbosity
+    test_result = unittest.main(argv=[''], exit=False, verbosity=2)
+    
+    # Run pytest tests if available
+    try:
+        import pytest
+        print("\nRunning pytest parametrized tests...")
+        pytest.main([__file__, '-v', '--tb=short'])
+    except ImportError:
+        print("Pytest not available, skipping parametrized tests")
+    
+    print("=" * 70)
+    print("All tests completed!")

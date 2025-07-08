@@ -26,6 +26,12 @@ class AuraAIServiceImpl @Inject constructor(
         return "Placeholder analytics response for '$_query'"
     }
 
+    /**
+     * Placeholder for downloading a file by its ID.
+     *
+     * @param _fileId The identifier of the file to download.
+     * @return Always returns null as the implementation is not provided.
+     */
     override suspend fun downloadFile(_fileId: String): File? {
         // TODO: Implement file download; Reported as unused
         println("AuraAIServiceImpl.downloadFile called for fileId: $_fileId")
@@ -33,10 +39,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Generates an image based on the provided prompt.
+     * Generates an image from the given prompt.
      *
-     * @param _prompt The textual description used to generate the image.
-     * @return A byte array representing the generated image, or null if not implemented.
+     * @param _prompt The description used to generate the image.
+     * @return The generated image as a byte array, or null if not implemented.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         // TODO: Implement image generation; Reported as unused
@@ -45,11 +51,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Generates text based on the provided prompt and optional parameters.
+     * Generates text based on the given prompt and optional parameters.
      *
-     * @param prompt The input text prompt for text generation.
-     * @param options Optional parameters that may influence text generation.
-     * @return A placeholder generated text string for the given prompt.
+     * @param prompt The input prompt for text generation.
+     * @param options Optional parameters that may affect the generated text.
+     * @return A placeholder string representing the generated text for the prompt.
      */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         // TODO: Implement text generation; Reported as unused
@@ -58,11 +64,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a placeholder AI-generated response for the given prompt.
+     * Returns a placeholder AI-generated response for the specified prompt.
      *
-     * @param prompt The input text to generate a response for.
-     * @param options Optional parameters for customizing the AI response.
-     * @return A placeholder response string, or null if not implemented.
+     * @param prompt The input text for which to generate a response.
+     * @param options Optional parameters to customize the AI response.
+     * @return A placeholder response string.
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         // TODO: Implement AI response retrieval; Reported as unused
@@ -71,10 +77,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Retrieves a placeholder memory value for the specified key.
+     * Returns a placeholder memory value for the given key.
      *
-     * @param _memoryKey The key identifying the memory entry to retrieve.
-     * @return A placeholder string representing the memory value for the given key.
+     * @param _memoryKey The key for which to retrieve the memory value.
+     * @return A placeholder string representing the memory value, or null if not implemented.
      */
     override fun getMemory(_memoryKey: String): String? {
         // TODO: Implement memory retrieval; Reported as unused
@@ -83,10 +89,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stores a value in memory associated with the specified key.
+     * Stores a value in memory associated with the given key.
      *
      * @param key The identifier for the memory entry.
-     * @param value The value to be stored.
+     * @param value The value to store.
      */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement memory saving; Reported as unused
@@ -94,7 +100,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns whether the service is currently connected.
+     * Indicates whether the service is currently connected.
      *
      * This placeholder implementation always returns true.
      *
@@ -107,9 +113,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder for publishing a message to a PubSub topic.
+     * Logs a PubSub topic and message as a placeholder for future PubSub publishing functionality.
      *
-     * Currently logs the topic and message; actual PubSub publishing is not implemented.
+     * No actual message publishing is performed.
      */
     override fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing; Reported as unused
@@ -118,9 +124,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Uploads a file and returns a placeholder file ID.
+     * Uploads a file and returns a placeholder file ID string.
      *
-     * @return A placeholder file ID string for the uploaded file, or null if not implemented.
+     * @param _file The file to be uploaded.
+     * @return A placeholder file ID string based on the file name, or null if not implemented.
      */
     override suspend fun uploadFile(_file: File): String? {
         // TODO: Implement file upload; Reported as unused
