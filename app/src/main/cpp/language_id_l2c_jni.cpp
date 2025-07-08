@@ -11,12 +11,12 @@ extern "C" {
 #endif
 
 /**
- * @brief Initializes the language identifier with the provided model path.
+ * @brief Initializes the language identifier using the provided model path.
  *
- * Uses a basic pattern-based approach for language identification without relying on external models.
- * Returns the version string of the language identifier implementation.
+ * Employs a simple pattern-based approach for language identification without loading external models.
+ * Returns the version string "1.2.0" if the model path is valid, or an empty string if the model path is null.
  *
- * @return jstring Version string ("1.2.0") if initialization succeeds, or an empty string if the model path is null.
+ * @return jstring Version string ("1.2.0") on success, or an empty string if initialization fails.
  */
 JNIEXPORT jstring
 
@@ -41,12 +41,12 @@ Java_com_example_app_language_LanguageIdentifier_nativeInitialize(
 }
 
 /**
- * @brief Detects the language of the provided text using heuristic pattern matching.
+ * @brief Identifies the language of the input text using heuristic pattern matching.
  *
- * Analyzes the input string for language-specific words and character patterns to identify Spanish ("es"), French ("fr"), German ("de"), Italian ("it"), Portuguese ("pt"), or defaults to English ("en"). If the text contains a high proportion of accented (non-ASCII) characters without a clear language match, returns "mul" for multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
+ * Analyzes the input string for language-specific words and character patterns to determine if the text is in Spanish ("es"), French ("fr"), German ("de"), Italian ("it"), Portuguese ("pt"), or defaults to English ("en"). If the text contains a high proportion of accented (non-ASCII) characters without a clear language match, returns "mul" for multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
  *
- * @param text The input text to analyze.
- * @return jstring ISO 639-1 language code ("es", "fr", "de", "it", "pt", "en", "mul", or "und").
+ * @param text Input text to analyze.
+ * @return jstring ISO 639-1 language code: "es", "fr", "de", "it", "pt", "en", "mul", or "und".
  */
 JNIEXPORT jstring
 
@@ -126,11 +126,11 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
 }
 
 /**
- * @brief Releases resources associated with the language identifier.
+ * @brief Logs cleanup of language identifier resources for a given handle.
  *
- * If the provided handle is non-zero, logs that resources have been cleaned up. No actual resource deallocation is performed in this implementation.
+ * If the handle is non-zero, a log entry is made indicating resource cleanup. No actual resource deallocation occurs.
  *
- * @param handle Native handle for the language identifier instance.
+ * @param handle Native handle representing the language identifier instance.
  */
 JNIEXPORT void JNICALL
 Java_com_example_app_language_LanguageIdentifier_nativeRelease(

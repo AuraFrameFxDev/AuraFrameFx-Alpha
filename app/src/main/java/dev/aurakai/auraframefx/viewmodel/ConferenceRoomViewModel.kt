@@ -95,7 +95,18 @@ class ConferenceRoomViewModel @Inject constructor(
 
     // This `sendMessage` was marked with `override` in user's snippet, suggesting an interface.
     // For now, assuming it's a direct method. If there's a base class/interface, it should be added.
-    /*override*/ suspend fun sendMessage(message: String, sender: AgentType, context: String) {
+    /*override*/ /**
+     * Sends a message to the specified AI agent and updates the conversation with the agent's response.
+     *
+     * Constructs an AI request using the provided message and context, routes it to the appropriate agent service,
+     * and appends the agent's response to the conversation messages. If an error occurs during processing,
+     * an error message from the system agent is added to the conversation.
+     *
+     * @param message The message to send to the AI agent.
+     * @param sender The agent type to which the message is sent.
+     * @param context Additional context information to include in the request.
+     */
+    suspend fun sendMessage(message: String, sender: AgentType, context: String) {
         // Fixed duplicate case for AgentType.AURA and added missing context parameter
         val responseFlow: Flow<AgentResponse>? = when (sender) {
             AgentType.AURA -> auraService.processRequestFlow(

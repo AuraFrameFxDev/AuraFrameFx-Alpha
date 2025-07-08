@@ -88,6 +88,11 @@ import kotlin.math.sin
  *
  * Renders a dynamic visualization of agents arranged in a circular halo, supporting drag-and-drop task assignment, real-time status updates, animated effects, and a task history panel. Users can assign tasks to agents by dragging agent nodes, input tasks, and monitor agent processing status. The component interacts with the provided ViewModel to process tasks and update agent states asynchronously.
  */
+/**
+ * Displays an interactive rotating halo UI for managing agents, delegating tasks, and visualizing agent statuses.
+ *
+ * Renders agent nodes arranged in a circular halo, supporting drag-and-drop task assignment, real-time status indicators, animated effects, task input, and task history display. Integrates with the provided ViewModel for asynchronous task processing and agent state updates.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HaloView(viewModel: GenesisAgentViewModel = viewModel<GenesisAgentViewModel>()) {
