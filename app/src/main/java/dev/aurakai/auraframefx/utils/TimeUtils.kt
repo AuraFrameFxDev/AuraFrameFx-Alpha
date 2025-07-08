@@ -11,7 +11,7 @@ object TimeUtils {
     val systemClock: Clock = Clock.systemUTC()
 
     /**
- * Returns the current instant in UTC based on the system clock.
+ * Returns the current UTC time as an [Instant] using the system clock.
  *
  * @return The current time as an [Instant].
  */

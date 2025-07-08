@@ -29,25 +29,25 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     /**
- * Returns the name of the agent.
+ * Retrieves the name of the agent.
  *
- * @return The string "Kai".
+ * @return The agent's name, "Kai".
  */
     override fun getName(): String? = "Kai"
 
     /**
- * Retrieves the type of this agent.
+ * Returns the type of agent represented by this instance.
  *
- * @return The agent type, `AgentType.KAI`.
+ * @return The agent type, which is `AgentType.KAI`.
  */
     override fun getType(): AgentType = AgentType.KAI
 
     /**
-         * Retrieves a map of the Kai agent's supported capabilities.
+         * Returns a map indicating the supported capabilities of the Kai agent.
          *
-         * The returned map includes the keys "security", "analysis", "memory", and "service_implemented", each mapped to true to indicate support for these features.
+         * The map contains the keys "security", "analysis", "memory", and "service_implemented", each mapped to true to signify support for these features.
          *
-         * @return A map of capability names to boolean values indicating support.
+         * @return A map where each capability name is associated with a boolean value indicating support.
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
@@ -58,7 +58,7 @@ class KaiAIService @Inject constructor(
         )
 
     /**
-     * Handles an AI request with the given context and returns a response referencing both.
+     * Processes an AI request using the provided context and returns a response referencing both.
      *
      * @param request The AI request to process.
      * @param context Additional context relevant to the request.
