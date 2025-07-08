@@ -5,10 +5,10 @@ import dev.aurakai.auraframefx.ai.model.GenerateTextResponse
 
 interface AiContentApi {
     /**
- * Generates AI-powered text content according to the specifications in the request.
+ * Generates AI-powered text content based on the provided request.
  *
- * @param request Contains the parameters and context for text generation.
- * @return The generated text content and related metadata.
+ * @param request The request specifying parameters and context for text generation.
+ * @return A response containing the generated text and associated metadata.
  */
 suspend fun generateText(request: GenerateTextRequest): GenerateTextResponse
 }

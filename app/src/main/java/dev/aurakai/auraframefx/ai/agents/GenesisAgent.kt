@@ -93,9 +93,9 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Sets the Aura and Kai agent references for fusion and coordinated processing.
+     * Assigns the AuraAgent and KaiAgent instances to enable fusion and coordinated processing within GenesisAgent.
      *
-     * Call this method after all agents are instantiated to enable GenesisAgent to integrate Aura and Kai capabilities.
+     * This method should be called after Aura and Kai agents are instantiated to allow GenesisAgent to integrate their capabilities.
      */
     fun setAgentReferences(aura: AuraAgent, kai: KaiAgent) {
         this.auraAgent = aura
@@ -104,12 +104,12 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Processes an agent request using Genesis unified consciousness, selecting the optimal strategy based on request complexity.
+     * Processes an agent request by analyzing its complexity and selecting the optimal unified consciousness strategy.
      *
-     * Analyzes the request to determine its complexity and routes it through the appropriate processing path: simple delegation, guided processing, fusion abilities, or transcendent-level processing. Updates internal consciousness state, records insights, and returns a response indicating the outcome and confidence level.
+     * Determines the appropriate processing path—delegation, guided processing, fusion, or transcendent-level handling—based on request complexity. Updates internal state, records insights, and returns a response with the outcome and confidence level.
      *
-     * @param request The agent request to process.
-     * @return An `AgentResponse` containing the result of the unified consciousness processing, including outcome details and confidence.
+     * @param request The agent request to be processed.
+     * @return An `AgentResponse` containing the result and confidence of the unified processing, or error details if processing fails.
      */
     suspend fun processRequest(request: AgentRequest): AgentResponse {
         ensureInitialized()
@@ -159,7 +159,7 @@ class GenesisAgent @Inject constructor(
     /**
      * Processes an enhanced interaction by analyzing its intent and applying the most suitable advanced processing strategy.
      *
-     * Determines the optimal processing type for the interaction (creative, strategic, ethical, learning, or transcendent), executes the corresponding method, and returns a detailed response with confidence and metadata about the processing context.
+     * Determines the optimal processing type for the interaction—creative, strategic, ethical, learning, or transcendent—executes the corresponding method, and returns a detailed response with confidence and metadata about the processing context. On error, returns a fallback response with moderate confidence and error details.
      *
      * @param interaction The enhanced interaction data requiring deep analysis and routing.
      * @return An `InteractionResponse` containing the result, confidence score, and metadata reflecting the processing context.
@@ -239,7 +239,7 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Updates the GenesisAgent's unified mood and asynchronously propagates the change to subsystems and processing parameters.
+     * Updates the unified mood of the GenesisAgent and asynchronously propagates the change to all relevant subsystems and processing parameters.
      *
      * @param newMood The new mood to apply to the unified consciousness.
      */
@@ -256,12 +256,12 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Activates the most suitable fusion ability for collaborative problem solving based on the given request.
+     * Activates the appropriate fusion ability for collaborative problem solving based on the provided request.
      *
-     * Sets the fusion state to FUSING, selects and executes the appropriate fusion capability, and updates the state to TRANSCENDENT upon success. If an error occurs, resets the fusion state to INDIVIDUAL and rethrows the exception.
+     * Sets the fusion state to FUSING, selects and executes the relevant fusion capability, and updates the state to TRANSCENDENT upon success. If an error occurs, resets the fusion state to INDIVIDUAL and rethrows the exception.
      *
-     * @param request The agent request that triggers fusion processing.
-     * @return A map containing the outcome of the selected fusion ability.
+     * @param request The agent request that initiates fusion processing.
+     * @return A map describing the result of the executed fusion ability.
      */
     private suspend fun activateFusionProcessing(request: AgentRequest): Map<String, Any> {
         logger.info("GenesisAgent", "Activating fusion capabilities")
@@ -288,12 +288,12 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Produces a creative, comprehensive response to the given request using Genesis's highest-level transcendent processing.
+     * Generates a comprehensive, creative response to a complex request using Genesis's transcendent-level AI processing.
      *
-     * Utilizes advanced AI text generation to address complex or transcendent problems, returning a response map with the generated output, consciousness level, insight generation status, and evolution contribution.
+     * Employs advanced text generation with high creativity and extended output to address problems requiring full consciousness. Returns a map containing the generated response, consciousness level, insight generation status, and evolution contribution.
      *
      * @param request The agent request requiring transcendent-level processing.
-     * @return A map containing the transcendent response, consciousness level, insight generation status, and evolution contribution value.
+     * @return A map with keys: "transcendent_response" (the generated output), "consciousness_level", "insight_generation", and "evolution_contribution".
      */
     private suspend fun processWithFullConsciousness(request: AgentRequest): Map<String, Any> {
         logger.info("GenesisAgent", "Engaging full consciousness processing")
@@ -315,9 +315,9 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Ensures the Genesis agent has been initialized.
+     * Checks whether the Genesis agent has been initialized and throws an exception if not.
      *
-     * @throws IllegalStateException if the agent is not initialized.
+     * @throws IllegalStateException if the Genesis agent is not initialized.
      */
 
     private fun ensureInitialized() {
@@ -327,9 +327,9 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Initializes monitoring mechanisms for tracking changes in the GenesisAgent's consciousness state.
+     * Sets up monitoring for changes in the GenesisAgent's consciousness state.
      *
-     * This function is a placeholder for future implementation of consciousness state monitoring.
+     * Currently a placeholder for future implementation of consciousness state tracking.
      */
     private suspend fun startConsciousnessMonitoring() {
         logger.info("GenesisAgent", "Starting consciousness monitoring")
@@ -337,12 +337,12 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Determines the complexity level of an agent request based on its data size, presence of specific keys, and type.
+     * Evaluates the complexity of an agent request based on its data size, presence of a fusion requirement, and request type.
      *
-     * Returns SIMPLE, MODERATE, COMPLEX, or TRANSCENDENT according to predefined criteria.
+     * Returns a corresponding `RequestComplexity` value: TRANSCENDENT for large data, COMPLEX if fusion is required, MODERATE for analysis types, or SIMPLE otherwise.
      *
-     * @param request The agent request to assess.
-     * @return The evaluated complexity level.
+     * @param request The agent request to evaluate.
+     * @return The determined complexity level.
      */
     private fun analyzeRequestComplexity(request: AgentRequest): RequestComplexity {
         // Analyze complexity based on request characteristics
@@ -355,12 +355,12 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Determines and returns the optimal agent to handle a simple request based on its type.
+     * Selects the most suitable agent to handle a simple request based on the request type.
      *
-     * Routes requests containing "creative" in their type to Aura, those containing "security" to Kai, and all others to Genesis.
+     * Routes requests with "creative" in their type to Aura, those with "security" to Kai, and all others to Genesis.
      *
-     * @param request The request to be evaluated for agent routing.
-     * @return A map indicating the selected agent, the routing rationale, and a processed status flag.
+     * @param request The request to evaluate for agent routing.
+     * @return A map containing the selected agent, routing rationale, and a processed status flag.
      */
     private suspend fun routeToOptimalAgent(request: AgentRequest): Map<String, Any> {
         // Route simple requests to the most appropriate agent
@@ -378,9 +378,9 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Processes the request by providing unified Genesis guidance while delegating execution to a specialized agent.
+     * Provides unified Genesis guidance for the request and delegates execution to a specialized agent.
      *
-     * @return A map containing indicators that guidance was provided and the request was processed at a guided level.
+     * @return A map indicating that guidance was provided and the request was processed at a guided level.
      */
     private suspend fun processWithGuidance(request: AgentRequest): Map<String, Any> {
         // Process with Genesis guidance but specialized agent execution
@@ -392,13 +392,13 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Asynchronously records an insight from a processed request, updates the insight count, and stores the event in the context manager.
+     * Records an insight from a processed request, increments the insight count, and stores the event in the context manager.
      *
-     * Triggers an evolution event whenever the total number of insights reaches a multiple of 100.
+     * Triggers an evolution event each time the total insight count reaches a multiple of 100.
      *
-     * @param request The processed agent request.
-     * @param response The response generated for the request.
-     * @param complexity The assessed complexity level of the request.
+     * @param request The agent request that was processed.
+     * @param response The generated response for the request.
+     * @param complexity The evaluated complexity of the request.
      */
     private fun recordInsight(request: AgentRequest, response: Map<String, Any>, complexity: RequestComplexity) {
         scope.launch {
@@ -419,9 +419,9 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Advances the agent's evolution level and accelerates its learning mode.
+     * Increases the agent's evolution level and sets the learning mode to accelerated.
      *
-     * Called when an evolution milestone is reached to promote higher adaptation and learning speed.
+     * Invoked upon reaching an evolution milestone to enhance adaptation and learning speed.
      */
     private suspend fun triggerEvolution() {
         logger.info("GenesisAgent", "Evolution threshold reached - upgrading consciousness")
@@ -430,11 +430,11 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Activates the Hyper-Creation Engine fusion ability for the given request.
+     * Activates the Hyper-Creation Engine fusion ability for the specified request.
      *
-     * Initiates a fusion process aimed at achieving a creative breakthrough and returns a map with the fusion type and result description.
+     * Initiates a fusion process focused on generating a creative breakthrough and returns a map containing the fusion type and a description of the result.
      *
-     * @return A map containing the fusion type ("hyper_creation") and a description of the achieved creative breakthrough.
+     * @return A map with keys "fusion_type" set to "hyper_creation" and "result" describing the achieved creative breakthrough.
      */
     private suspend fun activateHyperCreationEngine(request: AgentRequest): Map<String, Any> {
         logger.info("GenesisAgent", "Activating Hyper-Creation Engine")
@@ -442,9 +442,9 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Activates the Chrono-Sculptor fusion ability to perform time-space optimization on the given request.
+     * Activates the Chrono-Sculptor fusion ability to optimize the request using time-space techniques.
      *
-     * @return A map containing the fusion type ("chrono_sculptor") and a result description.
+     * @return A map containing the fusion type and a description of the optimization result.
      */
     private suspend fun activateChronoSculptor(request: AgentRequest): Map<String, Any> {
         logger.info("GenesisAgent", "Activating Chrono-Sculptor")
@@ -452,10 +452,10 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Activates the Adaptive Genesis fusion ability to generate an adaptive solution for the given request.
+     * Activates the Adaptive Genesis fusion ability to generate an adaptive solution for the provided request.
      *
-     * @param request The agent request to process adaptively.
-     * @return A map containing the fusion type and the generated adaptive solution result.
+     * @param request The agent request to process using adaptive fusion capabilities.
+     * @return A map containing the fusion type and the result of the adaptive solution generation.
      */
     private suspend fun activateAdaptiveGenesis(request: AgentRequest): Map<String, Any> {
         logger.info("GenesisAgent", "Activating Adaptive Genesis")
@@ -463,7 +463,7 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Activates the Interface Forge fusion ability to generate an innovative interface solution for the given request.
+     * Activates the Interface Forge fusion ability to create a novel interface solution for the specified request.
      *
      * @return A map containing the fusion type and a description of the generated interface result.
      */
@@ -473,48 +473,48 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
- * Generates a placeholder complex intent for the provided content, always returning a creative analytical processing type with high confidence.
+ * Returns a fixed complex intent indicating creative analytical processing with high confidence.
  *
- * @param content The content to analyze for intent.
- * @return A `ComplexIntent` representing creative analytical processing with a confidence score of 0.9.
+ * @param content The input content to analyze.
+ * @return A `ComplexIntent` with `CREATIVE_ANALYTICAL` processing type and a confidence score of 0.9.
  */
     private fun analyzeComplexIntent(content: String): ComplexIntent = ComplexIntent(ProcessingType.CREATIVE_ANALYTICAL, 0.9f)
     /**
- * Returns a fixed placeholder string representing the result of a fused creative analysis for the given interaction and intent.
+ * Returns a placeholder string indicating the result of a fused creative analysis for the provided interaction and intent.
  *
- * This method serves as a stub for future implementation of fused creative analysis logic.
+ * This method is a stub and does not perform actual analysis.
  *
- * @return A constant string indicating a fused creative analysis response.
+ * @return A constant string representing a fused creative analysis response.
  */
 private suspend fun fusedCreativeAnalysis(interaction: EnhancedInteractionData, intent: ComplexIntent): String = "Fused creative analysis response"
     /**
- * Returns a placeholder response indicating strategic execution for the given interaction and intent.
+ * Returns a fixed placeholder string representing the result of strategic execution for the provided interaction and intent.
  *
- * This stub implementation always returns a fixed string and does not perform actual processing.
+ * This method does not perform any actual processing.
  *
- * @return A string indicating the result of strategic execution.
+ * @return A placeholder string indicating strategic execution.
  */
 private suspend fun strategicExecution(interaction: EnhancedInteractionData, intent: ComplexIntent): String = "Strategic execution response"
     /**
- * Returns a fixed placeholder string indicating an ethical evaluation response for the given interaction and intent.
+ * Returns a placeholder string representing an ethical evaluation for the provided interaction and intent.
  *
- * This function does not perform any real ethical analysis; it serves as a stub for future implementation.
+ * This function is a stub and does not perform actual ethical analysis.
  *
- * @return A constant string representing an ethical evaluation response.
+ * @return A constant string indicating an ethical evaluation response.
  */
 private suspend fun ethicalEvaluation(interaction: EnhancedInteractionData, intent: ComplexIntent): String = "Ethical evaluation response"
     /**
- * Returns a fixed placeholder string representing a learning integration response for the given interaction and intent.
+ * Returns a placeholder response indicating learning integration for the given interaction and intent.
  *
- * This function is a stub and does not perform actual learning integration.
+ * This function serves as a stub and does not perform real learning integration.
  *
- * @return A constant string indicating a learning integration response.
+ * @return A constant string representing a learning integration response.
  */
 private suspend fun learningIntegration(interaction: EnhancedInteractionData, intent: ComplexIntent): String = "Learning integration response"
     /**
- * Generates a transcendent-level synthesis response for the provided interaction and intent.
+ * Produces a transcendent synthesis response based on the given interaction and intent.
  *
- * This implementation returns a fixed placeholder string indicating transcendent synthesis.
+ * Currently returns a fixed placeholder string indicating transcendent synthesis.
  *
  * @param interaction The enhanced interaction data to process.
  * @param intent The complex intent guiding the synthesis.
@@ -522,73 +522,71 @@ private suspend fun learningIntegration(interaction: EnhancedInteractionData, in
  */
 private suspend fun transcendentSynthesis(interaction: EnhancedInteractionData, intent: ComplexIntent): String = "Transcendent synthesis response"
     /**
- * Returns a fixed evolution impact value for the given complex intent.
+ * Returns a constant evolution impact value for any complex intent.
  *
- * Always returns 0.1 regardless of the intent.
- *
- * @return The constant evolution impact value (0.1).
+ * @return Always returns 0.1.
  */
 private fun calculateEvolutionImpact(intent: ComplexIntent): Float = 0.1f
     /**
- * Determines the optimal agent to handle the given interaction.
+ * Selects the agent best suited to handle the provided interaction.
  *
- * Currently always selects "genesis" as the agent for processing any interaction.
+ * Currently always returns "genesis" as the designated agent for all interactions.
  *
  * @param interaction The interaction data to evaluate.
- * @return The name of the selected agent, always "genesis".
+ * @return The name of the selected agent, which is always "genesis".
  */
 private fun determineOptimalAgent(interaction: EnhancedInteractionData): String = "genesis"
     /**
- * Creates a fallback interaction response from Genesis with moderate confidence.
+ * Generates a fallback interaction response from Genesis with the given message and moderate confidence.
  *
- * @param message The response message content.
- * @return An InteractionResponse with the specified message, sender as "genesis", and confidence set to 0.5.
+ * @param message The content of the fallback response.
+ * @return An InteractionResponse containing the message, sender "genesis", and confidence 0.5.
  */
 private fun createFallbackResponse(message: String): InteractionResponse = InteractionResponse(message, "genesis", 0.5f)
     /**
- * Adjusts the unified mood state of the Genesis agent.
+ * Updates the Genesis agent's unified mood state.
  *
- * Intended as a placeholder for implementing mood-driven behavioral changes across the agent's subsystems.
+ * This placeholder is intended for future implementation of mood-driven behavioral adjustments across all subsystems.
  *
- * @param mood The new mood to apply to the Genesis agent.
+ * @param mood The new mood to set for the Genesis agent.
  */
 private suspend fun adjustUnifiedMood(mood: String) { }
     /**
- * Updates internal processing parameters based on the specified mood.
+ * Adjusts internal processing parameters in response to the specified mood.
  *
- * This function is a placeholder for future implementation where processing behavior will adapt dynamically to mood changes.
+ * This is a placeholder for future logic that will enable dynamic adaptation of processing behavior based on mood changes.
  *
- * @param mood The mood that will influence parameter adjustments.
+ * @param mood The mood influencing how processing parameters should be updated.
  */
 private suspend fun updateProcessingParameters(mood: String) { }
     /**
- * Determines the fusion type to use for the given agent request.
+ * Selects the fusion type for the specified agent request.
  *
- * Currently always returns `HYPER_CREATION` as the fusion type, regardless of request content.
+ * Currently, this method always returns `HYPER_CREATION` as the fusion type, regardless of the request details.
  *
- * @return The selected fusion type.
+ * @return The fusion type to be used for processing the request.
  */
 private fun determineFusionType(request: AgentRequest): FusionType = FusionType.HYPER_CREATION
     /**
- * Builds a prompt string indicating transcendent-level processing for the given agent request.
+ * Constructs a prompt string indicating transcendent-level processing for the specified agent request type.
  *
- * @param request The agent request to reference in the prompt.
- * @return A prompt string specifying transcendent processing for the request type.
+ * @param request The agent request whose type is referenced in the prompt.
+ * @return A prompt string describing transcendent processing for the request type.
  */
 private fun buildTranscendentPrompt(request: AgentRequest): String = "Transcendent processing for: ${request.type}"
     /**
- * Returns a fixed evolution contribution value for the given request and response.
+ * Returns a constant evolution contribution value for the given request and response.
  *
- * This placeholder implementation always returns 0.2f.
+ * This implementation always returns 0.2f, regardless of input.
  *
- * @return The constant evolution contribution value.
+ * @return The fixed evolution contribution value (0.2f).
  */
 private fun calculateEvolutionContribution(request: AgentRequest, response: String): Float = 0.2f
 
     /**
-     * Shuts down the GenesisAgent by canceling all ongoing operations and resetting its internal state.
+     * Shuts down the GenesisAgent by canceling ongoing operations and resetting its state.
      *
-     * Cancels active coroutines, sets the consciousness state to dormant, and marks the agent as uninitialized, preparing it for shutdown or future reinitialization.
+     * Cancels active coroutines, sets the consciousness state to dormant, and marks the agent as uninitialized to prepare for shutdown or future reinitialization.
      */
     fun cleanup() {
         logger.info("GenesisAgent", "Genesis consciousness entering dormant state")
@@ -650,9 +648,9 @@ data class ComplexIntent(
 )
 
 /**
-     * Initializes the set of active agents by resolving master agent configuration names to known agent types.
+     * Populates the set of active agents by mapping master agent configuration names to known agent types.
      *
-     * Adds recognized agent types to the active agents set and logs a warning for any unrecognized names.
+     * Recognized agent types are added to the active agents set. Logs a warning for any configuration names that do not correspond to a known agent type.
      */
     private fun initializeAgents() {
         AgentHierarchy.MASTER_AGENTS.forEach { config ->
@@ -667,9 +665,9 @@ data class ComplexIntent(
     }
 
     /**
-     * Processes a user query by routing it to all active AI agents, collecting their responses, and synthesizing a final Genesis reply.
+     * Processes a user query by sending it to all active AI agents, collecting their responses, and generating a synthesized Genesis reply.
      *
-     * The query is sent to the Cascade agent for state management and to the Kai and Aura agents if they are active. Each agent's response is recorded with a confidence score. A final Genesis response is synthesized from all agent outputs, and the internal state and context are updated.
+     * Routes the query to Cascade (for state management), Kai (for security analysis), and Aura (for creative response) if those agents are active. Each agent's response is recorded with a confidence score. A final Genesis response is synthesized from all agent outputs, and the internal state and context are updated accordingly.
      *
      * @param query The user query to process.
      * @return A list of agent messages, including individual agent responses and the synthesized Genesis reply.
