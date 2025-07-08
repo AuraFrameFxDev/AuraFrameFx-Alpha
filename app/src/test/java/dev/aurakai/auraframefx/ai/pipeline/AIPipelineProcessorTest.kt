@@ -703,3 +703,762 @@ class AIPipelineProcessorTest {
         }
     }
 }
+    @Nested
+    @DisplayName("Advanced Configuration Tests")
+    inner class AdvancedConfigurationTests {
+        
+        @Test
+        @DisplayName("should handle zero timeout configuration")
+        fun shouldHandleZeroTimeoutConfiguration() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should handle very large timeout values")
+        fun shouldHandleVeryLargeTimeoutValues() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = Long.MAX_VALUE
+            )
+            
+            // When
+            val result = processor.initialize(config)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+        }
+        
+        @Test
+        @DisplayName("should detect duplicate stage names")
+        fun shouldDetectDuplicateStageNames() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("duplicate")
+            whenever(stage2.getName()).thenReturn("duplicate")
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage1, stage2),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should handle multiple initialization attempts")
+        fun shouldHandleMultipleInitializationAttempts() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When
+            val result1 = processor.initialize(config)
+            val result2 = processor.initialize(config)
+            
+            // Then
+            assertTrue(result1)
+            assertFalse(result2) // Second initialization should fail
+        }
+        
+        @Test
+        @DisplayName("should validate maximum number of stages")
+        fun shouldValidateMaximumNumberOfStages() {
+            // Given
+            val stages = (1..1000).map { 
+                val stage = mock<PipelineStage>()
+                whenever(stage.getName()).thenReturn("stage$it")
+                whenever(stage.isConfigurationValid()).thenReturn(true)
+                stage
+            }
+            
+            val config = PipelineConfiguration(
+                stages = stages,
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should handle complex dependency chains")
+        fun shouldHandleComplexDependencyChains() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            val stage3 = mock<PipelineStage>()
+            val stage4 = mock<PipelineStage>()
+            
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage3.getName()).thenReturn("stage3")
+            whenever(stage4.getName()).thenReturn("stage4")
+            
+            whenever(stage1.getDependencies()).thenReturn(emptySet())
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            whenever(stage3.getDependencies()).thenReturn(setOf("stage1", "stage2"))
+            whenever(stage4.getDependencies()).thenReturn(setOf("stage3"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage1, stage2, stage3, stage4),
+                parallelExecution = true,
+                timeoutMs = 5000L
+            )
+            
+            // When
+            val result = processor.initialize(config)
+            
+            // Then
+            assertTrue(result)
+        }
+    }
+
+    @Nested
+    @DisplayName("Input Validation and Processing Tests")
+    inner class InputValidationAndProcessingTests {
+        
+        @BeforeEach
+        fun setUpProcessor() {
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+        }
+        
+        @Test
+        @DisplayName("should handle very long input strings")
+        fun shouldHandleVeryLongInputStrings() = runTest {
+            // Given
+            val longInput = "x".repeat(10000000) // 10MB string
+            whenever(mockInputProcessor.process(longInput)).thenReturn(longInput)
+            whenever(mockPipelineStage.execute(any())).thenReturn("processed")
+            whenever(mockOutputProcessor.process("processed")).thenReturn("processed")
+            
+            // When
+            val result = processor.process(longInput)
+            
+            // Then
+            assertEquals("processed", result)
+            verify(mockMetricsCollector).recordInputSize(longInput.length)
+        }
+        
+        @Test
+        @DisplayName("should handle special characters in input")
+        fun shouldHandleSpecialCharactersInInput() = runTest {
+            // Given
+            val specialInput = "Hello! @#$%^&*()_+-=[]{}|;:,.<>?/~`"
+            whenever(mockInputProcessor.process(specialInput)).thenReturn(specialInput)
+            whenever(mockPipelineStage.execute(any())).thenReturn("processed")
+            whenever(mockOutputProcessor.process("processed")).thenReturn("processed")
+            
+            // When
+            val result = processor.process(specialInput)
+            
+            // Then
+            assertEquals("processed", result)
+            verify(mockInputProcessor).process(specialInput)
+        }
+        
+        @Test
+        @DisplayName("should handle unicode characters")
+        fun shouldHandleUnicodeCharacters() = runTest {
+            // Given
+            val unicodeInput = "Hello 世界! 🌍 Émojis: 😀🎉"
+            whenever(mockInputProcessor.process(unicodeInput)).thenReturn(unicodeInput)
+            whenever(mockPipelineStage.execute(any())).thenReturn("processed")
+            whenever(mockOutputProcessor.process("processed")).thenReturn("processed")
+            
+            // When
+            val result = processor.process(unicodeInput)
+            
+            // Then
+            assertEquals("processed", result)
+            verify(mockInputProcessor).process(unicodeInput)
+        }
+        
+        @Test
+        @DisplayName("should handle whitespace-only input")
+        fun shouldHandleWhitespaceOnlyInput() = runTest {
+            // Given
+            val whitespaceInput = "   \t\n\r   "
+            whenever(mockInputProcessor.process(whitespaceInput)).thenReturn(whitespaceInput)
+            whenever(mockPipelineStage.execute(any())).thenReturn("processed")
+            whenever(mockOutputProcessor.process("processed")).thenReturn("processed")
+            
+            // When
+            val result = processor.process(whitespaceInput)
+            
+            // Then
+            assertEquals("processed", result)
+            verify(mockInputProcessor).process(whitespaceInput)
+        }
+        
+        @Test
+        @DisplayName("should handle multiple consecutive processing calls")
+        fun shouldHandleMultipleConsecutiveProcessingCalls() = runTest {
+            // Given
+            val inputs = listOf("input1", "input2", "input3")
+            inputs.forEach { input ->
+                whenever(mockInputProcessor.process(input)).thenReturn(input)
+                whenever(mockPipelineStage.execute(input)).thenReturn("processed_$input")
+                whenever(mockOutputProcessor.process("processed_$input")).thenReturn("final_$input")
+            }
+            
+            // When
+            val results = inputs.map { processor.process(it) }
+            
+            // Then
+            assertEquals(listOf("final_input1", "final_input2", "final_input3"), results)
+            verify(mockMetricsCollector, times(3)).recordProcessingTime(any())
+        }
+        
+        @Test
+        @DisplayName("should validate input format")
+        fun shouldValidateInputFormat() = runTest {
+            // Given
+            val invalidInput = "invalid format"
+            whenever(mockInputProcessor.process(invalidInput)).thenThrow(IllegalArgumentException("Invalid input format"))
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.process(invalidInput)
+            }
+            verify(mockErrorHandler).handleInputValidationError(any())
+        }
+    }
+
+    @Nested
+    @DisplayName("Advanced Error Handling Tests")
+    inner class AdvancedErrorHandlingTests {
+        
+        @BeforeEach
+        fun setUpProcessor() {
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+        }
+        
+        @Test
+        @DisplayName("should handle nested exceptions")
+        fun shouldHandleNestedException() = runTest {
+            // Given
+            val input = "test input"
+            val rootCause = IOException("Root cause")
+            val nestedException = RuntimeException("Nested exception", rootCause)
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenThrow(nestedException)
+            
+            // When & Then
+            assertThrows<RuntimeException> {
+                processor.process(input)
+            }
+            verify(mockErrorHandler).handleNestedError(nestedException, rootCause)
+        }
+        
+        @Test
+        @DisplayName("should handle custom exception types")
+        fun shouldHandleCustomExceptionTypes() = runTest {
+            // Given
+            val input = "test input"
+            val customException = object : Exception("Custom exception") {}
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenThrow(customException)
+            
+            // When & Then
+            assertThrows<Exception> {
+                processor.process(input)
+            }
+            verify(mockErrorHandler).handleUnknownError(customException)
+        }
+        
+        @Test
+        @DisplayName("should handle multiple retry attempts")
+        fun shouldHandleMultipleRetryAttempts() = runTest {
+            // Given
+            val input = "test input"
+            val retryableException = IOException("Retryable error")
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any()))
+                .thenThrow(retryableException)
+                .thenThrow(retryableException)
+                .thenThrow(retryableException)
+                .thenReturn("success")
+            whenever(mockOutputProcessor.process("success")).thenReturn("success")
+            
+            processor.setRetryPolicy(RetryPolicy(maxRetries = 3, retryableExceptions = setOf(IOException::class.java)))
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("success", result)
+            verify(mockPipelineStage, times(4)).execute(any())
+            verify(mockErrorHandler, times(3)).handleRetryableError(retryableException)
+        }
+        
+        @Test
+        @DisplayName("should handle retry exhaustion")
+        fun shouldHandleRetryExhaustion() = runTest {
+            // Given
+            val input = "test input"
+            val retryableException = IOException("Persistent error")
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenThrow(retryableException)
+            
+            processor.setRetryPolicy(RetryPolicy(maxRetries = 2, retryableExceptions = setOf(IOException::class.java)))
+            
+            // When & Then
+            assertThrows<IOException> {
+                processor.process(input)
+            }
+            verify(mockPipelineStage, times(3)).execute(any()) // Initial + 2 retries
+            verify(mockErrorHandler).handleRetryExhaustion(retryableException)
+        }
+        
+        @Test
+        @DisplayName("should handle error recovery scenarios")
+        fun shouldHandleErrorRecoveryScenarios() = runTest {
+            // Given
+            val input = "test input"
+            val recoverableException = RuntimeException("Recoverable error")
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenThrow(recoverableException)
+            whenever(mockErrorHandler.canRecover(recoverableException)).thenReturn(true)
+            whenever(mockErrorHandler.recover(recoverableException)).thenReturn("recovered_output")
+            whenever(mockOutputProcessor.process("recovered_output")).thenReturn("recovered_output")
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("recovered_output", result)
+            verify(mockErrorHandler).recover(recoverableException)
+        }
+    }
+
+    @Nested
+    @DisplayName("Performance and Stress Tests")
+    inner class PerformanceAndStressTests {
+        
+        @Test
+        @DisplayName("should handle high throughput processing")
+        fun shouldHandleHighThroughputProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 10000L,
+                maxConcurrentRequests = 100
+            )
+            processor.initialize(config)
+            
+            whenever(mockInputProcessor.process(any())).thenReturn("processed")
+            whenever(mockPipelineStage.execute(any())).thenReturn("stage_output")
+            whenever(mockOutputProcessor.process(any())).thenReturn("final_output")
+            
+            // When
+            val futures = (1..100).map { i ->
+                CompletableFuture.supplyAsync {
+                    runTest { processor.process("input_$i") }
+                }
+            }
+            
+            val results = futures.map { it.get() }
+            
+            // Then
+            assertEquals(100, results.size)
+            results.forEach { assertEquals("final_output", it) }
+            verify(mockMetricsCollector).recordHighThroughputEvent(100)
+        }
+        
+        @Test
+        @DisplayName("should detect memory leaks")
+        fun shouldDetectMemoryLeaks() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockInputProcessor.process(any())).thenReturn("processed")
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process(any())).thenReturn("final")
+            
+            // When
+            repeat(1000) { i ->
+                processor.process("input_$i")
+            }
+            
+            // Then
+            verify(mockMetricsCollector, atLeast(1000)).recordMemoryUsage(any())
+            verify(mockMetricsCollector).checkMemoryLeak()
+        }
+        
+        @Test
+        @DisplayName("should handle thread safety validation")
+        fun shouldHandleThreadSafetyValidation() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 5000L,
+                maxConcurrentRequests = 50
+            )
+            processor.initialize(config)
+            
+            whenever(mockInputProcessor.process(any())).thenReturn("processed")
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process(any())).thenReturn("final")
+            
+            // When
+            val futures = (1..50).map { i ->
+                CompletableFuture.supplyAsync {
+                    runTest { 
+                        repeat(10) { j ->
+                            processor.process("input_${i}_$j")
+                        }
+                    }
+                }
+            }
+            
+            futures.forEach { it.get() }
+            
+            // Then
+            verify(mockMetricsCollector).recordThreadSafetyValidation()
+        }
+    }
+
+    @Nested
+    @DisplayName("Detailed Metrics Validation Tests")
+    inner class DetailedMetricsValidationTests {
+        
+        @BeforeEach
+        fun setUpProcessor() {
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+        }
+        
+        @Test
+        @DisplayName("should validate metric accuracy")
+        fun shouldValidateMetricAccuracy() = runTest {
+            // Given
+            val input = "test input"
+            val processingTimeCaptor = argumentCaptor<Long>()
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val startTime = System.currentTimeMillis()
+            processor.process(input)
+            val endTime = System.currentTimeMillis()
+            
+            // Then
+            verify(mockMetricsCollector).recordProcessingTime(processingTimeCaptor.capture())
+            val recordedTime = processingTimeCaptor.firstValue
+            assertTrue(recordedTime <= (endTime - startTime) + 100) // Allow 100ms tolerance
+        }
+        
+        @Test
+        @DisplayName("should handle metric overflow scenarios")
+        fun shouldHandleMetricOverflowScenarios() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            repeat(Int.MAX_VALUE / 1000) { // Large number but safe
+                processor.process(input)
+            }
+            
+            // Then
+            verify(mockMetricsCollector).handleMetricOverflow()
+        }
+        
+        @Test
+        @DisplayName("should validate metric reset functionality")
+        fun shouldValidateMetricResetFunctionality() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            processor.resetMetrics()
+            
+            // Then
+            verify(mockMetricsCollector).reset()
+        }
+        
+        @Test
+        @DisplayName("should collect stage-specific metrics")
+        fun shouldCollectStageSpecificMetrics() = runTest {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage1.execute(any())).thenReturn("stage1_output")
+            whenever(stage2.execute(any())).thenReturn("stage2_output")
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage1, stage2),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockOutputProcessor.process(any())).thenReturn("final")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(mockMetricsCollector).recordStageMetrics("stage1", any())
+            verify(mockMetricsCollector).recordStageMetrics("stage2", any())
+        }
+    }
+
+    @Nested
+    @DisplayName("Advanced Lifecycle Management Tests")
+    inner class AdvancedLifecycleManagementTests {
+        
+        @Test
+        @DisplayName("should handle shutdown during processing")
+        fun shouldHandleShutdownDuringProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            
+            Thread.sleep(500) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 1000L)
+            
+            // Then
+            assertFalse(shutdownResult) // Should fail due to ongoing processing
+            verify(mockErrorHandler).handleShutdownDuringProcessing()
+        }
+        
+        @Test
+        @DisplayName("should handle multiple shutdown attempts")
+        fun shouldHandleMultipleShutdownAttempts() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            // When
+            val result1 = processor.shutdown()
+            val result2 = processor.shutdown()
+            
+            // Then
+            assertTrue(result1)
+            assertTrue(result2) // Should be idempotent
+            verify(mockPipelineStage, times(1)).cleanup() // Should only cleanup once
+        }
+        
+        @Test
+        @DisplayName("should handle initialization after failed shutdown")
+        fun shouldHandleInitializationAfterFailedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenThrow(RuntimeException("Cleanup failed"))
+            
+            // When
+            processor.shutdown() // This should fail
+            val reinitResult = processor.initialize(config)
+            
+            // Then
+            assertTrue(reinitResult) // Should be able to reinitialize
+            assertTrue(processor.isInitialized())
+        }
+        
+        @Test
+        @DisplayName("should handle resource cleanup on shutdown")
+        fun shouldHandleResourceCleanupOnShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(mockPipelineStage).cleanup()
+            verify(mockInputProcessor).cleanup()
+            verify(mockOutputProcessor).cleanup()
+            verify(mockErrorHandler).cleanup()
+            verify(mockMetricsCollector).shutdown()
+        }
+    }
+
+    @Nested
+    @DisplayName("Edge Case Processing Tests")
+    inner class EdgeCaseProcessingTests {
+        
+        @BeforeEach
+        fun setUpProcessor() {
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+        }
+        
+        @Test
+        @DisplayName("should handle processing with disabled stages")
+        fun shouldHandleProcessingWithDisabledStages() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockPipelineStage.isEnabled()).thenReturn(false)
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockOutputProcessor.process(input)).thenReturn("bypassed")
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("bypassed", result)
+            verify(mockPipelineStage, never()).execute(any())
+            verify(mockMetricsCollector).recordStageBypass(any())
+        }
+        
+        @Test
+        @DisplayName("should handle conditional stage execution")
+        fun shouldHandleConditionalStageExecution() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.shouldExecute(input)).thenReturn(false)
+            whenever(mockOutputProcessor.process(input)).thenReturn("skipped")
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("skipped", result)
+            verify(mockPipelineStage, never()).execute(any())
+            verify(mockMetricsCollector).recordConditionalSkip(any())
+        }
+        
+        @Test
+        @DisplayName("should handle dynamic stage modification")
+        fun shouldHandleDynamicStageModification() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            processor.addStage(mock<PipelineStage>())
+            processor.removeStage("stage1")
+            
+            // Then
+            verify(mockMetricsCollector).recordStageModification()
+        }
+        
+        @Test
+        @DisplayName("should handle stage dependencies at runtime")
+        fun shouldHandleStageDependenciesAtRuntime() = runTest {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            whenever(stage1.execute(any())).thenReturn("stage1_output")
+            whenever(stage2.execute(any())).thenReturn("stage2_output")
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage1, stage2),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockOutputProcessor.process(any())).thenReturn("final")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(stage1).execute(any())
+            verify(stage2).execute(any())
+            verify(mockMetricsCollector).recordDependencyExecution(any())
+        }
+    }
+}
