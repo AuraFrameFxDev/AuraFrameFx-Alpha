@@ -170,7 +170,7 @@ fun RecordingButton(
     isRecording: Boolean,
     onClick: () -> Unit,
 ) {
-    val icon = if (isRecording) Icons.Default.Stop else Icons.Default.Circle
+    val icon = if (isRecording) Icons.Default.Stop else Icons.Default.FiberManualRecord
     val color = if (isRecording) Color.Red else NeonPurple
 
     IconButton(
