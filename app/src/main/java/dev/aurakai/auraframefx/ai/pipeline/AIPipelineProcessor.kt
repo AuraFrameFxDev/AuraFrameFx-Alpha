@@ -380,10 +380,11 @@ class AIPipelineProcessor @Inject constructor(
                 (current["response_patterns"] as? MutableMap<String, Any>) ?: mutableMapOf()
             val taskType = categorizeTask(task)
             responsePatterns[taskType] = mapOf(
-                "last_confidence" to responses.map { it: AgentMessage -> it.confidence }.average(), // Explicitly typed 'it'
+                "last_confidence" to responses.map { msg: AgentMessage -> msg.confidence }.average(),
+                // or just:
+                // "last_confidence" to responses.map { it.confidence }.average(),
                 "agent_count" to responses.size,
                 "timestamp" to System.currentTimeMillis()
-            )
             newContext["response_patterns"] = responsePatterns
 
             // Update system metrics
