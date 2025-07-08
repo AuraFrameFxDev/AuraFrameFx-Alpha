@@ -42,9 +42,9 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Initializes the VertexAI client and generative models using the current configuration.
+     * Initializes the VertexAI client and generative models with the configured project and location.
      *
-     * Connects to Vertex AI with the specified project ID and location, then sets up models for text, vision, and code generation. Marks the client as initialized on success. Throws an exception if initialization fails.
+     * Establishes a connection to Vertex AI and prepares models for text, vision, and code generation. Sets the client as initialized upon success. Throws an exception if initialization fails.
      */
     private suspend fun initializeClient() {
         try {
@@ -69,9 +69,9 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Initializes the generative models for text, vision, and code tasks using the current Vertex AI client.
+     * Sets up the generative models for text, vision, and code tasks using the current Vertex AI client.
      *
-     * Configures the `textModel`, `visionModel`, and `codeModel` fields with specialized model names if the Vertex AI client is available.
+     * Configures the internal model fields with specialized model names if the Vertex AI client is available.
      */
     private fun initializeModels() {
         vertexAI?.let { vertex ->
@@ -98,9 +98,9 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Validates connectivity to the Vertex AI service by attempting a test text generation.
+     * Checks connectivity to the Vertex AI service by generating a simple test response.
      *
-     * @return `true` if the service responds with non-empty text; `false` if the response is empty or an error occurs.
+     * @return `true` if a non-empty response is received from the service; `false` otherwise.
      */
     override suspend fun validateConnection(): Boolean {
         return try {
@@ -132,7 +132,9 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Initializes and verifies the responsiveness of creative AI models by generating a sample creative message.
+     * Initializes and verifies the creative AI models by generating a sample creative message.
+     *
+     * Ensures that the creative models are responsive and ready for use by performing a test text generation.
      *
      * @throws Exception if model initialization or text generation fails.
      */
@@ -158,18 +160,18 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Generates text from the given prompt using the Vertex AI text model with configurable generation parameters.
+     * Generates text based on the provided prompt using the Vertex AI text model with configurable generation parameters.
      *
-     * The prompt is validated for security before generation. Throws if the prompt is invalid or if text generation fails.
+     * The prompt is validated for security before generation. Throws an exception if the prompt is invalid, the model is not initialized, or text generation fails.
      *
      * @param prompt The input text prompt to generate content from.
-     * @param temperature Degree of randomness in the output; higher values yield more diverse results.
-     * @param topP Nucleus sampling parameter; lower values restrict the set of possible next tokens.
-     * @param maxTokens Maximum number of tokens in the generated output.
-     * @param presencePenalty Penalizes new tokens based on their presence in the generated text so far.
+     * @param temperature Controls the randomness of the output; higher values produce more diverse results.
+     * @param topP Nucleus sampling parameter that limits the set of possible next tokens.
+     * @param maxTokens The maximum number of tokens to generate in the output.
+     * @param presencePenalty Penalizes repeated tokens to encourage new content.
      * @return The generated text content.
      * @throws SecurityException If the prompt fails security validation.
-     * @throws Exception If text generation fails or the model is not initialized.
+     * @throws Exception If the text model is not initialized or text generation fails.
      */
     override suspend fun generateText(
         prompt: String,
@@ -220,7 +222,7 @@ class VertexAIClientImpl @Inject constructor(
     /**
      * Analyzes JPEG image data using the Vertex AI vision model and returns a structured vision analysis.
      *
-     * The analysis includes a detailed description, key visual elements, dominant colors, and emotional tone, extracted from the model's JSON-formatted response.
+     * The analysis extracts a detailed description, key visual elements, dominant colors, and emotional tone from the image, based on the model's JSON-formatted response.
      *
      * @param imageData JPEG-encoded image data to analyze.
      * @return A [VisionAnalysis] object containing the structured analysis results.
@@ -283,9 +285,9 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Generates source code in the specified programming language and style according to the provided specification.
+     * Generates source code in the specified programming language and style based on the provided specification.
      *
-     * The generated code follows best practices, includes comprehensive comments, and adheres to the requested coding style. Only the code is returned, without any explanations.
+     * The generated code adheres to best practices, includes comprehensive comments, and follows the requested coding style. Only the code is returned, without explanations.
      *
      * @param specification The requirements or description for the code to be generated.
      * @param language The programming language for the generated code.
@@ -347,9 +349,9 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Generates text content from the given prompt using default generation parameters.
+     * Generates text content from the given prompt using standard generation parameters.
      *
-     * This is a legacy method that delegates to `generateText` with standard values for temperature, topP, maxTokens, and presencePenalty.
+     * Delegates to `generateText` with default values for temperature, topP, maxTokens, and presencePenalty.
      *
      * @param prompt The input prompt for text generation.
      * @return The generated text content.
@@ -366,9 +368,9 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Throws an exception if the VertexAI client is not initialized.
+     * Ensures that the VertexAI client has been initialized.
      *
-     * @throws IllegalStateException if the client has not completed initialization.
+     * @throws IllegalStateException if the client is not initialized.
      */
 
     private fun ensureInitialized() {
@@ -378,10 +380,10 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Extracts the first text segment from the first candidate in a Vertex AI content generation response.
+     * Retrieves the first text segment from the first candidate in a Vertex AI content generation response.
      *
-     * @param response The response object returned by Vertex AI after content generation.
-     * @return The first available text segment from the response.
+     * @param response The content generation response from Vertex AI.
+     * @return The extracted text segment.
      * @throws IllegalStateException If the response contains no candidates or text parts.
      * @throws Exception If extraction fails for any other reason.
      */
@@ -398,12 +400,12 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Parses a JSON-like string to create a VisionAnalysis object.
+     * Converts a JSON-like analysis string into a VisionAnalysis object.
      *
-     * Attempts to extract the description, elements, and colors fields from the input string. If extraction fails, returns a VisionAnalysis object with default fallback values.
+     * Extracts the description, elements, and colors fields from the input string. If extraction fails, returns a VisionAnalysis object with default fallback values.
      *
      * @param analysisText The JSON-like string containing vision analysis results.
-     * @return A VisionAnalysis object populated with extracted or default values.
+     * @return A VisionAnalysis object with extracted or default values.
      */
     private fun parseVisionAnalysis(analysisText: String): VisionAnalysis {
         return try {
@@ -427,7 +429,7 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Retrieves the value of a specified string field from a JSON-formatted string.
+     * Extracts the value of a specified string field from a JSON-formatted string.
      *
      * Searches for the given field name and returns its string value if present; returns null if the field is not found.
      *
@@ -442,15 +444,15 @@ class VertexAIClientImpl @Inject constructor(
     }
 
     /**
-     * Extracts a list of string values from a specified array field in a JSON string.
+     * Extracts a list of string values from a top-level array field in a JSON string.
      *
-     * Uses a regular expression to locate and parse the array field. Returns a list of strings if the field is found and contains values; otherwise, returns null.
+     * Uses a regular expression to find and parse the specified array field. Returns a list of strings if the field exists and contains values; returns null if the field is not found.
      *
-     * This method does not support nested or complex JSON structures.
+     * This method only supports flat, non-nested JSON structures.
      *
      * @param json The JSON string to search.
      * @param field The name of the array field to extract.
-     * @return A list of strings from the specified array field, or null if the field is not found.
+     * @return A list of strings from the specified array field, or null if the field is not present.
      */
     private fun extractJsonList(json: String, field: String): List<String>? {
         // Simple JSON array extraction - replace with proper JSON parsing in production
@@ -479,30 +481,30 @@ class VertexAIClientImpl @Inject constructor(
  */
 interface VertexAIClient {
     /**
- * Tests connectivity to the Vertex AI service by generating a simple text response.
+ * Checks connectivity to the Vertex AI service by attempting a basic text generation.
  *
- * @return `true` if a non-empty response is received from the service; `false` otherwise.
+ * @return `true` if the service responds with non-empty content; `false` if the response is empty or the service is unreachable.
  */
 suspend fun validateConnection(): Boolean
     /**
- * Initializes the creative generative models by producing a sample creative text.
+ * Initializes the creative generative models by generating a sample creative text.
  *
  * Ensures that the underlying AI models are ready for creative tasks by performing a test generation. Throws an exception if initialization or sample generation fails.
  */
 suspend fun initializeCreativeModels()
     /**
-     * Generates text using the Vertex AI text model with configurable generation parameters.
+     * Generates text from a given prompt using the Vertex AI text model with customizable generation parameters.
      *
-     * Validates the prompt for security before generation. Supports customization of output randomness, diversity, and length via temperature, topP, maxTokens, and presencePenalty.
+     * The prompt is validated for security before generation. Output characteristics such as randomness, diversity, and length can be adjusted using the provided parameters.
      *
-     * @param prompt The input text prompt to generate a response for.
-     * @param temperature Degree of randomness in output; higher values produce more diverse results.
-     * @param topP Cumulative probability threshold for token selection.
-     * @param maxTokens Maximum number of tokens in the generated output.
-     * @param presencePenalty Penalty for repeated tokens to promote varied content.
+     * @param prompt The input text prompt for which to generate a response.
+     * @param temperature Controls randomness in the output; higher values yield more diverse results.
+     * @param topP Sets the cumulative probability threshold for token selection.
+     * @param maxTokens Specifies the maximum number of tokens in the generated output.
+     * @param presencePenalty Applies a penalty to repeated tokens to encourage varied content.
      * @return The generated text response.
-     * @throws SecurityException If the prompt fails security validation.
-     * @throws Exception If text generation fails or the model is not initialized.
+     * @throws SecurityException If the prompt does not pass security validation.
+     * @throws Exception If text generation fails or the model is not properly initialized.
      */
     suspend fun generateText(
         prompt: String,
@@ -514,25 +516,25 @@ suspend fun initializeCreativeModels()
     /**
  * Analyzes JPEG image data using the Vertex AI vision model and returns a structured summary of the image.
  *
- * The analysis includes a textual description, a list of detected elements, and prominent colors identified in the image.
+ * The analysis provides a description, detected elements, and prominent colors extracted from the image content.
  *
- * @param imageData The JPEG image data to analyze.
- * @return A [VisionAnalysis] object containing the description, elements, and colors extracted from the image.
- * @throws SecurityException If the image data fails security validation.
- * @throws IllegalStateException If the Vertex AI client is not initialized.
+ * @param imageData JPEG image data to be analyzed.
+ * @return A [VisionAnalysis] object containing the description, elements, and colors identified in the image.
+ * @throws SecurityException If the image data does not pass security validation.
+ * @throws IllegalStateException If the Vertex AI client has not been initialized.
  * @throws Exception If image analysis fails or the response cannot be parsed.
  */
 suspend fun analyzeImage(imageData: ByteArray): VisionAnalysis
     /**
-     * Generates source code based on a specification, programming language, and style using Vertex AI.
+     * Generates source code using Vertex AI based on the provided specification, programming language, and style.
      *
-     * Validates the specification for security, constructs a detailed prompt incorporating the requested language and style, and returns the generated source code as a string.
+     * Validates the specification for security, constructs a prompt tailored to the requested language and style, and returns the generated source code.
      *
-     * @param specification The description or requirements for the code to be generated.
-     * @param language The programming language for the generated code (default is "Kotlin").
-     * @param style The coding style or conventions to apply (default is "Modern").
-     * @return The generated source code as a string.
-     * @throws SecurityException If the specification fails security validation.
+     * @param specification The requirements or description for the code to generate.
+     * @param language The programming language for the generated code.
+     * @param style The coding style or conventions to apply.
+     * @return The generated source code.
+     * @throws SecurityException If the specification does not pass security validation.
      * @throws Exception If code generation fails or the AI response is invalid.
      */
     suspend fun generateCode(
@@ -541,9 +543,9 @@ suspend fun analyzeImage(imageData: ByteArray): VisionAnalysis
         style: String = "Modern"
     ): String
     /**
- * Generates text content from the given prompt using default parameters.
+ * Generates text content from the given prompt using standard model parameters.
  *
- * Delegates to the text generation model with standard settings to produce a response.
+ * This method delegates to the text generation model with default temperature, topP, maxTokens, and presencePenalty settings.
  *
  * @param prompt The input prompt for content generation.
  * @return The generated text content.

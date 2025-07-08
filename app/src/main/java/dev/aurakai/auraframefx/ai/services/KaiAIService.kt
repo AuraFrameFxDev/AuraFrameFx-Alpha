@@ -35,18 +35,18 @@ class KaiAIService @Inject constructor(
  */
 override fun getName(): String? = "Kai"
     /**
- * Gets the type of this agent.
+ * Returns the type of this agent as `AgentType.KAI`.
  *
- * @return `AgentType.KAI`, indicating this agent is of type KAI.
+ * @return The agent type.
  */
 override fun getType(): AgentType = AgentType.KAI
 
     /**
-         * Returns a map indicating the agent's supported capabilities.
+         * Returns a map of the agent's supported capabilities.
          *
-         * The returned map contains keys for "security", "analysis", "memory", and "service_implemented", each set to `true`.
+         * The map includes keys such as "security", "analysis", "memory", and "service_implemented", each set to `true` to indicate support.
          *
-         * @return A map where each key represents a capability supported by the agent.
+         * @return A map where each key is a capability name and the value indicates support.
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
