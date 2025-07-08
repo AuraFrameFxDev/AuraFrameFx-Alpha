@@ -77,12 +77,12 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Processes a creative AI request and returns a response specific to the requested creative task.
+     * Processes a creative AI request and returns an agent response with generated content.
      *
-     * Routes the request to the appropriate creative handler based on its type, updates the agent's creative state, and returns an `AgentResponse` containing the generated content and a confidence score. On error, returns an error message with zero confidence.
+     * Routes the request to a specialized creative handler based on its type (such as UI generation, theme creation, animation design, creative text, visual concept, user experience, or general creative tasks). Updates the agent's creative state during processing. On success, returns an `AgentResponse` containing the generated content and a confidence score of 1.0; on failure, returns an error message with zero confidence.
      *
-     * @param request The creative AI request specifying the task type and details.
-     * @return An `AgentResponse` with the generated content and confidence score, or an error message if processing fails.
+     * @param request The creative AI request specifying the type of creative task and its details.
+     * @return An `AgentResponse` containing the generated content, confidence score, and error information if an error occurred.
      */
     suspend fun processRequest(request: AiRequest): AgentResponse {
         ensureInitialized()
