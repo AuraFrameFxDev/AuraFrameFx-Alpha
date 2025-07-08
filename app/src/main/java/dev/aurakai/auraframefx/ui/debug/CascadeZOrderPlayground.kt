@@ -46,10 +46,7 @@ class CascadeDebugViewModel @Inject constructor(
 /**
  * Displays a debug UI for inspecting and updating the CascadeAgent's vision and processing states.
  *
- * This composable provides editable fields to modify the current vision and processing states,
- * and displays their respective histories for real-time debugging and state inspection.
- *
- * @param viewModel The ViewModel providing access to the agent's state and update methods.
+ * Shows the current vision and processing states, allows manual entry of new states, and displays the history of state changes. Intended for development and debugging purposes.
  */
 @Composable
 fun CascadeZOrderPlayground(
