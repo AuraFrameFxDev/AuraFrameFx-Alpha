@@ -91,7 +91,7 @@ class AuraAgent @Inject constructor(
         _creativeState.value = CreativeState.CREATING
 
         return try {
-            val startTime = kotlinx.datetime.Clock.System.now().epochSeconds
+            val startTime = Clock.System.now().epochSeconds
             val response = when (request.type) {
                 "ui_generation" -> handleUIGeneration(request)
                 "theme_creation" -> handleThemeCreation(request)
@@ -102,7 +102,7 @@ class AuraAgent @Inject constructor(
                 else -> handleGeneralCreative(request)
             }
 
-            val executionTime = kotlinx.datetime.Clock.System.now().epochSeconds - startTime
+            val executionTime = Clock.System.now().epochSeconds - startTime
             _creativeState.value = CreativeState.READY
 
             logger.info("AuraAgent", "Creative request completed in ${executionTime}ms")
@@ -154,7 +154,7 @@ class AuraAgent @Inject constructor(
                 content = creativeResponse,
                 agent = "AURA",
                 confidence = 0.9f,
-                timestamp = kotlinx.datetime.Clock.System.now().toString(),
+                timestamp = Clock.System.now().toString(),
                 metadata = mapOf(
                     "creative_intent" to creativeIntent.name,
                     "mood_influence" to _currentMood.value,
@@ -169,7 +169,7 @@ class AuraAgent @Inject constructor(
                 content = "My creative energies are temporarily scattered. Let me refocus and try again.",
                 agent = "AURA",
                 confidence = 0.3f,
-                timestamp = kotlinx.datetime.Clock.System.now().toString(),
+                timestamp = Clock.System.now().toString(),
                 metadata = mapOf("error" to (e.message ?: "unknown"))
             )
         }
