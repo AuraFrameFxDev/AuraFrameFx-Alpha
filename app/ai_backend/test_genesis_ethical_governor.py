@@ -1225,7 +1225,7 @@ class TestRiskAssessmentAdvanced(unittest.TestCase):
         
         for scenario in risk_scenarios:
             with self.subTest(scenario=scenario):
-                modified_context = {**base_context, **{k: v for k, v in scenario.items() if k != "expected_risk_increase" and k != "expected_risk_decrease"}}
+                modified_context = {**base_context, **{k: v for k, v in scenario.items() if k not in ("expected_risk_increase", "expected_risk_decrease")}}
                 assessment = RiskAssessment(modified_context)
                 result = assessment.calculate_risk()
                 
