@@ -1,6 +1,10 @@
 /*
  * AuraFrameFX Ecosystem API
+<<<<<<< HEAD
  * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
+=======
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -37,7 +41,11 @@ public class AiContentApiTest {
 
     /**
      * Generate image description using AI
+<<<<<<< HEAD
      * <p>
+=======
+     *
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      * Generate a description for the provided image URL
      *
      * @throws ApiException if the Api call fails

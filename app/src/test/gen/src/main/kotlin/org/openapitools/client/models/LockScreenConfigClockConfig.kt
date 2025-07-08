@@ -20,6 +20,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
+<<<<<<< HEAD
  *
  *
  * @param customTextColorEnabled
@@ -30,6 +31,18 @@ import com.squareup.moshi.JsonClass
 
 
 data class LockScreenConfigClockConfig(
+=======
+ * 
+ *
+ * @param customTextColorEnabled 
+ * @param customTextColor 
+ * @param customTextSizeEnabled 
+ * @param customTextSize 
+ */
+
+
+data class LockScreenConfigClockConfig (
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     @Json(name = "customTextColorEnabled")
     val customTextColorEnabled: kotlin.Boolean? = null,

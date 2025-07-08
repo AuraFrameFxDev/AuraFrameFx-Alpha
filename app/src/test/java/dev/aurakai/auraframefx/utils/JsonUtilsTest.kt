@@ -1,5 +1,6 @@
 package dev.aurakai.auraframefx.utils
 
+<<<<<<< HEAD
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -17,14 +18,47 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import java.io.ByteArrayInputStream
+=======
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import org.junit.jupiter.params.provider.NullSource
+import org.junit.jupiter.params.provider.EmptySource
+import org.junit.jupiter.params.provider.CsvSource
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.whenever
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.never
+import org.mockito.kotlin.any
+import org.mockito.kotlin.times
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 import java.io.IOException
 import java.io.InputStream
 import java.io.Reader
 import java.io.StringReader
+<<<<<<< HEAD
 import java.io.StringWriter
 import java.io.Writer
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletableFuture
+=======
+import java.io.Writer
+import java.io.StringWriter
+import java.nio.charset.StandardCharsets
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutionException
+import kotlin.random.Random
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("JsonUtils Tests")
@@ -32,10 +66,17 @@ class JsonUtilsTest {
 
     @Mock
     private lateinit var mockInputStream: InputStream
+<<<<<<< HEAD
 
     @Mock
     private lateinit var mockReader: Reader
 
+=======
+    
+    @Mock
+    private lateinit var mockReader: Reader
+    
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
     @Mock
     private lateinit var mockWriter: Writer
 
@@ -98,7 +139,11 @@ class JsonUtilsTest {
         @DisplayName("Should parse valid JSON string successfully")
         fun testParseValidJsonString() {
             val result = JsonUtils.parseJsonString(sampleValidJson)
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.isJsonObject)
             val jsonObject = result.asJsonObject
@@ -114,7 +159,11 @@ class JsonUtilsTest {
         @DisplayName("Should parse empty JSON object successfully")
         fun testParseEmptyJsonObject() {
             val result = JsonUtils.parseJsonString(sampleEmptyJson)
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.isJsonObject)
             assertTrue(result.asJsonObject.entrySet().isEmpty())
@@ -124,7 +173,11 @@ class JsonUtilsTest {
         @DisplayName("Should parse JSON array successfully")
         fun testParseJsonArray() {
             val result = JsonUtils.parseJsonString(sampleArrayJson)
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.isJsonArray)
             val jsonArray = result.asJsonArray
@@ -138,7 +191,11 @@ class JsonUtilsTest {
         @DisplayName("Should parse deeply nested JSON successfully")
         fun testParseDeeplyNestedJson() {
             val result = JsonUtils.parseJsonString(sampleNestedJson)
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.isJsonObject)
             val deepValue = result.asJsonObject
@@ -169,6 +226,7 @@ class JsonUtilsTest {
         }
 
         @ParameterizedTest
+<<<<<<< HEAD
         @ValueSource(
             strings = [
                 "{ \"key\": }",
@@ -179,6 +237,16 @@ class JsonUtilsTest {
                 "{ \"unclosed\": \"string"
             ]
         )
+=======
+        @ValueSource(strings = [
+            "{ \"key\": }",
+            "{ \"key\": value }",
+            "{ key: \"value\" }",
+            "{ \"key\": \"value\", }",
+            "[ 1, 2, 3, ]",
+            "{ \"unclosed\": \"string"
+        ])
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         @DisplayName("Should throw exception for various malformed JSON")
         fun testParseMalformedJson(malformedJson: String) {
             assertThrows<JsonSyntaxException> {
@@ -195,9 +263,15 @@ class JsonUtilsTest {
         @DisplayName("Should serialize object to JSON string successfully")
         fun testSerializeObjectToJson() {
             val testObject = TestDataClass("Test", 42, true, listOf(1, 2, 3))
+<<<<<<< HEAD
 
             val jsonString = JsonUtils.toJsonString(testObject)
 
+=======
+            
+            val jsonString = JsonUtils.toJsonString(testObject)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(jsonString)
             assertTrue(jsonString.contains("\"name\":\"Test\""))
             assertTrue(jsonString.contains("\"value\":42"))
@@ -209,7 +283,11 @@ class JsonUtilsTest {
         @DisplayName("Should serialize null object to null JSON")
         fun testSerializeNullObject() {
             val jsonString = JsonUtils.toJsonString(null)
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertEquals("null", jsonString)
         }
 
@@ -217,9 +295,15 @@ class JsonUtilsTest {
         @DisplayName("Should serialize empty object successfully")
         fun testSerializeEmptyObject() {
             val emptyObject = EmptyTestClass()
+<<<<<<< HEAD
 
             val jsonString = JsonUtils.toJsonString(emptyObject)
 
+=======
+            
+            val jsonString = JsonUtils.toJsonString(emptyObject)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(jsonString)
             assertEquals("{}", jsonString)
         }
@@ -228,9 +312,15 @@ class JsonUtilsTest {
         @DisplayName("Should serialize collection to JSON array")
         fun testSerializeCollectionToJson() {
             val collection = listOf("item1", "item2", "item3")
+<<<<<<< HEAD
 
             val jsonString = JsonUtils.toJsonString(collection)
 
+=======
+            
+            val jsonString = JsonUtils.toJsonString(collection)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(jsonString)
             assertTrue(jsonString.contains("\"item1\""))
             assertTrue(jsonString.contains("\"item2\""))
@@ -245,9 +335,15 @@ class JsonUtilsTest {
                 "key2" to 42,
                 "key3" to true
             )
+<<<<<<< HEAD
 
             val jsonString = JsonUtils.toJsonString(map)
 
+=======
+            
+            val jsonString = JsonUtils.toJsonString(map)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(jsonString)
             assertTrue(jsonString.contains("\"key1\":\"value1\""))
             assertTrue(jsonString.contains("\"key2\":42"))
@@ -263,10 +359,16 @@ class JsonUtilsTest {
         @DisplayName("Should deserialize JSON string to object successfully")
         fun testDeserializeJsonToObject() {
             val jsonString = """{"name":"Test","value":42,"active":true,"numbers":[1,2,3]}"""
+<<<<<<< HEAD
 
             val result =
                 JsonUtils.fromJsonString<TestDataClass>(jsonString, TestDataClass::class.java)
 
+=======
+            
+            val result = JsonUtils.fromJsonString<TestDataClass>(jsonString, TestDataClass::class.java)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertEquals("Test", result.name)
             assertEquals(42, result.value)
@@ -278,10 +380,16 @@ class JsonUtilsTest {
         @DisplayName("Should deserialize empty JSON object successfully")
         fun testDeserializeEmptyJsonObject() {
             val jsonString = "{}"
+<<<<<<< HEAD
 
             val result =
                 JsonUtils.fromJsonString<EmptyTestClass>(jsonString, EmptyTestClass::class.java)
 
+=======
+            
+            val result = JsonUtils.fromJsonString<EmptyTestClass>(jsonString, EmptyTestClass::class.java)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
         }
 
@@ -289,7 +397,11 @@ class JsonUtilsTest {
         @DisplayName("Should throw exception when deserializing invalid JSON")
         fun testDeserializeInvalidJson() {
             val invalidJson = "{ invalid json }"
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertThrows<JsonSyntaxException> {
                 JsonUtils.fromJsonString<TestDataClass>(invalidJson, TestDataClass::class.java)
             }
@@ -299,7 +411,11 @@ class JsonUtilsTest {
         @DisplayName("Should throw exception when deserializing JSON with wrong type")
         fun testDeserializeWrongType() {
             val jsonString = """{"name":"Test","value":"not_a_number","active":true}"""
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertThrows<JsonSyntaxException> {
                 JsonUtils.fromJsonString<TestDataClass>(jsonString, TestDataClass::class.java)
             }
@@ -313,11 +429,18 @@ class JsonUtilsTest {
         @Test
         @DisplayName("Should read JSON from InputStream successfully")
         fun testReadJsonFromInputStream() {
+<<<<<<< HEAD
             val inputStream =
                 ByteArrayInputStream(sampleValidJson.toByteArray(StandardCharsets.UTF_8))
 
             val result = JsonUtils.parseJsonFromStream(inputStream)
 
+=======
+            val inputStream = ByteArrayInputStream(sampleValidJson.toByteArray(StandardCharsets.UTF_8))
+            
+            val result = JsonUtils.parseJsonFromStream(inputStream)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.isJsonObject)
             assertEquals("John Doe", result.asJsonObject.get("name").asString)
@@ -327,9 +450,15 @@ class JsonUtilsTest {
         @DisplayName("Should read JSON from Reader successfully")
         fun testReadJsonFromReader() {
             val reader = StringReader(sampleValidJson)
+<<<<<<< HEAD
 
             val result = JsonUtils.parseJsonFromReader(reader)
 
+=======
+            
+            val result = JsonUtils.parseJsonFromReader(reader)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.isJsonObject)
             assertEquals("John Doe", result.asJsonObject.get("name").asString)
@@ -340,9 +469,15 @@ class JsonUtilsTest {
         fun testWriteJsonToWriter() {
             val writer = StringWriter()
             val testObject = TestDataClass("Test", 42, true, listOf(1, 2, 3))
+<<<<<<< HEAD
 
             JsonUtils.writeJsonToWriter(testObject, writer)
 
+=======
+            
+            JsonUtils.writeJsonToWriter(testObject, writer)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             val result = writer.toString()
             assertNotNull(result)
             assertTrue(result.contains("\"name\":\"Test\""))
@@ -353,7 +488,11 @@ class JsonUtilsTest {
         @DisplayName("Should handle IOException when reading from stream")
         fun testReadJsonFromStreamIOException() {
             whenever(mockInputStream.read()).thenThrow(IOException("Stream error"))
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertThrows<IOException> {
                 JsonUtils.parseJsonFromStream(mockInputStream)
             }
@@ -364,7 +503,11 @@ class JsonUtilsTest {
         fun testWriteJsonToWriterIOException() {
             whenever(mockWriter.write(any<String>())).thenThrow(IOException("Write error"))
             val testObject = TestDataClass("Test", 42, true, listOf(1, 2, 3))
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertThrows<IOException> {
                 JsonUtils.writeJsonToWriter(testObject, mockWriter)
             }
@@ -415,6 +558,7 @@ class JsonUtilsTest {
         }
 
         @ParameterizedTest
+<<<<<<< HEAD
         @ValueSource(
             strings = [
                 "{ \"key\": }",
@@ -425,6 +569,16 @@ class JsonUtilsTest {
                 "{ \"unclosed\": \"string"
             ]
         )
+=======
+        @ValueSource(strings = [
+            "{ \"key\": }",
+            "{ \"key\": value }",
+            "{ key: \"value\" }",
+            "{ \"key\": \"value\", }",
+            "[ 1, 2, 3, ]",
+            "{ \"unclosed\": \"string"
+        ])
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         @DisplayName("Should identify various malformed JSON as invalid")
         fun testMalformedJsonValidation(malformedJson: String) {
             assertFalse(JsonUtils.isValidJson(malformedJson))
@@ -439,9 +593,15 @@ class JsonUtilsTest {
         @DisplayName("Should format JSON with proper indentation")
         fun testFormatJsonWithIndentation() {
             val compactJson = """{"name":"John","age":30,"active":true}"""
+<<<<<<< HEAD
 
             val formatted = JsonUtils.formatJson(compactJson, 2)
 
+=======
+            
+            val formatted = JsonUtils.formatJson(compactJson, 2)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(formatted)
             assertTrue(formatted.contains("  \"name\": \"John\""))
             assertTrue(formatted.contains("  \"age\": 30"))
@@ -452,9 +612,15 @@ class JsonUtilsTest {
         @DisplayName("Should format JSON with custom indentation")
         fun testFormatJsonWithCustomIndentation() {
             val compactJson = """{"name":"John","age":30}"""
+<<<<<<< HEAD
 
             val formatted = JsonUtils.formatJson(compactJson, 4)
 
+=======
+            
+            val formatted = JsonUtils.formatJson(compactJson, 4)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(formatted)
             assertTrue(formatted.contains("    \"name\": \"John\""))
             assertTrue(formatted.contains("    \"age\": 30"))
@@ -470,9 +636,15 @@ class JsonUtilsTest {
                     "active": true
                 }
             """.trimIndent()
+<<<<<<< HEAD
 
             val minified = JsonUtils.minifyJson(formattedJson)
 
+=======
+            
+            val minified = JsonUtils.minifyJson(formattedJson)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(minified)
             assertFalse(minified.contains("  "))
             assertFalse(minified.contains("\n"))
@@ -485,7 +657,11 @@ class JsonUtilsTest {
         @DisplayName("Should handle empty JSON in formatting")
         fun testFormatEmptyJson() {
             val formatted = JsonUtils.formatJson("{}", 2)
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(formatted)
             assertEquals("{}", formatted.trim())
         }
@@ -507,7 +683,11 @@ class JsonUtilsTest {
         @DisplayName("Should extract value using simple JSON path")
         fun testExtractValueSimplePath() {
             val result = JsonUtils.extractValue(sampleValidJson, "$.name")
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertEquals("John Doe", result)
         }
@@ -516,7 +696,11 @@ class JsonUtilsTest {
         @DisplayName("Should extract value using nested JSON path")
         fun testExtractValueNestedPath() {
             val result = JsonUtils.extractValue(sampleValidJson, "$.address.city")
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertEquals("Anytown", result)
         }
@@ -525,7 +709,11 @@ class JsonUtilsTest {
         @DisplayName("Should extract value using array index JSON path")
         fun testExtractValueArrayPath() {
             val result = JsonUtils.extractValue(sampleValidJson, "$.scores[0]")
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertEquals(95, result)
         }
@@ -534,7 +722,11 @@ class JsonUtilsTest {
         @DisplayName("Should return null for non-existent path")
         fun testExtractValueNonExistentPath() {
             val result = JsonUtils.extractValue(sampleValidJson, "$.nonexistent")
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNull(result)
         }
 
@@ -542,7 +734,11 @@ class JsonUtilsTest {
         @DisplayName("Should handle complex path expressions")
         fun testExtractValueComplexPath() {
             val result = JsonUtils.extractValue(sampleValidJson, "$.scores[*]")
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result is List<*>)
             val scores = result as List<*>
@@ -570,9 +766,15 @@ class JsonUtilsTest {
         fun testMergeJsonObjects() {
             val json1 = """{"name":"John","age":30}"""
             val json2 = """{"city":"New York","age":31}"""
+<<<<<<< HEAD
 
             val merged = JsonUtils.mergeJsonObjects(json1, json2)
 
+=======
+            
+            val merged = JsonUtils.mergeJsonObjects(json1, json2)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(merged)
             assertTrue(merged.contains("\"name\":\"John\""))
             assertTrue(merged.contains("\"age\":31"))
@@ -583,9 +785,15 @@ class JsonUtilsTest {
         @DisplayName("Should filter JSON object by keys")
         fun testFilterJsonByKeys() {
             val keys = listOf("name", "age")
+<<<<<<< HEAD
 
             val filtered = JsonUtils.filterJsonByKeys(sampleValidJson, keys)
 
+=======
+            
+            val filtered = JsonUtils.filterJsonByKeys(sampleValidJson, keys)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(filtered)
             assertTrue(filtered.contains("\"name\":\"John Doe\""))
             assertTrue(filtered.contains("\"age\":30"))
@@ -597,9 +805,15 @@ class JsonUtilsTest {
         @DisplayName("Should exclude keys from JSON object")
         fun testExcludeKeysFromJson() {
             val keysToExclude = listOf("scores", "address")
+<<<<<<< HEAD
 
             val filtered = JsonUtils.excludeKeysFromJson(sampleValidJson, keysToExclude)
 
+=======
+            
+            val filtered = JsonUtils.excludeKeysFromJson(sampleValidJson, keysToExclude)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(filtered)
             assertTrue(filtered.contains("\"name\":\"John Doe\""))
             assertTrue(filtered.contains("\"age\":30"))
@@ -614,9 +828,15 @@ class JsonUtilsTest {
             val transformer: (Any) -> Any = { value ->
                 if (value is String) value.uppercase() else value
             }
+<<<<<<< HEAD
 
             val transformed = JsonUtils.transformJsonValues(sampleValidJson, transformer)
 
+=======
+            
+            val transformed = JsonUtils.transformJsonValues(sampleValidJson, transformer)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(transformed)
             assertTrue(transformed.contains("\"name\":\"JOHN DOE\""))
             assertTrue(transformed.contains("\"age\":30"))
@@ -638,6 +858,7 @@ class JsonUtilsTest {
                 if (i < 1000) largeJsonBuilder.append(",")
             }
             largeJsonBuilder.append("}")
+<<<<<<< HEAD
 
             val largeJson = largeJsonBuilder.toString()
 
@@ -645,6 +866,15 @@ class JsonUtilsTest {
             val result = JsonUtils.parseJsonString(largeJson)
             val endTime = System.currentTimeMillis()
 
+=======
+            
+            val largeJson = largeJsonBuilder.toString()
+            
+            val startTime = System.currentTimeMillis()
+            val result = JsonUtils.parseJsonString(largeJson)
+            val endTime = System.currentTimeMillis()
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.isJsonObject)
             assertTrue(endTime - startTime < 1000) // Should parse in less than 1 second
@@ -654,9 +884,15 @@ class JsonUtilsTest {
         @DisplayName("Should handle deeply nested JSON structures")
         fun testDeeplyNestedJsonHandling() {
             val deepJson = generateDeeplyNestedJson(50)
+<<<<<<< HEAD
 
             val result = JsonUtils.parseJsonString(deepJson)
 
+=======
+            
+            val result = JsonUtils.parseJsonString(deepJson)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.isJsonObject)
         }
@@ -673,9 +909,15 @@ class JsonUtilsTest {
                     "backslash": "Path\\to\\file"
                 }
             """.trimIndent()
+<<<<<<< HEAD
 
             val result = JsonUtils.parseJsonString(specialJson)
 
+=======
+            
+            val result = JsonUtils.parseJsonString(specialJson)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.isJsonObject)
             val jsonObject = result.asJsonObject
@@ -695,9 +937,15 @@ class JsonUtilsTest {
                     JsonUtils.parseJsonString(json)
                 }
             }
+<<<<<<< HEAD
 
             val results = futures.map { it.get() }
 
+=======
+            
+            val results = futures.map { it.get() }
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertEquals(10, results.size)
             results.forEachIndexed { index, result ->
                 assertNotNull(result)
@@ -717,9 +965,15 @@ class JsonUtilsTest {
                     "array": [1, null, 3]
                 }
             """.trimIndent()
+<<<<<<< HEAD
 
             val result = JsonUtils.parseJsonString(nullJson)
 
+=======
+            
+            val result = JsonUtils.parseJsonString(nullJson)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.isJsonObject)
             val jsonObject = result.asJsonObject
@@ -741,9 +995,15 @@ class JsonUtilsTest {
                     }
                 }
             """.trimIndent()
+<<<<<<< HEAD
 
             val result = JsonUtils.parseJsonString(emptyJson)
 
+=======
+            
+            val result = JsonUtils.parseJsonString(emptyJson)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.isJsonObject)
             val jsonObject = result.asJsonObject
@@ -774,12 +1034,19 @@ class JsonUtilsTest {
         @DisplayName("Should handle generic type deserialization safely")
         fun testGenericTypeDeserialization() {
             val listJson = """["item1", "item2", "item3"]"""
+<<<<<<< HEAD
 
             val result = JsonUtils.fromJsonString<List<String>>(
                 listJson,
                 object : TypeToken<List<String>>() {}.type
             )
 
+=======
+            
+            val result = JsonUtils.fromJsonString<List<String>>(listJson, 
+                object : TypeToken<List<String>>() {}.type)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertEquals(3, result.size)
             assertEquals("item1", result[0])
@@ -791,12 +1058,19 @@ class JsonUtilsTest {
         @DisplayName("Should handle map type deserialization safely")
         fun testMapTypeDeserialization() {
             val mapJson = """{"key1":"value1","key2":"value2"}"""
+<<<<<<< HEAD
 
             val result = JsonUtils.fromJsonString<Map<String, String>>(
                 mapJson,
                 object : TypeToken<Map<String, String>>() {}.type
             )
 
+=======
+            
+            val result = JsonUtils.fromJsonString<Map<String, String>>(mapJson,
+                object : TypeToken<Map<String, String>>() {}.type)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertEquals(2, result.size)
             assertEquals("value1", result["key1"])
@@ -807,12 +1081,19 @@ class JsonUtilsTest {
         @DisplayName("Should handle nested generic type deserialization")
         fun testNestedGenericTypeDeserialization() {
             val nestedJson = """{"items":[{"id":1,"name":"Item1"},{"id":2,"name":"Item2"}]}"""
+<<<<<<< HEAD
 
             val result = JsonUtils.fromJsonString<Map<String, List<Map<String, Any>>>>(
                 nestedJson,
                 object : TypeToken<Map<String, List<Map<String, Any>>>>() {}.type
             )
 
+=======
+            
+            val result = JsonUtils.fromJsonString<Map<String, List<Map<String, Any>>>>(nestedJson,
+                object : TypeToken<Map<String, List<Map<String, Any>>>>() {}.type)
+            
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertNotNull(result)
             assertTrue(result.containsKey("items"))
             val items = result["items"] as List<Map<String, Any>>

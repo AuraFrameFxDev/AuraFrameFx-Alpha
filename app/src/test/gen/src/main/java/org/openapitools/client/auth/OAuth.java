@@ -1,6 +1,10 @@
 /*
  * AuraFrameFX Ecosystem API
+<<<<<<< HEAD
  * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
+=======
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -22,6 +26,7 @@ import java.util.List;
 
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class OAuth implements Authentication {
+<<<<<<< HEAD
     private String accessToken;
 
     public String getAccessToken() {
@@ -39,4 +44,23 @@ public class OAuth implements Authentication {
             headerParams.put("Authorization", "Bearer " + accessToken);
         }
     }
+=======
+  private String accessToken;
+
+  public String getAccessToken() {
+    return accessToken;
+  }
+
+  public void setAccessToken(String accessToken) {
+    this.accessToken = accessToken;
+  }
+
+  @Override
+  public void applyToParams(List<Pair> queryParams, Map<String, String> headerParams, Map<String, String> cookieParams,
+                            String payload, String method, URI uri) throws ApiException {
+    if (accessToken != null) {
+      headerParams.put("Authorization", "Bearer " + accessToken);
+    }
+  }
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 }

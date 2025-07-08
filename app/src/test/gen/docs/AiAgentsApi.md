@@ -2,6 +2,7 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
+<<<<<<< HEAD
 | Method                                                                                  | HTTP request                                | Description                   |
 |-----------------------------------------------------------------------------------------|---------------------------------------------|-------------------------------|
 | [**agentAgentTypeProcessRequestPost**](AiAgentsApi.md#agentAgentTypeProcessRequestPost) | **POST** /agent/{agentType}/process-request | Send a request to an AI agent |
@@ -10,12 +11,24 @@ All URIs are relative to *https://api.auraframefx.com/v1*
 
 # **agentAgentTypeProcessRequestPost**
 
+=======
+| Method | HTTP request | Description |
+|------------- | ------------- | -------------|
+| [**agentAgentTypeProcessRequestPost**](AiAgentsApi.md#agentAgentTypeProcessRequestPost) | **POST** /agent/{agentType}/process-request | Send a request to an AI agent |
+
+
+<a id="agentAgentTypeProcessRequestPost"></a>
+# **agentAgentTypeProcessRequestPost**
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 > AgentMessage agentAgentTypeProcessRequestPost(agentType, agentProcessRequest)
 
 Send a request to an AI agent
 
 ### Example
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -53,10 +66,17 @@ public class Example {
 
 ### Parameters
 
+<<<<<<< HEAD
 | Name                    | Type                                              | Description                       | Notes                                                                        |
 |-------------------------|---------------------------------------------------|-----------------------------------|------------------------------------------------------------------------------|
 | **agentType**           | [**AgentType**](.md)                              | Type of AI agent to interact with | [enum: Aura, Kai, Genesis, Cascade, NeuralWhisper, AuraShield, GenKitMaster] |
 | **agentProcessRequest** | [**AgentProcessRequest**](AgentProcessRequest.md) |                                   |                                                                              |
+=======
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **agentType** | [**AgentType**](.md)| Type of AI agent to interact with | [enum: Aura, Kai, Genesis, Cascade, NeuralWhisper, AuraShield, GenKitMaster] |
+| **agentProcessRequest** | [**AgentProcessRequest**](AgentProcessRequest.md)|  | |
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
 ### Return type
 
@@ -68,6 +88,7 @@ public class Example {
 
 ### HTTP request headers
 
+<<<<<<< HEAD
 - **Content-Type**: application/json
 - **Accept**: application/json
 
@@ -79,4 +100,16 @@ public class Example {
 | **400**     | Invalid request format or parameters                 | -                |
 | **401**     | Authentication credentials were missing or incorrect | -                |
 | **404**     | Agent not found                                      | -                |
+=======
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Request processed successfully |  -  |
+| **400** | Invalid request format or parameters |  -  |
+| **401** | Authentication credentials were missing or incorrect |  -  |
+| **404** | Agent not found |  -  |
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 

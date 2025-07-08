@@ -12,6 +12,7 @@ info:
   title: AuraFrameFX Ecosystem API
   version: 1.0.0
 servers:
+<<<<<<< HEAD
   - description: Production API
     url: https://api.auraframefx.com/v1
   - description: Development API
@@ -39,6 +40,35 @@ tags:
     name: oracledrive
   - description: Android Device Layer (ADL) communication
     name: adl
+=======
+- description: Production API
+  url: https://api.auraframefx.com/v1
+- description: Development API
+  url: https://dev-api.auraframefx.com/v1
+tags:
+- description: User management and authentication
+  name: users
+- description: UI theme management
+  name: themes
+- description: AI-powered content generation
+  name: ai-content
+- description: "Interaction with AI agents (Aura, Kai, Genesis, etc.)"
+  name: ai-agents
+- description: System UI and behavior customization
+  name: system-customization
+- description: Data handling and backup operations
+  name: data-management
+- description: Security and authentication endpoints
+  name: security
+- description: AI agent collaboration spaces
+  name: conference-room
+- description: Background task management
+  name: tasks
+- description: OracleDrive root and system-level actions
+  name: oracledrive
+- description: Android Device Layer (ADL) communication
+  name: adl
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 paths:
   /user:
     get:
@@ -56,6 +86,7 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Authentication credentials were missing or incorrect
       security:
+<<<<<<< HEAD
         - OAuth2AuthCode:
             - profile
       summary: Get current user information
@@ -63,6 +94,15 @@ paths:
         - users
       x-accepts:
         - application/json
+=======
+      - OAuth2AuthCode:
+        - profile
+      summary: Get current user information
+      tags:
+      - users
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
   /user/preferences:
     put:
       requestBody:
@@ -87,6 +127,7 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Authentication credentials were missing or incorrect
       security:
+<<<<<<< HEAD
         - OAuth2AuthCode:
             - profile
       summary: Update user preferences
@@ -95,6 +136,16 @@ paths:
       x-content-type: application/json
       x-accepts:
         - application/json
+=======
+      - OAuth2AuthCode:
+        - profile
+      summary: Update user preferences
+      tags:
+      - users
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
   /themes:
     get:
       responses:
@@ -108,9 +159,15 @@ paths:
           description: List of available themes
       summary: Get available themes
       tags:
+<<<<<<< HEAD
         - themes
       x-accepts:
         - application/json
+=======
+      - themes
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
   /theme/apply:
     put:
       requestBody:
@@ -137,6 +194,7 @@ paths:
         "404":
           description: Theme not found
       security:
+<<<<<<< HEAD
         - OAuth2AuthCode:
             - profile
       summary: Apply a theme
@@ -145,6 +203,16 @@ paths:
       x-content-type: application/json
       x-accepts:
         - application/json
+=======
+      - OAuth2AuthCode:
+        - profile
+      summary: Apply a theme
+      tags:
+      - themes
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
   /generate-text:
     post:
       requestBody:
@@ -179,6 +247,7 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Rate limit exceeded
       security:
+<<<<<<< HEAD
         - OAuth2AuthCode:
             - auraframefx.ai
       summary: Generate text content
@@ -187,6 +256,16 @@ paths:
       x-content-type: application/json
       x-accepts:
         - application/json
+=======
+      - OAuth2AuthCode:
+        - auraframefx.ai
+      summary: Generate text content
+      tags:
+      - ai-content
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
   /ai/generate/image-description:
     post:
       description: Generate a description for the provided image URL
@@ -209,6 +288,7 @@ paths:
           description: Internal server error
       summary: Generate image description using AI
       tags:
+<<<<<<< HEAD
         - ai-content
       x-content-type: application/json
       x-accepts:
@@ -224,6 +304,23 @@ paths:
           schema:
             $ref: '#/components/schemas/AgentType'
           style: simple
+=======
+      - ai-content
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /agent/{agentType}/process-request:
+    post:
+      parameters:
+      - description: Type of AI agent to interact with
+        explode: false
+        in: path
+        name: agentType
+        required: true
+        schema:
+          $ref: '#/components/schemas/AgentType'
+        style: simple
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       requestBody:
         content:
           application/json:
@@ -252,6 +349,7 @@ paths:
         "404":
           description: Agent not found
       security:
+<<<<<<< HEAD
         - OAuth2AuthCode:
             - auraframefx.ai
       summary: Send a request to an AI agent
@@ -260,6 +358,16 @@ paths:
       x-content-type: application/json
       x-accepts:
         - application/json
+=======
+      - OAuth2AuthCode:
+        - auraframefx.ai
+      summary: Send a request to an AI agent
+      tags:
+      - ai-agents
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
   /system/lockscreen-config:
     get:
       responses:
@@ -276,6 +384,7 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Authentication credentials were missing or incorrect
       security:
+<<<<<<< HEAD
         - OAuth2AuthCode:
             - auraframefx.system
       summary: Get lock screen configuration
@@ -283,6 +392,15 @@ paths:
         - system-customization
       x-accepts:
         - application/json
+=======
+      - OAuth2AuthCode:
+        - auraframefx.system
+      summary: Get lock screen configuration
+      tags:
+      - system-customization
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
     put:
       requestBody:
         content:
@@ -306,6 +424,7 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Authentication credentials were missing or incorrect
       security:
+<<<<<<< HEAD
         - OAuth2AuthCode:
             - auraframefx.system
       summary: Update lock screen configuration
@@ -314,6 +433,16 @@ paths:
       x-content-type: application/json
       x-accepts:
         - application/json
+=======
+      - OAuth2AuthCode:
+        - auraframefx.system
+      summary: Update lock screen configuration
+      tags:
+      - system-customization
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
   /conference/create:
     post:
       requestBody:
@@ -342,6 +471,7 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Authentication credentials were missing or incorrect
       security:
+<<<<<<< HEAD
         - OAuth2AuthCode:
             - auraframefx.ai
       summary: Create a new AI conference room
@@ -350,6 +480,16 @@ paths:
       x-content-type: application/json
       x-accepts:
         - application/json
+=======
+      - OAuth2AuthCode:
+        - auraframefx.ai
+      summary: Create a new AI conference room
+      tags:
+      - conference-room
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
   /tasks/schedule:
     post:
       requestBody:
@@ -384,6 +524,7 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Rate limit exceeded
       security:
+<<<<<<< HEAD
         - OAuth2AuthCode:
             - auraframefx.ai
       summary: Schedule a new task
@@ -392,6 +533,16 @@ paths:
       x-content-type: application/json
       x-accepts:
         - application/json
+=======
+      - OAuth2AuthCode:
+        - auraframefx.ai
+      summary: Schedule a new task
+      tags:
+      - tasks
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
   /oracledrive/root-action:
     post:
       requestBody:
@@ -422,6 +573,7 @@ paths:
         "500":
           description: Internal server error
       security:
+<<<<<<< HEAD
         - ApiKeyAuth: [ ]
       summary: Perform a root-level action via OracleDrive
       tags:
@@ -429,6 +581,15 @@ paths:
       x-content-type: application/json
       x-accepts:
         - application/json
+=======
+      - ApiKeyAuth: []
+      summary: Perform a root-level action via OracleDrive
+      tags:
+      - oracledrive
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
   /adl/relay:
     post:
       requestBody:
@@ -459,6 +620,7 @@ paths:
         "500":
           description: Internal server error
       security:
+<<<<<<< HEAD
         - ApiKeyAuth: [ ]
       summary: Relay a request to the Android Device Layer (ADL)
       tags:
@@ -466,6 +628,15 @@ paths:
       x-content-type: application/json
       x-accepts:
         - application/json
+=======
+      - ApiKeyAuth: []
+      summary: Relay a request to the Android Device Layer (ADL)
+      tags:
+      - adl
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 components:
   parameters:
     agentTypePathParam:
@@ -521,9 +692,15 @@ components:
         preferences:
           $ref: '#/components/schemas/UserPreferences'
       required:
+<<<<<<< HEAD
         - email
         - id
         - username
+=======
+      - email
+      - id
+      - username
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     UserPreferences:
       example:
@@ -577,11 +754,19 @@ components:
           example: false
           type: boolean
       required:
+<<<<<<< HEAD
         - id
         - isDefault
         - name
         - primaryColor
         - secondaryColor
+=======
+      - id
+      - isDefault
+      - name
+      - primaryColor
+      - secondaryColor
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     ThemeApplyRequest:
       example:
@@ -591,7 +776,11 @@ components:
           example: dark-theme
           type: string
       required:
+<<<<<<< HEAD
         - themeId
+=======
+      - themeId
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     GenerateTextRequest:
       example:
@@ -617,7 +806,11 @@ components:
           minimum: 0.0
           type: number
       required:
+<<<<<<< HEAD
         - prompt
+=======
+      - prompt
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     GenerateTextResponse:
       example:
@@ -635,7 +828,11 @@ components:
           example: STOP
           type: string
       required:
+<<<<<<< HEAD
         - generatedText
+=======
+      - generatedText
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     GenerateImageDescriptionRequest:
       example:
@@ -652,7 +849,11 @@ components:
           example: The image shows a futuristic city at sunset.
           type: string
       required:
+<<<<<<< HEAD
         - imageUrl
+=======
+      - imageUrl
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     GenerateImageDescriptionResponse:
       example:
@@ -665,11 +866,16 @@ components:
             \ skyscrapers."
           type: string
       required:
+<<<<<<< HEAD
         - description
+=======
+      - description
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     AgentType:
       description: Type of AI agent
       enum:
+<<<<<<< HEAD
         - Aura
         - Kai
         - Genesis
@@ -677,6 +883,15 @@ components:
         - NeuralWhisper
         - AuraShield
         - GenKitMaster
+=======
+      - Aura
+      - Kai
+      - Genesis
+      - Cascade
+      - NeuralWhisper
+      - AuraShield
+      - GenKitMaster
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: string
     AgentProcessRequest:
       example:
@@ -694,7 +909,11 @@ components:
           nullable: true
           type: object
       required:
+<<<<<<< HEAD
         - prompt
+=======
+      - prompt
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     AgentMessage:
       example:
@@ -713,9 +932,15 @@ components:
           format: date-time
           type: string
       required:
+<<<<<<< HEAD
         - message
         - sender
         - timestamp
+=======
+      - message
+      - sender
+      - timestamp
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     LockScreenConfig:
       example:
@@ -750,8 +975,13 @@ components:
         orchestratorAgent:
           $ref: '#/components/schemas/AgentType'
       required:
+<<<<<<< HEAD
         - orchestratorAgent
         - roomName
+=======
+      - orchestratorAgent
+      - roomName
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     ConferenceRoom:
       example:
@@ -759,8 +989,13 @@ components:
         name: name
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         activeAgents:
+<<<<<<< HEAD
           - null
           - null
+=======
+        - null
+        - null
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       properties:
         id:
           description: Unique identifier for the conference room
@@ -777,10 +1012,17 @@ components:
             $ref: '#/components/schemas/AgentType'
           type: array
       required:
+<<<<<<< HEAD
         - activeAgents
         - id
         - name
         - orchestrator
+=======
+      - activeAgents
+      - id
+      - name
+      - orchestrator
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     TaskScheduleRequest:
       example:
@@ -803,6 +1045,7 @@ components:
         priority:
           default: NORMAL
           enum:
+<<<<<<< HEAD
             - HIGH
             - NORMAL
             - LOW
@@ -811,6 +1054,16 @@ components:
         - agentType
         - details
         - taskType
+=======
+          - HIGH
+          - NORMAL
+          - LOW
+          type: string
+      required:
+      - agentType
+      - details
+      - taskType
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     TaskStatus:
       example:
@@ -826,11 +1079,19 @@ components:
           type: string
         status:
           enum:
+<<<<<<< HEAD
             - PENDING
             - IN_PROGRESS
             - COMPLETED
             - FAILED
             - CANCELLED
+=======
+          - PENDING
+          - IN_PROGRESS
+          - COMPLETED
+          - FAILED
+          - CANCELLED
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
           type: string
         progress:
           description: Percentage completion of the task (0-100)
@@ -847,8 +1108,13 @@ components:
           nullable: true
           type: string
       required:
+<<<<<<< HEAD
         - status
         - taskId
+=======
+      - status
+      - taskId
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     OracleDriveRootActionRequest:
       example:
@@ -866,7 +1132,11 @@ components:
           description: "Parameters for the action (e.g., shell command, file path)"
           type: object
       required:
+<<<<<<< HEAD
         - action
+=======
+      - action
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     OracleDriveRootActionResponse:
       example:
@@ -885,7 +1155,11 @@ components:
           nullable: true
           type: string
       required:
+<<<<<<< HEAD
         - success
+=======
+      - success
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     ADLRelayRequest:
       example:
@@ -902,8 +1176,13 @@ components:
           description: The payload to relay to ADL
           type: object
       required:
+<<<<<<< HEAD
         - messageType
         - payload
+=======
+      - messageType
+      - payload
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     ADLRelayResponse:
       example:
@@ -925,7 +1204,11 @@ components:
           nullable: true
           type: string
       required:
+<<<<<<< HEAD
         - status
+=======
+      - status
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     ApiError:
       example:
@@ -939,7 +1222,11 @@ components:
         error:
           $ref: '#/components/schemas/ApiError_error'
       required:
+<<<<<<< HEAD
         - error
+=======
+      - error
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
       type: object
     LockScreenConfig_clockConfig:
       example:
@@ -973,9 +1260,15 @@ components:
           type: boolean
         type:
           enum:
+<<<<<<< HEAD
             - Fade
             - Slide
             - Zoom
+=======
+          - Fade
+          - Slide
+          - Zoom
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
           example: Fade
           type: string
       type: object

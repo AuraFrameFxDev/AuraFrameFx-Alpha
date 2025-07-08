@@ -2,6 +2,7 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
+<<<<<<< HEAD
 | Method                                                   | HTTP request              | Description                  |
 |----------------------------------------------------------|---------------------------|------------------------------|
 | [**userGet**](UsersApi.md#userGet)                       | **GET** /user             | Get current user information |
@@ -11,12 +12,25 @@ All URIs are relative to *https://api.auraframefx.com/v1*
 
 # **userGet**
 
+=======
+| Method | HTTP request | Description |
+|------------- | ------------- | -------------|
+| [**userGet**](UsersApi.md#userGet) | **GET** /user | Get current user information |
+| [**userPreferencesPut**](UsersApi.md#userPreferencesPut) | **PUT** /user/preferences | Update user preferences |
+
+
+<a id="userGet"></a>
+# **userGet**
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 > User userGet()
 
 Get current user information
 
 ### Example
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -51,7 +65,10 @@ public class Example {
 ```
 
 ### Parameters
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 This endpoint does not need any parameter.
 
 ### Return type
@@ -64,6 +81,7 @@ This endpoint does not need any parameter.
 
 ### HTTP request headers
 
+<<<<<<< HEAD
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
@@ -78,12 +96,28 @@ This endpoint does not need any parameter.
 
 # **userPreferencesPut**
 
+=======
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | User information retrieved successfully |  -  |
+| **401** | Authentication credentials were missing or incorrect |  -  |
+
+<a id="userPreferencesPut"></a>
+# **userPreferencesPut**
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 > userPreferencesPut(userPreferencesUpdate)
 
 Update user preferences
 
 ### Example
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -119,9 +153,15 @@ public class Example {
 
 ### Parameters
 
+<<<<<<< HEAD
 | Name                      | Type                                                  | Description | Notes |
 |---------------------------|-------------------------------------------------------|-------------|-------|
 | **userPreferencesUpdate** | [**UserPreferencesUpdate**](UserPreferencesUpdate.md) |             |       |
+=======
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **userPreferencesUpdate** | [**UserPreferencesUpdate**](UserPreferencesUpdate.md)|  | |
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
 ### Return type
 
@@ -133,6 +173,7 @@ null (empty response body)
 
 ### HTTP request headers
 
+<<<<<<< HEAD
 - **Content-Type**: application/json
 - **Accept**: application/json
 
@@ -143,4 +184,15 @@ null (empty response body)
 | **200**     | Preferences updated successfully                     | -                |
 | **400**     | Invalid request format or parameters                 | -                |
 | **401**     | Authentication credentials were missing or incorrect | -                |
+=======
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Preferences updated successfully |  -  |
+| **400** | Invalid request format or parameters |  -  |
+| **401** | Authentication credentials were missing or incorrect |  -  |
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 

@@ -21,6 +21,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
+<<<<<<< HEAD
  *
  *
  * @param roomName Name of the new conference room
@@ -29,6 +30,16 @@ import com.squareup.moshi.JsonClass
 
 
 data class ConferenceRoomCreateRequest(
+=======
+ * 
+ *
+ * @param roomName Name of the new conference room
+ * @param orchestratorAgent 
+ */
+
+
+data class ConferenceRoomCreateRequest (
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     /* Name of the new conference room */
     @Json(name = "roomName")

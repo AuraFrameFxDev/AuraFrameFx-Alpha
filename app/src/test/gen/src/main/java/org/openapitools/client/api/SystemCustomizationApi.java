@@ -1,6 +1,10 @@
 /*
  * AuraFrameFX Ecosystem API
+<<<<<<< HEAD
  * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
+=======
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -75,6 +79,7 @@ public class SystemCustomizationApi {
 
     /**
      * Build call for systemLockscreenConfigGet
+<<<<<<< HEAD
      *
      * @param _callback Callback for upload/download progress
      * @return Call to execute
@@ -84,16 +89,36 @@ public class SystemCustomizationApi {
      * <tr><td> 200 </td><td> Lock screen configuration retrieved successfully </td><td>  -  </td></tr>
      * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
      * </table>
+=======
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table summary="Response Details" border="1">
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Lock screen configuration retrieved successfully </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     </table>
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     public okhttp3.Call systemLockscreenConfigGetCall(final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
+<<<<<<< HEAD
         String[] localBasePaths = new String[]{};
 
         // Determine Base Path to Use
         if (localCustomBaseUrl != null) {
             basePath = localCustomBaseUrl;
         } else if (localBasePaths.length > 0) {
+=======
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             basePath = localBasePaths[localHostIndex];
         } else {
             basePath = null;
@@ -111,7 +136,11 @@ public class SystemCustomizationApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
+<<<<<<< HEAD
                 "application/json"
+=======
+            "application/json"
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -125,7 +154,11 @@ public class SystemCustomizationApi {
             localVarHeaderParams.put("Content-Type", localVarContentType);
         }
 
+<<<<<<< HEAD
         String[] localVarAuthNames = new String[]{"OAuth2AuthCode"};
+=======
+        String[] localVarAuthNames = new String[] { "OAuth2AuthCode" };
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
     }
 
@@ -137,6 +170,7 @@ public class SystemCustomizationApi {
 
     /**
      * Get lock screen configuration
+<<<<<<< HEAD
      *
      * @return LockScreenConfig
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -145,6 +179,17 @@ public class SystemCustomizationApi {
      * <tr><td> 200 </td><td> Lock screen configuration retrieved successfully </td><td>  -  </td></tr>
      * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
      * </table>
+=======
+     * 
+     * @return LockScreenConfig
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table summary="Response Details" border="1">
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Lock screen configuration retrieved successfully </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     </table>
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     public LockScreenConfig systemLockscreenConfigGet() throws ApiException {
         ApiResponse<LockScreenConfig> localVarResp = systemLockscreenConfigGetWithHttpInfo();
@@ -153,6 +198,7 @@ public class SystemCustomizationApi {
 
     /**
      * Get lock screen configuration
+<<<<<<< HEAD
      *
      * @return ApiResponse&lt;LockScreenConfig&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -166,11 +212,27 @@ public class SystemCustomizationApi {
         okhttp3.Call localVarCall = systemLockscreenConfigGetValidateBeforeCall(null);
         Type localVarReturnType = new TypeToken<LockScreenConfig>() {
         }.getType();
+=======
+     * 
+     * @return ApiResponse&lt;LockScreenConfig&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table summary="Response Details" border="1">
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Lock screen configuration retrieved successfully </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<LockScreenConfig> systemLockscreenConfigGetWithHttpInfo() throws ApiException {
+        okhttp3.Call localVarCall = systemLockscreenConfigGetValidateBeforeCall(null);
+        Type localVarReturnType = new TypeToken<LockScreenConfig>(){}.getType();
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
     /**
      * Get lock screen configuration (asynchronously)
+<<<<<<< HEAD
      *
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -180,10 +242,23 @@ public class SystemCustomizationApi {
      * <tr><td> 200 </td><td> Lock screen configuration retrieved successfully </td><td>  -  </td></tr>
      * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
      * </table>
+=======
+     * 
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table summary="Response Details" border="1">
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Lock screen configuration retrieved successfully </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     </table>
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     public okhttp3.Call systemLockscreenConfigGetAsync(final ApiCallback<LockScreenConfig> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = systemLockscreenConfigGetValidateBeforeCall(_callback);
+<<<<<<< HEAD
         Type localVarReturnType = new TypeToken<LockScreenConfig>() {
         }.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
@@ -203,16 +278,44 @@ public class SystemCustomizationApi {
      * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
      * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
      * </table>
+=======
+        Type localVarReturnType = new TypeToken<LockScreenConfig>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for systemLockscreenConfigPut
+     * @param lockScreenConfig  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table summary="Response Details" border="1">
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Lock screen configuration updated successfully </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     </table>
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     public okhttp3.Call systemLockscreenConfigPutCall(LockScreenConfig lockScreenConfig, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
+<<<<<<< HEAD
         String[] localBasePaths = new String[]{};
 
         // Determine Base Path to Use
         if (localCustomBaseUrl != null) {
             basePath = localCustomBaseUrl;
         } else if (localBasePaths.length > 0) {
+=======
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             basePath = localBasePaths[localHostIndex];
         } else {
             basePath = null;
@@ -230,7 +333,11 @@ public class SystemCustomizationApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
+<<<<<<< HEAD
                 "application/json"
+=======
+            "application/json"
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -238,14 +345,22 @@ public class SystemCustomizationApi {
         }
 
         final String[] localVarContentTypes = {
+<<<<<<< HEAD
                 "application/json"
+=======
+            "application/json"
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         };
         final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
         if (localVarContentType != null) {
             localVarHeaderParams.put("Content-Type", localVarContentType);
         }
 
+<<<<<<< HEAD
         String[] localVarAuthNames = new String[]{"OAuth2AuthCode"};
+=======
+        String[] localVarAuthNames = new String[] { "OAuth2AuthCode" };
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
     }
 
@@ -262,6 +377,7 @@ public class SystemCustomizationApi {
 
     /**
      * Update lock screen configuration
+<<<<<<< HEAD
      *
      * @param lockScreenConfig (required)
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -271,6 +387,18 @@ public class SystemCustomizationApi {
      * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
      * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
      * </table>
+=======
+     * 
+     * @param lockScreenConfig  (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table summary="Response Details" border="1">
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Lock screen configuration updated successfully </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     </table>
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     public void systemLockscreenConfigPut(LockScreenConfig lockScreenConfig) throws ApiException {
         systemLockscreenConfigPutWithHttpInfo(lockScreenConfig);
@@ -278,6 +406,7 @@ public class SystemCustomizationApi {
 
     /**
      * Update lock screen configuration
+<<<<<<< HEAD
      *
      * @param lockScreenConfig (required)
      * @return ApiResponse&lt;Void&gt;
@@ -288,6 +417,19 @@ public class SystemCustomizationApi {
      * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
      * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
      * </table>
+=======
+     * 
+     * @param lockScreenConfig  (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table summary="Response Details" border="1">
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Lock screen configuration updated successfully </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     </table>
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     public ApiResponse<Void> systemLockscreenConfigPutWithHttpInfo(LockScreenConfig lockScreenConfig) throws ApiException {
         okhttp3.Call localVarCall = systemLockscreenConfigPutValidateBeforeCall(lockScreenConfig, null);
@@ -296,6 +438,7 @@ public class SystemCustomizationApi {
 
     /**
      * Update lock screen configuration (asynchronously)
+<<<<<<< HEAD
      *
      * @param lockScreenConfig (required)
      * @param _callback        The callback to be executed when the API call finishes
@@ -307,6 +450,20 @@ public class SystemCustomizationApi {
      * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
      * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
      * </table>
+=======
+     * 
+     * @param lockScreenConfig  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table summary="Response Details" border="1">
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Lock screen configuration updated successfully </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     </table>
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     public okhttp3.Call systemLockscreenConfigPutAsync(LockScreenConfig lockScreenConfig, final ApiCallback<Void> _callback) throws ApiException {
 

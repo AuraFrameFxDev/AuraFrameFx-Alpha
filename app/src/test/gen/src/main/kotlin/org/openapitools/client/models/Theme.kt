@@ -20,6 +20,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
+<<<<<<< HEAD
  *
  *
  * @param id
@@ -31,6 +32,19 @@ import com.squareup.moshi.JsonClass
 
 
 data class Theme(
+=======
+ * 
+ *
+ * @param id 
+ * @param name 
+ * @param primaryColor 
+ * @param secondaryColor 
+ * @param isDefault 
+ */
+
+
+data class Theme (
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     @Json(name = "id")
     val id: kotlin.String,

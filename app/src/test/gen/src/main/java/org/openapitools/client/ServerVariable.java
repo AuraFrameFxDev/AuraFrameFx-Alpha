@@ -12,9 +12,15 @@ public class ServerVariable {
     public HashSet<String> enumValues = null;
 
     /**
+<<<<<<< HEAD
      * @param description  A description for the server variable.
      * @param defaultValue The default value to use for substitution.
      * @param enumValues   An enumeration of string values to be used if the substitution options are from a limited set.
+=======
+     * @param description A description for the server variable.
+     * @param defaultValue The default value to use for substitution.
+     * @param enumValues An enumeration of string values to be used if the substitution options are from a limited set.
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     public ServerVariable(String description, String defaultValue, HashSet<String> enumValues) {
         this.description = description;

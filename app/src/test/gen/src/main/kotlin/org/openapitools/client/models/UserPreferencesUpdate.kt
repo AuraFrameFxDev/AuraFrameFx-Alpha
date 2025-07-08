@@ -21,6 +21,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
+<<<<<<< HEAD
  *
  *
  * @param preferences
@@ -28,6 +29,15 @@ import com.squareup.moshi.JsonClass
 
 
 data class UserPreferencesUpdate(
+=======
+ * 
+ *
+ * @param preferences 
+ */
+
+
+data class UserPreferencesUpdate (
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     @Json(name = "preferences")
     val preferences: UserPreferences? = null

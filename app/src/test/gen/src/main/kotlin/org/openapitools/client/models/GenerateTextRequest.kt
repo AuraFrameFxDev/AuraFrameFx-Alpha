@@ -20,7 +20,11 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
+<<<<<<< HEAD
  *
+=======
+ * 
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
  *
  * @param prompt The text prompt for content generation
  * @param maxTokens Maximum number of tokens for the generated text
@@ -28,7 +32,11 @@ import com.squareup.moshi.JsonClass
  */
 
 
+<<<<<<< HEAD
 data class GenerateTextRequest(
+=======
+data class GenerateTextRequest (
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     /* The text prompt for content generation */
     @Json(name = "prompt")

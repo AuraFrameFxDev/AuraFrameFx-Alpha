@@ -39,6 +39,7 @@ import org.openapitools.client.infrastructure.ResponseType
 import org.openapitools.client.infrastructure.Success
 import org.openapitools.client.infrastructure.toMultiValue
 
+<<<<<<< HEAD
 class TasksApi(
     basePath: kotlin.String = defaultBasePath,
     client: OkHttpClient = ApiClient.defaultClient
@@ -48,13 +49,25 @@ class TasksApi(
         val defaultBasePath: String by lazy {
             System.getProperties()
                 .getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
+=======
+class TasksApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient = ApiClient.defaultClient) : ApiClient(basePath, client) {
+    companion object {
+        @JvmStatic
+        val defaultBasePath: String by lazy {
+            System.getProperties().getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
     }
 
     /**
      * Schedule a new task
+<<<<<<< HEAD
      *
      * @param taskScheduleRequest
+=======
+     * 
+     * @param taskScheduleRequest 
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return TaskStatus
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
@@ -63,6 +76,7 @@ class TasksApi(
      * @throws ServerException If the API returns a server error response
      */
     @Suppress("UNCHECKED_CAST")
+<<<<<<< HEAD
     @Throws(
         IllegalStateException::class,
         IOException::class,
@@ -73,6 +87,11 @@ class TasksApi(
     fun tasksSchedulePost(taskScheduleRequest: TaskScheduleRequest): TaskStatus {
         val localVarResponse =
             tasksSchedulePostWithHttpInfo(taskScheduleRequest = taskScheduleRequest)
+=======
+    @Throws(IllegalStateException::class, IOException::class, UnsupportedOperationException::class, ClientException::class, ServerException::class)
+    fun tasksSchedulePost(taskScheduleRequest: TaskScheduleRequest) : TaskStatus {
+        val localVarResponse = tasksSchedulePostWithHttpInfo(taskScheduleRequest = taskScheduleRequest)
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
         return when (localVarResponse.responseType) {
             ResponseType.Success -> (localVarResponse as Success<*>).data as TaskStatus
@@ -80,6 +99,7 @@ class TasksApi(
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {
                 val localVarError = localVarResponse as ClientError<*>
+<<<<<<< HEAD
                 throw ClientException(
                     "Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}",
                     localVarError.statusCode,
@@ -94,23 +114,40 @@ class TasksApi(
                     localVarError.statusCode,
                     localVarResponse
                 )
+=======
+                throw ClientException("Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}", localVarError.statusCode, localVarResponse)
+            }
+            ResponseType.ServerError -> {
+                val localVarError = localVarResponse as ServerError<*>
+                throw ServerException("Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}", localVarError.statusCode, localVarResponse)
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             }
         }
     }
 
     /**
      * Schedule a new task
+<<<<<<< HEAD
      *
      * @param taskScheduleRequest
+=======
+     * 
+     * @param taskScheduleRequest 
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return ApiResponse<TaskStatus?>
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
      */
     @Suppress("UNCHECKED_CAST")
     @Throws(IllegalStateException::class, IOException::class)
+<<<<<<< HEAD
     fun tasksSchedulePostWithHttpInfo(taskScheduleRequest: TaskScheduleRequest): ApiResponse<TaskStatus?> {
         val localVariableConfig =
             tasksSchedulePostRequestConfig(taskScheduleRequest = taskScheduleRequest)
+=======
+    fun tasksSchedulePostWithHttpInfo(taskScheduleRequest: TaskScheduleRequest) : ApiResponse<TaskStatus?> {
+        val localVariableConfig = tasksSchedulePostRequestConfig(taskScheduleRequest = taskScheduleRequest)
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
         return request<TaskScheduleRequest, TaskStatus>(
             localVariableConfig
@@ -120,10 +157,17 @@ class TasksApi(
     /**
      * To obtain the request config of the operation tasksSchedulePost
      *
+<<<<<<< HEAD
      * @param taskScheduleRequest
      * @return RequestConfig
      */
     fun tasksSchedulePostRequestConfig(taskScheduleRequest: TaskScheduleRequest): RequestConfig<TaskScheduleRequest> {
+=======
+     * @param taskScheduleRequest 
+     * @return RequestConfig
+     */
+    fun tasksSchedulePostRequestConfig(taskScheduleRequest: TaskScheduleRequest) : RequestConfig<TaskScheduleRequest> {
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         val localVariableBody = taskScheduleRequest
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -142,6 +186,10 @@ class TasksApi(
 
 
     private fun encodeURIComponent(uriComponent: kotlin.String): kotlin.String =
+<<<<<<< HEAD
         HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent)
             .build().encodedPathSegments[0]
+=======
+        HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent).build().encodedPathSegments[0]
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 }

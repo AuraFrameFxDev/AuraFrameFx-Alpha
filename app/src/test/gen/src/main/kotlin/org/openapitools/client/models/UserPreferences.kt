@@ -20,6 +20,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
+<<<<<<< HEAD
  *
  *
  * @param themeId
@@ -29,6 +30,17 @@ import com.squareup.moshi.JsonClass
 
 
 data class UserPreferences(
+=======
+ * 
+ *
+ * @param themeId 
+ * @param language 
+ * @param notificationsEnabled 
+ */
+
+
+data class UserPreferences (
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     @Json(name = "themeId")
     val themeId: kotlin.String? = null,

@@ -39,6 +39,7 @@ import org.openapitools.client.infrastructure.ResponseType
 import org.openapitools.client.infrastructure.Success
 import org.openapitools.client.infrastructure.toMultiValue
 
+<<<<<<< HEAD
 class ConferenceRoomApi(
     basePath: kotlin.String = defaultBasePath,
     client: OkHttpClient = ApiClient.defaultClient
@@ -48,13 +49,25 @@ class ConferenceRoomApi(
         val defaultBasePath: String by lazy {
             System.getProperties()
                 .getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
+=======
+class ConferenceRoomApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient = ApiClient.defaultClient) : ApiClient(basePath, client) {
+    companion object {
+        @JvmStatic
+        val defaultBasePath: String by lazy {
+            System.getProperties().getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
     }
 
     /**
      * Create a new AI conference room
+<<<<<<< HEAD
      *
      * @param conferenceRoomCreateRequest
+=======
+     * 
+     * @param conferenceRoomCreateRequest 
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return ConferenceRoom
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
@@ -63,6 +76,7 @@ class ConferenceRoomApi(
      * @throws ServerException If the API returns a server error response
      */
     @Suppress("UNCHECKED_CAST")
+<<<<<<< HEAD
     @Throws(
         IllegalStateException::class,
         IOException::class,
@@ -73,6 +87,11 @@ class ConferenceRoomApi(
     fun conferenceCreatePost(conferenceRoomCreateRequest: ConferenceRoomCreateRequest): ConferenceRoom {
         val localVarResponse =
             conferenceCreatePostWithHttpInfo(conferenceRoomCreateRequest = conferenceRoomCreateRequest)
+=======
+    @Throws(IllegalStateException::class, IOException::class, UnsupportedOperationException::class, ClientException::class, ServerException::class)
+    fun conferenceCreatePost(conferenceRoomCreateRequest: ConferenceRoomCreateRequest) : ConferenceRoom {
+        val localVarResponse = conferenceCreatePostWithHttpInfo(conferenceRoomCreateRequest = conferenceRoomCreateRequest)
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
         return when (localVarResponse.responseType) {
             ResponseType.Success -> (localVarResponse as Success<*>).data as ConferenceRoom
@@ -80,6 +99,7 @@ class ConferenceRoomApi(
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {
                 val localVarError = localVarResponse as ClientError<*>
+<<<<<<< HEAD
                 throw ClientException(
                     "Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}",
                     localVarError.statusCode,
@@ -94,23 +114,40 @@ class ConferenceRoomApi(
                     localVarError.statusCode,
                     localVarResponse
                 )
+=======
+                throw ClientException("Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}", localVarError.statusCode, localVarResponse)
+            }
+            ResponseType.ServerError -> {
+                val localVarError = localVarResponse as ServerError<*>
+                throw ServerException("Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}", localVarError.statusCode, localVarResponse)
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             }
         }
     }
 
     /**
      * Create a new AI conference room
+<<<<<<< HEAD
      *
      * @param conferenceRoomCreateRequest
+=======
+     * 
+     * @param conferenceRoomCreateRequest 
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return ApiResponse<ConferenceRoom?>
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
      */
     @Suppress("UNCHECKED_CAST")
     @Throws(IllegalStateException::class, IOException::class)
+<<<<<<< HEAD
     fun conferenceCreatePostWithHttpInfo(conferenceRoomCreateRequest: ConferenceRoomCreateRequest): ApiResponse<ConferenceRoom?> {
         val localVariableConfig =
             conferenceCreatePostRequestConfig(conferenceRoomCreateRequest = conferenceRoomCreateRequest)
+=======
+    fun conferenceCreatePostWithHttpInfo(conferenceRoomCreateRequest: ConferenceRoomCreateRequest) : ApiResponse<ConferenceRoom?> {
+        val localVariableConfig = conferenceCreatePostRequestConfig(conferenceRoomCreateRequest = conferenceRoomCreateRequest)
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 
         return request<ConferenceRoomCreateRequest, ConferenceRoom>(
             localVariableConfig
@@ -120,10 +157,17 @@ class ConferenceRoomApi(
     /**
      * To obtain the request config of the operation conferenceCreatePost
      *
+<<<<<<< HEAD
      * @param conferenceRoomCreateRequest
      * @return RequestConfig
      */
     fun conferenceCreatePostRequestConfig(conferenceRoomCreateRequest: ConferenceRoomCreateRequest): RequestConfig<ConferenceRoomCreateRequest> {
+=======
+     * @param conferenceRoomCreateRequest 
+     * @return RequestConfig
+     */
+    fun conferenceCreatePostRequestConfig(conferenceRoomCreateRequest: ConferenceRoomCreateRequest) : RequestConfig<ConferenceRoomCreateRequest> {
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
         val localVariableBody = conferenceRoomCreateRequest
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -142,6 +186,10 @@ class ConferenceRoomApi(
 
 
     private fun encodeURIComponent(uriComponent: kotlin.String): kotlin.String =
+<<<<<<< HEAD
         HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent)
             .build().encodedPathSegments[0]
+=======
+        HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent).build().encodedPathSegments[0]
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 }
