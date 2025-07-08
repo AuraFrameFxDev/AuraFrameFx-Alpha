@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import java.lang.System // Added import
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -169,22 +170,15 @@ class TaskScheduler @Inject constructor(
         return task.urgency.value * config.urgencyWeight
     }
 
-    /**
-     * Calculates the importance score for a task based on its importance value and the configured importance weight.
-     *
-     * @return The weighted importance score as a float.
-     */
     private fun calculateImportanceScore(task: Task): Float {
         return task.importance.value * config.importanceWeight
     }
 
     /**
-     * Updates the task statistics to reflect the latest state after a task is created or its status changes.
+     * Updates the task statistics to reflect the current state after a task change.
      *
      * Increments the total task count, updates counts for active, completed, and pending tasks,
-     * refreshes per-status task counts based on the provided task's status, and sets the last updated timestamp.
-     *
-     * @param task The task whose change triggers the statistics update.
+     * refreshes the per-status task counts, and sets the last updated timestamp.
      */
     private fun updateStats(task: Task) {
         _taskStats.update { current ->

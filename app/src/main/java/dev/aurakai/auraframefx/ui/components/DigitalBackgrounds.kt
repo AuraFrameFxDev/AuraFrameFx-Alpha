@@ -47,7 +47,7 @@ fun HexagonGridBackground(
 }
 
 /**
- * Draws a grid of evenly spaced vertical and horizontal lines across the canvas to create a digital landscape effect.
+ * Draws a grid pattern of evenly spaced vertical and horizontal lines across the canvas.
  *
  * @param color The color used for the grid lines.
  */
@@ -73,9 +73,9 @@ private fun DrawScope.drawDigitalLandscape(color: Color) {
 }
 
 /**
- * Draws a hexagonal grid pattern by outlining staggered hexagons across the canvas.
+ * Draws a staggered grid of hexagon outlines across the canvas using the given color.
  *
- * Each row is horizontally offset to form a continuous tiling effect. Hexagons are drawn with a slightly reduced radius for visual spacing.
+ * Each row of hexagons is horizontally offset to create a continuous hexagonal tiling pattern.
  *
  * @param color The color used for the hexagon outlines.
  */
@@ -101,13 +101,13 @@ private fun DrawScope.drawHexagonGrid(color: Color) {
 }
 
 /**
- * Draws a hexagon outline centered at the given position with the specified radius and color.
+ * Draws a hexagon outline centered at the specified position with the given radius and color.
  *
- * The hexagon is constructed by connecting six vertices spaced 60 degrees apart around the center.
+ * The hexagon is created by connecting six equally spaced vertices around the center point.
  *
- * @param center The center point of the hexagon.
+ * @param center The center position of the hexagon.
  * @param radius The distance from the center to each vertex.
- * @param color The outline color of the hexagon.
+ * @param color The color of the hexagon outline.
  */
 private fun DrawScope.drawHexagon(
     center: androidx.compose.ui.geometry.Offset,
