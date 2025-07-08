@@ -171,7 +171,7 @@ fun CascadeZOrderPlayground(
                             text = "Vision History",
                             style = MaterialTheme.typography.titleSmall
                         )
-                        visionState.history?.forEach { entry ->
+                        visionState.value.history?.forEach { entry ->
                             Text(text = "- $entry")
                         }
                     }
@@ -180,7 +180,7 @@ fun CascadeZOrderPlayground(
                             text = "Processing History",
                             style = MaterialTheme.typography.titleSmall
                         )
-                        processingState.history?.forEach { entry ->
+                        processingState.value.history?.forEach { entry ->
                             Text(text = "- $entry")
                         }
                     }

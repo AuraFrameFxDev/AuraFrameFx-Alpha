@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color // Added import for Color
  *
  * Placeholder for a cyber edge glow visual effect.
  */
+
 /**
  * Placeholder for applying a cyber edge glow visual effect to the modifier.
  *
@@ -40,7 +41,7 @@ fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this /**
  * Currently returns the original Modifier unchanged. Intended for future implementation of a digital glitch effect.
  * @return The original Modifier instance.
  */
-fun Modifier.digitalGlitchEffect(): Modifier = this // Placeholder
+// REMOVED: fun Modifier.digitalGlitchEffect(): Modifier = this // Placeholder
 
 // The object can be removed if it serves no other purpose,
 // or kept if it's meant to group other non-Modifier related transition utilities.

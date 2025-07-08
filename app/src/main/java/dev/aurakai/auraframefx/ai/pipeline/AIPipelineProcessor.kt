@@ -61,11 +61,11 @@ class AIPipelineProcessor @Inject constructor(
         // Process through Cascade first for state management
         val cascadeAgentResponse = cascadeService.processRequest(
             AiRequest(
-                task,
-                "context"
+                query = task, // Use named argument
+                context = mapOf("type" to "context_retrieval") // Pass a map
             ),
             context = "pipeline_processing"
-        ) // Renamed variable, removed .first()
+        )
         responses.add(
             AgentMessage(
                 content = cascadeAgentResponse.content, // Direct access
@@ -79,11 +79,11 @@ class AIPipelineProcessor @Inject constructor(
         if (selectedAgents.contains(AgentType.KAI)) {
             val kaiAgentResponse = kaiService.processRequest(
                 AiRequest(
-                    task,
-                    "security"
+                    query = task, // Use named argument
+                    context = mapOf("type" to "security_check") // Pass a map
                 ),
                 context = "security_analysis"
-            ) // Renamed variable, removed .first()
+            )
             responses.add(
                 AgentMessage(
                     content = kaiAgentResponse.content, // Direct access
@@ -380,10 +380,11 @@ class AIPipelineProcessor @Inject constructor(
                 (current["response_patterns"] as? MutableMap<String, Any>) ?: mutableMapOf()
             val taskType = categorizeTask(task)
             responsePatterns[taskType] = mapOf(
-                "last_confidence" to responses.map { it.confidence }.average(),
+                "last_confidence" to responses.map { msg: AgentMessage -> msg.confidence }.average(),
+                // or just:
+                // "last_confidence" to responses.map { it.confidence }.average(),
                 "agent_count" to responses.size,
                 "timestamp" to System.currentTimeMillis()
-            )
             newContext["response_patterns"] = responsePatterns
 
             // Update system metrics

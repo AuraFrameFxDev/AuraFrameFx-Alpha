@@ -6,14 +6,18 @@ import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import java.lang.System // Added import
 
 @Serializable
 data class ContextChain(
-    val id: String = "ctx_${Clock.System.now().epochSeconds}",
+data class ContextChain(
+    val id: String = "ctx_${Clock.System.now().toEpochMilliseconds()}",
+    // … other properties …
+)
     val rootContext: String,
     val currentContext: String,
     val contextHistory: List<ContextNode> = emptyList(),
-    val relatedMemories: List<MemoryItem> = emptyList(),
+    @Contextual val relatedMemories: List<CanonicalMemoryItem> = emptyList(), // Changed MemoryItem to CanonicalMemoryItem
     val metadata: Map<String, String> = emptyMap(),
     val priority: Float = 0.5f,
     val relevanceScore: Float = 0.0f,

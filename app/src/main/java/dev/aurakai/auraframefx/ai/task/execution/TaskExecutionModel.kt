@@ -5,11 +5,12 @@ import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlinx.datetime.Clock.System
+// Removed import kotlinx.datetime.Clock.System as System is now java.lang.System
+import java.lang.System // Added import for java.lang.System
 
 @Serializable
 data class TaskExecution(
-    val id: String = "exec_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "exec_${System.currentTimeMillis()}",
     val taskId: String,
     val agent: AgentType,
     val type: String,
@@ -33,7 +34,7 @@ data class TaskExecution(
 
 @Serializable
 data class ExecutionPlan(
-    val id: String = "plan_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "plan_${System.currentTimeMillis()}",
     val steps: List<ExecutionStep>,
     val estimatedDuration: Long,
     val requiredResources: Set<String>,
@@ -42,7 +43,7 @@ data class ExecutionPlan(
 
 @Serializable
 data class ExecutionStep(
-    val id: String = "step_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "step_${System.currentTimeMillis()}",
     val description: String,
     val type: StepType,
     val priority: Float = 0.5f,
@@ -53,7 +54,7 @@ data class ExecutionStep(
 
 @Serializable
 data class Checkpoint(
-    val id: String = "chk_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "chk_${System.currentTimeMillis()}",
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val stepId: String,
     val status: CheckpointStatus,

@@ -143,7 +143,11 @@ class TrinityCoordinatorService @Inject constructor(
                     // Synthesize results with Genesis
                     val synthesisRequest = AiRequest(
                         query = "Synthesize insights from Kai and Aura responses",
-                        type = request.type
+                        // Pass original context or a new one for synthesis
+                        context = mapOf(
+                            "type" to "synthesis",
+                            "original_request_type" to (request.context?.get("type") ?: "unknown")
+                        )
                     )
 
                     val synthesis = genesisBridgeService.processRequest(synthesisRequest).first()
