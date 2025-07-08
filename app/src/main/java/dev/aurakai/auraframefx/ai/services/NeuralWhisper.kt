@@ -73,6 +73,12 @@ class NeuralWhisper @Inject constructor(
         }
     }
 
+    /**
+     * Initializes the speech-to-text (STT) engine if speech recognition is available on the device.
+     *
+     * Sets up the `SpeechRecognizer` instance and updates the STT initialization flag. Logs availability or errors.
+     * Actual recognition listener setup and permission handling are not implemented.
+     */
     private fun initializeStt() {
         // TODO: Implement STT initialization using Android's SpeechRecognizer or a third-party library.
         // This will involve setting up a SpeechRecognitionListener.
@@ -88,9 +94,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Converts audio input into transcribed text using speech-to-text processing.
+     * Transcribes audio input to text using speech-to-text processing.
      *
-     * Updates the conversation state to reflect listening and processing stages. Returns a placeholder transcription string, or null if speech recognition is not initialized.
+     * Updates the conversation state to Listening and Processing stages. Returns a placeholder transcription string, or null if speech recognition is not initialized.
      *
      * @param audioInput The audio data or trigger for speech recognition.
      * @return The transcribed text, or null if speech recognition is unavailable.
@@ -118,12 +124,12 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initiates text-to-speech synthesis for the given text in the specified locale.
+     * Initiates text-to-speech synthesis for the provided text using the specified locale.
      *
-     * Updates the conversation state to indicate speaking. Returns `false` if the TTS engine is not initialized; otherwise, returns `true` as a placeholder.
+     * Updates the conversation state to Speaking. Returns `false` if the TTS engine is not initialized; otherwise, returns `true` as a placeholder.
      *
-     * @param text The text to synthesize into speech.
-     * @param locale The locale to use for speech synthesis (defaults to US English).
+     * @param text The text to be spoken.
+     * @param locale The locale for speech synthesis (default is US English).
      * @return `true` if the synthesis request is accepted (placeholder), or `false` if TTS is not initialized.
      */
     fun textToSpeech(text: String, locale: Locale = Locale.US): Boolean {
@@ -149,10 +155,10 @@ class NeuralWhisper @Inject constructor(
     /**
      * Processes a transcribed voice command and returns a placeholder response.
      *
-     * Updates the conversation state to indicate processing of the command. Intended for future implementation of natural language understanding and command-to-action mapping.
+     * Updates the conversation state to indicate that the command is being understood. This method is intended as a stub for future natural language understanding and command-to-action mapping.
      *
-     * @param command The transcribed voice command to process.
-     * @return A placeholder response representing the result of command processing.
+     * @param command The transcribed voice command to interpret.
+     * @return A placeholder response string representing the result of processing the command.
      */
     fun processVoiceCommand(command: String): Any { // Placeholder return type
         // TODO: Implement NLU and command mapping.
@@ -168,11 +174,11 @@ class NeuralWhisper @Inject constructor(
 
 
     /**
-     * Updates the conversation state to indicate that context information is being shared with the Kai agent.
+     * Updates the conversation state to reflect that context information is being shared with the Kai agent.
      *
-     * The actual communication with the Kai agent is not implemented; only the state is updated and the action is logged.
+     * This method does not perform any actual communication with the Kai agent; it only updates the state and logs the action.
      *
-     * @param contextText The context information to share.
+     * @param contextText The context information intended for sharing.
      */
     fun shareContextWithKai(contextText: String) {
         _conversationStateFlow.value =
