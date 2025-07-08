@@ -5,10 +5,11 @@ import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import java.lang.System // Added import
 
 @Serializable
 data class Task(
-    val id: String = "task_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "task_${System.currentTimeMillis()}",
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val priority: TaskPriority = TaskPriority.NORMAL,
     val urgency: TaskUrgency = TaskUrgency.MEDIUM,

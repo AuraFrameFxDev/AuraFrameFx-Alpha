@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import java.lang.System // Added import
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,7 +47,7 @@ class ContextManager @Inject constructor(
             currentContext = initialContext,
             contextHistory = listOf(
                 ContextNode(
-                    id = "ctx_${Clock.System.now().toEpochMilliseconds()}_0",
+                    id = "ctx_${System.currentTimeMillis()}_0",
                     content = initialContext,
                     agent = agent,
                     metadata = metadata.mapValues { it.value.toString() } // Convert Map<String, Any> to Map<String, String>
@@ -87,7 +88,7 @@ class ContextManager @Inject constructor(
         val updatedChain = chain.copy(
             currentContext = newContext,
             contextHistory = chain.contextHistory + ContextNode(
-                id = "ctx_${Clock.System.now().toEpochMilliseconds()}_${chain.contextHistory.size}",
+                id = "ctx_${System.currentTimeMillis()}_${chain.contextHistory.size}",
                 content = newContext,
                 agent = agent,
                 metadata = metadata.mapValues { it.value.toString() } // Convert Map<String, Any> to Map<String, String>

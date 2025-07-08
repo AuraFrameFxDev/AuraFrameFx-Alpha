@@ -5,10 +5,11 @@ import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import java.lang.System // Added import
 
 @Serializable
 data class MemoryItem(
-    val id: String = "mem_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "mem_${System.currentTimeMillis()}",
     val content: String,
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val agent: AgentType,
@@ -31,7 +32,7 @@ data class MemoryQuery(
 
 @Serializable
 data class MemoryRetrievalResult(
-    val items: List<MemoryItem>,
+    @Contextual val items: List<MemoryItem>, // Ensured @Contextual is present
     val total: Int,
     val query: MemoryQuery,
 )

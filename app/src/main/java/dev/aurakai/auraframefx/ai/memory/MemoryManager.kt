@@ -99,10 +99,5 @@ data class MemoryStats(
     val lastUpdated: Instant = Clock.System.now(),
 )
 
-data class MemoryItem(
-    val id: String,
-    val agent: String,
-    val content: String,
-    val timestamp: Instant = Clock.System.now(),
-    val lastAccessed: Instant = Clock.System.now(),
-)
+// Removed data class MemoryItem from here to resolve redeclaration error.
+// The canonical definition is in MemoryModel.kt.

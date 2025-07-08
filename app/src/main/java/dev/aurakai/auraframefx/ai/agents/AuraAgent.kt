@@ -10,6 +10,7 @@ import dev.aurakai.auraframefx.utils.AuraFxLogger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
+import java.lang.System // Added import
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -90,7 +91,7 @@ class AuraAgent @Inject constructor(
         _creativeState.value = CreativeState.CREATING
 
         return try {
-            val startTime = Clock.System.now().epochSeconds
+            val startTime = System.currentTimeMillis()
             val response = when (request.type) {
                 "ui_generation" -> handleUIGeneration(request)
                 "theme_creation" -> handleThemeCreation(request)
@@ -101,7 +102,7 @@ class AuraAgent @Inject constructor(
                 else -> handleGeneralCreative(request)
             }
 
-            val executionTime = Clock.System.now().epochSeconds - startTime
+            val executionTime = System.currentTimeMillis() - startTime
             _creativeState.value = CreativeState.READY
 
             logger.info("AuraAgent", "Creative request completed in ${executionTime}ms")

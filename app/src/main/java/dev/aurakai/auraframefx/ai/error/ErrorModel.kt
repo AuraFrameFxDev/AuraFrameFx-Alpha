@@ -5,10 +5,11 @@ import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import java.lang.System // Added import
 
 @Serializable
 data class AIError(
-    val id: String = "err_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "err_${System.currentTimeMillis()}",
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val agent: AgentType,
     val type: ErrorType,
@@ -22,7 +23,7 @@ data class AIError(
 
 @Serializable
 data class RecoveryAction(
-    val id: String = "act_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "act_${System.currentTimeMillis()}",
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val actionType: RecoveryActionType,
     val description: String,

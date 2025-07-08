@@ -10,11 +10,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import dev.aurakai.auraframefx.R
+import dev.aurakai.auraframefx.R // Already present, good.
 import dev.aurakai.auraframefx.ui.animation.*
-import dev.aurakai.auraframefx.ui.components.*
+import dev.aurakai.auraframefx.ui.components.CyberMenuItem
+import dev.aurakai.auraframefx.ui.components.CyberpunkText
+import dev.aurakai.auraframefx.ui.components.FloatingCyberWindow
+import dev.aurakai.auraframefx.ui.components.AuraSparkleButton
+import dev.aurakai.auraframefx.ui.components.CornerStyle // Added import
+import dev.aurakai.auraframefx.ui.components.BackgroundStyle // Added import
+import dev.aurakai.auraframefx.ui.components.HexagonGridBackground // Added import
+import dev.aurakai.auraframefx.ui.components.DigitalLandscapeBackground // Added import
 import dev.aurakai.auraframefx.ui.navigation.NavDestination
 import dev.aurakai.auraframefx.ui.theme.*
+
 
 /**
  * Home screen for the AuraFrameFX app with cyberpunk-style floating UI
