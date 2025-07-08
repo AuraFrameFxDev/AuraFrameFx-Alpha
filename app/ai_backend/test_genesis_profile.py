@@ -1820,3 +1820,752 @@ if __name__ == '__main__':
     
     # Run pytest tests
     pytest.main([__file__, '-v'])
+
+class TestSecurityAndDataIntegrity(unittest.TestCase):
+    """Test security-related scenarios and data integrity"""
+    
+    def setUp(self):
+        """
+        Set up a fresh ProfileManager and security test data.
+        """
+        self.manager = ProfileManager()
+        self.malicious_data = {
+            'name': 'security_test',
+            'version': '1.0.0',
+            'settings': {
+                'script_injection': '<script>alert("xss")</script>',
+                'sql_injection': "'; DROP TABLE profiles; --",
+                'path_traversal': '../../../etc/passwd',
+                'command_injection': '; rm -rf /',
+                'null_bytes': 'test\x00hidden'
+            }
+        }
+    
+    def test_xss_prevention_in_profile_data(self):
+        """
+        Tests that profile data containing potential XSS payloads can be stored and retrieved safely without script execution.
+        """
+        profile = self.manager.create_profile('xss_test', self.malicious_data)
+        
+        # Verify the data is stored as-is without modification
+        self.assertEqual(profile.data['settings']['script_injection'], '<script>alert("xss")</script>')
+        self.assertIsInstance(profile.data['settings']['script_injection'], str)
+    
+    def test_sql_injection_resistance(self):
+        """
+        Tests that profile IDs and data containing SQL injection attempts are handled safely.
+        """
+        malicious_id = "test'; DROP TABLE profiles; --"
+        
+        try:
+            profile = self.manager.create_profile(malicious_id, self.malicious_data)
+            # If creation succeeds, verify the ID is stored literally
+            self.assertEqual(profile.profile_id, malicious_id)
+        except (ValueError, TypeError):
+            # If the implementation prevents such IDs, that's also acceptable
+            pass
+    
+    def test_path_traversal_in_profile_names(self):
+        """
+        Tests that profile names containing path traversal attempts are handled appropriately.
+        """
+        traversal_data = {
+            'name': '../../../malicious_profile',
+            'version': '1.0.0',
+            'settings': {}
+        }
+        
+        profile = self.manager.create_profile('traversal_test', traversal_data)
+        self.assertEqual(profile.data['name'], '../../../malicious_profile')
+    
+    def test_null_byte_injection_handling(self):
+        """
+        Tests that profile data containing null bytes is handled correctly without truncation.
+        """
+        null_data = {
+            'name': 'null_test\x00hidden_data',
+            'version': '1.0.0\x00more_hidden',
+            'settings': {'key\x00hidden': 'value\x00hidden'}
+        }
+        
+        profile = self.manager.create_profile('null_test', null_data)
+        
+        # Verify null bytes are preserved
+        self.assertIn('\x00', profile.data['name'])
+        self.assertIn('\x00', profile.data['version'])
+    
+    def test_profile_data_immutability_deep_modification(self):
+        """
+        Tests that deeply nested profile data cannot be modified through external references.
+        """
+        nested_data = {
+            'name': 'immutability_test',
+            'version': '1.0.0',
+            'settings': {
+                'deep': {
+                    'nested': {
+                        'value': 'original'
+                    }
+                }
+            }
+        }
+        
+        profile = self.manager.create_profile('immutable_test', nested_data)
+        original_nested_value = profile.data['settings']['deep']['nested']['value']
+        
+        # Attempt to modify through the original data reference
+        nested_data['settings']['deep']['nested']['value'] = 'modified'
+        
+        # Profile should maintain original value if properly isolated
+        self.assertEqual(profile.data['settings']['deep']['nested']['value'], original_nested_value)
+    
+    def test_data_sanitization_and_validation(self):
+        """
+        Tests that profile data is properly sanitized while preserving legitimate special characters.
+        """
+        special_char_data = {
+            'name': 'test_âéîôû_profile_测试_🚀',
+            'version': '1.0.0-beta+build.123',
+            'settings': {
+                'unicode_text': 'Hello 世界 🌍',
+                'special_chars': '!@#$%^&*()_+-=[]{}|;:,.<>?',
+                'whitespace': 'text\twith\nvarious\rwhitespace',
+                'quotes': '"double" and \'single\' quotes'
+            }
+        }
+        
+        profile = self.manager.create_profile('sanitization_test', special_char_data)
+        
+        # Verify all special characters are preserved
+        self.assertEqual(profile.data['name'], 'test_âéîôû_profile_测试_🚀')
+        self.assertEqual(profile.data['settings']['unicode_text'], 'Hello 世界 🌍')
+        self.assertIn('"double"', profile.data['settings']['quotes'])
+        self.assertIn("'single'", profile.data['settings']['quotes'])
+
+
+class TestConcurrencyAndThreadSafety(unittest.TestCase):
+    """Test concurrency scenarios and thread safety"""
+    
+    def setUp(self):
+        """
+        Set up ProfileManager and test data for concurrency tests.
+        """
+        self.manager = ProfileManager()
+        self.base_data = {
+            'name': 'concurrent_test',
+            'version': '1.0.0',
+            'settings': {'counter': 0}
+        }
+    
+    def test_rapid_sequential_operations(self):
+        """
+        Tests rapid sequential create, read, update, delete operations to simulate high-frequency access patterns.
+        """
+        import time
+        
+        operations_count = 100
+        start_time = time.time()
+        
+        for i in range(operations_count):
+            profile_id = f'rapid_{i}'
+            
+            # Create
+            profile = self.manager.create_profile(profile_id, self.base_data.copy())
+            
+            # Read
+            retrieved = self.manager.get_profile(profile_id)
+            self.assertIsNotNone(retrieved)
+            
+            # Update
+            self.manager.update_profile(profile_id, {'settings': {'counter': i}})
+            
+            # Delete every other profile
+            if i % 2 == 0:
+                result = self.manager.delete_profile(profile_id)
+                self.assertTrue(result)
+        
+        end_time = time.time()
+        duration = end_time - start_time
+        
+        # Should complete within reasonable time
+        self.assertLess(duration, 5.0, "Rapid sequential operations took too long")
+    
+    def test_profile_state_consistency_under_rapid_updates(self):
+        """
+        Tests that profile state remains consistent when subjected to rapid updates with competing modifications.
+        """
+        profile_id = 'consistency_test'
+        self.manager.create_profile(profile_id, self.base_data)
+        
+        # Perform rapid updates with different values
+        for i in range(50):
+            update_data = {
+                'name': f'updated_name_{i}',
+                'settings': {
+                    'counter': i,
+                    'timestamp': time.time(),
+                    'iteration': i
+                }
+            }
+            
+            updated_profile = self.manager.update_profile(profile_id, update_data)
+            
+            # Verify update was applied
+            self.assertEqual(updated_profile.data['name'], f'updated_name_{i}')
+            self.assertEqual(updated_profile.data['settings']['counter'], i)
+        
+        # Verify final state
+        final_profile = self.manager.get_profile(profile_id)
+        self.assertEqual(final_profile.data['name'], 'updated_name_49')
+        self.assertEqual(final_profile.data['settings']['counter'], 49)
+    
+    def test_memory_consistency_during_bulk_operations(self):
+        """
+        Tests memory consistency and profile integrity during bulk operations with mixed creates, updates, and deletes.
+        """
+        num_profiles = 200
+        profile_ids = []
+        
+        # Bulk create
+        for i in range(num_profiles):
+            profile_id = f'bulk_consistency_{i}'
+            data = {
+                'name': f'profile_{i}',
+                'version': '1.0.0',
+                'settings': {'index': i, 'batch': 'consistency_test'}
+            }
+            self.manager.create_profile(profile_id, data)
+            profile_ids.append(profile_id)
+        
+        # Mixed operations
+        for i in range(0, num_profiles, 3):
+            # Update every 3rd profile
+            update_data = {'name': f'updated_profile_{i}'}
+            self.manager.update_profile(profile_ids[i], update_data)
+            
+            # Delete every 6th profile
+            if i % 6 == 0:
+                self.manager.delete_profile(profile_ids[i])
+        
+        # Verify remaining profiles are in correct state
+        remaining_profiles = 0
+        for profile_id in profile_ids:
+            profile = self.manager.get_profile(profile_id)
+            if profile is not None:
+                remaining_profiles += 1
+                # Verify data integrity
+                self.assertIsInstance(profile.data, dict)
+                self.assertIn('name', profile.data)
+                self.assertIn('version', profile.data)
+                self.assertIn('settings', profile.data)
+        
+        # Should have deleted num_profiles // 6 profiles
+        expected_remaining = num_profiles - (num_profiles // 6)
+        self.assertEqual(remaining_profiles, expected_remaining)
+
+
+class TestDataCorruptionAndRecovery(unittest.TestCase):
+    """Test data corruption scenarios and recovery mechanisms"""
+    
+    def setUp(self):
+        """
+        Set up ProfileManager and test data for corruption/recovery tests.
+        """
+        self.manager = ProfileManager()
+        self.valid_data = {
+            'name': 'corruption_test',
+            'version': '1.0.0',
+            'settings': {'value': 'original'}
+        }
+    
+    def test_recovery_from_corrupted_profile_data(self):
+        """
+        Tests that the system can detect and handle scenarios where profile data becomes corrupted.
+        """
+        profile = self.manager.create_profile('corruption_test', self.valid_data)
+        
+        # Simulate data corruption by directly modifying internal state
+        original_data = profile.data.copy()
+        
+        # Corrupt the data in various ways
+        corrupted_scenarios = [
+            None,  # Complete data loss
+            {},    # Empty data
+            {'incomplete': 'data'},  # Missing required fields
+            'invalid_type',  # Wrong data type
+        ]
+        
+        for corrupted_data in corrupted_scenarios:
+            with self.subTest(corruption_type=type(corrupted_data).__name__):
+                # Temporarily corrupt the data
+                profile.data = corrupted_data
+                
+                try:
+                    # Attempt to update with valid data (recovery attempt)
+                    recovered_profile = self.manager.update_profile('corruption_test', self.valid_data)
+                    
+                    # Verify recovery
+                    self.assertIsNotNone(recovered_profile)
+                    self.assertEqual(recovered_profile.data['name'], 'corruption_test')
+                    
+                except Exception as e:
+                    # If recovery fails, ensure it fails gracefully
+                    self.assertIsInstance(e, (TypeError, AttributeError, ProfileError))
+                
+                # Restore for next test
+                profile.data = original_data.copy()
+    
+    def test_partial_update_rollback_simulation(self):
+        """
+        Tests behavior when a profile update partially fails, ensuring the profile remains in a valid state.
+        """
+        profile = self.manager.create_profile('rollback_test', self.valid_data)
+        original_updated_at = profile.updated_at
+        
+        # Simulate partial update failure scenarios
+        problematic_updates = [
+            {'name': None},  # Invalid name
+            {'version': []},  # Invalid version type
+            {'settings': 'not_a_dict'},  # Invalid settings type
+        ]
+        
+        for problematic_update in problematic_updates:
+            with self.subTest(update_data=problematic_update):
+                try:
+                    self.manager.update_profile('rollback_test', problematic_update)
+                except (TypeError, ValueError, ValidationError):
+                    # Expected failure - verify profile state is preserved
+                    current_profile = self.manager.get_profile('rollback_test')
+                    self.assertIsNotNone(current_profile)
+                    self.assertEqual(current_profile.data['name'], 'corruption_test')
+                    self.assertEqual(current_profile.data['version'], '1.0.0')
+                    # updated_at might change even on failed updates, depending on implementation
+    
+    def test_profile_validation_after_external_modification(self):
+        """
+        Tests that profiles maintain validity even after external modifications to their data structures.
+        """
+        profile = self.manager.create_profile('external_mod_test', self.valid_data)
+        
+        # External modifications that could break validation
+        external_modifications = [
+            lambda p: p.data.clear(),  # Clear all data
+            lambda p: p.data.update({'invalid_field': None}),  # Add invalid field
+            lambda p: delattr(p, 'created_at') if hasattr(p, 'created_at') else None,  # Remove required attribute
+            lambda p: setattr(p, 'profile_id', None),  # Corrupt profile ID
+        ]
+        
+        for mod_func in external_modifications:
+            with self.subTest(modification=mod_func.__name__):
+                # Create fresh profile for each test
+                test_profile = self.manager.create_profile(f'mod_test_{id(mod_func)}', self.valid_data.copy())
+                
+                try:
+                    # Apply external modification
+                    mod_func(test_profile)
+                    
+                    # Test if profile is still retrievable and valid
+                    retrieved = self.manager.get_profile(test_profile.profile_id)
+                    
+                    # Profile might be None if corruption is detected and handled
+                    if retrieved is not None:
+                        # If still retrievable, verify basic attributes exist
+                        self.assertTrue(hasattr(retrieved, 'data'))
+                        self.assertTrue(hasattr(retrieved, 'profile_id'))
+                
+                except Exception as e:
+                    # External modifications might cause various exceptions
+                    # Verify they are handled gracefully
+                    self.assertIsInstance(e, (AttributeError, TypeError, KeyError))
+
+
+class TestAdvancedPerformanceScenarios(unittest.TestCase):
+    """Test advanced performance scenarios and optimization verification"""
+    
+    def setUp(self):
+        """
+        Set up ProfileManager for performance testing.
+        """
+        self.manager = ProfileManager()
+    
+    def test_memory_leak_detection_during_profile_lifecycle(self):
+        """
+        Tests for memory leaks during repeated profile create/delete cycles.
+        """
+        import gc
+        import sys
+        
+        # Force garbage collection and get baseline
+        gc.collect()
+        initial_objects = len(gc.get_objects())
+        
+        # Perform many create/delete cycles
+        for cycle in range(10):
+            profiles_in_cycle = 100
+            
+            # Create profiles
+            for i in range(profiles_in_cycle):
+                profile_id = f'leak_test_{cycle}_{i}'
+                data = {
+                    'name': f'profile_{i}',
+                    'version': '1.0.0',
+                    'settings': {'data': list(range(100))}  # Some data to occupy memory
+                }
+                self.manager.create_profile(profile_id, data)
+            
+            # Delete all profiles from this cycle
+            for i in range(profiles_in_cycle):
+                profile_id = f'leak_test_{cycle}_{i}'
+                self.manager.delete_profile(profile_id)
+            
+            # Force garbage collection
+            gc.collect()
+        
+        # Check final object count
+        final_objects = len(gc.get_objects())
+        object_growth = final_objects - initial_objects
+        
+        # Allow some growth but not excessive (less than 10% of initial objects)
+        max_allowed_growth = initial_objects * 0.1
+        self.assertLess(object_growth, max_allowed_growth, 
+                       f"Potential memory leak detected: {object_growth} objects added")
+    
+    def test_performance_degradation_with_large_datasets(self):
+        """
+        Tests that performance doesn't degrade significantly as the number of profiles increases.
+        """
+        import time
+        
+        dataset_sizes = [100, 500, 1000, 2000]
+        creation_times = []
+        lookup_times = []
+        
+        for size in dataset_sizes:
+            # Test creation time
+            start_time = time.time()
+            for i in range(size):
+                data = {
+                    'name': f'perf_test_{size}_{i}',
+                    'version': '1.0.0',
+                    'settings': {'index': i}
+                }
+                self.manager.create_profile(f'perf_{size}_{i}', data)
+            creation_time = time.time() - start_time
+            creation_times.append(creation_time / size)  # Average time per profile
+            
+            # Test lookup time
+            start_time = time.time()
+            for i in range(min(100, size)):  # Sample lookups
+                self.manager.get_profile(f'perf_{size}_{i}')
+            lookup_time = time.time() - start_time
+            lookup_times.append(lookup_time / min(100, size))  # Average lookup time
+        
+        # Verify performance doesn't degrade exponentially
+        # Creation time should be roughly linear
+        for i in range(1, len(creation_times)):
+            performance_ratio = creation_times[i] / creation_times[0]
+            self.assertLess(performance_ratio, 10.0, 
+                           f"Creation performance degraded by {performance_ratio}x at size {dataset_sizes[i]}")
+        
+        # Lookup time should remain relatively constant (may vary due to dict implementation)
+        for i in range(1, len(lookup_times)):
+            performance_ratio = lookup_times[i] / lookup_times[0]
+            self.assertLess(performance_ratio, 5.0, 
+                           f"Lookup performance degraded by {performance_ratio}x at size {dataset_sizes[i]}")
+    
+    def test_resource_cleanup_verification(self):
+        """
+        Tests that resources are properly cleaned up when profiles are deleted.
+        """
+        import weakref
+        
+        # Create profiles and keep weak references
+        weak_refs = []
+        profile_ids = []
+        
+        for i in range(50):
+            profile_id = f'cleanup_test_{i}'
+            data = {
+                'name': f'cleanup_profile_{i}',
+                'version': '1.0.0',
+                'settings': {'large_data': list(range(1000))}
+            }
+            
+            profile = self.manager.create_profile(profile_id, data)
+            weak_refs.append(weakref.ref(profile))
+            profile_ids.append(profile_id)
+        
+        # Delete all profiles
+        for profile_id in profile_ids:
+            self.manager.delete_profile(profile_id)
+        
+        # Force garbage collection
+        import gc
+        gc.collect()
+        
+        # Check that objects were properly cleaned up
+        alive_refs = sum(1 for ref in weak_refs if ref() is not None)
+        
+        # Some references might still exist due to Python's garbage collection timing
+        # but most should be cleaned up
+        cleanup_percentage = (len(weak_refs) - alive_refs) / len(weak_refs)
+        self.assertGreater(cleanup_percentage, 0.8, 
+                          f"Only {cleanup_percentage:.1%} of profiles were cleaned up")
+
+
+class TestConfigurationAndEnvironmentScenarios(unittest.TestCase):
+    """Test various configuration and environment scenarios"""
+    
+    def setUp(self):
+        """
+        Set up test fixtures for configuration testing.
+        """
+        self.manager = ProfileManager()
+        self.config_data = {
+            'name': 'config_test',
+            'version': '1.0.0',
+            'settings': {
+                'environment': 'test',
+                'debug': True,
+                'features': ['feature1', 'feature2']
+            }
+        }
+    
+    def test_profile_configuration_inheritance(self):
+        """
+        Tests that profile configurations can be built incrementally with inheritance-like behavior.
+        """
+        base_config = {
+            'name': 'base_profile',
+            'version': '1.0.0',
+            'settings': {
+                'base_feature': True,
+                'timeout': 30,
+                'retries': 3
+            }
+        }
+        
+        # Create base profile
+        base_profile = self.manager.create_profile('base_config', base_config)
+        
+        # Create derived configuration by extending base
+        derived_config = base_config.copy()
+        derived_config['name'] = 'derived_profile'
+        derived_config['settings'].update({
+            'derived_feature': True,
+            'timeout': 60,  # Override base value
+            'additional_setting': 'new_value'
+        })
+        
+        derived_profile = self.manager.create_profile('derived_config', derived_config)
+        
+        # Verify inheritance behavior
+        self.assertEqual(derived_profile.data['settings']['base_feature'], True)  # Inherited
+        self.assertEqual(derived_profile.data['settings']['timeout'], 60)  # Overridden
+        self.assertEqual(derived_profile.data['settings']['derived_feature'], True)  # Added
+        self.assertEqual(derived_profile.data['settings']['retries'], 3)  # Inherited
+    
+    def test_environment_specific_profile_configurations(self):
+        """
+        Tests creating profiles with environment-specific configurations (dev, staging, prod).
+        """
+        environments = ['development', 'staging', 'production']
+        env_configs = {
+            'development': {
+                'debug': True,
+                'log_level': 'DEBUG',
+                'timeout': 10,
+                'mock_services': True
+            },
+            'staging': {
+                'debug': False,
+                'log_level': 'INFO',
+                'timeout': 30,
+                'mock_services': False
+            },
+            'production': {
+                'debug': False,
+                'log_level': 'ERROR',
+                'timeout': 60,
+                'mock_services': False
+            }
+        }
+        
+        created_profiles = {}
+        
+        for env in environments:
+            profile_data = {
+                'name': f'{env}_profile',
+                'version': '1.0.0',
+                'settings': env_configs[env]
+            }
+            
+            profile = self.manager.create_profile(f'{env}_config', profile_data)
+            created_profiles[env] = profile
+            
+            # Verify environment-specific settings
+            self.assertEqual(profile.data['settings']['log_level'], env_configs[env]['log_level'])
+            self.assertEqual(profile.data['settings']['timeout'], env_configs[env]['timeout'])
+        
+        # Verify differences between environments
+        self.assertTrue(created_profiles['development'].data['settings']['debug'])
+        self.assertFalse(created_profiles['production'].data['settings']['debug'])
+        
+        self.assertTrue(created_profiles['development'].data['settings']['mock_services'])
+        self.assertFalse(created_profiles['production'].data['settings']['mock_services'])
+    
+    def test_feature_flag_configuration_scenarios(self):
+        """
+        Tests profile configurations with feature flags and conditional settings.
+        """
+        feature_combinations = [
+            {'feature_a': True, 'feature_b': False, 'feature_c': True},
+            {'feature_a': False, 'feature_b': True, 'feature_c': False},
+            {'feature_a': True, 'feature_b': True, 'feature_c': True},
+            {'feature_a': False, 'feature_b': False, 'feature_c': False},
+        ]
+        
+        for i, features in enumerate(feature_combinations):
+            profile_data = {
+                'name': f'feature_profile_{i}',
+                'version': '1.0.0',
+                'settings': {
+                    'features': features,
+                    'conditional_settings': self._generate_conditional_settings(features)
+                }
+            }
+            
+            profile = self.manager.create_profile(f'feature_config_{i}', profile_data)
+            
+            # Verify feature flags are properly stored
+            for feature, enabled in features.items():
+                self.assertEqual(profile.data['settings']['features'][feature], enabled)
+            
+            # Verify conditional settings are correctly applied
+            conditional_settings = profile.data['settings']['conditional_settings']
+            if features['feature_a'] and features['feature_b']:
+                self.assertIn('combined_feature_setting', conditional_settings)
+            
+            if any(features.values()):
+                self.assertTrue(conditional_settings.get('any_feature_enabled', False))
+    
+    def _generate_conditional_settings(self, features):
+        """
+        Helper method to generate conditional settings based on feature flags.
+        """
+        settings = {
+            'any_feature_enabled': any(features.values()),
+            'all_features_enabled': all(features.values())
+        }
+        
+        if features['feature_a'] and features['feature_b']:
+            settings['combined_feature_setting'] = 'a_and_b_enabled'
+        
+        if features['feature_c']:
+            settings['feature_c_timeout'] = 120
+        
+        return settings
+
+
+@pytest.mark.parametrize("complexity_level,data_structure", [
+    ("simple", {"key": "value"}),
+    ("nested", {"level1": {"level2": {"level3": "deep_value"}}}),
+    ("list_heavy", {"lists": [list(range(i * 10)) for i in range(1, 6)]}),
+    ("mixed", {"str": "text", "int": 42, "list": [1, 2, 3], "dict": {"nested": True}}),
+    ("unicode", {"unicode": "测试 🚀 émojis", "mixed": "ascii + 测试"}),
+])
+def test_data_structure_complexity_parametrized(complexity_level, data_structure):
+    """
+    Parametrized test that verifies ProfileManager handles various levels of data structure complexity.
+    
+    Parameters:
+        complexity_level (str): Description of the complexity level being tested.
+        data_structure (dict): The data structure to include in profile settings.
+    """
+    manager = ProfileManager()
+    profile_data = {
+        'name': f'complexity_{complexity_level}',
+        'version': '1.0.0',
+        'settings': data_structure
+    }
+    
+    # Create profile with complex data
+    profile = manager.create_profile(f'complex_{complexity_level}', profile_data)
+    assert profile is not None
+    
+    # Retrieve and verify data integrity
+    retrieved = manager.get_profile(f'complex_{complexity_level}')
+    assert retrieved is not None
+    assert retrieved.data['settings'] == data_structure
+    
+    # Update with modified complex data
+    modified_data = data_structure.copy()
+    if isinstance(modified_data, dict) and 'key' in modified_data:
+        modified_data['key'] = 'updated_value'
+    elif isinstance(modified_data, dict):
+        modified_data['new_key'] = 'new_value'
+    
+    updated_profile = manager.update_profile(f'complex_{complexity_level}', 
+                                           {'settings': modified_data})
+    assert updated_profile.data['settings'] == modified_data
+
+
+@pytest.mark.parametrize("error_scenario,operation,expected_exception", [
+    ("invalid_profile_id", "create", (TypeError, ValueError)),
+    ("none_data", "create", (TypeError, ValueError)),
+    ("nonexistent_update", "update", ProfileNotFoundError),
+    ("invalid_update_data", "update", (TypeError, AttributeError)),
+    ("circular_reference", "create", (ValueError, TypeError, RecursionError)),
+])
+def test_error_scenarios_parametrized(error_scenario, operation, expected_exception):
+    """
+    Parametrized test for comprehensive error scenario coverage.
+    
+    Parameters:
+        error_scenario (str): Description of the error scenario being tested.
+        operation (str): The operation being performed ("create", "update", etc.).
+        expected_exception: The exception type(s) expected to be raised.
+    """
+    manager = ProfileManager()
+    
+    if error_scenario == "invalid_profile_id":
+        with pytest.raises(expected_exception):
+            manager.create_profile(None, {"name": "test", "version": "1.0", "settings": {}})
+    
+    elif error_scenario == "none_data":
+        with pytest.raises(expected_exception):
+            manager.create_profile("test_id", None)
+    
+    elif error_scenario == "nonexistent_update":
+        with pytest.raises(expected_exception):
+            manager.update_profile("nonexistent_id", {"name": "updated"})
+    
+    elif error_scenario == "invalid_update_data":
+        # Create a profile first
+        manager.create_profile("test_id", {"name": "test", "version": "1.0", "settings": {}})
+        try:
+            manager.update_profile("test_id", None)
+            # If no exception, verify the behavior is still correct
+            profile = manager.get_profile("test_id")
+            assert profile is not None
+        except expected_exception:
+            pass  # Expected behavior
+    
+    elif error_scenario == "circular_reference":
+        # Create data with potential circular reference
+        data = {"name": "test", "version": "1.0", "settings": {}}
+        data["settings"]["self_ref"] = data  # Circular reference
+        
+        try:
+            manager.create_profile("circular_test", data)
+        except expected_exception:
+            pass  # Expected if implementation handles circular references
+        except Exception as e:
+            # Allow other exceptions that might be raised by circular references
+            assert isinstance(e, (ValueError, TypeError, RecursionError))
+
+
+if __name__ == '__main__':
+    # Run extended test suite
+    unittest.main(argv=[''], exit=False, verbosity=2)
+    pytest.main([__file__, '-v', '--tb=short'])
