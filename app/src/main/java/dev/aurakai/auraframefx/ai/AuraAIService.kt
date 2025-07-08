@@ -15,11 +15,24 @@ interface AuraAIService {
         return null
     }
 
+    /**
+     * Generates an image based on the provided prompt.
+     *
+     * @param _prompt The textual description used to generate the image.
+     * @return A ByteArray containing the generated image data, or null if image generation is not implemented.
+     */
     suspend fun generateImage(_prompt: String): ByteArray? { // Returns URL or path to image -> ByteArray?
         // TODO: Implement image generation
         return null // Placeholder for image data
     }
 
+    /**
+     * Generates text based on the provided prompt and optional configuration parameters.
+     *
+     * @param prompt The input text prompt to guide text generation.
+     * @param options Optional map of configuration parameters, such as "temperature" (Double) and "max_tokens" (Int), to control generation behavior.
+     * @return A structured string containing the generated text and configuration details, or an error message if generation fails.
+     */
     suspend fun generateText(prompt: String, options: Map<String, Any>? = null): String {
         try {
             // Basic text generation with configurable options
@@ -37,6 +50,16 @@ interface AuraAIService {
         }
     }
 
+    /**
+     * Generates an AI response to the given prompt, optionally incorporating context and system instructions.
+     *
+     * The response includes the original prompt, any provided context, and the system prompt from the options map.
+     * If an error occurs during response generation, an error message is returned.
+     *
+     * @param prompt The input prompt for the AI.
+     * @param options Optional map containing "context" and "system_prompt" keys to influence the response.
+     * @return A formatted AI-generated response string, or an error message if an exception occurs.
+     */
     fun getAIResponse(
         prompt: String,
         options: Map<String, Any>? = null,
@@ -59,9 +82,21 @@ interface AuraAIService {
         }
     }
 
-    fun getMemory(memoryKey: String): String?
+    /**
+ * Retrieves a stored memory value associated with the given key.
+ *
+ * @param memoryKey The key identifying the memory entry to retrieve.
+ * @return The stored value as a string, or null if not found.
+ */
+fun getMemory(memoryKey: String): String?
     
-    fun saveMemory(key: String, value: Any)
+    /**
+ * Saves a value in memory under the specified key.
+ *
+ * @param key The identifier for the memory entry.
+ * @param value The value to store.
+ */
+fun saveMemory(key: String, value: Any)
 
     /**
      * Checks if the AI service is connected.
@@ -72,12 +107,24 @@ interface AuraAIService {
         return true
     }
 
+    /**
+     * Publishes a message to the specified Pub/Sub topic.
+     *
+     * @param _topic The name of the topic to publish to.
+     * @param _message The message to be published.
+     */
     fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing
     }
 
 
 
+    /**
+     * Uploads a file and returns its file ID or URL.
+     *
+     * @param _file The file to upload.
+     * @return The file ID or URL if the upload is successful, or null if not implemented.
+     */
     suspend fun uploadFile(_file: File): String? { // Returns file ID or URL
         // TODO: Implement file upload
         return null

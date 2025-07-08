@@ -20,14 +20,21 @@ class AuraAIServiceImpl @Inject constructor(
     private val cloudStatusMonitor: CloudStatusMonitor,
     private val auraFxLogger: AuraFxLogger,
 ) : AuraAIService {
+    /**
+     * Returns a fixed placeholder string for analytics queries.
+     *
+     * This implementation does not perform any analytics processing and always returns "Analytics response placeholder".
+     *
+     * @return The placeholder analytics response string.
+     */
     override fun analyticsQuery(_query: String): String {
         return "Analytics response placeholder"
     }
 
     /**
-     * Placeholder for file download functionality.
+     * Stub for file download functionality.
      *
-     * Always returns null, indicating that file download is not implemented.
+     * Always returns null, indicating that file download is not supported in this implementation.
      *
      * @param _fileId The identifier of the file to download.
      * @return Always null.
@@ -37,43 +44,43 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null as image generation is not implemented in this stub.
+     * Stub method for image generation that always returns null.
      *
-     * @param _prompt The prompt describing the desired image.
-     * @return Always null, indicating image generation is not available.
+     * This implementation does not support image generation and serves as a placeholder.
+     *
+     * @return Always null.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         return null
     }
 
     /**
-     * Returns a fixed placeholder string for generated text.
+     * Returns a fixed placeholder string for generated text, regardless of the input prompt or options.
      *
      * @param prompt The input prompt for text generation.
      * @param options Optional parameters for text generation.
-     * @return A placeholder string indicating generated text.
+     * @return Always returns the string "Generated text placeholder".
      */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         return "Generated text placeholder"
     }
 
     /**
-     * Returns a fixed placeholder string as the AI response for the given prompt and options.
+     * Returns a placeholder string as the AI response for the given prompt and options.
      *
      * @param prompt The input prompt for the AI.
      * @param options Optional parameters for customizing the AI response.
-     * @return Always returns a placeholder string indicating the response is not implemented.
+     * @return A fixed placeholder string indicating the response is not implemented.
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         return "AI response placeholder"
     }
 
     /**
-     * Retrieves the memory value associated with the specified key.
+     * Retrieves the memory value for the given key.
      *
      * This implementation always returns null, indicating that memory retrieval is not supported.
      *
-     * @param _memoryKey The key for which to retrieve the memory value.
      * @return Always null.
      */
     override fun getMemory(_memoryKey: String): String? {
@@ -81,12 +88,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder for storing a value in memory associated with the given key.
+     * Stub method for saving a value in memory associated with a key.
      *
-     * This method is not yet implemented and currently performs no operation.
+     * This implementation does not perform any operation.
      *
      * @param key The identifier for the memory entry.
-     * @param value The value to be stored.
+     * @param value The value to associate with the key.
      */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement memory saving

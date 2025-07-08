@@ -33,6 +33,11 @@ class OracleDriveServiceConnector(private val context: Context) {
             _isServiceConnected.value = true
         }
 
+        /**
+         * Handles the event when the connection to the AuraDrive service is lost.
+         *
+         * Clears the service interface reference and updates the connection status to disconnected.
+         */
         override fun onServiceDisconnected(name: ComponentName?) {
             auraDriveService = null
             _isServiceConnected.value = false
@@ -40,9 +45,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Binds to the remote AuraDrive service using an explicit intent.
+     * Initiates binding to the remote AuraDrive service using an explicit intent.
      *
-     * Attempts to establish a connection to the AuraDrive service component. If binding fails due to a security exception, the connection state is set to false.
+     * Sets the connection state to false if a security exception prevents binding.
      */
     fun bindService() {
         val intent = Intent().apply {
@@ -59,9 +64,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Unbinds from the AuraDrive service and marks the connection as disconnected.
+     * Unbinds from the AuraDrive service and updates the connection status to disconnected.
      *
-     * Any exceptions during unbinding are silently ignored.
+     * Any exceptions during unbinding are ignored.
      */
     fun unbindService() {
         try {
@@ -73,9 +78,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Retrieves the current status string from the remote AuraDrive service.
+     * Returns the current status string from the remote AuraDrive service, or null if unavailable or on communication error.
      *
-     * @return The status reported by the remote service, or null if the service is unavailable or a RemoteException occurs.
+     * @return The status reported by the remote service, or null if the service is not connected or a RemoteException occurs.
      */
     suspend fun getStatusFromOracleDrive(): String? = withContext(Dispatchers.IO) {
         try {

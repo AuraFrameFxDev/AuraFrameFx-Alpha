@@ -236,13 +236,13 @@ object KineticIdentity {
     )
 
     /**
-     * Creates an animation spec that introduces a dramatic pause before executing an action.
+     * Returns an animation spec that adds a dramatic pause before performing the given action animation.
      *
-     * The resulting animation combines a pause of the specified duration with the duration of the provided action animation spec, using a cubic bezier easing for dramatic effect.
+     * The resulting animation delays the start of the action by the specified pause duration, then executes the action using a combined duration and a dramatic cubic bezier easing.
      *
-     * @param pauseDurationMillis The duration of the pause before the action, in milliseconds. Defaults to 500 ms.
-     * @param actionSpec The animation spec representing the action to follow the pause. Defaults to `DaringEnter`.
-     * @return An animation spec with the combined pause and action duration, using dramatic easing.
+     * @param pauseDurationMillis Duration of the pause before the action, in milliseconds.
+     * @param actionSpec The animation spec for the action to perform after the pause.
+     * @return An animation spec with the total duration of the pause plus the action, using dramatic easing.
      */
     fun createDramaticPause(
         pauseDurationMillis: Int = 500,
@@ -258,12 +258,12 @@ object KineticIdentity {
  */
 
 /**
-     * Returns a tween animation that starts after the specified delay, with total duration equal to the delay plus the original animation's duration.
+     * Creates a tween animation spec that introduces a delay before starting the original animation.
      *
-     * For spring-based specs, the duration is estimated as 1000 ms; for other types, a standard duration is used.
+     * The resulting animation has a total duration equal to the specified delay plus the original animation's duration. For spring-based specs, the duration is estimated as 1000 ms; for other types, a standard duration is used.
      *
      * @param delayMillis The delay in milliseconds before the animation begins.
-     * @return A tween animation spec with the combined delay and duration.
+     * @return An animation spec with the combined delay and duration.
      */
 fun <T> AnimationSpec<T>.afterDelay(delayMillis: Int): AnimationSpec<T> = 
     tween(
