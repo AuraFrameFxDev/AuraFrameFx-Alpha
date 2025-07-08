@@ -52,12 +52,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Creates a singleton AIContentApi instance configured for the AuraFrameFx AI API.
-     *
-     * Uses the provided OkHttpClient for HTTP communication with the API.
+     * Creates a singleton AIContentApi for communicating with the AuraFrameFx AI API.
      *
      * @param okHttpClient The HTTP client used for API requests.
-     * @return An AIContentApi instance targeting the AuraFrameFx AI API.
+     * @return An AIContentApi instance configured with the AuraFrameFx API base URL.
      */
     @Provides
     @Singleton
