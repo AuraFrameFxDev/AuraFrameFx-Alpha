@@ -1370,10 +1370,10 @@ fun testGenesisAgent_extremeScenarios() = runBlocking {
         val agent = DummyAgent("ZeroConfidenceAgent", "response", 0.0f)
         
         assertEquals("ZeroConfidenceAgent", agent.getName())
-        
+
         val request = AiRequest("test", emptyMap())
         val response = agent.processRequest(request)
-        
+
         assertEquals("response", response.content)
         assertEquals(0.0f, response.confidence)
     }
@@ -1381,10 +1381,10 @@ fun testGenesisAgent_extremeScenarios() = runBlocking {
     @Test
     fun testDummyAgent_withNegativeConfidence() = runBlocking {
         val agent = DummyAgent("NegativeConfidenceAgent", "response", -0.5f)
-        
+
         val request = AiRequest("test", emptyMap())
         val response = agent.processRequest(request)
-        
+
         assertEquals("response", response.content)
         assertEquals(-0.5f, response.confidence)
     }
@@ -1392,10 +1392,10 @@ fun testGenesisAgent_extremeScenarios() = runBlocking {
     @Test
     fun testDummyAgent_withExtremeConfidence() = runBlocking {
         val agent = DummyAgent("ExtremeConfidenceAgent", "response", Float.MAX_VALUE)
-        
+
         val request = AiRequest("test", emptyMap())
         val response = agent.processRequest(request)
-        
+
         assertEquals("response", response.content)
         assertEquals(Float.MAX_VALUE, response.confidence)
     }
@@ -1403,10 +1403,10 @@ fun testGenesisAgent_extremeScenarios() = runBlocking {
     @Test
     fun testDummyAgent_withEmptyResponse() = runBlocking {
         val agent = DummyAgent("EmptyResponseAgent", "", 0.5f)
-        
+
         val request = AiRequest("test", emptyMap())
         val response = agent.processRequest(request)
-        
+
         assertEquals("", response.content)
         assertEquals(0.5f, response.confidence)
     }
@@ -1415,10 +1415,10 @@ fun testGenesisAgent_extremeScenarios() = runBlocking {
     fun testDummyAgent_withUnicodeResponse() = runBlocking {
         val unicodeResponse = "Unicode: 你好 🌍 émojis ñ"
         val agent = DummyAgent("UnicodeAgent", unicodeResponse, 0.5f)
-        
+
         val request = AiRequest("test", emptyMap())
         val response = agent.processRequest(request)
-        
+
         assertEquals(unicodeResponse, response.content)
         assertEquals(0.5f, response.confidence)
     }
@@ -1444,7 +1444,7 @@ fun testGenesisAgent_extremeScenarios() = runBlocking {
                 agent.processRequest(AiRequest("test", emptyMap()))
                 fail("Agent ${agent.getName()} should have thrown an exception")
             } catch (e: Exception) {
-                assertTrue("Should throw expected exception type", 
+                assertTrue("Should throw expected exception type",
                     e is RuntimeException || e is IllegalStateException || e is IllegalArgumentException)
             }
         }
@@ -1546,7 +1546,7 @@ fun testGenesisAgent_extremeScenarios() = runBlocking {
                 extremePrompt,
                 GenesisAgent.ConversationMode.TURN_ORDER
             )
-            
+
             assertEquals(1, responses.size)
             assertEquals("handled extreme scenario", responses["ExtremeAgent"]?.content)
         } catch (e: OutOfMemoryError) {

@@ -10,10 +10,7 @@ import java.lang.System // Added import
 
 @Serializable
 data class ContextChain(
-data class ContextChain(
-    val id: String = "ctx_${Clock.System.now().toEpochMilliseconds()}",
-    // … other properties …
-)
+    val id: String = "ctx_${System.currentTimeMillis()}",
     val rootContext: String,
     val currentContext: String,
     val contextHistory: List<ContextNode> = emptyList(),

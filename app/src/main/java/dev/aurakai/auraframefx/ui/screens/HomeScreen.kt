@@ -10,16 +10,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import dev.aurakai.auraframefx.R
+import dev.aurakai.auraframefx.R // Already present, good.
 import dev.aurakai.auraframefx.ui.animation.*
 import dev.aurakai.auraframefx.ui.components.CyberMenuItem
 import dev.aurakai.auraframefx.ui.components.CyberpunkText
 import dev.aurakai.auraframefx.ui.components.FloatingCyberWindow
 import dev.aurakai.auraframefx.ui.components.AuraSparkleButton
-import dev.aurakai.auraframefx.ui.components.CornerStyle // Added import
-import dev.aurakai.auraframefx.ui.components.BackgroundStyle // Added import
-import dev.aurakai.auraframefx.ui.components.HexagonGridBackground // Added import
-import dev.aurakai.auraframefx.ui.components.DigitalLandscapeBackground // Added import
+import dev.aurakai.auraframefx.ui.components.CornerStyle
+import dev.aurakai.auraframefx.ui.components.BackgroundStyle
+import dev.aurakai.auraframefx.ui.components.HexagonGridBackground
+import dev.aurakai.auraframefx.ui.components.DigitalLandscapeBackground
+import dev.aurakai.auraframefx.ui.components.digitalGlitchEffect // Explicit import
+import dev.aurakai.auraframefx.ui.components.cyberEdgeGlow // Explicit import for consistency
 import dev.aurakai.auraframefx.ui.navigation.NavDestination
 import dev.aurakai.auraframefx.ui.theme.*
 
@@ -34,11 +36,6 @@ import dev.aurakai.auraframefx.ui.theme.*
  * Displays the AuraFrameFX home screen with a cyberpunk-themed floating UI, layered backgrounds, interactive navigation menu, action buttons, and system status panels.
  *
  * The screen features a digital landscape and hexagon grid background, a stylized title header, a main navigation menu with selectable items and AI chat access, action buttons for system functions, and a status panel showing neural and quantum system states. Navigation actions are triggered based on user interaction with menu items and buttons.
- */
-/**
- * Displays the cyberpunk-themed home screen UI for the AuraFrameFX app.
- *
- * Renders a layered digital landscape and animated hexagon grid background, with floating cyber windows containing the app title, navigation menu, action buttons, and a status panel. Users can select navigation items, trigger navigation to other screens (such as AI Chat, Profile, Settings, and Oracle Drive Control), and view system status information. The interface features custom cyberpunk styling, animated effects, and interactive elements consistent with a futuristic neural interface theme.
  */
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -254,7 +251,8 @@ fun HomeScreen(navController: NavController) {
                 ) {
                     CyberpunkText(
                         text = stringResource(R.string.aura_shield_active),
-                        color = CyberpunkTextColor.Primary
+                        color = CyberpunkTextColor.Primary,
+                        style = CyberpunkTextStyle.Body // Added style
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -266,22 +264,26 @@ fun HomeScreen(navController: NavController) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             CyberpunkText(
                                 text = stringResource(R.string.neural),
-                                color = CyberpunkTextColor.White
+                                color = CyberpunkTextColor.White,
+                                style = CyberpunkTextStyle.Label // Added style
                             )
                             CyberpunkText(
                                 text = stringResource(R.string.active),
-                                color = CyberpunkTextColor.Primary
+                                color = CyberpunkTextColor.Primary,
+                                style = CyberpunkTextStyle.Body // Added style
                             )
                         }
 
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             CyberpunkText(
                                 text = stringResource(R.string.quantum),
-                                color = CyberpunkTextColor.White
+                                color = CyberpunkTextColor.White,
+                                style = CyberpunkTextStyle.Label // Added style
                             )
                             CyberpunkText(
                                 text = stringResource(R.string.quantum_percent),
-                                color = CyberpunkTextColor.Primary
+                                color = CyberpunkTextColor.Primary,
+                                style = CyberpunkTextStyle.Body // Added style
                             )
                         }
                     }

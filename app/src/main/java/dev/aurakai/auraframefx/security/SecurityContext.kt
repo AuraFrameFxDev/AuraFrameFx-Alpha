@@ -386,9 +386,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Generates a secure random 32-character hexadecimal identifier.
+     * Generates a random 16-byte hexadecimal string to be used as a secure identifier.
      *
-     * @return A randomly generated 32-character hexadecimal string.
+     * @return A securely generated 32-character hexadecimal ID.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -397,9 +397,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Asynchronously records a security event for auditing and monitoring purposes.
+     * Asynchronously records a security event for auditing and monitoring.
      *
-     * The event is serialized and written to the debug log. In production, events should be securely persisted rather than logged.
+     * The event is serialized and written to the debug log. In production environments, events should be securely persisted.
      *
      * @param event The security event to record.
      */
@@ -414,9 +414,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Records a validation event for the specified request type and data for auditing purposes.
+     * Records a security validation event for the specified request type and data.
      *
-     * This function does not perform any actual validation of the request; it only records the event.
+     * This function logs a validation event for auditing purposes but does not perform any actual validation of the request.
      *
      * @param requestType The type of request being recorded.
      * @param requestData The data associated with the request.
