@@ -72,6 +72,12 @@ class NeuralWhisper @Inject constructor(
         }
     }
 
+    /**
+     * Initializes the speech-to-text (STT) engine if speech recognition is available on the device.
+     *
+     * Sets up the `SpeechRecognizer` instance and updates the STT initialization state.
+     * Logs availability status. Actual listener setup and permission handling are not implemented.
+     */
     private fun initializeStt() {
         // TODO: Implement STT initialization using Android's SpeechRecognizer or a third-party library.
         // This will involve setting up a SpeechRecognitionListener.
@@ -87,12 +93,12 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Converts audio input into transcribed text using speech-to-text processing.
+     * Transcribes spoken audio input to text using speech-to-text processing.
      *
-     * This is a placeholder implementation; actual speech recognition logic will be added in the future.
+     * This is a placeholder implementation; actual speech recognition logic will be implemented in the future.
      *
-     * @param audioInput The audio data or trigger for starting speech recognition.
-     * @return The transcribed text if successful, or null if speech recognition is not initialized or an error occurs.
+     * @param audioInput The audio data or trigger for initiating speech recognition.
+     * @return The transcribed text if successful, or null if speech recognition is not initialized.
      */
     suspend fun speechToText(audioInput: Any /* Placeholder type */): String? {
         // TODO: Implement actual STT logic.
@@ -116,7 +122,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Attempts to synthesize speech from the provided text using the text-to-speech engine.
      *
-     * This is a placeholder; actual speech synthesis is not performed.
+     * This is a placeholder implementation; actual speech synthesis is not performed.
      *
      * @param text The text to be spoken.
      * @param locale The language and region for speech synthesis (defaults to US English).
@@ -143,12 +149,12 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Processes a transcribed voice command and returns a placeholder action.
+     * Processes a transcribed voice command and returns a placeholder action object.
      *
-     * Updates the conversation state to reflect that the command is being processed. Intended for future mapping of recognized commands to agent actions using natural language understanding (NLU).
+     * Updates the conversation state to indicate that the command is being processed. Intended for future implementation of natural language understanding and command-to-action mapping.
      *
      * @param command The transcribed voice command to process.
-     * @return A placeholder object representing the result of command processing.
+     * @return A placeholder object representing the result of processing the command.
      */
     fun processVoiceCommand(command: String): Any { // Placeholder return type
         // TODO: Implement NLU and command mapping.
@@ -166,7 +172,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Shares context information with the Kai agent or controller.
      *
-     * Updates the conversation state to indicate that context is being shared. Actual integration with the Kai agent is not implemented.
+     * Updates the conversation state to reflect that context is being shared. Actual integration with the Kai agent is not implemented.
      *
      * @param contextText The context information to share.
      */
@@ -195,9 +201,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Stops the current audio recording session and returns a status message.
+     * Stops the current audio recording session and returns a message indicating the result.
      *
-     * @return A message indicating whether the recording was stopped successfully or the reason for failure.
+     * @return A status message describing whether the recording was stopped successfully or the reason for failure.
      */
     fun stopRecording(): String {
         return try {

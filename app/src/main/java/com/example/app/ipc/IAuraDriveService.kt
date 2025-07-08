@@ -5,29 +5,29 @@ import android.os.IInterface
 
 interface IAuraDriveService : IInterface {
     /**
- * Returns a string summarizing the current operational status of the Oracle Drive.
+ * Returns the current operational status of the Oracle Drive as a summary string.
  *
- * @return The current Oracle Drive status.
+ * @return A string describing the Oracle Drive's current status.
  */
 fun getOracleDriveStatus(): String
     /**
- * Toggles the enabled or disabled state of the LSPosed module.
+ * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the operation succeeds, `false` if it fails.
+ * @return `true` if the module was successfully toggled, `false` otherwise.
  */
 fun toggleLSPosedModule(): Boolean  
     /**
- * Returns a comprehensive internal status report of the Aura Drive service.
+ * Returns a detailed internal status report of the Aura Drive service.
  *
- * The returned string provides detailed information useful for diagnostics or monitoring.
+ * The returned string contains comprehensive information useful for diagnostics or monitoring.
  *
- * @return A string containing the detailed internal status of the service.
+ * @return The detailed internal status of the service.
  */
 fun getDetailedInternalStatus(): String
     /**
- * Retrieves a list of internal diagnostics log entries for debugging or monitoring the service.
+ * Returns a list of internal diagnostics log entries for debugging or monitoring purposes.
  *
- * @return A list of strings, each containing a diagnostics log entry.
+ * @return A list of strings representing individual diagnostics log entries.
  */
 fun getInternalDiagnosticsLog(): List<String>
     
@@ -36,7 +36,7 @@ fun getInternalDiagnosticsLog(): List<String>
             /**
              * Returns an `IAuraDriveService` implementation backed by the provided `IBinder`, or null if the binder is null.
              *
-             * Commonly used to obtain a service interface for IPC binding. The returned implementation is a placeholder and does not perform actual service logic.
+             * The returned implementation serves as a placeholder and does not perform actual service logic.
              *
              * @param service The `IBinder` representing the remote service, or null.
              * @return An `IAuraDriveService` implementation if the binder is non-null; otherwise, null.
@@ -46,13 +46,13 @@ fun getInternalDiagnosticsLog(): List<String>
                 return if (service != null) {
                     object : IAuraDriveService {
                         /**
- * Returns the underlying IBinder instance associated with this interface implementation.
+ * Returns the IBinder instance backing this interface implementation.
  *
- * @return The IBinder backing this implementation.
+ * @return The underlying IBinder.
  */
 override fun asBinder(): IBinder = service
                         /**
- * Returns a string describing the current operational status of the Oracle Drive.
+ * Returns the current operational status of the Oracle Drive.
  *
  * In this stub implementation, always returns "Unknown".
  *
@@ -60,15 +60,15 @@ override fun asBinder(): IBinder = service
  */
 override fun getOracleDriveStatus(): String = "Unknown"
                         /**
- * Toggles the enabled state of the LSPosed module.
+ * Toggles the enabled or disabled state of the LSPosed module.
  *
- * @return `true` if the module state was successfully changed, or `false` if the operation failed.
+ * @return `true` if the module state was successfully toggled, `false` otherwise.
  */
 override fun toggleLSPosedModule(): Boolean = false
                         /**
  * Returns a detailed internal status report of the Aura Drive service.
  *
- * @return A string containing comprehensive information about the service's internal state.
+ * @return A string describing the current internal state of the service.
  */
 override fun getDetailedInternalStatus(): String = "Not implemented"
                         /**
@@ -76,7 +76,7 @@ override fun getDetailedInternalStatus(): String = "Not implemented"
  *
  * In this stub implementation, always returns an empty list.
  *
- * @return An empty list of diagnostic log entries.
+ * @return An empty list, as no diagnostics are available in the stub.
  */
 override fun getInternalDiagnosticsLog(): List<String> = emptyList()
                     }
