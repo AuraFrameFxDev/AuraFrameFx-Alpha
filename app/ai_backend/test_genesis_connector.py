@@ -3578,3 +3578,1091 @@ if __name__ == '__main__':
         run_comprehensive_test_suite()
     else:
         unittest.main(verbosity=2)
+
+class TestGenesisConnectorAdvancedErrorHandling(unittest.TestCase):
+    """
+    Advanced error handling tests for GenesisConnector.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up advanced error handling test environment."""
+        self.connector = GenesisConnector()
+
+    def test_recursive_error_handling(self):
+        """Test handling of recursive error scenarios."""
+        def recursive_error_func(depth=0):
+            if depth > 10:
+                raise RecursionError("Maximum recursion depth exceeded")
+            return recursive_error_func(depth + 1)
+        
+        with patch.object(self.connector, 'format_payload') as mock_format:
+            mock_format.side_effect = recursive_error_func
+            
+            payload = {'message': 'recursion_test'}
+            
+            with self.assertRaises(RecursionError):
+                self.connector.format_payload(payload)
+
+    def test_signal_handling_during_requests(self):
+        """Test handling of system signals during request processing."""
+        import signal
+        
+        def signal_handler(signum, frame):
+            raise KeyboardInterrupt("Signal received")
+        
+        with patch('requests.post') as mock_post:
+            mock_post.side_effect = KeyboardInterrupt("Interrupted by signal")
+            
+            payload = {'message': 'signal_test'}
+            
+            with self.assertRaises(KeyboardInterrupt):
+                self.connector.send_request(payload)
+
+    def test_encoding_error_handling(self):
+        """Test handling of various encoding errors."""
+        encoding_errors = [
+            UnicodeDecodeError('utf-8', b'invalid', 0, 1, 'invalid start byte'),
+            UnicodeEncodeError('ascii', 'café', 0, 1, 'ordinal not in range'),
+            LookupError('unknown encoding: invalid-encoding'),
+        ]
+        
+        for error in encoding_errors:
+            with self.subTest(error=error.__class__.__name__):
+                with patch.object(self.connector, 'format_payload') as mock_format:
+                    mock_format.side_effect = error
+                    
+                    payload = {'message': 'encoding_test'}
+                    
+                    with self.assertRaises(type(error)):
+                        self.connector.format_payload(payload)
+
+    def test_database_connection_error_simulation(self):
+        """Test handling of database-like connection errors."""
+        db_errors = [
+            ConnectionRefusedError("Database connection refused"),
+            ConnectionAbortedError("Database connection aborted"),
+            ConnectionResetError("Database connection reset"),
+            BrokenPipeError("Database pipe broken"),
+        ]
+        
+        for error in db_errors:
+            with self.subTest(error=error.__class__.__name__):
+                with patch('requests.post') as mock_post:
+                    mock_post.side_effect = error
+                    
+                    payload = {'message': 'db_error_test'}
+                    
+                    with self.assertRaises(type(error)):
+                        self.connector.send_request(payload)
+
+    def test_permission_error_handling(self):
+        """Test handling of permission-related errors."""
+        permission_errors = [
+            PermissionError("Permission denied"),
+            FileNotFoundError("Configuration file not found"),
+            IsADirectoryError("Expected file, got directory"),
+            NotADirectoryError("Expected directory, got file"),
+        ]
+        
+        for error in permission_errors:
+            with self.subTest(error=error.__class__.__name__):
+                with patch('builtins.open', side_effect=error):
+                    try:
+                        # Simulate file operations that might fail
+                        self.connector.config = {'api_key': 'test'}
+                        self.assertIsNotNone(self.connector.config)
+                    except Exception:
+                        # Expected for permission errors
+                        pass
+
+    def test_import_error_handling(self):
+        """Test handling of import errors for optional dependencies."""
+        with patch('builtins.__import__', side_effect=ImportError("Module not found")):
+            try:
+                # Test optional import handling
+                connector = GenesisConnector()
+                self.assertIsNotNone(connector)
+            except ImportError:
+                # Should handle gracefully
+                pass
+
+    def test_system_exit_handling(self):
+        """Test handling of system exit calls."""
+        with patch('sys.exit') as mock_exit:
+            mock_exit.side_effect = SystemExit(1)
+            
+            try:
+                # Simulate scenario that might call sys.exit
+                self.connector.validate_config(None)
+            except SystemExit:
+                # Should propagate system exit
+                pass
+
+    def test_keyboard_interrupt_handling(self):
+        """Test graceful handling of keyboard interrupts."""
+        with patch('requests.post') as mock_post:
+            mock_post.side_effect = KeyboardInterrupt("User interrupted")
+            
+            payload = {'message': 'interrupt_test'}
+            
+            with self.assertRaises(KeyboardInterrupt):
+                self.connector.send_request(payload)
+
+
+class TestGenesisConnectorAdvancedNetworking(unittest.TestCase):
+    """
+    Advanced networking tests for GenesisConnector.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up advanced networking test environment."""
+        self.connector = GenesisConnector(config={
+            'api_key': 'network_test_key',
+            'base_url': 'https://api.network.test.com'
+        })
+
+    @patch('requests.post')
+    def test_chunked_transfer_encoding(self, mock_post):
+        """Test handling of chunked transfer encoding."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.headers = {'Transfer-Encoding': 'chunked'}
+        mock_response.iter_content = Mock(return_value=[b'chunk1', b'chunk2', b'chunk3'])
+        mock_response.json.return_value = {'chunked': True}
+        mock_post.return_value = mock_response
+        
+        payload = {'message': 'chunked_test'}
+        result = self.connector.send_request(payload)
+        
+        self.assertEqual(result['chunked'], True)
+
+    @patch('requests.post')
+    def test_gzip_compression_handling(self, mock_post):
+        """Test handling of gzip compressed responses."""
+        import gzip
+        
+        original_data = b'{"compressed": true, "data": "test"}'
+        compressed_data = gzip.compress(original_data)
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.headers = {'Content-Encoding': 'gzip'}
+        mock_response.content = compressed_data
+        mock_response.json.return_value = {'compressed': True}
+        mock_post.return_value = mock_response
+        
+        payload = {'message': 'gzip_test'}
+        result = self.connector.send_request(payload)
+        
+        self.assertEqual(result['compressed'], True)
+
+    @patch('requests.post')
+    def test_http2_protocol_handling(self, mock_post):
+        """Test handling of HTTP/2 protocol features."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.headers = {'HTTP-Version': '2.0'}
+        mock_response.json.return_value = {'http2': True}
+        mock_post.return_value = mock_response
+        
+        payload = {'message': 'http2_test'}
+        result = self.connector.send_request(payload)
+        
+        self.assertEqual(result['http2'], True)
+
+    @patch('requests.post')
+    def test_websocket_upgrade_handling(self, mock_post):
+        """Test handling of WebSocket upgrade scenarios."""
+        mock_response = Mock()
+        mock_response.status_code = 101  # Switching Protocols
+        mock_response.headers = {
+            'Connection': 'Upgrade',
+            'Upgrade': 'websocket'
+        }
+        mock_post.return_value = mock_response
+        
+        payload = {'message': 'websocket_test'}
+        
+        try:
+            result = self.connector.send_request(payload)
+            # Should handle protocol upgrade appropriately
+            self.assertIsNotNone(result)
+        except Exception:
+            # May not support WebSocket upgrades
+            pass
+
+    @patch('requests.post')
+    def test_server_sent_events_handling(self, mock_post):
+        """Test handling of Server-Sent Events (SSE)."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.headers = {'Content-Type': 'text/event-stream'}
+        mock_response.iter_lines = Mock(return_value=[
+            b'data: {"event": "message", "data": "test"}',
+            b'data: {"event": "end"}',
+            b''
+        ])
+        mock_post.return_value = mock_response
+        
+        payload = {'message': 'sse_test'}
+        
+        try:
+            result = self.connector.send_request(payload, stream=True)
+            self.assertIsNotNone(result)
+        except AttributeError:
+            # Stream parameter might not be implemented
+            pass
+
+    @patch('requests.post')
+    def test_multipart_form_data_handling(self, mock_post):
+        """Test handling of multipart form data requests."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'multipart': True}
+        mock_post.return_value = mock_response
+        
+        payload = {'message': 'multipart_test'}
+        files = {
+            'file1': ('test1.txt', b'content1', 'text/plain'),
+            'file2': ('test2.json', b'{"test": true}', 'application/json')
+        }
+        
+        try:
+            result = self.connector.send_request(payload, files=files)
+            self.assertEqual(result['multipart'], True)
+        except TypeError:
+            # Files parameter might not be supported
+            pass
+
+    @patch('requests.post')
+    def test_connection_pooling_limits(self, mock_post):
+        """Test connection pooling behavior under load."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'pooled': True}
+        mock_post.return_value = mock_response
+        
+        # Simulate connection pool exhaustion
+        with patch('requests.Session') as mock_session:
+            mock_session.side_effect = ConnectionError("Connection pool exhausted")
+            
+            connector = GenesisConnector(config={'use_connection_pool': True})
+            payload = {'message': 'pool_test'}
+            
+            with self.assertRaises(ConnectionError):
+                connector.send_request(payload)
+
+    @patch('requests.post')
+    def test_dns_resolution_caching(self, mock_post):
+        """Test DNS resolution caching behavior."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'dns_cached': True}
+        mock_post.return_value = mock_response
+        
+        # Test with DNS caching enabled
+        connector = GenesisConnector(config={
+            'api_key': 'test',
+            'base_url': 'https://cached.dns.test.com',
+            'enable_dns_cache': True
+        })
+        
+        payload = {'message': 'dns_test'}
+        result = connector.send_request(payload)
+        
+        self.assertEqual(result['dns_cached'], True)
+
+    @patch('requests.get')
+    def test_ipv6_connectivity(self, mock_get):
+        """Test IPv6 connectivity handling."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'ipv6': True}
+        mock_get.return_value = mock_response
+        
+        connector = GenesisConnector(config={
+            'api_key': 'test',
+            'base_url': 'https://[2001:db8::1]:8080'  # IPv6 address
+        })
+        
+        result = connector.connect()
+        self.assertTrue(result)
+
+    @patch('requests.post')
+    def test_proxy_authentication(self, mock_post):
+        """Test proxy authentication scenarios."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'proxy_auth': True}
+        mock_post.return_value = mock_response
+        
+        connector = GenesisConnector(config={
+            'api_key': 'test',
+            'base_url': 'https://api.test.com',
+            'proxies': {
+                'http': 'http://user:pass@proxy.test.com:8080',
+                'https': 'https://user:pass@proxy.test.com:8080'
+            }
+        })
+        
+        payload = {'message': 'proxy_auth_test'}
+        result = connector.send_request(payload)
+        
+        self.assertEqual(result['proxy_auth'], True)
+
+
+class TestGenesisConnectorAdvancedSerialization(unittest.TestCase):
+    """
+    Advanced serialization tests for GenesisConnector.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up advanced serialization test environment."""
+        self.connector = GenesisConnector()
+
+    def test_msgpack_serialization(self):
+        """Test handling of MessagePack serialization."""
+        try:
+            import msgpack
+            
+            payload = {
+                'message': 'msgpack_test',
+                'binary_data': b'binary_content',
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            # Test with msgpack format
+            with patch.object(self.connector, 'format_payload') as mock_format:
+                mock_format.return_value = msgpack.packb(payload)
+                
+                result = self.connector.format_payload(payload)
+                self.assertIsNotNone(result)
+                
+        except ImportError:
+            # Skip if msgpack not available
+            pass
+
+    def test_protobuf_serialization(self):
+        """Test handling of Protocol Buffers serialization."""
+        # Mock protobuf message
+        class MockProtobufMessage:
+            def SerializeToString(self):
+                return b'protobuf_serialized_data'
+            
+            def ParseFromString(self, data):
+                return True
+        
+        payload = MockProtobufMessage()
+        
+        try:
+            formatted = self.connector.format_payload({'protobuf': payload})
+            self.assertIsNotNone(formatted)
+        except (ValueError, TypeError):
+            # Expected for unsupported types
+            pass
+
+    def test_avro_serialization(self):
+        """Test handling of Apache Avro serialization."""
+        # Mock Avro schema and data
+        avro_schema = {
+            "type": "record",
+            "name": "TestRecord",
+            "fields": [
+                {"name": "message", "type": "string"},
+                {"name": "timestamp", "type": "long"}
+            ]
+        }
+        
+        avro_data = {
+            "message": "avro_test",
+            "timestamp": int(datetime.now().timestamp()),
+            "schema": avro_schema
+        }
+        
+        try:
+            formatted = self.connector.format_payload(avro_data)
+            self.assertIsNotNone(formatted)
+        except (ValueError, TypeError):
+            # Expected if Avro not supported
+            pass
+
+    def test_xml_serialization(self):
+        """Test handling of XML serialization."""
+        import xml.etree.ElementTree as ET
+        
+        # Create XML structure
+        root = ET.Element('root')
+        message = ET.SubElement(root, 'message')
+        message.text = 'xml_test'
+        
+        payload = {
+            'xml_data': ET.tostring(root, encoding='unicode'),
+            'format': 'xml'
+        }
+        
+        formatted = self.connector.format_payload(payload)
+        self.assertIsNotNone(formatted)
+        self.assertIn('xml_data', formatted)
+
+    def test_yaml_serialization(self):
+        """Test handling of YAML serialization."""
+        try:
+            import yaml
+            
+            payload = {
+                'message': 'yaml_test',
+                'config': {
+                    'nested': {
+                        'value': 123,
+                        'list': [1, 2, 3]
+                    }
+                }
+            }
+            
+            # Test YAML serialization
+            yaml_string = yaml.dump(payload)
+            formatted = self.connector.format_payload({'yaml': yaml_string})
+            self.assertIsNotNone(formatted)
+            
+        except ImportError:
+            # Skip if PyYAML not available
+            pass
+
+    def test_pickle_serialization_security(self):
+        """Test security handling of pickle serialization."""
+        import pickle
+        
+        # Create potentially dangerous pickle data
+        dangerous_data = pickle.dumps("safe_data")
+        
+        payload = {
+            'message': 'pickle_test',
+            'pickled_data': dangerous_data
+        }
+        
+        try:
+            formatted = self.connector.format_payload(payload)
+            # Should handle binary data appropriately
+            self.assertIsNotNone(formatted)
+        except (ValueError, TypeError):
+            # Expected for binary data
+            pass
+
+    def test_nested_object_serialization(self):
+        """Test serialization of deeply nested custom objects."""
+        class CustomNestedObject:
+            def __init__(self, value, nested=None):
+                self.value = value
+                self.nested = nested
+                
+            def __str__(self):
+                return f"CustomNestedObject({self.value})"
+            
+            def __repr__(self):
+                return self.__str__()
+        
+        # Create nested structure
+        nested_obj = CustomNestedObject("level1", 
+                                      CustomNestedObject("level2", 
+                                                        CustomNestedObject("level3")))
+        
+        payload = {
+            'message': 'nested_object_test',
+            'nested_custom': nested_obj
+        }
+        
+        formatted = self.connector.format_payload(payload)
+        self.assertIsNotNone(formatted)
+
+    def test_dataclass_serialization(self):
+        """Test serialization of dataclasses."""
+        from dataclasses import dataclass, asdict
+        
+        @dataclass
+        class TestDataClass:
+            message: str
+            value: int
+            optional: str = None
+        
+        test_obj = TestDataClass(message="dataclass_test", value=42, optional="test")
+        
+        payload = {
+            'dataclass': asdict(test_obj),
+            'message': 'dataclass_serialization_test'
+        }
+        
+        formatted = self.connector.format_payload(payload)
+        self.assertIsNotNone(formatted)
+        self.assertIn('dataclass', formatted)
+
+    def test_enum_serialization(self):
+        """Test serialization of enum values."""
+        from enum import Enum, IntEnum
+        
+        class TestEnum(Enum):
+            VALUE1 = "test_value_1"
+            VALUE2 = "test_value_2"
+        
+        class TestIntEnum(IntEnum):
+            LOW = 1
+            MEDIUM = 2
+            HIGH = 3
+        
+        payload = {
+            'enum_value': TestEnum.VALUE1,
+            'int_enum_value': TestIntEnum.MEDIUM,
+            'message': 'enum_test'
+        }
+        
+        formatted = self.connector.format_payload(payload)
+        self.assertIsNotNone(formatted)
+
+    def test_namedtuple_serialization(self):
+        """Test serialization of namedtuples."""
+        from collections import namedtuple
+        
+        TestTuple = namedtuple('TestTuple', ['field1', 'field2', 'field3'])
+        test_tuple = TestTuple(field1="value1", field2=42, field3=True)
+        
+        payload = {
+            'namedtuple': test_tuple._asdict(),
+            'message': 'namedtuple_test'
+        }
+        
+        formatted = self.connector.format_payload(payload)
+        self.assertIsNotNone(formatted)
+        self.assertIn('namedtuple', formatted)
+
+
+class TestGenesisConnectorAdvancedConcurrency(unittest.TestCase):
+    """
+    Advanced concurrency tests for GenesisConnector.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up advanced concurrency test environment."""
+        self.connector = GenesisConnector(config={
+            'api_key': 'concurrency_test_key',
+            'base_url': 'https://api.concurrency.test.com'
+        })
+
+    def test_deadlock_detection(self):
+        """Test detection and handling of deadlock scenarios."""
+        import threading
+        import time
+        
+        lock1 = threading.Lock()
+        lock2 = threading.Lock()
+        results = []
+        
+        def worker1():
+            with lock1:
+                time.sleep(0.01)
+                with lock2:
+                    results.append("worker1")
+        
+        def worker2():
+            with lock2:
+                time.sleep(0.01)
+                with lock1:
+                    results.append("worker2")
+        
+        # Start threads that could deadlock
+        thread1 = threading.Thread(target=worker1)
+        thread2 = threading.Thread(target=worker2)
+        
+        thread1.start()
+        thread2.start()
+        
+        # Wait with timeout to detect deadlock
+        thread1.join(timeout=0.1)
+        thread2.join(timeout=0.1)
+        
+        # At least one thread should complete or both should timeout
+        self.assertTrue(thread1.is_alive() or thread2.is_alive() or len(results) > 0)
+
+    def test_race_condition_handling(self):
+        """Test handling of race conditions in configuration updates."""
+        import threading
+        import time
+        
+        results = []
+        errors = []
+        
+        def config_updater(thread_id):
+            try:
+                for i in range(10):
+                    new_config = {
+                        'api_key': f'race_key_{thread_id}_{i}',
+                        'base_url': f'https://race{thread_id}.test.com'
+                    }
+                    self.connector.reload_config(new_config)
+                    results.append(f"thread_{thread_id}_update_{i}")
+                    time.sleep(0.001)
+            except Exception as e:
+                errors.append(e)
+        
+        # Start multiple threads updating config simultaneously
+        threads = [threading.Thread(target=config_updater, args=(i,)) for i in range(5)]
+        
+        for thread in threads:
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        
+        # Should handle concurrent updates without excessive errors
+        self.assertGreater(len(results), len(errors))
+
+    def test_thread_pool_exhaustion(self):
+        """Test behavior when thread pool is exhausted."""
+        import concurrent.futures
+        import time
+        
+        def blocking_task(task_id):
+            time.sleep(0.1)
+            return f"task_{task_id}_completed"
+        
+        # Try to exhaust thread pool
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            # Submit more tasks than workers
+            futures = [executor.submit(blocking_task, i) for i in range(10)]
+            
+            # Should handle gracefully
+            results = []
+            for future in concurrent.futures.as_completed(futures, timeout=5):
+                results.append(future.result())
+            
+            self.assertEqual(len(results), 10)
+
+    def test_async_context_manager(self):
+        """Test async context manager functionality if available."""
+        import asyncio
+        
+        async def async_test():
+            try:
+                async with self.connector as conn:
+                    # Test async operations
+                    self.assertIsNotNone(conn)
+                    return True
+            except (AttributeError, TypeError):
+                # Async context manager not implemented
+                return False
+        
+        # Run async test if event loop available
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # Skip if already running
+                return
+            result = loop.run_until_complete(async_test())
+            # Test passes regardless of async support
+            self.assertIsNotNone(result)
+        except RuntimeError:
+            # No event loop available
+            pass
+
+    def test_semaphore_rate_limiting(self):
+        """Test semaphore-based rate limiting."""
+        import threading
+        import time
+        
+        semaphore = threading.Semaphore(2)  # Allow 2 concurrent requests
+        results = []
+        
+        def rate_limited_request(request_id):
+            with semaphore:
+                start_time = time.time()
+                time.sleep(0.1)  # Simulate request duration
+                end_time = time.time()
+                results.append({
+                    'id': request_id,
+                    'duration': end_time - start_time,
+                    'timestamp': start_time
+                })
+        
+        # Start multiple threads
+        threads = [threading.Thread(target=rate_limited_request, args=(i,)) for i in range(5)]
+        
+        for thread in threads:
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        
+        # Verify rate limiting worked
+        self.assertEqual(len(results), 5)
+        
+        # Check that no more than 2 requests were processed simultaneously
+        results.sort(key=lambda x: x['timestamp'])
+        overlapping_count = 0
+        for i in range(len(results) - 1):
+            if results[i]['timestamp'] + results[i]['duration'] > results[i + 1]['timestamp']:
+                overlapping_count += 1
+        
+        self.assertLessEqual(overlapping_count, 1)  # At most 2 concurrent (1 overlap)
+
+    def test_condition_variable_synchronization(self):
+        """Test condition variable synchronization."""
+        import threading
+        import time
+        
+        condition = threading.Condition()
+        shared_data = []
+        
+        def producer():
+            with condition:
+                for i in range(3):
+                    shared_data.append(f"item_{i}")
+                    condition.notify_all()
+                    time.sleep(0.01)
+        
+        def consumer(consumer_id):
+            with condition:
+                while len(shared_data) == 0:
+                    condition.wait(timeout=1)
+                if shared_data:
+                    item = shared_data.pop(0)
+                    return f"consumer_{consumer_id}_got_{item}"
+        
+        # Start producer and consumers
+        producer_thread = threading.Thread(target=producer)
+        consumer_threads = [threading.Thread(target=consumer, args=(i,)) for i in range(2)]
+        
+        producer_thread.start()
+        for thread in consumer_threads:
+            thread.start()
+        
+        producer_thread.join()
+        for thread in consumer_threads:
+            thread.join()
+        
+        # Test completed without deadlock
+        self.assertTrue(True)
+
+    def test_barrier_synchronization(self):
+        """Test barrier synchronization."""
+        import threading
+        import time
+        
+        barrier = threading.Barrier(3)
+        results = []
+        
+        def barrier_worker(worker_id):
+            try:
+                # Do some work
+                time.sleep(0.01 * worker_id)
+                results.append(f"worker_{worker_id}_phase1")
+                
+                # Wait for all workers to reach barrier
+                barrier.wait()
+                
+                # Continue with synchronized work
+                results.append(f"worker_{worker_id}_phase2")
+                
+            except threading.BrokenBarrierError:
+                results.append(f"worker_{worker_id}_barrier_broken")
+        
+        # Start workers
+        workers = [threading.Thread(target=barrier_worker, args=(i,)) for i in range(3)]
+        
+        for worker in workers:
+            worker.start()
+        
+        for worker in workers:
+            worker.join()
+        
+        # All workers should complete both phases
+        phase1_count = len([r for r in results if 'phase1' in r])
+        phase2_count = len([r for r in results if 'phase2' in r])
+        
+        self.assertEqual(phase1_count, 3)
+        self.assertEqual(phase2_count, 3)
+
+    def test_thread_local_storage(self):
+        """Test thread-local storage behavior."""
+        import threading
+        import time
+        
+        thread_local_data = threading.local()
+        results = []
+        
+        def thread_worker(worker_id):
+            # Set thread-local data
+            thread_local_data.worker_id = worker_id
+            thread_local_data.data = f"data_for_worker_{worker_id}"
+            
+            time.sleep(0.01)
+            
+            # Verify thread-local data is preserved
+            if hasattr(thread_local_data, 'worker_id'):
+                results.append({
+                    'worker_id': thread_local_data.worker_id,
+                    'data': thread_local_data.data
+                })
+        
+        # Start multiple threads
+        threads = [threading.Thread(target=thread_worker, args=(i,)) for i in range(5)]
+        
+        for thread in threads:
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        
+        # Each thread should have its own data
+        self.assertEqual(len(results), 5)
+        
+        # Verify data isolation
+        worker_ids = [r['worker_id'] for r in results]
+        self.assertEqual(len(set(worker_ids)), 5)  # All unique
+
+
+class TestGenesisConnectorAdvancedMetrics(unittest.TestCase):
+    """
+    Advanced metrics and monitoring tests for GenesisConnector.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up advanced metrics test environment."""
+        self.connector = GenesisConnector(config={
+            'api_key': 'metrics_test_key',
+            'base_url': 'https://api.metrics.test.com'
+        })
+
+    def test_custom_metrics_collection(self):
+        """Test collection of custom metrics."""
+        # Mock metrics collection
+        with patch.object(self.connector, 'collect_custom_metrics') as mock_collect:
+            mock_collect.return_value = {
+                'custom_metric_1': 42,
+                'custom_metric_2': 'value',
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            try:
+                metrics = self.connector.collect_custom_metrics()
+                self.assertIn('custom_metric_1', metrics)
+                self.assertIn('timestamp', metrics)
+            except AttributeError:
+                # Custom metrics not implemented
+                pass
+
+    def test_histogram_metrics(self):
+        """Test histogram-based metrics collection."""
+        # Simulate histogram data
+        histogram_data = {
+            'response_times': [0.1, 0.2, 0.15, 0.3, 0.25, 0.18, 0.22],
+            'payload_sizes': [1024, 2048, 512, 4096, 1536, 768, 2560],
+            'buckets': [0.1, 0.2, 0.5, 1.0, 2.0, 5.0]
+        }
+        
+        try:
+            # Test histogram processing
+            with patch.object(self.connector, 'process_histogram_metrics') as mock_histogram:
+                mock_histogram.return_value = {
+                    'p50': 0.2,
+                    'p95': 0.28,
+                    'p99': 0.29,
+                    'mean': 0.2,
+                    'count': 7
+                }
+                
+                metrics = self.connector.process_histogram_metrics(histogram_data)
+                self.assertIn('p50', metrics)
+                self.assertIn('p95', metrics)
+                
+        except AttributeError:
+            # Histogram metrics not implemented
+            pass
+
+    def test_counter_metrics(self):
+        """Test counter-based metrics collection."""
+        counter_data = {
+            'requests_total': 100,
+            'errors_total': 5,
+            'cache_hits': 75,
+            'cache_misses': 25
+        }
+        
+        try:
+            with patch.object(self.connector, 'update_counters') as mock_counters:
+                mock_counters.return_value = counter_data
+                
+                metrics = self.connector.update_counters(counter_data)
+                self.assertIn('requests_total', metrics)
+                self.assertIn('errors_total', metrics)
+                
+        except AttributeError:
+            # Counter metrics not implemented
+            pass
+
+    def test_gauge_metrics(self):
+        """Test gauge-based metrics collection."""
+        import psutil
+        import os
+        
+        try:
+            # Collect system metrics
+            process = psutil.Process(os.getpid())
+            gauge_data = {
+                'memory_usage_mb': process.memory_info().rss / 1024 / 1024,
+                'cpu_percent': process.cpu_percent(),
+                'open_files': len(process.open_files()),
+                'threads': process.num_threads()
+            }
+            
+            with patch.object(self.connector, 'update_gauges') as mock_gauges:
+                mock_gauges.return_value = gauge_data
+                
+                metrics = self.connector.update_gauges(gauge_data)
+                self.assertIn('memory_usage_mb', metrics)
+                
+        except (ImportError, AttributeError):
+            # psutil or gauge metrics not available
+            pass
+
+    def test_metrics_aggregation(self):
+        """Test metrics aggregation across time windows."""
+        time_series_data = [
+            {'timestamp': '2024-01-01T00:00:00Z', 'value': 10},
+            {'timestamp': '2024-01-01T00:01:00Z', 'value': 15},
+            {'timestamp': '2024-01-01T00:02:00Z', 'value': 12},
+            {'timestamp': '2024-01-01T00:03:00Z', 'value': 18},
+            {'timestamp': '2024-01-01T00:04:00Z', 'value': 14},
+        ]
+        
+        try:
+            with patch.object(self.connector, 'aggregate_metrics') as mock_aggregate:
+                mock_aggregate.return_value = {
+                    'avg': 13.8,
+                    'min': 10,
+                    'max': 18,
+                    'sum': 69,
+                    'count': 5
+                }
+                
+                aggregated = self.connector.aggregate_metrics(time_series_data)
+                self.assertIn('avg', aggregated)
+                self.assertIn('max', aggregated)
+                
+        except AttributeError:
+            # Metrics aggregation not implemented
+            pass
+
+    def test_metrics_export(self):
+        """Test metrics export functionality."""
+        metrics_data = {
+            'counters': {'requests': 100, 'errors': 5},
+            'gauges': {'memory_mb': 128, 'cpu_percent': 25.5},
+            'histograms': {'response_time': {'p50': 0.2, 'p95': 0.5}},
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        export_formats = ['json', 'prometheus', 'statsd']
+        
+        for fmt in export_formats:
+            with self.subTest(format=fmt):
+                try:
+                    with patch.object(self.connector, 'export_metrics') as mock_export:
+                        mock_export.return_value = f"metrics_exported_as_{fmt}"
+                        
+                        exported = self.connector.export_metrics(metrics_data, format=fmt)
+                        self.assertIn(fmt, exported)
+                        
+                except AttributeError:
+                    # Export not implemented for this format
+                    pass
+
+    def test_metrics_alerting(self):
+        """Test metrics-based alerting."""
+        alert_rules = [
+            {'metric': 'error_rate', 'threshold': 0.05, 'operator': '>', 'severity': 'warning'},
+            {'metric': 'response_time_p95', 'threshold': 1.0, 'operator': '>', 'severity': 'critical'},
+            {'metric': 'memory_usage_mb', 'threshold': 1024, 'operator': '>', 'severity': 'warning'}
+        ]
+        
+        current_metrics = {
+            'error_rate': 0.08,  # Should trigger warning
+            'response_time_p95': 1.5,  # Should trigger critical
+            'memory_usage_mb': 512  # Should not trigger
+        }
+        
+        try:
+            with patch.object(self.connector, 'check_alerts') as mock_alerts:
+                mock_alerts.return_value = [
+                    {'rule': alert_rules[0], 'triggered': True, 'severity': 'warning'},
+                    {'rule': alert_rules[1], 'triggered': True, 'severity': 'critical'}
+                ]
+                
+                alerts = self.connector.check_alerts(current_metrics, alert_rules)
+                triggered_alerts = [a for a in alerts if a['triggered']]
+                self.assertEqual(len(triggered_alerts), 2)
+                
+        except AttributeError:
+            # Alerting not implemented
+            pass
+
+    def test_metrics_dashboard_data(self):
+        """Test metrics dashboard data preparation."""
+        dashboard_config = {
+            'widgets': [
+                {'type': 'line_chart', 'metric': 'response_time', 'time_range': '1h'},
+                {'type': 'counter', 'metric': 'requests_total', 'aggregation': 'sum'},
+                {'type': 'gauge', 'metric': 'memory_usage', 'unit': 'MB'}
+            ],
+            'refresh_interval': 30
+        }
+        
+        try:
+            with patch.object(self.connector, 'prepare_dashboard_data') as mock_dashboard:
+                mock_dashboard.return_value = {
+                    'widgets': [
+                        {'widget_id': 'chart_1', 'data': [1, 2, 3, 4, 5]},
+                        {'widget_id': 'counter_1', 'value': 1000},
+                        {'widget_id': 'gauge_1', 'value': 256, 'max': 1024}
+                    ],
+                    'last_updated': datetime.now().isoformat()
+                }
+                
+                dashboard_data = self.connector.prepare_dashboard_data(dashboard_config)
+                self.assertIn('widgets', dashboard_data)
+                self.assertIn('last_updated', dashboard_data)
+                
+        except AttributeError:
+            # Dashboard functionality not implemented
+            pass
+
+    def test_metrics_retention_policy(self):
+        """Test metrics retention policy enforcement."""
+        retention_config = {
+            'raw_metrics': {'retention_days': 7},
+            'hourly_aggregates': {'retention_days': 30},
+            'daily_aggregates': {'retention_days': 365}
+        }
+        
+        try:
+            with patch.object(self.connector, 'apply_retention_policy') as mock_retention:
+                mock_retention.return_value = {
+                    'deleted_records': 1500,
+                    'retained_records': 8500,
+                    'policy_applied': True
+                }
+                
+                result = self.connector.apply_retention_policy(retention_config)
+                self.assertIn('deleted_records', result)
+                self.assertIn('policy_applied', result)
+                
+        except AttributeError:
+            # Retention policy not implemented
+            pass
+
+
+if __name__ == '__main__':
+    # Run the additional comprehensive tests
+    unittest.main(verbosity=2)

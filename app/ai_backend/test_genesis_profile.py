@@ -2822,3 +2822,634 @@ class TestProfileSystemStress(unittest.TestCase):
 if __name__ == '__main__':
     # Run comprehensive test suite
     unittest.main(argv=[''], exit=False, verbosity=2)
+# Additional comprehensive tests for enhanced coverage
+
+class TestGenesisProfileAdvancedScenarios(unittest.TestCase):
+    """Advanced test scenarios for GenesisProfile class"""
+    
+    def setUp(self):
+        """Set up test fixtures for advanced scenarios"""
+        self.sample_data = {
+            'name': 'advanced_test_profile',
+            'version': '1.0.0',
+            'settings': {
+                'ai_model': 'gpt-4',
+                'temperature': 0.7,
+                'max_tokens': 1000
+            }
+        }
+        self.profile_id = 'advanced_profile_123'
+    
+    def test_genesis_profile_with_complex_nested_data(self):
+        """Test GenesisProfile with deeply nested complex data structures"""
+        complex_data = {
+            'name': 'complex_nested_profile',
+            'version': '2.0.0',
+            'settings': {
+                'model_configs': {
+                    'primary': {
+                        'model_type': 'transformer',
+                        'layers': [
+                            {'type': 'attention', 'heads': 8, 'dim': 512},
+                            {'type': 'feedforward', 'dim': 2048, 'activation': 'relu'},
+                            {'type': 'normalization', 'eps': 1e-6}
+                        ],
+                        'training': {
+                            'optimizer': {'type': 'adam', 'lr': 0.001, 'betas': [0.9, 0.999]},
+                            'schedule': {'type': 'cosine', 'warmup_steps': 1000}
+                        }
+                    },
+                    'fallback': {
+                        'model_type': 'rnn',
+                        'units': 256,
+                        'dropout': 0.1
+                    }
+                },
+                'preprocessing': {
+                    'tokenizer': {
+                        'type': 'byte_pair_encoding',
+                        'vocab_size': 50000,
+                        'special_tokens': ['<pad>', '<unk>', '<start>', '<end>']
+                    },
+                    'normalization': {
+                        'lowercase': True,
+                        'remove_accents': True,
+                        'unicode_normalization': 'NFC'
+                    }
+                }
+            }
+        }
+        
+        profile = GenesisProfile(self.profile_id, complex_data)
+        
+        self.assertEqual(profile.profile_id, self.profile_id)
+        self.assertEqual(profile.data['settings']['model_configs']['primary']['layers'][0]['heads'], 8)
+        self.assertEqual(profile.data['settings']['preprocessing']['tokenizer']['vocab_size'], 50000)
+        self.assertIsInstance(profile.created_at, datetime)
+        self.assertIsInstance(profile.updated_at, datetime)
+    
+    def test_genesis_profile_with_callable_objects(self):
+        """Test GenesisProfile handling of callable objects and functions"""
+        def dummy_function():
+            return "test_result"
+        
+        class DummyClass:
+            def __call__(self):
+                return "callable_result"
+        
+        callable_data = {
+            'name': 'callable_test',
+            'version': '1.0.0',
+            'settings': {
+                'function_ref': dummy_function,
+                'callable_obj': DummyClass(),
+                'lambda_func': lambda x: x * 2,
+                'method_ref': str.upper
+            }
+        }
+        
+        profile = GenesisProfile(self.profile_id, callable_data)
+        
+        self.assertEqual(profile.profile_id, self.profile_id)
+        self.assertEqual(profile.data['name'], 'callable_test')
+        # Verify callables are preserved
+        self.assertIsInstance(profile.data['settings']['function_ref'], type(dummy_function))
+        self.assertIsInstance(profile.data['settings']['callable_obj'], DummyClass)
+    
+    def test_genesis_profile_with_custom_objects(self):
+        """Test GenesisProfile with custom Python objects"""
+        class CustomConfig:
+            def __init__(self, name, value):
+                self.name = name
+                self.value = value
+            
+            def __eq__(self, other):
+                return isinstance(other, CustomConfig) and self.name == other.name and self.value == other.value
+        
+        custom_data = {
+            'name': 'custom_objects_test',
+            'version': '1.0.0',
+            'settings': {
+                'config_object': CustomConfig('test_config', 42),
+                'object_list': [CustomConfig(f'config_{i}', i) for i in range(5)],
+                'mixed_types': {
+                    'custom': CustomConfig('mixed', 100),
+                    'regular': {'key': 'value'},
+                    'numbers': [1, 2, 3]
+                }
+            }
+        }
+        
+        profile = GenesisProfile(self.profile_id, custom_data)
+        
+        self.assertEqual(profile.data['settings']['config_object'].name, 'test_config')
+        self.assertEqual(profile.data['settings']['config_object'].value, 42)
+        self.assertEqual(len(profile.data['settings']['object_list']), 5)
+        self.assertEqual(profile.data['settings']['mixed_types']['custom'].name, 'mixed')
+
+
+class TestProfileManagerAdvancedOperations(unittest.TestCase):
+    """Advanced test scenarios for ProfileManager operations"""
+    
+    def setUp(self):
+        """Set up test fixtures for advanced ProfileManager operations"""
+        self.manager = ProfileManager()
+        self.sample_data = {
+            'name': 'advanced_manager_test',
+            'version': '1.0.0',
+            'settings': {'temperature': 0.7}
+        }
+    
+    def test_profile_manager_bulk_operations(self):
+        """Test ProfileManager bulk create, update, and delete operations"""
+        profiles_to_create = []
+        
+        # Create bulk test data
+        for i in range(100):
+            profile_data = {
+                'name': f'bulk_profile_{i}',
+                'version': '1.0.0',
+                'settings': {
+                    'index': i,
+                    'category': 'bulk_test',
+                    'priority': i % 10
+                }
+            }
+            profiles_to_create.append((f'bulk_{i}', profile_data))
+        
+        # Bulk create
+        created_profiles = []
+        for profile_id, data in profiles_to_create:
+            profile = self.manager.create_profile(profile_id, data)
+            created_profiles.append(profile)
+        
+        self.assertEqual(len(created_profiles), 100)
+        self.assertEqual(len(self.manager.profiles), 100)
+        
+        # Bulk update
+        for i in range(0, 100, 10):  # Update every 10th profile
+            profile_id = f'bulk_{i}'
+            updated_data = {'settings': {'index': i, 'updated': True, 'batch_update': True}}
+            self.manager.update_profile(profile_id, updated_data)
+        
+        # Verify updates
+        for i in range(0, 100, 10):
+            profile = self.manager.get_profile(f'bulk_{i}')
+            self.assertTrue(profile.data['settings']['updated'])
+            self.assertTrue(profile.data['settings']['batch_update'])
+        
+        # Bulk delete
+        deleted_count = 0
+        for i in range(50, 100):  # Delete second half
+            if self.manager.delete_profile(f'bulk_{i}'):
+                deleted_count += 1
+        
+        self.assertEqual(deleted_count, 50)
+        self.assertEqual(len(self.manager.profiles), 50)
+    
+    def test_profile_manager_transactional_operations(self):
+        """Test ProfileManager transactional-like operations with rollback simulation"""
+        original_profiles = {}
+        
+        # Create initial profiles
+        for i in range(5):
+            profile_id = f'transaction_test_{i}'
+            data = {
+                'name': f'transaction_profile_{i}',
+                'version': '1.0.0',
+                'settings': {'initial_value': i}
+            }
+            profile = self.manager.create_profile(profile_id, data)
+            original_profiles[profile_id] = profile.data.copy()
+        
+        # Simulate transaction with potential rollback
+        def simulate_transaction():
+            """Simulate a transaction that might need rollback"""
+            modified_profiles = {}
+            try:
+                # Modify all profiles
+                for i in range(5):
+                    profile_id = f'transaction_test_{i}'
+                    current_profile = self.manager.get_profile(profile_id)
+                    modified_profiles[profile_id] = current_profile.data.copy()
+                    
+                    # Simulate transaction operation
+                    self.manager.update_profile(profile_id, {
+                        'settings': {
+                            'initial_value': current_profile.data['settings']['initial_value'],
+                            'transaction_id': 'tx_123',
+                            'modified_at': datetime.now().isoformat()
+                        }
+                    })
+                
+                # Simulate transaction failure on 3rd profile
+                if len(modified_profiles) > 2:
+                    raise Exception("Simulated transaction failure")
+                
+            except Exception:
+                # Rollback simulation - restore original data
+                for profile_id, original_data in original_profiles.items():
+                    self.manager.update_profile(profile_id, original_data)
+                raise
+        
+        # Execute transaction and expect failure
+        with self.assertRaises(Exception):
+            simulate_transaction()
+        
+        # Verify rollback worked
+        for profile_id, original_data in original_profiles.items():
+            current_profile = self.manager.get_profile(profile_id)
+            self.assertEqual(current_profile.data['settings']['initial_value'], 
+                           original_data['settings']['initial_value'])
+            self.assertNotIn('transaction_id', current_profile.data['settings'])
+    
+    def test_profile_manager_with_inheritance_patterns(self):
+        """Test ProfileManager with profile inheritance and template patterns"""
+        # Create base template profile
+        base_template = {
+            'name': 'base_template',
+            'version': '1.0.0',
+            'settings': {
+                'base_config': {
+                    'timeout': 30,
+                    'retry_count': 3,
+                    'log_level': 'INFO'
+                },
+                'features': {
+                    'caching': True,
+                    'monitoring': True
+                }
+            }
+        }
+        
+        base_profile = self.manager.create_profile('base_template', base_template)
+        
+        # Create derived profiles with inheritance
+        derived_profiles = []
+        for i in range(3):
+            # Copy base template
+            derived_data = json.loads(json.dumps(base_template))  # Deep copy
+            derived_data['name'] = f'derived_profile_{i}'
+            derived_data['settings']['instance_id'] = i
+            derived_data['settings']['base_config']['timeout'] = 30 + (i * 10)
+            derived_data['settings']['specialized'] = {
+                'feature_set': f'feature_set_{i}',
+                'custom_param': i * 100
+            }
+            
+            profile = self.manager.create_profile(f'derived_{i}', derived_data)
+            derived_profiles.append(profile)
+        
+        # Verify inheritance
+        for i, profile in enumerate(derived_profiles):
+            self.assertEqual(profile.data['settings']['instance_id'], i)
+            self.assertEqual(profile.data['settings']['base_config']['timeout'], 30 + (i * 10))
+            self.assertEqual(profile.data['settings']['base_config']['retry_count'], 3)  # Inherited
+            self.assertTrue(profile.data['settings']['features']['caching'])  # Inherited
+            self.assertEqual(profile.data['settings']['specialized']['custom_param'], i * 100)
+        
+        # Test template modification and inheritance update
+        updated_base = {
+            'base_config': {
+                'timeout': 30,
+                'retry_count': 5,  # Changed
+                'log_level': 'DEBUG',  # Changed
+                'new_feature': True  # Added
+            }
+        }
+        
+        self.manager.update_profile('base_template', {'settings': updated_base})
+        
+        # Verify base template was updated
+        updated_base_profile = self.manager.get_profile('base_template')
+        self.assertEqual(updated_base_profile.data['settings']['base_config']['retry_count'], 5)
+        self.assertEqual(updated_base_profile.data['settings']['base_config']['log_level'], 'DEBUG')
+        self.assertTrue(updated_base_profile.data['settings']['base_config']['new_feature'])
+
+
+class TestProfileValidatorAdvancedValidation(unittest.TestCase):
+    """Advanced validation scenarios for ProfileValidator"""
+    
+    def test_profile_validator_with_schema_evolution(self):
+        """Test ProfileValidator with evolving schema requirements"""
+        # Define schema evolution scenarios
+        schema_versions = {
+            'v1': {
+                'required_fields': ['name', 'version', 'settings'],
+                'settings_schema': {
+                    'required': ['model_type'],
+                    'optional': ['temperature', 'max_tokens']
+                }
+            },
+            'v2': {
+                'required_fields': ['name', 'version', 'settings'],
+                'settings_schema': {
+                    'required': ['model_type', 'safety_settings'],
+                    'optional': ['temperature', 'max_tokens', 'response_format']
+                }
+            },
+            'v3': {
+                'required_fields': ['name', 'version', 'settings', 'metadata'],
+                'settings_schema': {
+                    'required': ['model_type', 'safety_settings', 'performance_tier'],
+                    'optional': ['temperature', 'max_tokens', 'response_format', 'custom_plugins']
+                }
+            }
+        }
+        
+        # Test data for each schema version
+        test_data = {
+            'v1': {
+                'name': 'v1_profile',
+                'version': '1.0.0',
+                'settings': {
+                    'model_type': 'gpt-4',
+                    'temperature': 0.7
+                }
+            },
+            'v2': {
+                'name': 'v2_profile',
+                'version': '2.0.0',
+                'settings': {
+                    'model_type': 'gpt-4',
+                    'temperature': 0.7,
+                    'safety_settings': {'content_filter': True}
+                }
+            },
+            'v3': {
+                'name': 'v3_profile',
+                'version': '3.0.0',
+                'settings': {
+                    'model_type': 'gpt-4',
+                    'temperature': 0.7,
+                    'safety_settings': {'content_filter': True},
+                    'performance_tier': 'premium'
+                },
+                'metadata': {'created_by': 'admin'}
+            }
+        }
+        
+        # Test that current validator accepts all versions
+        for version, data in test_data.items():
+            with self.subTest(version=version):
+                result = ProfileValidator.validate_profile_data(data)
+                self.assertTrue(result, f"Validation failed for {version}")
+    
+    def test_profile_validator_with_conditional_validation(self):
+        """Test ProfileValidator with conditional validation logic"""
+        # Test conditional validation scenarios
+        conditional_cases = [
+            {
+                'name': 'development_profile',
+                'description': 'Development profile with debug settings',
+                'data': {
+                    'name': 'dev_profile',
+                    'version': '1.0.0-dev',
+                    'settings': {
+                        'environment': 'development',
+                        'debug_mode': True,
+                        'verbose_logging': True,
+                        'performance_tracking': False
+                    }
+                },
+                'expected_valid': True
+            },
+            {
+                'name': 'production_profile',
+                'description': 'Production profile with strict settings',
+                'data': {
+                    'name': 'prod_profile',
+                    'version': '1.0.0',
+                    'settings': {
+                        'environment': 'production',
+                        'debug_mode': False,
+                        'verbose_logging': False,
+                        'performance_tracking': True,
+                        'security_hardening': True
+                    }
+                },
+                'expected_valid': True
+            },
+            {
+                'name': 'inconsistent_profile',
+                'description': 'Profile with inconsistent environment settings',
+                'data': {
+                    'name': 'inconsistent_profile',
+                    'version': '1.0.0',
+                    'settings': {
+                        'environment': 'production',
+                        'debug_mode': True,  # Inconsistent with production
+                        'verbose_logging': True  # Inconsistent with production
+                    }
+                },
+                'expected_valid': True  # Current validator doesn't check consistency
+            }
+        ]
+        
+        for case in conditional_cases:
+            with self.subTest(case=case['name']):
+                result = ProfileValidator.validate_profile_data(case['data'])
+                self.assertEqual(result, case['expected_valid'], 
+                               f"Unexpected validation result for {case['description']}")
+    
+    def test_profile_validator_with_custom_validation_rules(self):
+        """Test ProfileValidator with custom validation rules simulation"""
+        # Simulate custom validation rules
+        def custom_validation_rules(data):
+            """Custom validation rules that extend base validation"""
+            # First, check base validation
+            if not ProfileValidator.validate_profile_data(data):
+                return False, "Base validation failed"
+            
+            # Custom rule 1: Name must not contain restricted words
+            restricted_words = ['test', 'tmp', 'debug']
+            name = data.get('name', '').lower()
+            if any(word in name for word in restricted_words):
+                return False, f"Name contains restricted word: {name}"
+            
+            # Custom rule 2: Version must follow semantic versioning
+            version = data.get('version', '')
+            version_pattern = r'^\d+\.\d+\.\d+(-[a-zA-Z0-9]+)?$'
+            if not re.match(version_pattern, version):
+                return False, f"Version doesn't follow semantic versioning: {version}"
+            
+            # Custom rule 3: Settings must have minimum required keys
+            settings = data.get('settings', {})
+            min_required_keys = ['model_type', 'temperature']
+            if not all(key in settings for key in min_required_keys):
+                missing = [key for key in min_required_keys if key not in settings]
+                return False, f"Settings missing required keys: {missing}"
+            
+            return True, "All validations passed"
+        
+        # Test cases for custom validation
+        custom_validation_cases = [
+            {
+                'name': 'valid_profile',
+                'data': {
+                    'name': 'production_profile',
+                    'version': '1.0.0',
+                    'settings': {
+                        'model_type': 'gpt-4',
+                        'temperature': 0.7,
+                        'max_tokens': 1000
+                    }
+                },
+                'expected_valid': True
+            },
+            {
+                'name': 'invalid_name',
+                'data': {
+                    'name': 'test_profile',  # Contains restricted word
+                    'version': '1.0.0',
+                    'settings': {
+                        'model_type': 'gpt-4',
+                        'temperature': 0.7
+                    }
+                },
+                'expected_valid': False
+            },
+            {
+                'name': 'invalid_version',
+                'data': {
+                    'name': 'production_profile',
+                    'version': '1.0',  # Invalid semantic version
+                    'settings': {
+                        'model_type': 'gpt-4',
+                        'temperature': 0.7
+                    }
+                },
+                'expected_valid': False
+            },
+            {
+                'name': 'missing_settings',
+                'data': {
+                    'name': 'production_profile',
+                    'version': '1.0.0',
+                    'settings': {
+                        'model_type': 'gpt-4'
+                        # Missing temperature
+                    }
+                },
+                'expected_valid': False
+            }
+        ]
+        
+        for case in custom_validation_cases:
+            with self.subTest(case=case['name']):
+                is_valid, message = custom_validation_rules(case['data'])
+                self.assertEqual(is_valid, case['expected_valid'], 
+                               f"Custom validation failed for {case['name']}: {message}")
+
+
+class TestProfileBuilderAdvancedPatterns(unittest.TestCase):
+    """Advanced builder patterns and scenarios"""
+    
+    def setUp(self):
+        """Set up test fixtures for advanced builder patterns"""
+        self.builder = ProfileBuilder()
+    
+    def test_profile_builder_with_conditional_building(self):
+        """Test ProfileBuilder with conditional building logic"""
+        # Test conditional building based on environment
+        def build_profile_for_environment(environment, feature_flags=None):
+            """Build a profile configured for specific environment"""
+            builder = ProfileBuilder()
+            
+            # Base configuration
+            builder.with_name(f'{environment}_profile')
+            builder.with_version('1.0.0')
+            
+            # Environment-specific settings
+            if environment == 'development':
+                settings = {
+                    'debug': True,
+                    'logging_level': 'DEBUG',
+                    'performance_monitoring': False,
+                    'cache_enabled': False
+                }
+            elif environment == 'staging':
+                settings = {
+                    'debug': False,
+                    'logging_level': 'INFO',
+                    'performance_monitoring': True,
+                    'cache_enabled': True,
+                    'load_testing': True
+                }
+            elif environment == 'production':
+                settings = {
+                    'debug': False,
+                    'logging_level': 'WARNING',
+                    'performance_monitoring': True,
+                    'cache_enabled': True,
+                    'security_hardening': True
+                }
+            else:
+                settings = {}
+            
+            # Apply feature flags if provided
+            if feature_flags:
+                settings.update(feature_flags)
+            
+            builder.with_settings(settings)
+            return builder.build()
+        
+        # Test different environments
+        dev_profile = build_profile_for_environment('development')
+        self.assertTrue(dev_profile['settings']['debug'])
+        self.assertEqual(dev_profile['settings']['logging_level'], 'DEBUG')
+        
+        staging_profile = build_profile_for_environment('staging')
+        self.assertFalse(staging_profile['settings']['debug'])
+        self.assertTrue(staging_profile['settings']['load_testing'])
+        
+        prod_profile = build_profile_for_environment('production')
+        self.assertTrue(prod_profile['settings']['security_hardening'])
+        self.assertEqual(prod_profile['settings']['logging_level'], 'WARNING')
+        
+        # Test with feature flags
+        feature_flags = {'experimental_feature': True, 'beta_api': True}
+        flagged_profile = build_profile_for_environment('production', feature_flags)
+        self.assertTrue(flagged_profile['settings']['experimental_feature'])
+        self.assertTrue(flagged_profile['settings']['beta_api'])
+    
+    def test_profile_builder_with_validation_integration(self):
+        """Test ProfileBuilder with integrated validation during building"""
+        def validated_builder():
+            """ProfileBuilder with integrated validation"""
+            class ValidatedProfileBuilder(ProfileBuilder):
+                def build(self):
+                    """Build and validate profile data"""
+                    profile_data = super().build()
+                    
+                    # Validate before returning
+                    if not ProfileValidator.validate_profile_data(profile_data):
+                        raise ValidationError("Built profile failed validation")
+                    
+                    return profile_data
+                
+                def with_validated_settings(self, settings):
+                    """Add settings with validation"""
+                    # Custom validation for settings
+                    if not isinstance(settings, dict):
+                        raise ValidationError("Settings must be a dictionary")
+                    
+                    # Check for required setting keys
+                    if 'model_type' not in settings:
+                        raise ValidationError("Settings must include 'model_type'")
+                    
+                    return self.with_settings(settings)
+            
+            return ValidatedProfileBuilder()
+        
+        # Test valid building
+        valid_profile = (validated_builder()
+                        .with_name('validated_profile')
+                        .with_version('1.0.0')
+                        .with_validated_settings({'model_type': 'gpt-4', 'temperature': 0.7})
+                        .build())
+        
+        self.assertEqual(valid_profile['name'], 'validated_profile')
+        self.assertEqual(valid_profile['settings']['model_type'], 'gpt-4')
+        
+        # Test invalid building - mis
