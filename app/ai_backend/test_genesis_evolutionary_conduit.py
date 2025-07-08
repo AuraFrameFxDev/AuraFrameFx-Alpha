@@ -1,6 +1,6 @@
 import pytest
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch, MagicMock, mock_open
 import sys
 import os
 from datetime import datetime
@@ -765,11 +765,6 @@ class TestEvolutionaryExceptions(unittest.TestCase):
         exception = PopulationEvolutionError("Population evolution failed")
         self.assertEqual(str(exception), "Population evolution failed")
         self.assertIsInstance(exception, EvolutionaryException)
-
-
-def mock_open(read_data=''):
-    """Mock open function for file operations."""
-    return MagicMock(spec=open)
 
 
 if __name__ == '__main__':

@@ -11,36 +11,27 @@ This test suite covers:
 
 import pytest
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 import sys
 import os
-from datetime import datetime, timedelta
-import json
-import tempfile
-import shutil
+from datetime import datetime
+from app.ai_backend.genesis_consciousness_matrix import (
+    ConsciousnessMatrix,
+    GenesisEngine,
+    NeuralPathway,
+    QuantumState,
+    EmergentBehavior,
+    ConsciousnessLevel,
+    MatrixError,
+    initialize_matrix,
+    process_consciousness_data,
+    calculate_emergence_factor,
+    quantum_entanglement_check,
+    neural_pathway_optimization
+)
 
 # Add the parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-try:
-    from app.ai_backend.genesis_consciousness_matrix import (
-        ConsciousnessMatrix,
-        GenesisEngine,
-        NeuralPathway,
-        QuantumState,
-        EmergentBehavior,
-        ConsciousnessLevel,
-        MatrixError,
-        initialize_matrix,
-        process_consciousness_data,
-        calculate_emergence_factor,
-        quantum_entanglement_check,
-        neural_pathway_optimization
-    )
-except ImportError as e:
-    # Fallback imports if the module structure is different
-    pytest.skip(f"Could not import required modules: {e}")
-
 
 class TestConsciousnessMatrix(unittest.TestCase):
     """Test cases for ConsciousnessMatrix class."""
@@ -83,10 +74,10 @@ class TestConsciousnessMatrix(unittest.TestCase):
         """Test matrix initialization with invalid parameters."""
         with self.assertRaises(ValueError):
             ConsciousnessMatrix(dimension=-1)
-        
+
         with self.assertRaises(ValueError):
             ConsciousnessMatrix(consciousness_level=-1.0)
-        
+
         with self.assertRaises(TypeError):
             ConsciousnessMatrix(dimension="invalid")
 
@@ -185,15 +176,15 @@ class TestConsciousnessMatrix(unittest.TestCase):
         # Configure matrix with specific state
         self.matrix.consciousness_level = 5.5
         self.matrix.quantum_state = 'entangled'
-        
+
         # Serialize
         serialized = self.matrix.serialize()
         self.assertIsInstance(serialized, dict)
-        
+
         # Create new matrix and deserialize
         new_matrix = ConsciousnessMatrix()
         new_matrix.deserialize(serialized)
-        
+
         self.assertEqual(new_matrix.consciousness_level, 5.5)
         self.assertEqual(new_matrix.quantum_state, 'entangled')
 
@@ -201,7 +192,7 @@ class TestConsciousnessMatrix(unittest.TestCase):
     def test_quantum_entanglement_with_mock(self, mock_quantum_service):
         """Test quantum entanglement with mocked external service."""
         mock_quantum_service.entangle.return_value = True
-        
+
         result = self.matrix.create_quantum_entanglement('target_matrix')
         self.assertTrue(result)
         mock_quantum_service.entangle.assert_called_once_with('target_matrix')
@@ -214,11 +205,11 @@ class TestConsciousnessMatrix(unittest.TestCase):
             'consciousness_level': 8.0,
             'emergence_factor': 0.7
         }
-        
+
         start_time = datetime.now()
         result = self.matrix.process_neural_data(large_data['neural_patterns'])
         end_time = datetime.now()
-        
+
         # Should complete within reasonable time
         self.assertLess((end_time - start_time).total_seconds(), 5.0)
         self.assertIsNotNone(result)
@@ -266,24 +257,24 @@ class TestGenesisEngine(unittest.TestCase):
         """Test engine start and stop operations."""
         self.engine.start()
         self.assertTrue(self.engine.is_running)
-        
+
         self.engine.stop()
         self.assertFalse(self.engine.is_running)
 
     def test_engine_concurrent_operations(self):
         """Test concurrent engine operations."""
         import threading
-        
+
         def create_matrices():
-            for i in range(10):
+            for _ in range(10):
                 self.engine.create_matrix(dimension=64)
-        
+
         threads = [threading.Thread(target=create_matrices) for _ in range(3)]
         for thread in threads:
             thread.start()
         for thread in threads:
             thread.join()
-        
+
         # Should handle concurrent operations safely
         self.assertGreater(len(self.engine.matrices), 0)
 
@@ -318,7 +309,7 @@ class TestNeuralPathway(unittest.TestCase):
         """Test pathway activation based on strength threshold."""
         self.pathway.strengthen(0.9)
         self.assertTrue(self.pathway.is_active)
-        
+
         self.pathway.weaken(0.7)
         self.assertFalse(self.pathway.is_active)
 
@@ -342,7 +333,7 @@ class TestQuantumState(unittest.TestCase):
             ('superposition', 'entangled'),
             ('entangled', 'collapsed')
         ]
-        
+
         for from_state, to_state in valid_transitions:
             self.quantum_state.state = from_state
             result = self.quantum_state.transition_to(to_state)
@@ -383,7 +374,7 @@ class TestModuleFunctions(unittest.TestCase):
             'quantum_states': ['superposition'],
             'timestamp': datetime.now().isoformat()
         }
-        
+
         result = process_consciousness_data(data)
         self.assertIsNotNone(result)
         self.assertIsInstance(result, dict)
@@ -392,7 +383,7 @@ class TestModuleFunctions(unittest.TestCase):
         """Test processing invalid consciousness data."""
         with self.assertRaises(ValueError):
             process_consciousness_data({})
-        
+
         with self.assertRaises(TypeError):
             process_consciousness_data("invalid")
 
@@ -409,11 +400,11 @@ class TestModuleFunctions(unittest.TestCase):
         # Empty data
         with self.assertRaises(ValueError):
             calculate_emergence_factor([])
-        
+
         # Single value
         factor = calculate_emergence_factor([0.5])
         self.assertEqual(factor, 0.5)
-        
+
         # All zeros
         factor = calculate_emergence_factor([0.0, 0.0, 0.0])
         self.assertEqual(factor, 0.0)
@@ -422,25 +413,25 @@ class TestModuleFunctions(unittest.TestCase):
         """Test successful quantum entanglement check."""
         matrix1 = ConsciousnessMatrix()
         matrix2 = ConsciousnessMatrix()
-        
+
         result = quantum_entanglement_check(matrix1, matrix2)
         self.assertIsInstance(result, bool)
 
     def test_quantum_entanglement_check_same_matrix(self):
         """Test quantum entanglement check with same matrix."""
         matrix = ConsciousnessMatrix()
-        
+
         with self.assertRaises(ValueError):
             quantum_entanglement_check(matrix, matrix)
 
     def test_neural_pathway_optimization(self):
         """Test neural pathway optimization."""
         pathways = [NeuralPathway() for _ in range(5)]
-        
+
         # Set different strengths
         for i, pathway in enumerate(pathways):
             pathway.strengthen(i * 0.2)
-        
+
         optimized = neural_pathway_optimization(pathways)
         self.assertIsInstance(optimized, list)
         self.assertEqual(len(optimized), len(pathways))
@@ -453,13 +444,13 @@ class TestErrorHandling(unittest.TestCase):
         """Test MatrixError creation and handling."""
         with self.assertRaises(MatrixError) as context:
             raise MatrixError("Test error message")
-        
+
         self.assertIn("Test error message", str(context.exception))
 
     def test_memory_management(self):
         """Test memory management with large datasets."""
         large_matrix = ConsciousnessMatrix(dimension=1000)
-        
+
         # Should not raise memory errors
         large_data = [0.5] * 10000
         result = large_matrix.process_neural_data(large_data)
@@ -468,23 +459,23 @@ class TestErrorHandling(unittest.TestCase):
     def test_thread_safety(self):
         """Test thread safety of matrix operations."""
         import threading
-        
+
         matrix = ConsciousnessMatrix()
         errors = []
-        
+
         def worker():
             try:
                 for _ in range(100):
                     matrix.process_neural_data([0.1, 0.5, 0.8])
             except Exception as e:
                 errors.append(e)
-        
+
         threads = [threading.Thread(target=worker) for _ in range(10)]
         for thread in threads:
             thread.start()
         for thread in threads:
             thread.join()
-        
+
         # Should complete without errors
         self.assertEqual(len(errors), 0)
 
@@ -497,15 +488,15 @@ class TestIntegrationScenarios(unittest.TestCase):
         # Initialize components
         engine = GenesisEngine()
         engine.start()
-        
+
         # Create matrix
         matrix_id = engine.create_matrix(dimension=128)
         matrix = engine.matrices[matrix_id]
-        
+
         # Process neural data
         neural_data = [0.1, 0.5, 0.8, 0.3, 0.7]
         result = matrix.process_neural_data(neural_data)
-        
+
         # Calculate consciousness level
         consciousness_data = {
             'neural_patterns': neural_data,
@@ -514,12 +505,12 @@ class TestIntegrationScenarios(unittest.TestCase):
             'emergence_factor': 0.5
         }
         level = matrix.calculate_consciousness_level(consciousness_data)
-        
+
         # Verify results
         self.assertIsNotNone(result)
         self.assertIsInstance(level, float)
         self.assertGreaterEqual(level, 0.0)
-        
+
         # Cleanup
         engine.destroy_matrix(matrix_id)
         engine.stop()
@@ -528,20 +519,20 @@ class TestIntegrationScenarios(unittest.TestCase):
         """Test interaction between multiple matrices."""
         engine = GenesisEngine()
         engine.start()
-        
+
         # Create multiple matrices
         matrix_ids = [
             engine.create_matrix(dimension=64),
             engine.create_matrix(dimension=64),
             engine.create_matrix(dimension=64)
         ]
-        
+
         matrices = [engine.matrices[mid] for mid in matrix_ids]
-        
+
         # Test quantum entanglement between matrices
         entangled = quantum_entanglement_check(matrices[0], matrices[1])
         self.assertIsInstance(entangled, bool)
-        
+
         # Cleanup
         for matrix_id in matrix_ids:
             engine.destroy_matrix(matrix_id)

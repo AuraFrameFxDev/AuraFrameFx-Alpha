@@ -1,6 +1,8 @@
 package dev.aurakai.auraframefx.ui.animation
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -43,14 +45,12 @@ class KineticIdentityIntegrationTest {
             }
         }
         
-        // Interact with first component
         composeTestRule.onNodeWithTag("kinetic1")
             .performTouchInput {
                 down(Offset(25f, 25f))
                 up()
             }
         
-        // Interact with second component
         composeTestRule.onNodeWithTag("kinetic2")
             .performTouchInput {
                 down(Offset(75f, 75f))
@@ -59,7 +59,6 @@ class KineticIdentityIntegrationTest {
         
         composeTestRule.waitForIdle()
         
-        // Verify independent behavior
         assertTrue("First component should capture events", positions1.isNotEmpty())
         assertTrue("Second component should capture events", positions2.isNotEmpty())
     }
@@ -72,6 +71,7 @@ class KineticIdentityIntegrationTest {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .testTag("scrollable-content")
             ) {
                 repeat(5) { index ->
@@ -86,7 +86,6 @@ class KineticIdentityIntegrationTest {
             }
         }
         
-        // Test interaction with components in scrollable content
         composeTestRule.onNodeWithTag("kinetic-2")
             .performTouchInput {
                 down(Offset(40f, 40f))
@@ -95,8 +94,10 @@ class KineticIdentityIntegrationTest {
         
         composeTestRule.waitForIdle()
         
-        assertTrue("Should maintain interactivity in scrollable content", 
-                  capturedPositions.isNotEmpty())
+        assertTrue(
+            "Should maintain interactivity in scrollable content",
+            capturedPositions.isNotEmpty()
+        )
     }
     
     @Test
@@ -105,7 +106,6 @@ class KineticIdentityIntegrationTest {
         val testTag = "performance-test"
         
         composeTestRule.setContent {
-            // Create multiple nested KineticIdentity components
             Box(modifier = Modifier.size(200.dp)) {
                 repeat(3) { i ->
                     KineticIdentity(
@@ -118,7 +118,6 @@ class KineticIdentityIntegrationTest {
             }
         }
         
-        // Perform intensive touch interactions
         repeat(3) { i ->
             composeTestRule.onNodeWithTag("$testTag-$i")
                 .performTouchInput {
@@ -131,10 +130,8 @@ class KineticIdentityIntegrationTest {
         
         composeTestRule.waitForIdle()
         
-        // Verify the system remained responsive
         assertTrue("Should handle intensive interactions", totalEvents > 0)
         
-        // Verify all components still exist and are functional
         repeat(3) { i ->
             composeTestRule.onNodeWithTag("$testTag-$i").assertExists()
         }

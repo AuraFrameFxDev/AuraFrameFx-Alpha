@@ -1,9 +1,10 @@
-import pytest
-import sys
 import os
+import sys
+
+import pytest
 
 # Add the app directory to the Python path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)))
 
 @pytest.fixture
 def sample_ethical_framework():

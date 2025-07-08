@@ -85,7 +85,45 @@ except ImportError:
 
 
 class TestEthicalGovernor(unittest.TestCase):
-    # ... (rest of the test code unchanged)
-    pass
+    def setUp(self):
+        self.framework = EthicalFramework("TestFramework", ["principle1", "principle2"])
+        self.policies = [GovernancePolicy("Policy1", {"rule": "value"})]
+        self.governor = EthicalGovernor(framework=self.framework, policies=self.policies)
+
+    def test_evaluate_decision_returns_expected_structure(self):
+        context = {"action": "test"}
+        result = self.governor.evaluate_decision(context)
+        self.assertIsInstance(result, dict)
+        self.assertIn("approved", result)
+        self.assertIn("risk_level", result)
+        self.assertIsInstance(result["approved"], bool)
+        self.assertIsInstance(result["risk_level"], str)
+
+    def test_apply_policy_returns_expected_structure(self):
+        context = {"user": "Alice"}
+        result = self.governor.apply_policy("Policy1", context)
+        self.assertIsInstance(result, dict)
+        self.assertIn("compliant", result)
+        self.assertIn("details", result)
+        self.assertIsInstance(result["compliant"], bool)
+        self.assertIsInstance(result["details"], str)
+
+    def test_log_violation_and_get_metrics(self):
+        metrics_before = self.governor.get_metrics()
+        self.assertEqual(metrics_before.get("violations"), 0)
+        violation = EthicalViolation("TestViolation", "Description", severity="high")
+        self.governor.log_violation(violation)
+        metrics_after = self.governor.get_metrics()
+        self.assertEqual(metrics_after.get("violations"), 1)
+
+    def test_decisions_and_get_metrics(self):
+        metrics_before = self.governor.get_metrics()
+        self.assertEqual(metrics_before.get("total_decisions"), 0)
+        decision1 = EthicalDecision(1, {"test": True}, outcome={"approved": True})
+        decision2 = EthicalDecision(2, {"test": False}, outcome={"approved": False})
+        self.governor.decisions.append(decision1)
+        self.governor.decisions.append(decision2)
+        metrics_after = self.governor.get_metrics()
+        self.assertEqual(metrics_after.get("total_decisions"), 2)
 
 # (Rest of the test classes unchanged for brevity)

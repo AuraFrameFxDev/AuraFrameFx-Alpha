@@ -1,4 +1,3 @@
-
 import pytest
 import json
 import tempfile
@@ -7,6 +6,8 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta
 import asyncio
 from typing import Dict, Any, List
+
+from app.ai_backend.genesis_core import GenesisCore
 
 class TestGenesisCore:
     """Comprehensive test suite for GenesisCore functionality"""
@@ -70,30 +71,30 @@ class TestGenesisCore:
     
     def test_validate_config_valid(self):
         """Test configuration validation with valid config"""
-        assert self.genesis_core.validate_config(self.sample_config) == True
+        assert self.genesis_core.validate_config(self.sample_config) is True
     
     def test_validate_config_missing_required_fields(self):
         """Test configuration validation with missing required fields"""
         invalid_config = {"temperature": 0.7}
-        assert self.genesis_core.validate_config(invalid_config) == False
+        assert self.genesis_core.validate_config(invalid_config) is False
     
     def test_validate_config_invalid_temperature(self):
         """Test configuration validation with invalid temperature"""
         invalid_config = self.sample_config.copy()
         invalid_config["temperature"] = 2.0  # Assuming max is 1.0
-        assert self.genesis_core.validate_config(invalid_config) == False
+        assert self.genesis_core.validate_config(invalid_config) is False
     
     def test_validate_config_negative_max_tokens(self):
         """Test configuration validation with negative max_tokens"""
         invalid_config = self.sample_config.copy()
         invalid_config["max_tokens"] = -100
-        assert self.genesis_core.validate_config(invalid_config) == False
+        assert self.genesis_core.validate_config(invalid_config) is False
     
     def test_validate_config_empty_api_key(self):
         """Test configuration validation with empty API key"""
         invalid_config = self.sample_config.copy()
         invalid_config["api_key"] = ""
-        assert self.genesis_core.validate_config(invalid_config) == False
+        assert self.genesis_core.validate_config(invalid_config) is False
     
     # Model Initialization Tests
     @patch('app.ai_backend.genesis_core.initialize_model')
@@ -372,16 +373,16 @@ class TestGenesisCore:
         valid_response = {"content": "Valid response", "status": "success"}
         invalid_response = {"error": "Invalid response"}
         
-        assert self.genesis_core.validate_response(valid_response) == True
-        assert self.genesis_core.validate_response(invalid_response) == False
+        assert self.genesis_core.validate_response(valid_response) is True
+        assert self.genesis_core.validate_response(invalid_response) is False
     
     def test_model_compatibility(self):
         """Test model compatibility checking"""
         compatible_model = {"version": "1.0", "type": "supported"}
         incompatible_model = {"version": "0.5", "type": "unsupported"}
         
-        assert self.genesis_core.check_model_compatibility(compatible_model) == True
-        assert self.genesis_core.check_model_compatibility(incompatible_model) == False
+        assert self.genesis_core.check_model_compatibility(compatible_model) is True
+        assert self.genesis_core.check_model_compatibility(incompatible_model) is False
 
 @pytest.fixture
 def genesis_core():
@@ -410,19 +411,19 @@ def mock_model():
 def test_temperature_values(genesis_core, temperature):
     """Test various temperature values"""
     config = {"temperature": temperature, "model_name": "test", "max_tokens": 100, "api_key": "key"}
-    assert genesis_core.validate_config(config) == True
+    assert genesis_core.validate_config(config) is True
 
 @pytest.mark.parametrize("max_tokens", [1, 100, 1000, 4000])
 def test_max_tokens_values(genesis_core, max_tokens):
     """Test various max_tokens values"""
     config = {"max_tokens": max_tokens, "model_name": "test", "temperature": 0.7, "api_key": "key"}
-    assert genesis_core.validate_config(config) == True
+    assert genesis_core.validate_config(config) is True
 
 @pytest.mark.parametrize("invalid_temp", [-1, 1.5, 2.0, "invalid"])
 def test_invalid_temperature_values(genesis_core, invalid_temp):
     """Test invalid temperature values"""
     config = {"temperature": invalid_temp, "model_name": "test", "max_tokens": 100, "api_key": "key"}
-    assert genesis_core.validate_config(config) == False
+    assert genesis_core.validate_config(config) is False
 
 @pytest.mark.parametrize("prompt", [
     "Simple prompt",
