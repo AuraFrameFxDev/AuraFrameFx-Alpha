@@ -47,7 +47,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Initializes the NeuralWhisper service by setting up text-to-speech and speech-to-text components.
      *
-     * This method prepares the service for audio processing and AI interaction. Additional initialization steps may be added in the future.
+     * Prepares the service for audio processing and AI interaction. Additional initialization steps may be added in the future.
      */
     fun initialize() {
         Log.d(TAG, "Initializing NeuralWhisper...")
@@ -57,10 +57,10 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initializes the TextToSpeech engine and updates the initialization state.
+     * Initializes the TextToSpeech engine and updates the initialization state flag.
      *
      * Attempts to create a TextToSpeech instance and sets the initialization flag based on the result.
-     * Language, voice, and other configuration are not yet implemented.
+     * Language, voice, pitch, and rate configuration are not yet implemented.
      */
     private fun initializeTts() {
         // TODO: Implement robust TTS initialization, including language availability checks.
@@ -105,7 +105,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Converts audio input to transcribed text using speech-to-text processing.
      *
-     * This is a placeholder implementation; actual speech recognition logic will be added in the future.
+     * This is a placeholder implementation; actual speech recognition logic is not yet implemented.
      *
      * @param audioInput The audio data or trigger for initiating speech recognition.
      * @return The transcribed text if successful, or null if speech recognition is not initialized.
@@ -161,7 +161,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Processes a transcribed voice command and returns a placeholder action.
      *
-     * Updates the conversation state to indicate processing. Intended for future implementation of natural language understanding and command-to-action mapping.
+     * Updates the conversation state to indicate processing. Intended for future implementation of natural language understanding and mapping commands to actions.
      *
      * @param command The transcribed voice command to process.
      * @return A placeholder object representing the result of processing the command.
@@ -182,9 +182,9 @@ class NeuralWhisper @Inject constructor(
     /**
      * Shares context information with the Kai agent or controller.
      *
-     * Updates the conversation state to reflect context sharing. Actual integration with the Kai agent is not implemented.
+     * Updates the conversation state to indicate context sharing. Actual integration with the Kai agent is not yet implemented.
      *
-     * @param contextText The context information to share.
+     * @param contextText The context information to be shared.
      */
     fun shareContextWithKai(contextText: String) {
         _conversationStateFlow.value = ConversationState.Processing("Sharing with Kai: $contextText")
@@ -195,6 +195,8 @@ class NeuralWhisper @Inject constructor(
 
     /**
      * Attempts to start audio recording for speech recognition.
+     *
+     * Updates the conversation state to `Recording`. The actual recording logic is not yet implemented.
      *
      * @return `true` if recording starts successfully; `false` if an error occurs.
      */
@@ -211,9 +213,11 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Stops the current audio recording session and returns a message indicating success or failure.
+     * Attempts to stop the current audio recording session and returns a status message.
      *
-     * @return A message describing the result of the stop operation.
+     * Updates the conversation state to indicate processing. The actual recording stop and processing logic are not yet implemented.
+     *
+     * @return A message indicating whether the recording was stopped successfully or describing the failure.
      */
     fun stopRecording(): String {
         return try {

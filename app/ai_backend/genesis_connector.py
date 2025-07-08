@@ -151,7 +151,7 @@ class GenesisBridgeServer:
         
     def start(self):
         """
-        Start the Genesis bridge server, enabling asynchronous processing of JSON requests from standard input.
+        Starts the Genesis bridge server, enabling asynchronous processing of JSON requests from standard input.
         
         Signals readiness to the client, launches a background thread for request handling, continuously reads and enqueues incoming JSON requests, manages invalid input, and supports graceful shutdown on keyboard interruption.
         """
@@ -180,9 +180,9 @@ class GenesisBridgeServer:
     
     def _process_requests(self):
         """
-        Continuously processes incoming requests from the queue in a background thread, routing each to the appropriate handler and sending the response to the client.
+        Continuously processes requests from the queue in a background thread, routing each to the appropriate handler and sending responses to the client.
         
-        Exceptions during request processing are caught and reported to maintain uninterrupted server operation.
+        Exceptions during processing are caught and reported to ensure the server remains responsive.
         """
         while self.running:
             try:
@@ -199,7 +199,7 @@ class GenesisBridgeServer:
     
     def _handle_request(self, request):
         """
-        Routes an incoming JSON request to the appropriate handler method based on its "requestType" and returns the handler's response.
+        Route an incoming JSON request to the appropriate handler based on its "requestType" field and return the handler's response.
         
         Parameters:
             request (dict): The JSON-decoded request containing a "requestType" and related fields.
@@ -256,10 +256,10 @@ class GenesisBridgeServer:
     
     def _handle_ping(self):
         """
-        Generate a response indicating the Genesis Trinity system is online, including status, message, and current timestamp.
+        Return a response confirming the Genesis Trinity system is online, including status, message, and current timestamp.
         
         Returns:
-            dict: A response with success status, persona identifier, operational message, and ISO-formatted timestamp.
+            dict: Contains success status, persona identifier, operational message, and ISO-formatted timestamp.
         """
         return {
             "success": True,
