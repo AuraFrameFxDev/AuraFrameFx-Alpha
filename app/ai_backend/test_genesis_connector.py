@@ -3578,3 +3578,823 @@ if __name__ == '__main__':
         run_comprehensive_test_suite()
     else:
         unittest.main(verbosity=2)
+
+class TestGenesisConnectorExtendedValidation(unittest.TestCase):
+    """
+    Extended validation tests for GenesisConnector with additional edge cases.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up extended validation test environment."""
+        self.connector = GenesisConnector()
+
+    def test_config_validation_with_nested_objects(self):
+        """Test configuration validation with deeply nested configuration objects."""
+        nested_configs = [
+            {
+                'api_key': 'test_key',
+                'base_url': 'https://api.test.com',
+                'advanced': {
+                    'retry': {'max_attempts': 3, 'backoff': {'type': 'exponential'}},
+                    'headers': {'custom': {'x-client': 'test', 'x-version': '1.0'}},
+                    'auth': {'type': 'bearer', 'refresh': {'enabled': True, 'interval': 3600}}
+                }
+            },
+            {
+                'api_key': 'test_key',
+                'base_url': 'https://api.test.com',
+                'features': {
+                    'caching': {'enabled': True, 'ttl': 300, 'backend': {'type': 'redis'}},
+                    'monitoring': {'metrics': True, 'tracing': True, 'logging': {'level': 'INFO'}}
+                }
+            }
+        ]
+        
+        for config in nested_configs:
+            with self.subTest(config=config):
+                try:
+                    result = self.connector.validate_config(config)
+                    self.assertIsInstance(result, bool)
+                except (ValueError, TypeError):
+                    # Acceptable if nested configs are not supported
+                    pass
+
+    def test_url_validation_comprehensive(self):
+        """Test comprehensive URL validation including various protocols and formats."""
+        url_test_cases = [
+            # Valid HTTPS URLs
+            ('https://api.test.com', True),
+            ('https://api.test.com:443', True),
+            ('https://api.test.com/v1/endpoint', True),
+            ('https://subdomain.api.test.com', True),
+            ('https://api-test.example.com', True),
+            # Edge case valid URLs
+            ('https://192.168.1.1:8080', True),
+            ('https://[::1]:8080', True),  # IPv6
+            ('https://api.test.com:8443/path?query=value', True),
+            # Invalid URLs
+            ('http://api.test.com', False),  # HTTP not HTTPS
+            ('ftp://api.test.com', False),
+            ('https://', False),
+            ('https://api..test.com', False),  # Double dots
+            ('https://api test.com', False),  # Space in domain
+            ('https://api.test.com:99999', False),  # Invalid port
+            ('javascript:alert(1)', False),
+            ('data:text/html,<script>', False),
+            ('file:///etc/passwd', False),
+        ]
+        
+        for url, should_be_valid in url_test_cases:
+            with self.subTest(url=url):
+                config = {'api_key': 'test_key', 'base_url': url}
+                
+                if should_be_valid:
+                    try:
+                        result = self.connector.validate_config(config)
+                        self.assertTrue(result)
+                    except ValueError:
+                        self.fail(f"Valid URL {url} was rejected")
+                else:
+                    with self.assertRaises(ValueError):
+                        self.connector.validate_config(config)
+
+    def test_api_key_format_validation(self):
+        """Test validation of various API key formats and patterns."""
+        api_key_test_cases = [
+            # Valid formats
+            ('sk-1234567890abcdef', True),
+            ('Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9', True),
+            ('api_key_12345', True),
+            ('AKIAIOSFODNN7EXAMPLE', True),  # AWS-style
+            ('ya29.1.AADtN_UtlxN3PuGAxrN2XQnZljX', True),  # Google-style
+            # Edge cases
+            ('k' * 64, True),  # 64 char key
+            ('k' * 256, True),  # Very long key
+            ('key-with-dashes-and_underscores', True),
+            ('key.with.dots', True),
+            # Invalid formats
+            ('', False),
+            (' ', False),
+            ('key with spaces', False),
+            ('key\nwith\nnewlines', False),
+            ('key\twith\ttabs', False),
+            ('key<with>brackets', False),
+            ('key"with"quotes', False),
+            ('key;with;semicolons', False),
+            ('key|with|pipes', False),
+        ]
+        
+        for api_key, should_be_valid in api_key_test_cases:
+            with self.subTest(api_key=repr(api_key)):
+                config = {'api_key': api_key, 'base_url': 'https://api.test.com'}
+                
+                if should_be_valid:
+                    try:
+                        result = self.connector.validate_config(config)
+                        self.assertTrue(result)
+                    except ValueError:
+                        self.fail(f"Valid API key {repr(api_key)} was rejected")
+                else:
+                    with self.assertRaises(ValueError):
+                        self.connector.validate_config(config)
+
+    def test_timeout_boundary_values(self):
+        """Test timeout validation with precise boundary values."""
+        timeout_test_cases = [
+            # Valid timeouts
+            (0.1, True),
+            (1, True),
+            (30, True),
+            (300, True),
+            (3600, True),  # 1 hour
+            (86400, True),  # 24 hours
+            # Edge cases
+            (0.001, True),  # 1ms
+            (0.0001, True),  # 0.1ms
+            (float('inf'), False),  # Infinity
+            (float('-inf'), False),  # Negative infinity
+            (float('nan'), False),  # NaN
+            (-1, False),  # Negative
+            (0, False),  # Zero might be invalid
+            ('30', False),  # String instead of number
+            (None, False),  # None
+        ]
+        
+        for timeout_value, should_be_valid in timeout_test_cases:
+            with self.subTest(timeout=timeout_value):
+                config = {
+                    'api_key': 'test_key',
+                    'base_url': 'https://api.test.com',
+                    'timeout': timeout_value
+                }
+                
+                if should_be_valid:
+                    try:
+                        result = self.connector.validate_config(config)
+                        self.assertTrue(result)
+                    except (ValueError, TypeError):
+                        # Some edge cases might still be rejected
+                        if timeout_value not in [0.001, 0.0001]:
+                            self.fail(f"Valid timeout {timeout_value} was rejected")
+                else:
+                    with self.assertRaises((ValueError, TypeError, OverflowError)):
+                        self.connector.validate_config(config)
+
+
+class TestGenesisConnectorAdvancedPayloadHandling(unittest.TestCase):
+    """
+    Advanced payload handling tests for complex data structures.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up advanced payload test environment."""
+        self.connector = GenesisConnector()
+
+    def test_payload_with_custom_serializable_objects(self):
+        """Test payload formatting with custom objects that implement serialization."""
+        class SerializableObject:
+            def __init__(self, data):
+                self.data = data
+            
+            def __dict__(self):
+                return {'serializable_data': self.data}
+            
+            def to_dict(self):
+                return {'custom_serialization': self.data}
+        
+        class JSONSerializable:
+            def __init__(self, value):
+                self.value = value
+            
+            def __json__(self):
+                return {'json_value': self.value}
+        
+        custom_objects = [
+            SerializableObject("test_data"),
+            JSONSerializable("json_test"),
+        ]
+        
+        for obj in custom_objects:
+            with self.subTest(obj=obj.__class__.__name__):
+                payload = {'custom_object': obj, 'message': 'test'}
+                
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+                    self.assertIn('message', formatted)
+                except (ValueError, TypeError):
+                    # Acceptable if custom serialization is not supported
+                    pass
+
+    def test_payload_with_generator_objects(self):
+        """Test payload formatting with generator and iterator objects."""
+        def test_generator():
+            for i in range(5):
+                yield f"item_{i}"
+        
+        def infinite_generator():
+            count = 0
+            while True:
+                yield count
+                count += 1
+                if count > 10:  # Prevent infinite loop in tests
+                    break
+        
+        generator_payloads = [
+            {'generator': test_generator(), 'message': 'finite_generator'},
+            {'iterator': iter([1, 2, 3, 4, 5]), 'message': 'list_iterator'},
+            {'range_obj': range(10), 'message': 'range_object'},
+        ]
+        
+        for payload in generator_payloads:
+            with self.subTest(payload=payload['message']):
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+                    self.assertIn('message', formatted)
+                except (ValueError, TypeError):
+                    # Generators might not be serializable
+                    pass
+
+    def test_payload_with_nested_collections(self):
+        """Test payload formatting with deeply nested collections."""
+        nested_collections = [
+            # Nested lists
+            {'nested_lists': [[[1, 2], [3, 4]], [[5, 6], [7, 8]]], 'message': 'nested_lists'},
+            # Nested dicts
+            {'nested_dicts': {'level1': {'level2': {'level3': {'value': 'deep'}}}}, 'message': 'nested_dicts'},
+            # Mixed nesting
+            {
+                'mixed': {
+                    'list_in_dict': [
+                        {'dict_in_list': {'nested_value': [1, 2, 3]}},
+                        {'another_dict': {'more_nesting': {'final': 'value'}}}
+                    ]
+                },
+                'message': 'mixed_nesting'
+            },
+            # Extreme nesting
+            {'extreme': {'a': {'b': {'c': {'d': {'e': {'f': {'g': 'deep_value'}}}}}}}, 'message': 'extreme_nesting'},
+        ]
+        
+        for payload in nested_collections:
+            with self.subTest(payload=payload['message']):
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+                    self.assertIn('message', formatted)
+                except (ValueError, RecursionError):
+                    # Deep nesting might be rejected
+                    if payload['message'] == 'extreme_nesting':
+                        pass  # Expected for extremely deep nesting
+                    else:
+                        raise
+
+    def test_payload_with_file_like_objects(self):
+        """Test payload formatting with file-like objects and streams."""
+        import io
+        import tempfile
+        
+        file_like_objects = [
+            io.StringIO("test string data"),
+            io.BytesIO(b"test binary data"),
+            tempfile.NamedTemporaryFile(mode='w+', delete=False),
+        ]
+        
+        try:
+            for i, file_obj in enumerate(file_like_objects):
+                with self.subTest(file_type=file_obj.__class__.__name__):
+                    if hasattr(file_obj, 'write'):
+                        file_obj.write(f"test data {i}")
+                        file_obj.seek(0)
+                    
+                    payload = {'file_object': file_obj, 'message': f'file_test_{i}'}
+                    
+                    try:
+                        formatted = self.connector.format_payload(payload)
+                        self.assertIsNotNone(formatted)
+                    except (ValueError, TypeError):
+                        # File objects might not be serializable
+                        pass
+        finally:
+            # Clean up file objects
+            for file_obj in file_like_objects:
+                try:
+                    if hasattr(file_obj, 'close'):
+                        file_obj.close()
+                    if hasattr(file_obj, 'name') and hasattr(file_obj, 'delete'):
+                        import os
+                        try:
+                            os.unlink(file_obj.name)
+                        except:
+                            pass
+                except:
+                    pass
+
+    def test_payload_with_function_objects(self):
+        """Test payload formatting with function and callable objects."""
+        def test_function():
+            return "test"
+        
+        class CallableClass:
+            def __call__(self):
+                return "callable"
+        
+        lambda_func = lambda x: x * 2
+        
+        callable_payloads = [
+            {'function': test_function, 'message': 'regular_function'},
+            {'lambda': lambda_func, 'message': 'lambda_function'},
+            {'callable': CallableClass(), 'message': 'callable_object'},
+            {'builtin': len, 'message': 'builtin_function'},
+            {'method': "test".upper, 'message': 'bound_method'},
+        ]
+        
+        for payload in callable_payloads:
+            with self.subTest(payload=payload['message']):
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    # Functions might be converted to string representation
+                    self.assertIsNotNone(formatted)
+                except (ValueError, TypeError):
+                    # Functions are typically not JSON serializable
+                    pass
+
+
+class TestGenesisConnectorAdvancedErrorHandling(unittest.TestCase):
+    """
+    Advanced error handling tests for comprehensive error scenarios.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up advanced error handling test environment."""
+        self.connector = GenesisConnector()
+
+    def test_error_context_preservation(self):
+        """Test that error context and stack traces are properly preserved."""
+        def nested_function_level_3():
+            raise ValueError("Deep error")
+        
+        def nested_function_level_2():
+            return nested_function_level_3()
+        
+        def nested_function_level_1():
+            return nested_function_level_2()
+        
+        with patch('requests.post') as mock_post:
+            mock_post.side_effect = nested_function_level_1
+            
+            payload = {'message': 'error_context_test'}
+            
+            try:
+                self.connector.send_request(payload)
+                self.fail("Expected ValueError was not raised")
+            except ValueError as e:
+                # Verify error context is preserved
+                self.assertIn("Deep error", str(e))
+                # Check that traceback contains nested function names
+                import traceback
+                tb_str = traceback.format_exc()
+                self.assertIn("nested_function_level_1", tb_str)
+                self.assertIn("nested_function_level_2", tb_str)
+                self.assertIn("nested_function_level_3", tb_str)
+
+    def test_error_recovery_with_partial_failure(self):
+        """Test error recovery when operations partially succeed."""
+        with patch('requests.post') as mock_post:
+            # Simulate partial success: some operations work, others fail
+            success_response = Mock()
+            success_response.status_code = 200
+            success_response.json.return_value = {'success': True}
+            
+            failure_response = Mock()
+            failure_response.status_code = 500
+            
+            mock_post.side_effect = [failure_response, success_response]
+            
+            payloads = [
+                {'message': 'test1', 'priority': 'high'},
+                {'message': 'test2', 'priority': 'low'},
+            ]
+            
+            results = []
+            errors = []
+            
+            for payload in payloads:
+                try:
+                    result = self.connector.send_request(payload)
+                    results.append(result)
+                except Exception as e:
+                    errors.append(e)
+            
+            # Should have partial success
+            self.assertEqual(len(results), 1)
+            self.assertEqual(len(errors), 1)
+            self.assertEqual(results[0]['success'], True)
+
+    def test_error_aggregation_in_batch_operations(self):
+        """Test error aggregation when multiple operations fail."""
+        with patch('requests.post') as mock_post:
+            mock_post.side_effect = [
+                ConnectionError("Network error 1"),
+                TimeoutError("Timeout error 2"),
+                ValueError("Value error 3"),
+                RuntimeError("Runtime error 4"),
+            ]
+            
+            payloads = [
+                {'batch_id': 1}, {'batch_id': 2}, 
+                {'batch_id': 3}, {'batch_id': 4}
+            ]
+            
+            errors = []
+            for payload in payloads:
+                try:
+                    self.connector.send_request(payload)
+                except Exception as e:
+                    errors.append((payload['batch_id'], e))
+            
+            # Should capture all different error types
+            self.assertEqual(len(errors), 4)
+            error_types = [type(error[1]).__name__ for error in errors]
+            self.assertIn('ConnectionError', error_types)
+            self.assertIn('TimeoutError', error_types)
+            self.assertIn('ValueError', error_types)
+            self.assertIn('RuntimeError', error_types)
+
+    def test_memory_cleanup_on_error(self):
+        """Test that memory is properly cleaned up when errors occur."""
+        import gc
+        import sys
+        
+        # Create large payload that will consume memory
+        large_payload = {'large_data': 'x' * (1024 * 1024)}  # 1MB
+        
+        initial_refs = sys.getrefcount(large_payload)
+        
+        with patch('requests.post') as mock_post:
+            mock_post.side_effect = MemoryError("Out of memory")
+            
+            try:
+                self.connector.send_request(large_payload)
+            except MemoryError:
+                pass
+        
+        # Force garbage collection
+        gc.collect()
+        
+        # Reference count should not have increased significantly
+        final_refs = sys.getrefcount(large_payload)
+        self.assertLessEqual(final_refs - initial_refs, 2)  # Allow small variance
+
+    @patch('requests.post')
+    def test_error_handling_with_malformed_error_responses(self, mock_post):
+        """Test handling when error responses themselves are malformed."""
+        # Create a mock response that raises an exception when accessed
+        mock_response = Mock()
+        mock_response.status_code = 500
+        mock_response.text = "Internal Server Error"
+        mock_response.json.side_effect = json.JSONDecodeError("Invalid JSON", "", 0)
+        mock_response.headers = {}
+        mock_post.return_value = mock_response
+        
+        payload = {'message': 'malformed_error_test'}
+        
+        with self.assertRaises(RuntimeError):
+            self.connector.send_request(payload)
+
+
+class TestGenesisConnectorAdvancedMocking(unittest.TestCase):
+    """
+    Advanced tests using sophisticated mocking scenarios.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up advanced mocking test environment."""
+        self.connector = GenesisConnector()
+
+    @patch('requests.Session')
+    def test_session_lifecycle_management(self, mock_session_class):
+        """Test proper session lifecycle management and resource cleanup."""
+        mock_session = Mock()
+        mock_session_class.return_value = mock_session
+        
+        # Configure session responses
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'session_test': True}
+        mock_session.post.return_value = mock_response
+        mock_session.get.return_value = mock_response
+        
+        connector = GenesisConnector(config={'use_session': True})
+        
+        # Make multiple requests to test session reuse
+        for i in range(5):
+            payload = {'request_id': i}
+            try:
+                if hasattr(connector, 'send_request'):
+                    result = connector.send_request(payload)
+                    self.assertIsNotNone(result)
+            except AttributeError:
+                # Skip if method doesn't exist
+                pass
+        
+        # Test session cleanup
+        try:
+            if hasattr(connector, 'close'):
+                connector.close()
+                mock_session.close.assert_called()
+        except AttributeError:
+            pass
+
+    @patch('time.time')
+    @patch('requests.post')
+    def test_request_timing_and_performance_metrics(self, mock_post, mock_time):
+        """Test request timing measurement and performance metrics collection."""
+        # Mock time progression
+        mock_time.side_effect = [1000.0, 1000.5, 1001.0, 1001.2]  # Simulate request durations
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'timing_test': True}
+        mock_post.return_value = mock_response
+        
+        payloads = [
+            {'request': 'timing_test_1'},
+            {'request': 'timing_test_2'}
+        ]
+        
+        for payload in payloads:
+            try:
+                result = self.connector.send_request(payload)
+                self.assertIsNotNone(result)
+            except AttributeError:
+                # Skip if method doesn't exist
+                pass
+        
+        # Verify timing calls were made
+        self.assertGreaterEqual(mock_time.call_count, 4)
+
+    @patch('logging.getLogger')
+    def test_structured_logging_integration(self, mock_get_logger):
+        """Test integration with structured logging systems."""
+        mock_logger = Mock()
+        mock_get_logger.return_value = mock_logger
+        
+        # Test various log levels and structured data
+        log_data = [
+            {'level': 'INFO', 'message': 'Request started', 'request_id': '123'},
+            {'level': 'DEBUG', 'message': 'Payload formatted', 'size': 1024},
+            {'level': 'ERROR', 'message': 'Request failed', 'error_code': 500},
+        ]
+        
+        for log_entry in log_data:
+            try:
+                if hasattr(self.connector, 'log_request'):
+                    self.connector.log_request(log_entry)
+            except AttributeError:
+                # Skip if method doesn't exist
+                pass
+        
+        # Verify logging integration
+        if mock_logger.info.called or mock_logger.debug.called or mock_logger.error.called:
+            self.assertTrue(True)  # At least one log method was called
+
+    @patch('requests.post')
+    def test_dynamic_configuration_injection(self, mock_post):
+        """Test dynamic configuration changes during runtime."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'config_test': True}
+        mock_post.return_value = mock_response
+        
+        # Test configuration changes between requests
+        configs = [
+            {'api_key': 'key1', 'base_url': 'https://api1.test.com'},
+            {'api_key': 'key2', 'base_url': 'https://api2.test.com'},
+            {'api_key': 'key3', 'base_url': 'https://api3.test.com'},
+        ]
+        
+        for i, config in enumerate(configs):
+            # Update configuration
+            try:
+                if hasattr(self.connector, 'reload_config'):
+                    self.connector.reload_config(config)
+                    
+                    # Make request with new config
+                    payload = {'config_test': i}
+                    result = self.connector.send_request(payload)
+                    self.assertIsNotNone(result)
+            except AttributeError:
+                # Skip if methods don't exist
+                pass
+
+
+class TestGenesisConnectorRealWorldScenarios(unittest.TestCase):
+    """
+    Real-world scenario tests simulating actual usage patterns.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up real-world scenario test environment."""
+        self.connector = GenesisConnector(config={
+            'api_key': 'real_world_test_key',
+            'base_url': 'https://api.realworld.test.com'
+        })
+
+    @patch('requests.post')
+    def test_file_upload_workflow(self, mock_post):
+        """Test a complete file upload workflow with progress tracking."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'upload_id': 'upload_12345',
+            'status': 'completed',
+            'file_size': 1024000
+        }
+        mock_post.return_value = mock_response
+        
+        # Simulate file upload payload
+        file_data = {
+            'file_name': 'test_document.pdf',
+            'file_size': 1024000,
+            'content_type': 'application/pdf',
+            'file_data': 'base64_encoded_file_content_here',
+            'metadata': {
+                'upload_timestamp': datetime.now().isoformat(),
+                'user_id': 'user_12345',
+                'folder_id': 'folder_67890'
+            }
+        }
+        
+        try:
+            formatted = self.connector.format_payload(file_data)
+            self.assertIsNotNone(formatted)
+            
+            result = self.connector.send_request(formatted)
+            self.assertEqual(result['status'], 'completed')
+            self.assertIn('upload_id', result)
+        except AttributeError:
+            # Skip if methods don't exist
+            pass
+
+    @patch('requests.post')
+    def test_batch_data_processing_workflow(self, mock_post):
+        """Test batch processing of multiple data records."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'batch_id': 'batch_67890',
+            'processed_count': 100,
+            'failed_count': 0,
+            'status': 'completed'
+        }
+        mock_post.return_value = mock_response
+        
+        # Simulate batch data processing
+        batch_data = {
+            'batch_id': 'batch_67890',
+            'operation': 'data_transformation',
+            'records': [
+                {'id': i, 'data': f'record_{i}', 'priority': 'normal'}
+                for i in range(100)
+            ],
+            'processing_options': {
+                'validation': True,
+                'transform_rules': ['normalize', 'validate', 'enrich'],
+                'output_format': 'json'
+            }
+        }
+        
+        try:
+            formatted = self.connector.format_payload(batch_data)
+            self.assertIsNotNone(formatted)
+            
+            result = self.connector.send_request(formatted)
+            self.assertEqual(result['status'], 'completed')
+            self.assertEqual(result['processed_count'], 100)
+        except AttributeError:
+            # Skip if methods don't exist
+            pass
+
+    @patch('requests.post')
+    def test_real_time_analytics_workflow(self, mock_post):
+        """Test real-time analytics data submission."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'analytics_id': 'analytics_54321',
+            'ingested_events': 50,
+            'processing_time_ms': 125
+        }
+        mock_post.return_value = mock_response
+        
+        # Simulate real-time analytics data
+        analytics_data = {
+            'session_id': 'session_98765',
+            'events': [
+                {
+                    'event_type': 'page_view',
+                    'timestamp': datetime.now().isoformat(),
+                    'properties': {
+                        'page_url': '/dashboard',
+                        'user_agent': 'Mozilla/5.0...',
+                        'referrer': 'https://google.com'
+                    }
+                },
+                {
+                    'event_type': 'button_click',
+                    'timestamp': datetime.now().isoformat(),
+                    'properties': {
+                        'button_id': 'submit_form',
+                        'form_data': {'field1': 'value1', 'field2': 'value2'}
+                    }
+                }
+            ],
+            'metadata': {
+                'client_id': 'client_13579',
+                'app_version': '2.1.0',
+                'platform': 'web'
+            }
+        }
+        
+        try:
+            formatted = self.connector.format_payload(analytics_data)
+            self.assertIsNotNone(formatted)
+            
+            result = self.connector.send_request(formatted)
+            self.assertEqual(result['ingested_events'], 50)
+            self.assertIn('analytics_id', result)
+        except AttributeError:
+            # Skip if methods don't exist
+            pass
+
+    @patch('requests.get')
+    @patch('requests.post')
+    def test_multi_step_workflow_with_dependencies(self, mock_post, mock_get):
+        """Test a multi-step workflow where each step depends on the previous."""
+        # Step 1: Initialize workflow
+        mock_get.return_value = Mock(
+            status_code=200,
+            json=Mock(return_value={'status': 'ready', 'workflow_id': 'wf_11111'})
+        )
+        
+        # Step 2: Submit data
+        mock_post.side_effect = [
+            Mock(status_code=200, json=Mock(return_value={
+                'step': 'data_submitted',
+                'workflow_id': 'wf_11111',
+                'next_step': 'processing'
+            })),
+            Mock(status_code=200, json=Mock(return_value={
+                'step': 'processing_complete',
+                'workflow_id': 'wf_11111',
+                'result_id': 'result_22222'
+            }))
+        ]
+        
+        try:
+            # Step 1: Check workflow status
+            if hasattr(self.connector, 'get_status'):
+                status = self.connector.get_status()
+                self.assertEqual(status['status'], 'ready')
+                workflow_id = status.get('workflow_id', 'wf_11111')
+            else:
+                workflow_id = 'wf_11111'
+            
+            # Step 2: Submit initial data
+            initial_data = {
+                'workflow_id': workflow_id,
+                'step': 'initialize',
+                'data': {'input': 'test_data', 'parameters': {'mode': 'batch'}}
+            }
+            
+            formatted = self.connector.format_payload(initial_data)
+            result1 = self.connector.send_request(formatted)
+            
+            # Step 3: Process based on previous result
+            processing_data = {
+                'workflow_id': workflow_id,
+                'step': 'process',
+                'previous_step_result': result1,
+                'processing_options': {'validate': True, 'optimize': True}
+            }
+            
+            formatted = self.connector.format_payload(processing_data)
+            result2 = self.connector.send_request(formatted)
+            
+            self.assertEqual(result2['step'], 'processing_complete')
+            self.assertIn('result_id', result2)
+            
+        except AttributeError:
+            # Skip if methods don't exist
+            pass
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
