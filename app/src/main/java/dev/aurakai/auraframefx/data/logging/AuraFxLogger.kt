@@ -245,16 +245,21 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Shuts down the logger by cancelling all ongoing logging and maintenance coroutines.
+     * Cancels all ongoing logging and maintenance operations, stopping the logger.
      *
-     * After calling this method, no further log entries will be processed or written.
+     * After this method is called, no further log entries will be processed or written.
      */
     fun shutdown() {
         Log.d(TAG, "AuraFxLogger shutting down loggerScope.")
         loggerScope.cancel()
     }
 
-    // Additional methods needed by DiagnosticsViewModel
+    /**
+     * Retrieves the log entries for a specific date.
+     *
+     * @param date The date in `yyyyMMdd` format for which to retrieve logs.
+     * @return A list of log lines for the specified date, or an empty list if the log file does not exist or an error occurs.
+     */
     suspend fun getLogsForDate(date: String): List<String> {
         return try {
             val logFileName = "${LOG_FILENAME_PREFIX}${date}.txt"
@@ -266,10 +271,20 @@ class AuraFxLogger @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves all available log files and their contents.
+     *
+     * @return A map where each key is a log filename and each value is the file's content, with the newest files first.
+     */
     suspend fun getAllLogs(): Map<String, String> {
         return readAllLogs()
     }
 
+    /**
+     * Deletes all log files in the internal logs directory that match the log filename prefix.
+     *
+     * Any exceptions encountered during deletion are logged as errors.
+     */
     suspend fun clearAllLogs() {
         try {
             val logsDir = File(context.filesDir, LOG_DIR)
@@ -285,7 +300,14 @@ class AuraFxLogger @Inject constructor(
         }
     }
 
-    // Internal file operation methods using injected context
+    /**
+     * Writes content to a file in the app's internal storage, creating parent directories if needed.
+     *
+     * @param filePath Relative path to the file within internal storage.
+     * @param content The text content to write.
+     * @param append If true, appends to the file; otherwise, overwrites it.
+     * @return True if the write operation succeeds, false otherwise.
+     */
     private fun writeToFileInternal(filePath: String, content: String, append: Boolean): Boolean {
         return try {
             val fullPath = File(context.filesDir, filePath)

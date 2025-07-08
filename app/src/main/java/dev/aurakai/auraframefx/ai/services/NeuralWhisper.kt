@@ -88,10 +88,12 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Converts speech from audio input into text.
-     * Placeholder - actual implementation will involve starting STT and receiving results via a listener.
-     * @param audioInput Raw audio data or a trigger to start listening.
-     * @return A String containing the transcribed text, or null if an error occurs.
+     * Converts audio input into transcribed text using speech-to-text processing.
+     *
+     * Updates the conversation state to reflect listening and processing stages. Returns a placeholder transcription string, or null if speech recognition is not initialized.
+     *
+     * @param audioInput The audio data or trigger for speech recognition.
+     * @return The transcribed text, or null if speech recognition is unavailable.
      */
     suspend fun speechToText(audioInput: Any /* Placeholder type */): String? {
         // TODO: Implement actual STT logic.
@@ -116,13 +118,13 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initiates text-to-speech synthesis for the provided text using the specified locale.
+     * Initiates text-to-speech synthesis for the given text in the specified locale.
      *
      * Updates the conversation state to indicate speaking. Returns `false` if the TTS engine is not initialized; otherwise, returns `true` as a placeholder.
      *
-     * @param text The text to be synthesized into speech.
-     * @param locale The locale for speech synthesis (defaults to US English).
-     * @return `true` if the request to synthesize speech is accepted (placeholder), or `false` if TTS is not initialized.
+     * @param text The text to synthesize into speech.
+     * @param locale The locale to use for speech synthesis (defaults to US English).
+     * @return `true` if the synthesis request is accepted (placeholder), or `false` if TTS is not initialized.
      */
     fun textToSpeech(text: String, locale: Locale = Locale.US): Boolean {
         // TODO: Implement actual TTS logic.
@@ -145,12 +147,12 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Processes a transcribed voice command and returns a placeholder action or response.
+     * Processes a transcribed voice command and returns a placeholder response.
      *
-     * Updates the conversation state to indicate that the command is being processed. Intended for future implementation of natural language understanding (NLU) and command-to-action mapping.
+     * Updates the conversation state to indicate processing of the command. Intended for future implementation of natural language understanding and command-to-action mapping.
      *
      * @param command The transcribed voice command to process.
-     * @return A placeholder action or response representing the result of command processing.
+     * @return A placeholder response representing the result of command processing.
      */
     fun processVoiceCommand(command: String): Any { // Placeholder return type
         // TODO: Implement NLU and command mapping.
@@ -166,11 +168,11 @@ class NeuralWhisper @Inject constructor(
 
 
     /**
-     * Shares the provided context information with the Kai agent or controller.
+     * Updates the conversation state to indicate that context information is being shared with the Kai agent.
      *
-     * Updates the conversation state to reflect that context is being shared. Actual communication with the Kai agent is not implemented.
+     * The actual communication with the Kai agent is not implemented; only the state is updated and the action is logged.
      *
-     * @param contextText The context information to be shared.
+     * @param contextText The context information to share.
      */
     fun shareContextWithKai(contextText: String) {
         _conversationStateFlow.value =
@@ -219,7 +221,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Releases all resources used by the NeuralWhisper service and resets its state to idle.
      *
-     * Stops and shuts down the text-to-speech engine, destroys the speech recognizer, clears their initialization flags, and sets the conversation state to idle.
+     * Stops and shuts down the text-to-speech engine, destroys the speech recognizer, clears their initialization flags, and updates the conversation state to idle.
      */
     fun cleanup() {
         Log.d(TAG, "Cleaning up NeuralWhisper resources.")
