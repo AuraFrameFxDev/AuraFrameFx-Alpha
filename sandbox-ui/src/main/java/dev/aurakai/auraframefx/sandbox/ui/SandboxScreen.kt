@@ -16,6 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel // Added import for viewModel
+import dev.aurakai.auraframefx.ui.components.DigitalLandscapeBackground
+import dev.aurakai.auraframefx.ui.components.HaloView
+import dev.aurakai.auraframefx.viewmodel.GenesisAgentViewModel
+import dev.aurakai.auraframefx.ui.animation.digitalPixelEffect // Added import
 
 /**
  * Aura's Creative Sandbox 🎨
@@ -72,11 +77,12 @@ fun SandboxScreen() {
                 colors = CardDefaults.cardColors(containerColor = Color.Black)
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // TODO: Add CyberpunkBackgrounds when available
+                    DigitalLandscapeBackground(modifier = Modifier.fillMaxSize()) // Used DigitalLandscapeBackground
                     Text(
-                        text = "🌌 Cyberpunk Background Placeholder",
-                        color = Color.White,
-                        modifier = Modifier.align(Alignment.Center)
+                        text = "Digital Landscape Background", // Updated text
+                        color = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.align(Alignment.Center).padding(8.dp)
+                            .background(Color.Black.copy(alpha = 0.5f)) // Added background for text readability
                     )
                 }
             }
@@ -95,12 +101,7 @@ fun SandboxScreen() {
                         modifier = Modifier.size(80.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Card(
-                            modifier = Modifier.size(60.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFE94560))
-                        ) {
-                            Box(modifier = Modifier.fillMaxSize())
-                        }
+                        PlaceholderAuraOrb() // Used PlaceholderAuraOrb
                     }
                     Text(
                         text = "Aura Orb",
@@ -115,13 +116,7 @@ fun SandboxScreen() {
                         modifier = Modifier.size(80.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        // TODO: Add HaloView when available
-                        Card(
-                            modifier = Modifier.size(60.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFF00F5FF))
-                        ) {
-                            Box(modifier = Modifier.fillMaxSize())
-                        }
+                        HaloView(viewModel = viewModel<GenesisAgentViewModel>()) // Used HaloView
                     }
                     Text(
                         text = "Halo View",
@@ -157,16 +152,16 @@ fun SandboxScreen() {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(150.dp),
+                            .height(150.dp)
+                            .digitalPixelEffect(visible = true), // Applied digitalPixelEffect
                         colors = CardDefaults.cardColors(containerColor = Color.Black)
                     ) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            // TODO: Add DigitalTransitions when available
                             Text(
-                                text = "✨ Digital Materialization Placeholder ✨",
+                                text = "✨ Digital Pixel Effect Applied ✨", // Updated text
                                 color = Color(0xFF00F5FF),
                                 fontWeight = FontWeight.Bold
                             )
@@ -232,6 +227,23 @@ fun SandboxScreen() {
                 color = Color.White.copy(alpha = 0.8f),
                 fontSize = 14.sp
             )
+        }
+    }
+}
+
+@Composable
+fun PlaceholderAuraOrb() {
+    Card(
+        modifier = Modifier.size(60.dp),
+        shape = CircleShape, // Make it circular
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFE94560).copy(alpha = 0.7f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Orb", fontSize = 10.sp, color = Color.White)
         }
     }
 }

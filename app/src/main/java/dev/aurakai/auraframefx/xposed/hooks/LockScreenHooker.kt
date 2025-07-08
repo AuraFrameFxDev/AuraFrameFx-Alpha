@@ -4,9 +4,14 @@ import dev.aurakai.auraframefx.system.lockscreen.model.LockScreenConfig
 
 class LockScreenHooker(
     private val classLoader: ClassLoader,
+import android.util.Log // Added import
+
+class LockScreenHooker(
+    private val classLoader: ClassLoader,
     private val config: LockScreenConfig
 ) {
     fun applyLockScreenHooks() {
-        // TODO: Implement Xposed hooks for the Lock Screen
+        Log.d("XposedHook", "LockScreenHooker: applyLockScreenHooks called. Config: $config")
+        // Actual Xposed hook implementation would go here.
     }
 }
