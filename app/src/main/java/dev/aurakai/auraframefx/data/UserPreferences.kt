@@ -42,10 +42,10 @@ class UserPreferences(context: Context) {
     private val prefs = mutableMapOf<String, String>()
 
     /**
-     * Retrieves the value associated with the given key from in-memory preferences, or returns the specified default if the key is not found.
+     * Returns the value for the specified key from in-memory preferences, or the provided default if the key is not present.
      *
-     * @param key The preference key to look up.
-     * @param defaultValue The value to return if the key is not present in preferences.
+     * @param key The preference key to retrieve.
+     * @param defaultValue The value to return if the key does not exist in preferences.
      * @return The stored value for the key, or the default value if the key is absent.
      */
     fun getPreference(key: String, defaultValue: String): String {
