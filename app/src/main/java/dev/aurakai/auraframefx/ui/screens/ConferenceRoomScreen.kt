@@ -139,6 +139,15 @@ fun ConferenceRoomScreen() {
     }
 }
 
+/**
+ * Displays a selectable button representing an agent.
+ *
+ * The button's appearance changes based on selection state. Clicking the button triggers the provided action.
+ *
+ * @param agent The name of the agent to display.
+ * @param isSelected Whether this agent is currently selected.
+ * @param onClick Called when the button is clicked.
+ */
 @Composable
 fun AgentButton(
     agent: String,
@@ -166,10 +175,10 @@ fun AgentButton(
 }
 
 /**
- * Displays a button for toggling the recording state with an appropriate icon and color.
+ * Renders a button that toggles the recording state, displaying a stop icon when recording and a record icon otherwise.
  *
- * @param isRecording Whether recording is currently active.
- * @param onClick Called when the button is pressed to toggle recording.
+ * @param isRecording Indicates whether recording is currently active.
+ * @param onClick Invoked when the button is pressed to toggle the recording state.
  */
 @Composable
 fun RecordingButton(
@@ -193,6 +202,12 @@ fun RecordingButton(
     }
 }
 
+/**
+ * Displays a button for toggling transcription state with an icon and color indicating the current status.
+ *
+ * @param isTranscribing Whether transcription is currently active.
+ * @param onClick Called when the button is pressed to toggle transcription.
+ */
 @Composable
 fun TranscribeButton(
     isTranscribing: Boolean,
