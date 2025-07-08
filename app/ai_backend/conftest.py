@@ -8,17 +8,26 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 @pytest.fixture
 def mock_api_key():
-    """Provide a mock API key for testing"""
+    """
+    Return a mock API key string for use in tests.
+    """
     return "test_api_key_12345"
 
 @pytest.fixture
 def mock_base_url():
-    """Provide a mock base URL for testing"""
+    """
+    Provides a mock base URL string for use in tests.
+    """
     return "https://api.genesis.test"
 
 @pytest.fixture
 def sample_api_response():
-    """Provide a sample API response for testing"""
+    """
+    Return a dictionary simulating a successful Genesis API chat completion response for use in tests.
+    
+    Returns:
+        dict: A mock API response containing metadata, assistant message, and token usage statistics.
+    """
     return {
         "id": "test_response_id",
         "object": "chat.completion",
@@ -43,7 +52,12 @@ def sample_api_response():
 
 @pytest.fixture
 def sample_error_response():
-    """Provide a sample error response for testing"""
+    """
+    Return a dictionary simulating an error response from the API for testing purposes.
+    
+    Returns:
+        dict: An error response containing error type, message, parameter, and code.
+    """
     return {
         "error": {
             "type": "invalid_request_error",
@@ -55,7 +69,9 @@ def sample_error_response():
 
 @pytest.fixture(autouse=True)
 def mock_environment():
-    """Mock environment variables for testing"""
+    """
+    Temporarily sets environment variables for the Genesis API key and base URL during tests, restoring the original environment afterward.
+    """
     os.environ["GENESIS_API_KEY"] = "test_env_key"
     os.environ["GENESIS_BASE_URL"] = "https://api.genesis.test"
     yield
