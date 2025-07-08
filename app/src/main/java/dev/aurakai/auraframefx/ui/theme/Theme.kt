@@ -58,9 +58,9 @@ val LocalMoodGlow = compositionLocalOf { Color.Transparent }
 val LocalMoodState = compositionLocalOf { Emotion.NEUTRAL }
 
 /**
- * Applies the AuraFrameFX theme and mood-driven dynamic theming to composable content.
+ * Applies the AuraFrameFX theme and mood-based dynamic effects to the provided composable content.
  *
- * Selects and applies a color scheme (dark, light, or dynamic based on device support and parameters), updates the status bar appearance, and provides mood-based glow color and emotion state via composition locals. Integrates Material3 theming and app typography for consistent UI styling.
+ * Selects and applies a Material3 color scheme (dark, light, or dynamic based on device support and parameters), updates the status bar appearance, and provides mood-driven glow color and emotion state throughout the composition. Ensures consistent UI styling with integrated app typography.
  *
  * @param darkTheme Whether to use the dark theme; defaults to the system setting.
  * @param dynamicColor Whether to enable dynamic color schemes on supported devices; defaults to true.
@@ -110,14 +110,14 @@ fun AuraFrameFXTheme(
 }
 
 /**
- * Computes a glow color that visually represents the specified emotion and its intensity.
+ * Returns a color that visually represents the given emotion and its intensity for use as a mood glow.
  *
- * Selects a distinct color for each recognized emotion, adjusting its alpha transparency based on the provided intensity (clamped between 0.1 and 0.5). If the emotion is unrecognized, returns the primary color from the given color scheme with reduced alpha.
+ * For recognized emotions, selects a distinct color and adjusts its alpha transparency based on the intensity (clamped between 0.1 and 0.5). For unrecognized emotions, returns the primary color from the provided color scheme with reduced alpha.
  *
- * @param emotion The emotion to visualize as a glow color.
- * @param intensity The strength of the emotion, influencing the color's alpha transparency.
- * @param baseColorScheme The fallback color scheme for unrecognized emotions.
- * @return A color representing the emotion and intensity, suitable for use as a mood glow.
+ * @param emotion The emotion to visualize.
+ * @param intensity The strength of the emotion, affecting the color's transparency.
+ * @param baseColorScheme The fallback color scheme used if the emotion is unrecognized.
+ * @return A color suitable for mood glow effects reflecting the emotion and intensity.
  */
 private fun getMoodGlowColor(
     emotion: Emotion,

@@ -9,9 +9,9 @@ import kotlinx.coroutines.delay
 class VertexAIClientImpl : VertexAIClient {
 
     /**
-     * Generates a simulated, context-aware AI response based on the input prompt and parameters.
+     * Generates a simulated, context-aware AI response as a multi-line string based on the prompt and parameters.
      *
-     * The returned multi-line string varies its format depending on keywords in the prompt ("code", "explain", or "analyze"), embedding the prompt, maxTokens, and temperature in the output. The method suspends briefly to mimic API latency.
+     * The output format adapts to keywords in the prompt ("code", "explain", or "analyze"), embedding the prompt, maxTokens, and temperature in the response. Suspends briefly to mimic API latency.
      *
      * @return A multi-line string simulating an AI-generated response tailored to the prompt and parameters.
      */
@@ -64,9 +64,8 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Simulates image analysis and returns a placeholder response referencing the provided prompt.
+     * Simulates image analysis and returns a stub response referencing the provided prompt.
      *
-     * @param imageData The image data to be analyzed (not processed in this stub).
      * @param prompt The prompt describing the analysis request.
      * @return A fixed string indicating simulated image analysis for the given prompt.
      */
@@ -76,19 +75,19 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Simulates the initialization of creative models without performing any real operations.
+     * Simulates creative model initialization with no real effect.
      *
-     * This stub method is intended for testing or development environments and does not interact with actual AI models.
+     * This stub method is intended for development or testing and does not interact with actual AI models.
      */
     override suspend fun initializeCreativeModels() {
         // Stub implementation
     }
 
     /**
-     * Simulates content generation by returning a stub string containing the provided prompt.
+     * Simulates content generation by returning a placeholder string that includes the provided prompt.
      *
-     * @param prompt The input prompt to include in the simulated response.
-     * @return A placeholder string embedding the prompt.
+     * @param prompt The input prompt to embed in the stub response.
+     * @return A simulated content string referencing the prompt.
      */
     override suspend fun generateContent(prompt: String): String? {
         delay(100)
@@ -96,12 +95,14 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Simulates code generation by returning a placeholder string for the specified specification, language, and style.
+     * Returns a stub code string indicating the specified language and code specification.
+     *
+     * Simulates code generation for development or testing purposes without producing real code.
      *
      * @param specification Description of the code to generate.
      * @param language Programming language for the generated code.
      * @param style Desired coding style.
-     * @return A stub string representing generated code in the specified language.
+     * @return A placeholder string representing generated code in the specified language.
      */
     override suspend fun generateCode(
         specification: String,
@@ -113,25 +114,25 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Simulates a connection check to Vertex AI, always indicating success.
+     * Simulates a connection check to Vertex AI and always returns `true`.
      *
-     * @return `true` to represent a successful connection in this stub implementation.
+     * @return `true` to indicate a successful connection in this stub implementation.
      */
     override suspend fun validateConnection(): Boolean {
         return true // Stub always returns true
     }
 
     /**
-     * No-op initialization method for interface compliance.
+     * No-op initialization method included to satisfy interface requirements.
      *
-     * This stub implementation performs no actions.
+     * This stub implementation does not perform any operations.
      */
     fun initialize() {
         // Stub implementation
     }
 
     /**
-     * Checks that the prompt string is not blank.
+     * Validates that the prompt string is not blank.
      *
      * @throws IllegalArgumentException if the prompt is blank.
      */
