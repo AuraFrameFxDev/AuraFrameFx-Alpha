@@ -34,12 +34,12 @@ class AIPipelineProcessor @Inject constructor(
     val taskPriority: StateFlow<Float> = _taskPriority
 
     /**
-     * Executes the complete AI pipeline for a given task, coordinating multiple agents and services to generate, aggregate, and return all agent responses.
+     * Processes an AI task by coordinating multiple agents and services, aggregating their responses, and updating pipeline state and context.
      *
-     * Orchestrates context retrieval, task prioritization, agent selection, response collection from relevant agents, synthesis of a final aggregated response, and updates to pipeline state and processing context.
+     * Executes the complete lifecycle for a given task: retrieves context, determines priority, selects relevant agents, collects their responses, synthesizes a final aggregated response, updates internal state, and returns all generated agent messages.
      *
-     * @param task The task description to be processed by the AI pipeline.
-     * @return A list of agent messages, including responses from each participating agent and the final aggregated response.
+     * @param task The description of the task to process.
+     * @return A list of agent messages containing responses from each participating agent and the final aggregated response.
      */
     suspend fun processTask(task: String): List<AgentMessage> {
         _pipelineState.value = Processing(task = task)
@@ -359,9 +359,9 @@ class AIPipelineProcessor @Inject constructor(
     }
 
     /**
-     * Updates the internal processing context with recent task history, response patterns, system metrics, and agent performance statistics.
+     * Updates the processing context with recent task history, response patterns, system metrics, and agent performance statistics.
      *
-     * Maintains a capped list of recent tasks, tracks average response confidence and agent participation by task type, updates system-level metrics such as total tasks processed, and records rolling confidence scores for each agent.
+     * Maintains a capped history of recent tasks, tracks average response confidence and agent participation by task type, updates system-level metrics such as total tasks processed, and records rolling confidence scores for each agent.
      *
      * @param task The task string that was processed.
      * @param responses The list of agent messages generated for the task.

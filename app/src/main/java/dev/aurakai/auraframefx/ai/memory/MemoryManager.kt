@@ -36,12 +36,10 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Retrieves memory items matching the specified query criteria.
-     *
-     * Filters stored memory items by agent, sorts them by descending timestamp, and limits the results to the maximum number configured. Returns a result containing the filtered items, their count, and the original query.
+     * Retrieves memory items matching the specified query, filtered by agent and limited to the configured maximum number of items.
      *
      * @param query The criteria used to filter and retrieve memory items.
-     * @return A result containing the retrieved memory items, their total count, and the query used.
+     * @return A result containing the filtered memory items, their count, and the original query.
      */
     fun retrieveMemory(query: MemoryQuery): MemoryRetrievalResult {
         val items = memoryStore.values
@@ -62,8 +60,7 @@ class MemoryManager @Inject constructor(
     /**
      * Retrieves a list of recent memory items within the configured context window.
      *
-     * Filters memory items whose timestamps fall within the maximum chain length duration from the current time,
-     * sorts them by descending timestamp, and limits the result to the configured maximum number of items.
+     * Filters memory items to those with timestamps more recent than the current time minus the maximum chain length, sorts them by descending timestamp, and limits the result to the maximum chain length.
      *
      * @param task The task identifier (currently unused in filtering).
      * @return A list of recent `CanonicalMemoryItem` objects within the context window.
