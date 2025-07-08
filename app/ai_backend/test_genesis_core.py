@@ -1,4 +1,3 @@
-
 import pytest
 import json
 import tempfile
@@ -7,6 +6,9 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta
 import asyncio
 from typing import Dict, Any, List
+
+# Import the GenesisCore class that we're testing
+from app.ai_backend.genesis_core import GenesisCore
 
 class TestGenesisCore:
     """Comprehensive test suite for GenesisCore functionality"""
@@ -70,30 +72,30 @@ class TestGenesisCore:
     
     def test_validate_config_valid(self):
         """Test configuration validation with valid config"""
-        assert self.genesis_core.validate_config(self.sample_config) == True
+        assert self.genesis_core.validate_config(self.sample_config) is True
     
     def test_validate_config_missing_required_fields(self):
         """Test configuration validation with missing required fields"""
         invalid_config = {"temperature": 0.7}
-        assert self.genesis_core.validate_config(invalid_config) == False
+        assert self.genesis_core.validate_config(invalid_config) is False
     
     def test_validate_config_invalid_temperature(self):
         """Test configuration validation with invalid temperature"""
         invalid_config = self.sample_config.copy()
         invalid_config["temperature"] = 2.0  # Assuming max is 1.0
-        assert self.genesis_core.validate_config(invalid_config) == False
+        assert self.genesis_core.validate_config(invalid_config) is False
     
     def test_validate_config_negative_max_tokens(self):
         """Test configuration validation with negative max_tokens"""
         invalid_config = self.sample_config.copy()
         invalid_config["max_tokens"] = -100
-        assert self.genesis_core.validate_config(invalid_config) == False
+        assert self.genesis_core.validate_config(invalid_config) is False
     
     def test_validate_config_empty_api_key(self):
         """Test configuration validation with empty API key"""
         invalid_config = self.sample_config.copy()
         invalid_config["api_key"] = ""
-        assert self.genesis_core.validate_config(invalid_config) == False
+        assert self.genesis_core.validate_config(invalid_config) is False
     
     # Model Initialization Tests
     @patch('app.ai_backend.genesis_core.initialize_model')
@@ -372,16 +374,16 @@ class TestGenesisCore:
         valid_response = {"content": "Valid response", "status": "success"}
         invalid_response = {"error": "Invalid response"}
         
-        assert self.genesis_core.validate_response(valid_response) == True
-        assert self.genesis_core.validate_response(invalid_response) == False
+        assert self.genesis_core.validate_response(valid_response) is True
+        assert self.genesis_core.validate_response(invalid_response) is False
     
     def test_model_compatibility(self):
         """Test model compatibility checking"""
         compatible_model = {"version": "1.0", "type": "supported"}
         incompatible_model = {"version": "0.5", "type": "unsupported"}
         
-        assert self.genesis_core.check_model_compatibility(compatible_model) == True
-        assert self.genesis_core.check_model_compatibility(incompatible_model) == False
+        assert self.genesis_core.check_model_compatibility(compatible_model) is True
+        assert self.genesis_core.check_model_compatibility(incompatible_model) is False
 
 @pytest.fixture
 def genesis_core():
@@ -410,19 +412,19 @@ def mock_model():
 def test_temperature_values(genesis_core, temperature):
     """Test various temperature values"""
     config = {"temperature": temperature, "model_name": "test", "max_tokens": 100, "api_key": "key"}
-    assert genesis_core.validate_config(config) == True
+    assert genesis_core.validate_config(config) is True
 
 @pytest.mark.parametrize("max_tokens", [1, 100, 1000, 4000])
 def test_max_tokens_values(genesis_core, max_tokens):
     """Test various max_tokens values"""
     config = {"max_tokens": max_tokens, "model_name": "test", "temperature": 0.7, "api_key": "key"}
-    assert genesis_core.validate_config(config) == True
+    assert genesis_core.validate_config(config) is True
 
 @pytest.mark.parametrize("invalid_temp", [-1, 1.5, 2.0, "invalid"])
 def test_invalid_temperature_values(genesis_core, invalid_temp):
     """Test invalid temperature values"""
     config = {"temperature": invalid_temp, "model_name": "test", "max_tokens": 100, "api_key": "key"}
-    assert genesis_core.validate_config(config) == False
+    assert genesis_core.validate_config(config) is False
 
 @pytest.mark.parametrize("prompt", [
     "Simple prompt",
@@ -436,6 +438,7 @@ def test_various_prompts(genesis_core, prompt):
     with patch.object(genesis_core, 'generate_text', return_value="Response"):
         result = genesis_core.generate_text(prompt)
         assert result == "Response"
+
 # Additional comprehensive test coverage
 
 class TestGenesisCoreBoundaryConditions:
@@ -456,14 +459,14 @@ class TestGenesisCoreBoundaryConditions:
         """Test configuration handling with None values"""
         config_with_none = self.valid_config.copy()
         config_with_none["temperature"] = None
-        assert self.genesis_core.validate_config(config_with_none) == False
+        assert self.genesis_core.validate_config(config_with_none) is False
 
     def test_config_with_extra_fields(self):
         """Test configuration with unexpected extra fields"""
         config_with_extra = self.valid_config.copy()
         config_with_extra["unexpected_field"] = "value"
         # Should still be valid but ignore extra fields
-        assert self.genesis_core.validate_config(config_with_extra) == True
+        assert self.genesis_core.validate_config(config_with_extra) is True
 
     def test_config_field_type_validation(self):
         """Test configuration field type validation"""
@@ -475,17 +478,17 @@ class TestGenesisCoreBoundaryConditions:
         ]
         
         for config in invalid_configs:
-            assert self.genesis_core.validate_config(config) == False
+            assert self.genesis_core.validate_config(config) is False
 
-    @pytest.mark.parametrize("config_type", [list, tuple, str, int, None])
+    @pytest.mark.parametrize("config_type", [list, tuple, str, int, type(None)])
     def test_validate_config_wrong_type(self, config_type):
         """Test configuration validation with wrong data types"""
-        if config_type is None:
+        if config_type is type(None):
             invalid_config = None
         else:
             invalid_config = config_type()
         
-        assert self.genesis_core.validate_config(invalid_config) == False
+        assert self.genesis_core.validate_config(invalid_config) is False
 
     # Additional Text Generation Edge Cases
     def test_generate_text_whitespace_only(self):
@@ -706,7 +709,7 @@ class TestGenesisCoreBoundaryConditions:
         
         for attempt in injection_attempts:
             is_injection = self.genesis_core.detect_prompt_injection(attempt)
-            assert is_injection == True
+            assert is_injection is True
 
     # Performance and Optimization Tests
     def test_caching_effectiveness(self):
@@ -806,9 +809,9 @@ class TestGenesisCoreBoundaryConditions:
         
         capabilities = self.genesis_core.detect_model_capabilities(model_features)
         
-        assert capabilities["can_stream"] == True
+        assert capabilities["can_stream"] is True
         assert capabilities["context_limit"] == 4096
-        assert capabilities["json_output"] == False
+        assert capabilities["json_output"] is False
 
     # Logging and Monitoring Tests
     def test_structured_logging(self):
@@ -933,7 +936,7 @@ class TestGenesisCoreBenchmarks:
         }
         
         result = benchmark(genesis_core.validate_config, config)
-        assert result == True
+        assert result is True
 
     @pytest.mark.benchmark
     def test_batch_processing_performance(self, benchmark):
