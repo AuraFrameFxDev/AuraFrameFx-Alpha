@@ -44,7 +44,7 @@ override fun getType(): AgentType = AgentType.KAI
     /**
          * Returns a map of the agent's supported capabilities.
          *
-         * The returned map includes the capabilities "security", "analysis", "memory", and "service_implemented", each set to `true`.
+         * The map includes the capabilities "security", "analysis", "memory", and "service_implemented", each set to `true`.
          *
          * @return A map where each key is a capability name and the value is `true` if supported.
          */
@@ -57,7 +57,7 @@ override fun getType(): AgentType = AgentType.KAI
         )
 
     /**
-     * Processes an AI request with the provided context and returns a response referencing both.
+     * Processes an AI request using the provided context and returns a response referencing both.
      *
      * @param request The AI request to process.
      * @param context Additional context information relevant to the request.

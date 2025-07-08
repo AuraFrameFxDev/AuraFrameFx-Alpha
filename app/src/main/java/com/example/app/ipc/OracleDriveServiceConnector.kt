@@ -21,9 +21,9 @@ class OracleDriveServiceConnector(private val context: Context) {
 
     private val serviceConnection = object : ServiceConnection {
         /**
-         * Handles actions when the AuraDrive service is connected.
+         * Called when the AuraDrive service is connected.
          *
-         * Retrieves the remote `IAuraDriveService` interface from the provided binder and marks the service as connected.
+         * Retrieves the remote `IAuraDriveService` interface from the provided binder and updates the connection status to connected.
          *
          * @param name The component name of the connected service.
          * @param service The binder interface to the connected service.
@@ -34,7 +34,7 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
 
         /**
-         * Handles disconnection from the AuraDrive service by clearing the service reference and updating the connection status to disconnected.
+         * Handles disconnection from the AuraDrive service by clearing the service reference and marking the connection as disconnected.
          */
         override fun onServiceDisconnected(name: ComponentName?) {
             auraDriveService = null
@@ -43,9 +43,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Initiates a connection to the AuraDrive service using an explicit intent.
+     * Attempts to bind to the AuraDrive service using an explicit intent.
      *
-     * Sets the connection state to false if a SecurityException occurs during binding.
+     * If a SecurityException occurs during binding, the connection state is set to false.
      */
     fun bindService() {
         val intent = Intent().apply {
@@ -62,9 +62,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Unbinds from the AuraDrive service and updates the connection status to disconnected.
+     * Unbinds from the AuraDrive service and marks the connection as disconnected.
      *
-     * Any exceptions during unbinding are ignored. The service reference is cleared and the connection state is set to false.
+     * Any exceptions during unbinding are ignored. The service reference is cleared and the connection status is set to false.
      */
     fun unbindService() {
         try {
@@ -76,9 +76,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Returns the current status from the AuraDrive service, or null if unavailable or a RemoteException occurs.
+     * Retrieves the current status string from the AuraDrive service.
      *
-     * @return The status string from the remote service, or null if the service is not connected or an error occurs.
+     * @return The status string if available, or null if the service is not connected or a RemoteException occurs.
      */
     suspend fun getStatusFromOracleDrive(): String? = withContext(Dispatchers.IO) {
         try {
@@ -91,7 +91,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
          * Toggles the LSPosed module on the connected Oracle Drive service.
          *
-         * The `packageName` and `enable` parameters are ignored; the toggle operation is performed according to the remote service's internal logic.
+         * The `packageName` and `enable` parameters are ignored; the toggle operation is determined by the remote service.
          *
          * @return "Success" if the module was toggled successfully, "Failed" if the operation did not succeed, or null if the service is unavailable or a remote exception occurs.
          */

@@ -151,7 +151,7 @@ class GenesisBridgeServer:
         
     def start(self):
         """
-        Starts the Genesis bridge server, enabling asynchronous processing of JSON requests from standard input.
+        Start the Genesis bridge server to asynchronously process JSON requests from standard input.
         
         Signals readiness to the client, launches a background thread for request handling, continuously reads and enqueues incoming JSON requests, handles invalid input, and supports graceful shutdown on keyboard interruption.
         """
@@ -180,9 +180,9 @@ class GenesisBridgeServer:
     
     def _process_requests(self):
         """
-        Continuously processes requests from the queue in a background thread, routing each to the appropriate handler and sending responses to the client.
+        Continuously processes queued requests in a background thread, routing each to the appropriate handler and sending responses to the client.
         
-        Exceptions during processing are caught and reported to ensure the server remains operational.
+        Exceptions encountered during processing are caught and reported to maintain uninterrupted server operation.
         """
         while self.running:
             try:
@@ -199,10 +199,10 @@ class GenesisBridgeServer:
     
     def _handle_request(self, request):
         """
-        Route an incoming JSON request to the appropriate handler based on its "requestType" field and return the handler's response.
+        Routes a JSON request to the appropriate handler based on its "requestType" and returns the handler's response.
         
         Parameters:
-            request (dict): The JSON-decoded request containing a "requestType" and related data.
+            request (dict): The JSON-decoded request containing a "requestType" and associated data.
         
         Returns:
             dict: The response from the corresponding handler, or an error response if the request type is unrecognized or an exception occurs.
@@ -256,10 +256,10 @@ class GenesisBridgeServer:
     
     def _handle_ping(self):
         """
-        Return a response confirming the Genesis Trinity system is online, including status, message, and current timestamp.
+        Generate a response indicating the Genesis Trinity system is online, including status, message, and current timestamp.
         
         Returns:
-            dict: Contains success status, persona identifier, operational message, and ISO-formatted timestamp.
+            dict: A dictionary with success status, persona identifier, operational message, and ISO-formatted timestamp.
         """
         return {
             "success": True,

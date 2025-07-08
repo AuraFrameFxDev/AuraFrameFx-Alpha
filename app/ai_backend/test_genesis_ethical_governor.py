@@ -22,11 +22,9 @@ except ImportError:
     class EthicalGovernor:
         def __init__(self, framework=None, policies=None):
             """
-            Initialize an EthicalGovernor instance with an optional ethical framework and governance policies.
+            Initialize the EthicalGovernor with an optional ethical framework and list of governance policies.
             
-            Parameters:
-                framework (dict, optional): The ethical framework to use for governance decisions.
-                policies (list, optional): A list of governance policies to enforce.
+            If no framework or policies are provided, defaults to an empty framework and policy list.
             """
             self.framework = framework or {}
             self.policies = policies or []
@@ -35,52 +33,55 @@ except ImportError:
             
         def evaluate_decision(self, decision_context):
             """
-            Evaluates an ethical decision based on the provided context.
+            Evaluates an ethical decision and returns approval status and risk level.
             
             Parameters:
-                decision_context: The context or data relevant to the decision being evaluated.
+                decision_context: Contextual information relevant to the decision.
             
             Returns:
-                dict: A dictionary containing the approval status (`approved`) and the assessed risk level (`risk_level`).
+                dict: Contains 'approved' (bool) indicating if the decision is approved, and 'risk_level' (str) representing the assessed risk.
             """
             return {"approved": True, "risk_level": "low"}
             
         def apply_policy(self, policy_name, context):
             """
-            Apply a specified governance policy to the provided context and return the compliance result.
+            Applies the specified governance policy to a given context and returns the compliance result.
             
             Parameters:
                 policy_name (str): The name of the policy to apply.
                 context (dict): The context in which the policy is evaluated.
             
             Returns:
-                dict: A dictionary indicating compliance status and details of the policy application.
+                dict: Dictionary indicating whether the context is compliant with the policy and details of the application.
             """
             return {"compliant": True, "details": "Policy applied"}
             
         def log_violation(self, violation):
             """
-            Adds an ethical violation to the internal list of recorded violations.
+            Record an ethical violation in the internal violations list.
+            
+            Parameters:
+            	violation: The violation instance to be added.
             """
             self.violations.append(violation)
             
         def get_metrics(self):
             """
-            Return a summary of the total number of decisions made and violations recorded.
+            Return a dictionary summarizing the total number of decisions and violations recorded by the governor.
             
             Returns:
-                dict: Contains 'total_decisions' and 'violations' counts.
+                dict: A dictionary with keys 'total_decisions' and 'violations', representing the counts of decisions made and violations logged.
             """
             return {"total_decisions": len(self.decisions), "violations": len(self.violations)}
     
     class EthicalDecision:
         def __init__(self, decision_id, context, outcome=None):
             """
-            Initialize an EthicalDecision instance with a unique ID, context, optional outcome, and a timestamp marking creation time.
+            Create an EthicalDecision with a unique identifier, associated context, optional outcome, and a creation timestamp.
             
             Parameters:
-                decision_id: Unique identifier for the decision.
-                context: Data or information relevant to the decision.
+                decision_id: Unique identifier for this decision instance.
+                context: Relevant data or information for the decision.
                 outcome: Optional result or resolution of the decision.
             """
             self.decision_id = decision_id
@@ -91,11 +92,11 @@ except ImportError:
     class EthicalFramework:
         def __init__(self, name, principles):
             """
-            Initialize an EthicalFramework with a name and a list of ethical principles.
+            Initialize an EthicalFramework with the specified name and associated ethical principles.
             
             Parameters:
-                name (str): The name of the ethical framework.
-                principles (list): A list of ethical principles associated with the framework.
+                name (str): The identifier for the ethical framework.
+                principles (list): Ethical principles that define the framework.
             """
             self.name = name
             self.principles = principles
@@ -103,12 +104,12 @@ except ImportError:
     class EthicalViolation:
         def __init__(self, violation_type, description, severity="medium"):
             """
-            Initialize an EthicalViolation instance with type, description, severity, and timestamp.
+            Create a new EthicalViolation with the specified type, description, severity, and a timestamp.
             
             Parameters:
-            	violation_type: The category or nature of the violation.
-            	description: A detailed explanation of the violation.
-            	severity: The seriousness of the violation (default is "medium").
+                violation_type: The category or nature of the violation.
+                description: Detailed explanation of the violation.
+                severity: The seriousness of the violation; defaults to "medium".
             """
             self.violation_type = violation_type
             self.description = description
@@ -118,11 +119,11 @@ except ImportError:
     class GovernancePolicy:
         def __init__(self, name, rules):
             """
-            Initialize a GovernancePolicy with a specified name and associated rules.
+            Initialize a GovernancePolicy instance with a given name and a list of associated rules.
             
             Parameters:
-                name (str): The name of the governance policy.
-                rules (list): The set of rules associated with the policy.
+                name (str): The policy's identifier.
+                rules (list): The rules that define the policy's requirements or constraints.
             """
             self.name = name
             self.rules = rules
@@ -130,38 +131,41 @@ except ImportError:
     class RiskAssessment:
         def __init__(self, context):
             """
-            Initialize a RiskAssessment instance with the provided context.
+            Initialize a RiskAssessment instance with the specified context to be used for risk evaluation.
             
             Parameters:
-                context: The data or situation to be assessed for risk.
+                context: The data or situation that will be assessed for risk.
             """
             self.context = context
             
         def calculate_risk(self):
             """
-            Calculate and return the risk assessment for the current context.
+            Calculates the risk level and score for the current context.
             
             Returns:
-                dict: A dictionary containing the risk level ("low") and a numerical risk score (0.2).
+                dict: Contains the risk level ("low") and a numerical risk score (0.2).
             """
             return {"level": "low", "score": 0.2}
     
     class ComplianceChecker:
         def __init__(self, regulations):
             """
-            Initialize the ComplianceChecker with a list of regulations to be used for compliance checks.
+            Initialize a ComplianceChecker with the specified regulations.
+            
+            Parameters:
+            	regulations: The set of regulations to be used for compliance checks.
             """
             self.regulations = regulations
             
         def check_compliance(self, action):
             """
-            Check whether a given action complies with the specified regulations.
+            Determine if the provided action meets all specified regulations.
             
             Parameters:
-                action: The action to be evaluated for compliance.
+                action: The action to evaluate for regulatory compliance.
             
             Returns:
-                dict: A dictionary indicating compliance status and details of the check.
+                dict: Contains compliance status and details of the compliance check.
             """
             return {"compliant": True, "details": "All checks passed"}
     
@@ -174,13 +178,10 @@ except ImportError:
             
         def calculate_metrics(self, decisions):
             """
-            Calculate and return fixed ethical metrics for a set of decisions.
-            
-            Parameters:
-                decisions: A collection of decision objects to evaluate.
+            Calculate and return ethical metrics for a set of decisions.
             
             Returns:
-                dict: Dictionary containing accuracy, fairness, and transparency scores.
+                dict: A dictionary with fixed values for accuracy, fairness, and transparency scores.
             """
             return {"accuracy": 0.95, "fairness": 0.92, "transparency": 0.88}
 
@@ -190,7 +191,7 @@ class TestEthicalGovernor(unittest.TestCase):
     
     def setUp(self):
         """
-        Initializes the ethical framework, governance policies, and ethical governor instance for each test.
+        Set up the test environment by creating an ethical framework, governance policies, and an ethical governor instance for each test case.
         """
         self.framework = EthicalFramework("test_framework", ["fairness", "transparency", "accountability"])
         self.policies = [
@@ -200,13 +201,17 @@ class TestEthicalGovernor(unittest.TestCase):
         self.governor = EthicalGovernor(framework=self.framework, policies=self.policies)
     
     def tearDown(self):
-        """Clean up after each test method."""
+        """
+        Reset test instance attributes to None after each test to ensure isolation between tests.
+        """
         self.governor = None
         self.framework = None
         self.policies = None
     
     def test_ethical_governor_initialization_with_framework_and_policies(self):
-        """Test that EthicalGovernor initializes correctly with framework and policies."""
+        """
+        Verify that EthicalGovernor is initialized with the specified framework and policies, and that its decisions and violations lists are empty.
+        """
         self.assertIsNotNone(self.governor)
         self.assertEqual(self.governor.framework, self.framework)
         self.assertEqual(self.governor.policies, self.policies)
@@ -215,7 +220,7 @@ class TestEthicalGovernor(unittest.TestCase):
     
     def test_ethical_governor_initialization_with_defaults(self):
         """
-        Test that an EthicalGovernor instance is initialized with default empty framework, policies, decisions, and violations.
+        Test that EthicalGovernor initializes with default empty framework, policies, decisions, and violations.
         """
         governor = EthicalGovernor()
         self.assertEqual(governor.framework, {})
@@ -225,7 +230,7 @@ class TestEthicalGovernor(unittest.TestCase):
     
     def test_evaluate_decision_with_valid_context(self):
         """
-        Test that evaluate_decision returns an approval and low risk level when given a valid decision context.
+        Test that evaluate_decision returns approval and a low risk level for a valid decision context.
         """
         context = {"user_data": "anonymous", "action": "recommend", "risk_factors": []}
         result = self.governor.evaluate_decision(context)
@@ -238,9 +243,9 @@ class TestEthicalGovernor(unittest.TestCase):
     
     def test_evaluate_decision_with_empty_context(self):
         """
-        Test that evaluate_decision returns a valid result when given an empty context.
+        Test that evaluate_decision returns a valid result when provided with an empty context.
         
-        Verifies that the returned dictionary contains the expected keys for approval status and risk level.
+        Verifies that the result is a dictionary containing the keys "approved" and "risk_level".
         """
         result = self.governor.evaluate_decision({})
         self.assertIsInstance(result, dict)
@@ -249,14 +254,14 @@ class TestEthicalGovernor(unittest.TestCase):
     
     def test_evaluate_decision_with_none_context(self):
         """
-        Test that evaluate_decision returns a dictionary when called with a None context.
+        Test that evaluate_decision returns a dictionary when given a None context.
         """
         result = self.governor.evaluate_decision(None)
         self.assertIsInstance(result, dict)
     
     def test_apply_policy_with_valid_inputs(self):
         """
-        Test that apply_policy returns a compliant result with correct details when given a valid policy name and context.
+        Tests that apply_policy returns a compliant result with expected details when provided a valid policy name and context.
         """
         result = self.governor.apply_policy("privacy_policy", {"data_type": "public"})
         
@@ -270,14 +275,14 @@ class TestEthicalGovernor(unittest.TestCase):
         """
         Test that applying a non-existent policy name returns a dictionary result.
         
-        Verifies that the `apply_policy` method handles invalid policy names gracefully and returns a dictionary, regardless of policy existence.
+        Verifies that the `apply_policy` method returns a dictionary even when the specified policy name does not exist.
         """
         result = self.governor.apply_policy("non_existent_policy", {"data": "test"})
         self.assertIsInstance(result, dict)
     
     def test_log_violation_adds_to_violations_list(self):
         """
-        Verify that logging a violation adds it to the EthicalGovernor's list of violations.
+        Test that logging a violation correctly appends it to the EthicalGovernor's violations list.
         """
         violation = EthicalViolation("privacy_breach", "Unauthorized data access")
         initial_count = len(self.governor.violations)
@@ -289,7 +294,7 @@ class TestEthicalGovernor(unittest.TestCase):
     
     def test_log_multiple_violations(self):
         """
-        Verify that logging multiple violations adds all of them to the governor's violation list.
+        Test that logging multiple violations results in all violations being recorded in the governor's violation list.
         """
         violations = [
             EthicalViolation("bias", "Discriminatory outcome"),
@@ -306,7 +311,7 @@ class TestEthicalGovernor(unittest.TestCase):
     
     def test_get_metrics_returns_correct_format(self):
         """
-        Test that the get_metrics method returns a dictionary with correct keys and accurate counts for total decisions and violations.
+        Test that get_metrics returns a dictionary with the correct keys and accurate counts for total decisions and violations.
         """
         metrics = self.governor.get_metrics()
         
@@ -318,7 +323,7 @@ class TestEthicalGovernor(unittest.TestCase):
     
     def test_get_metrics_after_adding_data(self):
         """
-        Verify that get_metrics returns correct counts after violations are logged but before any decisions are added.
+        Tests that get_metrics accurately reports the number of logged violations and zero decisions when only violations have been added.
         """
         # Add some violations
         self.governor.log_violation(EthicalViolation("test", "test violation"))
@@ -335,7 +340,7 @@ class TestEthicalDecision(unittest.TestCase):
     
     def test_ethical_decision_initialization_complete(self):
         """
-        Test that EthicalDecision initializes correctly when all parameters are provided, including decision ID, context, outcome, and timestamp.
+        Test that EthicalDecision is properly initialized with all parameters, including decision ID, context, outcome, and timestamp.
         """
         decision_id = "test_decision_001"
         context = {"user": "test_user", "action": "data_access"}
@@ -350,9 +355,9 @@ class TestEthicalDecision(unittest.TestCase):
     
     def test_ethical_decision_initialization_minimal(self):
         """
-        Test that EthicalDecision initializes correctly with only required parameters.
+        Test initialization of EthicalDecision with only required parameters.
         
-        Verifies that the decision ID and context are set, the outcome is None by default, and a timestamp is generated.
+        Ensures that the decision ID and context are set, the outcome defaults to None, and a timestamp is generated.
         """
         decision_id = "minimal_decision"
         context = {"basic": "context"}
@@ -366,7 +371,7 @@ class TestEthicalDecision(unittest.TestCase):
     
     def test_ethical_decision_timestamp_uniqueness(self):
         """
-        Verify that each EthicalDecision instance has a timestamp attribute of type datetime, ensuring timestamps are properly set upon creation.
+        Test that each EthicalDecision instance has a timestamp attribute of type datetime upon creation.
         """
         decision1 = EthicalDecision("d1", {"test": 1})
         decision2 = EthicalDecision("d2", {"test": 2})
@@ -378,7 +383,7 @@ class TestEthicalDecision(unittest.TestCase):
     
     def test_ethical_decision_with_complex_context(self):
         """
-        Verify that EthicalDecision correctly stores and handles complex nested context data structures.
+        Test that EthicalDecision instances accurately store and provide access to complex, nested context data structures.
         """
         complex_context = {
             "user_profile": {"age": 25, "location": "US"},
@@ -398,7 +403,7 @@ class TestEthicalFramework(unittest.TestCase):
     
     def test_ethical_framework_initialization(self):
         """
-        Test that EthicalFramework is initialized with the correct name and principles.
+        Test that EthicalFramework initializes with the specified name and list of principles.
         """
         name = "Human Rights Framework"
         principles = ["dignity", "equality", "justice", "freedom"]
@@ -410,7 +415,7 @@ class TestEthicalFramework(unittest.TestCase):
     
     def test_ethical_framework_with_empty_principles(self):
         """
-        Test that an EthicalFramework initialized with an empty principles list correctly stores the name and an empty principles list.
+        Test that initializing an EthicalFramework with an empty principles list correctly sets the name and stores an empty list of principles.
         """
         framework = EthicalFramework("Empty Framework", [])
         
@@ -420,7 +425,7 @@ class TestEthicalFramework(unittest.TestCase):
     
     def test_ethical_framework_with_single_principle(self):
         """
-        Test that EthicalFramework correctly stores a single ethical principle.
+        Test that an EthicalFramework initialized with a single principle correctly stores that principle.
         """
         framework = EthicalFramework("Simple Framework", ["fairness"])
         
@@ -429,7 +434,7 @@ class TestEthicalFramework(unittest.TestCase):
     
     def test_ethical_framework_principles_immutability(self):
         """
-        Verify that changes to the original principles list after EthicalFramework initialization do not affect the framework's stored principles.
+        Test that modifying the original principles list after creating an EthicalFramework does not alter the framework's internal principles.
         """
         original_principles = ["principle1", "principle2"]
         framework = EthicalFramework("Test", original_principles)
@@ -448,7 +453,7 @@ class TestEthicalViolation(unittest.TestCase):
     
     def test_ethical_violation_initialization_with_all_params(self):
         """
-        Verify that EthicalViolation initializes correctly when all parameters are provided, including type, description, severity, and timestamp.
+        Test that EthicalViolation is properly initialized with specified type, description, severity, and that a timestamp is set.
         """
         violation_type = "privacy_breach"
         description = "Unauthorized access to personal data"
@@ -463,9 +468,9 @@ class TestEthicalViolation(unittest.TestCase):
     
     def test_ethical_violation_default_severity(self):
         """
-        Test that EthicalViolation initializes with the correct default severity and attributes.
+        Test that EthicalViolation uses the default severity when none is provided.
         
-        Verifies that when no severity is provided, the default value is set to "medium", and all other attributes are correctly assigned.
+        Verifies that the severity is set to "medium" by default and all other attributes are correctly initialized.
         """
         violation = EthicalViolation("bias", "Algorithmic bias detected")
         
@@ -476,7 +481,7 @@ class TestEthicalViolation(unittest.TestCase):
     
     def test_ethical_violation_different_severity_levels(self):
         """
-        Verify that EthicalViolation instances correctly store various severity levels.
+        Test that EthicalViolation instances store the specified severity level for each provided value.
         """
         severities = ["low", "medium", "high", "critical"]
         
@@ -486,7 +491,7 @@ class TestEthicalViolation(unittest.TestCase):
     
     def test_ethical_violation_timestamp_creation(self):
         """
-        Verify that an EthicalViolation instance creates a timestamp within the expected time window during initialization.
+        Test that the EthicalViolation instance assigns a timestamp during initialization that falls within the creation time window.
         """
         before = datetime.datetime.now()
         violation = EthicalViolation("test", "test")
@@ -501,7 +506,7 @@ class TestGovernancePolicy(unittest.TestCase):
     
     def test_governance_policy_initialization(self):
         """
-        Test that a GovernancePolicy object is correctly initialized with a name and a list of rules.
+        Test initialization of a GovernancePolicy object with a specified name and list of rules.
         """
         name = "Data Protection Policy"
         rules = ["encrypt_at_rest", "encrypt_in_transit", "user_consent_required"]
@@ -513,7 +518,7 @@ class TestGovernancePolicy(unittest.TestCase):
     
     def test_governance_policy_with_empty_rules(self):
         """
-        Test that a GovernancePolicy instance correctly handles initialization with an empty rules list.
+        Test initialization of a GovernancePolicy with an empty rules list to ensure attributes are set correctly.
         """
         policy = GovernancePolicy("Empty Policy", [])
         
@@ -523,7 +528,7 @@ class TestGovernancePolicy(unittest.TestCase):
     
     def test_governance_policy_with_complex_rules(self):
         """
-        Test that GovernancePolicy correctly handles initialization with a mix of complex rule structures, including dictionaries and strings.
+        Test that GovernancePolicy can be initialized with a list of rules containing both dictionaries and strings, and that the rules are stored with their original types.
         """
         complex_rules = [
             {"rule_id": "R001", "condition": "age < 18", "action": "require_parental_consent"},
@@ -543,7 +548,7 @@ class TestRiskAssessment(unittest.TestCase):
     
     def test_risk_assessment_initialization(self):
         """
-        Test that a RiskAssessment instance is correctly initialized with the provided context.
+        Test that a RiskAssessment object is initialized with the specified context.
         """
         context = {"user_data": "sensitive", "location": "public"}
         
@@ -553,7 +558,7 @@ class TestRiskAssessment(unittest.TestCase):
     
     def test_calculate_risk_returns_correct_format(self):
         """
-        Test that RiskAssessment.calculate_risk returns a dictionary with the expected keys and values.
+        Verify that RiskAssessment.calculate_risk returns a dictionary with 'level' and 'score' keys and expected values.
         """
         assessment = RiskAssessment({"test": "context"})
         result = assessment.calculate_risk()
@@ -566,7 +571,7 @@ class TestRiskAssessment(unittest.TestCase):
     
     def test_calculate_risk_with_empty_context(self):
         """
-        Test that calculate_risk returns a dictionary with expected keys when initialized with an empty context.
+        Test that RiskAssessment.calculate_risk() returns a dictionary with 'level' and 'score' keys when initialized with an empty context.
         """
         assessment = RiskAssessment({})
         result = assessment.calculate_risk()
@@ -577,7 +582,7 @@ class TestRiskAssessment(unittest.TestCase):
     
     def test_calculate_risk_with_none_context(self):
         """
-        Test that RiskAssessment.calculate_risk returns a dictionary when initialized with a None context.
+        Test that RiskAssessment.calculate_risk() returns a dictionary when the context is None.
         """
         assessment = RiskAssessment(None)
         result = assessment.calculate_risk()
@@ -586,7 +591,7 @@ class TestRiskAssessment(unittest.TestCase):
     
     def test_risk_assessment_context_preservation(self):
         """
-        Verify that the RiskAssessment instance preserves the original context data after initialization.
+        Test that RiskAssessment retains the provided context data unchanged after initialization.
         """
         original_context = {"sensitive_data": True, "user_count": 1000}
         assessment = RiskAssessment(original_context)
@@ -600,7 +605,7 @@ class TestComplianceChecker(unittest.TestCase):
     
     def test_compliance_checker_initialization(self):
         """
-        Test that the ComplianceChecker is initialized with the correct list of regulations.
+        Test that ComplianceChecker is initialized with the specified regulations list.
         """
         regulations = ["GDPR", "CCPA", "HIPAA"]
         
@@ -610,7 +615,7 @@ class TestComplianceChecker(unittest.TestCase):
     
     def test_check_compliance_returns_correct_format(self):
         """
-        Test that ComplianceChecker.check_compliance returns a dictionary with expected keys and values for a compliant action.
+        Test that ComplianceChecker.check_compliance returns a dictionary with the correct keys and values for a compliant action.
         """
         checker = ComplianceChecker(["GDPR"])
         result = checker.check_compliance("data_processing")
@@ -623,9 +628,9 @@ class TestComplianceChecker(unittest.TestCase):
     
     def test_check_compliance_with_empty_action(self):
         """
-        Test that ComplianceChecker.check_compliance returns a valid result when given an empty action string.
+        Test that ComplianceChecker.check_compliance handles an empty action string.
         
-        Verifies that the returned dictionary contains the expected keys for compliance status and details.
+        Verifies that the returned dictionary includes the expected compliance status and details keys.
         """
         checker = ComplianceChecker(["GDPR"])
         result = checker.check_compliance("")
@@ -636,7 +641,7 @@ class TestComplianceChecker(unittest.TestCase):
     
     def test_check_compliance_with_none_action(self):
         """
-        Test that ComplianceChecker.check_compliance returns a dictionary when given None as the action.
+        Test that ComplianceChecker.check_compliance returns a dictionary when called with None as the action.
         """
         checker = ComplianceChecker(["GDPR"])
         result = checker.check_compliance(None)
@@ -645,9 +650,9 @@ class TestComplianceChecker(unittest.TestCase):
     
     def test_compliance_checker_with_multiple_regulations(self):
         """
-        Test that ComplianceChecker correctly stores and recognizes multiple regulations.
+        Test that ComplianceChecker correctly stores multiple regulations.
         
-        Verifies that all provided regulations are present in the ComplianceChecker's internal list.
+        Ensures that all provided regulations are present in the ComplianceChecker's internal list after initialization.
         """
         regulations = ["GDPR", "CCPA", "HIPAA", "SOX", "PCI-DSS"]
         checker = ComplianceChecker(regulations)
@@ -658,7 +663,9 @@ class TestComplianceChecker(unittest.TestCase):
     
     def test_compliance_checker_with_empty_regulations(self):
         """
-        Test that ComplianceChecker correctly handles initialization with an empty regulations list and returns a dictionary when checking compliance.
+        Test ComplianceChecker behavior when initialized with an empty regulations list.
+        
+        Verifies that the regulations attribute is set to an empty list and that check_compliance returns a dictionary when called.
         """
         checker = ComplianceChecker([])
         result = checker.check_compliance("test_action")
@@ -671,7 +678,9 @@ class TestEthicalMetrics(unittest.TestCase):
     """Test suite for EthicalMetrics class"""
     
     def test_ethical_metrics_initialization(self):
-        """Test EthicalMetrics initialization."""
+        """
+        Test that an EthicalMetrics instance initializes with an empty metrics dictionary.
+        """
         metrics = EthicalMetrics()
         
         self.assertIsInstance(metrics.metrics, dict)
@@ -679,7 +688,7 @@ class TestEthicalMetrics(unittest.TestCase):
     
     def test_calculate_metrics_returns_correct_format(self):
         """
-        Verify that the calculate_metrics method of EthicalMetrics returns a dictionary with the expected keys and values for accuracy, fairness, and transparency.
+        Test that EthicalMetrics.calculate_metrics returns a dictionary containing accuracy, fairness, and transparency with expected values.
         """
         metrics = EthicalMetrics()
         decisions = [
@@ -699,7 +708,7 @@ class TestEthicalMetrics(unittest.TestCase):
     
     def test_calculate_metrics_with_empty_decisions(self):
         """
-        Test that calculate_metrics returns a dictionary with expected metric keys when given an empty decisions list.
+        Test that EthicalMetrics.calculate_metrics returns a dictionary with accuracy, fairness, and transparency keys when provided an empty decisions list.
         """
         metrics = EthicalMetrics()
         result = metrics.calculate_metrics([])
@@ -711,7 +720,7 @@ class TestEthicalMetrics(unittest.TestCase):
     
     def test_calculate_metrics_with_none_decisions(self):
         """
-        Test that calculate_metrics returns a dictionary when called with None as the decisions input.
+        Test that calculate_metrics returns a dictionary when given None as the decisions input.
         """
         metrics = EthicalMetrics()
         result = metrics.calculate_metrics(None)
@@ -720,7 +729,7 @@ class TestEthicalMetrics(unittest.TestCase):
     
     def test_calculate_metrics_with_large_decision_set(self):
         """
-        Tests that the calculate_metrics method correctly processes a large set of decisions and returns a dictionary containing accuracy, fairness, and transparency metrics as numeric values.
+        Test that calculate_metrics processes a large list of decisions and returns a dictionary with numeric accuracy, fairness, and transparency metrics.
         """
         metrics = EthicalMetrics()
         decisions = [EthicalDecision(f"d{i}", {"test": i}) for i in range(100)]
@@ -741,7 +750,7 @@ class TestEthicalGovernanceIntegration(unittest.TestCase):
     
     def setUp(self):
         """
-        Initialize the integration test environment with an ethical framework, governance policies, an ethical governor, a compliance checker, and metrics tracking.
+        Sets up the integration test environment with an ethical framework, governance policies, an ethical governor, a compliance checker, and metrics tracking.
         """
         self.framework = EthicalFramework("AI Ethics Framework", 
                                         ["fairness", "transparency", "accountability", "privacy"])
@@ -756,9 +765,9 @@ class TestEthicalGovernanceIntegration(unittest.TestCase):
     
     def test_full_ethical_decision_workflow(self):
         """
-        Test the end-to-end ethical decision workflow, including decision evaluation, compliance checking, decision record creation, and metrics calculation.
+        Test the complete ethical decision workflow, ensuring correct interaction between evaluation, compliance checking, decision recording, and metrics calculation.
         
-        This test verifies that each component in the ethical governance pipeline interacts correctly and produces expected outputs for a typical decision scenario.
+        Verifies that each component in the ethical governance pipeline produces expected outputs for a standard decision scenario.
         """
         # Create decision context
         context = {
@@ -789,7 +798,7 @@ class TestEthicalGovernanceIntegration(unittest.TestCase):
     
     def test_violation_logging_and_tracking(self):
         """
-        Tests that violations can be logged and tracked by the governor, and verifies that violation counts and severity levels are accurately recorded in both the violations list and metrics.
+        Test that the governor correctly logs and tracks violations, ensuring accurate counts and severity levels in both the violations list and metrics.
         """
         # Create violations
         violations = [
@@ -818,7 +827,7 @@ class TestEthicalGovernanceIntegration(unittest.TestCase):
     
     def test_policy_application_with_risk_assessment(self):
         """
-        Test that applying a policy and performing a risk assessment on the same high-risk context both return valid results and can be used together without error.
+        Tests that applying a policy and performing a risk assessment on a high-risk context both return valid results and can be executed together without errors.
         """
         high_risk_context = {
             "data_type": "sensitive_personal",
@@ -849,9 +858,9 @@ class TestEdgeCasesAndErrorHandling:
     
     def test_ethical_governor_with_malformed_framework(self):
         """
-        Test that EthicalGovernor can be initialized with a malformed framework object and still evaluate decisions without error.
+        Test initialization of EthicalGovernor with an invalid framework object and verify decision evaluation does not raise errors.
         
-        Verifies that the governor accepts a non-framework object as its framework parameter and that decision evaluation proceeds without raising exceptions.
+        Ensures that passing a non-framework object as the framework parameter does not prevent the governor from evaluating decisions successfully.
         """
         malformed_framework = "not_a_framework_object"
         governor = EthicalGovernor(framework=malformed_framework)
@@ -863,7 +872,7 @@ class TestEdgeCasesAndErrorHandling:
     
     def test_ethical_decision_with_unicode_content(self):
         """
-        Test that EthicalDecision correctly handles context data containing Unicode characters.
+        Test that EthicalDecision instances can store and retrieve context data containing Unicode characters.
         """
         unicode_context = {
             "user_name": "测试用户",
@@ -877,7 +886,7 @@ class TestEdgeCasesAndErrorHandling:
     
     def test_violation_with_extremely_long_description(self):
         """
-        Tests that EthicalViolation can handle and store extremely long descriptions without truncation or errors.
+        Test that EthicalViolation correctly stores extremely long descriptions without truncation or errors.
         """
         long_description = "This is a test violation with a very long description. " * 100
         violation = EthicalViolation("test", long_description, "low")
@@ -888,7 +897,7 @@ class TestEdgeCasesAndErrorHandling:
     
     def test_governance_policy_with_none_rules(self):
         """
-        Test that a GovernancePolicy instance correctly handles initialization when rules are set to None.
+        Test that GovernancePolicy initializes correctly when the rules parameter is set to None.
         """
         policy = GovernancePolicy("test_policy", None)
         assert policy.name == "test_policy"
@@ -896,7 +905,7 @@ class TestEdgeCasesAndErrorHandling:
     
     def test_risk_assessment_with_deeply_nested_context(self):
         """
-        Tests that RiskAssessment can handle and preserve a deeply nested context structure, and that risk calculation returns a dictionary.
+        Test that RiskAssessment correctly processes and preserves a deeply nested context, and that calculate_risk returns a dictionary.
         """
         nested_context = {
             "level1": {
@@ -931,7 +940,9 @@ class TestEthicalGovernorAdvanced(unittest.TestCase):
     """Advanced test suite for EthicalGovernor with extensive edge case coverage"""
     
     def setUp(self):
-        """Set up advanced test fixtures."""
+        """
+        Initialize advanced test fixtures for ethical governance testing, including a framework with multiple principles, a set of governance policies, and an EthicalGovernor instance.
+        """
         self.framework = EthicalFramework("Advanced Framework", 
                                         ["fairness", "transparency", "accountability", "privacy", "safety"])
         self.policies = [
@@ -942,7 +953,9 @@ class TestEthicalGovernorAdvanced(unittest.TestCase):
         self.governor = EthicalGovernor(framework=self.framework, policies=self.policies)
     
     def test_evaluate_decision_with_high_risk_context(self):
-        """Test decision evaluation with high-risk context requiring multiple policy checks."""
+        """
+        Test that the ethical governor evaluates a high-risk decision context, ensuring the result includes approval status, risk level, and, if present, a risk assessment dictionary.
+        """
         high_risk_context = {
             "user_data": {"age": 16, "location": "EU", "sensitive_attributes": ["health", "financial"]},
             "action": "automated_decision_making",
@@ -961,7 +974,11 @@ class TestEthicalGovernorAdvanced(unittest.TestCase):
             self.assertIsInstance(result["risk_assessment"], dict)
     
     def test_evaluate_decision_with_conflicting_policies(self):
-        """Test decision evaluation when policies might conflict."""
+        """
+        Test that the ethical governor evaluates a decision context with potentially conflicting policy requirements and handles conflicts gracefully.
+        
+        Verifies that the result is a dictionary and, if policy conflicts are reported, that they are provided as a list.
+        """
         conflicting_context = {
             "transparency_required": True,
             "privacy_protection": True,
@@ -978,7 +995,11 @@ class TestEthicalGovernorAdvanced(unittest.TestCase):
             self.assertIsInstance(result["policy_conflicts"], list)
     
     def test_evaluate_decision_with_malformed_context(self):
-        """Test decision evaluation with various malformed contexts."""
+        """
+        Test that the ethical governor can evaluate decisions with various malformed or unusual context inputs without crashing.
+        
+        Verifies that the result is always a dictionary containing the "approved" key, regardless of input structure or content.
+        """
         malformed_contexts = [
             {"user_data": None, "action": "test"},
             {"action": ""},
@@ -997,7 +1018,11 @@ class TestEthicalGovernorAdvanced(unittest.TestCase):
                 self.assertIn("approved", result)
     
     def test_apply_policy_with_complex_scenarios(self):
-        """Test policy application with complex real-world scenarios."""
+        """
+        Test that the governor's policy application method correctly handles complex, real-world policy and context scenarios.
+        
+        Verifies that applying various policies with detailed contexts returns a dictionary containing a 'compliant' key, ensuring the method's robustness across diverse inputs.
+        """
         scenarios = [
             {
                 "policy": "strict_privacy",
@@ -1033,7 +1058,11 @@ class TestEthicalGovernorAdvanced(unittest.TestCase):
                 self.assertIn("compliant", result)
     
     def test_continuous_monitoring_simulation(self):
-        """Test continuous monitoring of decisions over time."""
+        """
+        Simulates continuous monitoring by evaluating a sequence of decisions over time and logging periodic violations.
+        
+        Verifies that the governor accumulates violations and processes multiple decisions, ensuring correct metrics and decision tracking.
+        """
         decisions_over_time = []
         
         for i in range(50):
@@ -1062,7 +1091,9 @@ class TestEthicalGovernorAdvanced(unittest.TestCase):
         self.assertEqual(len(decisions_over_time), 50)
     
     def test_policy_hierarchy_and_precedence(self):
-        """Test policy hierarchy when multiple policies apply."""
+        """
+        Test that the ethical governor correctly applies multiple policies with hierarchical and overlapping requirements, ensuring each policy returns a valid compliance result.
+        """
         hierarchical_context = {
             "safety_critical": True,
             "privacy_sensitive": True,
@@ -1086,7 +1117,9 @@ class TestEthicalDecisionAdvanced(unittest.TestCase):
     """Advanced test suite for EthicalDecision with comprehensive scenarios"""
     
     def test_decision_serialization_and_deserialization(self):
-        """Test decision can be serialized and deserialized properly."""
+        """
+        Verify that an EthicalDecision instance can be serialized to a dictionary and its fields retain correct types for deserialization.
+        """
         original_decision = EthicalDecision(
             "serialization_test",
             {"user": "test_user", "action": "serialize"},
@@ -1107,7 +1140,11 @@ class TestEthicalDecisionAdvanced(unittest.TestCase):
         self.assertIsInstance(decision_dict["timestamp"], str)
     
     def test_decision_with_streaming_data(self):
-        """Test decision handling with streaming/real-time data."""
+        """
+        Test that EthicalDecision instances can be created and managed correctly for a sequence of streaming or real-time data contexts.
+        
+        Verifies that 100 unique EthicalDecision objects are created, each with a unique decision ID and timestamp, simulating real-time data processing.
+        """
         streaming_contexts = [
             {"stream_id": i, "data": f"stream_data_{i}", "timestamp": datetime.datetime.now()}
             for i in range(100)
@@ -1125,7 +1162,9 @@ class TestEthicalDecisionAdvanced(unittest.TestCase):
         self.assertEqual(len(set(decision_ids)), 100)  # All unique
     
     def test_decision_with_multimedia_context(self):
-        """Test decision with multimedia and complex data types."""
+        """
+        Tests that an EthicalDecision can be created with a multimedia-rich context and that complex nested data types are correctly stored and accessible.
+        """
         multimedia_context = {
             "text_data": "User generated content with sentiment analysis",
             "image_metadata": {
@@ -1156,7 +1195,11 @@ class TestEthicalFrameworkAdvanced(unittest.TestCase):
     """Advanced test suite for EthicalFramework with comprehensive scenarios"""
     
     def test_framework_validation_and_consistency(self):
-        """Test framework validation for consistency and completeness."""
+        """
+        Validates that various EthicalFramework instances have consistent and complete names and principles.
+        
+        Ensures that each framework's name is a non-empty string and that all principles are non-empty strings within a list.
+        """
         frameworks = [
             EthicalFramework("Minimal", ["fairness"]),
             EthicalFramework("Standard", ["fairness", "transparency", "accountability"]),
@@ -1181,7 +1224,11 @@ class TestEthicalFrameworkAdvanced(unittest.TestCase):
                     self.assertGreater(len(principle), 0)
     
     def test_framework_principle_relationships(self):
-        """Test relationships and dependencies between principles."""
+        """
+        Test that an ethical framework correctly includes principles that are related or dependent on each other.
+        
+        This test verifies that when a complex ethical framework is initialized with a set of principles, the expected related or dependent principles are also present in the framework's principles list.
+        """
         complex_framework = EthicalFramework(
             "Complex_Framework",
             [
@@ -1205,7 +1252,9 @@ class TestEthicalFrameworkAdvanced(unittest.TestCase):
                         self.assertIn(related_principle, complex_framework.principles)
     
     def test_framework_internationalization(self):
-        """Test framework with international and cultural considerations."""
+        """
+        Test that ethical frameworks with international and cultural principles are initialized correctly and contain non-empty principles lists.
+        """
         international_frameworks = [
             EthicalFramework("EU_Framework", ["gdpr_compliance", "fundamental_rights", "dignity"]),
             EthicalFramework("US_Framework", ["constitutional_rights", "due_process", "equal_protection"]),
@@ -1222,7 +1271,9 @@ class TestEthicalViolationAdvanced(unittest.TestCase):
     """Advanced test suite for EthicalViolation with comprehensive scenarios"""
     
     def test_violation_categorization_and_severity(self):
-        """Test violation categorization and severity levels."""
+        """
+        Test that EthicalViolation instances are correctly categorized and assigned severity levels, and verify grouping by severity.
+        """
         violation_categories = [
             ("bias", "Algorithmic bias in hiring decisions", "critical"),
             ("privacy", "Unauthorized data collection", "high"),
@@ -1252,7 +1303,9 @@ class TestEthicalViolationAdvanced(unittest.TestCase):
         self.assertEqual(len(high_violations), 3)
     
     def test_violation_aggregation_and_patterns(self):
-        """Test violation aggregation and pattern detection."""
+        """
+        Tests aggregation of ethical violations and detection of patterns, including repeated types and severity distribution.
+        """
         # Generate violations with patterns
         violations = []
         
@@ -1289,7 +1342,9 @@ class TestEthicalViolationAdvanced(unittest.TestCase):
         self.assertIn("critical", severity_counts)
     
     def test_violation_temporal_analysis(self):
-        """Test temporal aspects of violations."""
+        """
+        Test that EthicalViolation instances have valid timestamps and can be analyzed for temporal properties, such as chronological ordering.
+        """
         violations = []
         base_time = datetime.datetime.now()
         
@@ -1318,7 +1373,11 @@ class TestComplianceCheckerAdvanced(unittest.TestCase):
     """Advanced test suite for ComplianceChecker with comprehensive scenarios"""
     
     def test_multi_regulation_compliance(self):
-        """Test compliance checking across multiple regulations simultaneously."""
+        """
+        Test that ComplianceChecker correctly evaluates compliance for actions under multiple simultaneous regulations.
+        
+        Verifies that the compliance check returns a dictionary with expected keys for a variety of actions, ensuring support for complex regulatory environments.
+        """
         comprehensive_regulations = [
             "GDPR", "CCPA", "HIPAA", "SOX", "PCI_DSS", "COPPA", "FERPA", "GLBA"
         ]
@@ -1343,7 +1402,11 @@ class TestComplianceCheckerAdvanced(unittest.TestCase):
                 self.assertIn("details", result)
     
     def test_regulation_specific_requirements(self):
-        """Test regulation-specific compliance requirements."""
+        """
+        Tests that the compliance checker correctly handles regulation-specific requirements for various regulations and actions.
+        
+        Verifies that the compliance result is a dictionary containing a "compliant" key, and checks for the presence and type of any regulation-specific fields in the result.
+        """
         regulation_actions = [
             ("GDPR", "data_portability_request"),
             ("CCPA", "opt_out_request"),
@@ -1365,7 +1428,11 @@ class TestComplianceCheckerAdvanced(unittest.TestCase):
                     self.assertIsInstance(result["regulation_specific"], dict)
     
     def test_compliance_conflict_resolution(self):
-        """Test handling of conflicting compliance requirements."""
+        """
+        Test that the ComplianceChecker can detect and handle conflicts when checking compliance against multiple, potentially conflicting regulations.
+        
+        Verifies that the compliance check returns a dictionary and, if conflicts are present, that they are reported as a list.
+        """
         conflicting_regulations = ["GDPR", "CCPA"]  # Different privacy approaches
         checker = ComplianceChecker(conflicting_regulations)
         
@@ -1390,7 +1457,9 @@ class TestRiskAssessmentAdvanced(unittest.TestCase):
     """Advanced test suite for RiskAssessment with comprehensive scenarios"""
     
     def test_multi_dimensional_risk_assessment(self):
-        """Test risk assessment across multiple dimensions."""
+        """
+        Test that RiskAssessment can evaluate risk across multiple dimensions and returns expected result structure for complex contexts.
+        """
         risk_contexts = [
             {
                 "privacy_risk": {"level": "high", "factors": ["pii", "sensitive_data"]},
@@ -1420,7 +1489,11 @@ class TestRiskAssessmentAdvanced(unittest.TestCase):
                     self.assertIsInstance(result["dimensions"], dict)
     
     def test_dynamic_risk_calculation(self):
-        """Test dynamic risk calculation based on changing contexts."""
+        """
+        Test that the risk assessment dynamically adjusts its risk score in response to changes in context attributes.
+        
+        This test modifies the base context with various risk-related factors and verifies that the calculated risk score reflects these changes appropriately.
+        """
         base_context = {
             "user_type": "standard",
             "data_sensitivity": "medium",
@@ -1451,7 +1524,9 @@ class TestRiskAssessmentAdvanced(unittest.TestCase):
                 # Note: Risk calculation logic depends on implementation
     
     def test_risk_assessment_edge_cases(self):
-        """Test risk assessment with edge cases and unusual contexts."""
+        """
+        Tests that the RiskAssessment class can handle a variety of edge case and unusual context inputs without errors, and that calculate_risk() returns a dictionary containing the expected keys.
+        """
         edge_cases = [
             {"empty_context": {}},
             {"null_values": {"user": None, "data": None}},
@@ -1477,7 +1552,11 @@ class TestEthicalMetricsAdvanced(unittest.TestCase):
     """Advanced test suite for EthicalMetrics with comprehensive scenarios"""
     
     def test_comprehensive_metrics_calculation(self):
-        """Test comprehensive metrics calculation with diverse decision sets."""
+        """
+        Test that the metrics calculation method produces valid accuracy, fairness, and transparency scores for diverse sets of ethical decisions.
+        
+        Verifies that the returned metrics are within the expected range [0, 1] and that the output structure is correct for high-quality, mixed, and low-quality decision sets.
+        """
         # Create diverse decision sets
         decision_sets = [
             # High-quality decisions
@@ -1506,7 +1585,11 @@ class TestEthicalMetricsAdvanced(unittest.TestCase):
                     self.assertLessEqual(metric_value, 1)
     
     def test_temporal_metrics_analysis(self):
-        """Test metrics analysis over time periods."""
+        """
+        Test that ethical metrics can be calculated and analyzed over a sequence of temporally distributed decisions.
+        
+        Creates a series of decisions with timestamps and varying attributes, then verifies that the metrics calculation returns expected keys and optionally includes temporal analysis data.
+        """
         # Create decisions with temporal patterns
         base_time = datetime.datetime.now()
         temporal_decisions = []
@@ -1536,7 +1619,11 @@ class TestEthicalMetricsAdvanced(unittest.TestCase):
             self.assertIsInstance(result["temporal_analysis"], dict)
     
     def test_comparative_metrics_analysis(self):
-        """Test comparative metrics analysis between different groups."""
+        """
+        Test comparative analysis of ethical metrics across different decision groups.
+        
+        This test verifies that the metrics calculation can handle and potentially differentiate between groups of decisions, ensuring that group-specific and fairness metrics are present and correctly structured in the results.
+        """
         # Create decision groups for comparative analysis
         group_a_decisions = [
             EthicalDecision(f"a_{i}", {"group": "A", "demographic": "group_a", "outcome": "positive"})
@@ -1569,7 +1656,11 @@ class TestPerformanceAndStress(unittest.TestCase):
     """Performance and stress testing for ethical governance components"""
     
     def test_large_scale_decision_processing(self):
-        """Test system performance with large numbers of decisions."""
+        """
+        Tests the system's ability to process a large number of ethical decisions efficiently.
+        
+        Simulates the evaluation of 1,000 decision contexts and verifies that all are processed and that the total processing time remains within acceptable limits.
+        """
         governor = EthicalGovernor()
         
         # Process large number of decisions
@@ -1595,7 +1686,9 @@ class TestPerformanceAndStress(unittest.TestCase):
         self.assertLess(processing_time, 30)  # Should complete in under 30 seconds
     
     def test_concurrent_violation_logging(self):
-        """Test concurrent violation logging."""
+        """
+        Tests that the EthicalGovernor can log a large number of violations and accurately report the total count in its metrics.
+        """
         governor = EthicalGovernor()
         
         # Create many violations
@@ -1616,7 +1709,9 @@ class TestPerformanceAndStress(unittest.TestCase):
         self.assertEqual(metrics["violations"], 500)
     
     def test_memory_usage_with_large_datasets(self):
-        """Test memory usage with large datasets."""
+        """
+        Tests that an EthicalDecision can be created and handled correctly with a large dataset in its context, verifying attribute sizes and successful initialization.
+        """
         # Create large decision context
         large_context = {
             "user_data": {f"field_{i}": f"value_{i}" for i in range(1000)},
@@ -1638,7 +1733,9 @@ class TestSecurityAndRobustness(unittest.TestCase):
     """Security and robustness testing for ethical governance components"""
     
     def test_input_sanitization(self):
-        """Test input sanitization and injection prevention."""
+        """
+        Test that the ethical governor handles potentially malicious or dangerous input data without executing or being affected by injection attempts.
+        """
         malicious_inputs = [
             {"eval": "exec('print(\"injection\")')"},
             {"script": "<script>alert('xss')</script>"},
@@ -1659,7 +1756,11 @@ class TestSecurityAndRobustness(unittest.TestCase):
                 self.assertIn("approved", result)
     
     def test_data_validation_and_bounds_checking(self):
-        """Test data validation and bounds checking."""
+        """
+        Tests that the ethical governor's decision evaluation handles extreme and invalid input values gracefully without errors.
+        
+        Verifies that the result is a dictionary containing the "approved" key for various edge case inputs, including out-of-bounds numbers, infinities, NaN, and very large strings.
+        """
         edge_cases = [
             {"age": -1},
             {"age": 200},
@@ -1681,7 +1782,9 @@ class TestSecurityAndRobustness(unittest.TestCase):
                 self.assertIn("approved", result)
     
     def test_error_handling_and_recovery(self):
-        """Test error handling and recovery mechanisms."""
+        """
+        Test that the ethical governor's decision evaluation handles various error scenarios, including circular references, deep nesting, type mismatches, missing data, and encoding issues, and recovers gracefully without unhandled exceptions.
+        """
         error_scenarios = [
             {"circular_reference": None},  # Will be set to circular reference
             {"deep_nesting": None},        # Will be set to deeply nested structure

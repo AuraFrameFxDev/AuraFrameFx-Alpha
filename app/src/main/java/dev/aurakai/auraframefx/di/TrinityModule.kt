@@ -56,9 +56,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton `TrinityCoordinatorService` for orchestrating and managing multiple AI personas within the Trinity AI system.
+     * Provides a singleton `TrinityCoordinatorService` that orchestrates and manages multiple AI personas within the Trinity AI system.
      *
-     * @return The singleton `TrinityCoordinatorService`.
+     * @return The configured `TrinityCoordinatorService`.
      */
     @Provides
     @Singleton
@@ -79,9 +79,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton `SecurityMonitor` responsible for overseeing security operations in the Trinity AI system.
+     * Provides a singleton SecurityMonitor for overseeing security operations within the Trinity AI system.
      *
-     * @return The singleton `SecurityMonitor`.
+     * @return The SecurityMonitor instance configured with the provided security context, GenesisBridgeService, and logger.
      */
     @Provides
     @Singleton
