@@ -58,9 +58,9 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Processes an AI request and emits a creative response or error as a coroutine flow.
+     * Processes an AI request and emits a creative text response or error as a coroutine flow.
      *
-     * Validates the request for security, generates a creative text response using the provided query and optional context, and emits the result as an `AgentResponse`. Emits an error response if processing fails.
+     * Validates the request for security, generates a creative response using the provided query and optional context, and emits the result as an `AgentResponse`. If processing fails, emits an error response with zero confidence.
      *
      * @param request The AI request containing the query and optional context.
      * @return A flow emitting a single `AgentResponse` with generated content or an error message.

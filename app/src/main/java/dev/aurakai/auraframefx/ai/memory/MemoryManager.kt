@@ -36,12 +36,12 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Retrieves memory items matching the specified query criteria.
+     * Retrieves memory items matching the specified query, applying agent filters and limiting the result count.
      *
-     * Filters stored memory items by agent, sorts them by descending timestamp, and limits the results to the maximum number configured. Returns a result containing the filtered items, their count, and the original query.
+     * Filters stored memory items by agent if an agent filter is provided in the query, sorts them by descending timestamp, and returns up to the maximum number of items allowed by the configuration.
      *
      * @param query The criteria used to filter and retrieve memory items.
-     * @return A result containing the retrieved memory items, their total count, and the query used.
+     * @return A [MemoryRetrievalResult] containing the filtered memory items, their count, and the original query.
      */
     fun retrieveMemory(query: MemoryQuery): MemoryRetrievalResult {
         val items = memoryStore.values
@@ -62,11 +62,10 @@ class MemoryManager @Inject constructor(
     /**
      * Retrieves a list of recent memory items within the configured context window.
      *
-     * Filters memory items whose timestamps fall within the maximum chain length duration from the current time,
-     * sorts them by descending timestamp, and limits the result to the configured maximum number of items.
+     * Filters stored memory items to include only those whose timestamps fall within the maximum chain length duration from the current time, sorts them by most recent, and limits the result to the configured maximum chain length.
      *
      * @param task The task identifier (currently unused in filtering).
-     * @return A list of recent `CanonicalMemoryItem` objects within the context window.
+     * @return A list of recent canonical memory items for context chaining.
      */
     fun getContextWindow(task: String): List<CanonicalMemoryItem> { // Changed MemoryItem to CanonicalMemoryItem
         val recentItems = memoryStore.values
