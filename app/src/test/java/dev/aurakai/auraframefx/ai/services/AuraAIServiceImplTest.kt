@@ -1,12 +1,9 @@
 package dev.aurakai.auraframefx.ai.services
 
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.async
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.delay
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
