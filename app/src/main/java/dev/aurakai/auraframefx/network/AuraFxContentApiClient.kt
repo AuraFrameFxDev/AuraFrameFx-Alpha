@@ -17,11 +17,11 @@ class AuraFxContentApiClient @Inject constructor(
     private val aiContentApi: AIContentApi,
 ) {
     /**
-     * Asynchronously generates AI-powered text based on the provided prompt.
+     * Generates AI-powered text based on the given prompt.
      *
-     * @param prompt The input prompt for text generation.
-     * @param maxTokens Optional maximum number of tokens for the generated text; defaults to 500 if not specified.
-     * @param temperature Optional value controlling the randomness of the output; defaults to 0.7 if not specified.
+     * @param prompt The prompt to generate text from.
+     * @param maxTokens Optional maximum number of tokens for the generated text; defaults to 500.
+     * @param temperature Optional value controlling output randomness; defaults to 0.7.
      * @return The API response containing the generated text.
      */
     suspend fun generateText(
@@ -40,7 +40,7 @@ class AuraFxContentApiClient @Inject constructor(
     }
 
     /**
-         * Generates an AI-powered description for an image at the specified URL, optionally using additional context to refine the output.
+         * Generates an AI-powered description for an image at the given URL, optionally using additional context to guide the output.
          *
          * @param imageUrl The URL of the image to describe.
          * @param context Optional context to guide the description generation.

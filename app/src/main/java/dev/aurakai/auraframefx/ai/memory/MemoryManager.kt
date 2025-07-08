@@ -57,12 +57,19 @@ class MemoryManager @Inject constructor(
         return recentItems
     }
 
+    /**
+     * Returns the current snapshot of memory statistics.
+     *
+     * @return The latest memory statistics, including total items, recent items, memory size, and last updated time.
+     */
     fun getMemoryStats(): MemoryStats {
         return _memoryStats.value
     }
 
     /**
-     * Updates the memory statistics with the current total item count, recent item count, total memory size, and the timestamp of the update.
+     * Refreshes memory statistics to reflect the current state of the memory store.
+     *
+     * Updates the total number of stored items, the count of recent items within the configured time window, the aggregate size of all memory content, and the timestamp of the update.
      */
     private fun updateStats() {
         _memoryStats.update { current ->
