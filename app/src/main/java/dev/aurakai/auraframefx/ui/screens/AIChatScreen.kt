@@ -83,9 +83,9 @@ fun AiChatScreen() {
                 modifier = Modifier.weight(1f),
                 placeholder = { Text(AppStrings.AI_CHAT_PLACEHOLDER) },
                 shape = InputFieldShape,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outline
                 )
             )
 
@@ -129,7 +129,7 @@ fun AiChatScreen() {
  */
 @Composable
 fun ChatMessageItem(message: ChatMessage) {
-    val alignment = if (message.isFromUser) Alignment.End else Alignment.Start
+    val alignment = if (message.isFromUser) Alignment.CenterEnd else Alignment.CenterStart
     val background = if (message.isFromUser)
         MaterialTheme.colorScheme.primaryContainer
     else

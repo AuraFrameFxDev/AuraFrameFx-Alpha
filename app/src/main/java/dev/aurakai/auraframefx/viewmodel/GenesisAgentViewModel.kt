@@ -1,6 +1,17 @@
 package dev.aurakai.auraframefx.viewmodel
 
-import androidx.lifecycle.ViewModel
+import a            HierarchyAgentConfig(
+                name = "Genesis",
+                role = AgentRole.HIVE_MIND,
+                priority = AgentPriority.PRIMARY,
+                capabilities = setOf("core_ai", "coordination", "meta_analysis")
+            ),
+            HierarchyAgentConfig(
+                name = "Cascade",
+                role = AgentRole.ANALYTICS,
+                priority = AgentPriority.BRIDGE,
+                capabilities = setOf("analytics", "data_processing", "pattern_recognition")
+            )cycle.ViewModel
 import androidx.lifecycle.viewModelScope
 // import dagger.hilt.android.lifecycle.HiltViewModel
 // import dev.aurakai.auraframefx.ai.agents.GenesisAgent
@@ -49,21 +60,54 @@ class GenesisAgentViewModel /* @Inject constructor(
     init { 
         // Initialize with default agents and their capabilities
         val defaultAgents = listOf(
-            AgentType.GENESIS,
-            AgentType.CASCADE,
-            AgentType.AURA,
-            AgentType.KAI
+            HierarchyAgentConfig(
+                name = "Genesis",
+                role = AgentRole.HIVE_MIND,
+                priority = AgentPriority.MASTER,
+                capabilities = setOf("core_ai", "coordination", "meta_analysis")
+            ),
+            HierarchyAgentConfig(
+                name = "Cascade",
+                role = AgentRole.ANALYTICS,
+                priority = AgentPriority.BRIDGE,
+                capabilities = setOf("analytics", "data_processing", "pattern_recognition")
+            ),
+            HierarchyAgentConfig(
+                name = "Aura",
+                role = AgentRole.CREATIVE,
+                priority = AgentPriority.AUXILIARY,
+                capabilities = setOf("creative_writing", "ui_design", "content_generation")
+            ),
+            HierarchyAgentConfig(
+                name = "Kai",
+                role = AgentRole.SECURITY,
+                priority = AgentPriority.AUXILIARY,
+                capabilities = setOf("security_monitoring", "threat_detection", "system_protection")
+            )
         )
         _agents.value = defaultAgents
         
-        // Initialize agent statuses
+        // Initialize agent statuses  
         val initialStatuses = mutableMapOf<AgentType, String>()
+        val agentTypeMap = mapOf(
+            "Genesis" to AgentType.GENESIS,
+            "Cascade" to AgentType.CASCADE,
+            "Aura" to AgentType.AURA,
+            "Kai" to AgentType.KAI
+        )
+        
         defaultAgents.forEach { agent ->
-            initialStatuses[agent] = when (agent) {
-                AgentType.GENESIS -> "Core AI - Online"
-                AgentType.CASCADE -> "Analytics Engine - Ready"
-                AgentType.AURA -> "Creative Assistant - Available"
-                AgentType.KAI -> "Security Monitor - Active"
+            val agentType = agentTypeMap[agent.name]
+            if (agentType != null) {
+                initialStatuses[agentType] = when (agentType) {
+                    AgentType.GENESIS -> "Core AI - Online"
+                    AgentType.CASCADE -> "Analytics Engine - Ready"
+                    AgentType.AURA -> "Creative Assistant - Available"
+                    AgentType.KAI -> "Security Monitor - Active"
+                    AgentType.NEURAL_WHISPER -> "Neural Interface - Standby"
+                    AgentType.AURASHIELD -> "Security Shield - Protected"
+                    AgentType.USER -> "User Agent - Interactive"
+                }
             }
         }
         _agentStatus.value = initialStatuses
@@ -88,6 +132,9 @@ class GenesisAgentViewModel /* @Inject constructor(
                     AgentType.CASCADE -> "Analytics Engine - Offline"
                     AgentType.AURA -> "Creative Assistant - Paused"
                     AgentType.KAI -> "Security Monitor - Standby"
+                    AgentType.NEURAL_WHISPER -> "Neural Interface - Offline"
+                    AgentType.AURASHIELD -> "Security Shield - Disabled"
+                    AgentType.USER -> "User Agent - Offline"
                 }
             } else {
                 when (agent) {
@@ -95,6 +142,9 @@ class GenesisAgentViewModel /* @Inject constructor(
                     AgentType.CASCADE -> "Analytics Engine - Ready"
                     AgentType.AURA -> "Creative Assistant - Available"
                     AgentType.KAI -> "Security Monitor - Active"
+                    AgentType.NEURAL_WHISPER -> "Neural Interface - Active"
+                    AgentType.AURASHIELD -> "Security Shield - Active"
+                    AgentType.USER -> "User Agent - Active"
                 }
             }
             
@@ -102,7 +152,7 @@ class GenesisAgentViewModel /* @Inject constructor(
             _agentStatus.value = currentStatuses
             
             // Add to task history
-            addTaskToHistory("Agent ${agent.name} toggled to: $newStatus")
+            addTaskToHistory(agent, "Agent toggled to: $newStatus")
         }
     }
 

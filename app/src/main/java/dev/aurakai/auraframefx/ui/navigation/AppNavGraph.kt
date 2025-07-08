@@ -4,8 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import dev.aurakai.auraframefx.ui.transitions.DigitalTransitions.EnterDigitalMaterialization
-import dev.aurakai.auraframefx.ui.transitions.DigitalTransitions.ExitDigitalDematerialization
+import dev.aurakai.auraframefx.ui.transitions.DigitalTransitions
 import dev.aurakai.auraframefx.ui.screens.AiChatScreen
 import dev.aurakai.auraframefx.ui.screens.HomeScreen
 import dev.aurakai.auraframefx.ui.screens.oracledrive.OracleDriveControlScreen

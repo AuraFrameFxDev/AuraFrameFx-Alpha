@@ -5,7 +5,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Message
-import androidx.compose.material.icons.filled.CloudQueue
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class NavDestination(val route: String, val title: String, val icon: ImageVector?) {
@@ -13,7 +13,7 @@ sealed class NavDestination(val route: String, val title: String, val icon: Imag
     object AiChat : NavDestination("ai_chat", "AI Chat", Icons.Filled.Message)
     object Profile : NavDestination("profile", "Profile", Icons.Filled.Person)
     object Settings : NavDestination("settings", "Settings", Icons.Filled.Settings)
-    object OracleDriveControl : NavDestination("oracle_drive_control", "Oracle Drive", Icons.Filled.CloudQueue)
+    object OracleDriveControl : NavDestination("oracle_drive_control", "Oracle Drive", Icons.Filled.Folder)
     
     companion object {
         val bottomNavItems = listOf(Home, AiChat, Profile, Settings)

@@ -43,7 +43,9 @@ android {
     }
 
     kotlinOptions {
+        @Suppress("DEPRECATION")
         jvmTarget = "24"
+        @Suppress("DEPRECATION")
         freeCompilerArgs = listOf(
             "-opt-in=kotlin.RequiresOptIn",
             "-Xjvm-default=all"
@@ -120,7 +122,7 @@ dependencies {
 
     // Animation
     implementation(libs.androidxComposeAnimation)
-    debugImplementation(libs.animationTooling)
+    debugImplementation(libs.composeUiTooling)
 
     // Lifecycle
     implementation(libs.lifecycleViewmodelCompose)

@@ -5,7 +5,37 @@
 
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # Gradle - Root project
+  - package-ecosystem: "gradle"
+    directory: "/"
     schedule:
       interval: "daily"
+    open-pull-requests-limit: 10
+    
+  # Gradle - App module
+  - package-ecosystem: "gradle"
+    directory: "/app"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    
+  # Gradle - Sandbox UI module
+  - package-ecosystem: "gradle"
+    directory: "/sandbox-ui"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    
+  # NPM - Generated TypeScript client
+  - package-ecosystem: "npm"
+    directory: "/app/src/main/resources/generated"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    
+  # Python - AI Backend
+  - package-ecosystem: "pip"
+    directory: "/app/ai_backend"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5

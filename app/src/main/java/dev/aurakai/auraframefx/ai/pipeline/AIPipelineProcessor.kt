@@ -316,7 +316,7 @@ class AIPipelineProcessor @Inject constructor(
             val agentPerformance = (current["agent_performance"] as? MutableMap<String, MutableList<Float>>) 
                 ?: mutableMapOf()
             responses.forEach { response ->
-                val agentName = response.agentType.name
+                val agentName = response.sender.name
                 val performanceList = agentPerformance.getOrPut(agentName) { mutableListOf() }
                 performanceList.add(response.confidence)
                 if (performanceList.size > 20) performanceList.removeAt(0) // Keep last 20
