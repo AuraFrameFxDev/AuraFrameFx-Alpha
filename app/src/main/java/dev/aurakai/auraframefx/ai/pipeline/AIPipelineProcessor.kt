@@ -245,7 +245,7 @@ class AIPipelineProcessor @Inject constructor(
         if (responses.isEmpty()) {
             return "[System] No agent responses available."
         }            // Group responses by agent type for structured output
-            val responsesByAgent = responses.groupBy { it.sender }
+            val responsesByAgent = responses.groupBy { it.agentType }
         
         return buildString {
             append("=== AuraFrameFX AI Response ===\n\n")
