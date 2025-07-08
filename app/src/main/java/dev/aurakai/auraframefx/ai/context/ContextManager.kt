@@ -26,14 +26,14 @@ class ContextManager @Inject constructor(
     val contextStats: StateFlow<ContextStats> = _contextStats
 
     /**
-     * Creates and registers a new context chain initialized with a single context node.
+     * Creates and registers a new context chain with an initial context node.
      *
-     * The new chain is associated with the specified root context, initial content, agent, and optional metadata. Metadata values are stored as strings. The chain is added to the active context registry, and statistics are updated.
+     * Initializes a new `ContextChain` using the provided root context, initial content, agent, and optional metadata (all metadata values are stored as strings). The chain is added to the active context registry, and context statistics are updated.
      *
-     * @param rootContext Identifier for the root context of the chain.
-     * @param initialContext Content of the initial context node.
-     * @param agent Agent associated with the initial context.
-     * @param metadata Optional metadata for the context; values are stored as strings.
+     * @param rootContext The identifier for the root context of the chain.
+     * @param initialContext The content of the initial context node.
+     * @param agent The agent associated with the initial context.
+     * @param metadata Optional metadata for the context; all values are stored as strings.
      * @return The unique identifier of the created context chain.
      */
     fun createContextChain(
@@ -65,14 +65,14 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Appends a new context node to an existing context chain with the specified context, agent, and metadata.
+     * Updates an existing context chain by appending a new context node with the provided context, agent, and metadata.
      *
-     * Updates the chain's history, agent-to-context mapping, and last updated timestamp. All metadata values are stored as strings.
+     * The chain's history, agent-to-context mapping, and last updated timestamp are updated. All metadata values are stored as strings.
      *
      * @param chainId The unique identifier of the context chain to update.
-     * @param newContext The context string to add to the chain.
+     * @param newContext The new context string to add.
      * @param agent The agent associated with the new context.
-     * @param metadata Optional metadata for the context node; values are stored as strings.
+     * @param metadata Optional metadata for the context node; all values are stored as strings.
      * @return The updated ContextChain.
      * @throws IllegalStateException if the specified context chain does not exist.
      */
