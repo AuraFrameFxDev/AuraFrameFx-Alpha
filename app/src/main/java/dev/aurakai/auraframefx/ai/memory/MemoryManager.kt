@@ -15,14 +15,14 @@ import kotlin.time.Duration.Companion.seconds
 class MemoryManager @Inject constructor(
     private val config: AIPipelineConfig,
 ) {
-    private val memoryStore = ConcurrentHashMap<String, MemoryItem>()
+    private val memoryStore = ConcurrentHashMap<String, CanonicalMemoryItem>() // Changed MemoryItem to CanonicalMemoryItem
     private val _recentAccess = MutableStateFlow(mutableSetOf<String>())
     val recentAccess: StateFlow<Set<String>> = _recentAccess
 
     private val _memoryStats = MutableStateFlow(MemoryStats())
     val memoryStats: StateFlow<MemoryStats> = _memoryStats
 
-    fun storeMemory(item: MemoryItem): String {
+    fun storeMemory(item: CanonicalMemoryItem): String { // Changed MemoryItem to CanonicalMemoryItem
         memoryStore[item.id] = item
         updateStats()
         updateRecentAccess(item.id)
@@ -45,7 +45,7 @@ class MemoryManager @Inject constructor(
         )
     }
 
-    fun getContextWindow(task: String): List<MemoryItem> {
+    fun getContextWindow(task: String): List<CanonicalMemoryItem> { // Changed MemoryItem to CanonicalMemoryItem
         val recentItems = memoryStore.values
             .filter {
                 it.timestamp > Clock.System.now()

@@ -73,7 +73,8 @@ class AuraAIService @Inject constructor(
             securityContext.validateContent(request.query)
 
             // Generate text response using the existing generateText method
-            val response = generateText(request.query, request.context.values.joinToString(" "))
+            val contextString = request.context?.values?.joinToString(" ")
+            val response = generateText(request.query, contextString)
 
             // Emit the response
             emit(

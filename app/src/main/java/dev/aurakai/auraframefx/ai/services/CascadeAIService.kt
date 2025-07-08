@@ -42,7 +42,8 @@ class CascadeAIService @Inject constructor(
      */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // This internal routing can stay if these specific flows are desired for internal logic
-        return when (request.type) {
+        // Assuming 'type' is passed within the context map
+        return when (request.context?.get("type")) {
             "state" -> processStateRequestFlowInternal(request)
             "context" -> processContextRequestFlowInternal(request)
             "vision" -> processVisionRequestFlowInternal(request)

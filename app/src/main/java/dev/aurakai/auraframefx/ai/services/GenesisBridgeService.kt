@@ -142,8 +142,8 @@ class GenesisBridgeService @Inject constructor(
                 fusionMode = fusionMode,
                 payload = mapOf(
                     "message" to request.query,
-                    "type" to request.type,
-                    "priority" to "normal" // AiRequest doesn't have isUrgent
+                    "type" to (request.context?.get("type") ?: "unknown"), // Get type from context map
+                    "priority" to "normal"
                 ),
                 context = buildContextMap(request)
             )

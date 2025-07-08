@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import java.lang.System // Added import
 
 @Serializable
-data class MemoryItem(
+data class CanonicalMemoryItem( // Renamed from MemoryItem
     val id: String = "mem_${System.currentTimeMillis()}",
     val content: String,
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
@@ -32,7 +32,7 @@ data class MemoryQuery(
 
 @Serializable
 data class MemoryRetrievalResult(
-    @Contextual val items: List<MemoryItem>, // Ensured @Contextual is present
+    @Contextual val items: List<CanonicalMemoryItem>, // Changed MemoryItem to CanonicalMemoryItem
     val total: Int,
     val query: MemoryQuery,
 )
