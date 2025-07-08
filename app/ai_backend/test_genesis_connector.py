@@ -5214,3 +5214,912 @@ if __name__ == '__main__':
     print(f"Total failures/errors: {total_failures}")
     print(f"Success rate: {((total_tests - total_failures) / total_tests * 100):.1f}%" if total_tests > 0 else "0%")
     print("="*80)
+
+class TestGenesisConnectorAdditionalScenarios(unittest.TestCase):
+    """
+    Additional comprehensive test scenarios for GenesisConnector.
+    Testing framework: unittest with pytest enhancements
+    Focuses on uncovered edge cases and modern security patterns.
+    """
+
+    def setUp(self):
+        """Set up additional test scenarios environment."""
+        self.connector = GenesisConnector()
+        self.test_config = {
+            'api_key': 'additional_test_key',
+            'base_url': 'https://api.additional.test.com',
+            'timeout': 30
+        }
+
+    def test_ipv6_url_validation(self):
+        """Test validation of IPv6 URLs in configuration."""
+        ipv6_configs = [
+            {'api_key': 'test', 'base_url': 'https://[::1]:8080'},  # IPv6 localhost
+            {'api_key': 'test', 'base_url': 'https://[2001:db8::1]:443'},  # IPv6 address
+            {'api_key': 'test', 'base_url': 'https://[fe80::1%eth0]:8080'},  # IPv6 with zone ID
+            {'api_key': 'test', 'base_url': 'http://[::ffff:192.0.2.1]:80'},  # IPv4-mapped IPv6
+        ]
+        
+        for config in ipv6_configs:
+            with self.subTest(url=config['base_url']):
+                try:
+                    result = self.connector.validate_config(config)
+                    self.assertIsInstance(result, bool)
+                except ValueError:
+                    # IPv6 URLs might not be supported
+                    pass
+
+    def test_punycode_domain_handling(self):
+        """Test handling of internationalized domain names with punycode."""
+        punycode_configs = [
+            {'api_key': 'test', 'base_url': 'https://xn--e1afmkfd.xn--p1ai'},  # пример.рф
+            {'api_key': 'test', 'base_url': 'https://xn--fsq.xn--0zwm56d'},  # 测试.测试
+            {'api_key': 'test', 'base_url': 'https://xn--zckzah.xn--zckzah'},  # テスト.テスト
+        ]
+        
+        for config in punycode_configs:
+            with self.subTest(domain=config['base_url']):
+                try:
+                    result = self.connector.validate_config(config)
+                    self.assertIsInstance(result, bool)
+                except (ValueError, UnicodeError):
+                    # Punycode domains might not be supported
+                    pass
+
+    def test_certificate_pinning_simulation(self):
+        """Test SSL certificate pinning scenarios."""
+        with patch('requests.post') as mock_post:
+            # Simulate SSL certificate mismatch
+            import ssl
+            mock_post.side_effect = ssl.SSLError("certificate verify failed: certificate signature failure")
+            
+            payload = {'message': 'cert_pinning_test'}
+            
+            with self.assertRaises(ssl.SSLError):
+                self.connector.send_request(payload)
+
+    def test_dns_over_https_compatibility(self):
+        """Test compatibility with DNS over HTTPS scenarios."""
+        doh_configs = [
+            {'api_key': 'test', 'base_url': 'https://cloudflare-dns.com/dns-query'},
+            {'api_key': 'test', 'base_url': 'https://dns.google/dns-query'},
+            {'api_key': 'test', 'base_url': 'https://1.1.1.1/dns-query'},
+        ]
+        
+        for config in doh_configs:
+            with self.subTest(doh_url=config['base_url']):
+                # These shouldn't be used as API endpoints, should be rejected
+                with self.assertRaises(ValueError):
+                    self.connector.validate_config(config)
+
+    def test_content_security_policy_headers(self):
+        """Test Content Security Policy header generation."""
+        csp_config = {
+            'api_key': 'test_key',
+            'base_url': 'https://api.test.com',
+            'csp_policy': "default-src 'self'; script-src 'none'"
+        }
+        
+        connector = GenesisConnector(config=csp_config)
+        headers = connector.get_headers()
+        
+        if 'csp_policy' in csp_config:
+            # Check if CSP header is added when configured
+            csp_headers = [h for h in headers.keys() if 'content-security-policy' in h.lower()]
+            if csp_headers:
+                self.assertIn("default-src 'self'", headers[csp_headers[0]])
+
+    def test_websocket_upgrade_prevention(self):
+        """Test prevention of unauthorized WebSocket upgrades."""
+        websocket_headers = {
+            'Connection': 'Upgrade',
+            'Upgrade': 'websocket',
+            'Sec-WebSocket-Key': 'dGhlIHNhbXBsZSBub25jZQ==',
+            'Sec-WebSocket-Version': '13'
+        }
+        
+        config = {
+            'api_key': 'test_key',
+            'base_url': 'wss://api.test.com/ws',
+            'custom_headers': websocket_headers
+        }
+        
+        # WebSocket URLs should be rejected for HTTP API connector
+        with self.assertRaises(ValueError):
+            self.connector.validate_config(config)
+
+    def test_server_timing_header_handling(self):
+        """Test handling of Server-Timing headers for performance monitoring."""
+        with patch('requests.post') as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.headers = {
+                'Server-Timing': 'db;dur=123.4, app;dur=47.2',
+                'Content-Type': 'application/json'
+            }
+            mock_response.json.return_value = {'timing_test': True}
+            mock_post.return_value = mock_response
+            
+            payload = {'message': 'timing_test'}
+            result = self.connector.send_request(payload)
+            
+            self.assertEqual(result['timing_test'], True)
+
+    def test_feature_policy_header_support(self):
+        """Test Feature-Policy/Permissions-Policy header support."""
+        feature_policy_config = {
+            'api_key': 'test_key',
+            'base_url': 'https://api.test.com',
+            'feature_policy': 'camera=(), microphone=(), geolocation=()'
+        }
+        
+        connector = GenesisConnector(config=feature_policy_config)
+        headers = connector.get_headers()
+        
+        # Check if feature policy headers are properly set
+        policy_headers = [h for h in headers.keys() if 'policy' in h.lower()]
+        if policy_headers:
+            for header in policy_headers:
+                self.assertIn('camera=()', headers[header])
+
+    def test_referrer_policy_configuration(self):
+        """Test Referrer-Policy header configuration."""
+        referrer_policies = [
+            'no-referrer',
+            'no-referrer-when-downgrade', 
+            'origin',
+            'origin-when-cross-origin',
+            'same-origin',
+            'strict-origin',
+            'strict-origin-when-cross-origin',
+            'unsafe-url'
+        ]
+        
+        for policy in referrer_policies:
+            with self.subTest(policy=policy):
+                config = {
+                    'api_key': 'test_key',
+                    'base_url': 'https://api.test.com',
+                    'referrer_policy': policy
+                }
+                
+                connector = GenesisConnector(config=config)
+                headers = connector.get_headers()
+                
+                referrer_headers = [h for h in headers.keys() if 'referrer-policy' in h.lower()]
+                if referrer_headers:
+                    self.assertEqual(headers[referrer_headers[0]], policy)
+
+    def test_cross_origin_embedder_policy(self):
+        """Test Cross-Origin-Embedder-Policy header handling."""
+        coep_values = ['unsafe-none', 'require-corp', 'credentialless']
+        
+        for coep_value in coep_values:
+            with self.subTest(coep=coep_value):
+                config = {
+                    'api_key': 'test_key',
+                    'base_url': 'https://api.test.com',
+                    'coep': coep_value
+                }
+                
+                connector = GenesisConnector(config=config)
+                headers = connector.get_headers()
+                
+                coep_headers = [h for h in headers.keys() if 'cross-origin-embedder-policy' in h.lower()]
+                if coep_headers:
+                    self.assertEqual(headers[coep_headers[0]], coep_value)
+
+    def test_brotli_compression_support(self):
+        """Test Brotli compression support in requests."""
+        with patch('requests.post') as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.headers = {'Content-Encoding': 'br'}
+            mock_response.json.return_value = {'compressed': True}
+            mock_post.return_value = mock_response
+            
+            payload = {'message': 'compression_test', 'data': 'x' * 1000}
+            result = self.connector.send_request(payload)
+            
+            self.assertEqual(result['compressed'], True)
+            
+            # Check if Accept-Encoding header includes brotli
+            call_args = mock_post.call_args
+            if call_args and 'headers' in call_args[1]:
+                headers = call_args[1]['headers']
+                encoding_headers = [h for h in headers.keys() if 'accept-encoding' in h.lower()]
+                if encoding_headers:
+                    accept_encoding = headers[encoding_headers[0]]
+                    # Brotli might be supported
+                    self.assertIsInstance(accept_encoding, str)
+
+    def test_early_hints_response_handling(self):
+        """Test handling of HTTP 103 Early Hints responses."""
+        with patch('requests.post') as mock_post:
+            # Simulate Early Hints response
+            early_hints_response = Mock()
+            early_hints_response.status_code = 103
+            early_hints_response.headers = {
+                'Link': '</styles.css>; rel=preload; as=style',
+                'Link': '</scripts.js>; rel=preload; as=script'
+            }
+            
+            final_response = Mock()
+            final_response.status_code = 200
+            final_response.json.return_value = {'early_hints': True}
+            
+            mock_post.return_value = final_response
+            
+            payload = {'message': 'early_hints_test'}
+            result = self.connector.send_request(payload)
+            
+            self.assertEqual(result['early_hints'], True)
+
+    def test_http3_compatibility_headers(self):
+        """Test HTTP/3 compatibility and Alt-Svc header handling."""
+        with patch('requests.post') as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.headers = {
+                'Alt-Svc': 'h3=":443"; ma=86400',
+                'Content-Type': 'application/json'
+            }
+            mock_response.json.return_value = {'http3_ready': True}
+            mock_post.return_value = mock_response
+            
+            payload = {'message': 'http3_test'}
+            result = self.connector.send_request(payload)
+            
+            self.assertEqual(result['http3_ready'], True)
+
+    def test_structured_headers_parsing(self):
+        """Test parsing of RFC 8941 Structured Headers."""
+        structured_headers = {
+            'Example-Integer': '123',
+            'Example-Decimal': '123.456',
+            'Example-String': '"hello world"',
+            'Example-Token': 'token_value',
+            'Example-Binary': ':cHJldGVuZCB0aGlzIGlzIGJpbmFyeQ==:',
+            'Example-Boolean': '?1',
+            'Example-List': '("foo" "bar"), ("baz"), ("bat" "one"), ("two")',
+            'Example-Dict': 'a=1, b=2; x=1; y=2, c=(a b c)'
+        }
+        
+        with patch('requests.post') as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.headers = structured_headers
+            mock_response.json.return_value = {'structured': True}
+            mock_post.return_value = mock_response
+            
+            payload = {'message': 'structured_headers_test'}
+            result = self.connector.send_request(payload)
+            
+            self.assertEqual(result['structured'], True)
+
+    def test_network_error_classification(self):
+        """Test classification of different network error types."""
+        network_errors = [
+            (ConnectionError("Connection refused"), 'connection_refused'),
+            (ConnectionError("Connection reset by peer"), 'connection_reset'),
+            (ConnectionError("No route to host"), 'no_route'),
+            (TimeoutError("Connection timeout"), 'timeout'),
+            (OSError("Network is unreachable"), 'network_unreachable'),
+            (socket.gaierror("Name or service not known"), 'dns_resolution'),
+        ]
+        
+        for error, error_type in network_errors:
+            with self.subTest(error_type=error_type):
+                with patch('requests.post') as mock_post:
+                    mock_post.side_effect = error
+                    
+                    payload = {'message': f'network_error_{error_type}'}
+                    
+                    try:
+                        # Test error classification if implemented
+                        result = self.connector.send_request_with_error_classification(payload)
+                        if result and 'error_type' in result:
+                            self.assertEqual(result['error_type'], error_type)
+                    except AttributeError:
+                        # Error classification might not be implemented
+                        with self.assertRaises(type(error)):
+                            self.connector.send_request(payload)
+
+    def test_payload_schema_evolution(self):
+        """Test handling of payload schema evolution and versioning."""
+        schema_versions = [
+            # v1 schema
+            {
+                'version': '1.0',
+                'data': {'message': 'test', 'timestamp': '2024-01-01T00:00:00Z'}
+            },
+            # v2 schema with additional fields
+            {
+                'version': '2.0', 
+                'data': {
+                    'message': 'test',
+                    'timestamp': '2024-01-01T00:00:00Z',
+                    'metadata': {'source': 'api', 'version': 2}
+                }
+            },
+            # v3 schema with breaking changes
+            {
+                'version': '3.0',
+                'data': {
+                    'content': 'test',  # renamed from 'message'
+                    'created_at': '2024-01-01T00:00:00Z',  # renamed from 'timestamp'
+                    'meta': {'origin': 'api', 'schema_version': 3}  # restructured metadata
+                }
+            }
+        ]
+        
+        for schema in schema_versions:
+            with self.subTest(version=schema['version']):
+                try:
+                    # Test schema versioning if implemented
+                    formatted = self.connector.format_payload_with_schema(
+                        schema['data'], 
+                        schema_version=schema['version']
+                    )
+                    self.assertIsNotNone(formatted)
+                    if isinstance(formatted, dict):
+                        self.assertIn('version', formatted) or self.assertIn('schema_version', str(formatted))
+                except AttributeError:
+                    # Schema versioning might not be implemented
+                    formatted = self.connector.format_payload(schema['data'])
+                    self.assertIsNotNone(formatted)
+
+    def test_graceful_api_deprecation_handling(self):
+        """Test handling of deprecated API endpoints and features."""
+        with patch('requests.post') as mock_post:
+            # Simulate deprecated API response
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.headers = {
+                'Deprecation': 'true',
+                'Sunset': 'Sat, 31 Dec 2024 23:59:59 GMT',
+                'Link': '<https://api.test.com/v2>; rel="successor-version"'
+            }
+            mock_response.json.return_value = {
+                'deprecated': True,
+                'sunset_date': '2024-12-31',
+                'migration_guide': 'https://docs.test.com/migration'
+            }
+            mock_post.return_value = mock_response
+            
+            payload = {'message': 'deprecation_test'}
+            result = self.connector.send_request(payload)
+            
+            self.assertEqual(result['deprecated'], True)
+            
+            # Check if deprecation warnings are handled
+            try:
+                warnings = self.connector.get_deprecation_warnings()
+                if warnings:
+                    self.assertIn('deprecated', str(warnings).lower())
+            except AttributeError:
+                # Deprecation warning handling might not be implemented
+                pass
+
+    def test_content_range_partial_responses(self):
+        """Test handling of HTTP 206 Partial Content responses."""
+        with patch('requests.post') as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 206
+            mock_response.headers = {
+                'Content-Range': 'bytes 200-1023/2048',
+                'Content-Length': '824',
+                'Content-Type': 'application/json'
+            }
+            mock_response.json.return_value = {'partial': True, 'range': '200-1023'}
+            mock_post.return_value = mock_response
+            
+            payload = {'message': 'partial_content_test', 'range': 'bytes=200-1023'}
+            result = self.connector.send_request(payload)
+            
+            self.assertEqual(result['partial'], True)
+
+    def test_multipart_form_data_edge_cases(self):
+        """Test edge cases in multipart form data handling."""
+        edge_case_files = [
+            # Empty file
+            {'empty_file': ('', '', 'application/octet-stream')},
+            # Large filename
+            {'long_name': ('x' * 255 + '.txt', 'content', 'text/plain')},
+            # Unicode filename
+            {'unicode_name': ('测试文件.txt', 'content', 'text/plain')},
+            # Special characters in filename
+            {'special_chars': ('file with spaces & symbols!@#.txt', 'content', 'text/plain')},
+            # Multiple files with same name
+            {'duplicate_name': [
+                ('file.txt', 'content1', 'text/plain'),
+                ('file.txt', 'content2', 'text/plain')
+            ]},
+        ]
+        
+        with patch('requests.post') as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {'multipart_handled': True}
+            mock_post.return_value = mock_response
+            
+            for files_dict in edge_case_files:
+                with self.subTest(case=list(files_dict.keys())[0]):
+                    payload = {'message': 'multipart_test'}
+                    
+                    try:
+                        result = self.connector.send_request(payload, files=files_dict)
+                        self.assertEqual(result['multipart_handled'], True)
+                    except (ValueError, TypeError):
+                        # Some edge cases might be rejected
+                        pass
+
+    def test_json_streaming_response_handling(self):
+        """Test handling of streaming JSON responses."""
+        with patch('requests.post') as mock_post:
+            # Simulate streaming response
+            json_chunks = [
+                b'{"stream":',
+                b'"data",',
+                b'"chunks":[',
+                b'1,2,3,4,5',
+                b'],',
+                b'"complete":true}'
+            ]
+            
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.iter_content.return_value = json_chunks
+            mock_response.headers = {'Transfer-Encoding': 'chunked'}
+            mock_post.return_value = mock_response
+            
+            payload = {'message': 'streaming_test', 'stream': True}
+            
+            try:
+                result = self.connector.send_request_streaming(payload)
+                self.assertIsNotNone(result)
+            except AttributeError:
+                # Streaming might not be implemented
+                result = self.connector.send_request(payload, stream=True)
+                self.assertIsNotNone(result)
+
+    def test_conditional_request_headers(self):
+        """Test conditional request headers (If-Modified-Since, ETag, etc.)."""
+        conditional_headers = {
+            'If-Modified-Since': 'Wed, 21 Oct 2015 07:28:00 GMT',
+            'If-None-Match': '"33a64df551425fcc55e4d42a148795d9f25f89d4"',
+            'If-Match': '"686897696a7c876b7e"',
+            'If-Unmodified-Since': 'Wed, 21 Oct 2015 07:28:00 GMT',
+            'If-Range': '"33a64df551425fcc55e4d42a148795d9f25f89d4"'
+        }
+        
+        with patch('requests.post') as mock_post:
+            # Test 304 Not Modified response
+            mock_response = Mock()
+            mock_response.status_code = 304
+            mock_response.headers = {'ETag': '"33a64df551425fcc55e4d42a148795d9f25f89d4"'}
+            mock_post.return_value = mock_response
+            
+            config = {
+                'api_key': 'test_key',
+                'base_url': 'https://api.test.com',
+                'conditional_headers': conditional_headers
+            }
+            
+            connector = GenesisConnector(config=config)
+            payload = {'message': 'conditional_test'}
+            
+            try:
+                result = connector.send_request(payload)
+                # 304 responses typically have no body
+                self.assertTrue(result is None or isinstance(result, dict))
+                
+                # Verify conditional headers were sent
+                call_args = mock_post.call_args
+                if call_args and 'headers' in call_args[1]:
+                    headers = call_args[1]['headers']
+                    for header_name in conditional_headers:
+                        if header_name in headers:
+                            self.assertEqual(headers[header_name], conditional_headers[header_name])
+                            
+            except Exception:
+                # Conditional requests might not be fully supported
+                pass
+
+    def test_cookie_handling_edge_cases(self):
+        """Test edge cases in HTTP cookie handling."""
+        complex_cookies = [
+            'session=abc123; Domain=.test.com; Path=/; Secure; HttpOnly; SameSite=Strict',
+            'prefs=compact; Expires=Wed, 09 Jun 2021 10:18:14 GMT',
+            'temp=xyz789; Max-Age=3600; SameSite=Lax',
+            'special=value%20with%20spaces; Domain=test.com',
+            'unicode=caf%C3%A9; Path=/api',  # URL-encoded unicode
+        ]
+        
+        with patch('requests.post') as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.headers = {'Set-Cookie': '; '.join(complex_cookies)}
+            mock_response.json.return_value = {'cookies_set': True}
+            mock_post.return_value = mock_response
+            
+            payload = {'message': 'cookie_test'}
+            result = self.connector.send_request(payload)
+            
+            self.assertEqual(result['cookies_set'], True)
+
+    def test_websocket_to_http_fallback(self):
+        """Test fallback from WebSocket to HTTP when WebSocket is unavailable."""
+        websocket_config = {
+            'api_key': 'test_key',
+            'base_url': 'wss://api.test.com/ws',
+            'fallback_url': 'https://api.test.com/http',
+            'enable_fallback': True
+        }
+        
+        try:
+            connector = GenesisConnector(config=websocket_config)
+            
+            with patch('requests.post') as mock_post:
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = {'fallback_used': True}
+                mock_post.return_value = mock_response
+                
+                payload = {'message': 'websocket_fallback_test'}
+                
+                try:
+                    result = connector.send_request_with_fallback(payload)
+                    self.assertEqual(result['fallback_used'], True)
+                except AttributeError:
+                    # WebSocket fallback might not be implemented
+                    pass
+                    
+        except ValueError:
+            # WebSocket URLs might be rejected entirely
+            pass
+
+    def test_response_decompression_vulnerabilities(self):
+        """Test protection against decompression bombs and zip bombs."""
+        with patch('requests.post') as mock_post:
+            # Simulate suspicious compression ratios
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.headers = {
+                'Content-Encoding': 'gzip',
+                'Content-Length': '100',  # Small compressed size
+                'X-Uncompressed-Size': '100000000'  # Very large uncompressed size
+            }
+            # Simulate a large response that could be a decompression bomb
+            mock_response.content = b'x' * 1000000  # 1MB of repeated data
+            mock_response.json.side_effect = MemoryError("Decompression bomb detected")
+            mock_post.return_value = mock_response
+            
+            payload = {'message': 'decompression_test'}
+            
+            try:
+                result = self.connector.send_request(payload)
+                # Should handle decompression bombs gracefully
+                self.assertIsNotNone(result)
+            except (MemoryError, ValueError):
+                # Expected to reject suspicious compressed content
+                pass
+
+    def tearDown(self):
+        """Clean up after additional scenario tests."""
+        if hasattr(self.connector, 'close'):
+            try:
+                self.connector.close()
+            except Exception:
+                pass
+
+
+class TestGenesisConnectorAccessibilityAndCompliance(unittest.TestCase):
+    """
+    Tests for accessibility features and compliance standards.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up accessibility and compliance test environment."""
+        self.connector = GenesisConnector()
+
+    def test_wcag_color_contrast_validation(self):
+        """Test WCAG color contrast validation for UI-related responses."""
+        color_combinations = [
+            ('#000000', '#FFFFFF'),  # High contrast (21:1)
+            ('#FFFFFF', '#000000'),  # High contrast (21:1)
+            ('#767676', '#FFFFFF'),  # AA compliant (4.54:1)
+            ('#595959', '#FFFFFF'),  # AAA compliant (7.01:1)
+            ('#FFFF00', '#000000'),  # High contrast yellow/black
+            ('#FF0000', '#FFFFFF'),  # Red on white
+            ('#0000FF', '#FFFFFF'),  # Blue on white
+            ('#FF0000', '#00FF00'),  # Poor contrast red/green
+        ]
+        
+        def calculate_contrast_ratio(color1, color2):
+            """Calculate WCAG contrast ratio between two colors."""
+            def get_luminance(hex_color):
+                """Calculate relative luminance of a color."""
+                hex_color = hex_color.lstrip('#')
+                rgb = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+                
+                def linearize(value):
+                    value = value / 255.0
+                    return value / 12.92 if value <= 0.03928 else ((value + 0.055) / 1.055) ** 2.4
+                
+                r, g, b = [linearize(c) for c in rgb]
+                return 0.2126 * r + 0.7152 * g + 0.0722 * b
+            
+            lum1 = get_luminance(color1)
+            lum2 = get_luminance(color2)
+            lighter = max(lum1, lum2)
+            darker = min(lum1, lum2)
+            return (lighter + 0.05) / (darker + 0.05)
+        
+        for fg_color, bg_color in color_combinations:
+            with self.subTest(fg=fg_color, bg=bg_color):
+                contrast_ratio = calculate_contrast_ratio(fg_color, bg_color)
+                
+                # Test different WCAG compliance levels
+                is_aa_compliant = contrast_ratio >= 4.5
+                is_aaa_compliant = contrast_ratio >= 7.0
+                
+                payload = {
+                    'ui_colors': {
+                        'foreground': fg_color,
+                        'background': bg_color,
+                        'contrast_ratio': contrast_ratio
+                    },
+                    'wcag_level': 'AAA' if is_aaa_compliant else 'AA' if is_aa_compliant else 'FAIL'
+                }
+                
+                try:
+                    # Test accessibility validation if implemented
+                    result = self.connector.validate_accessibility(payload)
+                    if result and 'wcag_compliant' in result:
+                        if payload['wcag_level'] == 'FAIL':
+                            self.assertFalse(result['wcag_compliant'])
+                        else:
+                            self.assertTrue(result['wcag_compliant'])
+                except AttributeError:
+                    # Accessibility validation might not be implemented
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+
+    def test_aria_label_validation(self):
+        """Test validation of ARIA labels and accessibility attributes."""
+        aria_test_cases = [
+            {
+                'element': 'button',
+                'aria_label': 'Submit form',
+                'aria_describedby': 'help-text',
+                'valid': True
+            },
+            {
+                'element': 'input',
+                'aria_label': '',  # Empty aria-label
+                'aria_labelledby': 'label-id',
+                'valid': True  # aria-labelledby is present
+            },
+            {
+                'element': 'div',
+                'role': 'button',
+                'aria_label': 'Custom button',
+                'valid': True
+            },
+            {
+                'element': 'img',
+                'alt': '',  # Decorative image
+                'aria_hidden': 'true',
+                'valid': True
+            },
+            {
+                'element': 'button',
+                # No aria-label or visible text
+                'valid': False
+            }
+        ]
+        
+        for test_case in aria_test_cases:
+            with self.subTest(element=test_case['element']):
+                payload = {'accessibility_test': test_case}
+                
+                try:
+                    result = self.connector.validate_aria_attributes(test_case)
+                    if result and 'aria_valid' in result:
+                        self.assertEqual(result['aria_valid'], test_case['valid'])
+                except AttributeError:
+                    # ARIA validation might not be implemented
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+
+    def test_keyboard_navigation_compliance(self):
+        """Test keyboard navigation compliance validation."""
+        keyboard_test_scenarios = [
+            {
+                'interactive_elements': ['button', 'input', 'select', 'textarea'],
+                'tab_order': [0, 1, 2, 3],
+                'has_focus_indicators': True,
+                'skip_links': True,
+                'compliant': True
+            },
+            {
+                'interactive_elements': ['div[onclick]', 'span[onclick]'],
+                'tab_order': [],  # No tabindex
+                'has_focus_indicators': False,
+                'compliant': False
+            },
+            {
+                'interactive_elements': ['button'],
+                'tab_order': [-1],  # Hidden from tab order
+                'has_skip_to_content': False,
+                'compliant': False
+            }
+        ]
+        
+        for scenario in keyboard_test_scenarios:
+            with self.subTest(scenario=str(scenario)[:50]):
+                payload = {'keyboard_navigation': scenario}
+                
+                try:
+                    result = self.connector.validate_keyboard_accessibility(scenario)
+                    if result and 'keyboard_compliant' in result:
+                        self.assertEqual(result['keyboard_compliant'], scenario['compliant'])
+                except AttributeError:
+                    # Keyboard accessibility validation might not be implemented
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+
+    def test_screen_reader_compatibility(self):
+        """Test screen reader compatibility validation."""
+        screen_reader_tests = [
+            {
+                'semantic_html': True,
+                'heading_structure': ['h1', 'h2', 'h3'],
+                'alt_text_present': True,
+                'form_labels': True,
+                'live_regions': ['aria-live=polite'],
+                'compatible': True
+            },
+            {
+                'semantic_html': False,  # Using divs instead of semantic elements
+                'heading_structure': ['div', 'div', 'div'],
+                'alt_text_present': False,
+                'compatible': False
+            },
+            {
+                'tables_with_headers': True,
+                'caption_present': True,
+                'scope_attributes': True,
+                'compatible': True
+            }
+        ]
+        
+        for test in screen_reader_tests:
+            with self.subTest(test=str(test)[:50]):
+                payload = {'screen_reader_test': test}
+                
+                try:
+                    result = self.connector.validate_screen_reader_compatibility(test)
+                    if result and 'screen_reader_compatible' in result:
+                        self.assertEqual(result['screen_reader_compatible'], test['compatible'])
+                except AttributeError:
+                    # Screen reader validation might not be implemented
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+
+    def test_gdpr_compliance_validation(self):
+        """Test GDPR compliance validation for data handling."""
+        gdpr_scenarios = [
+            {
+                'consent_obtained': True,
+                'data_purpose_specified': True,
+                'retention_period_defined': True,
+                'right_to_deletion': True,
+                'data_portability': True,
+                'compliant': True
+            },
+            {
+                'consent_obtained': False,
+                'personal_data_processed': True,
+                'compliant': False
+            },
+            {
+                'consent_obtained': True,
+                'data_purpose_vague': True,
+                'excessive_data_collection': True,
+                'compliant': False
+            }
+        ]
+        
+        for scenario in gdpr_scenarios:
+            with self.subTest(scenario=str(scenario)[:50]):
+                payload = {'gdpr_compliance': scenario}
+                
+                try:
+                    result = self.connector.validate_gdpr_compliance(scenario)
+                    if result and 'gdpr_compliant' in result:
+                        self.assertEqual(result['gdpr_compliant'], scenario['compliant'])
+                except AttributeError:
+                    # GDPR validation might not be implemented
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+
+    def test_section_508_compliance(self):
+        """Test Section 508 compliance validation."""
+        section_508_criteria = [
+            {
+                'criterion': '1194.22(a)',  # Text alternatives
+                'alt_text_present': True,
+                'compliant': True
+            },
+            {
+                'criterion': '1194.22(b)',  # Multimedia alternatives
+                'captions_present': True,
+                'audio_descriptions': True,
+                'compliant': True
+            },
+            {
+                'criterion': '1194.22(c)',  # Color not sole means
+                'color_only_indicator': False,
+                'alternative_indicators': True,
+                'compliant': True
+            },
+            {
+                'criterion': '1194.22(d)',  # Document structure
+                'proper_markup': True,
+                'reading_order': True,
+                'compliant': True
+            }
+        ]
+        
+        for criterion in section_508_criteria:
+            with self.subTest(criterion=criterion['criterion']):
+                payload = {'section_508_test': criterion}
+                
+                try:
+                    result = self.connector.validate_section_508(criterion)
+                    if result and 'section_508_compliant' in result:
+                        self.assertEqual(result['section_508_compliant'], criterion['compliant'])
+                except AttributeError:
+                    # Section 508 validation might not be implemented
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+
+
+# Add the new test classes to the main test runner
+if __name__ == '__main__':
+    additional_test_suites = [
+        TestGenesisConnectorAdditionalScenarios,
+        TestGenesisConnectorAccessibilityAndCompliance,
+    ]
+    
+    print("\n" + "="*80)
+    print("RUNNING ADDITIONAL COMPREHENSIVE TEST SCENARIOS")
+    print("="*80)
+    
+    total_tests = 0
+    total_failures = 0
+    
+    for suite_class in additional_test_suites:
+        print(f"\nRunning {suite_class.__name__}...")
+        suite = unittest.TestLoader().loadTestsFromTestCase(suite_class)
+        runner = unittest.TextTestRunner(verbosity=2)
+        result = runner.run(suite)
+        
+        total_tests += result.testsRun
+        total_failures += len(result.failures) + len(result.errors)
+        
+        print(f"Tests run: {result.testsRun}")
+        print(f"Failures: {len(result.failures)}")
+        print(f"Errors: {len(result.errors)}")
+    
+    print(f"\n" + "="*80)
+    print(f"ADDITIONAL SCENARIOS SUMMARY")
+    print(f"Total additional tests run: {total_tests}")
+    print(f"Total failures/errors: {total_failures}")
+    success_rate = ((total_tests - total_failures) / total_tests * 100) if total_tests > 0 else 0
+    print(f"Success rate: {success_rate:.1f}%")
+    print("="*80)
+

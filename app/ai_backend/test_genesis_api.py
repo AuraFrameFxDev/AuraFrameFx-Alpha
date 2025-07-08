@@ -1545,3 +1545,754 @@ def test_error_handling_parameterized(status_code, expected_exception):
     """
     with pytest.raises(expected_exception):
         handle_genesis_error(status_code, {"error": f"Error {status_code}"})
+
+class TestGenesisAPIAdvancedEdgeCases:
+    """Additional edge case tests for comprehensive coverage."""
+    
+    def setup_method(self):
+        """Setup method for advanced edge case tests."""
+        self.api_key = "test_api_key_edge_cases"
+        self.base_url = "https://api.genesis.example.com"
+        self.genesis_api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
+
+    @pytest.mark.asyncio
+    async def test_generate_text_with_special_characters_in_prompt(self):
+        """Test text generation with various special characters in prompts."""
+        special_prompts = [
+            "Test with newlines\n\nand tabs\t\there",
+            "Test with quotes 'single' and \"double\"",
+            "Test with backslashes \\ and forward slashes /",
+            "Test with unicode: é, ñ, 中文, русский, العربية",
+            "Test with emojis: 😀🎉🚀💡",
+            "Test with mathematical symbols: ∑, ∞, ≤, ≥, ∂",
+            "Test with markup-like content: <tag>content</tag>",
+            "Test with JSON-like: {\"key\": \"value\", \"number\": 42}",
+            "Test with code: def func(): return 'hello'",
+            "Test with URLs: https://example.com/path?param=value",
+        ]
+        
+        mock_response = {
+            "id": "special_chars_id",
+            "text": "Response with special handling",
+            "model": "genesis-v1",
+            "created": 1234567890,
+            "usage": {"prompt_tokens": 20, "completion_tokens": 15}
+        }
+        
+        for prompt in special_prompts:
+            with patch('aiohttp.ClientSession.post') as mock_post:
+                mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+                mock_post.return_value.__aenter__.return_value.status = 200
+                
+                result = await self.genesis_api.generate_text(prompt)
+                assert result.text == "Response with special handling"
+                
+                # Verify the prompt was passed correctly
+                call_args = mock_post.call_args
+                assert call_args[1]['json']['prompt'] == prompt
+
+    @pytest.mark.asyncio
+    async def test_generate_text_with_binary_content_rejection(self):
+        """Test that binary content in prompts is handled appropriately."""
+        binary_content = b'\x00\x01\x02\xff\xfe\xfd'
+        
+        with pytest.raises(TypeError):
+            await self.genesis_api.generate_text(binary_content)
+
+    @pytest.mark.asyncio
+    async def test_generate_text_with_extremely_nested_data_structures(self):
+        """Test handling of complex nested data structures in parameters."""
+        complex_params = {
+            "nested": {
+                "deep": {
+                    "structure": [1, 2, {"inner": "value"}]
+                }
+            }
+        }
+        
+        mock_response = {
+            "id": "nested_test_id",
+            "text": "Nested structure response",
+            "model": "genesis-v1",
+            "created": 1234567890,
+            "usage": {"prompt_tokens": 10, "completion_tokens": 20}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            # Test that complex parameters are handled appropriately
+            result = await self.genesis_api.generate_text(
+                "Test prompt",
+                custom_params=complex_params
+            )
+            assert result.text == "Nested structure response"
+
+    @pytest.mark.asyncio
+    async def test_api_response_with_unexpected_additional_fields(self):
+        """Test handling of API responses with unexpected additional fields."""
+        response_with_extra_fields = {
+            "id": "extra_fields_id",
+            "text": "Response with extra fields",
+            "model": "genesis-v1",
+            "created": 1234567890,
+            "usage": {"prompt_tokens": 10, "completion_tokens": 20},
+            "experimental_field": "unexpected_value",
+            "metadata": {
+                "version": "1.2.3",
+                "build": "abc123",
+                "features": ["feature1", "feature2"]
+            },
+            "statistics": {
+                "processing_time": 0.5,
+                "queue_time": 0.1
+            }
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=response_with_extra_fields)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            result = await self.genesis_api.generate_text("Test extra fields")
+            assert result.text == "Response with extra fields"
+            assert result.usage["prompt_tokens"] == 10
+
+    @pytest.mark.asyncio
+    async def test_api_timeout_with_partial_response(self):
+        """Test handling of timeout scenarios with partial responses."""
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            # Simulate timeout during response reading
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(
+                side_effect=asyncio.TimeoutError("Response reading timeout")
+            )
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            with pytest.raises(GenesisAPITimeoutError):
+                await self.genesis_api.generate_text("Test partial timeout")
+
+    @pytest.mark.asyncio
+    async def test_concurrent_requests_with_mixed_outcomes(self):
+        """Test concurrent requests with mixed success and failure outcomes."""
+        success_response = {
+            "id": "success_id",
+            "text": "Success response",
+            "model": "genesis-v1",
+            "created": 1234567890,
+            "usage": {"prompt_tokens": 5, "completion_tokens": 10}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            # Mix of success and various failure responses
+            mock_responses = [
+                (200, success_response),
+                (429, {"error": "Rate limit"}),
+                (500, {"error": "Server error"}),
+                (200, success_response),
+                (401, {"error": "Auth error"}),
+            ]
+            
+            async def mock_response_generator(*args, **kwargs):
+                status, response_data = mock_responses.pop(0)
+                mock_resp = AsyncMock()
+                mock_resp.status = status
+                mock_resp.json = AsyncMock(return_value=response_data)
+                return mock_resp
+            
+            mock_post.return_value.__aenter__.side_effect = mock_response_generator
+            
+            tasks = [
+                self.genesis_api.generate_text(f"Concurrent test {i}")
+                for i in range(5)
+            ]
+            
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Check that we got a mix of successes and exceptions
+            successes = [r for r in results if isinstance(r, GenesisResponse)]
+            exceptions = [r for r in results if isinstance(r, Exception)]
+            
+            assert len(successes) == 2  # Two successful responses
+            assert len(exceptions) == 3  # Three different types of errors
+
+    def test_genesis_request_deep_copy_behavior(self):
+        """Test deep copy behavior of GenesisRequest objects."""
+        import copy
+        
+        original = GenesisRequest(
+            prompt="Original prompt",
+            model="genesis-v1",
+            max_tokens=100,
+            temperature=0.7,
+            custom_data={"nested": {"value": 42}}
+        )
+        
+        # Test deep copy
+        copied = copy.deepcopy(original)
+        assert copied.prompt == original.prompt
+        assert copied.model == original.model
+        assert copied.max_tokens == original.max_tokens
+        assert copied.temperature == original.temperature
+        
+        # Verify it's a true deep copy (modifying copy doesn't affect original)
+        if hasattr(copied, 'custom_data'):
+            copied.custom_data["nested"]["value"] = 999
+            assert original.custom_data["nested"]["value"] == 42
+
+    def test_genesis_response_string_representation(self):
+        """Test string representation of GenesisResponse objects."""
+        response = GenesisResponse(
+            id="repr_test_id",
+            text="Test response for string representation",
+            model="genesis-v1",
+            created=1234567890,
+            usage={"prompt_tokens": 15, "completion_tokens": 25}
+        )
+        
+        response_str = str(response)
+        assert "repr_test_id" in response_str
+        assert "genesis-v1" in response_str
+        
+        # Test repr as well
+        response_repr = repr(response)
+        assert "GenesisResponse" in response_repr
+        assert "repr_test_id" in response_repr
+
+    @pytest.mark.asyncio
+    async def test_api_with_custom_user_agent_headers(self):
+        """Test API calls with custom user agent and headers."""
+        custom_headers = {
+            "User-Agent": "TestClient/1.0",
+            "X-Custom-Header": "custom_value",
+            "Accept": "application/json"
+        }
+        
+        genesis_api = GenesisAPI(
+            api_key=self.api_key,
+            base_url=self.base_url,
+            custom_headers=custom_headers
+        )
+        
+        mock_response = {
+            "id": "custom_headers_id",
+            "text": "Custom headers response",
+            "model": "genesis-v1",
+            "created": 1234567890,
+            "usage": {"prompt_tokens": 5, "completion_tokens": 10}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            result = await genesis_api.generate_text("Test custom headers")
+            assert result.text == "Custom headers response"
+            
+            # Verify custom headers were included
+            call_args = mock_post.call_args
+            if 'headers' in call_args[1]:
+                headers = call_args[1]['headers']
+                assert headers.get("User-Agent") == "TestClient/1.0"
+                assert headers.get("X-Custom-Header") == "custom_value"
+
+    @pytest.mark.asyncio
+    async def test_request_id_correlation_across_retries(self):
+        """Test that request IDs are properly correlated across retry attempts."""
+        original_request_id = str(uuid.uuid4())
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            # First attempt fails, second succeeds
+            mock_responses = [
+                (503, {"error": "Service unavailable"}),
+                (200, {
+                    "id": original_request_id,
+                    "text": "Retry success",
+                    "model": "genesis-v1",
+                    "created": 1234567890,
+                    "usage": {"prompt_tokens": 5, "completion_tokens": 10}
+                })
+            ]
+            
+            response_iterator = iter(mock_responses)
+            
+            async def mock_response_generator(*args, **kwargs):
+                status, response_data = next(response_iterator)
+                mock_resp = AsyncMock()
+                mock_resp.status = status
+                mock_resp.json = AsyncMock(return_value=response_data)
+                return mock_resp
+            
+            mock_post.return_value.__aenter__.side_effect = mock_response_generator
+            
+            with patch('asyncio.sleep'):  # Speed up retry delays
+                result = await self.genesis_api.generate_text("Test retry correlation")
+                assert result.id == original_request_id
+                assert result.text == "Retry success"
+
+    def test_error_message_formatting_and_localization(self):
+        """Test error message formatting and potential localization support."""
+        error_scenarios = [
+            {
+                "status": 401,
+                "error_data": {
+                    "error": "Invalid API key",
+                    "error_code": "AUTH_001",
+                    "message": "The provided API key is invalid or expired",
+                    "documentation_url": "https://docs.genesis.com/errors#AUTH_001"
+                }
+            },
+            {
+                "status": 429,
+                "error_data": {
+                    "error": "Rate limit exceeded",
+                    "error_code": "RATE_001",
+                    "message": "You have exceeded your rate limit. Please try again later.",
+                    "retry_after": 60,
+                    "limit": 100,
+                    "window": 3600
+                }
+            },
+            {
+                "status": 500,
+                "error_data": {
+                    "error": "Internal server error",
+                    "error_code": "INTERNAL_001",
+                    "message": "An unexpected error occurred. Please try again.",
+                    "trace_id": "abc123def456"
+                }
+            }
+        ]
+        
+        for scenario in error_scenarios:
+            try:
+                handle_genesis_error(scenario["status"], scenario["error_data"])
+                assert False, "Expected exception to be raised"
+            except GenesisAPIError as e:
+                error_message = str(e)
+                # Verify error message contains useful information
+                assert len(error_message) > 0
+                # Check for presence of key error information
+                if "error_code" in scenario["error_data"]:
+                    assert scenario["error_data"]["error_code"] in error_message or \
+                           scenario["error_data"]["error"] in error_message
+
+
+class TestGenesisAPIDataValidationAndSerialization:
+    """Tests for data validation and serialization edge cases."""
+    
+    def test_genesis_request_with_none_values(self):
+        """Test GenesisRequest handling of None values in various fields."""
+        # Test that None values are handled appropriately
+        with pytest.raises(ValueError):
+            GenesisRequest(prompt=None, model="genesis-v1")
+        
+        with pytest.raises(ValueError):
+            GenesisRequest(prompt="Test", model=None)
+        
+        # Test that None values in optional fields are handled
+        request = GenesisRequest(
+            prompt="Test",
+            model="genesis-v1",
+            max_tokens=None,  # Should use default
+            temperature=None  # Should use default
+        )
+        assert request.prompt == "Test"
+        assert request.model == "genesis-v1"
+
+    def test_genesis_response_with_missing_optional_fields(self):
+        """Test GenesisResponse creation with various missing optional fields."""
+        # Test minimal response
+        minimal_response = GenesisResponse(
+            id="minimal_id",
+            text="Minimal text",
+            model="genesis-v1"
+        )
+        assert minimal_response.id == "minimal_id"
+        assert minimal_response.text == "Minimal text"
+        assert minimal_response.model == "genesis-v1"
+        assert minimal_response.created is None
+        assert minimal_response.usage == {}
+        
+        # Test response with partial optional fields
+        partial_response = GenesisResponse(
+            id="partial_id",
+            text="Partial text",
+            model="genesis-v1",
+            created=1234567890
+        )
+        assert partial_response.created == 1234567890
+        assert partial_response.usage == {}
+
+    def test_json_serialization_round_trip(self):
+        """Test JSON serialization and deserialization round trip."""
+        original_request = GenesisRequest(
+            prompt="Serialization test",
+            model="genesis-v1",
+            max_tokens=200,
+            temperature=0.8
+        )
+        
+        # Convert to dict, then to JSON, then back
+        request_dict = original_request.to_dict()
+        json_str = json.dumps(request_dict)
+        parsed_dict = json.loads(json_str)
+        reconstructed_request = GenesisRequest.from_dict(parsed_dict)
+        
+        assert reconstructed_request.prompt == original_request.prompt
+        assert reconstructed_request.model == original_request.model
+        assert reconstructed_request.max_tokens == original_request.max_tokens
+        assert reconstructed_request.temperature == original_request.temperature
+
+    def test_unicode_handling_in_serialization(self):
+        """Test proper Unicode handling in serialization."""
+        unicode_text = "Test with Unicode: 你好世界 🌍 café naïve résumé"
+        
+        request = GenesisRequest(
+            prompt=unicode_text,
+            model="genesis-v1",
+            max_tokens=100
+        )
+        
+        # Test serialization preserves Unicode
+        serialized = request.to_dict()
+        assert serialized["prompt"] == unicode_text
+        
+        # Test deserialization preserves Unicode
+        reconstructed = GenesisRequest.from_dict(serialized)
+        assert reconstructed.prompt == unicode_text
+
+    def test_large_numerical_values_handling(self):
+        """Test handling of large numerical values in usage statistics."""
+        large_usage = {
+            "prompt_tokens": 999999999,
+            "completion_tokens": 888888888,
+            "total_tokens": 1888888887
+        }
+        
+        response = GenesisResponse(
+            id="large_numbers_id",
+            text="Large numbers test",
+            model="genesis-v1",
+            created=1234567890,
+            usage=large_usage
+        )
+        
+        assert response.usage["prompt_tokens"] == 999999999
+        assert response.usage["completion_tokens"] == 888888888
+        assert response.usage["total_tokens"] == 1888888887
+
+    def test_floating_point_precision_in_temperature(self):
+        """Test floating point precision handling in temperature values."""
+        precision_values = [0.0, 0.1, 0.12345, 0.999999, 1.0]
+        
+        for temp in precision_values:
+            request = GenesisRequest(
+                prompt="Precision test",
+                model="genesis-v1",
+                temperature=temp
+            )
+            assert abs(request.temperature - temp) < 1e-10  # Allow for floating point precision
+
+    def test_date_time_edge_cases_in_response(self):
+        """Test edge cases in datetime handling for response timestamps."""
+        edge_case_timestamps = [
+            0,  # Unix epoch
+            1234567890,  # Common test timestamp
+            2147483647,  # Max 32-bit signed integer
+            253402300799,  # Year 9999
+        ]
+        
+        for timestamp in edge_case_timestamps:
+            response = GenesisResponse(
+                id="datetime_test_id",
+                text="DateTime test",
+                model="genesis-v1",
+                created=timestamp
+            )
+            assert response.created == timestamp
+            
+            # Test that timestamp can be converted to datetime
+            if timestamp > 0:
+                dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+                assert isinstance(dt, datetime)
+
+
+class TestGenesisAPIStateAndLifecycle:
+    """Tests for API state management and lifecycle."""
+    
+    def setup_method(self):
+        """Setup for lifecycle tests."""
+        self.api_key = "lifecycle_test_key"
+        self.base_url = "https://api.genesis.example.com"
+
+    def test_api_instance_immutability(self):
+        """Test that API instance configuration is immutable after creation."""
+        api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
+        
+        original_api_key = api.api_key
+        original_base_url = api.base_url
+        original_timeout = api.timeout
+        
+        # Attempting to modify should not change the instance
+        try:
+            api.api_key = "new_key"
+        except AttributeError:
+            pass  # Expected if property is read-only
+        
+        # Verify values haven't changed
+        assert api.api_key == original_api_key
+        assert api.base_url == original_base_url
+        assert api.timeout == original_timeout
+
+    @pytest.mark.asyncio
+    async def test_api_resource_cleanup_on_context_exit(self):
+        """Test proper resource cleanup when using API as context manager."""
+        cleanup_called = False
+        
+        class MockSession:
+            def __init__(self):
+                self.closed = False
+                
+            async def close(self):
+                nonlocal cleanup_called
+                cleanup_called = True
+                self.closed = True
+                
+            async def __aenter__(self):
+                return self
+                
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                await self.close()
+        
+        with patch('aiohttp.ClientSession', MockSession):
+            async with GenesisAPI(api_key=self.api_key, base_url=self.base_url) as api:
+                pass  # Just enter and exit the context
+            
+            # Verify cleanup was called
+            assert cleanup_called
+
+    def test_multiple_api_instances_independence(self):
+        """Test that multiple API instances are independent."""
+        api1 = GenesisAPI(api_key="key1", base_url="https://api1.example.com")
+        api2 = GenesisAPI(api_key="key2", base_url="https://api2.example.com")
+        
+        assert api1.api_key != api2.api_key
+        assert api1.base_url != api2.base_url
+        
+        # Test that modifying one doesn't affect the other
+        api1_original_timeout = api1.timeout
+        api2_original_timeout = api2.timeout
+        
+        # Create new instance with different timeout
+        api3 = GenesisAPI(api_key="key3", base_url="https://api3.example.com", timeout=120)
+        
+        assert api1.timeout == api1_original_timeout
+        assert api2.timeout == api2_original_timeout
+        assert api3.timeout == 120
+
+    @pytest.mark.asyncio
+    async def test_api_state_during_concurrent_operations(self):
+        """Test API state consistency during concurrent operations."""
+        api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
+        
+        mock_response = {
+            "id": "concurrent_state_id",
+            "text": "Concurrent state response",
+            "model": "genesis-v1",
+            "created": 1234567890,
+            "usage": {"prompt_tokens": 5, "completion_tokens": 10}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            # Start multiple concurrent operations
+            tasks = [
+                api.generate_text(f"Concurrent prompt {i}")
+                for i in range(10)
+            ]
+            
+            results = await asyncio.gather(*tasks)
+            
+            # Verify all requests completed successfully
+            assert len(results) == 10
+            for result in results:
+                assert result.text == "Concurrent state response"
+            
+            # Verify API state is still consistent
+            assert api.api_key == self.api_key
+            assert api.base_url == self.base_url
+
+
+# Additional fixtures for the new comprehensive tests
+@pytest.fixture
+def comprehensive_test_data():
+    """Fixture providing comprehensive test data for various scenarios."""
+    return {
+        "unicode_texts": [
+            "Hello 世界",
+            "Café naïve résumé",
+            "Москва",
+            "العربية",
+            "🌍🚀💡😀",
+            "∑∞≤≥∂"
+        ],
+        "special_characters": [
+            "\n\t\r",
+            "\\\"'/",
+            "<>&",
+            "{}[]",
+            "$()",
+            "@#%"
+        ],
+        "large_numbers": [
+            999999999,
+            1234567890123,
+            float('inf'),
+            -float('inf')
+        ],
+        "edge_case_timestamps": [
+            0,
+            1234567890,
+            2147483647,
+            253402300799
+        ]
+    }
+
+
+@pytest.fixture
+def mock_network_conditions():
+    """Fixture for simulating various network conditions."""
+    return {
+        "slow_response": 5.0,
+        "timeout_threshold": 30.0,
+        "retry_delays": [1, 2, 4, 8, 16],
+        "error_rates": [0.1, 0.2, 0.5, 0.8]
+    }
+
+
+# Integration tests with external dependencies
+class TestGenesisAPIExternalIntegration:
+    """Integration tests with external dependencies."""
+    
+    @pytest.mark.asyncio
+    async def test_integration_with_logging_system(self):
+        """Test integration with Python logging system."""
+        import logging
+        
+        # Configure a test logger
+        test_logger = logging.getLogger("genesis_api_test")
+        test_logger.setLevel(logging.DEBUG)
+        
+        # Create a handler to capture log messages
+        log_messages = []
+        
+        class TestHandler(logging.Handler):
+            def emit(self, record):
+                log_messages.append(record.getMessage())
+        
+        handler = TestHandler()
+        test_logger.addHandler(handler)
+        
+        api = GenesisAPI(api_key="test_key", base_url="https://api.genesis.example.com")
+        
+        mock_response = {
+            "id": "logging_test_id",
+            "text": "Logging test response",
+            "model": "genesis-v1",
+            "created": 1234567890,
+            "usage": {"prompt_tokens": 5, "completion_tokens": 10}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            # Test that logging integration works
+            with patch('logging.getLogger', return_value=test_logger):
+                result = await api.generate_text("Test logging integration")
+                assert result.text == "Logging test response"
+        
+        # Clean up
+        test_logger.removeHandler(handler)
+
+    @pytest.mark.asyncio
+    async def test_integration_with_asyncio_event_loop(self):
+        """Test proper integration with asyncio event loop."""
+        api = GenesisAPI(api_key="test_key", base_url="https://api.genesis.example.com")
+        
+        mock_response = {
+            "id": "event_loop_test_id",
+            "text": "Event loop test response",
+            "model": "genesis-v1",
+            "created": 1234567890,
+            "usage": {"prompt_tokens": 5, "completion_tokens": 10}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            # Test that the API works with different event loop configurations
+            result = await api.generate_text("Test event loop integration")
+            assert result.text == "Event loop test response"
+            
+            # Test with asyncio.wait_for
+            result = await asyncio.wait_for(
+                api.generate_text("Test with timeout"),
+                timeout=10.0
+            )
+            assert result.text == "Event loop test response"
+
+    def test_thread_safety_considerations(self):
+        """Test thread safety considerations for API instances."""
+        import threading
+        import queue
+        
+        api = GenesisAPI(api_key="thread_test_key", base_url="https://api.genesis.example.com")
+        results_queue = queue.Queue()
+        
+        def worker():
+            # Each thread should be able to create its own event loop
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            try:
+                mock_response = {
+                    "id": "thread_test_id",
+                    "text": f"Thread {threading.current_thread().name} response",
+                    "model": "genesis-v1",
+                    "created": 1234567890,
+                    "usage": {"prompt_tokens": 5, "completion_tokens": 10}
+                }
+                
+                with patch('aiohttp.ClientSession.post') as mock_post:
+                    mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+                    mock_post.return_value.__aenter__.return_value.status = 200
+                    
+                    result = loop.run_until_complete(
+                        api.generate_text(f"Thread {threading.current_thread().name} test")
+                    )
+                    results_queue.put(result)
+            finally:
+                loop.close()
+        
+        # Start multiple threads
+        threads = []
+        for i in range(3):
+            thread = threading.Thread(target=worker, name=f"TestThread-{i}")
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+        
+        # Verify all threads completed successfully
+        assert results_queue.qsize() == 3
+        while not results_queue.empty():
+            result = results_queue.get()
+            assert "Thread TestThread-" in result.text
+            assert "response" in result.text
+
