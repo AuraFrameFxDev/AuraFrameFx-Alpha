@@ -9,12 +9,12 @@ import kotlinx.coroutines.delay
 class VertexAIClientImpl : VertexAIClient {
     
     /**
-     * Returns a placeholder string containing the provided prompt to simulate text generation.
+     * Simulates text generation by returning a fixed string containing the provided prompt.
      *
      * This stub method introduces a brief artificial delay and ignores the `maxTokens` and `temperature` parameters.
      *
      * @param prompt The input prompt to include in the simulated response.
-     * @return A fixed string referencing the prompt.
+     * @return A placeholder string referencing the prompt.
      */
     override suspend fun generateText(prompt: String, maxTokens: Int, temperature: Float): String {
         delay(100) // Simulate API call
@@ -34,19 +34,19 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Stub method for creative model initialization.
+     * Placeholder for creative model initialization.
      *
-     * This implementation performs no operation and is intended as a placeholder for testing or development.
+     * This stub implementation performs no operation and is intended for testing or development purposes.
      */
     override suspend fun initializeCreativeModels() {
         // Stub implementation
     }
     
     /**
-     * Simulates content generation by returning a fixed placeholder string containing the provided prompt.
+     * Simulates content generation by returning a fixed placeholder string that includes the provided prompt.
      *
      * @param prompt The input prompt for content generation.
-     * @return A placeholder string that includes the prompt.
+     * @return A placeholder string referencing the prompt.
      */
     override suspend fun generateContent(prompt: String): String? {
         delay(100)
@@ -54,7 +54,7 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates code generation by returning a fixed placeholder string referencing the given specification and language.
+     * Returns a fixed placeholder string simulating code generation for the specified specification and language.
      *
      * @param specification Description of the code to generate.
      * @param language Programming language for the generated code.
@@ -67,7 +67,7 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates validating the connection to Vertex AI.
+     * Simulates a connection check to Vertex AI.
      *
      * @return Always returns `true` to indicate a successful connection in this stub implementation.
      */
@@ -76,14 +76,14 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * No-op method included to satisfy interface requirements.
+     * Placeholder method with no operation, included to fulfill interface requirements.
      */
     fun initialize() {
         // Stub implementation
     }
     
     /**
-     * Validates that the prompt string is not blank.
+     * Checks that the prompt string is not blank.
      *
      * @throws IllegalArgumentException if the prompt is blank.
      */

@@ -151,9 +151,9 @@ class GenesisBridgeServer:
         
     def start(self):
         """
-        Start the Genesis bridge server, enabling asynchronous processing of JSON requests from standard input.
+        Starts the Genesis bridge server, enabling asynchronous processing of JSON requests from standard input.
         
-        Signals readiness to the client, launches a background thread for request handling, continuously reads and enqueues incoming JSON requests, manages invalid input, and supports graceful shutdown on keyboard interruption.
+        Signals readiness to the client, launches a background thread for request handling, continuously reads and enqueues incoming JSON requests, handles invalid input, and supports graceful shutdown on keyboard interruption.
         """
         self.running = True
         print("Genesis Ready", flush=True)  # Signal to Android that we're ready
@@ -180,9 +180,9 @@ class GenesisBridgeServer:
     
     def _process_requests(self):
         """
-        Continuously processes incoming requests from the queue in a background thread, routing each to the appropriate handler and sending the response to the client.
+        Continuously processes requests from the queue in a background thread, routing each to the appropriate handler and sending responses to the client.
         
-        Exceptions during request processing are caught and reported to maintain uninterrupted server operation.
+        Exceptions during processing are caught and reported to ensure uninterrupted server operation.
         """
         while self.running:
             try:
@@ -199,13 +199,13 @@ class GenesisBridgeServer:
     
     def _handle_request(self, request):
         """
-        Routes an incoming JSON request to the appropriate handler method based on its "requestType" and returns the handler's response.
+        Dispatches a JSON request to the appropriate handler based on its "requestType" field and returns the handler's response.
         
         Parameters:
-            request (dict): The JSON-decoded request containing a "requestType" and related fields.
+            request (dict): The JSON-decoded request containing a "requestType" and related data.
         
         Returns:
-            dict: The response from the corresponding handler, or an error response if the request type is unrecognized or an exception occurs.
+            dict: The response from the selected handler, or an error response if the request type is unrecognized or an exception occurs.
         """
         try:
             request_type = request.get("requestType", "")
@@ -256,10 +256,10 @@ class GenesisBridgeServer:
     
     def _handle_ping(self):
         """
-        Generate a response indicating the Genesis Trinity system is online, including status, message, and current timestamp.
+        Return a response confirming the Genesis Trinity system is online, including status, message, and current timestamp.
         
         Returns:
-            dict: A response with success status, persona identifier, operational message, and ISO-formatted timestamp.
+            dict: Contains success status, persona identifier, operational message, and ISO-formatted timestamp.
         """
         return {
             "success": True,
