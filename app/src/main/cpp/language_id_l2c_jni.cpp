@@ -10,6 +10,11 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Initializes the language identifier with the specified model path.
+ *
+ * Returns the version string "1.2.0" upon successful initialization, or an empty string if the model path is null.
+ */
 JNIEXPORT jstring
 
 JNICALL
@@ -32,6 +37,14 @@ Java_com_example_app_language_LanguageIdentifier_nativeInitialize(
     return env->NewStringUTF("1.2.0"); // Updated version to reflect improvements
 }
 
+/**
+ * @brief Detects the language of the given text using heuristic analysis.
+ *
+ * Analyzes the input text for common words, articles, and character frequency to identify whether it is written in English, Spanish, French, German, Italian, or Portuguese. If the text contains a high proportion of accented (non-ASCII) characters but no clear language match, returns "mul" to indicate multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
+ *
+ * @param text The input text to analyze.
+ * @return jstring A language code ("en", "es", "fr", "de", "it", "pt", "mul", or "und") representing the detected language.
+ */
 JNIEXPORT jstring
 
 JNICALL
@@ -109,6 +122,13 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
     return env->NewStringUTF(result.c_str());
 }
 
+/**
+ * @brief Releases resources associated with the language identifier handle.
+ *
+ * If the provided handle is non-zero, performs cleanup operations for the language identifier instance.
+ *
+ * @param handle Native handle representing the language identifier instance to be released.
+ */
 JNIEXPORT void JNICALL
 Java_com_example_app_language_LanguageIdentifier_nativeRelease(
         JNIEnv
