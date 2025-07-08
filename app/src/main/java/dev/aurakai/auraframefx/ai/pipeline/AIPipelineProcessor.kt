@@ -240,6 +240,14 @@ class AIPipelineProcessor @Inject constructor(
         return selectedAgents
     }
 
+    /**
+     * Synthesizes a final AI response by aggregating and formatting messages from multiple agents.
+     *
+     * Groups agent responses by sender, highlights the primary Genesis analysis if present, includes supplementary inputs from other agents with icons, and appends an average confidence score.
+     *
+     * @param responses The list of agent messages to aggregate.
+     * @return A formatted string representing the combined AI response, or a default message if no responses are available.
+     */
     private fun generateFinalResponse(responses: List<AgentMessage>): String {
         // Sophisticated response synthesis from multiple agents
         if (responses.isEmpty()) {
@@ -285,6 +293,11 @@ class AIPipelineProcessor @Inject constructor(
             .coerceIn(0.0f, 1.0f) // Added .toFloat()
     }
 
+    /**
+     * Updates the processing context with new task and response information, including task history, response patterns, system metrics, and agent performance tracking.
+     *
+     * Maintains recent task history, adapts response patterns for learning, tracks system metrics, and records agent confidence scores for performance analysis.
+     */
     private fun updateContext(task: String, responses: List<AgentMessage>) {
         // Enhanced context update with learning and adaptation
         _processingContext.update { current ->
