@@ -21,9 +21,9 @@ class AuraAIServiceImpl @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : AuraAIService {
     /**
-     * Returns a fixed placeholder string for analytics queries.
+     * Returns a fixed placeholder string for any analytics query.
      *
-     * This implementation does not perform any analytics processing and always returns "Analytics response placeholder".
+     * This method does not perform analytics processing and always returns "Analytics response placeholder".
      *
      * @return The placeholder analytics response string.
      */
@@ -32,9 +32,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub for file download functionality.
-     *
-     * Always returns null, indicating that file download is not supported in this implementation.
+     * Returns null to indicate that file download is not supported in this implementation.
      *
      * @param _fileId The identifier of the file to download.
      * @return Always null.
@@ -44,9 +42,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for image generation that always returns null.
+     * Returns null to indicate that image generation is not supported.
      *
-     * This implementation does not support image generation and serves as a placeholder.
+     * This method serves as a placeholder and does not perform any image generation.
      *
      * @return Always null.
      */
@@ -55,31 +53,33 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a fixed placeholder string for generated text, regardless of the input prompt or options.
+     * Returns a fixed placeholder string for any text generation request.
+     *
+     * This method does not perform actual text generation and always returns "Generated text placeholder" regardless of the input.
      *
      * @param prompt The input prompt for text generation.
      * @param options Optional parameters for text generation.
-     * @return Always returns the string "Generated text placeholder".
+     * @return The string "Generated text placeholder".
      */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         return "Generated text placeholder"
     }
 
     /**
-     * Returns a placeholder string as the AI response for the given prompt and options.
+     * Returns a fixed placeholder string for any AI response request.
      *
-     * @param prompt The input prompt for the AI.
-     * @param options Optional parameters for customizing the AI response.
-     * @return A fixed placeholder string indicating the response is not implemented.
+     * Always returns "AI response placeholder" regardless of the input prompt or options.
+     *
+     * @return The placeholder string "AI response placeholder".
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         return "AI response placeholder"
     }
 
     /**
-     * Retrieves the memory value for the given key.
+     * Retrieves the memory value for the specified key.
      *
-     * This implementation always returns null, indicating that memory retrieval is not supported.
+     * This stub implementation always returns null, indicating that memory retrieval is not supported.
      *
      * @return Always null.
      */
@@ -88,9 +88,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for saving a value in memory associated with a key.
+     * Placeholder method for saving a value in memory associated with a key.
      *
-     * This implementation does not perform any operation.
+     * This implementation does nothing and does not persist any data.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.
