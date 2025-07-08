@@ -20,6 +20,12 @@ class AuraAIServiceImpl @Inject constructor(
     private val cloudStatusMonitor: CloudStatusMonitor,
     private val auraFxLogger: AuraFxLogger,
 ) : AuraAIService {
+    /**
+     * Returns a placeholder response for an analytics query.
+     *
+     * @param _query The analytics query string.
+     * @return A fixed placeholder string indicating the response is not implemented.
+     */
     override fun analyticsQuery(_query: String): String {
         return "Analytics response placeholder"
     }
@@ -27,10 +33,8 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Attempts to download a file by its ID.
      *
-     * Currently returns null, as file download functionality is not implemented.
-     *
      * @param _fileId The identifier of the file to download.
-     * @return Always null.
+     * @return Always returns null, as file download functionality is not implemented.
      */
     override suspend fun downloadFile(_fileId: String): File? {
         return null
@@ -58,20 +62,20 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a fixed placeholder AI response string for the given prompt and options.
+     * Returns a placeholder AI response string regardless of the provided prompt or options.
      *
      * @param prompt The input prompt for the AI.
      * @param options Optional parameters for customizing the AI response.
-     * @return A placeholder string "AI response placeholder" regardless of input.
+     * @return Always returns the string "AI response placeholder".
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         return "AI response placeholder"
     }
 
     /**
-     * Retrieves the memory value associated with the specified key.
+     * Retrieves the memory value associated with the given key.
      *
-     * @param _memoryKey The key for the memory entry to retrieve.
+     * @param _memoryKey The key identifying the memory entry to retrieve.
      * @return Always returns null, as memory retrieval is not implemented.
      */
     override fun getMemory(_memoryKey: String): String? {
@@ -79,12 +83,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Saves a value associated with the specified key to memory.
+     * Saves a value to memory under the specified key.
      *
-     * This method is currently not implemented and performs no action.
+     * This method is not yet implemented and currently performs no action.
      *
-     * @param key The identifier for the memory entry.
-     * @param value The value to be stored.
+     * @param key The key to associate with the stored value.
+     * @param value The value to store in memory.
      */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement memory saving

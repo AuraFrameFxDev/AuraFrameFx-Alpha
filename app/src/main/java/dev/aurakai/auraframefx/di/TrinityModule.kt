@@ -30,11 +30,11 @@ import javax.inject.Singleton
 object TrinityModule {
 
     /**
-     * Provides a singleton GenesisBridgeService that integrates multiple AI services with the Trinity Python backend.
+     * Provides a singleton instance of GenesisBridgeService that connects multiple AI services with the Trinity Python backend.
      *
-     * The returned service facilitates unified communication among AI components, manages context and security, and interfaces with the application environment.
+     * The service enables unified communication between AI components, manages operational context and security, and interfaces with the application environment.
      *
-     * @return A configured singleton instance of GenesisBridgeService.
+     * @return A configured GenesisBridgeService singleton.
      */
     @Provides
     @Singleton
@@ -59,9 +59,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton instance of TrinityCoordinatorService for orchestrating AI personas and managing their interactions within the Trinity AI system.
+     * Provides a singleton instance of `TrinityCoordinatorService` to coordinate AI personas and manage their interactions within the Trinity AI system.
      *
-     * @return A configured TrinityCoordinatorService singleton responsible for coordinating AI components and ensuring integrated operation.
+     * @return A singleton `TrinityCoordinatorService` configured to orchestrate AI components and ensure integrated operation.
      */
     @Provides
     @Singleton
@@ -82,11 +82,11 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton instance of SecurityMonitor for the Trinity AI system.
+     * Provides a singleton SecurityMonitor instance for overseeing security operations in the Trinity AI system.
      *
-     * The SecurityMonitor oversees security operations by integrating the security context, Genesis bridge service, and logging capabilities.
+     * The SecurityMonitor integrates the security context, Genesis bridge service, and logging to monitor and manage security-related activities within the application.
      *
-     * @return A configured singleton SecurityMonitor instance.
+     * @return A configured SecurityMonitor singleton.
      */
     @Provides
     @Singleton

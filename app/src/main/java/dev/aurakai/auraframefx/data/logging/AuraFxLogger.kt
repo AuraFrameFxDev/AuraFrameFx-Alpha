@@ -201,9 +201,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Reads and returns the contents of the current day's log file.
+     * Retrieves the contents of the current day's log file.
      *
-     * @return The contents of today's log file, or an empty string if the file does not exist or cannot be read.
+     * @return The contents of today's log file, or an empty string if the file is missing or unreadable.
      */
     suspend fun readCurrentDayLogs(): String = withContext(Dispatchers.IO) {
         val fileName = getCurrentLogFileName()
@@ -213,9 +213,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Removes log files older than the retention period from the internal logs directory.
+     * Deletes log files older than the retention period from the internal logs directory.
      *
-     * Scans the log directory for files with the log filename prefix and deletes those whose last modified time exceeds the configured retention period.
+     * Scans the log directory for files with the designated log filename prefix and removes those whose last modified time exceeds the configured retention period.
      */
     private suspend fun cleanupOldLogs() = withContext(Dispatchers.IO) {
         // Use injected context
@@ -247,7 +247,7 @@ class AuraFxLogger @Inject constructor(
     /**
      * Cancels all ongoing logging operations and terminates the logger's coroutine scope.
      *
-     * After calling this method, no further log entries will be processed or written.
+     * After this method is called, no further log entries will be processed or written.
      */
     fun shutdown() {
         Log.d(TAG, "AuraFxLogger shutting down loggerScope.")
@@ -255,10 +255,10 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Returns the log entries for a given date as a list of lines.
+     * Retrieves log entries for the specified date as a list of lines.
      *
      * @param date The date in `yyyyMMdd` format for which to retrieve log entries.
-     * @return A list of log lines for the specified date, or an empty list if unavailable or an error occurs.
+     * @return A list of log lines for the given date, or an empty list if the log file is missing or an error occurs.
      */
     suspend fun getLogsForDate(date: String): List<String> {
         return try {
@@ -272,18 +272,18 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Returns a map of all log filenames to their contents, with the newest files first.
+     * Retrieves all log files and their contents, sorted with the newest files first.
      *
-     * @return A map where each key is a log filename and each value is the file's content.
+     * @return A map where each key is a log filename and each value is the content of that file.
      */
     suspend fun getAllLogs(): Map<String, String> {
         return readAllLogs()
     }
 
     /**
-     * Removes all log files with the designated prefix from the internal logs directory.
+     * Deletes all log files with the designated prefix from the internal logs directory.
      *
-     * Logs any errors encountered during the deletion process.
+     * Logs any errors encountered during the deletion process to Android Logcat.
      */
     suspend fun clearAllLogs() {
         try {
@@ -301,12 +301,12 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Writes text content to a file in the app's internal storage, creating parent directories if necessary.
+     * Writes text content to a file in the app's internal storage, creating parent directories if needed.
      *
      * @param filePath The relative path to the target file within internal storage.
      * @param content The text content to write to the file.
      * @param append If true, appends the content to the file; if false, overwrites the file.
-     * @return True if the write operation is successful; false otherwise.
+     * @return True if the write operation succeeds; false otherwise.
      */
     private fun writeToFileInternal(filePath: String, content: String, append: Boolean): Boolean {
         return try {
