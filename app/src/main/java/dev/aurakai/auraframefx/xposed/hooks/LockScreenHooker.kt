@@ -1,10 +1,7 @@
 package dev.aurakai.auraframefx.xposed.hooks
 
+import android.util.Log
 import dev.aurakai.auraframefx.system.lockscreen.model.LockScreenConfig
-
-class LockScreenHooker(
-    private val classLoader: ClassLoader,
-import android.util.Log // Added import
 
 class LockScreenHooker(
     private val classLoader: ClassLoader,

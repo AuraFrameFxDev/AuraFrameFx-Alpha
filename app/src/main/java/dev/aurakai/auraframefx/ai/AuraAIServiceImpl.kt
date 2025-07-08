@@ -20,28 +20,12 @@ class AuraAIServiceImpl @Inject constructor(
     private val auraFxLogger: dev.aurakai.auraframefx.data.logging.AuraFxLogger,
 ) : AuraAIService {
 
-    /**
-     * Returns a placeholder analytics response for the specified query.
-     *
-     * This method is a stub and does not perform any actual analytics processing.
-     *
-     * @param _query The analytics query string.
-     * @return A fixed placeholder response string for the provided query.
-     */
     override fun analyticsQuery(_query: String): String {
         // TODO: Implement analytics query; Reported as unused
         println("AuraAIServiceImpl.analyticsQuery called with query: $_query")
         return "Placeholder analytics response for '$_query'"
     }
 
-    /**
-     * Placeholder for downloading a file by its ID.
-     *
-     * Always returns null as file download functionality is not implemented.
-     *
-     * @param _fileId The ID of the file to download.
-     * @return Always null.
-     */
     override suspend fun downloadFile(_fileId: String): File? {
         // TODO: Implement file download; Reported as unused
         println("AuraAIServiceImpl.downloadFile called for fileId: $_fileId")
@@ -49,10 +33,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Generates an image from the given prompt.
+     * Generates an image based on the provided prompt.
      *
-     * @param _prompt The textual description to guide image generation.
-     * @return A byte array containing the generated image, or null if image generation is not implemented.
+     * @param _prompt The textual description used to generate the image.
+     * @return A byte array representing the generated image, or null if not implemented.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         // TODO: Implement image generation; Reported as unused
@@ -61,11 +45,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a placeholder generated text string for the given prompt.
+     * Generates text based on the provided prompt and optional parameters.
      *
-     * @param prompt The input prompt for text generation.
-     * @param options Optional parameters for text generation (currently unused).
-     * @return A placeholder string representing the generated text.
+     * @param prompt The input text prompt for text generation.
+     * @param options Optional parameters that may influence text generation.
+     * @return A placeholder generated text string for the given prompt.
      */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         // TODO: Implement text generation; Reported as unused
@@ -74,11 +58,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a placeholder AI-generated response for the provided prompt.
+     * Returns a placeholder AI-generated response for the given prompt.
      *
      * @param prompt The input text to generate a response for.
-     * @param options Optional parameters for customizing the response.
-     * @return A fixed placeholder response string.
+     * @param options Optional parameters for customizing the AI response.
+     * @return A placeholder response string, or null if not implemented.
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         // TODO: Implement AI response retrieval; Reported as unused
@@ -87,10 +71,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a placeholder memory value for the given key.
+     * Retrieves a placeholder memory value for the specified key.
      *
      * @param _memoryKey The key identifying the memory entry to retrieve.
-     * @return A placeholder string representing the memory value, or null if not available.
+     * @return A placeholder string representing the memory value for the given key.
      */
     override fun getMemory(_memoryKey: String): String? {
         // TODO: Implement memory retrieval; Reported as unused
@@ -99,12 +83,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for associating a value with a memory key.
-     *
-     * Currently does not persist data and serves as a placeholder for future memory storage implementation.
+     * Stores a value in memory associated with the specified key.
      *
      * @param key The identifier for the memory entry.
-     * @param value The value to store for the given key.
+     * @param value The value to be stored.
      */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement memory saving; Reported as unused
@@ -112,7 +94,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Indicates whether the service is currently connected.
+     * Returns whether the service is currently connected.
      *
      * This placeholder implementation always returns true.
      *
@@ -125,9 +107,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder method for publishing a message to a PubSub topic.
+     * Placeholder for publishing a message to a PubSub topic.
      *
-     * Logs the topic and message but does not perform any actual publishing or network operations.
+     * Currently logs the topic and message; actual PubSub publishing is not implemented.
      */
     override fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing; Reported as unused
@@ -136,10 +118,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Uploads a file and returns a placeholder file ID string based on the file name.
+     * Uploads a file and returns a placeholder file ID.
      *
-     * @param _file The file to upload.
-     * @return A placeholder file ID string derived from the file name.
+     * @return A placeholder file ID string for the uploaded file, or null if not implemented.
      */
     override suspend fun uploadFile(_file: File): String? {
         // TODO: Implement file upload; Reported as unused

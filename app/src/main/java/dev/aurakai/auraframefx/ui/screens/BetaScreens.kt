@@ -20,23 +20,6 @@ import androidx.navigation.NavHostController
  *
  * Presents the main interface for the app, including navigation to the AI chat screen and a placeholder for settings.
  */
-/**
- * Displays the home screen with app title, status messages, and navigation buttons.
- *
- * Presents the app name, a subtitle, and a status message in a vertically centered column layout.
- * Provides buttons to navigate to the AI Chat screen and a placeholder for future settings navigation.
- */
-/**
- * Displays the home screen with app title, status messages, and navigation buttons.
- *
- * Shows the application name, a subtitle, and a status message in a vertically centered column layout.
- * Provides buttons to navigate to the AI Chat screen and a placeholder for future settings navigation.
- */
-/**
- * Displays the home screen with the app title, status messages, and navigation buttons in a vertically centered column layout.
- *
- * Includes buttons for navigating to the AI Chat screen and a placeholder for settings.
- */
 @Composable
 fun HomeScreen(navController: NavHostController) {
     Column(
@@ -76,7 +59,9 @@ fun HomeScreen(navController: NavHostController) {
 }
 
 /**
- * Displays the AI chat interface with a centered layout, showing a headline and a readiness status message.
+ * Displays the AI chat interface screen with a centered column layout.
+ *
+ * Shows a headline and a status message indicating that Trinity AI agents are ready.
  */
 @Composable
 fun BetaAiChatScreen() {
