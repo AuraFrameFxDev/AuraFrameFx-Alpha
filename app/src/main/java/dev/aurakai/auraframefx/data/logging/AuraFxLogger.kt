@@ -274,7 +274,7 @@ class AuraFxLogger @Inject constructor(
     /**
      * Retrieves all available log files and their contents.
      *
-     * @return A map where each key is a log filename and each value is the file's content, with the newest files first.
+     * @return A map of log filenames to their contents, sorted with the newest files first.
      */
     suspend fun getAllLogs(): Map<String, String> {
         return readAllLogs()
@@ -283,7 +283,7 @@ class AuraFxLogger @Inject constructor(
     /**
      * Deletes all log files in the internal logs directory that match the log filename prefix.
      *
-     * Any exceptions encountered during deletion are logged as errors.
+     * Logs any exceptions encountered during the deletion process as errors.
      */
     suspend fun clearAllLogs() {
         try {
@@ -301,12 +301,12 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Writes content to a file in the app's internal storage, creating parent directories if needed.
+     * Writes text content to a file in the app's internal storage, creating parent directories if necessary.
      *
-     * @param filePath Relative path to the file within internal storage.
-     * @param content The text content to write.
-     * @param append If true, appends to the file; otherwise, overwrites it.
-     * @return True if the write operation succeeds, false otherwise.
+     * @param filePath The relative path to the target file within internal storage.
+     * @param content The text content to write to the file.
+     * @param append If true, appends the content to the file; if false, overwrites the file.
+     * @return True if the write operation is successful, false otherwise.
      */
     private fun writeToFileInternal(filePath: String, content: String, append: Boolean): Boolean {
         return try {

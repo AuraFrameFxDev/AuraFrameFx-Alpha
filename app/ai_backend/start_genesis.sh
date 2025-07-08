@@ -20,7 +20,7 @@ print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
 
-# print_success prints a message to stdout with a green [SUCCESS] prefix to indicate a successful operation.
+# print_success prints a message to stdout with a green [SUCCESS] prefix.
 print_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }

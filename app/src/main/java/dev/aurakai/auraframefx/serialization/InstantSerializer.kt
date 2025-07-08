@@ -16,7 +16,7 @@ object InstantSerializer : KSerializer<Instant> {
         PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
 
     /**
-     * Serializes an [Instant] as an ISO-8601 string using the given [encoder].
+     * Serializes an [Instant] as an ISO-8601 string using the specified [encoder].
      *
      * Converts the [Instant] to its string representation before encoding.
      */
