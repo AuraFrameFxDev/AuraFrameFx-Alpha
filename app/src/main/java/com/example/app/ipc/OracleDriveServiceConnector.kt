@@ -33,6 +33,11 @@ class OracleDriveServiceConnector(private val context: Context) {
             _isServiceConnected.value = true
         }
 
+        /**
+         * Handles disconnection from the AuraDrive service.
+         *
+         * Clears the service interface reference and updates the connection status to disconnected.
+         */
         override fun onServiceDisconnected(name: ComponentName?) {
             auraDriveService = null
             _isServiceConnected.value = false
@@ -40,9 +45,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Attempts to bind to the remote AuraDrive service.
+     * Binds to the remote AuraDrive service using an explicit intent.
      *
-     * Initiates a connection to the AuraDrive service using an explicit intent. If a SecurityException occurs during binding, the connection state is set to false.
+     * Sets the connection state to false if a SecurityException occurs during binding.
      */
     fun bindService() {
         val intent = Intent().apply {
@@ -59,7 +64,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Unbinds from the AuraDrive service and marks the connection as disconnected.
+     * Unbinds from the AuraDrive service and updates the connection status to disconnected.
      *
      * Any exceptions during unbinding are silently ignored.
      */
@@ -73,9 +78,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Retrieves the current status string from the remote AuraDrive service.
+     * Retrieves the current status from the remote AuraDrive service.
      *
-     * @return The status reported by the remote service, or null if the service is unavailable or a RemoteException occurs.
+     * @return The status string reported by the remote service, or null if the service is unavailable or a RemoteException occurs.
      */
     suspend fun getStatusFromOracleDrive(): String? = withContext(Dispatchers.IO) {
         try {
@@ -118,9 +123,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Retrieves the internal diagnostics log from the remote AuraDrive service as a single newline-separated string.
      *
-     * Returns null if the service is unavailable or a remote exception occurs.
-     *
-     * @return The diagnostics log as a single string, or null if unavailable.
+     * @return The diagnostics log as a single string, or null if the service is unavailable or a remote exception occurs.
      */
     suspend fun getInternalDiagnosticsLog(): String? = withContext(Dispatchers.IO) {
         try {
