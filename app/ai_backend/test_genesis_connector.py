@@ -23,7 +23,7 @@ class TestGenesisConnector(unittest.TestCase):
     def setUp(self):
 
         """
-        Initializes a new GenesisConnector instance and a mock configuration before each test case.
+        Prepares a new GenesisConnector instance and mock configuration for each test case.
         """
         self.connector = GenesisConnector()
         self.mock_config = {
@@ -36,7 +36,9 @@ class TestGenesisConnector(unittest.TestCase):
     def tearDown(self):
 
         """
-        Performs cleanup after each test method. Override to reset state or release resources if necessary.
+        Cleans up after each test method execution.
+        
+        Override this method to reset state or release resources between tests if needed.
         """
         # Reset any global state if needed
         pass
@@ -44,7 +46,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_init_default_parameters(self):
 
         """
-        Test that a GenesisConnector instance initializes successfully with default parameters.
+        Test that a GenesisConnector instance can be created with default parameters.
         """
         connector = GenesisConnector()
         self.assertIsNotNone(connector)
@@ -53,9 +55,9 @@ class TestGenesisConnector(unittest.TestCase):
     def test_init_with_config(self):
 
         """
-        Test initialization of GenesisConnector with a custom configuration.
+        Tests that GenesisConnector initializes correctly with a provided custom configuration.
         
-        Verifies that the connector instance is created and its configuration matches the provided custom config.
+        Verifies that the connector instance is created and its configuration attribute matches the supplied config.
         """
         connector = GenesisConnector(config=self.mock_config)
         self.assertIsNotNone(connector)
@@ -64,25 +66,29 @@ class TestGenesisConnector(unittest.TestCase):
     def test_init_with_none_config(self):
 
         """
-        Test initializing GenesisConnector with None as the configuration.
-        
-        Verifies that passing None for the config parameter does not raise an exception and produces a valid GenesisConnector instance.
+        Test that initializing GenesisConnector with None as the configuration does not raise an exception and results in a valid instance.
         """
         connector = GenesisConnector(config=None)
         self.assertIsNotNone(connector)
 
     def test_init_with_empty_config(self):
-        """Test GenesisConnector initialization with empty config."""
+        """
+        Verify that GenesisConnector can be initialized with an empty configuration dictionary.
+        """
         connector = GenesisConnector(config={})
         self.assertIsNotNone(connector)
 
     def test_init_with_invalid_config_type(self):
-        """Test GenesisConnector initialization with invalid config type."""
+        """
+        Test that initializing GenesisConnector with a non-dictionary config raises a TypeError.
+        """
         with self.assertRaises(TypeError):
             GenesisConnector(config="invalid_string_config")
 
     def test_init_with_config_containing_non_string_keys(self):
-        """Test GenesisConnector initialization with config containing non-string keys."""
+        """
+        Test that initializing GenesisConnector with a configuration containing non-string keys raises a ValueError.
+        """
         invalid_config = {123: 'value', 'valid_key': 'value'}
         with self.assertRaises(ValueError):
             GenesisConnector(config=invalid_config)
@@ -119,7 +125,9 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_connect_failure_timeout(self, mock_get):
-        """Test connection failure with timeout."""
+        """
+        Test that the connector returns False when a connection attempt fails due to a timeout.
+        """
         mock_get.side_effect = TimeoutError("Connection timeout")
         
         result = self.connector.connect()
@@ -130,7 +138,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_connect_failure_connection_error(self, mock_get):
 
         """
-        Verify that connect() returns False when a connection error is raised during the connection attempt.
+        Test that connect() returns False when a connection error occurs during the connection attempt.
         """
         mock_get.side_effect = ConnectionError("Connection failed")
         
@@ -140,7 +148,11 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_connect_with_ssl_verification_disabled(self, mock_get):
-        """Test connection with SSL verification disabled."""
+        """
+        Verifies that the connector successfully establishes a connection when SSL verification is disabled in the configuration.
+        
+        Ensures that the HTTP request is made with SSL verification turned off and that a successful connection result is returned.
+        """
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'status': 'connected'}
@@ -155,7 +167,11 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_connect_with_custom_user_agent(self, mock_get):
-        """Test connection with custom User-Agent header."""
+        """
+        Verifies that the connector includes a custom User-Agent header when establishing a connection.
+        
+        Ensures the custom User-Agent specified in the configuration is present in the HTTP request headers during connection.
+        """
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'status': 'connected'}
@@ -175,7 +191,11 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_connect_with_proxy_configuration(self, mock_get):
-        """Test connection with proxy configuration."""
+        """
+        Verify that the GenesisConnector uses the specified proxy configuration when establishing a connection.
+        
+        Ensures that the connection succeeds and that the HTTP request is made with the provided proxy settings.
+        """
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'status': 'connected'}
@@ -195,7 +215,9 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_connect_with_authentication_headers(self, mock_get):
-        """Test connection with custom authentication headers."""
+        """
+        Verify that the connector includes appropriate authentication headers when establishing a connection using authentication configuration.
+        """
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'status': 'connected'}
@@ -217,7 +239,9 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_connect_with_multiple_failure_codes(self, mock_get):
-        """Test connection failure with various HTTP status codes."""
+        """
+        Verify that the connector's `connect` method returns `False` when the HTTP response status code indicates various types of failure, including client and server errors.
+        """
         failure_codes = [400, 401, 403, 404, 500, 502, 503, 504]
         
         for code in failure_codes:
@@ -231,7 +255,9 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_connect_with_redirect_handling(self, mock_get):
-        """Test connection with redirect handling."""
+        """
+        Test that the connector successfully establishes a connection when HTTP redirects occur, ensuring redirects are properly followed.
+        """
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'status': 'connected'}
@@ -248,7 +274,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_send_request_success(self, mock_post):
 
         """
-        Test that send_request returns the expected response dictionary when a POST request with a valid payload is successful.
+        Verifies that send_request returns the correct response dictionary when a POST request with a valid payload succeeds.
         """
         mock_response = Mock()
         mock_response.status_code = 200
@@ -272,7 +298,9 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_send_request_empty_payload(self, mock_post):
-        """Test sending request with empty payload."""
+        """
+        Test that sending a request with an empty payload raises a ValueError.
+        """
         with self.assertRaises(ValueError):
             self.connector.send_request({})
 
@@ -280,7 +308,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_send_request_server_error(self, mock_post):
 
         """
-        Test that send_request raises a RuntimeError when the server responds with a 500 Internal Server Error.
+        Test that send_request raises a RuntimeError when the server returns a 500 Internal Server Error response.
         """
         mock_response = Mock()
         mock_response.status_code = 500
@@ -296,7 +324,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_send_request_malformed_json(self, mock_post):
 
         """
-        Verifies that send_request raises a ValueError when the server returns a response with malformed JSON.
+        Test that send_request raises a ValueError when the server responds with malformed JSON.
         """
         mock_response = Mock()
         mock_response.status_code = 200
@@ -310,7 +338,11 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_send_request_with_different_http_methods(self, mock_post):
-        """Test sending requests with different HTTP methods."""
+        """
+        Verifies that the connector correctly sends requests using various HTTP methods and processes their responses.
+        
+        Tests the `send_request` method with GET, POST, PUT, DELETE, and PATCH, ensuring the correct method is used and the response is handled as expected.
+        """
         methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
         
         for method in methods:
@@ -328,7 +360,11 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_send_request_with_file_upload(self, mock_post):
-        """Test sending request with file upload."""
+        """
+        Test that sending a request with a file upload correctly processes the file and returns the expected response.
+        
+        Verifies that the file is included in the request and the response indicates a successful upload.
+        """
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'uploaded': True}
@@ -345,7 +381,9 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_send_request_with_streaming_response(self, mock_post):
-        """Test sending request with streaming response."""
+        """
+        Test that sending a request with streaming enabled returns a non-None result when the response is streamed in chunks.
+        """
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.iter_content.return_value = [b'chunk1', b'chunk2']
@@ -358,7 +396,9 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_send_request_with_custom_timeout(self, mock_post):
-        """Test sending request with custom timeout."""
+        """
+        Test that sending a request with a custom timeout value correctly applies the timeout and returns the expected response.
+        """
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'timeout_test': True}
@@ -374,7 +414,9 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_send_request_with_request_id_tracking(self, mock_post):
-        """Test sending request with request ID tracking."""
+        """
+        Verify that sending a request with a request ID in the payload correctly returns the same request ID in the response.
+        """
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'request_id': '12345'}
@@ -388,7 +430,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_validate_config_valid(self):
 
         """
-        Verify that `validate_config` returns True for a valid configuration dictionary.
+        Test that `validate_config` returns True when provided with a valid configuration dictionary.
         """
         valid_config = {
             'api_key': 'valid_key',
@@ -403,7 +445,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_validate_config_missing_api_key(self):
 
         """
-        Verify that `validate_config` raises a `ValueError` when the configuration does not include an API key.
+        Test that `validate_config` raises a `ValueError` when the API key is missing from the configuration.
         """
         invalid_config = {
             'base_url': 'https://valid.url',
@@ -416,7 +458,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_validate_config_invalid_url(self):
 
         """
-        Verify that `validate_config` raises a `ValueError` when the configuration contains an invalid base URL.
+        Test that `validate_config` raises a `ValueError` when provided with a configuration containing an invalid base URL.
         """
         invalid_config = {
             'api_key': 'valid_key',
@@ -430,7 +472,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_validate_config_negative_timeout(self):
 
         """
-        Test that `validate_config` raises a `ValueError` when the configuration specifies a negative timeout value.
+        Test that `validate_config` raises a `ValueError` when given a configuration with a negative timeout value.
         """
         invalid_config = {
             'api_key': 'valid_key',
@@ -442,12 +484,18 @@ class TestGenesisConnector(unittest.TestCase):
             self.connector.validate_config(invalid_config)
 
     def test_validate_config_none_input(self):
-        """Test configuration validation with None input."""
+        """
+        Test that `validate_config` raises a `ValueError` when called with `None` as input.
+        """
         with self.assertRaises(ValueError):
             self.connector.validate_config(None)
 
     def test_validate_config_with_extreme_values(self):
-        """Test configuration validation with extreme values."""
+        """
+        Tests the configuration validator with extreme and boundary values for API key, base URL, and timeout.
+        
+        Verifies that configurations with minimal and maximal acceptable values are validated successfully, while configurations with empty API keys or invalid URL schemes raise a ValueError.
+        """
         extreme_configs = [
             {'api_key': 'k', 'base_url': 'https://a.b', 'timeout': 0.1},  # Minimum values
             {'api_key': 'x' * 1000, 'base_url': 'https://very-long-domain-name.com', 'timeout': 3600},  # Large values
@@ -465,7 +513,9 @@ class TestGenesisConnector(unittest.TestCase):
                         self.connector.validate_config(config)
 
     def test_validate_config_with_additional_fields(self):
-        """Test configuration validation with additional optional fields."""
+        """
+        Verify that the configuration validator accepts configs containing additional optional fields beyond the required ones.
+        """
         extended_config = {
             'api_key': 'test_key',
             'base_url': 'https://api.test.com',
@@ -485,7 +535,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_get_status_healthy(self, mock_get):
 
         """
-        Verify that `get_status` returns a dictionary with status 'healthy' and the correct version when the service responds with HTTP 200 and a healthy status payload.
+        Test that `get_status` returns a status dictionary indicating 'healthy' and includes the correct version when the service responds with HTTP 200 and a healthy status payload.
         """
         mock_response = Mock()
         mock_response.status_code = 200
@@ -499,7 +549,11 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_get_status_unhealthy(self, mock_get):
-        """Test getting status when service is unhealthy."""
+        """
+        Test that get_status() returns 'unhealthy' when the service responds with HTTP 503.
+        
+        Simulates an unhealthy service by mocking the HTTP GET response to return a 503 status code and verifies that the returned status dictionary reflects the 'unhealthy' state.
+        """
         mock_response = Mock()
         mock_response.status_code = 503
         mock_get.return_value = mock_response
@@ -510,7 +564,9 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_get_status_with_detailed_response(self, mock_get):
-        """Test getting detailed status information."""
+        """
+        Verify that get_status() returns a detailed status dictionary including health, version, uptime, connection count, memory usage, and last restart time.
+        """
         detailed_status = {
             'status': 'healthy',
             'version': '2.1.0',
@@ -533,7 +589,11 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.get')
     def test_get_status_with_partial_service_degradation(self, mock_get):
-        """Test getting status when service is partially degraded."""
+        """
+        Verify that get_status() correctly reports a 'degraded' status and includes relevant issue details when the service is partially degraded.
+        
+        Simulates a scenario where the service returns a degraded status with specific issues and affected endpoints, and asserts that these are present in the returned status dictionary.
+        """
         degraded_status = {
             'status': 'degraded',
             'issues': ['high_latency', 'connection_pool_exhausted'],
@@ -551,7 +611,9 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertIn('affected_endpoints', status)
 
     def test_format_payload_valid_data(self):
-        """Test payload formatting with valid data."""
+        """
+        Tests that the payload formatting method correctly serializes valid data containing strings, timestamps, and nested dictionaries.
+        """
         data = {
             'message': 'test',
             'timestamp': datetime.now().isoformat(),
@@ -567,7 +629,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_format_payload_with_special_characters(self):
 
         """
-        Tests that the payload formatting method correctly handles data with special characters and Unicode, ensuring all expected keys are present in the formatted result.
+        Verifies that the payload formatting method correctly processes data containing special characters and Unicode, ensuring all relevant keys are present in the formatted output.
         """
         data = {
             'message': 'test with üñíçødé',
@@ -584,18 +646,22 @@ class TestGenesisConnector(unittest.TestCase):
     def test_format_payload_empty_data(self):
 
         """
-        Test that calling format_payload with an empty dictionary raises a ValueError.
+        Test that `format_payload` raises a ValueError when given an empty dictionary.
         """
         with self.assertRaises(ValueError):
             self.connector.format_payload({})
 
     def test_format_payload_none_data(self):
-        """Test payload formatting with None data."""
+        """
+        Verify that formatting a payload with `None` as input raises a ValueError.
+        """
         with self.assertRaises(ValueError):
             self.connector.format_payload(None)
 
     def test_format_payload_with_nested_structures(self):
-        """Test payload formatting with deeply nested data structures."""
+        """
+        Verifies that the payload formatter correctly serializes deeply nested data structures, including nested dictionaries and arrays.
+        """
         nested_data = {
             'level1': {
                 'level2': {
@@ -616,7 +682,9 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertIn('timestamp', formatted)
 
     def test_format_payload_with_circular_references(self):
-        """Test payload formatting with circular references."""
+        """
+        Tests that formatting a payload containing circular references raises a ValueError.
+        """
         data = {'key': 'value'}
         data['self'] = data  # Create circular reference
         
@@ -625,7 +693,9 @@ class TestGenesisConnector(unittest.TestCase):
             self.connector.format_payload(data)
 
     def test_format_payload_with_binary_data(self):
-        """Test payload formatting with binary data."""
+        """
+        Tests that the payload formatter correctly processes and encodes binary data fields within a payload.
+        """
         binary_data = {
             'message': 'test',
             'binary_field': b'binary_content',
@@ -638,7 +708,9 @@ class TestGenesisConnector(unittest.TestCase):
         # Binary data should be handled appropriately (encoded/converted)
 
     def test_format_payload_with_datetime_objects(self):
-        """Test payload formatting with various datetime objects."""
+        """
+        Tests that the payload formatter correctly serializes various datetime, date, and time objects.
+        """
         from datetime import datetime, date, time
         
         datetime_data = {
@@ -659,9 +731,9 @@ class TestGenesisConnector(unittest.TestCase):
     def test_retry_mechanism_success_after_retry(self, mock_post):
 
         """
-        Verifies that `send_request_with_retry` retries after an initial failure and returns the correct response upon a subsequent success.
+        Tests that `send_request_with_retry` retries after an initial failure and returns the correct response when a subsequent attempt succeeds.
         
-        Simulates a failed POST request followed by a successful one, ensuring the method returns the expected data and performs the correct number of retries.
+        Simulates a failed POST request followed by a successful one, verifying that the method returns the expected data and performs the correct number of retries.
         """
         # First call fails, second succeeds
         mock_response_fail = Mock()
@@ -684,7 +756,7 @@ class TestGenesisConnector(unittest.TestCase):
         """
         Test that a RuntimeError is raised when all retry attempts for a failed request are exhausted.
         
-        Verifies that the request is attempted the expected number of times and that each attempt results in a server error.
+        Ensures the request is attempted the correct number of times and each attempt results in a server error.
         """
         mock_response = Mock()
         mock_response.status_code = 500
@@ -702,9 +774,9 @@ class TestGenesisConnector(unittest.TestCase):
     def test_retry_mechanism_backoff_timing(self, mock_post, mock_sleep):
 
         """
-        Verifies that the retry mechanism applies incrementally increasing backoff delays between retries after consecutive server errors.
+        Test that the retry mechanism uses increasing backoff delays between retries after consecutive server errors.
         
-        Simulates repeated server errors and asserts that the sleep function is called with delays that increase according to the backoff strategy.
+        Simulates repeated server errors and verifies that the sleep function is called with incrementally increasing delays as specified by the backoff strategy.
         """
         mock_response = Mock()
         mock_response.status_code = 500
@@ -722,7 +794,11 @@ class TestGenesisConnector(unittest.TestCase):
     @patch('time.sleep')
     @patch('requests.post')
     def test_retry_mechanism_with_exponential_backoff(self, mock_post, mock_sleep):
-        """Test retry mechanism with exponential backoff strategy."""
+        """
+        Verifies that the retry mechanism applies exponential backoff delays between retries and raises a RuntimeError after exceeding the maximum number of retries on repeated server errors.
+        
+        This test ensures that the backoff intervals double with each retry attempt and that the retry logic terminates with an exception when all attempts fail.
+        """
         mock_response = Mock()
         mock_response.status_code = 500
         mock_post.return_value = mock_response
@@ -739,7 +815,11 @@ class TestGenesisConnector(unittest.TestCase):
     @patch('time.sleep')
     @patch('requests.post')
     def test_retry_mechanism_with_jitter(self, mock_post, mock_sleep):
-        """Test retry mechanism with jitter to avoid thundering herd."""
+        """
+        Verifies that the retry mechanism applies jitter to backoff intervals to prevent synchronized retries.
+        
+        This test ensures that when `use_jitter` is enabled, the retry logic incorporates a random delay (jitter) between attempts, and raises a `RuntimeError` after exceeding the maximum number of retries.
+        """
         with patch('random.uniform') as mock_random:
             mock_random.return_value = 0.5  # Fixed jitter value
             mock_response = Mock()
@@ -757,7 +837,11 @@ class TestGenesisConnector(unittest.TestCase):
 
     @patch('requests.post')
     def test_retry_mechanism_with_specific_retry_codes(self, mock_post):
-        """Test retry mechanism only retries on specific HTTP status codes."""
+        """
+        Verify that the retry mechanism in `send_request_with_retry` only retries on specific HTTP status codes and not on others.
+        
+        Tests that retries occur for server error codes (500, 502, 503, 504) and do not occur for client error codes (400, 401, 403, 404, 422), raising `RuntimeError` in both cases.
+        """
         retry_codes = [500, 502, 503, 504]
         no_retry_codes = [400, 401, 403, 404, 422]
         
@@ -790,7 +874,9 @@ class TestGenesisConnector(unittest.TestCase):
                 self.assertEqual(mock_post.call_count, 1)
 
     def test_parse_response_valid_json(self):
-        """Test parsing valid JSON response."""
+        """
+        Test that a valid JSON string is correctly parsed into a Python dictionary.
+        """
         response_data = {'key': 'value', 'number': 123, 'bool': True}
         json_string = json.dumps(response_data)
         
@@ -801,7 +887,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_parse_response_invalid_json(self):
 
         """
-        Test that `parse_response` raises a ValueError when given an invalid JSON string.
+        Test that `parse_response` raises a ValueError when provided with an invalid JSON string.
         """
         invalid_json = '{"invalid": json}'
         
@@ -809,20 +895,24 @@ class TestGenesisConnector(unittest.TestCase):
             self.connector.parse_response(invalid_json)
 
     def test_parse_response_empty_string(self):
-        """Test parsing empty string response."""
+        """
+        Test that parsing an empty string response raises a ValueError.
+        """
         with self.assertRaises(ValueError):
             self.connector.parse_response('')
 
     def test_parse_response_none_input(self):
 
         """
-        Test that passing None to parse_response raises a ValueError.
+        Test that `parse_response` raises a ValueError when given None as input.
         """
         with self.assertRaises(ValueError):
             self.connector.parse_response(None)
 
     def test_parse_response_with_different_content_types(self):
-        """Test parsing responses with different content types."""
+        """
+        Verifies that the response parser correctly handles various content types, returning parsed JSON for 'application/json' and raw text for other types.
+        """
         test_cases = [
             ('application/json', '{"key": "value"}'),
             ('text/plain', 'plain text response'),
@@ -845,7 +935,9 @@ class TestGenesisConnector(unittest.TestCase):
                     self.assertEqual(parsed, content)
 
     def test_parse_response_with_encoding_issues(self):
-        """Test parsing responses with different character encodings."""
+        """
+        Test that the response parser correctly handles responses with various character encodings, ensuring special characters are processed without errors.
+        """
         test_encodings = ['utf-8', 'latin-1', 'ascii']
         
         for encoding in test_encodings:
@@ -860,7 +952,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_log_request_valid_data(self):
 
         """
-        Test that the log_request method logs the payload when provided with valid data.
+        Verify that log_request logs the payload when given valid data.
         """
         with patch('logging.info') as mock_log:
             payload = {'message': 'test'}
@@ -871,7 +963,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_log_request_sensitive_data_redaction(self):
 
         """
-        Verify that sensitive fields such as 'api_key' and 'password' are redacted from log output when logging a request payload.
+        Test that sensitive fields like 'api_key' and 'password' are properly redacted from log output when logging request payloads.
         """
         with patch('logging.info') as mock_log:
             payload = {
@@ -887,7 +979,9 @@ class TestGenesisConnector(unittest.TestCase):
             self.assertNotIn('secret_password', logged_message)
 
     def test_log_request_with_performance_metrics(self):
-        """Test logging request with performance metrics."""
+        """
+        Test that the log_request method logs performance metrics, including request duration, when timing is enabled.
+        """
         with patch('logging.info') as mock_log, \
              patch('time.time') as mock_time:
             
@@ -902,7 +996,9 @@ class TestGenesisConnector(unittest.TestCase):
             self.assertIn('duration', logged_message.lower())
 
     def test_log_request_with_structured_logging(self):
-        """Test logging request with structured logging format."""
+        """
+        Verify that the log_request method logs payloads using a structured logging format, ensuring key fields are present in the logged output.
+        """
         with patch('logging.info') as mock_log:
             payload = {
                 'message': 'test',
@@ -921,7 +1017,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_get_headers_with_auth(self):
 
         """
-        Tests that `get_headers` returns headers containing both `Authorization` and `Content-Type` when an API key is present in the configuration.
+        Tests that `get_headers` includes both `Authorization` and `Content-Type` headers when an API key is provided in the configuration.
         """
         connector = GenesisConnector(config={'api_key': 'test_key'})
         headers = connector.get_headers()
@@ -932,7 +1028,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_get_headers_without_auth(self):
 
         """
-        Verify that `get_headers` omits the `Authorization` header when no authentication is configured, but includes the `Content-Type` header.
+        Verify that `get_headers` excludes the `Authorization` header when authentication is not configured, while ensuring the `Content-Type` header is present.
         """
         connector = GenesisConnector(config={})
         headers = connector.get_headers()
@@ -941,7 +1037,9 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertIn('Content-Type', headers)
 
     def test_get_headers_with_custom_headers(self):
-        """Test getting headers with custom headers merged."""
+        """
+        Verify that custom headers specified in the configuration are correctly merged into the headers returned by the connector, alongside standard headers such as authorization.
+        """
         connector = GenesisConnector(config={
             'api_key': 'test_key',
             'custom_headers': {
@@ -958,7 +1056,9 @@ class TestGenesisConnector(unittest.TestCase):
         self.assertEqual(headers['X-Custom-Header'], 'custom_value')
 
     def test_get_headers_with_conditional_headers(self):
-        """Test getting headers with conditional headers based on request type."""
+        """
+        Verify that `get_headers` returns the correct Content-Type header for different request types, including JSON, form, and multipart requests.
+        """
         connector = GenesisConnector(config={'api_key': 'test_key'})
         
         # Test headers for different request types
@@ -974,7 +1074,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_close_connection(self):
 
         """
-        Verify that calling the connector's `close` method completes without raising exceptions.
+        Tests that the connector's `close` method executes without raising any exceptions.
         """
         # This test depends on the actual implementation
         result = self.connector.close()
@@ -984,7 +1084,7 @@ class TestGenesisConnector(unittest.TestCase):
 
     def test_context_manager_usage(self):
         """
-        Verify that GenesisConnector can be used as a context manager without raising errors.
+        Verify that GenesisConnector supports context manager usage and initializes correctly within a `with` block.
         """
         with GenesisConnector(config=self.mock_config) as connector:
             self.assertIsNotNone(connector)
@@ -993,7 +1093,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_thread_safety(self):
 
         """
-        Verifies that configuration validation in GenesisConnector is thread-safe by running multiple concurrent validations and ensuring all succeed.
+        Tests that configuration validation in GenesisConnector is thread-safe by performing concurrent validations across multiple threads and verifying all succeed.
         """
         import threading
         results = []
@@ -1019,7 +1119,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_large_payload_handling(self):
 
         """
-        Test that the connector can format and handle large payloads without raising memory-related errors.
+        Tests that the connector can format and process large payloads without encountering memory errors.
         """
         large_payload = {
             'message': 'x' * 10000,  # 10KB string
@@ -1033,11 +1133,17 @@ class TestGenesisConnector(unittest.TestCase):
     def test_concurrent_requests(self):
 
         """
-        Verifies that the connector can handle multiple concurrent requests, ensuring all complete successfully without errors.
+        Tests that the connector can process multiple requests concurrently, ensuring each request completes successfully and returns the expected result.
         """
         import concurrent.futures
         
         def make_request():
+            """
+            Mocks an HTTP POST request and sends a test payload using the connector's send_request method.
+            
+            Returns:
+                dict: The response data returned by the mocked send_request call.
+            """
             with patch('requests.post') as mock_post:
                 mock_response = Mock()
                 mock_response.status_code = 200
@@ -1056,7 +1162,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_error_handling_chain(self):
 
         """
-        Tests that an exception is raised and properly propagated when a network error occurs during a chained `send_request` call.
+        Verifies that exceptions raised during a chained `send_request` call due to network errors are properly propagated.
         """
         with patch('requests.post') as mock_post:
             mock_post.side_effect = Exception("Network error")
@@ -1067,7 +1173,9 @@ class TestGenesisConnector(unittest.TestCase):
                 self.connector.send_request(payload)
 
     def test_configuration_reload(self):
-        """Test reloading configuration."""
+        """
+        Test that reloading the connector's configuration updates it with new values.
+        """
         new_config = {
             'api_key': 'new_key',
             'base_url': 'https://new.url',
@@ -1082,7 +1190,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_metrics_collection(self):
 
         """
-        Verifies that sending a request through the connector records both 'requests_sent' and 'response_time' metrics.
+        Tests that sending a request through the connector results in both 'requests_sent' and 'response_time' metrics being recorded.
         """
         with patch('requests.post') as mock_post:
             mock_response = Mock()
@@ -1101,7 +1209,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_health_check_endpoint(self):
 
         """
-        Test that the health check endpoint returns a status of 'healthy' when the service responds with HTTP 200 and valid JSON.
+        Tests that the health check endpoint returns a status of 'healthy' when the service responds with HTTP 200 and valid JSON.
         """
         with patch('requests.get') as mock_get:
             mock_response = Mock()
@@ -1116,7 +1224,7 @@ class TestGenesisConnector(unittest.TestCase):
     def test_rate_limiting_handling(self):
 
         """
-        Tests that a RuntimeError is raised when an HTTP 429 response with a Retry-After header is received, indicating the connector correctly handles rate limiting.
+        Verify that a RuntimeError is raised when the connector receives an HTTP 429 response with a Retry-After header, ensuring proper rate limiting handling.
         """
         with patch('requests.post') as mock_post:
             mock_response = Mock()
@@ -1130,7 +1238,9 @@ class TestGenesisConnector(unittest.TestCase):
                 self.connector.send_request(payload)
 
     def test_connection_pooling_behavior(self):
-        """Test connection pooling and reuse behavior."""
+        """
+        Verifies that the GenesisConnector reuses the same session for multiple requests when connection pooling is enabled.
+        """
         with patch('requests.Session') as mock_session:
             mock_session_instance = Mock()
             mock_session.return_value = mock_session_instance
@@ -1152,8 +1262,17 @@ class TestGenesisConnector(unittest.TestCase):
             mock_session.assert_called_once()
 
     def test_async_request_handling(self):
-        """Test asynchronous request handling if supported."""
+        """
+        Tests that the GenesisConnector can handle asynchronous requests correctly if async support is implemented.
+        
+        This test mocks aiohttp's ClientSession to simulate an async HTTP POST request and verifies that the async request method returns the expected result. If async methods are not implemented or no event loop is available, the test is skipped.
+        """
         async def async_test():
+            """
+            Tests the asynchronous request handling of GenesisConnector using mocked aiohttp session.
+            
+            Verifies that an asynchronous POST request returns the expected response when async methods are implemented. Skips the test if async support is not available.
+            """
             with patch('aiohttp.ClientSession') as mock_session:
                 mock_session_instance = Mock()
                 mock_session.return_value.__aenter__.return_value = mock_session_instance
@@ -1182,7 +1301,9 @@ class TestGenesisConnector(unittest.TestCase):
             pass
 
     def test_batch_request_processing(self):
-        """Test processing multiple requests in batch."""
+        """
+        Tests that the connector can process multiple requests in a batch and returns the expected results for each payload.
+        """
         with patch('requests.post') as mock_post:
             mock_response = Mock()
             mock_response.status_code = 200
@@ -1205,7 +1326,11 @@ class TestGenesisConnector(unittest.TestCase):
                 pass
 
     def test_webhook_validation(self):
-        """Test webhook signature validation."""
+        """
+        Tests the validation of webhook signatures using HMAC SHA-256.
+        
+        Verifies that the connector correctly validates a webhook payload against a valid signature and rejects an invalid signature. Skips the test if webhook validation is not implemented.
+        """
         webhook_payload = {'event': 'test_event', 'data': {'key': 'value'}}
         secret = 'webhook_secret'
         
@@ -1236,7 +1361,9 @@ class TestGenesisConnector(unittest.TestCase):
             pass
 
     def test_circuit_breaker_functionality(self):
-        """Test circuit breaker pattern implementation."""
+        """
+        Verifies that the circuit breaker pattern is correctly implemented by simulating repeated failures and ensuring further requests are blocked once the breaker is open.
+        """
         with patch('requests.post') as mock_post:
             # Simulate multiple failures to trigger circuit breaker
             mock_response = Mock()
@@ -1262,7 +1389,9 @@ class TestGenesisConnector(unittest.TestCase):
                 pass
 
     def test_request_deduplication(self):
-        """Test request deduplication to prevent duplicate requests."""
+        """
+        Verifies that identical requests with the same idempotency key are deduplicated, ensuring only one HTTP request is made and the same response is returned for duplicates.
+        """
         with patch('requests.post') as mock_post:
             mock_response = Mock()
             mock_response.status_code = 200
@@ -1285,7 +1414,11 @@ class TestGenesisConnector(unittest.TestCase):
                 pass
 
     def test_request_signing(self):
-        """Test request signing for enhanced security."""
+        """
+        Verifies that the connector correctly signs requests and includes the signature header for enhanced security.
+        
+        This test mocks a POST request, sends a signed request with a payload and signing key, and asserts that the response indicates successful signing. It also checks that the 'X-Signature' header is present in the request. The test is skipped if request signing is not implemented.
+        """
         with patch('requests.post') as mock_post:
             mock_response = Mock()
             mock_response.status_code = 200
@@ -1308,7 +1441,11 @@ class TestGenesisConnector(unittest.TestCase):
                 pass
 
     def test_response_caching(self):
-        """Test response caching functionality."""
+        """
+        Verifies that repeated requests to the same endpoint utilize response caching, resulting in only one actual HTTP request.
+        
+        Ensures that the first call retrieves data from the API and subsequent calls return the cached response. Skips the test if caching is not implemented.
+        """
         with patch('requests.get') as mock_get:
             mock_response = Mock()
             mock_response.status_code = 200
@@ -1332,7 +1469,9 @@ class TestGenesisConnector(unittest.TestCase):
                 pass
 
     def test_request_tracing(self):
-        """Test request tracing for debugging and monitoring."""
+        """
+        Verifies that request tracing captures and exposes trace information during a request, including request ID and timing details, when tracing is enabled.
+        """
         with patch('requests.post') as mock_post:
             mock_response = Mock()
             mock_response.status_code = 200
@@ -1355,7 +1494,11 @@ class TestGenesisConnector(unittest.TestCase):
                 pass
 
     def test_configuration_hot_reload(self):
-        """Test hot reloading configuration without restart."""
+        """
+        Verifies that the connector can update its configuration at runtime without requiring a restart.
+        
+        This test ensures that hot reloading the configuration updates the connector's settings immediately, and falls back to a standard reload if hot reload is not implemented.
+        """
         original_config = {'api_key': 'old_key', 'base_url': 'https://old.url'}
         new_config = {'api_key': 'new_key', 'base_url': 'https://new.url'}
         
@@ -1373,7 +1516,11 @@ class TestGenesisConnector(unittest.TestCase):
             self.assertEqual(connector.config['api_key'], 'new_key')
 
     def test_memory_usage_monitoring(self):
-        """Test memory usage monitoring during operations."""
+        """
+        Verifies that memory usage remains within acceptable limits during repeated payload formatting operations.
+        
+        This test uses `psutil` to monitor the process's memory before and after formatting several large payloads, ensuring that memory consumption does not increase excessively, which helps detect potential memory leaks.
+        """
         try:
             import psutil
             import os
@@ -1401,7 +1548,9 @@ class TestGenesisConnector(unittest.TestCase):
             pass
 
     def test_security_headers_validation(self):
-        """Test validation of security-related headers."""
+        """
+        Verifies that the GenesisConnector includes and correctly sets security-related HTTP headers in requests.
+        """
         security_headers = {
             'X-Content-Type-Options': 'nosniff',
             'X-Frame-Options': 'DENY',
@@ -1421,7 +1570,11 @@ class TestGenesisConnector(unittest.TestCase):
             self.assertEqual(headers[security_header], expected_value)
 
     def test_api_version_negotiation(self):
-        """Test API version negotiation."""
+        """
+        Verifies that the connector correctly retrieves supported API versions and negotiates the appropriate version.
+        
+        This test mocks the API response to provide a list of supported versions and a default version, then checks that the connector can retrieve these versions and successfully negotiate a requested version. Skips the test if version negotiation is not implemented.
+        """
         with patch('requests.get') as mock_get:
             mock_response = Mock()
             mock_response.status_code = 200
@@ -1444,7 +1597,11 @@ class TestGenesisConnector(unittest.TestCase):
                 pass
 
     def test_error_recovery_mechanisms(self):
-        """Test various error recovery mechanisms."""
+        """
+        Verifies that the connector's error recovery mechanisms handle various exceptions appropriately during request sending.
+        
+        Simulates different error scenarios (network errors, timeouts, invalid responses, server errors) and checks whether the connector recovers or raises exceptions as expected.
+        """
         with patch('requests.post') as mock_post:
             # Test different error scenarios and recovery
             error_scenarios = [
@@ -1474,7 +1631,11 @@ class TestGenesisConnector(unittest.TestCase):
                             self.fail(f"Recovery failed for {error.__class__.__name__}: {e}")
 
     def test_load_balancing_across_endpoints(self):
-        """Test load balancing across multiple endpoints."""
+        """
+        Verifies that the connector distributes requests across multiple endpoints using load balancing.
+        
+        This test checks that when multiple requests are sent, the connector cycles through the provided endpoints according to the specified load balancing strategy (e.g., round robin). It ensures that requests are distributed as expected and that each response indicates successful balancing. The test is skipped if load balancing is not implemented.
+        """
         endpoints = [
             'https://api1.test.com',
             'https://api2.test.com',
@@ -1518,7 +1679,7 @@ class TestGenesisConnectorIntegration(unittest.TestCase):
     def setUp(self):
 
         """
-        Prepare the integration test environment by initializing a GenesisConnector instance with a test configuration.
+        Sets up the integration test environment by creating a GenesisConnector instance with a test configuration.
         """
         self.connector = GenesisConnector(config={
             'api_key': 'test_key',
@@ -1529,9 +1690,9 @@ class TestGenesisConnectorIntegration(unittest.TestCase):
     def test_full_request_lifecycle(self):
 
         """
-        Simulates sending a payload through the connector and verifies that a successful response is returned.
+        Tests the complete request lifecycle by sending a payload through the connector and verifying a successful response.
         
-        Asserts that the connector processes a POST request correctly and the response contains the expected result.
+        Simulates a POST request and asserts that the connector returns the expected result.
         """
         with patch('requests.post') as mock_post:
             mock_response = Mock()
@@ -1548,7 +1709,7 @@ class TestGenesisConnectorIntegration(unittest.TestCase):
     def test_connection_and_request_flow(self):
 
         """
-        Verifies that the connector can successfully establish a connection and send a request, returning the correct response data.
+        Tests that the connector can establish a connection and send a request, returning the expected response data.
         """
         with patch('requests.get') as mock_get, \
              patch('requests.post') as mock_post:
@@ -1580,16 +1741,16 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
     def setUp(self):
 
         """
-        Set up a GenesisConnector instance and mock configuration for edge case testing.
+        Initializes a GenesisConnector instance for edge case testing.
         """
         self.connector = GenesisConnector()
 
 
     def test_init_with_malformed_config_types(self):
         """
-        Test that initializing GenesisConnector with malformed configuration types raises ValueError or TypeError.
+        Test that GenesisConnector initialization fails with malformed configuration types.
         
-        Covers scenarios such as non-string or empty API keys and base URLs, and non-numeric timeout values.
+        Verifies that providing non-string or empty API keys and base URLs, or non-numeric timeout values, raises ValueError or TypeError during initialization or configuration validation.
         """
         malformed_configs = [
             {'api_key': 123, 'base_url': 'https://test.com'},  # Non-string api_key
@@ -1607,7 +1768,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_init_with_unicode_config(self):
         """
-        Verify that GenesisConnector initializes successfully with a configuration containing Unicode characters.
+        Test that GenesisConnector can be initialized with a configuration containing Unicode characters in its fields.
         """
         unicode_config = {
             'api_key': 'test_key_🔑',
@@ -1622,9 +1783,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
     @patch('requests.get')
     def test_connect_with_redirects(self, mock_get):
         """
-        Test that the connector's connect method handles HTTP 302 redirects without returning None.
+        Test that the connect method correctly handles HTTP 302 redirects.
         
-        Simulates an HTTP redirect response and verifies that the connect method returns a non-None result, indicating proper handling of redirects.
+        Simulates an HTTP 302 response and verifies that the method returns a non-None result, indicating successful redirect handling.
         """
         mock_response = Mock()
         mock_response.status_code = 302
@@ -1639,7 +1800,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
     @patch('requests.get')
     def test_connect_with_ssl_errors(self, mock_get):
         """
-        Verify that the connector's connect() method returns False when an SSL certificate error is encountered during the connection attempt.
+        Test that connect() returns False when an SSL certificate error occurs during connection.
         """
         import ssl
         mock_get.side_effect = ssl.SSLError("SSL certificate verify failed")
@@ -1653,7 +1814,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         """
         Test that the connector's connect method returns False when a DNS resolution error occurs.
         
-        Simulates a DNS resolution failure by raising a socket.gaierror during the connection attempt and verifies that the connector handles it gracefully.
+        Simulates a DNS resolution failure by raising a socket.gaierror during the connection attempt and verifies that the connector handles the error gracefully without raising an exception.
         """
         import socket
         mock_get.side_effect = socket.gaierror("Name or service not known")
@@ -1665,7 +1826,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
     @patch('requests.post')
     def test_send_request_with_binary_payload(self, mock_post):
         """
-        Test that the connector correctly processes and sends a request containing binary data in the payload, returning the expected response dictionary.
+        Tests that the connector can process and send a request with a large, binary-like payload, and handles memory or value errors gracefully.
         """
         mock_response = Mock()
         mock_response.status_code = 200
@@ -1689,7 +1850,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
             self.assertIsInstance(e, (MemoryError, ValueError))
 
     def test_malformed_json_responses(self):
-        """Test handling of various malformed JSON responses."""
+        """
+        Tests the connector's ability to handle and report errors for a variety of malformed JSON response strings, including incomplete structures, syntax errors, duplicate keys, invalid escapes, and type inconsistencies.
+        """
         malformed_responses = [
             '{"incomplete":',
             '{"trailing_comma":,}',
@@ -1707,7 +1870,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
     @patch('requests.post')
     def test_send_request_with_nested_payload(self, mock_post):
         """
-        Tests sending a deeply nested payload through the connector and verifies that the response is processed correctly.
+        Test sending a deeply nested payload using the connector and verify correct response processing and timeout handling.
+        
+        Verifies that the connector can process nested payloads and that configuration validation behaves as expected for various timeout values, including raising a ValueError for infinite timeouts.
         """
         mock_response = Mock()
         mock_response.status_code = 200
@@ -1730,7 +1895,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
                     self.assertTrue(result)
 
     def test_special_characters_in_headers(self):
-        """Test handling of special characters in headers."""
+        """
+        Verifies that the GenesisConnector correctly encodes and processes HTTP headers containing special characters, spaces, Unicode, quotes, newlines, and tabs.
+        """
         special_headers = {
             'X-Custom-Header': 'value with spaces',
             'X-Unicode-Header': 'café',
@@ -1751,9 +1918,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
     @patch('requests.post')
     def test_send_request_with_circular_reference(self, mock_post):
         """
-        Test that sending a payload with a circular reference raises a ValueError or TypeError.
+        Test that sending a payload containing a circular reference raises a ValueError or TypeError.
         
-        This ensures the connector detects and rejects payloads that cannot be serialized due to circular references.
+        Ensures the connector detects and rejects payloads that cannot be serialized due to circular references.
         """
         # Create circular reference
         payload = {'message': 'test'}
@@ -1766,9 +1933,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
     @patch('requests.post')
     def test_send_request_with_extremely_large_payload(self, mock_post):
         """
-        Test that sending an extremely large payload results in a RuntimeError when the server responds with HTTP 413 (Payload Too Large).
+        Verify that sending an extremely large payload triggers a RuntimeError when the server returns HTTP 413 (Payload Too Large).
         
-        This verifies that the connector properly raises an error when the payload exceeds server limits.
+        This test ensures the connector raises an error when the payload size exceeds server limits.
         """
         mock_response = Mock()
         mock_response.status_code = 413  # Payload too large
@@ -1784,7 +1951,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_validate_config_with_sql_injection_attempts(self):
         """
-        Verify that configuration validation safely handles SQL injection patterns by raising a ValueError or returning a boolean result without executing any injected code.
+        Test that configuration validation rejects or safely handles SQL injection patterns in config values.
+        
+        Ensures that no injected SQL or code is executed and that a ValueError is raised or a boolean result is returned for malicious input.
         """
         malicious_configs = [
             {'api_key': "'; DROP TABLE users; --", 'base_url': 'https://test.com'},
@@ -1793,6 +1962,13 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         ]
         
         def modify_config(connector, config_updates):
+            """
+            Applies a series of configuration updates to a connector, validating each update and ensuring proper handling of malicious input.
+            
+            Parameters:
+                connector: The connector instance whose configuration is being validated.
+                config_updates (iterable): An iterable of configuration updates to validate.
+            """
             for update in config_updates:
                 try:
 
@@ -1805,7 +1981,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_validate_config_with_path_traversal_attempts(self):
         """
-        Verify that configuration validation raises a ValueError when the API key or base URL contains path traversal patterns.
+        Tests that validate_config raises ValueError when the API key or base URL contains path traversal patterns.
         """
         malicious_configs = [
             {'api_key': '../../../etc/passwd', 'base_url': 'https://test.com'},
@@ -1820,7 +1996,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_validate_config_with_xss_attempts(self):
         """
-        Tests that configuration validation raises a ValueError when the API key or base URL contains XSS attack patterns.
+        Verify that configuration validation raises a ValueError when the API key or base URL contains XSS attack patterns.
         """
         malicious_configs = [
             {'api_key': '<script>alert("xss")</script>', 'base_url': 'https://test.com'},
@@ -1836,9 +2012,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
     @patch('requests.get')
     def test_get_status_with_timeout_variations(self, mock_get):
         """
-        Test that `get_status` returns a status of 'timeout' when different timeout-related exceptions are raised during status retrieval.
+        Verify that `get_status` returns a status of 'timeout' when various timeout-related exceptions occur during status retrieval.
         
-        Simulates various timeout and connection error scenarios to ensure the connector handles them gracefully by reporting a 'timeout' status.
+        Simulates different timeout and connection error exceptions to ensure the connector consistently reports a 'timeout' status in these scenarios.
         """
         import socket
         timeout_scenarios = [
@@ -1859,7 +2035,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_format_payload_with_datetime_objects(self):
         """
-        Test that payload formatting serializes datetime, date, and time objects into supported formats.
+        Verify that the payload formatting method correctly serializes `datetime`, `date`, and `time` objects into supported string formats.
         """
         from datetime import datetime, date, time
         
@@ -1879,7 +2055,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_format_payload_with_decimal_and_complex_numbers(self):
         """
-        Verify that the payload formatting method correctly serializes decimal, complex, and float numeric types without errors.
+        Test that the payload formatting method serializes decimal, complex, and float numeric types without raising errors and includes them in the formatted output.
         """
         from decimal import Decimal
         
@@ -1899,21 +2075,21 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_format_payload_with_custom_objects(self):
         """
-        Verify that the payload formatting method includes the string representation of custom objects in the formatted payload.
+        Test that the payload formatting method correctly serializes custom objects by including their string representation in the formatted payload.
         """
         class CustomObject:
             def __init__(self, value):
                 """
-                Initialize the instance with the specified value.
+                Initialize the instance with the given value.
                 
                 Parameters:
-                    value: The value to be stored in the instance.
+                    value: The value to assign to the instance.
                 """
                 self.value = value
             
             def __str__(self):
                 """
-                Return a string representation of the object, displaying its value in the format 'CustomObject(value)'.
+                Return a string representation of the object in the format 'CustomObject(value)'.
                 """
                 return f"CustomObject({self.value})"
         
@@ -1933,9 +2109,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
     @patch('requests.post')
     def test_retry_mechanism_with_exponential_backoff(self, mock_post):
         """
-        Verify that the retry mechanism applies exponential backoff delays between retries and raises a RuntimeError after exceeding the maximum retries.
+        Test that the retry mechanism uses exponential backoff delays and raises RuntimeError after maximum retries are exceeded.
         
-        This test ensures that each retry delay increases exponentially and that the function raises an error when all retries fail.
+        Verifies that each retry delay increases exponentially and that a RuntimeError is raised when all retry attempts fail.
         """
         mock_response = Mock()
         mock_response.status_code = 500
@@ -1957,9 +2133,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
     @patch('requests.post')
     def test_retry_mechanism_with_jitter(self, mock_post):
         """
-        Test that the retry mechanism introduces randomized jitter to backoff delays during repeated server errors.
+        Verifies that the retry mechanism applies randomized jitter to backoff intervals when repeated server errors occur.
         
-        Simulates consecutive HTTP 500 responses and verifies that the retry logic applies jitter to sleep intervals. Expects a RuntimeError after exceeding the maximum retry attempts.
+        Simulates consecutive HTTP 500 responses and checks that jitter is introduced to sleep durations between retries. Expects a RuntimeError after exceeding the maximum number of retries.
         """
         mock_response = Mock()
         mock_response.status_code = 500
@@ -1981,7 +2157,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_parse_response_with_edge_case_json(self):
         """
-        Tests that the response parser correctly processes JSON strings with edge case structures, such as empty objects, arrays, null values, booleans, numbers, escaped characters, and Unicode content.
+        Verify that the response parser correctly handles JSON strings with edge case structures, including empty objects, arrays, nulls, booleans, numbers, escaped characters, and Unicode content.
         """
         edge_cases = [
             '{"empty_object": {}}',
@@ -2000,9 +2176,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_parse_response_with_large_json(self):
         """
-        Verify that the connector correctly parses a large JSON string with 10,000 key-value pairs.
-        
-        Ensures the parsed result contains all expected keys and values from the original JSON.
+        Tests that the connector can accurately parse a large JSON string containing 10,000 key-value pairs, ensuring all data is preserved in the parsed result.
         """
         large_dict = {f'key_{i}': f'value_{i}' for i in range(10000)}
         large_json = json.dumps(large_dict)
@@ -2015,7 +2189,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_log_request_with_various_log_levels(self):
         """
-        Test that the log_request method logs payloads at each supported logging level without errors.
+        Verifies that the log_request method logs payloads at all supported logging levels without raising errors, under various simulated network conditions.
         """
         log_levels = [
             ('DEBUG', logging.DEBUG),
@@ -2028,6 +2202,18 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
             with self.subTest(condition=condition):
                 with patch('requests.post') as mock_post:
                     def simulate_network(*args, **kwargs):
+                        """
+                        Simulates a network request with configurable delay and error rate for testing purposes.
+                        
+                        Parameters:
+                        	condition (dict): A dictionary containing 'delay' (float, seconds to sleep) and 'error_rate' (float, probability of raising a ConnectionError).
+                        
+                        Returns:
+                        	Mock: A mock response object with status_code 200 and a JSON body indicating simulation.
+                        
+                        Raises:
+                        	ConnectionError: If a simulated network error occurs based on the specified error rate.
+                        """
                         import time
                         import random
                         
@@ -2051,7 +2237,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_log_request_with_pii_data(self):
         """
-        Test that logging a request with PII fields properly redacts sensitive information before it is logged.
+        Verify that the log_request method redacts sensitive PII fields from the payload before logging.
+        
+        This test checks that various types of personally identifiable information (PII) are not present in the logged output, ensuring sensitive data is properly protected.
         """
         pii_fields = [
             'ssn', 'social_security_number', 'credit_card', 'phone_number',
@@ -2074,7 +2262,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_get_headers_with_custom_user_agent(self):
         """
-        Tests that the connector includes a custom User-Agent header in the generated headers when specified in the configuration.
+        Verify that a custom User-Agent header is included in the connector's headers when specified in the configuration.
         """
         custom_config = {
             'api_key': 'test_key',
@@ -2089,7 +2277,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_get_headers_with_additional_headers(self):
         """
-        Tests that headers returned by the connector include custom headers specified in the configuration.
+        Verify that custom headers specified in the configuration are included in the headers returned by the connector.
         """
         custom_config = {
             'api_key': 'test_key',
@@ -2108,7 +2296,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_close_connection_with_pending_requests(self):
         """
-        Tests that closing the connector while requests are pending completes without raising errors or leaving threads hanging.
+        Verify that closing the connector with pending requests does not raise errors or leave threads hanging, even when resource exhaustion occurs.
         """
         with patch('requests.post') as mock_post:
             mock_post.side_effect = OSError("Too many open files")
@@ -2122,7 +2310,7 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_context_manager_with_exception(self):
         """
-        Test that exceptions raised inside the GenesisConnector context manager block are properly propagated.
+        Verify that exceptions raised within a GenesisConnector context manager block are correctly propagated to the caller.
         """
         with self.assertRaises(ValueError):
             with GenesisConnector(config=self.mock_config) as connector:
@@ -2131,9 +2319,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_context_manager_cleanup(self):
         """
-        Test that exiting the GenesisConnector context manager triggers the cleanup method.
+        Verify that exiting the GenesisConnector context manager calls the cleanup method exactly once.
         
-        Ensures that the `close` method is called exactly once when the context is exited.
+        Ensures the `close` method is invoked when the context is exited.
         """
         with patch.object(GenesisConnector, 'close') as mock_close:
             with GenesisConnector(config=self.mock_config) as connector:
@@ -2144,9 +2332,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_memory_usage_with_large_datasets(self):
         """
-        Test that formatting many large payloads does not cause significant memory usage growth.
+        Verifies that formatting multiple large payloads does not result in significant memory usage growth.
         
-        Formats a series of large payloads and asserts that the connector's reference count remains stable, indicating no substantial memory leaks.
+        Formats a series of large payloads and checks that the connector's reference count remains stable, indicating the absence of substantial memory leaks.
         """
         import sys
         
@@ -2173,9 +2361,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_concurrent_config_updates(self):
         """
-        Verify that the connector supports multiple concurrent configuration updates without errors.
+        Test that the connector can handle multiple concurrent configuration updates without errors.
         
-        Spawns several threads to update the connector's configuration simultaneously and asserts that all updates complete successfully.
+        Spawns several threads to update the connector's configuration simultaneously and verifies that all updates complete successfully.
         """
         import threading
         import time
@@ -2184,10 +2372,10 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
         
         def update_config(config_id):
             """
-            Update the connector's configuration using a unique API key and base URL derived from the provided config ID, and record the config ID in the results list.
+            Updates the connector's configuration with a new API key and base URL based on the given config ID, and records the config ID in the results list.
             
             Parameters:
-                config_id (int): The identifier used to generate a unique API key and base URL for the new configuration.
+                config_id (int): Identifier used to generate a unique API key and base URL for the configuration.
             """
             new_config = {
                 'api_key': f'key_{config_id}',
@@ -2213,9 +2401,9 @@ class TestGenesisConnectorEdgeCases(unittest.TestCase):
 
     def test_error_propagation_chain(self):
         """
-        Test that exceptions raised during a request maintain the original exception chain.
+        Test that exceptions raised during a request preserve the original exception chain.
         
-        Simulates a nested exception when sending a request and asserts that the raised exception preserves its cause.
+        Simulates a nested exception when sending a request and asserts that the raised exception maintains its cause for accurate error propagation.
         """
         with patch('requests.post') as mock_post:
             mock_post.side_effect = MemoryError("Out of memory")
@@ -2238,7 +2426,7 @@ class TestGenesisConnectorPerformance(unittest.TestCase):
 
     def setUp(self):
         """
-        Set up a GenesisConnector instance with a test configuration before each performance test.
+        Initializes a GenesisConnector instance with a test configuration before each performance test.
         """
         self.connector = GenesisConnector(config={
             'api_key': 'test_key',
@@ -2247,7 +2435,7 @@ class TestGenesisConnectorPerformance(unittest.TestCase):
 
     def test_payload_formatting_performance(self):
         """
-        Test that formatting payloads of various sizes completes in under one second and produces a non-None result.
+        Verifies that formatting payloads containing various timezone-aware and naive datetime objects completes in under one second and returns a non-None result.
         """
         import time
         
@@ -2268,20 +2456,20 @@ class TestGenesisConnectorPerformance(unittest.TestCase):
 
     def test_concurrent_request_performance(self):
         """
-        Test that 50 concurrent requests are processed by the connector within 5 seconds, ensuring all responses are received and performance requirements are met.
+        Verifies that the connector can process 50 concurrent requests within 5 seconds, ensuring all responses are received and performance criteria are met.
         """
         import concurrent.futures
         import time
         
         def make_request(request_id):
             """
-            Send a POST request through the connector with the given request ID in the payload and return the response data.
+            Send a POST request using the connector with the specified request ID in the payload and return the response data.
             
             Parameters:
-                request_id: The value to use as the 'id' field in the request payload.
+                request_id: The value to include as the 'id' field in the request payload.
             
             Returns:
-                dict: The response data from the connector.
+                dict: The response data returned by the connector.
             """
             with patch('requests.post') as mock_post:
                 mock_response = Mock()
@@ -2311,7 +2499,7 @@ class TestGenesisConnectorPerformance(unittest.TestCase):
 
     def test_memory_leak_detection(self):
         """
-        Test that repeated payload formatting and header generation do not cause significant memory leaks by verifying object count stability after garbage collection.
+        Verifies that repeated payload formatting and header generation do not result in significant memory leaks by checking object count stability after garbage collection.
         """
         import gc
         import sys
@@ -2353,15 +2541,13 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
 
     def setUp(self):
         """
-        Set up the test fixture for boundary condition tests by creating a GenesisConnector instance.
+        Set up the test fixture by initializing a GenesisConnector instance for boundary condition tests.
         """
         self.connector = GenesisConnector()
 
     def test_extremely_long_api_key(self):
         """
-        Test validation of configuration with an extremely long API key.
-        
-        Verifies that the connector either accepts a very long API key or raises a ValueError if the key length is excessive.
+        Tests whether the connector correctly handles configuration with an extremely long API key, either accepting it or raising a ValueError if the key length is excessive.
         """
         long_key = 'a' * 10000  # 10KB API key
         config = {
@@ -2379,7 +2565,7 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
 
     def test_maximum_timeout_values(self):
         """
-        Test configuration validation with extreme timeout values, including zero, large integers, and infinity, verifying that the connector accepts valid values and raises errors for invalid ones.
+        Test that configuration validation correctly handles extreme timeout values, accepting valid values such as zero and large integers, and raising errors for invalid values like negative or infinite timeouts.
         """
         extreme_timeouts = [
             0,  # Minimum
@@ -2405,7 +2591,7 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
 
     def test_url_length_boundaries(self):
         """
-        Test configuration validation with base URLs of varying lengths, verifying acceptance of valid URLs and rejection of excessively long ones.
+        Tests that configuration validation correctly accepts base URLs within acceptable length limits and rejects those that are excessively long.
         """
         base_url = 'https://api.test.com'
         
@@ -2429,7 +2615,7 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
 
     def test_payload_size_boundaries(self):
         """
-        Verify that payload formatting correctly handles and raises errors for payloads ranging from empty to 10MB, ensuring proper behavior at size boundaries.
+        Test that payloads from empty to 10MB are formatted correctly or raise appropriate errors at size boundaries.
         """
         sizes = [0, 1, 1024, 1024*1024, 10*1024*1024]  # 0B, 1B, 1KB, 1MB, 10MB
         
@@ -2443,7 +2629,7 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
 
     def test_unicode_boundary_conditions(self):
         """
-        Test that payload formatting correctly handles a range of Unicode strings, including control characters, boundary code points, and emojis, either by processing them or raising appropriate errors.
+        Tests that payload formatting handles various Unicode strings, including control characters, boundary code points, and emojis, by either processing them successfully or raising appropriate errors.
         """
         unicode_test_cases = [
             'Basic ASCII',
@@ -2470,7 +2656,9 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
 
     def test_numeric_boundary_conditions(self):
         """
-        Tests payload formatting with numeric edge cases, including extreme integer and floating-point values, verifying correct serialization or appropriate exception handling.
+        Test that payloads containing numeric boundary values are correctly formatted or raise appropriate exceptions.
+        
+        Covers serialization of extreme integers, floating-point infinities, NaN, and very large or small numbers, ensuring robust handling of numeric edge cases.
         """
         import sys
         
