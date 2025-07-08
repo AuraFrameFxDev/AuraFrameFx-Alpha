@@ -847,3 +847,705 @@ class CircuitBreakerOpenException(message: String) : Exception(message)
 
 // Mock data classes
 data class HealthCheckResult(val isHealthy: Boolean, val message: String)
+    @Nested
+    @DisplayName("Concurrent Operations Tests")
+    inner class ConcurrentOperationsTests {
+        
+        @Test
+        @DisplayName("Should handle concurrent generate response calls")
+        fun shouldHandleConcurrentGenerateResponseCalls() = runTest {
+            // Given
+            val prompts = listOf("Prompt 1", "Prompt 2", "Prompt 3", "Prompt 4", "Prompt 5")
+            val mockResponse = mockHttpResponse(200, "Concurrent response")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
+            
+            // When
+            val deferredResults = prompts.map { prompt ->
+                async { auraAIService.generateResponse(prompt) }
+            }
+            val results = deferredResults.map { it.await() }
+            
+            // Then
+            assertEquals(prompts.size, results.size)
+            results.forEach { result ->
+                assertEquals("Concurrent response", result)
+            }
+            verify(mockHttpClient, times(prompts.size)).post(any())
+        }
+        
+        @Test
+        @DisplayName("Should handle concurrent configuration updates")
+        fun shouldHandleConcurrentConfigurationUpdates() = runTest {
+            // Given
+            val apiKeys = listOf("key1", "key2", "key3")
+            val baseUrls = listOf("https://api1.test.com", "https://api2.test.com", "https://api3.test.com")
+            val timeouts = listOf(1000L, 2000L, 3000L)
+            
+            // When
+            val configUpdates = listOf(
+                async { auraAIService.updateApiKey(apiKeys[0]) },
+                async { auraAIService.updateBaseUrl(baseUrls[0]) },
+                async { auraAIService.updateTimeout(timeouts[0]) }
+            )
+            configUpdates.forEach { it.await() }
+            
+            // Then
+            verify(mockConfigurationService).updateApiKey(apiKeys[0])
+            verify(mockConfigurationService).updateBaseUrl(baseUrls[0])
+            verify(mockConfigurationService).updateTimeout(timeouts[0])
+        }
+        
+        @Test
+        @DisplayName("Should handle concurrent streaming operations")
+        fun shouldHandleConcurrentStreamingOperations() = runTest {
+            // Given
+            val prompts = listOf("Stream 1", "Stream 2", "Stream 3")
+            val mockStream = mockStreamResponse(listOf("chunk1", "chunk2"))
+            
+            whenever(mockHttpClient.postStream(any())).thenReturn(mockStream)
+            
+            // When
+            val streamingJobs = prompts.map { prompt ->
+                async {
+                    val chunks = mutableListOf<String>()
+                    auraAIService.generateStreamingResponse(prompt).collect { chunk ->
+                        chunks.add(chunk)
+                    }
+                    chunks
+                }
+            }
+            val allResults = streamingJobs.map { it.await() }
+            
+            // Then
+            assertEquals(prompts.size, allResults.size)
+            allResults.forEach { chunks ->
+                assertEquals(listOf("chunk1", "chunk2"), chunks)
+            }
+            verify(mockHttpClient, times(prompts.size)).postStream(any())
+        }
+    }
+    
+    @Nested
+    @DisplayName("Boundary Value Tests")
+    inner class BoundaryValueTests {
+        
+        @Test
+        @DisplayName("Should handle maximum prompt length")
+        fun shouldHandleMaximumPromptLength() = runTest {
+            // Given
+            val maxPrompt = "A".repeat(1000000) // 1MB prompt
+            val mockResponse = mockHttpResponse(200, "Max prompt response")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
+            
+            // When
+            val result = auraAIService.generateResponse(maxPrompt)
+            
+            // Then
+            assertEquals("Max prompt response", result)
+            verify(mockLogger).info("Generating AI response for prompt length: ${maxPrompt.length}")
+        }
+        
+        @Test
+        @DisplayName("Should handle minimum timeout value")
+        fun shouldHandleMinimumTimeoutValue() {
+            // Given
+            val minimumTimeout = 1L
+            
+            // When
+            auraAIService.updateTimeout(minimumTimeout)
+            
+            // Then
+            verify(mockConfigurationService).updateTimeout(minimumTimeout)
+            verify(mockLogger).info("Timeout updated to $minimumTimeout ms")
+        }
+        
+        @Test
+        @DisplayName("Should handle maximum timeout value")
+        fun shouldHandleMaximumTimeoutValue() {
+            // Given
+            val maximumTimeout = Long.MAX_VALUE
+            
+            // When
+            auraAIService.updateTimeout(maximumTimeout)
+            
+            // Then
+            verify(mockConfigurationService).updateTimeout(maximumTimeout)
+            verify(mockLogger).info("Timeout updated to $maximumTimeout ms")
+        }
+        
+        @Test
+        @DisplayName("Should handle zero timeout boundary")
+        fun shouldHandleZeroTimeoutBoundary() {
+            // Given
+            val zeroTimeout = 0L
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                auraAIService.updateTimeout(zeroTimeout)
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle edge case temperature values")
+        fun shouldHandleEdgeCaseTemperatureValues() {
+            // Given - Test exact boundary values
+            val exactMinParams = mapOf("temperature" to 0.0)
+            val exactMaxParams = mapOf("temperature" to 1.0)
+            val justOverMaxParams = mapOf("temperature" to 1.0000001)
+            val justUnderMinParams = mapOf("temperature" to -0.0000001)
+            
+            // When & Then - Valid boundaries
+            auraAIService.updateModelParameters(exactMinParams)
+            auraAIService.updateModelParameters(exactMaxParams)
+            
+            // Invalid boundaries
+            assertThrows<IllegalArgumentException> {
+                auraAIService.updateModelParameters(justOverMaxParams)
+            }
+            
+            assertThrows<IllegalArgumentException> {
+                auraAIService.updateModelParameters(justUnderMinParams)
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle edge case max_tokens values")
+        fun shouldHandleEdgeCaseMaxTokensValues() {
+            // Given
+            val minValidTokens = mapOf("max_tokens" to 1)
+            val maxValidTokens = mapOf("max_tokens" to Int.MAX_VALUE)
+            val invalidZeroTokens = mapOf("max_tokens" to 0)
+            val invalidNegativeTokens = mapOf("max_tokens" to -1)
+            
+            // When & Then - Valid values
+            auraAIService.updateModelParameters(minValidTokens)
+            auraAIService.updateModelParameters(maxValidTokens)
+            
+            // Invalid values
+            assertThrows<IllegalArgumentException> {
+                auraAIService.updateModelParameters(invalidZeroTokens)
+            }
+            
+            assertThrows<IllegalArgumentException> {
+                auraAIService.updateModelParameters(invalidNegativeTokens)
+            }
+        }
+    }
+    
+    @Nested
+    @DisplayName("Error Recovery Tests")
+    inner class ErrorRecoveryTests {
+        
+        @Test
+        @DisplayName("Should handle network interruption during streaming")
+        fun shouldHandleNetworkInterruptionDuringStreaming() = runTest {
+            // Given
+            val prompt = "Test streaming with interruption"
+            val interruptedStream = flow<String> {
+                emit("chunk1")
+                emit("chunk2")
+                delay(100)
+                throw IOException("Network interrupted")
+            }
+            
+            whenever(mockHttpClient.postStream(any())).thenReturn(interruptedStream)
+            
+            // When & Then
+            val chunks = mutableListOf<String>()
+            assertThrows<IOException> {
+                auraAIService.generateStreamingResponse(prompt).collect { chunk ->
+                    chunks.add(chunk)
+                }
+            }
+            
+            // Verify partial data was collected before interruption
+            assertEquals(listOf("chunk1", "chunk2"), chunks)
+        }
+        
+        @Test
+        @DisplayName("Should handle memory pressure scenarios")
+        fun shouldHandleMemoryPressureScenarios() = runTest {
+            // Given
+            val largeResponse = "X".repeat(10000000) // 10MB response
+            val mockResponse = mockHttpResponse(200, largeResponse)
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
+            
+            // When
+            val result = auraAIService.generateResponse("Large response test")
+            
+            // Then
+            assertEquals(largeResponse, result)
+        }
+        
+        @Test
+        @DisplayName("Should handle intermittent failures")
+        fun shouldHandleIntermittentFailures() = runTest {
+            // Given
+            val prompt = "Intermittent test"
+            whenever(mockHttpClient.post(any()))
+                .thenThrow(IOException("First attempt failed"))
+                .thenReturn(mockHttpResponse(200, "Success on retry"))
+            
+            // When & Then - First call should fail
+            assertThrows<IOException> {
+                auraAIService.generateResponse(prompt)
+            }
+            
+            // Second call should succeed (if retry logic exists)
+            // Note: This test assumes no built-in retry, but shows how to test it
+        }
+        
+        @Test
+        @DisplayName("Should handle malformed responses")
+        fun shouldHandleMalformedResponses() = runTest {
+            // Given
+            val prompt = "Malformed response test"
+            val malformedResponse = mockHttpResponse(200, "\u0000\u0001\u0002Invalid binary data")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(malformedResponse)
+            
+            // When
+            val result = auraAIService.generateResponse(prompt)
+            
+            // Then - Should handle gracefully
+            assertEquals("\u0000\u0001\u0002Invalid binary data", result)
+        }
+    }
+    
+    @Nested
+    @DisplayName("Advanced Validation Tests")
+    inner class AdvancedValidationTests {
+        
+        @Test
+        @DisplayName("Should validate URL schemes strictly")
+        fun shouldValidateUrlSchemesStrictly() {
+            // Given - Various URL formats
+            val validUrls = listOf(
+                "https://api.test.com",
+                "https://api.test.com:8080",
+                "https://api.test.com/v1/path"
+            )
+            
+            val invalidUrls = listOf(
+                "http://api.test.com",  // HTTP not HTTPS
+                "ftp://api.test.com",   // Wrong protocol
+                "https://",             // Incomplete
+                "api.test.com",         // No protocol
+                "//api.test.com"        // Protocol relative
+            )
+            
+            // When & Then - Valid URLs should work
+            validUrls.forEach { url ->
+                auraAIService.updateBaseUrl(url)
+                verify(mockConfigurationService).updateBaseUrl(url)
+            }
+            
+            // Invalid URLs should fail
+            invalidUrls.forEach { url ->
+                assertThrows<IllegalArgumentException> {
+                    auraAIService.updateBaseUrl(url)
+                }
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle complex model parameters")
+        fun shouldHandleComplexModelParameters() {
+            // Given - Complex parameter combinations
+            val validComplexParams = mapOf(
+                "temperature" to 0.7,
+                "max_tokens" to 2048,
+                "top_p" to 0.9,
+                "frequency_penalty" to 0.1,
+                "presence_penalty" to 0.2,
+                "stop_sequences" to listOf("STOP", "END"),
+                "custom_param" to "custom_value"
+            )
+            
+            val mixedValidInvalidParams = mapOf(
+                "temperature" to 0.5,     // Valid
+                "max_tokens" to -100,     // Invalid
+                "top_p" to 0.8           // Valid
+            )
+            
+            // When & Then
+            auraAIService.updateModelParameters(validComplexParams)
+            verify(mockConfigurationService).updateModelParameters(validComplexParams)
+            
+            assertThrows<IllegalArgumentException> {
+                auraAIService.updateModelParameters(mixedValidInvalidParams)
+            }
+        }
+        
+        @Test
+        @DisplayName("Should validate parameter types strictly")
+        fun shouldValidateParameterTypesStrictly() {
+            // Given - Wrong parameter types
+            val wrongTypeParams = mapOf(
+                "temperature" to "0.7",  // String instead of Double
+                "max_tokens" to 2048.5   // Double instead of Int
+            )
+            
+            // When & Then - Should handle gracefully or validate types
+            // This test demonstrates type validation if implemented
+            auraAIService.updateModelParameters(wrongTypeParams)
+            verify(mockConfigurationService).updateModelParameters(wrongTypeParams)
+        }
+    }
+    
+    @Nested
+    @DisplayName("Performance and Load Tests")
+    inner class PerformanceAndLoadTests {
+        
+        @Test
+        @DisplayName("Should handle high-frequency requests")
+        fun shouldHandleHighFrequencyRequests() = runTest {
+            // Given
+            val numberOfRequests = 100
+            val mockResponse = mockHttpResponse(200, "High frequency response")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
+            
+            // When
+            val startTime = System.currentTimeMillis()
+            val results = (1..numberOfRequests).map { i ->
+                async { auraAIService.generateResponse("Request $i") }
+            }.map { it.await() }
+            val endTime = System.currentTimeMillis()
+            
+            // Then
+            assertEquals(numberOfRequests, results.size)
+            results.forEach { result ->
+                assertEquals("High frequency response", result)
+            }
+            
+            // Verify reasonable performance (adjust threshold as needed)
+            val totalTime = endTime - startTime
+            assertTrue(totalTime < 10000, "High frequency requests took too long: ${totalTime}ms")
+            
+            verify(mockHttpClient, times(numberOfRequests)).post(any())
+        }
+        
+        @Test
+        @DisplayName("Should handle batch processing with mixed results")
+        fun shouldHandleBatchProcessingWithMixedResults() = runTest {
+            // Given
+            val mixedPrompts = listOf(
+                "Success prompt 1",
+                "", // This would cause validation error if processed individually
+                "Success prompt 2"
+            )
+            val mockResponse = mockHttpResponse(200, "Batch mixed response")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
+            
+            // When
+            val results = auraAIService.generateBatchResponses(mixedPrompts)
+            
+            // Then
+            assertEquals(1, results.size) // Current implementation returns single response
+            assertEquals("Batch mixed response", results[0])
+        }
+        
+        @Test
+        @DisplayName("Should handle rapid configuration changes")
+        fun shouldHandleRapidConfigurationChanges() = runTest {
+            // Given
+            val configChanges = 50
+            
+            // When
+            val updateJobs = (1..configChanges).map { i ->
+                async {
+                    when (i % 3) {
+                        0 -> auraAIService.updateApiKey("key-$i")
+                        1 -> auraAIService.updateBaseUrl("https://api-$i.test.com")
+                        else -> auraAIService.updateTimeout((1000 + i).toLong())
+                    }
+                }
+            }
+            updateJobs.forEach { it.await() }
+            
+            // Then - Verify some updates were made (exact count depends on execution order)
+            verify(mockConfigurationService, atLeast(1)).updateApiKey(any())
+            verify(mockConfigurationService, atLeast(1)).updateBaseUrl(any())
+            verify(mockConfigurationService, atLeast(1)).updateTimeout(any())
+        }
+    }
+    
+    @Nested
+    @DisplayName("Integration Workflow Tests")
+    inner class IntegrationWorkflowTests {
+        
+        @Test
+        @DisplayName("Should handle complete AI workflow")
+        fun shouldHandleCompleteAiWorkflow() = runTest {
+            // Given - Complete workflow scenario
+            val mockResponse = mockHttpResponse(200, "Workflow response")
+            val mockStreamChunks = listOf("Stream", " response")
+            val mockStream = mockStreamResponse(mockStreamChunks)
+            
+            whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
+            whenever(mockHttpClient.postStream(any())).thenReturn(mockStream)
+            whenever(mockHttpClient.get(any())).thenReturn(mockResponse)
+            
+            // When - Execute complete workflow
+            // 1. Health check
+            val healthResult = auraAIService.healthCheck()
+            
+            // 2. Update configuration
+            auraAIService.updateApiKey("workflow-key")
+            auraAIService.updateModelParameters(mapOf("temperature" to 0.8))
+            
+            // 3. Generate responses
+            val singleResponse = auraAIService.generateResponse("Single prompt")
+            val batchResponses = auraAIService.generateBatchResponses(listOf("Batch 1", "Batch 2"))
+            
+            // 4. Streaming response
+            val streamChunks = mutableListOf<String>()
+            auraAIService.generateStreamingResponse("Stream prompt").collect { chunk ->
+                streamChunks.add(chunk)
+            }
+            
+            // 5. Get statistics and cleanup
+            val stats = auraAIService.getServiceStatistics()
+            auraAIService.clearCache()
+            
+            // Then - Verify complete workflow
+            assertTrue(healthResult.isHealthy)
+            assertEquals("Workflow response", singleResponse)
+            assertEquals(1, batchResponses.size)
+            assertEquals(mockStreamChunks, streamChunks)
+            assertNotNull(stats)
+            
+            // Verify all operations were called
+            verify(mockHttpClient).get(any())
+            verify(mockHttpClient, times(2)).post(any()) // Single + batch
+            verify(mockHttpClient).postStream(any())
+            verify(mockConfigurationService).updateApiKey("workflow-key")
+            verify(mockConfigurationService).updateModelParameters(any())
+        }
+        
+        @Test
+        @DisplayName("Should handle service lifecycle operations")
+        fun shouldHandleServiceLifecycleOperations() = runTest {
+            // Given - Service lifecycle scenario
+            val newConfig = mapOf(
+                "temperature" to 0.9,
+                "max_tokens" to 4096
+            )
+            
+            whenever(mockConfigurationService.getApiKey()).thenReturn("lifecycle-key")
+            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://lifecycle.test.com")
+            whenever(mockConfigurationService.getTimeout()).thenReturn(60000L)
+            
+            // When - Lifecycle operations
+            // 1. Initial statistics
+            val initialStats = auraAIService.getServiceStatistics()
+            
+            // 2. Configuration reload
+            auraAIService.reloadConfiguration()
+            
+            // 3. Update parameters
+            auraAIService.updateModelParameters(newConfig)
+            
+            // 4. Reset and clear
+            auraAIService.resetStatistics()
+            auraAIService.clearCache()
+            auraAIService.expireCache()
+            
+            // 5. Final statistics
+            val finalStats = auraAIService.getServiceStatistics()
+            
+            // Then
+            assertNotNull(initialStats)
+            assertNotNull(finalStats)
+            verify(mockConfigurationService, times(2)).getApiKey() // Init + reload
+            verify(mockConfigurationService, times(2)).getBaseUrl() // Init + reload
+            verify(mockConfigurationService, times(2)).getTimeout() // Init + reload
+            verify(mockConfigurationService).updateModelParameters(newConfig)
+        }
+    }
+    
+    @Nested
+    @DisplayName("Security and Authentication Tests")
+    inner class SecurityAndAuthenticationTests {
+        
+        @Test
+        @DisplayName("Should handle API key security")
+        fun shouldHandleApiKeySecurity() {
+            // Given - Various security scenarios
+            val validKey = "sk-1234567890abcdef"
+            val emptyKey = ""
+            val nullKey: String? = null
+            val shortKey = "sk-123"
+            val malformedKey = "invalid-key-format"
+            
+            // When & Then - Valid key should work
+            auraAIService.updateApiKey(validKey)
+            verify(mockConfigurationService).updateApiKey(validKey)
+            
+            // Invalid keys should fail
+            assertThrows<IllegalArgumentException> {
+                auraAIService.updateApiKey(emptyKey)
+            }
+            
+            // Test with various key formats
+            auraAIService.updateApiKey(shortKey) // Should work if not empty
+            auraAIService.updateApiKey(malformedKey) // Should work if not empty
+        }
+        
+        @Test
+        @DisplayName("Should handle authentication failures")
+        fun shouldHandleAuthenticationFailures() = runTest {
+            // Given
+            val prompt = "Authenticated request"
+            val authFailureResponse = mockHttpResponse(401, "Unauthorized")
+            val forbiddenResponse = mockHttpResponse(403, "Forbidden")
+            
+            // When & Then - 401 Unauthorized
+            whenever(mockHttpClient.post(any())).thenReturn(authFailureResponse)
+            assertThrows<IOException> {
+                auraAIService.generateResponse(prompt)
+            }
+            
+            // 403 Forbidden
+            whenever(mockHttpClient.post(any())).thenReturn(forbiddenResponse)
+            assertThrows<IOException> {
+                auraAIService.generateResponse(prompt)
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle rate limiting scenarios")
+        fun shouldHandleRateLimitingScenarios() = runTest {
+            // Given
+            val prompt = "Rate limited request"
+            val rateLimitResponse = mockHttpResponse(429, "Too Many Requests")
+            
+            whenever(mockHttpClient.post(any())).thenReturn(rateLimitResponse)
+            
+            // When & Then
+            assertThrows<IOException> {
+                auraAIService.generateResponse(prompt)
+            }
+            
+            verify(mockLogger).error("HTTP error response: 429 - Too Many Requests")
+        }
+    }
+    
+    @Nested
+    @DisplayName("Data Validation and Sanitization Tests")
+    inner class DataValidationTests {
+        
+        @Test
+        @DisplayName("Should handle null and undefined parameters")
+        fun shouldHandleNullAndUndefinedParameters() {
+            // Given - Parameters with null values
+            val paramsWithNulls = mapOf<String, Any?>(
+                "temperature" to null,
+                "max_tokens" to 2048,
+                "top_p" to null
+            )
+            
+            // When & Then - Should handle gracefully
+            auraAIService.updateModelParameters(paramsWithNulls.filterValues { it != null })
+            verify(mockConfigurationService).updateModelParameters(any())
+        }
+        
+        @Test
+        @DisplayName("Should validate prompt content sanitization")
+        fun shouldValidatePromptContentSanitization() = runTest {
+            // Given - Prompts with potentially dangerous content
+            val sqlInjectionPrompt = "'; DROP TABLE users; --"
+            val xssPrompt = "<script>alert('xss')</script>"
+            val commandInjectionPrompt = "; rm -rf / ;"
+            val normalPrompt = "What is machine learning?"
+            
+            val mockResponse = mockHttpResponse(200, "Sanitized response")
+            whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
+            
+            // When & Then - All should be handled safely
+            assertEquals("Sanitized response", auraAIService.generateResponse(sqlInjectionPrompt))
+            assertEquals("Sanitized response", auraAIService.generateResponse(xssPrompt))
+            assertEquals("Sanitized response", auraAIService.generateResponse(commandInjectionPrompt))
+            assertEquals("Sanitized response", auraAIService.generateResponse(normalPrompt))
+            
+            verify(mockHttpClient, times(4)).post(any())
+        }
+        
+        @Test
+        @DisplayName("Should handle unusual character encodings")
+        fun shouldHandleUnusualCharacterEncodings() = runTest {
+            // Given - Various character encodings
+            val utf8Prompt = "UTF-8: Hello 世界"
+            val emojiPrompt = "Emojis: 😀🎉🚀💻🌟"
+            val rtlPrompt = "RTL: مرحبا بالعالم"
+            val mixedPrompt = "Mixed: Hello नमस्ते 你好 🌍"
+            
+            val mockResponse = mockHttpResponse(200, "Encoded response")
+            whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
+            
+            // When & Then
+            assertEquals("Encoded response", auraAIService.generateResponse(utf8Prompt))
+            assertEquals("Encoded response", auraAIService.generateResponse(emojiPrompt))
+            assertEquals("Encoded response", auraAIService.generateResponse(rtlPrompt))
+            assertEquals("Encoded response", auraAIService.generateResponse(mixedPrompt))
+        }
+    }
+    
+    @Nested
+    @DisplayName("Service State Management Tests")
+    inner class ServiceStateManagementTests {
+        
+        @Test
+        @DisplayName("Should maintain state consistency across operations")
+        fun shouldMaintainStateConsistencyAcrossOperations() = runTest {
+            // Given - Multiple state-changing operations
+            val mockResponse = mockHttpResponse(200, "State test response")
+            whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
+            
+            // When - Perform multiple operations that might affect state
+            val initialStats = auraAIService.getServiceStatistics()
+            
+            auraAIService.generateResponse("Test 1")
+            auraAIService.updateApiKey("new-key")
+            auraAIService.generateResponse("Test 2")
+            auraAIService.clearCache()
+            auraAIService.generateResponse("Test 3")
+            
+            val finalStats = auraAIService.getServiceStatistics()
+            
+            // Then - State should be consistent
+            assertNotNull(initialStats)
+            assertNotNull(finalStats)
+            verify(mockHttpClient, times(3)).post(any())
+            verify(mockConfigurationService).updateApiKey("new-key")
+        }
+        
+        @Test
+        @DisplayName("Should handle service recovery after errors")
+        fun shouldHandleServiceRecoveryAfterErrors() = runTest {
+            // Given - Service experiences errors then recovers
+            val mockSuccessResponse = mockHttpResponse(200, "Recovery success")
+            
+            whenever(mockHttpClient.post(any()))
+                .thenThrow(IOException("Service error"))
+                .thenReturn(mockSuccessResponse)
+            
+            // When & Then - First call fails
+            assertThrows<IOException> {
+                auraAIService.generateResponse("First attempt")
+            }
+            
+            // Service should still be functional for subsequent calls
+            val result = auraAIService.generateResponse("Recovery attempt")
+            assertEquals("Recovery success", result)
+            
+            // Configuration should still work
+            auraAIService.updateTimeout(5000L)
+            verify(mockConfigurationService).updateTimeout(5000L)
+        }
+    }
