@@ -1,5 +1,3 @@
-
-
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.layout.*

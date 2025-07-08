@@ -36,7 +36,7 @@ public class OAuthOkHttpClient implements HttpClient {
         MediaType mediaType = MediaType.parse("application/json");
         Request.Builder requestBuilder = new Request.Builder().url(request.getLocationUri());
 
-        if(headers != null) {
+        if (headers != null) {
             for (Entry<String, String> entry : headers.entrySet()) {
                 if (entry.getKey().equalsIgnoreCase("Content-Type")) {
                     mediaType = MediaType.parse(entry.getValue());

@@ -1,9 +1,6 @@
-
-
 # AgentType
 
 ## Enum
-
 
 * `AURA` (value: `"Aura"`)
 

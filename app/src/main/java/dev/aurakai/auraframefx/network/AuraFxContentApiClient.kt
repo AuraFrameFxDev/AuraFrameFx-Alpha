@@ -49,13 +49,14 @@ class AuraFxContentApiClient @Inject constructor(
     suspend fun generateImageDescription(
         imageUrl: String,
         context: String? = null,
-    ): Any = withContext(Dispatchers.IO) { // Temporary: Use Any instead of missing GenerateImageDescriptionResponse
+    ): Any =
+        withContext(Dispatchers.IO) { // Temporary: Use Any instead of missing GenerateImageDescriptionResponse
 
-        aiContentApi.aiGenerateImageDescriptionPost(
-            GenerateImageDescriptionRequest(
-                imageUrl = imageUrl,
-                context = context
+            aiContentApi.aiGenerateImageDescriptionPost(
+                GenerateImageDescriptionRequest(
+                    imageUrl = imageUrl,
+                    context = context
+                )
             )
-        )
-    }
+        }
 }

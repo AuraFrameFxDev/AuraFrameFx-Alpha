@@ -1,12 +1,16 @@
 [versions]
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
 agp = "8.11.0"
+generativeai = "0.9.0"
 kotlin = "2.2.0"
 ksp = "2.2.0-2.0.2"
 hilt = "2.56.2"
 composeBom = "2025.06.01"
 composeCompiler = "2.2.0"
 googleServices = "4.4.3"
+firebaseCrashlyticsPlugin = "3.2.1"
+firebasePerfPlugin = "1.4.3"
+toolchainsFoojayResolver = "1.0.0"
 
 # --- APP Dependencies ---
 accompanistPager = "0.36.0"
@@ -31,9 +35,9 @@ firebaseConfigKtx = "22.1.2"
 firebaseStorageKtx = "21.0.2"
 kotlinxCoroutines = "1.10.2"
 kotlinxSerializationJson = "1.9.0"
-kotlinxDatetime = "0.7.0"
+kotlinxDatetime = "0.7.1"
 retrofit = "3.0.0"
-okhttp = "5.0.0"
+okhttp = "5.1.0"
 converterGson = "3.0.0"
 retrofitKotlinxSerializationConverter = "1.0.0"
 coilCompose = "2.7.0"
@@ -48,12 +52,10 @@ mockk = "1.14.4"
 
 # --- Build Logic Plugins ---
 openapiGeneratorPlugin = "7.14.0"
-firebaseCrashlyticsPlugin = "3.0.4"
-firebasePerfPlugin = "1.4.2"
-toolchainsFoojayResolver = "1.0.0"
 
 [libraries]
 # Hilt (Core & Testing)
+generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hiltCompiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" } # KSP
 hiltNavigationCompose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
@@ -70,7 +72,7 @@ androidxMaterial3 = { group = "androidx.compose.material3", name = "material3" }
 androidxComposeAnimation = { group = "androidx.compose.animation", name = "animation" }
 composeUiTestJunit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 composeUiTooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-composeUiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+composeUiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version = "1.8.3" }
 
 # AndroidX
 androidxCoreKtx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -91,14 +93,14 @@ androidxRoomCompiler = { module = "androidx.room:room-compiler", version.ref = "
 androidxWorkRuntimeKtx = { module = "androidx.work:work-runtime-ktx", version.ref = "workManager" }
 androidxDatastorePreferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidxDatastoreCore = { module = "androidx.datastore:datastore-core", version.ref = "datastoreCore" }
-androidxSecurityCrypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+androidxSecurityCrypto = { module = "androidx.security:security-crypto", version = "1.1.0-beta01" }
 
 # Firebase
 firebaseBom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBomVersion" }
-firebaseAnalyticsKtx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
-firebaseCrashlyticsKtx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
-firebasePerfKtx = { group = "com.google.firebase", name = "firebase-perf-ktx" }
-firebaseMessagingKtx = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
+firebaseAnalyticsKtx = { group = "com.google.firebase", name = "firebase-analytics-ktx", version = "22.5.0" }
+firebaseCrashlyticsKtx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx", version = "19.4.4" }
+firebasePerfKtx = { group = "com.google.firebase", name = "firebase-perf-ktx", version = "21.0.5" }
+firebaseMessagingKtx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version = "24.1.2" }
 firebaseConfigKtx = { module = "com.google.firebase:firebase-config-ktx", version.ref = "firebaseConfigKtx" }
 firebaseStorageKtx = { module = "com.google.firebase:firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 
@@ -135,14 +137,14 @@ mockkAgent = { module = "io.mockk:mockk-agent-jvm", version.ref = "mockk" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-openapi-generator = { id = "org.openapi.generator", version.ref = "openapiGeneratorPlugin" }
-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
-firebase-perf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerfPlugin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" } # Corrected from composeCompiler to kotlin
-gradle-toolchains-foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "toolchainsFoojayResolver" }
-
+googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+openapiGenerator = { id = "org.openapi.generator", version.ref = "openapiGeneratorPlugin" }
+firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
+firebasePerf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerfPlugin" }
+kotlinCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+gradleToolchainsFoojayResolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "toolchainsFoojayResolver" }

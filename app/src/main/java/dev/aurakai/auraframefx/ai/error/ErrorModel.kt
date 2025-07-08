@@ -8,8 +8,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AIError(
-    val id: String = "err_${Clock.System.now().toEpochMilliseconds()}",
-    @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
+    val id: String = "err_${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}",
+    @Serializable(with = InstantSerializer::class) val timestamp: Instant = kotlinx.datetime.Clock.System.now(),
     val agent: AgentType,
     val type: ErrorType,
     val message: String,
@@ -22,8 +22,8 @@ data class AIError(
 
 @Serializable
 data class RecoveryAction(
-    val id: String = "act_${Clock.System.now().toEpochMilliseconds()}",
-    @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
+    val id: String = "act_${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}",
+    @Serializable(with = InstantSerializer::class) val timestamp: Instant = kotlinx.datetime.Clock.System.now(),
     val actionType: RecoveryActionType,
     val description: String,
     val result: RecoveryResult? = null,

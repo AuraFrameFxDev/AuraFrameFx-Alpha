@@ -1,8 +1,8 @@
 @echo off
 setlocal
 
-REM Set the Java home to the correct JDK 24 installation
-set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-24.0.1.10-hotspot
+REM Set the Java home to the available JDK 17 installation
+set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-17.0.15.6-hotspot
 
 REM Add Java bin to PATH
 set PATH=%JAVA_HOME%\bin;%PATH%

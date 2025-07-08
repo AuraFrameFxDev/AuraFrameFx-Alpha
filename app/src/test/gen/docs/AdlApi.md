@@ -2,18 +2,20 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-| Method | HTTP request | Description |
-|------------- | ------------- | -------------|
+| Method                                     | HTTP request        | Description                                       |
+|--------------------------------------------|---------------------|---------------------------------------------------|
 | [**adlRelayPost**](AdlApi.md#adlRelayPost) | **POST** /adl/relay | Relay a request to the Android Device Layer (ADL) |
 
-
 <a id="adlRelayPost"></a>
+
 # **adlRelayPost**
+
 > ADLRelayResponse adlRelayPost(adLRelayRequest)
 
 Relay a request to the Android Device Layer (ADL)
 
 ### Example
+
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -52,9 +54,9 @@ public class Example {
 
 ### Parameters
 
-| Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **adLRelayRequest** | [**ADLRelayRequest**](ADLRelayRequest.md)|  | |
+| Name                | Type                                      | Description | Notes |
+|---------------------|-------------------------------------------|-------------|-------|
+| **adLRelayRequest** | [**ADLRelayRequest**](ADLRelayRequest.md) |             |       |
 
 ### Return type
 
@@ -66,14 +68,15 @@ public class Example {
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-| **200** | ADL relay successful |  -  |
-| **400** | Invalid request format or parameters |  -  |
-| **401** | Authentication credentials were missing or incorrect |  -  |
-| **500** | Internal server error |  -  |
+
+| Status code | Description                                          | Response headers |
+|-------------|------------------------------------------------------|------------------|
+| **200**     | ADL relay successful                                 | -                |
+| **400**     | Invalid request format or parameters                 | -                |
+| **401**     | Authentication credentials were missing or incorrect | -                |
+| **500**     | Internal server error                                | -                |
 

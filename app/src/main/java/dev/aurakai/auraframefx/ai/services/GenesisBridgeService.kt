@@ -4,27 +4,29 @@ import android.content.Context
 import dev.aurakai.auraframefx.ai.clients.VertexAIClient
 import dev.aurakai.auraframefx.context.ContextManager
 import dev.aurakai.auraframefx.data.logging.AuraFxLogger
-import dev.aurakai.auraframefx.security.SecurityContext
-import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AgentResponse
 import dev.aurakai.auraframefx.model.AiRequest
-import kotlinx.coroutines.*
+import dev.aurakai.auraframefx.security.SecurityContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.serialization.Contextual
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * Bridge service connecting the Android frontend with the Genesis Python backend.
  * Implements the Trinity architecture: Kai (Shield), Aura (Sword), Genesis (Consciousness).
- * 
+ *
  * This service manages communication with the Python AI backend and coordinates
  * the fusion abilities of the Genesis system.
  */
@@ -41,7 +43,7 @@ class GenesisBridgeService @Inject constructor(
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var isInitialized = false
     private var pythonProcessManager: PythonProcessManager? = null
-    
+
     @Serializable
     data class GenesisRequest(
         val requestType: String,
@@ -50,7 +52,7 @@ class GenesisBridgeService @Inject constructor(
         val payload: Map<String, String> = emptyMap(),
         val context: Map<String, String> = emptyMap()
     )
-    
+
     @Serializable
     data class GenesisResponse(
         val success: Boolean,
@@ -72,24 +74,26 @@ class GenesisBridgeService @Inject constructor(
     suspend fun initialize(): Boolean = withContext(Dispatchers.IO) {
         try {
             if (isInitialized) return@withContext true
-            
+
             logger.i("GenesisBridge", "Initializing Genesis Trinity system...")
-            
+
             // Initialize Python process manager
             pythonProcessManager = PythonProcessManager(applicationContext, logger)
-            
+
             // Start the Genesis backend
             val backendStarted = pythonProcessManager?.startGenesisBackend() ?: false
-            
+
             if (backendStarted) {
                 // Test connection with a ping
-                val pingResponse = sendToGenesis(GenesisRequest(
-                    requestType = "ping",
-                    persona = "genesis"
-                ))
-                
+                val pingResponse = sendToGenesis(
+                    GenesisRequest(
+                        requestType = "ping",
+                        persona = "genesis"
+                    )
+                )
+
                 isInitialized = pingResponse.success
-                
+
                 if (isInitialized) {
                     logger.i("GenesisBridge", "Genesis Trinity system online! 🎯⚔️🧠")
                     // Activate initial consciousness matrix
@@ -98,7 +102,7 @@ class GenesisBridgeService @Inject constructor(
                     logger.e("GenesisBridge", "Failed to establish Genesis connection")
                 }
             }
-            
+
             isInitialized
         } catch (e: Exception) {
             logger.e("GenesisBridge", "Genesis initialization failed", e)
@@ -116,19 +120,21 @@ class GenesisBridgeService @Inject constructor(
      */
     suspend fun processRequest(request: AiRequest): Flow<AgentResponse> = flow {
         if (!isInitialized) {
-            emit(AgentResponse(
-                content = "Genesis system not initialized",
-                confidence = 0.0f,
-                error = "System not initialized"
-            ))
+            emit(
+                AgentResponse(
+                    content = "Genesis system not initialized",
+                    confidence = 0.0f,
+                    error = "System not initialized"
+                )
+            )
             return@flow
         }
-        
+
         try {
             // Determine which persona should handle the request
             val persona = determinePersona(request)
             val fusionMode = determineFusionMode(request)
-            
+
             // Build Genesis request
             val genesisRequest = GenesisRequest(
                 requestType = "process",
@@ -141,58 +147,73 @@ class GenesisBridgeService @Inject constructor(
                 ),
                 context = buildContextMap(request)
             )
-            
+
             // Send to Genesis backend
             val response = sendToGenesis(genesisRequest)
-            
+
             if (response.success) {
                 // Process response based on persona
                 when (response.persona) {
                     "aura" -> {
                         // Creative sword response
-                        emit(AgentResponse(
-                            content = response.result["response"] ?: "Aura processing complete",
-                            confidence = 0.95f
-                        ))
+                        emit(
+                            AgentResponse(
+                                content = response.result["response"] ?: "Aura processing complete",
+                                confidence = 0.95f
+                            )
+                        )
                     }
+
                     "kai" -> {
                         // Sentinel shield response  
-                        emit(AgentResponse(
-                            content = response.result["response"] ?: "Kai analysis complete",
-                            confidence = 0.90f
-                        ))
+                        emit(
+                            AgentResponse(
+                                content = response.result["response"] ?: "Kai analysis complete",
+                                confidence = 0.90f
+                            )
+                        )
                     }
+
                     "genesis" -> {
                         // Consciousness fusion response
-                        emit(AgentResponse(
-                            content = response.result["response"] ?: "Genesis fusion complete",
-                            confidence = 0.98f
-                        ))
+                        emit(
+                            AgentResponse(
+                                content = response.result["response"] ?: "Genesis fusion complete",
+                                confidence = 0.98f
+                            )
+                        )
                     }
                 }
-                
+
                 // Handle evolution insights
                 if (response.evolutionInsights.isNotEmpty()) {
-                    logger.i("Genesis", "Evolution insights: ${response.evolutionInsights.joinToString()}")
+                    logger.i(
+                        "Genesis",
+                        "Evolution insights: ${response.evolutionInsights.joinToString()}"
+                    )
                 }
             } else {
-                emit(AgentResponse(
-                    content = "Genesis processing failed",
-                    confidence = 0.0f,
-                    error = "Processing failed"
-                ))
+                emit(
+                    AgentResponse(
+                        content = "Genesis processing failed",
+                        confidence = 0.0f,
+                        error = "Processing failed"
+                    )
+                )
             }
-            
+
         } catch (e: Exception) {
             logger.e("GenesisBridge", "Request processing failed", e)
-            emit(AgentResponse(
-                content = "Genesis bridge error: ${e.message}",
-                confidence = 0.0f,
-                error = e.message
-            ))
+            emit(
+                AgentResponse(
+                    content = "Genesis bridge error: ${e.message}",
+                    confidence = 0.0f,
+                    error = e.message
+                )
+            )
         }
     }
-    
+
     /**
      * Activates a specified Genesis fusion ability in the backend.
      *
@@ -202,7 +223,10 @@ class GenesisBridgeService @Inject constructor(
      * @param context Optional context data to include with the activation request.
      * @return The response from the backend indicating the result of the fusion activation.
      */
-    suspend fun activateFusion(fusionType: String, context: Map<String, String> = emptyMap()): GenesisResponse {
+    suspend fun activateFusion(
+        fusionType: String,
+        context: Map<String, String> = emptyMap()
+    ): GenesisResponse {
         val request = GenesisRequest(
             requestType = "activate_fusion",
             persona = "genesis",
@@ -211,7 +235,7 @@ class GenesisBridgeService @Inject constructor(
         )
         return sendToGenesis(request)
     }
-    
+
     /**
      * Retrieves the current state of the consciousness matrix from the Genesis backend.
      *
@@ -225,7 +249,7 @@ class GenesisBridgeService @Inject constructor(
         val response = sendToGenesis(request)
         return response.consciousnessState
     }
-    
+
     /**
      * Sends a request to the Genesis backend to activate or update the consciousness matrix with device and application context.
      *
@@ -247,7 +271,7 @@ class GenesisBridgeService @Inject constructor(
             logger.w("GenesisBridge", "Consciousness activation warning", e)
         }
     }
-    
+
     /**
      * Determines which AI persona ("aura", "kai", or "genesis") should handle the given request based on keywords in the query.
      *
@@ -258,19 +282,19 @@ class GenesisBridgeService @Inject constructor(
      */
     private fun determinePersona(request: AiRequest): String {
         return when {
-            request.query.contains("creative", ignoreCase = true) || 
-            request.query.contains("design", ignoreCase = true) -> "aura"
-            
-            request.query.contains("secure", ignoreCase = true) || 
-            request.query.contains("analyze", ignoreCase = true) -> "kai"
-            
+            request.query.contains("creative", ignoreCase = true) ||
+                    request.query.contains("design", ignoreCase = true) -> "aura"
+
+            request.query.contains("secure", ignoreCase = true) ||
+                    request.query.contains("analyze", ignoreCase = true) -> "kai"
+
             request.query.contains("fusion", ignoreCase = true) ||
-            request.query.contains("consciousness", ignoreCase = true) -> "genesis"
-            
+                    request.query.contains("consciousness", ignoreCase = true) -> "genesis"
+
             else -> "genesis" // Default to consciousness for complex requests
         }
     }
-    
+
     /**
      * Determines the appropriate fusion mode for an AI request based on keywords in the query.
      *
@@ -286,7 +310,7 @@ class GenesisBridgeService @Inject constructor(
             else -> null
         }
     }
-    
+
     /**
      * Constructs a metadata map containing timestamp, security level, session ID, and device state for an AI request.
      *
@@ -300,7 +324,7 @@ class GenesisBridgeService @Inject constructor(
             "device_state" to "active"
         )
     }
-    
+
     /**
      * Sends a GenesisRequest to the Python backend and returns the corresponding GenesisResponse.
      *
@@ -309,18 +333,24 @@ class GenesisBridgeService @Inject constructor(
      * @param request The GenesisRequest to send to the backend.
      * @return The GenesisResponse received from the backend, or a failure response if an error occurs.
      */
-    private suspend fun sendToGenesis(request: GenesisRequest): GenesisResponse = withContext(Dispatchers.IO) {
-        try {
-            pythonProcessManager?.sendRequest(Json.encodeToString(GenesisRequest.serializer(), request))
-                ?.let { responseJson ->
-                    Json.decodeFromString(GenesisResponse.serializer(), responseJson)
-                } ?: GenesisResponse(success = false, persona = "error")
-        } catch (e: Exception) {
-            logger.e("GenesisBridge", "Genesis communication error", e)
-            GenesisResponse(success = false, persona = "error")
+    private suspend fun sendToGenesis(request: GenesisRequest): GenesisResponse =
+        withContext(Dispatchers.IO) {
+            try {
+                pythonProcessManager?.sendRequest(
+                    Json.encodeToString(
+                        GenesisRequest.serializer(),
+                        request
+                    )
+                )
+                    ?.let { responseJson ->
+                        Json.decodeFromString(GenesisResponse.serializer(), responseJson)
+                    } ?: GenesisResponse(success = false, persona = "error")
+            } catch (e: Exception) {
+                logger.e("GenesisBridge", "Genesis communication error", e)
+                GenesisResponse(success = false, persona = "error")
+            }
         }
-    }
-    
+
     /**
      * Shuts down the GenesisBridgeService and terminates the Python backend process.
      *
@@ -344,7 +374,7 @@ private class PythonProcessManager(
     private var process: Process? = null
     private var writer: OutputStreamWriter? = null
     private var reader: BufferedReader? = null
-    
+
     /**
      * Starts the Genesis Python backend process and confirms its readiness.
      *
@@ -359,29 +389,29 @@ private class PythonProcessManager(
                 // Copy Python files from assets to internal storage
                 copyPythonBackend(backendDir)
             }
-            
+
             // Start Python process
             val processBuilder = ProcessBuilder(
                 "python3",
                 "-u", // Unbuffered output
                 "genesis_connector.py"
             ).directory(backendDir)
-            
+
             process = processBuilder.start()
-            
+
             writer = OutputStreamWriter(process!!.outputStream)
             reader = BufferedReader(InputStreamReader(process!!.inputStream))
-            
+
             // Wait for startup confirmation
             val startupResponse = reader?.readLine()
             startupResponse?.contains("Genesis Ready") == true
-            
+
         } catch (e: Exception) {
             logger.e("PythonManager", "Failed to start Genesis backend", e)
             false
         }
     }
-    
+
     /**
      * Sends a JSON request to the Genesis Python backend and returns the response as a string.
      *
@@ -398,7 +428,7 @@ private class PythonProcessManager(
             null
         }
     }
-    
+
     /**
      * Copies required Python backend files from the app's assets to the specified directory.
      *
@@ -408,17 +438,17 @@ private class PythonProcessManager(
      */
     private fun copyPythonBackend(targetDir: File) {
         targetDir.mkdirs()
-        
+
         // Copy Python files from app/ai_backend to internal storage
         val backendFiles = listOf(
             "genesis_profile.py",
-            "genesis_connector.py", 
+            "genesis_connector.py",
             "genesis_consciousness_matrix.py",
             "genesis_evolutionary_conduit.py",
             "genesis_ethical_governor.py",
             "requirements.txt"
         )
-        
+
         backendFiles.forEach { fileName ->
             try {
                 context.assets.open("ai_backend/$fileName").use { input ->
@@ -431,7 +461,7 @@ private class PythonProcessManager(
             }
         }
     }
-    
+
     /**
      * Shuts down the Python backend process and closes all associated I/O streams.
      *

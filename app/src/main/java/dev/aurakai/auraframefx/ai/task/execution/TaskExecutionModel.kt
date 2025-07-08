@@ -1,7 +1,7 @@
 package dev.aurakai.auraframefx.ai.task.execution
 
 import dev.aurakai.auraframefx.model.AgentType
-import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
+import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -60,7 +60,7 @@ data class Checkpoint(
     val metadata: Map<String, String> = emptyMap(),
 )
 
-@Serializable // Added annotation
+@Serializable
 enum class ExecutionStatus {
     PENDING,
     INITIALIZING,
@@ -72,7 +72,7 @@ enum class ExecutionStatus {
     TIMEOUT
 }
 
-@Serializable // Added annotation
+@Serializable
 enum class ExecutionResult {
     SUCCESS,
     PARTIAL_SUCCESS,
@@ -82,7 +82,7 @@ enum class ExecutionResult {
     UNKNOWN
 }
 
-@Serializable // Added annotation
+@Serializable
 enum class StepType {
     COMPUTATION,
     COMMUNICATION,
@@ -94,7 +94,7 @@ enum class StepType {
     REPORTING
 }
 
-@Serializable // Added annotation
+@Serializable
 enum class CheckpointStatus {
     PENDING,
     STARTED,
@@ -109,6 +109,6 @@ enum class TaskPriority {
     NORMAL,
     HIGH,
     URGENT;
-    
+
     val value: Int get() = ordinal
 }

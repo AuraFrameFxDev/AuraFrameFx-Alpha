@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -14,11 +14,13 @@
 package org.openapitools.client.model;
 
 import java.util.Objects;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -35,6 +37,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 
 import java.lang.reflect.Type;
@@ -51,181 +54,178 @@ import org.openapitools.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class LockScreenConfigHapticFeedback {
-  public static final String SERIALIZED_NAME_ENABLED = "enabled";
-  @SerializedName(SERIALIZED_NAME_ENABLED)
-  private Boolean enabled;
+    public static final String SERIALIZED_NAME_ENABLED = "enabled";
+    public static final String SERIALIZED_NAME_INTENSITY = "intensity";
+    public static HashSet<String> openapiFields;
+    public static HashSet<String> openapiRequiredFields;
 
-  public static final String SERIALIZED_NAME_INTENSITY = "intensity";
-  @SerializedName(SERIALIZED_NAME_INTENSITY)
-  private Integer intensity;
+    static {
+        // a set of all properties/fields (JSON key names)
+        openapiFields = new HashSet<String>();
+        openapiFields.add("enabled");
+        openapiFields.add("intensity");
 
-  public LockScreenConfigHapticFeedback() {
-  }
-
-  public LockScreenConfigHapticFeedback enabled(Boolean enabled) {
-    this.enabled = enabled;
-    return this;
-  }
-
-  /**
-   * Get enabled
-   * @return enabled
-   */
-  @javax.annotation.Nullable
-  public Boolean getEnabled() {
-    return enabled;
-  }
-
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
-  }
-
-
-  public LockScreenConfigHapticFeedback intensity(Integer intensity) {
-    this.intensity = intensity;
-    return this;
-  }
-
-  /**
-   * Get intensity
-   * minimum: 0
-   * maximum: 255
-   * @return intensity
-   */
-  @javax.annotation.Nullable
-  public Integer getIntensity() {
-    return intensity;
-  }
-
-  public void setIntensity(Integer intensity) {
-    this.intensity = intensity;
-  }
-
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+        // a set of required properties/fields (JSON key names)
+        openapiRequiredFields = new HashSet<String>();
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    @SerializedName(SERIALIZED_NAME_ENABLED)
+    private Boolean enabled;
+    @SerializedName(SERIALIZED_NAME_INTENSITY)
+    private Integer intensity;
+
+    public LockScreenConfigHapticFeedback() {
     }
-    LockScreenConfigHapticFeedback lockScreenConfigHapticFeedback = (LockScreenConfigHapticFeedback) o;
-    return Objects.equals(this.enabled, lockScreenConfigHapticFeedback.enabled) &&
-        Objects.equals(this.intensity, lockScreenConfigHapticFeedback.intensity);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(enabled, intensity);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class LockScreenConfigHapticFeedback {\n");
-    sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
-    sb.append("    intensity: ").append(toIndentedString(intensity)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
-
-
-  public static HashSet<String> openapiFields;
-  public static HashSet<String> openapiRequiredFields;
-
-  static {
-    // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("enabled");
-    openapiFields.add("intensity");
-
-    // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-  }
-
-  /**
-   * Validates the JSON Element and throws an exception if issues found
-   *
-   * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to LockScreenConfigHapticFeedback
-   */
-  public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      if (jsonElement == null) {
-        if (!LockScreenConfigHapticFeedback.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in LockScreenConfigHapticFeedback is not found in the empty JSON string", LockScreenConfigHapticFeedback.openapiRequiredFields.toString()));
+    /**
+     * Validates the JSON Element and throws an exception if issues found
+     *
+     * @param jsonElement JSON Element
+     * @throws IOException if the JSON Element is invalid with respect to LockScreenConfigHapticFeedback
+     */
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+        if (jsonElement == null) {
+            if (!LockScreenConfigHapticFeedback.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+                throw new IllegalArgumentException(String.format("The required field(s) %s in LockScreenConfigHapticFeedback is not found in the empty JSON string", LockScreenConfigHapticFeedback.openapiRequiredFields.toString()));
+            }
         }
-      }
 
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!LockScreenConfigHapticFeedback.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `LockScreenConfigHapticFeedback` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+        Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+        // check to see if the JSON string contains additional fields
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            if (!LockScreenConfigHapticFeedback.openapiFields.contains(entry.getKey())) {
+                throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `LockScreenConfigHapticFeedback` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+            }
         }
-      }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-  }
-
-  public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!LockScreenConfigHapticFeedback.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'LockScreenConfigHapticFeedback' and its subtypes
-       }
-       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<LockScreenConfigHapticFeedback> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(LockScreenConfigHapticFeedback.class));
-
-       return (TypeAdapter<T>) new TypeAdapter<LockScreenConfigHapticFeedback>() {
-           @Override
-           public void write(JsonWriter out, LockScreenConfigHapticFeedback value) throws IOException {
-             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-             elementAdapter.write(out, obj);
-           }
-
-           @Override
-           public LockScreenConfigHapticFeedback read(JsonReader in) throws IOException {
-             JsonElement jsonElement = elementAdapter.read(in);
-             validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
-           }
-
-       }.nullSafe();
     }
-  }
 
-  /**
-   * Create an instance of LockScreenConfigHapticFeedback given an JSON string
-   *
-   * @param jsonString JSON string
-   * @return An instance of LockScreenConfigHapticFeedback
-   * @throws IOException if the JSON string is invalid with respect to LockScreenConfigHapticFeedback
-   */
-  public static LockScreenConfigHapticFeedback fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, LockScreenConfigHapticFeedback.class);
-  }
+    /**
+     * Create an instance of LockScreenConfigHapticFeedback given an JSON string
+     *
+     * @param jsonString JSON string
+     * @return An instance of LockScreenConfigHapticFeedback
+     * @throws IOException if the JSON string is invalid with respect to LockScreenConfigHapticFeedback
+     */
+    public static LockScreenConfigHapticFeedback fromJson(String jsonString) throws IOException {
+        return JSON.getGson().fromJson(jsonString, LockScreenConfigHapticFeedback.class);
+    }
 
-  /**
-   * Convert an instance of LockScreenConfigHapticFeedback to an JSON string
-   *
-   * @return JSON string
-   */
-  public String toJson() {
-    return JSON.getGson().toJson(this);
-  }
+    public LockScreenConfigHapticFeedback enabled(Boolean enabled) {
+        this.enabled = enabled;
+        return this;
+    }
+
+    /**
+     * Get enabled
+     *
+     * @return enabled
+     */
+    @javax.annotation.Nullable
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public LockScreenConfigHapticFeedback intensity(Integer intensity) {
+        this.intensity = intensity;
+        return this;
+    }
+
+    /**
+     * Get intensity
+     * minimum: 0
+     * maximum: 255
+     *
+     * @return intensity
+     */
+    @javax.annotation.Nullable
+    public Integer getIntensity() {
+        return intensity;
+    }
+
+    public void setIntensity(Integer intensity) {
+        this.intensity = intensity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        LockScreenConfigHapticFeedback lockScreenConfigHapticFeedback = (LockScreenConfigHapticFeedback) o;
+        return Objects.equals(this.enabled, lockScreenConfigHapticFeedback.enabled) &&
+                Objects.equals(this.intensity, lockScreenConfigHapticFeedback.intensity);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(enabled, intensity);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class LockScreenConfigHapticFeedback {\n");
+        sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
+        sb.append("    intensity: ").append(toIndentedString(intensity)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
+
+    /**
+     * Convert an instance of LockScreenConfigHapticFeedback to an JSON string
+     *
+     * @return JSON string
+     */
+    public String toJson() {
+        return JSON.getGson().toJson(this);
+    }
+
+    public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (!LockScreenConfigHapticFeedback.class.isAssignableFrom(type.getRawType())) {
+                return null; // this class only serializes 'LockScreenConfigHapticFeedback' and its subtypes
+            }
+            final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+            final TypeAdapter<LockScreenConfigHapticFeedback> thisAdapter
+                    = gson.getDelegateAdapter(this, TypeToken.get(LockScreenConfigHapticFeedback.class));
+
+            return (TypeAdapter<T>) new TypeAdapter<LockScreenConfigHapticFeedback>() {
+                @Override
+                public void write(JsonWriter out, LockScreenConfigHapticFeedback value) throws IOException {
+                    JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+                    elementAdapter.write(out, obj);
+                }
+
+                @Override
+                public LockScreenConfigHapticFeedback read(JsonReader in) throws IOException {
+                    JsonElement jsonElement = elementAdapter.read(in);
+                    validateJsonElement(jsonElement);
+                    return thisAdapter.fromJsonTree(jsonElement);
+                }
+
+            }.nullSafe();
+        }
+    }
 }
 

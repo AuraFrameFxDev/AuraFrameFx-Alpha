@@ -2,19 +2,21 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-| Method | HTTP request | Description |
-|------------- | ------------- | -------------|
-| [**userGet**](UsersApi.md#userGet) | **GET** /user | Get current user information |
-| [**userPreferencesPut**](UsersApi.md#userPreferencesPut) | **PUT** /user/preferences | Update user preferences |
-
+| Method                                                   | HTTP request              | Description                  |
+|----------------------------------------------------------|---------------------------|------------------------------|
+| [**userGet**](UsersApi.md#userGet)                       | **GET** /user             | Get current user information |
+| [**userPreferencesPut**](UsersApi.md#userPreferencesPut) | **PUT** /user/preferences | Update user preferences      |
 
 <a id="userGet"></a>
+
 # **userGet**
+
 > User userGet()
 
 Get current user information
 
 ### Example
+
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -49,6 +51,7 @@ public class Example {
 ```
 
 ### Parameters
+
 This endpoint does not need any parameter.
 
 ### Return type
@@ -61,22 +64,26 @@ This endpoint does not need any parameter.
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-| **200** | User information retrieved successfully |  -  |
-| **401** | Authentication credentials were missing or incorrect |  -  |
+
+| Status code | Description                                          | Response headers |
+|-------------|------------------------------------------------------|------------------|
+| **200**     | User information retrieved successfully              | -                |
+| **401**     | Authentication credentials were missing or incorrect | -                |
 
 <a id="userPreferencesPut"></a>
+
 # **userPreferencesPut**
+
 > userPreferencesPut(userPreferencesUpdate)
 
 Update user preferences
 
 ### Example
+
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -112,9 +119,9 @@ public class Example {
 
 ### Parameters
 
-| Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **userPreferencesUpdate** | [**UserPreferencesUpdate**](UserPreferencesUpdate.md)|  | |
+| Name                      | Type                                                  | Description | Notes |
+|---------------------------|-------------------------------------------------------|-------------|-------|
+| **userPreferencesUpdate** | [**UserPreferencesUpdate**](UserPreferencesUpdate.md) |             |       |
 
 ### Return type
 
@@ -126,13 +133,14 @@ null (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-| **200** | Preferences updated successfully |  -  |
-| **400** | Invalid request format or parameters |  -  |
-| **401** | Authentication credentials were missing or incorrect |  -  |
+
+| Status code | Description                                          | Response headers |
+|-------------|------------------------------------------------------|------------------|
+| **200**     | Preferences updated successfully                     | -                |
+| **400**     | Invalid request format or parameters                 | -                |
+| **401**     | Authentication credentials were missing or incorrect | -                |
 

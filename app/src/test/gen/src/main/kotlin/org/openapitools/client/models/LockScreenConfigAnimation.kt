@@ -20,14 +20,14 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
  *
- * @param enabled 
- * @param type 
+ *
+ * @param enabled
+ * @param type
  */
 
 
-data class LockScreenConfigAnimation (
+data class LockScreenConfigAnimation(
 
     @Json(name = "enabled")
     val enabled: kotlin.Boolean? = null,
@@ -38,15 +38,18 @@ data class LockScreenConfigAnimation (
 ) {
 
     /**
-     * 
+     *
      *
      * Values: Fade,Slide,Zoom
      */
     @JsonClass(generateAdapter = false)
     enum class Type(val value: kotlin.String) {
-        @Json(name = "Fade") Fade("Fade"),
-        @Json(name = "Slide") Slide("Slide"),
-        @Json(name = "Zoom") Zoom("Zoom");
+        @Json(name = "Fade")
+        Fade("Fade"),
+        @Json(name = "Slide")
+        Slide("Slide"),
+        @Json(name = "Zoom")
+        Zoom("Zoom");
     }
 
 }

@@ -3,12 +3,12 @@ package dev.aurakai.auraframefx.ai.task
 import dev.aurakai.auraframefx.ai.error.ErrorHandler
 import dev.aurakai.auraframefx.ai.pipeline.AIPipelineConfig
 import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -188,12 +188,12 @@ class TaskScheduler @Inject constructor(
     }
 }
 
-@kotlinx.serialization.Serializable // Added annotation
+@kotlinx.serialization.Serializable
 data class TaskStats(
     val totalTasks: Int = 0,
     val activeTasks: Int = 0,
     val completedTasks: Int = 0,
     val pendingTasks: Int = 0,
     val taskCounts: Map<TaskStatus, Int> = emptyMap(),
-    @kotlinx.serialization.Serializable(with = dev.aurakai.auraframefx.serialization.InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
+    @kotlinx.serialization.Serializable(with = InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
 )

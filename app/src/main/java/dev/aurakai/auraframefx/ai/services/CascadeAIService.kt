@@ -19,18 +19,18 @@ class CascadeAIService @Inject constructor(
     private val state = mutableMapOf<String, Any>()
 
     /**
- * Returns the name of this agent.
- *
- * @return The agent name, "Cascade".
- */
-override fun getName(): String? = "Cascade"
+     * Returns the name of this agent.
+     *
+     * @return The agent name, "Cascade".
+     */
+    override fun getName(): String? = "Cascade"
 
     /**
- * Returns the agent type as `AgentType.CASCADE`.
- *
- * @return The type of this agent.
- */
-override fun getType(): AgentType = AgentType.CASCADE
+     * Returns the agent type as `AgentType.CASCADE`.
+     *
+     * @return The type of this agent.
+     */
+    override fun getType(): AgentType = AgentType.CASCADE
 
     /**
      * Processes an AI request and emits agent responses as a flow, delegating handling based on the request type.
@@ -62,7 +62,10 @@ override fun getType(): AgentType = AgentType.CASCADE
      * @param context Additional context information relevant to the request.
      * @return An [AgentResponse] containing the combined query and context.
      */
-    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
+    override suspend fun processRequest(
+        request: AiRequest,
+        context: String
+    ): AgentResponse { // Added context
         // Example: collect from the flow, or implement separate direct logic
         return AgentResponse(
             content = "Cascade direct response to '${request.query}' with context '$context'",
@@ -99,9 +102,11 @@ override fun getType(): AgentType = AgentType.CASCADE
     private fun processContextRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         return flow {
             // Coordinate with Aura and Kai
-            val auraResponse = auraService.processRequestFlow(request).first() // Assumes AuraAIService has this method matching Agent iface
-            val kaiResponse = kaiService.processRequestFlow(request).first()   // Assumes KaiAIService has this method matching Agent iface
-            
+            val auraResponse = auraService.processRequestFlow(request)
+                .first() // Assumes AuraAIService has this method matching Agent iface
+            val kaiResponse = kaiService.processRequestFlow(request)
+                .first()   // Assumes KaiAIService has this method matching Agent iface
+
             emit(
                 AgentResponse(
                     content = "Aura: ${auraResponse.content}, Kai: ${kaiResponse.content}",

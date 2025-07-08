@@ -3,12 +3,12 @@ import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kotlinCompose)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.google.services)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.openapi.generator)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.openapiGenerator)
 }
 
 android {
@@ -30,26 +30,9 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-    }
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_24
-        targetCompatibility = JavaVersion.VERSION_24
-    }
-
-    kotlinOptions {
-        @Suppress("DEPRECATION")
-        jvmTarget = "24"
-        @Suppress("DEPRECATION")
-        freeCompilerArgs = listOf(
-            "-opt-in=kotlin.RequiresOptIn",
-            "-Xjvm-default=all"
-        )
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -65,6 +48,32 @@ android {
             path = file("src/main/cpp/CMakeLists.txt")
             version = "3.22.1"
         }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+            "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
+            "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-opt-in=kotlin.time.ExperimentalTime",
+            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi"
+        )
     }
 }
 
@@ -106,7 +115,7 @@ dependencies {
     kspTest(libs.daggerHiltAndroidCompiler)
 
     // Time and Date
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+    implementation(libs.kotlinxDatetime)
 
     // AndroidX & Compose
     implementation(libs.androidxCoreKtx)
@@ -139,10 +148,10 @@ dependencies {
     ksp(libs.androidxRoomCompiler)
 
     // Security
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation(libs.androidxSecurityCrypto)
 
     // Google AI
-    implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
+    implementation(libs.guava)
 
     // Firebase
     implementation(platform(libs.firebaseBom))
@@ -198,4 +207,3 @@ dependencies {
     debugImplementation(libs.composeUiTooling)
     debugImplementation(libs.composeUiTestManifest)
 }
-

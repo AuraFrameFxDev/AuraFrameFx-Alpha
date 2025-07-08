@@ -1,12 +1,18 @@
 package dev.aurakai.auraframefx.system.monitor
 
-import android.content.Context
 import android.app.ActivityManager
-import android.os.Debug
+import android.content.Context
 import android.os.Process
 import dev.aurakai.auraframefx.utils.AuraFxLogger
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,17 +27,17 @@ class SystemMonitor @Inject constructor(
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var isMonitoring = false
-    
+
     // Performance metrics
     private val _cpuUsage = MutableStateFlow(0.0f)
     val cpuUsage: StateFlow<Float> = _cpuUsage
-    
+
     private val _memoryUsage = MutableStateFlow(0L)
     val memoryUsage: StateFlow<Long> = _memoryUsage
-    
+
     private val _availableMemory = MutableStateFlow(0L)
     val availableMemory: StateFlow<Long> = _availableMemory
-    
+
     private val _networkActivity = MutableStateFlow(NetworkMetrics())
     val networkActivity: StateFlow<NetworkMetrics> = _networkActivity
 
@@ -44,10 +50,10 @@ class SystemMonitor @Inject constructor(
      */
     fun startMonitoring(intervalMs: Long = 5000) {
         if (isMonitoring) return
-        
+
         logger.info("SystemMonitor", "Starting system performance monitoring")
         isMonitoring = true
-        
+
         scope.launch {
             while (isMonitoring) {
                 try {
@@ -82,7 +88,7 @@ class SystemMonitor @Inject constructor(
      */
     fun getPerformanceMetrics(component: String): Map<String, Any> {
         logger.debug("SystemMonitor", "Getting performance metrics for: $component")
-        
+
         return mapOf(
             "component" to component,
             "cpu_usage_percent" to _cpuUsage.value,
@@ -109,7 +115,7 @@ class SystemMonitor @Inject constructor(
     fun getSystemHealthScore(): Float {
         val cpuScore = 1.0f - (_cpuUsage.value / 100f).coerceAtMost(1.0f)
         val memoryScore = (_availableMemory.value.toFloat() / getTotalMemory()).coerceAtLeast(0.1f)
-        
+
         return (cpuScore + memoryScore) / 2.0f
     }
 
@@ -121,9 +127,9 @@ class SystemMonitor @Inject constructor(
      * @return `true` if any stress condition is met; otherwise, `false`.
      */
     fun isSystemUnderStress(): Boolean {
-        return _cpuUsage.value > 80f || 
-               calculateMemoryUsagePercent() > 85f ||
-               _availableMemory.value < (50 * 1024 * 1024) // Less than 50MB available
+        return _cpuUsage.value > 80f ||
+                calculateMemoryUsagePercent() > 85f ||
+                _availableMemory.value < (50 * 1024 * 1024) // Less than 50MB available
     }
 
     /**
@@ -183,10 +189,11 @@ class SystemMonitor @Inject constructor(
      */
     private fun updateMemoryMetrics() {
         try {
-            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val activityManager =
+                context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             val memoryInfo = ActivityManager.MemoryInfo()
             activityManager.getMemoryInfo(memoryInfo)
-            
+
             _availableMemory.value = memoryInfo.availMem
             _memoryUsage.value = memoryInfo.totalMem - memoryInfo.availMem
         } catch (e: Exception) {

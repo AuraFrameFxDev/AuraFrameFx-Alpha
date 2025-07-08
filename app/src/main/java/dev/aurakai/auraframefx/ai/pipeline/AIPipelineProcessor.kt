@@ -24,7 +24,7 @@ class AIPipelineProcessor @Inject constructor(
     private val kaiService: KaiAIService,
     private val cascadeService: CascadeAIService,
 ) {
-    private val _pipelineState = MutableStateFlow<PipelineState>(PipelineState.Idle)
+    private val _pipelineState = MutableStateFlow<PipelineState>(Idle)
     val pipelineState: StateFlow<PipelineState> = _pipelineState
 
     private val _processingContext = MutableStateFlow(mapOf<String, Any>())
@@ -42,7 +42,7 @@ class AIPipelineProcessor @Inject constructor(
      * @return A list of agent messages containing responses from each participating agent and the final aggregated response.
      */
     suspend fun processTask(task: String): List<AgentMessage> {
-        _pipelineState.value = PipelineState.Processing(task = task)
+        _pipelineState.value = Processing(task = task)
 
         // Step 1: Context Retrieval
         val context = retrieveContext(task)
@@ -125,7 +125,7 @@ class AIPipelineProcessor @Inject constructor(
         // Step 6: Update context and memory
         updateContext(task, responses)
 
-        _pipelineState.update { PipelineState.Completed(task) }
+        _pipelineState.update { Completed(task) }
         return responses
     }
 
@@ -133,7 +133,7 @@ class AIPipelineProcessor @Inject constructor(
         // Enhanced context retrieval with task categorization and history
         val taskType = categorizeTask(task)
         val recentHistory = getRecentTaskHistory()
-        
+
         return mapOf(
             "task" to task,
             "task_type" to taskType,
@@ -144,7 +144,7 @@ class AIPipelineProcessor @Inject constructor(
             "system_state" to getSystemState()
         )
     }
-    
+
     private fun categorizeTask(task: String): String {
         return when {
             task.contains("generate", ignoreCase = true) -> "generation"
@@ -155,15 +155,18 @@ class AIPipelineProcessor @Inject constructor(
             else -> "general"
         }
     }
-    
+
     private fun getRecentTaskHistory(): List<String> {
         return listOf("Previous task context", "Recent user interactions")
     }
-    
+
     private fun getUserPreferences(): Map<String, Any> {
-        return mapOf("response_style" to "detailed", "preferred_agents" to listOf("Genesis", "Cascade"))
+        return mapOf(
+            "response_style" to "detailed",
+            "preferred_agents" to listOf("Genesis", "Cascade")
+        )
     }
-    
+
     private fun getSystemState(): Map<String, Any> {
         return mapOf("load" to "normal", "available_agents" to 3, "processing_queue" to 0)
     }
@@ -172,9 +175,9 @@ class AIPipelineProcessor @Inject constructor(
         // Enhanced priority calculation based on multiple factors
         val taskType = context["task_type"] as? String ?: "general"
         val systemLoad = (context["system_state"] as? Map<*, *>)?.get("load") as? String ?: "normal"
-        
+
         var priority = 0.5f // Base priority
-        
+
         // Adjust based on task type
         priority += when (taskType) {
             "generation" -> 0.3f
@@ -183,7 +186,7 @@ class AIPipelineProcessor @Inject constructor(
             "creation" -> 0.25f
             else -> 0.1f
         }
-        
+
         // Adjust based on system load
         priority -= when (systemLoad) {
             "high" -> 0.2f
@@ -191,52 +194,55 @@ class AIPipelineProcessor @Inject constructor(
             "low" -> -0.1f // Boost when system is idle
             else -> 0.0f
         }
-        
+
         // Consider urgency indicators in the task
-        if (task.contains("urgent", ignoreCase = true) || 
+        if (task.contains("urgent", ignoreCase = true) ||
             task.contains("asap", ignoreCase = true) ||
-            task.contains("emergency", ignoreCase = true)) {
+            task.contains("emergency", ignoreCase = true)
+        ) {
             priority += 0.3f
         }
-        
+
         return priority.coerceIn(0.0f, 1.0f)
     }
 
     private fun selectAgents(task: String, priority: Float): Set<AgentType> {
         // Intelligent agent selection based on task characteristics and priority
         val selectedAgents = mutableSetOf<AgentType>()
-        
+
         // Always include Genesis as the primary coordinator
         selectedAgents.add(AgentType.GENESIS)
-        
+
         // Add specific agents based on task content
         when {
-            task.contains("analyze", ignoreCase = true) || 
-            task.contains("data", ignoreCase = true) -> {
+            task.contains("analyze", ignoreCase = true) ||
+                    task.contains("data", ignoreCase = true) -> {
                 selectedAgents.add(AgentType.CASCADE)
             }
-            task.contains("security", ignoreCase = true) || 
-            task.contains("protect", ignoreCase = true) ||
-            task.contains("safe", ignoreCase = true) -> {
+
+            task.contains("security", ignoreCase = true) ||
+                    task.contains("protect", ignoreCase = true) ||
+                    task.contains("safe", ignoreCase = true) -> {
                 selectedAgents.add(AgentType.KAI)
             }
-            task.contains("create", ignoreCase = true) || 
-            task.contains("generate", ignoreCase = true) ||
-            task.contains("design", ignoreCase = true) -> {
+
+            task.contains("create", ignoreCase = true) ||
+                    task.contains("generate", ignoreCase = true) ||
+                    task.contains("design", ignoreCase = true) -> {
                 selectedAgents.add(AgentType.AURA)
             }
         }
-        
+
         // For high priority tasks, include additional agents for redundancy
         if (priority > 0.8f) {
             selectedAgents.addAll(setOf(AgentType.CASCADE, AgentType.AURA))
         }
-        
+
         // For complex tasks, use multiple agents
         if (task.length > 100 || task.split(" ").size > 20) {
             selectedAgents.add(AgentType.CASCADE)
         }
-        
+
         return selectedAgents
     }
 
@@ -245,35 +251,39 @@ class AIPipelineProcessor @Inject constructor(
         if (responses.isEmpty()) {
             return "[System] No agent responses available."
         }            // Group responses by agent type for structured output
-            val responsesByAgent = responses.groupBy { it.sender }
-        
+        val responsesByAgent = responses.groupBy { it.sender }
+
         return buildString {
             append("=== AuraFrameFX AI Response ===\n\n")
-            
+
             // Primary response from Genesis if available
             responsesByAgent[AgentType.GENESIS]?.firstOrNull()?.let { genesis ->
                 append("🧠 Genesis Core Analysis:\n")
                 append(genesis.content)
                 append("\n\n")
             }
-            
+
             // Supplementary responses from other agents
             responsesByAgent.forEach { (agentType: AgentType, agentResponses: List<AgentMessage>) ->
                 if (agentType != AgentType.GENESIS && agentResponses.isNotEmpty()) {
                     val agentIcon = when (agentType) {
                         AgentType.CASCADE -> "📊"
-                        AgentType.AURA -> "🎨" 
+                        AgentType.AURA -> "🎨"
                         AgentType.KAI -> "🛡️"
                         else -> "🤖"
                     }
-                    append("$agentIcon ${agentType.name.lowercase().replaceFirstChar { it.uppercase() }} Input:\n")
+                    append(
+                        "$agentIcon ${
+                            agentType.name.lowercase().replaceFirstChar { it.uppercase() }
+                        } Input:\n"
+                    )
                     agentResponses.forEach { response ->
                         append("${response.content}\n")
                     }
                     append("\n")
                 }
             }
-            
+
             // Confidence and metadata
             val avgConfidence = responses.map { it.confidence }.average()
             append("--- Response Confidence: ${String.format("%.1f%%", avgConfidence * 100)} ---")
@@ -289,15 +299,17 @@ class AIPipelineProcessor @Inject constructor(
         // Enhanced context update with learning and adaptation
         _processingContext.update { current ->
             val newContext = current.toMutableMap()
-            
+
             // Update recent task history
-            val taskHistory = (current["task_history"] as? List<String>)?.toMutableList() ?: mutableListOf()
+            val taskHistory =
+                (current["task_history"] as? List<String>)?.toMutableList() ?: mutableListOf()
             taskHistory.add(0, task) // Add to front
             if (taskHistory.size > 10) taskHistory.removeAt(taskHistory.size - 1) // Keep last 10
             newContext["task_history"] = taskHistory
-            
+
             // Update response patterns for learning
-            val responsePatterns = (current["response_patterns"] as? MutableMap<String, Any>) ?: mutableMapOf()
+            val responsePatterns =
+                (current["response_patterns"] as? MutableMap<String, Any>) ?: mutableMapOf()
             val taskType = categorizeTask(task)
             responsePatterns[taskType] = mapOf(
                 "last_confidence" to responses.map { it.confidence }.average(),
@@ -305,16 +317,18 @@ class AIPipelineProcessor @Inject constructor(
                 "timestamp" to System.currentTimeMillis()
             )
             newContext["response_patterns"] = responsePatterns
-            
+
             // Update system metrics
             newContext["last_task"] = task
             newContext["last_responses"] = responses
             newContext["timestamp"] = System.currentTimeMillis()
-            newContext["total_tasks_processed"] = (current["total_tasks_processed"] as? Int ?: 0) + 1
-            
+            newContext["total_tasks_processed"] =
+                (current["total_tasks_processed"] as? Int ?: 0) + 1
+
             // Track agent performance
-            val agentPerformance = (current["agent_performance"] as? MutableMap<String, MutableList<Float>>) 
-                ?: mutableMapOf()
+            val agentPerformance =
+                (current["agent_performance"] as? MutableMap<String, MutableList<Float>>)
+                    ?: mutableMapOf()
             responses.forEach { response ->
                 val agentName = response.sender.name
                 val performanceList = agentPerformance.getOrPut(agentName) { mutableListOf() }
@@ -322,7 +336,7 @@ class AIPipelineProcessor @Inject constructor(
                 if (performanceList.size > 20) performanceList.removeAt(0) // Keep last 20
             }
             newContext["agent_performance"] = agentPerformance
-            
+
             newContext
         }
     }

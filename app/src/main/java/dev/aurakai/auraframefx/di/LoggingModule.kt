@@ -6,10 +6,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import dev.aurakai.auraframefx.data.logging.AuraFxLogger
-import dev.aurakai.auraframefx.data.logging.AuraFxLogger as AuraFxLoggerImpl
 import dev.aurakai.auraframefx.ai.services.KaiAIService
+import dev.aurakai.auraframefx.data.logging.AuraFxLogger
 import javax.inject.Singleton
+import dev.aurakai.auraframefx.data.logging.AuraFxLogger as AuraFxLoggerImpl
 
 /**
  * Hilt Module for providing logging dependencies.

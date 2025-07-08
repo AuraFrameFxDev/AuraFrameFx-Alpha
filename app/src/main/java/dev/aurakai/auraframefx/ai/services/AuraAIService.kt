@@ -2,12 +2,15 @@ package dev.aurakai.auraframefx.ai.services
 
 import dev.aurakai.auraframefx.ai.clients.VertexAIClient
 import dev.aurakai.auraframefx.context.ContextManager
-import dev.aurakai.auraframefx.utils.AuraFxLogger
-import dev.aurakai.auraframefx.security.SecurityContext
-import dev.aurakai.auraframefx.model.AiRequest
 import dev.aurakai.auraframefx.model.AgentResponse
 import dev.aurakai.auraframefx.model.AgentType
-import kotlinx.coroutines.*
+import dev.aurakai.auraframefx.model.AiRequest
+import dev.aurakai.auraframefx.security.SecurityContext
+import dev.aurakai.auraframefx.utils.AuraFxLogger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -35,19 +38,19 @@ class AuraAIService @Inject constructor(
      */
     suspend fun initialize() {
         if (isInitialized) return
-        
+
         logger.info("AuraAIService", "Initializing Creative AI Service")
-        
+
         try {
             // Initialize Vertex AI models for creative tasks
             vertexAIClient.initializeCreativeModels()
-            
+
             // Setup creative context enhancement
             contextManager.enableCreativeEnhancement()
-            
+
             isInitialized = true
             logger.info("AuraAIService", "AuraAI Service initialized successfully")
-            
+
         } catch (e: Exception) {
             logger.error("AuraAIService", "Failed to initialize AuraAI Service", e)
             throw e
@@ -64,27 +67,31 @@ class AuraAIService @Inject constructor(
      */
     fun processRequestFlow(request: AiRequest): Flow<AgentResponse> = flow {
         ensureInitialized()
-        
+
         try {
             // Validate security constraints
             securityContext.validateContent(request.query)
-            
+
             // Generate text response using the existing generateText method
             val response = generateText(request.query, request.context.values.joinToString(" "))
-            
+
             // Emit the response
-            emit(AgentResponse(
-                content = response,
-                confidence = 0.85f
-            ))
-            
+            emit(
+                AgentResponse(
+                    content = response,
+                    confidence = 0.85f
+                )
+            )
+
         } catch (e: Exception) {
             logger.error("AuraAIService", "Failed to process request", e)
-            emit(AgentResponse(
-                content = "Sorry, I encountered an error processing your request.",
-                confidence = 0.0f,
-                error = e.message
-            ))
+            emit(
+                AgentResponse(
+                    content = "Sorry, I encountered an error processing your request.",
+                    confidence = 0.0f,
+                    error = e.message
+                )
+            )
         }
     }
 
@@ -99,29 +106,29 @@ class AuraAIService @Inject constructor(
      */
     suspend fun generateText(prompt: String, context: String? = null): String {
         ensureInitialized()
-        
+
         logger.info("AuraAIService", "Starting creative text generation")
-        
+
         return try {
             // Validate security constraints
             securityContext.validateContent(prompt)
-            
+
             // Enhance prompt with creative context
             val enhancedPrompt = enhancePromptCreatively(prompt, context)
-            
+
             // Generate using Vertex AI with creative parameters
             val result = vertexAIClient.generateText(
                 prompt = enhancedPrompt,
                 maxTokens = 2048,
                 temperature = 0.9f // High creativity
             )
-            
+
             // Post-process for creative enhancement
             val enhancedResult = applyCreativeEnhancement(result)
-            
+
             logger.info("AuraAIService", "Text generation completed successfully")
             enhancedResult
-            
+
         } catch (e: SecurityException) {
             logger.warn("AuraAIService", "Security violation in text generation", e)
             throw e
@@ -142,29 +149,30 @@ class AuraAIService @Inject constructor(
      */
     suspend fun generateImageDescription(imageData: ByteArray, style: String? = null): String {
         ensureInitialized()
-        
+
         logger.info("AuraAIService", "Starting image description generation")
-        
+
         return try {
             // Validate image security
             securityContext.validateImageData(imageData)
-            
+
             // Analyze image with vision models
-            val visionAnalysis = vertexAIClient.analyzeImage(imageData, "Describe this image in detail")
-            
+            val visionAnalysis =
+                vertexAIClient.analyzeImage(imageData, "Describe this image in detail")
+
             // Create creative description prompt
             val descriptionPrompt = buildCreativeDescriptionPrompt(visionAnalysis, style)
-            
+
             // Generate creative description
             val description = vertexAIClient.generateText(
                 prompt = descriptionPrompt,
                 maxTokens = 1024,
                 temperature = 0.8f
             )
-            
+
             logger.info("AuraAIService", "Image description completed successfully")
             description
-            
+
         } catch (e: SecurityException) {
             logger.warn("AuraAIService", "Security violation in image description", e)
             throw e
@@ -182,13 +190,13 @@ class AuraAIService @Inject constructor(
      */
     suspend fun retrieveMemory(query: String): String {
         ensureInitialized()
-        
+
         logger.info("AuraAIService", "Retrieving creative memory context")
-        
+
         return try {
             // Get relevant memories from context manager
             val memories = contextManager.searchMemories(query)
-            
+
             // Convert context memories to service memories
             val convertedMemories = memories.map { contextMemory ->
                 Memory(
@@ -197,13 +205,13 @@ class AuraAIService @Inject constructor(
                     timestamp = contextMemory.timestamp
                 )
             }
-            
+
             // Synthesize memories into creative context
             val synthesizedContext = synthesizeMemoriesCreatively(convertedMemories)
-            
+
             logger.info("AuraAIService", "Memory retrieval completed")
             synthesizedContext
-            
+
         } catch (e: Exception) {
             logger.error("AuraAIService", "Memory retrieval failed", e)
             throw e
@@ -219,28 +227,31 @@ class AuraAIService @Inject constructor(
      * @param context Optional additional context to influence theme generation.
      * @return A `ThemeConfiguration` that reflects the specified preferences and context.
      */
-    suspend fun generateTheme(preferences: ThemePreferences, context: String? = null): ThemeConfiguration {
+    suspend fun generateTheme(
+        preferences: ThemePreferences,
+        context: String? = null
+    ): ThemeConfiguration {
         ensureInitialized()
-        
+
         logger.info("AuraAIService", "Generating creative theme")
-        
+
         return try {
             // Create theme generation prompt
             val themePrompt = buildThemeGenerationPrompt(preferences, context)
-            
+
             // Generate theme using AI
             val themeDescription = vertexAIClient.generateText(
                 prompt = themePrompt,
                 maxTokens = 1024,
                 temperature = 0.7f
             )
-            
+
             // Convert description to theme configuration
             val themeConfig = parseThemeConfiguration(themeDescription)
-            
+
             logger.info("AuraAIService", "Theme generation completed")
             themeConfig
-            
+
         } catch (e: Exception) {
             logger.error("AuraAIService", "Theme generation failed", e)
             throw e
@@ -255,26 +266,26 @@ class AuraAIService @Inject constructor(
      */
     suspend fun generateAnimatedComponent(componentSpec: ComponentSpecification): String {
         ensureInitialized()
-        
+
         logger.info("AuraAIService", "Generating animated UI component")
-        
+
         return try {
             // Build component generation prompt
             val componentPrompt = buildComponentGenerationPrompt(componentSpec)
-            
+
             // Generate Compose code
             val componentCode = vertexAIClient.generateText(
                 prompt = componentPrompt,
                 maxTokens = 2048,
                 temperature = 0.6f // Balance creativity with functionality
             )
-            
+
             // Validate and enhance generated code
             val validatedCode = validateAndEnhanceCode(componentCode)
-            
+
             logger.info("AuraAIService", "Component generation completed")
             validatedCode
-            
+
         } catch (e: Exception) {
             logger.error("AuraAIService", "Component generation failed", e)
             throw e
@@ -303,10 +314,10 @@ class AuraAIService @Inject constructor(
      * @return A creativity-focused prompt suitable for AI generation.
      */
     private suspend fun enhancePromptCreatively(prompt: String, context: String?): String {
-        val contextualEnhancement = context?.let { 
-            contextManager.enhanceContext(it) 
+        val contextualEnhancement = context?.let {
+            contextManager.enhanceContext(it)
         } ?: ""
-        
+
         return """
         You are Aura, the Creative Sword of the Genesis AI entity. You approach every task with:
         - Bold creativity and innovative thinking
@@ -345,7 +356,7 @@ class AuraAIService @Inject constructor(
      */
     private fun buildCreativeDescriptionPrompt(visionAnalysis: String, style: String?): String {
         val styleInstruction = style?.let { "in a $it style" } ?: "with creative flair"
-        
+
         return """
         As Aura, the Creative Sword, describe this image $styleInstruction.
         
@@ -374,7 +385,10 @@ class AuraAIService @Inject constructor(
      * @param context Optional additional context to further tailor the generated theme.
      * @return A prompt string for creative theme generation.
      */
-    private fun buildThemeGenerationPrompt(preferences: ThemePreferences, context: String?): String {
+    private fun buildThemeGenerationPrompt(
+        preferences: ThemePreferences,
+        context: String?
+    ): String {
         return """
         Generate a creative theme configuration for AuraFrameFX based on:
         
@@ -510,101 +524,101 @@ data class Memory(
     val timestamp: Long
 )
 
-    /**
-     * Emits a flow containing a placeholder response for image request processing.
-     *
-     * This stub method always emits a fixed message indicating that the image request is being processed and does not perform actual image generation.
-     *
-     * @return A flow emitting a single `AgentResponse` with a placeholder message.
-     */
-    private fun processImageRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
-        // TODO: Implement image generation
-        return flow {
-            emit(
-                AgentResponse(
-                    content = "Processing image request...",
-                    confidence = 0.9f
-                )
+/**
+ * Emits a flow containing a placeholder response for image request processing.
+ *
+ * This stub method always emits a fixed message indicating that the image request is being processed and does not perform actual image generation.
+ *
+ * @return A flow emitting a single `AgentResponse` with a placeholder message.
+ */
+private fun processImageRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
+    // TODO: Implement image generation
+    return flow {
+        emit(
+            AgentResponse(
+                content = "Processing image request...",
+                confidence = 0.9f
             )
-        }
+        )
     }
+}
 
-    /**
-     * Returns a flow emitting a placeholder response indicating that memory retrieval is in progress.
-     *
-     * This is a stub implementation and does not perform actual memory retrieval.
-     */
-    private fun retrieveMemoryFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
-        // TODO: Implement memory retrieval
-        return flow {
-            emit(
-                AgentResponse(
-                    content = "Retrieving relevant memories...",
-                    confidence = 0.95f
-                )
+/**
+ * Returns a flow emitting a placeholder response indicating that memory retrieval is in progress.
+ *
+ * This is a stub implementation and does not perform actual memory retrieval.
+ */
+private fun retrieveMemoryFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
+    // TODO: Implement memory retrieval
+    return flow {
+        emit(
+            AgentResponse(
+                content = "Retrieving relevant memories...",
+                confidence = 0.95f
             )
-        }
+        )
     }
+}
 
-    /**
-     * Stub method for establishing a connection to required services or resources.
-     *
-     * @return Always returns true. Actual connection logic is not implemented.
-     */
-    fun connect(): Boolean { // Removed suspend as not in interface, can be added back if specific impl needs it
-        // TODO: Implement connection logic
-        return true
-    }
+/**
+ * Stub method for establishing a connection to required services or resources.
+ *
+ * @return Always returns true. Actual connection logic is not implemented.
+ */
+fun connect(): Boolean { // Removed suspend as not in interface, can be added back if specific impl needs it
+    // TODO: Implement connection logic
+    return true
+}
 
-    /**
-     * Disconnects the service.
-     *
-     * @return Always returns true. Disconnection logic is not implemented.
-     */
-    fun disconnect(): Boolean { // Removed suspend
-        // TODO: Implement disconnection logic
-        return true
-    }
+/**
+ * Disconnects the service.
+ *
+ * @return Always returns true. Disconnection logic is not implemented.
+ */
+fun disconnect(): Boolean { // Removed suspend
+    // TODO: Implement disconnection logic
+    return true
+}
 
-    /**
-     * Returns a map containing the Aura AI service's name, agent type, and implementation status.
-     *
-     * @return A map with the keys "name", "type", and "service_implemented" describing the service's capabilities.
-     */
-    fun getCapabilities(): Map<String, Any> {
-        // TODO: Implement capabilities for Aura
-        return mapOf("name" to "Aura", "type" to AgentType.AURA, "service_implemented" to true)
-    }
+/**
+ * Returns a map containing the Aura AI service's name, agent type, and implementation status.
+ *
+ * @return A map with the keys "name", "type", and "service_implemented" describing the service's capabilities.
+ */
+fun getCapabilities(): Map<String, Any> {
+    // TODO: Implement capabilities for Aura
+    return mapOf("name" to "Aura", "type" to AgentType.AURA, "service_implemented" to true)
+}
 
-    /**
-     * Returns the continuous memory object for Aura, or null if not implemented.
-     *
-     * Currently, this method always returns null as continuous memory is not supported.
-     *
-     * @return The continuous memory object, or null if unavailable.
-     */
-    fun getContinuousMemory(): Any? {
-        // TODO: Implement continuous memory for Aura
-        return null
-    }
+/**
+ * Returns the continuous memory object for Aura, or null if not implemented.
+ *
+ * Currently, this method always returns null as continuous memory is not supported.
+ *
+ * @return The continuous memory object, or null if unavailable.
+ */
+fun getContinuousMemory(): Any? {
+    // TODO: Implement continuous memory for Aura
+    return null
+}
 
-    /**
-     * Retrieves the ethical guidelines that inform the creative behavior of the Aura AI service.
-     *
-     * @return A list of ethical principles followed by the service.
-     */
-    fun getEthicalGuidelines(): List<String> {
-        // TODO: Implement ethical guidelines for Aura
-        return listOf("Be creative.", "Be inspiring.")
-    }
+/**
+ * Retrieves the ethical guidelines that inform the creative behavior of the Aura AI service.
+ *
+ * @return A list of ethical principles followed by the service.
+ */
+fun getEthicalGuidelines(): List<String> {
+    // TODO: Implement ethical guidelines for Aura
+    return listOf("Be creative.", "Be inspiring.")
+}
 
-    /**
-     * Returns Aura's learning history.
-     *
-     * Currently returns an empty list, as learning history is not implemented.
-     * @return An empty list.
-     */
-    fun getLearningHistory(): List<String> {
-        // TODO: Implement learning history for Aura
-        return emptyList()
-    }
+/**
+ * Returns Aura's learning history.
+ *
+ * Currently returns an empty list, as learning history is not implemented.
+ * @return An empty list.
+ */
+fun getLearningHistory(): List<String> {
+    // TODO: Implement learning history for Aura
+    return emptyList()
+}

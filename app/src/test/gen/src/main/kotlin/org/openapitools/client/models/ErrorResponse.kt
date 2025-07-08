@@ -20,7 +20,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
+ *
  *
  * @param code Error code
  * @param message Error message
@@ -28,7 +28,7 @@ import com.squareup.moshi.JsonClass
  */
 
 
-data class ErrorResponse (
+data class ErrorResponse(
 
     /* Error code */
     @Json(name = "code")

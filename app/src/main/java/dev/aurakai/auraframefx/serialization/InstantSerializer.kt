@@ -12,15 +12,16 @@ import kotlinx.serialization.encoding.Encoder
  * Kotlinx.serialization serializer for kotlinx.datetime.Instant
  */
 object InstantSerializer : KSerializer<Instant> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
-    
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
+
     /**
      * Serializes an [Instant] value as its ISO-8601 string representation using the provided [Encoder].
      */
     override fun serialize(encoder: Encoder, value: Instant) {
         encoder.encodeString(value.toString())
     }
-    
+
     /**
      * Decodes a string from the given decoder and parses it into an [Instant].
      *

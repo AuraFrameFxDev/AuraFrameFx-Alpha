@@ -1,8 +1,8 @@
 package dev.aurakai.auraframefx.ai.context
 
 import dev.aurakai.auraframefx.ai.memory.MemoryItem
-import dev.aurakai.auraframefx.model.AgentType // Explicit import
-import dev.aurakai.auraframefx.serialization.InstantSerializer // Import for serializer
+import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable

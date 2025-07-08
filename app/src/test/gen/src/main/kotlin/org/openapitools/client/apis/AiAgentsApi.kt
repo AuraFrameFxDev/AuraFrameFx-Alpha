@@ -40,19 +40,23 @@ import org.openapitools.client.infrastructure.ResponseType
 import org.openapitools.client.infrastructure.Success
 import org.openapitools.client.infrastructure.toMultiValue
 
-class AiAgentsApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient = ApiClient.defaultClient) : ApiClient(basePath, client) {
+class AiAgentsApi(
+    basePath: kotlin.String = defaultBasePath,
+    client: OkHttpClient = ApiClient.defaultClient
+) : ApiClient(basePath, client) {
     companion object {
         @JvmStatic
         val defaultBasePath: String by lazy {
-            System.getProperties().getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
+            System.getProperties()
+                .getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
         }
     }
 
     /**
      * Send a request to an AI agent
-     * 
+     *
      * @param agentType Type of AI agent to interact with
-     * @param agentProcessRequest 
+     * @param agentProcessRequest
      * @return AgentMessage
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
@@ -61,9 +65,21 @@ class AiAgentsApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClien
      * @throws ServerException If the API returns a server error response
      */
     @Suppress("UNCHECKED_CAST")
-    @Throws(IllegalStateException::class, IOException::class, UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun agentAgentTypeProcessRequestPost(agentType: AgentType, agentProcessRequest: AgentProcessRequest) : AgentMessage {
-        val localVarResponse = agentAgentTypeProcessRequestPostWithHttpInfo(agentType = agentType, agentProcessRequest = agentProcessRequest)
+    @Throws(
+        IllegalStateException::class,
+        IOException::class,
+        UnsupportedOperationException::class,
+        ClientException::class,
+        ServerException::class
+    )
+    fun agentAgentTypeProcessRequestPost(
+        agentType: AgentType,
+        agentProcessRequest: AgentProcessRequest
+    ): AgentMessage {
+        val localVarResponse = agentAgentTypeProcessRequestPostWithHttpInfo(
+            agentType = agentType,
+            agentProcessRequest = agentProcessRequest
+        )
 
         return when (localVarResponse.responseType) {
             ResponseType.Success -> (localVarResponse as Success<*>).data as AgentMessage
@@ -71,28 +87,43 @@ class AiAgentsApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClien
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {
                 val localVarError = localVarResponse as ClientError<*>
-                throw ClientException("Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}", localVarError.statusCode, localVarResponse)
+                throw ClientException(
+                    "Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}",
+                    localVarError.statusCode,
+                    localVarResponse
+                )
             }
+
             ResponseType.ServerError -> {
                 val localVarError = localVarResponse as ServerError<*>
-                throw ServerException("Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}", localVarError.statusCode, localVarResponse)
+                throw ServerException(
+                    "Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}",
+                    localVarError.statusCode,
+                    localVarResponse
+                )
             }
         }
     }
 
     /**
      * Send a request to an AI agent
-     * 
+     *
      * @param agentType Type of AI agent to interact with
-     * @param agentProcessRequest 
+     * @param agentProcessRequest
      * @return ApiResponse<AgentMessage?>
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
      */
     @Suppress("UNCHECKED_CAST")
     @Throws(IllegalStateException::class, IOException::class)
-    fun agentAgentTypeProcessRequestPostWithHttpInfo(agentType: AgentType, agentProcessRequest: AgentProcessRequest) : ApiResponse<AgentMessage?> {
-        val localVariableConfig = agentAgentTypeProcessRequestPostRequestConfig(agentType = agentType, agentProcessRequest = agentProcessRequest)
+    fun agentAgentTypeProcessRequestPostWithHttpInfo(
+        agentType: AgentType,
+        agentProcessRequest: AgentProcessRequest
+    ): ApiResponse<AgentMessage?> {
+        val localVariableConfig = agentAgentTypeProcessRequestPostRequestConfig(
+            agentType = agentType,
+            agentProcessRequest = agentProcessRequest
+        )
 
         return request<AgentProcessRequest, AgentMessage>(
             localVariableConfig
@@ -103,10 +134,13 @@ class AiAgentsApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClien
      * To obtain the request config of the operation agentAgentTypeProcessRequestPost
      *
      * @param agentType Type of AI agent to interact with
-     * @param agentProcessRequest 
+     * @param agentProcessRequest
      * @return RequestConfig
      */
-    fun agentAgentTypeProcessRequestPostRequestConfig(agentType: AgentType, agentProcessRequest: AgentProcessRequest) : RequestConfig<AgentProcessRequest> {
+    fun agentAgentTypeProcessRequestPostRequestConfig(
+        agentType: AgentType,
+        agentProcessRequest: AgentProcessRequest
+    ): RequestConfig<AgentProcessRequest> {
         val localVariableBody = agentProcessRequest
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -115,7 +149,10 @@ class AiAgentsApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClien
 
         return RequestConfig(
             method = RequestMethod.POST,
-            path = "/agent/{agentType}/process-request".replace("{"+"agentType"+"}", encodeURIComponent(agentType.toString())),
+            path = "/agent/{agentType}/process-request".replace(
+                "{" + "agentType" + "}",
+                encodeURIComponent(agentType.toString())
+            ),
             query = localVariableQuery,
             headers = localVariableHeaders,
             requiresAuthentication = true,
@@ -125,5 +162,6 @@ class AiAgentsApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClien
 
 
     private fun encodeURIComponent(uriComponent: kotlin.String): kotlin.String =
-        HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent).build().encodedPathSegments[0]
+        HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent)
+            .build().encodedPathSegments[0]
 }

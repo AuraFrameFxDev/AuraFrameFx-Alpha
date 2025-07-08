@@ -29,25 +29,26 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     /**
- * Returns the name of this agent.
- *
- * @return The string "Kai".
- */
-override fun getName(): String? = "Kai"
-    /**
- * Returns the type of this agent.
- *
- * @return `AgentType.KAI`, indicating this agent is of type KAI.
- */
-override fun getType(): AgentType = AgentType.KAI
+     * Returns the name of this agent.
+     *
+     * @return The string "Kai".
+     */
+    override fun getName(): String? = "Kai"
 
     /**
-         * Returns a map of the Kai agent's supported capabilities.
-         *
-         * The returned map includes the keys "security", "analysis", "memory", and "service_implemented", each set to true to indicate support for these features.
-         *
-         * @return A map of capability names to their support status.
-         */
+     * Returns the type of this agent.
+     *
+     * @return `AgentType.KAI`, indicating this agent is of type KAI.
+     */
+    override fun getType(): AgentType = AgentType.KAI
+
+    /**
+     * Returns a map of the Kai agent's supported capabilities.
+     *
+     * The returned map includes the keys "security", "analysis", "memory", and "service_implemented", each set to true to indicate support for these features.
+     *
+     * @return A map of capability names to their support status.
+     */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
             "security" to true,
@@ -63,7 +64,10 @@ override fun getType(): AgentType = AgentType.KAI
      * @param context Additional context information for the request.
      * @return An AgentResponse containing a message referencing the request query and context, with a confidence score of 1.0.
      */
-    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
+    override suspend fun processRequest(
+        request: AiRequest,
+        context: String
+    ): AgentResponse { // Added context
         auraFxLogger.i(
             "KaiAIService",
             "Processing request: ${request.query} with context: $context"

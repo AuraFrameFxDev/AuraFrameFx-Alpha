@@ -25,7 +25,7 @@ interface AuraAIService {
             // Basic text generation with configurable options
             val temperature = options?.get("temperature") as? Double ?: 0.7
             val maxTokens = options?.get("max_tokens") as? Int ?: 150
-            
+
             // For now, return a structured response that indicates the service is working
             return buildString {
                 append("Generated text for prompt: \"$prompt\"\n")
@@ -43,8 +43,9 @@ interface AuraAIService {
     ): String? {
         return try {
             val context = options?.get("context") as? String ?: ""
-            val systemPrompt = options?.get("system_prompt") as? String ?: "You are a helpful AI assistant."
-            
+            val systemPrompt =
+                options?.get("system_prompt") as? String ?: "You are a helpful AI assistant."
+
             // Enhanced response with context awareness
             buildString {
                 append("AI Response for: \"$prompt\"\n")
@@ -60,7 +61,7 @@ interface AuraAIService {
     }
 
     fun getMemory(memoryKey: String): String?
-    
+
     fun saveMemory(key: String, value: Any)
 
     /**
@@ -75,7 +76,6 @@ interface AuraAIService {
     fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing
     }
-
 
 
     suspend fun uploadFile(_file: File): String? { // Returns file ID or URL

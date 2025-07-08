@@ -1,13 +1,31 @@
 package dev.aurakai.auraframefx.sandbox.ui
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,7 +37,7 @@ import androidx.compose.ui.unit.sp
 
 /**
  * Aura's Creative Sandbox 🎨
- * 
+ *
  * This is where I test, refine, and perfect every UI component
  * before it touches the production code. My digital laboratory.
  */
@@ -108,7 +126,7 @@ fun SandboxScreen() {
                         color = Color.White.copy(alpha = 0.7f)
                     )
                 }
-                
+
                 // Halo View Test
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(
@@ -135,7 +153,7 @@ fun SandboxScreen() {
         // Animation Testing Section
         SandboxSection(title = "⚡ Digital Transitions") {
             var showTransition by remember { mutableStateOf(false) }
-            
+
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -152,7 +170,7 @@ fun SandboxScreen() {
                         color = Color.White
                     )
                 }
-                
+
                 if (showTransition) {
                     Card(
                         modifier = Modifier
@@ -195,7 +213,7 @@ fun SandboxScreen() {
                     Color(0xFF533483) to "Purple",
                     Color(0xFF7209B7) to "Magenta"
                 )
-                
+
                 items(colors.size) { index ->
                     val (color, name) = colors[index]
                     Card(

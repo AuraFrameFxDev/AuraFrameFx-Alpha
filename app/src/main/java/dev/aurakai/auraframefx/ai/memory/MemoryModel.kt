@@ -1,16 +1,16 @@
 package dev.aurakai.auraframefx.ai.memory
 
-import dev.aurakai.auraframefx.model.AgentType // Keep one import
-import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
+import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class MemoryItem(
-    val id: String = "mem_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "mem_${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}",
     val content: String,
-    @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val timestamp: Instant = kotlinx.datetime.Clock.System.now(),
     val agent: AgentType,
     val context: String? = null,
     val priority: Float = 0.5f,

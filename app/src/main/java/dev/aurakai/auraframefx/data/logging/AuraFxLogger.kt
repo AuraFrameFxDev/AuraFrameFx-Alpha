@@ -10,6 +10,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -251,6 +252,37 @@ class AuraFxLogger @Inject constructor(
     fun shutdown() {
         Log.d(TAG, "AuraFxLogger shutting down loggerScope.")
         loggerScope.cancel()
+    }
+
+    // Additional methods needed by DiagnosticsViewModel
+    suspend fun getLogsForDate(date: String): List<String> {
+        return try {
+            val logFileName = "${LOG_FILENAME_PREFIX}${date}.txt"
+            val content = readFromFileInternal("$LOG_DIR/$logFileName")
+            content?.split("\n") ?: emptyList()
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Error getting logs for date $date: ${e.message}")
+            emptyList()
+        }
+    }
+
+    suspend fun getAllLogs(): Map<String, String> {
+        return readAllLogs()
+    }
+
+    suspend fun clearAllLogs() {
+        try {
+            val logsDir = File(context.filesDir, LOG_DIR)
+            if (logsDir.exists()) {
+                logsDir.listFiles()?.forEach { file ->
+                    if (file.name.startsWith(LOG_FILENAME_PREFIX)) {
+                        file.delete()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error clearing all logs: ${e.message}", e)
+        }
     }
 
     // Internal file operation methods using injected context

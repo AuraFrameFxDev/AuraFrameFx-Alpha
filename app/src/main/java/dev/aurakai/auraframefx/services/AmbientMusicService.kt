@@ -22,16 +22,6 @@ class AmbientMusicService @Inject constructor() : Service() {
         return START_NOT_STICKY
     }
 
-    override fun onCreate() {
-        super.onCreate()
-        // TODO: Initialization code for the service.
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        // TODO: Cleanup code for the service.
-    }
-
     // Example methods that might be relevant for a music service
     fun pause() {
         // TODO: Implement pause logic. Reported as unused. Implement or remove.

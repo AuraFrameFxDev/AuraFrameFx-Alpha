@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -28,7 +28,7 @@ public class ApiResponse<T> {
      * <p>Constructor for ApiResponse.</p>
      *
      * @param statusCode The status code of HTTP response
-     * @param headers The headers of HTTP response
+     * @param headers    The headers of HTTP response
      */
     public ApiResponse(int statusCode, Map<String, List<String>> headers) {
         this(statusCode, headers, null);
@@ -38,8 +38,8 @@ public class ApiResponse<T> {
      * <p>Constructor for ApiResponse.</p>
      *
      * @param statusCode The status code of HTTP response
-     * @param headers The headers of HTTP response
-     * @param data The object deserialized from response bod
+     * @param headers    The headers of HTTP response
+     * @param data       The object deserialized from response bod
      */
     public ApiResponse(int statusCode, Map<String, List<String>> headers, T data) {
         this.statusCode = statusCode;
@@ -59,7 +59,7 @@ public class ApiResponse<T> {
     /**
      * <p>Get the <code>headers</code>.</p>
      *
-     * @return a {@link java.util.Map} of headers 
+     * @return a {@link java.util.Map} of headers
      */
     public Map<String, List<String>> getHeaders() {
         return headers;

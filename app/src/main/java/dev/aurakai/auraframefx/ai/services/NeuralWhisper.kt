@@ -1,8 +1,8 @@
 package dev.aurakai.auraframefx.ai.services
 
 import android.content.Context
-import android.speech.tts.TextToSpeech
 import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.aurakai.auraframefx.model.ConversationState
@@ -23,6 +23,7 @@ class NeuralWhisper @Inject constructor(
 ) {
     companion object {
         private const val TAG = "NeuralWhisper"
+
         // TODO: Review hardcoded audio parameters. Make them constants or configurable if necessary.
         private const val DEFAULT_SAMPLE_RATE = 44100
         private const val DEFAULT_CHANNELS = 1 // Mono
@@ -103,7 +104,10 @@ class NeuralWhisper @Inject constructor(
             Log.w(TAG, "STT not initialized, cannot process speech to text.")
             return null
         }
-        Log.d(TAG, "speechToText called (TODO: actual implementation with listener and async result)")
+        Log.d(
+            TAG,
+            "speechToText called (TODO: actual implementation with listener and async result)"
+        )
         _conversationStateFlow.value = ConversationState.Listening
         // Simulate processing
         kotlinx.coroutines.delay(1000) // Placeholder for actual STT processing
@@ -169,7 +173,8 @@ class NeuralWhisper @Inject constructor(
      * @param contextText The context information to be shared.
      */
     fun shareContextWithKai(contextText: String) {
-        _conversationStateFlow.value = ConversationState.Processing("Sharing with Kai: $contextText")
+        _conversationStateFlow.value =
+            ConversationState.Processing("Sharing with Kai: $contextText")
         Log.d(TAG, "NeuralWhisper: Sharing context with Kai: $contextText")
         // TODO: Actually interact with a KaiController/Agent once its type is defined and injected.
         // Example: kaiAgent?.processSharedContext(contextText)

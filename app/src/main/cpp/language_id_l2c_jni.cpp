@@ -54,7 +54,7 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
     // Enhanced language detection using multiple heuristics
     std::string textStr(nativeText);
     std::string result = "en"; // Default to English
-    
+
     // Convert to lowercase for case-insensitive matching
     std::transform(textStr.begin(), textStr.end(), textStr.begin(), ::tolower);
 
@@ -93,13 +93,13 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
                textStr.find(" com ") != std::string::npos) {
         result = "pt"; // Portuguese
     }
-    
+
     // Additional character frequency analysis for better accuracy
     int accentCount = 0;
-    for (char c : textStr) {
+    for (char c: textStr) {
         if (c < 0 || c > 127) accentCount++; // Non-ASCII characters
     }
-    
+
     // If high accent frequency and no clear language match, default to multi-lingual
     if (accentCount > textStr.length() * 0.1 && result == "en") {
         result = "mul"; // Multiple/unknown with accents
@@ -119,7 +119,7 @@ Java_com_example_app_language_LanguageIdentifier_nativeRelease(
     // Clean up resources if needed
     if (handle != 0) {
         // Resource cleanup completed - handle closed
-        LOGI("Language identifier resources cleaned up for handle: %lld", (long long)handle);
+        LOGI("Language identifier resources cleaned up for handle: %lld", (long long) handle);
     }
 }
 

@@ -20,14 +20,14 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
+ *
  *
  * @param prompt The prompt/instruction for the AI agent
  * @param context Additional context (e.g., previous messages, data references)
  */
 
 
-data class AgentProcessRequest (
+data class AgentProcessRequest(
 
     /* The prompt/instruction for the AI agent */
     @Json(name = "prompt")
