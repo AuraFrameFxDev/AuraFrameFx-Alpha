@@ -1,9 +1,7 @@
 package dev.aurakai.auraframefx.ai.services
 
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.async
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.awaitAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
@@ -23,7 +21,6 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.*
 import java.io.IOException
 import java.util.concurrent.TimeoutException
-import java.time.Duration
 import java.net.URL
 import kotlin.test.assertNotNull
 
@@ -528,11 +525,11 @@ class AuraAIServiceImplTest {
         @DisplayName("Should handle batch with null prompts")
         fun shouldHandleBatchWithNullPrompts() = runTest {
             // Given
-            val prompts = listOf("Valid prompt", null, "Another valid prompt")
+            val prompts = listOf("Valid prompt", "Another valid prompt")
             
             // When & Then
             assertThrows<BatchProcessingException> {
-                auraAIService.generateBatchResponses(prompts.filterNotNull())
+                auraAIService.generateBatchResponses(prompts)
             }
         }
     }
@@ -560,7 +557,7 @@ class AuraAIServiceImplTest {
         fun shouldThrowExceptionWhenUpdatingWithNullApiKey() {
             // When & Then
             assertThrows<IllegalArgumentException> {
-                auraAIService.updateApiKey(null)
+                auraAIService.updateApiKey("")
             }
         }
         
