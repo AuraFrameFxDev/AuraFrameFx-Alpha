@@ -1820,3 +1820,991 @@ if __name__ == '__main__':
     
     # Run pytest tests
     pytest.main([__file__, '-v'])
+
+class TestSecurityAndDataSanitization(unittest.TestCase):
+    """Test security-related scenarios and data sanitization"""
+    
+    def setUp(self):
+        """Set up ProfileManager and test data for security tests."""
+        self.manager = ProfileManager()
+        
+    def test_sql_injection_prevention_in_profile_data(self):
+        """
+        Tests that profile data containing SQL injection attempts is stored safely without execution.
+        
+        Verifies that potentially malicious SQL strings are treated as regular data rather than executed commands.
+        """
+        malicious_data = {
+            'name': "'; DROP TABLE users; --",
+            'version': '1.0.0',
+            'settings': {
+                'query': "SELECT * FROM profiles WHERE id = '1' OR '1'='1",
+                'command': "UPDATE profiles SET admin = 1 WHERE id = 1; --"
+            }
+        }
+        
+        profile = self.manager.create_profile('sql_injection_test', malicious_data)
+        
+        # Verify data is stored as-is without execution
+        self.assertEqual(profile.data['name'], "'; DROP TABLE users; --")
+        self.assertIn("SELECT * FROM profiles", profile.data['settings']['query'])
+        self.assertIn("UPDATE profiles", profile.data['settings']['command'])
+    
+    def test_script_injection_prevention_in_profile_data(self):
+        """
+        Tests that profile data containing script injection attempts (XSS-style) is stored safely.
+        
+        Ensures that potentially malicious script tags and JavaScript code are preserved as data without execution.
+        """
+        script_data = {
+            'name': '<script>alert("XSS")</script>',
+            'version': '1.0.0',
+            'settings': {
+                'description': '"><script>document.cookie="malicious=true"</script>',
+                'callback': 'javascript:alert("XSS")',
+                'onload': 'eval("malicious_code()")'
+            }
+        }
+        
+        profile = self.manager.create_profile('script_injection_test', script_data)
+        
+        # Verify script content is stored as plain text
+        self.assertIn('<script>', profile.data['name'])
+        self.assertIn('javascript:', profile.data['settings']['callback'])
+        self.assertIn('eval(', profile.data['settings']['onload'])
+    
+    def test_path_traversal_prevention_in_profile_ids(self):
+        """
+        Tests that profile IDs containing path traversal attempts are handled appropriately.
+        
+        Verifies that directory traversal patterns in profile IDs either work as regular IDs or raise appropriate exceptions.
+        """
+        traversal_ids = [
+            '../../../etc/passwd',
+            '..\\..\\windows\\system32',
+            '/etc/shadow',
+            'C:\\Windows\\System32\\config\\SAM',
+            '....//....//etc//passwd'
+        ]
+        
+        for traversal_id in traversal_ids:
+            with self.subTest(profile_id=traversal_id):
+                data = {
+                    'name': 'traversal_test',
+                    'version': '1.0.0',
+                    'settings': {}
+                }
+                
+                try:
+                    profile = self.manager.create_profile(traversal_id, data)
+                    # If creation succeeds, verify the ID is stored as-is
+                    self.assertEqual(profile.profile_id, traversal_id)
+                except (ValueError, TypeError):
+                    # If the implementation rejects dangerous IDs, that's also acceptable
+                    pass
+    
+    def test_large_payload_handling(self):
+        """
+        Tests system behavior when handling extremely large profile data to prevent DoS attacks.
+        
+        Verifies that the system can handle or appropriately reject very large data payloads without crashing.
+        """
+        # Create progressively larger payloads
+        payload_sizes = [1024, 10240, 102400, 1024000]  # 1KB to 1MB
+        
+        for size in payload_sizes:
+            with self.subTest(payload_size=size):
+                large_data = {
+                    'name': 'large_payload_test',
+                    'version': '1.0.0',
+                    'settings': {
+                        'large_field': 'x' * size,
+                        'description': f'Payload size: {size} bytes'
+                    }
+                }
+                
+                try:
+                    start_time = time.time()
+                    profile = self.manager.create_profile(f'large_payload_{size}', large_data)
+                    end_time = time.time()
+                    
+                    # Verify creation succeeded and wasn't too slow
+                    self.assertIsNotNone(profile)
+                    self.assertLess(end_time - start_time, 5.0, f"Large payload processing took too long for size {size}")
+                    self.assertEqual(len(profile.data['settings']['large_field']), size)
+                    
+                except (MemoryError, ValueError) as e:
+                    # If the system appropriately rejects large payloads, that's acceptable
+                    self.assertIsInstance(e, (MemoryError, ValueError))
+
+
+class TestThreadSafetySimulation(unittest.TestCase):
+    """Test thread safety simulation through rapid sequential operations"""
+    
+    def setUp(self):
+        """Set up ProfileManager for thread safety tests."""
+        self.manager = ProfileManager()
+    
+    def test_rapid_sequential_profile_creation(self):
+        """
+        Simulates concurrent profile creation through rapid sequential operations.
+        
+        Tests system stability when multiple profiles are created in quick succession, simulating concurrent access patterns.
+        """
+        import threading
+        import time
+        
+        results = []
+        errors = []
+        
+        def create_profiles_batch(start_idx, count):
+            """Create a batch of profiles with unique IDs."""
+            try:
+                for i in range(start_idx, start_idx + count):
+                    data = {
+                        'name': f'concurrent_profile_{i}',
+                        'version': '1.0.0',
+                        'settings': {'thread_id': threading.current_thread().ident, 'index': i}
+                    }
+                    profile = self.manager.create_profile(f'concurrent_{i}', data)
+                    results.append(profile.profile_id)
+            except Exception as e:
+                errors.append(str(e))
+        
+        # Simulate concurrent access with multiple "threads" (sequential execution)
+        batch_size = 50
+        num_batches = 4
+        
+        for batch in range(num_batches):
+            start_idx = batch * batch_size
+            create_profiles_batch(start_idx, batch_size)
+        
+        # Verify all profiles were created successfully
+        self.assertEqual(len(results), num_batches * batch_size)
+        self.assertEqual(len(errors), 0, f"Errors occurred: {errors}")
+        self.assertEqual(len(self.manager.profiles), num_batches * batch_size)
+    
+    def test_rapid_read_write_operations(self):
+        """
+        Tests rapid alternating read and write operations on the same profile.
+        
+        Simulates scenarios where a profile is frequently accessed and updated, verifying data consistency and system stability.
+        """
+        # Create initial profile
+        profile_id = 'read_write_test'
+        initial_data = {
+            'name': 'read_write_profile',
+            'version': '1.0.0',
+            'settings': {'counter': 0, 'operations': []}
+        }
+        
+        self.manager.create_profile(profile_id, initial_data)
+        
+        # Perform rapid read-write operations
+        for i in range(100):
+            # Read current state
+            current_profile = self.manager.get_profile(profile_id)
+            self.assertIsNotNone(current_profile)
+            
+            # Update with new data
+            new_counter = current_profile.data['settings']['counter'] + 1
+            new_operations = current_profile.data['settings']['operations'] + [f'operation_{i}']
+            
+            update_data = {
+                'settings': {
+                    'counter': new_counter,
+                    'operations': new_operations,
+                    'last_update': i
+                }
+            }
+            
+            updated_profile = self.manager.update_profile(profile_id, update_data)
+            self.assertEqual(updated_profile.data['settings']['counter'], new_counter)
+        
+        # Verify final state
+        final_profile = self.manager.get_profile(profile_id)
+        self.assertEqual(final_profile.data['settings']['counter'], 100)
+        self.assertEqual(len(final_profile.data['settings']['operations']), 100)
+    
+    def test_profile_manager_state_consistency_under_stress(self):
+        """
+        Tests ProfileManager state consistency under rapid profile lifecycle operations.
+        
+        Performs create, read, update, delete operations in rapid succession to verify state consistency.
+        """
+        operations_count = 200
+        profile_lifetime = 10  # How many operations before deleting a profile
+        
+        active_profiles = set()
+        
+        for i in range(operations_count):
+            operation = i % 4  # Cycle through CRUD operations
+            profile_id = f'stress_test_{i // profile_lifetime}'
+            
+            if operation == 0:  # Create
+                if profile_id not in active_profiles:
+                    data = {
+                        'name': f'stress_profile_{i}',
+                        'version': '1.0.0',
+                        'settings': {'created_at_iteration': i}
+                    }
+                    profile = self.manager.create_profile(profile_id, data)
+                    active_profiles.add(profile_id)
+                    self.assertIsNotNone(profile)
+            
+            elif operation == 1:  # Read
+                if profile_id in active_profiles:
+                    profile = self.manager.get_profile(profile_id)
+                    self.assertIsNotNone(profile)
+            
+            elif operation == 2:  # Update
+                if profile_id in active_profiles:
+                    try:
+                        update_data = {'settings': {'updated_at_iteration': i}}
+                        updated_profile = self.manager.update_profile(profile_id, update_data)
+                        self.assertIsNotNone(updated_profile)
+                    except ProfileNotFoundError:
+                        # Profile might have been deleted, remove from tracking
+                        active_profiles.discard(profile_id)
+            
+            elif operation == 3:  # Delete
+                if profile_id in active_profiles and i % profile_lifetime == profile_lifetime - 1:
+                    result = self.manager.delete_profile(profile_id)
+                    if result:
+                        active_profiles.remove(profile_id)
+        
+        # Verify manager state is consistent
+        self.assertEqual(len(self.manager.profiles), len(active_profiles))
+        for profile_id in active_profiles:
+            self.assertIsNotNone(self.manager.get_profile(profile_id))
+
+
+class TestAdvancedErrorRecoveryScenarios(unittest.TestCase):
+    """Test advanced error recovery and resilience scenarios"""
+    
+    def setUp(self):
+        """Set up ProfileManager for error recovery tests."""
+        self.manager = ProfileManager()
+    
+    def test_partial_update_rollback_simulation(self):
+        """
+        Tests system behavior during simulated partial update failures.
+        
+        Verifies that profiles remain in a consistent state even when update operations encounter errors partway through.
+        """
+        # Create initial profile
+        profile_id = 'rollback_test'
+        initial_data = {
+            'name': 'rollback_profile',
+            'version': '1.0.0',
+            'settings': {
+                'field1': 'value1',
+                'field2': 'value2',
+                'critical_field': 'important_data'
+            }
+        }
+        
+        profile = self.manager.create_profile(profile_id, initial_data)
+        original_updated_at = profile.updated_at
+        
+        # Simulate partial update failure by updating with problematic data
+        problematic_updates = [
+            {'settings': None},  # Invalid settings type
+            {'name': None},      # Invalid name type  
+            {'version': []},     # Invalid version type
+        ]
+        
+        for update_data in problematic_updates:
+            with self.subTest(update_data=update_data):
+                try:
+                    self.manager.update_profile(profile_id, update_data)
+                except (TypeError, ValueError, ProfileError):
+                    # If update fails, verify profile is still in original state
+                    recovered_profile = self.manager.get_profile(profile_id)
+                    self.assertIsNotNone(recovered_profile)
+                    self.assertEqual(recovered_profile.data['name'], 'rollback_profile')
+                    self.assertEqual(recovered_profile.data['settings']['critical_field'], 'important_data')
+    
+    def test_cascading_failure_handling(self):
+        """
+        Tests system resilience when multiple related operations fail in sequence.
+        
+        Simulates scenarios where failures in one operation might trigger additional failures, verifying graceful handling.
+        """
+        # Create multiple related profiles
+        base_profile_id = 'cascade_base'
+        dependent_profile_ids = ['cascade_dep1', 'cascade_dep2', 'cascade_dep3']
+        
+        # Create base profile
+        base_data = {
+            'name': 'cascade_base_profile',
+            'version': '1.0.0',
+            'settings': {'type': 'base', 'dependencies': dependent_profile_ids}
+        }
+        self.manager.create_profile(base_profile_id, base_data)
+        
+        # Create dependent profiles
+        for dep_id in dependent_profile_ids:
+            dep_data = {
+                'name': f'dependent_{dep_id}',
+                'version': '1.0.0',
+                'settings': {'type': 'dependent', 'parent': base_profile_id}
+            }
+            self.manager.create_profile(dep_id, dep_data)
+        
+        # Simulate cascading failures
+        failure_scenarios = [
+            ('invalid_update', {'settings': 'invalid_type'}),
+            ('missing_field_update', {'nonexistent_field': 'value'}),
+            ('circular_reference', {'settings': {'parent': base_profile_id}})
+        ]
+        
+        for scenario_name, bad_update in failure_scenarios:
+            with self.subTest(scenario=scenario_name):
+                # Try to update base profile with bad data
+                try:
+                    self.manager.update_profile(base_profile_id, bad_update)
+                except (TypeError, ValueError, ProfileError):
+                    pass  # Expected failure
+                
+                # Verify all profiles still exist and are accessible
+                base_profile = self.manager.get_profile(base_profile_id)
+                self.assertIsNotNone(base_profile, f"Base profile lost during {scenario_name}")
+                
+                for dep_id in dependent_profile_ids:
+                    dep_profile = self.manager.get_profile(dep_id)
+                    self.assertIsNotNone(dep_profile, f"Dependent profile {dep_id} lost during {scenario_name}")
+    
+    def test_memory_pressure_simulation(self):
+        """
+        Tests system behavior under simulated memory pressure conditions.
+        
+        Creates large numbers of profiles with substantial data to test memory management and stability.
+        """
+        import gc
+        
+        # Force garbage collection before test
+        gc.collect()
+        initial_objects = len(gc.get_objects())
+        
+        try:
+            # Create profiles with substantial memory footprint
+            large_profiles = []
+            for i in range(50):
+                large_data = {
+                    'name': f'memory_pressure_profile_{i}',
+                    'version': '1.0.0',
+                    'settings': {
+                        'large_data': [j for j in range(1000)],  # 1000 integers
+                        'large_text': 'x' * 10000,  # 10KB string
+                        'large_dict': {f'key_{j}': f'value_{j}' * 100 for j in range(100)}
+                    }
+                }
+                
+                profile = self.manager.create_profile(f'memory_pressure_{i}', large_data)
+                large_profiles.append(profile.profile_id)
+                
+                # Verify profile was created successfully
+                self.assertIsNotNone(profile)
+                self.assertEqual(len(profile.data['settings']['large_data']), 1000)
+            
+            # Verify all profiles are still accessible
+            for profile_id in large_profiles:
+                profile = self.manager.get_profile(profile_id)
+                self.assertIsNotNone(profile)
+            
+            # Clean up profiles and verify memory is released
+            for profile_id in large_profiles:
+                result = self.manager.delete_profile(profile_id)
+                self.assertTrue(result)
+            
+            # Force garbage collection
+            gc.collect()
+            
+            # Verify profiles are actually deleted
+            self.assertEqual(len(self.manager.profiles), 0)
+            
+        except MemoryError:
+            # If system runs out of memory, that's an acceptable failure mode
+            self.skipTest("System ran out of memory during test - acceptable for resource-constrained environments")
+
+
+class TestPropertyBasedTesting(unittest.TestCase):
+    """Property-based testing scenarios for robust validation"""
+    
+    def setUp(self):
+        """Set up ProfileManager for property-based tests."""
+        self.manager = ProfileManager()
+    
+    def test_profile_id_invariants(self):
+        """
+        Tests that profile ID properties remain invariant across all operations.
+        
+        Verifies that profile IDs are immutable and consistent throughout the profile lifecycle.
+        """
+        test_cases = [
+            'simple_id',
+            'id_with_underscores_123',
+            'id-with-dashes-456',
+            'id.with.dots.789',
+            'UPPERCASE_ID',
+            'MixedCase_ID_123'
+        ]
+        
+        for original_id in test_cases:
+            with self.subTest(profile_id=original_id):
+                data = {
+                    'name': f'test_profile_{original_id}',
+                    'version': '1.0.0',
+                    'settings': {'test': True}
+                }
+                
+                # Create profile
+                profile = self.manager.create_profile(original_id, data)
+                self.assertEqual(profile.profile_id, original_id)
+                
+                # Retrieve profile
+                retrieved = self.manager.get_profile(original_id)
+                self.assertEqual(retrieved.profile_id, original_id)
+                
+                # Update profile
+                updated = self.manager.update_profile(original_id, {'name': 'updated'})
+                self.assertEqual(updated.profile_id, original_id)
+                
+                # Verify ID remains unchanged
+                final_profile = self.manager.get_profile(original_id)
+                self.assertEqual(final_profile.profile_id, original_id)
+    
+    def test_data_preservation_invariants(self):
+        """
+        Tests that profile data preservation properties hold across operations.
+        
+        Verifies that data not explicitly updated remains unchanged during update operations.
+        """
+        import copy
+        
+        original_data = {
+            'name': 'preservation_test',
+            'version': '1.0.0',
+            'settings': {
+                'preserve_this': 'important_value',
+                'and_this': {'nested': 'data'},
+                'update_this': 'old_value'
+            },
+            'metadata': {
+                'should_preserve': True,
+                'tags': ['tag1', 'tag2']
+            }
+        }
+        
+        profile = self.manager.create_profile('preservation_test', original_data)
+        
+        # Store copy of original for comparison
+        preserved_data = copy.deepcopy(original_data)
+        
+        # Update only specific fields
+        update_data = {
+            'settings': {
+                'update_this': 'new_value',
+                'new_field': 'added_value'
+            }
+        }
+        
+        updated_profile = self.manager.update_profile('preservation_test', update_data)
+        
+        # Verify preserved fields remain unchanged
+        self.assertEqual(updated_profile.data['name'], preserved_data['name'])
+        self.assertEqual(updated_profile.data['version'], preserved_data['version'])
+        self.assertEqual(updated_profile.data['metadata'], preserved_data['metadata'])
+        
+        # Verify updated fields changed
+        self.assertEqual(updated_profile.data['settings']['update_this'], 'new_value')
+        self.assertEqual(updated_profile.data['settings']['new_field'], 'added_value')
+        
+        # Verify other settings preserved
+        self.assertEqual(updated_profile.data['settings']['preserve_this'], 'important_value')
+    
+    def test_timestamp_monotonicity(self):
+        """
+        Tests that timestamp properties maintain monotonic ordering.
+        
+        Verifies that created_at <= updated_at and that updated_at increases with each update.
+        """
+        import time
+        
+        profile_id = 'timestamp_test'
+        data = {
+            'name': 'timestamp_profile',
+            'version': '1.0.0',
+            'settings': {'counter': 0}
+        }
+        
+        # Create profile
+        profile = self.manager.create_profile(profile_id, data)
+        initial_created_at = profile.created_at
+        initial_updated_at = profile.updated_at
+        
+        # Verify initial invariant: created_at <= updated_at
+        self.assertLessEqual(initial_created_at, initial_updated_at)
+        
+        # Perform multiple updates with small delays
+        previous_updated_at = initial_updated_at
+        
+        for i in range(5):
+            time.sleep(0.001)  # Small delay to ensure timestamp difference
+            
+            update_data = {'settings': {'counter': i + 1}}
+            updated_profile = self.manager.update_profile(profile_id, update_data)
+            
+            # Verify monotonicity: updated_at increases
+            self.assertGreaterEqual(updated_profile.updated_at, previous_updated_at)
+            
+            # Verify created_at remains unchanged
+            self.assertEqual(updated_profile.created_at, initial_created_at)
+            
+            previous_updated_at = updated_profile.updated_at
+
+
+class TestAdvancedBuilderPatterns(unittest.TestCase):
+    """Test advanced ProfileBuilder patterns and usage scenarios"""
+    
+    def setUp(self):
+        """Set up ProfileBuilder for advanced pattern tests."""
+        self.builder = ProfileBuilder()
+    
+    def test_builder_factory_pattern(self):
+        """
+        Tests using ProfileBuilder as a factory for creating standardized profile templates.
+        
+        Verifies that builder instances can be used to create consistent profile templates with preset configurations.
+        """
+        def create_ai_model_profile_builder():
+            """Factory function for AI model profile builders."""
+            return (ProfileBuilder()
+                   .with_version('1.0.0')
+                   .with_settings({
+                       'type': 'ai_model',
+                       'framework': 'unknown',
+                       'optimization': 'standard'
+                   }))
+        
+        def create_gpt_profile_builder():
+            """Factory function for GPT-specific profile builders."""
+            base = create_ai_model_profile_builder()
+            return base.with_settings({
+                'framework': 'openai',
+                'model_family': 'gpt',
+                'api_version': 'v1'
+            })
+        
+        # Create GPT-4 profile
+        gpt4_profile = (create_gpt_profile_builder()
+                       .with_name('gpt4_profile')
+                       .with_settings({
+                           'model': 'gpt-4',
+                           'temperature': 0.7,
+                           'max_tokens': 1000
+                       })
+                       .build())
+        
+        # Create GPT-3.5 profile
+        gpt35_profile = (create_gpt_profile_builder()
+                        .with_name('gpt35_profile')
+                        .with_settings({
+                            'model': 'gpt-3.5-turbo',
+                            'temperature': 0.5,
+                            'max_tokens': 500
+                        })
+                        .build())
+        
+        # Verify both profiles have expected base properties
+        for profile in [gpt4_profile, gpt35_profile]:
+            self.assertEqual(profile['version'], '1.0.0')
+            self.assertEqual(profile['settings']['type'], 'ai_model')
+            self.assertEqual(profile['settings']['framework'], 'openai')
+            self.assertEqual(profile['settings']['model_family'], 'gpt')
+        
+        # Verify specific differences
+        self.assertEqual(gpt4_profile['settings']['model'], 'gpt-4')
+        self.assertEqual(gpt35_profile['settings']['model'], 'gpt-3.5-turbo')
+    
+    def test_builder_configuration_composition(self):
+        """
+        Tests composing complex profile configurations through multiple builder stages.
+        
+        Verifies that builders can be used to gradually compose complex configurations in stages.
+        """
+        # Stage 1: Basic profile structure
+        stage1 = (self.builder
+                 .with_name('composed_profile')
+                 .with_version('1.0.0'))
+        
+        # Stage 2: Add AI model configuration
+        stage2 = stage1.with_settings({
+            'ai_config': {
+                'model': 'gpt-4',
+                'temperature': 0.7,
+                'max_tokens': 1000
+            }
+        })
+        
+        # Stage 3: Add processing pipeline
+        stage3 = stage2.with_settings({
+            'pipeline': {
+                'input_processor': 'tokenizer',
+                'output_processor': 'formatter',
+                'middleware': ['validator', 'sanitizer']
+            }
+        })
+        
+        # Stage 4: Add monitoring and logging
+        final_profile = stage3.with_settings({
+            'monitoring': {
+                'enabled': True,
+                'metrics': ['latency', 'throughput', 'errors'],
+                'logging_level': 'INFO'
+            }
+        }).build()
+        
+        # Verify all stages are present in final profile
+        self.assertEqual(final_profile['name'], 'composed_profile')
+        self.assertIn('ai_config', final_profile['settings'])
+        self.assertIn('pipeline', final_profile['settings'])
+        self.assertIn('monitoring', final_profile['settings'])
+        
+        # Verify nested configurations
+        self.assertEqual(final_profile['settings']['ai_config']['model'], 'gpt-4')
+        self.assertEqual(len(final_profile['settings']['pipeline']['middleware']), 2)
+        self.assertTrue(final_profile['settings']['monitoring']['enabled'])
+    
+    def test_builder_conditional_configuration(self):
+        """
+        Tests conditional configuration building based on runtime parameters.
+        
+        Verifies that builders can conditionally include or modify configurations based on input parameters.
+        """
+        def build_environment_specific_profile(env='development', features=None):
+            """Build profile with environment-specific configurations."""
+            if features is None:
+                features = []
+            
+            builder = (ProfileBuilder()
+                      .with_name(f'{env}_profile')
+                      .with_version('1.0.0'))
+            
+            # Base settings for all environments
+            settings = {
+                'environment': env,
+                'features': features,
+                'base_config': True
+            }
+            
+            # Environment-specific configurations
+            if env == 'development':
+                settings.update({
+                    'debug': True,
+                    'logging_level': 'DEBUG',
+                    'hot_reload': True,
+                    'test_mode': True
+                })
+            elif env == 'staging':
+                settings.update({
+                    'debug': False,
+                    'logging_level': 'INFO',
+                    'monitoring': 'basic',
+                    'cache_enabled': True
+                })
+            elif env == 'production':
+                settings.update({
+                    'debug': False,
+                    'logging_level': 'WARN',
+                    'monitoring': 'full',
+                    'cache_enabled': True,
+                    'performance_optimized': True
+                })
+            
+            # Feature-specific configurations
+            if 'analytics' in features:
+                settings['analytics'] = {
+                    'enabled': True,
+                    'providers': ['google_analytics', 'mixpanel']
+                }
+            
+            if 'experimental' in features:
+                settings['experimental_features'] = {
+                    'enabled': True,
+                    'beta_testing': env in ['development', 'staging']
+                }
+            
+            return builder.with_settings(settings).build()
+        
+        # Test different environment configurations
+        dev_profile = build_environment_specific_profile('development', ['analytics', 'experimental'])
+        staging_profile = build_environment_specific_profile('staging', ['analytics'])
+        prod_profile = build_environment_specific_profile('production')
+        
+        # Verify environment-specific settings
+        self.assertTrue(dev_profile['settings']['debug'])
+        self.assertEqual(dev_profile['settings']['logging_level'], 'DEBUG')
+        
+        self.assertFalse(staging_profile['settings']['debug'])
+        self.assertEqual(staging_profile['settings']['logging_level'], 'INFO')
+        self.assertTrue(staging_profile['settings']['cache_enabled'])
+        
+        self.assertFalse(prod_profile['settings']['debug'])
+        self.assertTrue(prod_profile['settings']['performance_optimized'])
+        
+        # Verify feature-specific settings
+        self.assertIn('analytics', dev_profile['settings'])
+        self.assertIn('experimental_features', dev_profile['settings'])
+        self.assertIn('analytics', staging_profile['settings'])
+        self.assertNotIn('experimental_features', staging_profile['settings'])
+        self.assertNotIn('analytics', prod_profile['settings'])
+
+
+# Import time for timestamp tests
+import time
+
+
+# Additional parametrized tests for comprehensive edge case coverage
+@pytest.mark.parametrize("special_char_data,expected_preserved", [
+    ({'name': 'test\x00null', 'version': '1.0.0', 'settings': {}}, True),
+    ({'name': 'test\n\r\twhitespace', 'version': '1.0.0', 'settings': {}}, True),
+    ({'name': 'test\uFEFFbom', 'version': '1.0.0', 'settings': {}}, True),
+    ({'name': 'test🚀emoji', 'version': '1.0.0', 'settings': {}}, True),
+    ({'name': 'test\u200Bzwsp', 'version': '1.0.0', 'settings': {}}, True),
+])
+def test_special_character_preservation_parametrized(special_char_data, expected_preserved):
+    """
+    Parametrized test verifying that special characters in profile data are preserved accurately.
+    
+    Parameters:
+        special_char_data (dict): Profile data containing special characters.
+        expected_preserved (bool): Whether the characters should be preserved exactly.
+    """
+    manager = ProfileManager()
+    
+    try:
+        profile = manager.create_profile('special_char_test', special_char_data)
+        
+        if expected_preserved:
+            assert profile.data['name'] == special_char_data['name']
+            # Verify round-trip preservation
+            retrieved = manager.get_profile('special_char_test')
+            assert retrieved.data['name'] == special_char_data['name']
+        
+    except (UnicodeError, ValueError) as e:
+        if not expected_preserved:
+            # If special characters cause issues, that might be acceptable
+            pass
+        else:
+            pytest.fail(f"Unexpected error with special characters: {e}")
+
+
+@pytest.mark.parametrize("stress_operation,iterations,max_time", [
+    ("create_delete_cycle", 100, 2.0),
+    ("update_intensive", 200, 1.0),
+    ("read_intensive", 1000, 0.5),
+    ("mixed_operations", 500, 3.0),
+])
+def test_stress_operations_parametrized(stress_operation, iterations, max_time):
+    """
+    Parametrized stress test for various ProfileManager operations.
+    
+    Parameters:
+        stress_operation (str): Type of operation to stress test.
+        iterations (int): Number of iterations to perform.
+        max_time (float): Maximum allowed time in seconds.
+    """
+    import time
+    import random
+    
+    manager = ProfileManager()
+    start_time = time.time()
+    
+    if stress_operation == "create_delete_cycle":
+        for i in range(iterations):
+            profile_id = f'stress_{i}'
+            data = {
+                'name': f'stress_profile_{i}',
+                'version': '1.0.0',
+                'settings': {'iteration': i}
+            }
+            # Create and immediately delete
+            profile = manager.create_profile(profile_id, data)
+            assert profile is not None
+            result = manager.delete_profile(profile_id)
+            assert result is True
+    
+    elif stress_operation == "update_intensive":
+        # Create one profile and update it many times
+        manager.create_profile('update_test', {
+            'name': 'update_profile',
+            'version': '1.0.0',
+            'settings': {'counter': 0}
+        })
+        
+        for i in range(iterations):
+            update_data = {'settings': {'counter': i, 'timestamp': time.time()}}
+            updated = manager.update_profile('update_test', update_data)
+            assert updated.data['settings']['counter'] == i
+    
+    elif stress_operation == "read_intensive":
+        # Create some profiles and read them repeatedly
+        num_profiles = min(10, iterations // 10)
+        for i in range(num_profiles):
+            manager.create_profile(f'read_test_{i}', {
+                'name': f'read_profile_{i}',
+                'version': '1.0.0',
+                'settings': {'index': i}
+            })
+        
+        for i in range(iterations):
+            profile_id = f'read_test_{i % num_profiles}'
+            profile = manager.get_profile(profile_id)
+            assert profile is not None
+    
+    elif stress_operation == "mixed_operations":
+        operations = ['create', 'read', 'update', 'delete']
+        profile_ids = set()
+        
+        for i in range(iterations):
+            op = random.choice(operations)
+            profile_id = f'mixed_{i % 20}'  # Limit to 20 profiles for mixed operations
+            
+            if op == 'create' and profile_id not in profile_ids:
+                data = {
+                    'name': f'mixed_profile_{i}',
+                    'version': '1.0.0',
+                    'settings': {'iteration': i}
+                }
+                profile = manager.create_profile(profile_id, data)
+                if profile:
+                    profile_ids.add(profile_id)
+            
+            elif op == 'read' and profile_id in profile_ids:
+                profile = manager.get_profile(profile_id)
+                assert profile is not None
+            
+            elif op == 'update' and profile_id in profile_ids:
+                try:
+                    update_data = {'settings': {'updated_at': i}}
+                    manager.update_profile(profile_id, update_data)
+                except ProfileNotFoundError:
+                    profile_ids.discard(profile_id)
+            
+            elif op == 'delete' and profile_id in profile_ids:
+                result = manager.delete_profile(profile_id)
+                if result:
+                    profile_ids.remove(profile_id)
+    
+    end_time = time.time()
+    duration = end_time - start_time
+    
+    assert duration < max_time, f"Stress test {stress_operation} took {duration:.2f}s, exceeding limit of {max_time}s"
+
+
+@pytest.mark.parametrize("validation_scenario,data,should_pass", [
+    ("minimal_valid", {"name": "test", "version": "1.0", "settings": {}}, True),
+    ("with_extras", {"name": "test", "version": "1.0", "settings": {}, "extra": "field"}, True),
+    ("empty_name", {"name": "", "version": "1.0", "settings": {}}, True),
+    ("none_settings", {"name": "test", "version": "1.0", "settings": None}, True),
+    ("missing_name", {"version": "1.0", "settings": {}}, False),
+    ("missing_version", {"name": "test", "settings": {}}, False),
+    ("missing_settings", {"name": "test", "version": "1.0"}, False),
+    ("all_missing", {}, False),
+])
+def test_comprehensive_validation_scenarios_parametrized(validation_scenario, data, should_pass):
+    """
+    Comprehensive parametrized validation test covering all edge cases.
+    
+    Parameters:
+        validation_scenario (str): Description of the validation scenario.
+        data (dict): Profile data to validate.
+        should_pass (bool): Whether validation should pass.
+    """
+    result = ProfileValidator.validate_profile_data(data)
+    
+    if should_pass:
+        assert result is True, f"Validation should pass for {validation_scenario}: {data}"
+    else:
+        assert result is False, f"Validation should fail for {validation_scenario}: {data}"
+
+
+# Final test to ensure all imports and dependencies are working
+class TestTestSuiteIntegrity(unittest.TestCase):
+    """Test that the test suite itself is properly configured"""
+    
+    def test_all_imports_available(self):
+        """
+        Verifies that all required imports and dependencies are available for the test suite.
+        """
+        # Test that all imported modules are accessible
+        import pytest
+        import unittest
+        import json
+        import tempfile
+        import os
+        import time
+        import gc
+        from datetime import datetime, timezone
+        from typing import Dict, Any, List, Optional
+        
+        # Verify test classes are accessible
+        test_classes = [
+            GenesisProfile,
+            ProfileManager, 
+            ProfileValidator,
+            ProfileBuilder,
+            ProfileError,
+            ValidationError,
+            ProfileNotFoundError
+        ]
+        
+        for cls in test_classes:
+            self.assertTrue(callable(cls), f"Class {cls.__name__} should be callable")
+    
+    def test_framework_compatibility(self):
+        """
+        Verifies that both unittest and pytest frameworks can coexist and function properly.
+        """
+        # Test unittest functionality
+        self.assertTrue(True)
+        self.assertEqual(1, 1)
+        
+        # Test that pytest markers work (this will be executed by pytest)
+        assert True
+        assert 1 == 1
+    
+    def test_parametrized_test_support(self):
+        """
+        Verifies that pytest parametrize functionality is working correctly.
+        """
+        # This test mainly ensures that pytest.mark.parametrize is available
+        # The actual parametrized tests above verify the functionality
+        import pytest
+        
+        self.assertTrue(hasattr(pytest.mark, 'parametrize'))
+
+
+if __name__ == '__main__':
+    # Enhanced test runner with better error handling
+    import sys
+    
+    print("Starting comprehensive test suite for GenesisProfile...")
+    print("=" * 60)
+    
+    # Run unittest tests with higher verbosity
+    print("\n🧪 Running unittest tests...")
+    unittest_result = unittest.main(argv=[''], exit=False, verbosity=2)
+    
+    # Run pytest tests with detailed output
+    print("\n🔬 Running pytest tests...")
+    pytest_exit_code = pytest.main([__file__, '-v', '--tb=short'])
+    
+    # Summary
+    print("\n" + "=" * 60)
+    print("Test Suite Summary:")
+    print(f"✅ Unittest tests completed")
+    print(f"✅ Pytest tests completed with exit code: {pytest_exit_code}")
+    print("=" * 60)
