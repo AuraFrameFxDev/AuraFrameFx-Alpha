@@ -22,6 +22,12 @@ class MemoryManager @Inject constructor(
     private val _memoryStats = MutableStateFlow(MemoryStats())
     val memoryStats: StateFlow<MemoryStats> = _memoryStats
 
+    /**
+     * Stores a canonical memory item and updates memory statistics and recent access tracking.
+     *
+     * @param item The memory item to store.
+     * @return The ID of the stored memory item.
+     */
     fun storeMemory(item: CanonicalMemoryItem): String { // Changed MemoryItem to CanonicalMemoryItem
         memoryStore[item.id] = item
         updateStats()
@@ -29,6 +35,14 @@ class MemoryManager @Inject constructor(
         return item.id
     }
 
+    /**
+     * Retrieves memory items matching the specified query criteria.
+     *
+     * Filters stored memory items by agent, sorts them by descending timestamp, and limits the results to the maximum number configured. Returns a result containing the filtered items, their count, and the original query.
+     *
+     * @param query The criteria used to filter and retrieve memory items.
+     * @return A result containing the retrieved memory items, their total count, and the query used.
+     */
     fun retrieveMemory(query: MemoryQuery): MemoryRetrievalResult {
         val items = memoryStore.values
             .filter { item ->
@@ -45,6 +59,15 @@ class MemoryManager @Inject constructor(
         )
     }
 
+    /**
+     * Retrieves a list of recent memory items within the configured context window.
+     *
+     * Filters memory items whose timestamps fall within the maximum chain length duration from the current time,
+     * sorts them by descending timestamp, and limits the result to the configured maximum number of items.
+     *
+     * @param task The task identifier (currently unused in filtering).
+     * @return A list of recent `CanonicalMemoryItem` objects within the context window.
+     */
     fun getContextWindow(task: String): List<CanonicalMemoryItem> { // Changed MemoryItem to CanonicalMemoryItem
         val recentItems = memoryStore.values
             .filter {

@@ -35,10 +35,10 @@ class CascadeAIService @Inject constructor(
     /**
      * Routes an AI request to the appropriate internal handler and emits agent responses as a flow.
      *
-     * Delegates processing to specialized internal methods based on the request type ("state", "context", "vision", or "processing"). Emits a default response for unrecognized types.
+     * Selects the processing flow based on the "type" key in the request's context map, delegating to specialized handlers for "state", "context", "vision", or "processing" types. Emits a default response flow if the type is unrecognized or absent.
      *
-     * @param request The AI request to route and process.
-     * @return A flow emitting agent responses relevant to the request type.
+     * @param request The AI request containing a context map used for routing.
+     * @return A flow emitting agent responses corresponding to the routed handler.
      */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // This internal routing can stay if these specific flows are desired for internal logic

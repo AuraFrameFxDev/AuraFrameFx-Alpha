@@ -111,9 +111,9 @@ class GenesisBridgeService @Inject constructor(
     }
 
     /**
-     * Processes an AI request by routing it to the appropriate Genesis persona (Kai, Aura, or Genesis fusion) and emits the resulting agent response as a flow.
+     * Processes an AI request by selecting the appropriate Genesis persona or fusion mode and emits the resulting agent response as a flow.
      *
-     * Determines the target persona and fusion mode based on the request content, constructs a structured request for the Genesis backend, and emits a persona-specific `AgentResponse` with confidence scores. Emits an error response if the Genesis system is not initialized or if processing fails.
+     * Determines the handling persona and fusion mode based on the request content, constructs a structured request for the Genesis backend, and emits a persona-specific `AgentResponse` with confidence scores. Emits an error response if the Genesis system is not initialized or if processing fails.
      *
      * @param request The AI request to process.
      * @return A flow emitting the agent's response to the request.
