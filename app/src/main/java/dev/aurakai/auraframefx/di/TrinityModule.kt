@@ -30,11 +30,11 @@ import javax.inject.Singleton
 object TrinityModule {
 
     /**
-     * Provides a singleton instance of GenesisBridgeService that connects multiple AI services with the Trinity Python backend.
+     * Provides a singleton GenesisBridgeService that integrates multiple AI services with the Trinity Python backend.
      *
-     * The service enables unified communication between AI components, manages operational context and security, and interfaces with the application environment.
+     * This service facilitates unified communication among AI components, manages operational and security context, and interfaces with the Android application environment.
      *
-     * @return A configured GenesisBridgeService singleton.
+     * @return A configured GenesisBridgeService instance.
      */
     @Provides
     @Singleton
@@ -59,9 +59,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton instance of `TrinityCoordinatorService` to coordinate AI personas and manage their interactions within the Trinity AI system.
+     * Provides a singleton instance of `TrinityCoordinatorService` for orchestrating AI personas and managing their interactions within the Trinity AI system.
      *
-     * @return A singleton `TrinityCoordinatorService` configured to orchestrate AI components and ensure integrated operation.
+     * @return A configured singleton `TrinityCoordinatorService` responsible for coordinating AI components and ensuring integrated operation.
      */
     @Provides
     @Singleton
@@ -82,9 +82,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton SecurityMonitor instance for overseeing security operations in the Trinity AI system.
+     * Provides a singleton instance of SecurityMonitor for managing security operations within the Trinity AI system.
      *
-     * The SecurityMonitor integrates the security context, Genesis bridge service, and logging to monitor and manage security-related activities within the application.
+     * The SecurityMonitor integrates the security context, GenesisBridgeService, and logging to oversee and manage security-related activities in the application.
      *
      * @return A configured SecurityMonitor singleton.
      */

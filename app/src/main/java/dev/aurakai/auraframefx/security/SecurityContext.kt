@@ -337,9 +337,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Simulates detection of potential security threats for testing purposes.
+     * Returns a randomly generated list of simulated security threats for testing purposes.
      *
-     * @return A list of simulated `SecurityThreat` objects, randomly included to mimic threat detection during beta testing.
+     * Used during beta testing to mimic threat detection by occasionally including predefined threat objects.
+     *
+     * @return A list of simulated `SecurityThreat` instances, which may be empty or contain one or more threats.
      */
     private fun detectThreats(): List<SecurityThreat> {
         // In a real implementation, this would perform actual threat analysis
@@ -363,12 +365,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Determines the overall threat level by evaluating the highest severity among the provided security threats.
+     * Returns the overall threat level based on the highest severity among the given security threats.
      *
-     * Returns `ThreatLevel.LOW` if the list is empty.
+     * If the list is empty, returns `ThreatLevel.LOW`.
      *
-     * @param threats List of detected security threats to evaluate.
-     * @return The highest threat level found, or `ThreatLevel.LOW` if no threats are present.
+     * @param threats The list of detected security threats to evaluate.
+     * @return The highest threat level present, or `ThreatLevel.LOW` if no threats are provided.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -386,9 +388,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Generates a secure random 32-character hexadecimal identifier.
+     * Generates a cryptographically secure 32-character hexadecimal identifier.
      *
-     * @return A cryptographically secure 32-character hexadecimal string suitable for use as a unique ID.
+     * @return A secure, randomly generated 32-character hexadecimal string suitable for use as a unique identifier.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -397,9 +399,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Asynchronously records a security event for auditing and monitoring.
+     * Asynchronously records a security event for auditing and monitoring purposes.
      *
-     * The event is serialized and written to the debug log. In production environments, events should be securely persisted.
+     * The event is serialized and output to the debug log. In production, events should be securely persisted.
      *
      * @param event The security event to record.
      */
@@ -414,9 +416,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Records a validation event for the specified request type and data without performing actual validation.
+     * Records a validation event for the specified request type and data without performing any actual validation.
      *
-     * Creates an audit entry for the request, which can be used for monitoring or compliance purposes.
+     * Creates an audit entry for monitoring or compliance purposes.
      *
      * @param requestType The type of request being recorded.
      * @param requestData The data associated with the request.

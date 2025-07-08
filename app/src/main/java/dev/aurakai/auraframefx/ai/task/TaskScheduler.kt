@@ -162,35 +162,41 @@ class TaskScheduler @Inject constructor(
         processQueue()
     }
 
+    /**
+     * Calculates the weighted priority score for a task based on its priority value and the configured priority weight.
+     *
+     * @return The weighted priority score as a Float.
+     */
     private fun calculatePriorityScore(task: Task): Float {
         return task.priority.value * config.priorityWeight
     }
 
     /**
-     * Calculates the urgency score for a task using its urgency value and the configured urgency weight.
+     * Calculates the weighted urgency score for the given task.
      *
-     * @return The weighted urgency score as a Float.
+     * Multiplies the task's urgency value by the configured urgency weight to determine its contribution to scheduling.
+     *
+     * @return The weighted urgency score.
      */
     private fun calculateUrgencyScore(task: Task): Float {
         return task.urgency.value * config.urgencyWeight
     }
 
     /**
-     * Calculates the weighted importance score for the given task using its importance value and the configured importance weight.
+     * Calculates the weighted importance score for a task based on its importance value and the configured importance weight.
      *
-     * @return The weighted importance score.
+     * @return The weighted importance score for the task.
      */
     private fun calculateImportanceScore(task: Task): Float {
         return task.importance.value * config.importanceWeight
     }
 
     /**
-     * Updates the task statistics to reflect the current state after a task is created or its status changes.
+     * Updates task statistics to reflect the current state after a task is created or its status changes.
      *
-     * Increments the total task count, updates the counts of active, completed, and pending tasks,
-     * refreshes the per-status task counts, and sets the last updated timestamp.
+     * Increments the total task count, updates counts of active, completed, and pending tasks, refreshes per-status task counts, and sets the last updated timestamp.
      *
-     * @param task The task whose creation or status change triggered the statistics update.
+     * @param task The task that triggered the statistics update.
      */
     private fun updateStats(task: Task) {
         _taskStats.update { current ->
