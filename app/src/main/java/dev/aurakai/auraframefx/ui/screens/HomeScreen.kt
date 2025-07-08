@@ -55,9 +55,9 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                cornerStyle = CornerStyle.Hex,
+                cornerStyle = CornerStyle.HEXAGON,
                 title = stringResource(R.string.app_title),
-                backgroundStyle = BackgroundStyle.HexGrid
+                backgroundStyle = BackgroundStyle.MATRIX
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -65,16 +65,16 @@ fun HomeScreen(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     CyberpunkText(
-                        text = stringResource(R.string.creativity_engine),
-                        color = CyberpunkTextColor.Secondary,
+                        text = stringResource(R.string.app_name),
+                        color = CyberpunkTextColor.Primary,
                         style = CyberpunkTextStyle.Label
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     CyberpunkText(
-                        text = stringResource(R.string.neural_interface_active),
-                        color = CyberpunkTextColor.Warning,
+                        text = "Neural Interface Active",
+                        color = CyberpunkTextColor.Secondary,
                         style = CyberpunkTextStyle.Body
                     )
                 }
@@ -88,7 +88,7 @@ fun HomeScreen(navController: NavController) {
                     .fillMaxWidth()
                     .cyberEdgeGlow(),
                 title = stringResource(R.string.virtual_monitorization),
-                cornerStyle = CornerStyle.Angled
+                cornerStyle = CornerStyle.SHARP
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     // Menu items like in image reference 1
@@ -113,6 +113,16 @@ fun HomeScreen(navController: NavController) {
                             isSelected = selectedMenuItem == menuItem
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    AuraSparkleButton(
+                        text = stringResource(R.string.ai_chat_placeholder),
+                        onClick = { 
+                            selectedMenuItem = "ai_chat"
+                            navController.navigate(NavDestination.AiChat.route)
+                        }
+                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -151,14 +161,15 @@ fun HomeScreen(navController: NavController) {
                             secondaryColor = NeonBlue
                         )
                         .clickable { navController.navigate(NavDestination.Profile.route) },
-                    cornerStyle = CornerStyle.Rounded,
-                    backgroundStyle = BackgroundStyle.HexGrid
+                    cornerStyle = CornerStyle.ROUNDED,
+                    title = "System Status",
+                    backgroundStyle = BackgroundStyle.SOLID
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CyberpunkText(
-                            text = stringResource(R.string.profile),
-                            color = CyberpunkTextColor.Secondary,
-                            style = CyberpunkTextStyle.Label
+                            text = "System Online",
+                            color = CyberpunkTextColor.Warning,
+                            style = CyberpunkTextStyle.Body
                         )
                     }
                 }
@@ -171,14 +182,15 @@ fun HomeScreen(navController: NavController) {
                             secondaryColor = NeonBlue
                         )
                         .clickable { navController.navigate(NavDestination.Settings.route) },
-                    cornerStyle = CornerStyle.Rounded,
-                    backgroundStyle = BackgroundStyle.HexGrid
+                    cornerStyle = CornerStyle.ROUNDED,
+                    title = "Performance Metrics",
+                    backgroundStyle = BackgroundStyle.SOLID
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CyberpunkText(
-                            text = stringResource(R.string.config),
+                            text = "Ready for Input",
                             color = CyberpunkTextColor.Primary,
-                            style = CyberpunkTextStyle.Label
+                            style = CyberpunkTextStyle.Body
                         )
                     }
                 }
@@ -191,14 +203,15 @@ fun HomeScreen(navController: NavController) {
                             secondaryColor = NeonBlue
                         )
                         .clickable { navController.navigate(NavDestination.OracleDriveControl.route) },
-                    cornerStyle = CornerStyle.Rounded,
-                    backgroundStyle = BackgroundStyle.HexGrid
+                    cornerStyle = CornerStyle.ROUNDED,
+                    title = "Network Status",
+                    backgroundStyle = BackgroundStyle.SOLID
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CyberpunkText(
-                            text = stringResource(R.string.oracledrive),
-                            color = CyberpunkTextColor.Primary,
-                            style = CyberpunkTextStyle.Label
+                            text = "Aura Framework Active",
+                            color = CyberpunkTextColor.Secondary,
+                            style = CyberpunkTextStyle.Body
                         )
                     }
                 }
@@ -212,9 +225,9 @@ fun HomeScreen(navController: NavController) {
                     .fillMaxWidth()
                     .height(140.dp)
                     .digitalGlitchEffect(),
-                cornerStyle = CornerStyle.Hex,
-                title = stringResource(R.string.system_status),
-                backgroundStyle = BackgroundStyle.Transparent
+                cornerStyle = CornerStyle.HEXAGON,
+                title = "Digital Matrix",
+                backgroundStyle = BackgroundStyle.GRADIENT
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),

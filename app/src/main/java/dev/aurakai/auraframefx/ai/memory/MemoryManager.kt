@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.Clock.System
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -72,7 +71,8 @@ class MemoryManager @Inject constructor(
                             .minus(config.contextChainingConfig.maxChainLength.seconds)
                     }
                     .size,
-                memorySize = memoryStore.values.sumOf { it.content.length }
+                memorySize = memoryStore.values.sumOf { it.content.length },
+                lastUpdated = Clock.System.now()
             )
         }
     }
@@ -94,4 +94,12 @@ data class MemoryStats(
     val recentItems: Int = 0,
     val memorySize: Int = 0,
     val lastUpdated: Instant = Clock.System.now(),
+)
+
+data class MemoryItem(
+    val id: String,
+    val agent: String,
+    val content: String,
+    val timestamp: Instant = Clock.System.now(),
+    val lastAccessed: Instant = Clock.System.now(),
 )

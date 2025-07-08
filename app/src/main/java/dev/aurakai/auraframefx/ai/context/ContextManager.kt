@@ -47,7 +47,7 @@ class ContextManager @Inject constructor(
             currentContext = initialContext,
             contextHistory = listOf(
                 ContextNode(
-                    id = "ctx_${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}_0",
+                    id = "ctx_${Clock.System.now().toEpochMilliseconds()}_0",
                     content = initialContext,
                     agent = agent,
                     metadata = metadata.mapValues { it.value.toString() } // Convert Map<String, Any> to Map<String, String>
@@ -88,13 +88,13 @@ class ContextManager @Inject constructor(
         val updatedChain = chain.copy(
             currentContext = newContext,
             contextHistory = chain.contextHistory + ContextNode(
-                id = "ctx_${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}_${chain.contextHistory.size}",
+                id = "ctx_${Clock.System.now().toEpochMilliseconds()}_${chain.contextHistory.size}",
                 content = newContext,
                 agent = agent,
                 metadata = metadata.mapValues { it.value.toString() } // Convert Map<String, Any> to Map<String, String>
             ),
             agentContext = chain.agentContext + (agent to newContext),
-            lastUpdated = kotlinx.datetime.Clock.System.now()
+            lastUpdated = Clock.System.now()
         )
 
         _activeContexts.update { current ->
@@ -159,13 +159,13 @@ class ContextManager @Inject constructor(
             current.copy(
                 totalChains = chains.size,
                 activeChains = chains.count {
-                    val now = kotlinx.datetime.Clock.System.now()
+                    val now = Clock.System.now()
                     val thresholdMs = config.contextChainingConfig.maxChainLength * 1000L
                     val threshold = now.minus(kotlin.time.Duration.parse("${thresholdMs}ms"))
                     it.lastUpdated > threshold
                 },
                 longestChain = chains.maxOfOrNull { it.contextHistory.size } ?: 0,
-                lastUpdated = kotlinx.datetime.Clock.System.now()
+                lastUpdated = Clock.System.now()
             )
         }
     }
@@ -176,5 +176,5 @@ data class ContextStats(
     val totalChains: Int = 0,
     val activeChains: Int = 0,
     val longestChain: Int = 0,
-    @Serializable(with = InstantSerializer::class) val lastUpdated: Instant = kotlinx.datetime.Clock.System.now(),
+    @Serializable(with = InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
 )

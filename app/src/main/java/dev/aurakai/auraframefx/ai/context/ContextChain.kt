@@ -5,12 +5,11 @@ import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.Clock.System
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ContextChain(
-    val id: String = "ctx_${Clock.System.now().toEpochMilliseconds()}",
+    val id: String = "ctx_${Clock.System.now().epochSeconds}",
     val rootContext: String,
     val currentContext: String,
     val contextHistory: List<ContextNode> = emptyList(),
