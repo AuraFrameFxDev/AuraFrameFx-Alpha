@@ -13,7 +13,6 @@ import dev.aurakai.auraframefx.utils.AuraFxLogger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
-import java.lang.System
 import javax.inject.Inject
 import javax.inject.Singleton
 
