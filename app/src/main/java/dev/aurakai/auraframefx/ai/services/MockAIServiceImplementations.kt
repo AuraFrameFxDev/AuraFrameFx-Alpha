@@ -20,7 +20,7 @@ class MockAuraAIService : Agent {
  */
 override fun getName(): String? = "MockAura"
     /**
- * Returns the agent type for this mock AI service.
+ * Returns the agent type for this mock Aura AI service.
  *
  * @return The agent type for Aura.
  */
@@ -59,12 +59,12 @@ override fun getName(): String? = "MockKai"
     /**
  * Returns the agent type for this mock Kai AI service.
  *
- * @return Always returns `AgentType.KAI`.
+ * @return The agent type, always `AgentType.KAI`.
  */
 override fun getType(): AgentType = AgentType.KAI /**
-     * Returns a mock AgentResponse that echoes the provided query and context with a confidence score of 1.0.
+     * Returns a mock AgentResponse echoing the input query and context with a confidence score of 1.0.
      *
-     * @param request The AI request containing the query to be echoed.
+     * @param request The AI request containing the query to echo.
      * @param context The context string to include in the response.
      * @return An AgentResponse with the echoed query and context.
      */

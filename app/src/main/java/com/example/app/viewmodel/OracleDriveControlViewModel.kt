@@ -27,9 +27,9 @@ class OracleDriveControlViewModel : ViewModel() {
     val diagnosticsLog: StateFlow<String> = _diagnosticsLog.asStateFlow()
     
     /**
-     * Simulates binding to the Oracle Drive service in beta mode.
+     * Simulates a service bind operation for Oracle Drive in beta mode.
      *
-     * Updates internal state to indicate that service binding is disabled. No actual service connection occurs.
+     * Updates internal state to reflect that service binding is disabled; does not perform any real service connection.
      */
     fun bindService() {
         // Beta stub: No actual binding
@@ -40,7 +40,7 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates unbinding from the Oracle Drive service in beta mode.
      *
-     * Updates the internal state to indicate the service is disconnected and sets a status message reflecting beta mode. No actual unbinding is performed.
+     * Updates the internal state to reflect a disconnected service and sets a status message indicating beta mode. No real unbinding occurs.
      */
     fun unbindService() {
         // Beta stub: No actual unbinding
@@ -49,9 +49,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Updates the status, detailed status, and diagnostics log with static messages indicating Oracle Drive features are disabled in beta mode.
+     * Updates the status, detailed status, and diagnostics log with static messages indicating that Oracle Drive features are disabled in beta mode.
      *
-     * Provides simulated feedback for UI testing without retrieving real status or diagnostics.
+     * This method provides simulated status and diagnostics for UI testing purposes without retrieving or reflecting any real service state.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -63,10 +63,10 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates toggling a module by updating the diagnostics log with a placeholder message.
      *
-     * Provides simulated feedback for UI testing in beta mode; does not change any actual module state.
+     * This method provides feedback for UI testing in beta mode and does not alter any actual module state.
      *
      * @param packageName The package name of the module to simulate toggling.
-     * @param enable `true` to simulate enabling the module, `false` to simulate disabling it.
+     * @param enable If `true`, simulates enabling the module; if `false`, simulates disabling it.
      */
     fun toggleModule(packageName: String, enable: Boolean) {
         // Beta stub: Just log the action without actually doing anything

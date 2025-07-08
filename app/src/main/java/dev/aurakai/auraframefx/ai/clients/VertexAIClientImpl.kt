@@ -9,12 +9,12 @@ import kotlinx.coroutines.delay
 class VertexAIClientImpl : VertexAIClient {
     
     /**
-     * Simulates text generation by returning a fixed placeholder string containing the provided prompt.
+     * Simulates text generation by returning a fixed placeholder string referencing the provided prompt.
      *
-     * This stub method introduces a brief artificial delay and ignores the `maxTokens` and `temperature` parameters.
+     * Introduces a brief artificial delay to mimic API latency. The `maxTokens` and `temperature` parameters are ignored.
      *
      * @param prompt The input prompt to include in the simulated response.
-     * @return A fixed string referencing the prompt.
+     * @return A placeholder string referencing the prompt.
      */
     override suspend fun generateText(prompt: String, maxTokens: Int, temperature: Float): String {
         delay(100) // Simulate API call
@@ -22,11 +22,11 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates image analysis and returns a fixed placeholder response referencing the provided prompt.
+     * Simulates image analysis by returning a fixed placeholder string referencing the provided prompt.
      *
      * @param imageData The image data to analyze.
      * @param prompt The prompt describing the analysis to perform.
-     * @return A placeholder string simulating the image analysis result for the given prompt.
+     * @return A placeholder string representing the simulated image analysis result.
      */
     override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String {
         delay(100) // Simulate API call
@@ -34,19 +34,19 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Stub method for creative model initialization that performs no operation.
+     * Simulates creative model initialization without performing any action.
      *
-     * Intended for testing or development; does not initialize any models.
+     * This stub method is intended for testing or development and does not initialize any models.
      */
     override suspend fun initializeCreativeModels() {
         // Stub implementation
     }
     
     /**
-     * Simulates content generation by returning a fixed placeholder string containing the provided prompt.
+     * Simulates content generation by returning a placeholder string containing the provided prompt.
      *
      * @param prompt The input prompt for content generation.
-     * @return A fixed placeholder string that includes the prompt.
+     * @return A placeholder string that includes the prompt.
      */
     override suspend fun generateContent(prompt: String): String? {
         delay(100)
@@ -54,7 +54,7 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates code generation by returning a fixed placeholder string referencing the provided specification and language.
+     * Returns a fixed placeholder string simulating code generation for the given specification and language.
      *
      * @param specification Description of the code to generate.
      * @param language Programming language for the generated code.
@@ -69,21 +69,21 @@ class VertexAIClientImpl : VertexAIClient {
     /**
      * Simulates a successful connection validation to Vertex AI.
      *
-     * @return `true` to indicate the connection is valid in this stub implementation.
+     * @return Always returns `true` to indicate a valid connection in this stub implementation.
      */
     override suspend fun validateConnection(): Boolean {
         return true // Stub always returns true
     }
     
     /**
-     * No-op method included to satisfy interface requirements.
+     * Performs no operation; included to fulfill interface requirements.
      */
     fun initialize() {
         // Stub implementation
     }
     
     /**
-     * Validates that the prompt string is not blank.
+     * Ensures the provided prompt string is not blank.
      *
      * @throws IllegalArgumentException if the prompt is blank.
      */
