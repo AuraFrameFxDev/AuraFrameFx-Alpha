@@ -702,4 +702,305 @@ class AIPipelineProcessorTest {
             future1.get() // Clean up
         }
     }
+
+    @Nested
+    @DisplayName("Advanced Initialization Edge Cases")
+    inner class AdvancedInitializationEdgeCases {
+        
+        @Test
+        @DisplayName("should handle zero timeout configuration")
+        fun shouldHandleZeroTimeoutConfiguration() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should handle extremely large timeout values")
+        fun shouldHandleExtremelyLargeTimeoutValues() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = Long.MAX_VALUE
+            )
+            
+            // When
+            val result = processor.initialize(config)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+        }
+        
+        @Test
+        @DisplayName("should detect duplicate stages by name")
+        fun shouldDetectDuplicateStagesByName() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("duplicateStage")
+            whenever(stage2.getName()).thenReturn("duplicateStage")
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage1, stage2),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage1.getDependencies()).thenReturn(setOf("stage2"))
+            whenever(stage2.getDependencies()).thenReturn(emptySet())
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage1, stage2), // Wrong order - stage1 depends on stage2 but comes first
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should re-initialize with different configuration")
+        fun shouldReinitializeWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            processor.initialize(config1)
+            
+            // When
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            verify(mockPipelineStage, times(2)).initialize()
+        }
+    }
+
+    @Nested
+    @DisplayName("Advanced Input Processing Edge Cases")
+    inner class AdvancedInputProcessingEdgeCases {
+        
+        @BeforeEach
+        fun setUpProcessor() {
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+        }
+        
+        @Test
+        @DisplayName("should handle unicode and special characters")
+        fun shouldHandleUnicodeAndSpecialCharacters() = runTest {
+            // Given
+            val unicodeInput = "🚀 Test with émojis and spéciál chãracters 中文 العربية"
+            whenever(mockInputProcessor.process(unicodeInput)).thenReturn(unicodeInput)
+            whenever(mockPipelineStage.execute(any())).thenReturn(unicodeInput)
+            whenever(mockOutputProcessor.process(unicodeInput)).thenReturn(unicodeInput)
+            
+            // When
+            val result = processor.process(unicodeInput)
+            
+            // Then
+            assertEquals(unicodeInput, result)
+            verify(mockInputProcessor).process(unicodeInput)
+        }
+        
+        @Test
+        @DisplayName("should handle extremely large input strings")
+        fun shouldHandleExtremelyLargeInputStrings() = runTest {
+            // Given
+            val largeInput = "A".repeat(10_000_000) // 10MB string
+            whenever(mockInputProcessor.process(largeInput)).thenReturn("processed")
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("final")
+            
+            // When
+            val result = processor.process(largeInput)
+            
+            // Then
+            assertEquals("final", result)
+            verify(mockMetricsCollector).recordLargeInputProcessing(largeInput.length)
+        }
+        
+        @Test
+        @DisplayName("should handle input with only whitespace")
+        fun shouldHandleInputWithOnlyWhitespace() = runTest {
+            // Given
+            val whitespaceInput = "   \t\n\r   "
+            whenever(mockInputProcessor.process(whitespaceInput)).thenReturn(whitespaceInput.trim())
+            whenever(mockPipelineStage.execute(any())).thenReturn("")
+            whenever(mockOutputProcessor.process("")).thenReturn("")
+            
+            // When
+            val result = processor.process(whitespaceInput)
+            
+            // Then
+            assertEquals("", result)
+            verify(mockInputProcessor).process(whitespaceInput)
+        }
+        
+        @Test
+        @DisplayName("should handle input with control characters")
+        fun shouldHandleInputWithControlCharacters() = runTest {
+            // Given
+            val controlCharsInput = "Test\u0000\u0001\u0002\u0003String"
+            whenever(mockInputProcessor.process(controlCharsInput)).thenReturn("sanitized")
+            whenever(mockPipelineStage.execute(any())).thenReturn("processed")
+            whenever(mockOutputProcessor.process("processed")).thenReturn("final")
+            
+            // When
+            val result = processor.process(controlCharsInput)
+            
+            // Then
+            assertEquals("final", result)
+            verify(mockInputProcessor).process(controlCharsInput)
+        }
+        
+        @Test
+        @DisplayName("should handle malformed input gracefully")
+        fun shouldHandleMalformedInputGracefully() = runTest {
+            // Given
+            val malformedInput = "\uFFFE\uFFFF" // Invalid Unicode characters
+            whenever(mockInputProcessor.process(malformedInput)).thenThrow(IllegalArgumentException("Malformed input"))
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.process(malformedInput)
+            }
+            verify(mockErrorHandler).handleMalformedInput(any())
+        }
+    }
+
+    @Nested
+    @DisplayName("Advanced Error Recovery and Resilience Tests")
+    inner class AdvancedErrorRecoveryTests {
+        
+        @BeforeEach
+        fun setUpProcessor() {
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+        }
+        
+        @Test
+        @DisplayName("should handle cascading failures across multiple stages")
+        fun shouldHandleCascadingFailuresAcrossMultipleStages() = runTest {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            val stage3 = mock<PipelineStage>()
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage1, stage2, stage3),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(stage1.execute(any())).thenThrow(RuntimeException("Stage 1 failed"))
+            whenever(stage2.execute(any())).thenThrow(RuntimeException("Stage 2 failed"))
+            whenever(stage3.execute(any())).thenThrow(RuntimeException("Stage 3 failed"))
+            
+            // When & Then
+            assertThrows<RuntimeException> {
+                processor.process(input)
+            }
+            verify(mockErrorHandler, times(3)).handleProcessingError(any())
+        }
+        
+        @Test
+        @DisplayName("should recover from intermittent network failures")
+        fun shouldRecoverFromIntermittentNetworkFailures() = runTest {
+            // Given
+            val input = "network test"
+            val networkException = java.net.ConnectException("Network temporarily unavailable")
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any()))
+                .thenThrow(networkException)
+                .thenThrow(networkException)
+                .thenReturn("success after retries")
+            whenever(mockOutputProcessor.process("success after retries")).thenReturn("final success")
+            
+            processor.setRetryPolicy(RetryPolicy(
+                maxRetries = 2,
+                retryableExceptions = setOf(java.net.ConnectException::class.java),
+                backoffStrategy = ExponentialBackoff(100, 2.0)
+            ))
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("final success", result)
+            verify(mockPipelineStage, times(3)).execute(any())
+            verify(mockErrorHandler, times(2)).handleRetryableError(networkException)
+        }
+        
+        @Test
+        @DisplayName("should implement circuit breaker pattern for repeated failures")
+        fun shouldImplementCircuitBreakerPatternForRepeatedFailures() = runTest {
+            // Given
+            val input = "circuit breaker test"
+            val persistentException = RuntimeException("Persistent failure")
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenThrow(persistentException)
+            
+            processor.setCircuitBreakerPolicy(CircuitBreakerPolicy(
+                failureThreshold = 3,
+                recoveryTimeoutMs = 10000L
+            ))
+            
+            // When & Then
+            repeat(4) {
+                assertThrows<RuntimeException> {
+                    processor.process(input)
+                }
+            }
+            
+            verify(mockErrorHandler).handleCircuitBreakerOpen()
+        }
+    }
 }
