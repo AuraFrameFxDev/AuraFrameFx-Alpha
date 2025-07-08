@@ -7,11 +7,11 @@
 // The name MUST follow the pattern: Java_your_package_name_YourActivityName_yourMethodName
 // Note that underscores in the package name are replaced with _1.
 extern "C" /**
- * @brief Returns a greeting message as a Java string via JNI.
+ * @brief Returns a greeting message from native C++ code to Java.
  *
- * Creates and returns a Java UTF string containing "Hello from Genesis C++ Core" to the calling Java method.
+ * Constructs and returns a Java string containing "Hello from Genesis C++ Core" for use in the calling Java environment.
  *
- * @return jstring Java string with the greeting message.
+ * @return jstring A Java string with the greeting message.
  */
 JNIEXPORT jstring JNICALL
 Java_com_auraframes_fx_MainActivity_stringFromJNI(JNIEnv *env, jobject /* this */) {

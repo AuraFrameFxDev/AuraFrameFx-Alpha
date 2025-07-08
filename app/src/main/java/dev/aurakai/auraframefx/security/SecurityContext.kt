@@ -363,12 +363,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Calculates the overall threat level based on the highest severity among detected security threats.
+     * Determines the overall threat level by evaluating the highest severity among the provided security threats.
      *
-     * If the list is empty, returns `ThreatLevel.LOW`.
+     * Returns `ThreatLevel.LOW` if the list is empty.
      *
-     * @param threats List of detected security threats.
-     * @return The highest threat level present in the list, or `ThreatLevel.LOW` if none.
+     * @param threats The list of detected security threats to evaluate.
+     * @return The highest threat level found, or `ThreatLevel.LOW` if no threats are present.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -386,9 +386,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Generates a secure random 32-character hexadecimal identifier.
+     * Generates a cryptographically secure 32-character hexadecimal identifier.
      *
-     * @return A randomly generated 32-character hexadecimal string.
+     * @return A 32-character hexadecimal string generated from 16 random bytes.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -397,9 +397,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Asynchronously records a security event for auditing and monitoring purposes.
+     * Asynchronously records a security event for auditing and monitoring.
      *
-     * The event is serialized and written to the debug log. In production, events should be securely persisted rather than logged.
+     * The event is serialized and written to the debug log. In production environments, events should be securely persisted instead of logged.
      *
      * @param event The security event to record.
      */
@@ -416,7 +416,7 @@ class SecurityContext @Inject constructor(
     /**
      * Records a validation event for the specified request type and data for auditing purposes.
      *
-     * This function does not perform any actual validation of the request; it only records the event.
+     * This function does not perform any actual validation; it only records the event for audit trails.
      *
      * @param requestType The type of request being recorded.
      * @param requestData The data associated with the request.

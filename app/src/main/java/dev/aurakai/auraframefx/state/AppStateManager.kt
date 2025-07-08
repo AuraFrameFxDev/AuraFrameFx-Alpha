@@ -21,14 +21,14 @@ class AppStateManager @Inject constructor() {
     /**
      * Sets the application state to the specified value.
      *
-     * @param newState The new application state to set.
+     * @param newState The new application state to apply.
      */
     fun updateAppState(newState: AppState) {
         _appState.value = newState
     }
 
     /**
-     * Sets the application's loading status.
+     * Sets the application's loading status flag.
      *
      * @param loading True if the application is loading; false otherwise.
      */

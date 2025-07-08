@@ -20,7 +20,7 @@ object TimeUtils {
     /**
  * Returns the current time as the number of milliseconds since the Unix epoch.
  *
- * @return The current timestamp in milliseconds.
+ * @return The current time in milliseconds.
  */
     fun currentTimestamp(): Long = System.currentTimeMillis()
 
