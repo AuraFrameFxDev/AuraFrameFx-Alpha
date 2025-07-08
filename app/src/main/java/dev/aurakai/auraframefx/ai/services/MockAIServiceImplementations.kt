@@ -14,13 +14,13 @@ import kotlinx.coroutines.flow.flowOf
 
 class MockAuraAIService : Agent {
     /**
- * Returns the fixed name identifying this mock AI service.
+ * Returns the fixed name "MockAura" identifying this mock AI service.
  *
  * @return The string "MockAura".
  */
 override fun getName(): String? = "MockAura"
     /**
- * Gets the agent type for this mock AI service.
+ * Returns the agent type for this mock AI service.
  *
  * @return The `AgentType.AURA` enum value.
  */
@@ -57,16 +57,16 @@ class MockKaiAIService : Agent {
  */
 override fun getName(): String? = "MockKai"
     /**
- * Gets the agent type for this mock Kai AI service.
+ * Returns the agent type for this mock Kai AI service.
  *
- * @return The agent type, always AgentType.KAI.
+ * @return Always returns AgentType.KAI.
  */
 override fun getType(): AgentType = AgentType.KAI /**
-     * Returns a mock AgentResponse echoing the provided query and context with a fixed confidence score of 1.0.
+     * Returns a mock AgentResponse that echoes the input query and context with a fixed confidence score of 1.0.
      *
-     * @param request The AI request containing the query.
+     * @param request The AI request containing the query to echo.
      * @param context The context string to include in the response.
-     * @return A mock AgentResponse reflecting the input query and context.
+     * @return An AgentResponse containing the echoed query and context.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         return AgentResponse(
@@ -86,13 +86,13 @@ override fun getType(): AgentType = AgentType.KAI /**
 
 class MockCascadeAIService : Agent {
     /**
- * Returns the fixed name identifier for this mock Cascade AI service.
+ * Returns the fixed name identifier for the mock Cascade AI service.
  *
  * @return The string "MockCascade".
  */
 override fun getName(): String? = "MockCascade"
     /**
- * Returns the agent type for this mock service.
+ * Returns the agent type associated with this mock service.
  *
  * @return The CASCADE agent type.
  */
