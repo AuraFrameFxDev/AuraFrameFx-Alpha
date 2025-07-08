@@ -31,7 +31,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     """Test suite for GenesisEvolutionaryConduit class."""
     
     def setUp(self):
-        """Set up test fixtures before each test method."""
+        """
+        Initializes a GenesisEvolutionaryConduit instance and test parameters before each test.
+        """
         self.conduit = GenesisEvolutionaryConduit()
         self.mock_population_size = 100
         self.mock_generation_limit = 50
@@ -39,12 +41,16 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
         self.mock_crossover_rate = 0.8
         
     def tearDown(self):
-        """Clean up after each test method."""
+        """
+        Removes the temporary directory created during the test, if it exists.
+        """
         if hasattr(self, 'temp_dir') and os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
     
     def test_initialization_default_parameters(self):
-        """Test conduit initialization with default parameters."""
+        """
+        Test that GenesisEvolutionaryConduit initializes correctly with default parameter values.
+        """
         conduit = GenesisEvolutionaryConduit()
         self.assertIsNotNone(conduit)
         self.assertEqual(conduit.population_size, 100)
@@ -53,7 +59,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
         self.assertEqual(conduit.crossover_rate, 0.7)
         
     def test_initialization_custom_parameters(self):
-        """Test conduit initialization with custom parameters."""
+        """
+        Verify that the GenesisEvolutionaryConduit initializes correctly with custom population size, generation limit, mutation rate, and crossover rate parameters.
+        """
         conduit = GenesisEvolutionaryConduit(
             population_size=self.mock_population_size,
             generation_limit=self.mock_generation_limit,
@@ -66,28 +74,36 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
         self.assertEqual(conduit.crossover_rate, self.mock_crossover_rate)
         
     def test_initialization_invalid_population_size(self):
-        """Test initialization with invalid population size."""
+        """
+        Test that initializing GenesisEvolutionaryConduit with a non-positive population size raises ConduitInitializationError.
+        """
         with self.assertRaises(ConduitInitializationError):
             GenesisEvolutionaryConduit(population_size=0)
         with self.assertRaises(ConduitInitializationError):
             GenesisEvolutionaryConduit(population_size=-10)
             
     def test_initialization_invalid_generation_limit(self):
-        """Test initialization with invalid generation limit."""
+        """
+        Test that initializing GenesisEvolutionaryConduit with a non-positive generation limit raises ConduitInitializationError.
+        """
         with self.assertRaises(ConduitInitializationError):
             GenesisEvolutionaryConduit(generation_limit=0)
         with self.assertRaises(ConduitInitializationError):
             GenesisEvolutionaryConduit(generation_limit=-5)
             
     def test_initialization_invalid_mutation_rate(self):
-        """Test initialization with invalid mutation rate."""
+        """
+        Test that initializing GenesisEvolutionaryConduit with an invalid mutation rate raises ConduitInitializationError.
+        """
         with self.assertRaises(ConduitInitializationError):
             GenesisEvolutionaryConduit(mutation_rate=-0.1)
         with self.assertRaises(ConduitInitializationError):
             GenesisEvolutionaryConduit(mutation_rate=1.1)
             
     def test_initialization_invalid_crossover_rate(self):
-        """Test initialization with invalid crossover rate."""
+        """
+        Test that initializing GenesisEvolutionaryConduit with an invalid crossover rate raises ConduitInitializationError.
+        """
         with self.assertRaises(ConduitInitializationError):
             GenesisEvolutionaryConduit(crossover_rate=-0.1)
         with self.assertRaises(ConduitInitializationError):
@@ -95,7 +111,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
             
     @patch('genesis_evolutionary_conduit.PopulationManager')
     def test_initialize_population_success(self, mock_population_manager):
-        """Test successful population initialization."""
+        """
+        Test that `initialize_population` successfully creates and returns a population using the mocked `PopulationManager`.
+        """
         mock_population = Mock()
         mock_population_manager.return_value = mock_population
         
@@ -109,7 +127,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
         
     @patch('genesis_evolutionary_conduit.PopulationManager')
     def test_initialize_population_failure(self, mock_population_manager):
-        """Test population initialization failure."""
+        """
+        Test that population initialization raises PopulationEvolutionError when the population manager fails.
+        """
         mock_population_manager.side_effect = Exception("Population initialization failed")
         
         with self.assertRaises(PopulationEvolutionError):
@@ -117,7 +137,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
             
     @patch('genesis_evolutionary_conduit.random.random')
     def test_mutate_agent_success(self, mock_random):
-        """Test successful agent mutation."""
+        """
+        Test that an agent is successfully mutated when the random value is below the mutation rate.
+        """
         mock_random.return_value = 0.005  # Below mutation rate
         mock_agent = Mock()
         mock_agent.mutate = Mock()
@@ -129,7 +151,11 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
         
     @patch('genesis_evolutionary_conduit.random.random')
     def test_mutate_agent_no_mutation(self, mock_random):
-        """Test agent mutation when probability is above threshold."""
+        """
+        Test that an agent is not mutated when the random probability exceeds the mutation rate.
+        
+        Ensures the mutation method is not called and the original agent is returned unchanged.
+        """
         mock_random.return_value = 0.5  # Above mutation rate
         mock_agent = Mock()
         mock_agent.mutate = Mock()
@@ -140,7 +166,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
         mock_agent.mutate.assert_not_called()
         
     def test_mutate_agent_mutation_failure(self):
-        """Test agent mutation when mutation fails."""
+        """
+        Test that mutate_agent raises AgentEvolutionError when the agent's mutate method fails.
+        """
         mock_agent = Mock()
         mock_agent.mutate.side_effect = Exception("Mutation failed")
         
@@ -149,7 +177,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
                 self.conduit.mutate_agent(mock_agent)
                 
     def test_crossover_agents_success(self):
-        """Test successful agent crossover."""
+        """
+        Test that the crossover_agents method returns the expected offspring when crossover is successful.
+        """
         mock_parent1 = Mock()
         mock_parent2 = Mock()
         mock_offspring = Mock()
@@ -163,7 +193,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
             mock_crossover.assert_called_once()
             
     def test_crossover_agents_failure(self):
-        """Test agent crossover failure."""
+        """
+        Test that agent crossover raises AgentEvolutionError when the crossover operation fails.
+        """
         mock_parent1 = Mock()
         mock_parent2 = Mock()
         
@@ -174,7 +206,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
                 self.conduit.crossover_agents(mock_parent1, mock_parent2)
                 
     def test_select_parents_success(self):
-        """Test successful parent selection."""
+        """
+        Test that parent selection returns two agents when selection is successful.
+        """
         mock_population = [Mock() for _ in range(10)]
         mock_selector = Mock()
         mock_selector.select.return_value = [mock_population[0], mock_population[1]]
@@ -186,19 +220,25 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
             mock_selector.select.assert_called_once_with(mock_population, 2)
             
     def test_select_parents_empty_population(self):
-        """Test parent selection with empty population."""
+        """
+        Test that selecting parents from an empty population raises a PopulationEvolutionError.
+        """
         with self.assertRaises(PopulationEvolutionError):
             self.conduit.select_parents([])
             
     def test_select_parents_insufficient_population(self):
-        """Test parent selection with insufficient population size."""
+        """
+        Test that selecting parents from a population with insufficient size raises a PopulationEvolutionError.
+        """
         mock_population = [Mock()]
         
         with self.assertRaises(PopulationEvolutionError):
             self.conduit.select_parents(mock_population)
             
     def test_evolve_generation_success(self):
-        """Test successful generation evolution."""
+        """
+        Test that evolving a generation produces a new population of the same size as the input population.
+        """
         mock_population = [Mock() for _ in range(10)]
         mock_new_population = [Mock() for _ in range(10)]
         
@@ -214,7 +254,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
                     self.assertEqual(len(result), len(mock_population))
                     
     def test_evolve_generation_failure(self):
-        """Test generation evolution failure."""
+        """
+        Test that evolve_generation raises PopulationEvolutionError when parent selection fails.
+        """
         mock_population = [Mock() for _ in range(10)]
         
         with patch.object(self.conduit, 'select_parents') as mock_select:
@@ -224,7 +266,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
                 self.conduit.evolve_generation(mock_population)
                 
     def test_evaluate_fitness_success(self):
-        """Test successful fitness evaluation."""
+        """
+        Test that the fitness evaluation method returns the expected fitness value for a valid agent.
+        """
         mock_agent = Mock()
         mock_agent.fitness = 0.8
         
@@ -237,7 +281,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
             mock_evaluator.evaluate.assert_called_once_with(mock_agent)
             
     def test_evaluate_fitness_failure(self):
-        """Test fitness evaluation failure."""
+        """
+        Test that `evaluate_fitness` raises `AgentEvolutionError` when the fitness evaluator fails.
+        """
         mock_agent = Mock()
         
         with patch.object(self.conduit, 'fitness_evaluator') as mock_evaluator:
@@ -247,7 +293,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
                 self.conduit.evaluate_fitness(mock_agent)
                 
     def test_run_evolution_success(self):
-        """Test successful evolution run."""
+        """
+        Test that the evolution run completes successfully and returns the evolved population when convergence is achieved.
+        """
         mock_population = [Mock() for _ in range(5)]
         mock_evolved_population = [Mock() for _ in range(5)]
         
@@ -265,7 +313,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
                     mock_evolve.assert_called()
                     
     def test_run_evolution_max_generations(self):
-        """Test evolution run reaching maximum generations."""
+        """
+        Test that the evolution run stops after reaching the maximum number of generations when convergence does not occur.
+        """
         mock_population = [Mock() for _ in range(5)]
         
         with patch.object(self.conduit, 'initialize_population') as mock_init:
@@ -281,7 +331,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
                     self.assertEqual(mock_evolve.call_count, self.conduit.generation_limit)
                     
     def test_check_convergence_converged(self):
-        """Test convergence check when population has converged."""
+        """
+        Test that the convergence check returns True when the population is considered converged.
+        """
         mock_agent = Mock()
         mock_agent.fitness = 0.95
         mock_population = [mock_agent] * 10
@@ -291,7 +343,11 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
         self.assertTrue(result)
         
     def test_check_convergence_not_converged(self):
-        """Test convergence check when population has not converged."""
+        """
+        Test that the convergence check returns False when the population has not converged.
+        
+        Creates a mock population with varying fitness values and verifies that the conduit does not report convergence.
+        """
         mock_agents = [Mock() for _ in range(10)]
         for i, agent in enumerate(mock_agents):
             agent.fitness = i * 0.1
@@ -301,7 +357,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
         self.assertFalse(result)
         
     def test_get_best_agent_success(self):
-        """Test getting best agent from population."""
+        """
+        Test that the best agent is correctly retrieved from a population based on highest fitness.
+        """
         mock_agents = [Mock() for _ in range(10)]
         for i, agent in enumerate(mock_agents):
             agent.fitness = i * 0.1
@@ -311,12 +369,16 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
         self.assertEqual(result, mock_agents[-1])  # Highest fitness
         
     def test_get_best_agent_empty_population(self):
-        """Test getting best agent from empty population."""
+        """
+        Test that retrieving the best agent from an empty population raises a PopulationEvolutionError.
+        """
         with self.assertRaises(PopulationEvolutionError):
             self.conduit.get_best_agent([])
             
     def test_save_evolution_state_success(self):
-        """Test successful evolution state saving."""
+        """
+        Test that the evolution state is saved successfully to a file using mocked file and JSON operations.
+        """
         self.temp_dir = tempfile.mkdtemp()
         state_file = os.path.join(self.temp_dir, 'evolution_state.json')
         
@@ -331,7 +393,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
                 mock_json.assert_called_once()
                 
     def test_load_evolution_state_success(self):
-        """Test successful evolution state loading."""
+        """
+        Test that the evolution state is loaded successfully from a file and matches the expected state.
+        """
         self.temp_dir = tempfile.mkdtemp()
         state_file = os.path.join(self.temp_dir, 'evolution_state.json')
         
@@ -350,14 +414,18 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
                 mock_json.assert_called_once()
                 
     def test_load_evolution_state_file_not_found(self):
-        """Test loading evolution state when file doesn't exist."""
+        """
+        Test that loading the evolution state from a non-existent file raises a FileNotFoundError.
+        """
         non_existent_file = '/non/existent/file.json'
         
         with self.assertRaises(FileNotFoundError):
             self.conduit.load_evolution_state(non_existent_file)
             
     def test_reset_evolution_state(self):
-        """Test resetting evolution state."""
+        """
+        Test that resetting the evolution state sets the current generation and best fitness to their initial values.
+        """
         self.conduit.current_generation = 50
         self.conduit.best_fitness = 0.8
         
@@ -367,7 +435,11 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
         self.assertEqual(self.conduit.best_fitness, 0.0)
         
     def test_get_evolution_statistics(self):
-        """Test getting evolution statistics."""
+        """
+        Test that evolution statistics are correctly retrieved from a population.
+        
+        Verifies that the returned statistics dictionary includes generation, population size, best, average, and worst fitness values.
+        """
         mock_population = [Mock() for _ in range(10)]
         for i, agent in enumerate(mock_population):
             agent.fitness = i * 0.1
@@ -381,19 +453,25 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
         self.assertIn('worst_fitness', stats)
         
     def test_validate_parameters_valid(self):
-        """Test parameter validation with valid values."""
+        """
+        Test that parameter validation succeeds with valid conduit parameters.
+        """
         # Should not raise any exceptions
         self.conduit.validate_parameters()
         
     def test_validate_parameters_invalid_population_size(self):
-        """Test parameter validation with invalid population size."""
+        """
+        Test that parameter validation raises ConduitInitializationError when population size is invalid.
+        """
         self.conduit.population_size = -10
         
         with self.assertRaises(ConduitInitializationError):
             self.conduit.validate_parameters()
             
     def test_validate_parameters_invalid_rates(self):
-        """Test parameter validation with invalid rates."""
+        """
+        Test that parameter validation raises ConduitInitializationError when mutation_rate is set to an invalid value.
+        """
         self.conduit.mutation_rate = 1.5
         
         with self.assertRaises(ConduitInitializationError):
@@ -404,24 +482,32 @@ class TestEvolutionaryAgent(unittest.TestCase):
     """Test suite for EvolutionaryAgent class."""
     
     def setUp(self):
-        """Set up test fixtures before each test method."""
+        """
+        Initialize a new EvolutionaryAgent instance before each test.
+        """
         self.agent = EvolutionaryAgent()
         
     def test_initialization_default(self):
-        """Test agent initialization with default parameters."""
+        """
+        Test that an EvolutionaryAgent is initialized with a genome, default fitness of 0.0, and a unique ID.
+        """
         agent = EvolutionaryAgent()
         self.assertIsNotNone(agent.genome)
         self.assertEqual(agent.fitness, 0.0)
         self.assertIsNotNone(agent.id)
         
     def test_initialization_custom_genome(self):
-        """Test agent initialization with custom genome."""
+        """
+        Test that an EvolutionaryAgent is initialized with a provided custom genome.
+        """
         custom_genome = [1, 0, 1, 1, 0]
         agent = EvolutionaryAgent(genome=custom_genome)
         self.assertEqual(agent.genome, custom_genome)
         
     def test_mutate_success(self):
-        """Test successful agent mutation."""
+        """
+        Test that mutating an agent successfully changes its genome.
+        """
         original_genome = self.agent.genome.copy()
         self.agent.mutate()
         
@@ -429,7 +515,9 @@ class TestEvolutionaryAgent(unittest.TestCase):
         self.assertNotEqual(self.agent.genome, original_genome)
         
     def test_mutate_with_rate(self):
-        """Test agent mutation with specific rate."""
+        """
+        Test that mutating an agent with a 100% mutation rate always changes its genome.
+        """
         original_genome = self.agent.genome.copy()
         self.agent.mutate(mutation_rate=1.0)  # 100% mutation rate
         
@@ -437,7 +525,9 @@ class TestEvolutionaryAgent(unittest.TestCase):
         self.assertNotEqual(self.agent.genome, original_genome)
         
     def test_crossover_success(self):
-        """Test successful agent crossover."""
+        """
+        Test that the crossover operation between two agents produces a valid offspring with a genome of the expected length.
+        """
         other_agent = EvolutionaryAgent()
         offspring = self.agent.crossover(other_agent)
         
@@ -445,12 +535,16 @@ class TestEvolutionaryAgent(unittest.TestCase):
         self.assertEqual(len(offspring.genome), len(self.agent.genome))
         
     def test_crossover_invalid_agent(self):
-        """Test crossover with invalid agent."""
+        """
+        Test that attempting to perform crossover with an invalid agent raises an AgentEvolutionError.
+        """
         with self.assertRaises(AgentEvolutionError):
             self.agent.crossover(None)
             
     def test_evaluate_fitness_success(self):
-        """Test successful fitness evaluation."""
+        """
+        Test that the agent's fitness is correctly evaluated and assigned using a mock evaluator.
+        """
         mock_evaluator = Mock()
         mock_evaluator.evaluate.return_value = 0.8
         
@@ -460,7 +554,9 @@ class TestEvolutionaryAgent(unittest.TestCase):
         mock_evaluator.evaluate.assert_called_once_with(self.agent)
         
     def test_clone_success(self):
-        """Test successful agent cloning."""
+        """
+        Test that cloning an agent produces a distinct agent with the same genome and fitness but a different ID.
+        """
         self.agent.fitness = 0.7
         clone = self.agent.clone()
         
@@ -470,7 +566,9 @@ class TestEvolutionaryAgent(unittest.TestCase):
         self.assertNotEqual(clone.id, self.agent.id)
         
     def test_to_dict_success(self):
-        """Test converting agent to dictionary."""
+        """
+        Test that converting an agent to a dictionary includes 'id', 'genome', and 'fitness' fields with correct values.
+        """
         self.agent.fitness = 0.6
         agent_dict = self.agent.to_dict()
         
@@ -480,7 +578,9 @@ class TestEvolutionaryAgent(unittest.TestCase):
         self.assertEqual(agent_dict['fitness'], 0.6)
         
     def test_from_dict_success(self):
-        """Test creating agent from dictionary."""
+        """
+        Test that an EvolutionaryAgent instance is correctly created from a valid dictionary representation.
+        """
         agent_dict = {
             'id': 'test_id',
             'genome': [1, 0, 1, 0],
@@ -494,7 +594,9 @@ class TestEvolutionaryAgent(unittest.TestCase):
         self.assertEqual(agent.fitness, 0.5)
         
     def test_from_dict_missing_fields(self):
-        """Test creating agent from dictionary with missing fields."""
+        """
+        Test that creating an EvolutionaryAgent from a dictionary missing required fields raises an AgentEvolutionError.
+        """
         agent_dict = {'genome': [1, 0, 1, 0]}
         
         with self.assertRaises(AgentEvolutionError):
@@ -505,18 +607,24 @@ class TestGeneticAlgorithm(unittest.TestCase):
     """Test suite for GeneticAlgorithm class."""
     
     def setUp(self):
-        """Set up test fixtures before each test method."""
+        """
+        Set up the GeneticAlgorithm instance before each test.
+        """
         self.algorithm = GeneticAlgorithm()
         
     def test_initialization_default(self):
-        """Test genetic algorithm initialization with default parameters."""
+        """
+        Test that the GeneticAlgorithm initializes with default selection, crossover, and mutation operators.
+        """
         algorithm = GeneticAlgorithm()
         self.assertIsNotNone(algorithm.selection_operator)
         self.assertIsNotNone(algorithm.crossover_operator)
         self.assertIsNotNone(algorithm.mutation_operator)
         
     def test_run_algorithm_success(self):
-        """Test successful algorithm run."""
+        """
+        Test that the genetic algorithm successfully produces a new population of the same size as the input when all operators function correctly.
+        """
         mock_population = [Mock() for _ in range(10)]
         
         with patch.object(self.algorithm, 'selection_operator') as mock_selection:
@@ -532,7 +640,9 @@ class TestGeneticAlgorithm(unittest.TestCase):
                     self.assertEqual(len(result), len(mock_population))
                     
     def test_run_algorithm_empty_population(self):
-        """Test algorithm run with empty population."""
+        """
+        Test that running the genetic algorithm with an empty population raises a PopulationEvolutionError.
+        """
         with self.assertRaises(PopulationEvolutionError):
             self.algorithm.run_algorithm([])
 
@@ -541,11 +651,17 @@ class TestFitnessEvaluator(unittest.TestCase):
     """Test suite for FitnessEvaluator class."""
     
     def setUp(self):
-        """Set up test fixtures before each test method."""
+        """
+        Set up the FitnessEvaluator instance before each test.
+        """
         self.evaluator = FitnessEvaluator()
         
     def test_evaluate_agent_success(self):
-        """Test successful agent evaluation."""
+        """
+        Test that the fitness evaluator successfully computes a valid fitness score for an agent.
+        
+        Verifies that the returned fitness is a float within the range [0.0, 1.0].
+        """
         mock_agent = Mock()
         mock_agent.genome = [1, 0, 1, 1, 0]
         
@@ -556,12 +672,16 @@ class TestFitnessEvaluator(unittest.TestCase):
         self.assertLessEqual(fitness, 1.0)
         
     def test_evaluate_agent_none(self):
-        """Test evaluation with None agent."""
+        """
+        Test that evaluating a None agent raises an AgentEvolutionError.
+        """
         with self.assertRaises(AgentEvolutionError):
             self.evaluator.evaluate(None)
             
     def test_evaluate_population_success(self):
-        """Test successful population evaluation."""
+        """
+        Test that evaluating a population returns a list of float fitness scores, one for each agent.
+        """
         mock_population = [Mock() for _ in range(5)]
         for agent in mock_population:
             agent.genome = [1, 0, 1, 0, 1]
@@ -572,7 +692,9 @@ class TestFitnessEvaluator(unittest.TestCase):
         self.assertTrue(all(isinstance(score, float) for score in fitness_scores))
         
     def test_evaluate_population_empty(self):
-        """Test evaluation with empty population."""
+        """
+        Test that evaluating an empty population returns an empty list of fitness scores.
+        """
         fitness_scores = self.evaluator.evaluate_population([])
         self.assertEqual(len(fitness_scores), 0)
 
@@ -581,11 +703,15 @@ class TestMutationOperator(unittest.TestCase):
     """Test suite for MutationOperator class."""
     
     def setUp(self):
-        """Set up test fixtures before each test method."""
+        """
+        Set up the MutationOperator instance before each test.
+        """
         self.operator = MutationOperator()
         
     def test_mutate_agent_success(self):
-        """Test successful agent mutation."""
+        """
+        Test that the mutation operator successfully mutates an agent and returns the same agent instance.
+        """
         mock_agent = Mock()
         mock_agent.genome = [1, 0, 1, 0, 1]
         
@@ -594,7 +720,9 @@ class TestMutationOperator(unittest.TestCase):
         self.assertEqual(result, mock_agent)
         
     def test_mutate_agent_with_rate(self):
-        """Test agent mutation with specific rate."""
+        """
+        Test that the mutation operator mutates an agent using a specified mutation rate.
+        """
         mock_agent = Mock()
         mock_agent.genome = [1, 0, 1, 0, 1]
         
@@ -603,7 +731,9 @@ class TestMutationOperator(unittest.TestCase):
         self.assertEqual(result, mock_agent)
         
     def test_mutate_agent_none(self):
-        """Test mutation with None agent."""
+        """
+        Test that mutating a None agent raises an AgentEvolutionError.
+        """
         with self.assertRaises(AgentEvolutionError):
             self.operator.mutate(None)
 
@@ -612,11 +742,15 @@ class TestCrossoverOperator(unittest.TestCase):
     """Test suite for CrossoverOperator class."""
     
     def setUp(self):
-        """Set up test fixtures before each test method."""
+        """
+        Set up the test fixture by initializing a CrossoverOperator instance before each test.
+        """
         self.operator = CrossoverOperator()
         
     def test_crossover_agents_success(self):
-        """Test successful agent crossover."""
+        """
+        Test that the crossover operator successfully produces an offspring agent from two parent agents.
+        """
         mock_parent1 = Mock()
         mock_parent2 = Mock()
         mock_parent1.genome = [1, 0, 1, 0, 1]
@@ -627,12 +761,16 @@ class TestCrossoverOperator(unittest.TestCase):
         self.assertIsNotNone(offspring)
         
     def test_crossover_agents_none_parents(self):
-        """Test crossover with None parents."""
+        """
+        Test that the crossover operator raises an AgentEvolutionError when both parent agents are None.
+        """
         with self.assertRaises(AgentEvolutionError):
             self.operator.crossover(None, None)
             
     def test_crossover_agents_single_none_parent(self):
-        """Test crossover with one None parent."""
+        """
+        Test that the crossover operation raises an AgentEvolutionError when one parent is None.
+        """
         mock_parent = Mock()
         mock_parent.genome = [1, 0, 1, 0, 1]
         
@@ -644,11 +782,17 @@ class TestSelectionOperator(unittest.TestCase):
     """Test suite for SelectionOperator class."""
     
     def setUp(self):
-        """Set up test fixtures before each test method."""
+        """
+        Set up the SelectionOperator instance before each test.
+        """
         self.operator = SelectionOperator()
         
     def test_select_agents_success(self):
-        """Test successful agent selection."""
+        """
+        Test that the selection operator successfully selects the specified number of agents from a population.
+        
+        Verifies that the selected agents are members of the original population and that the correct number of agents is returned.
+        """
         mock_population = [Mock() for _ in range(10)]
         for i, agent in enumerate(mock_population):
             agent.fitness = i * 0.1
@@ -659,19 +803,25 @@ class TestSelectionOperator(unittest.TestCase):
         self.assertTrue(all(agent in mock_population for agent in selected))
         
     def test_select_agents_empty_population(self):
-        """Test selection with empty population."""
+        """
+        Test that selecting agents from an empty population raises a PopulationEvolutionError.
+        """
         with self.assertRaises(PopulationEvolutionError):
             self.operator.select([], 2)
             
     def test_select_agents_invalid_count(self):
-        """Test selection with invalid count."""
+        """
+        Test that selecting agents with an invalid count raises a PopulationEvolutionError.
+        """
         mock_population = [Mock() for _ in range(5)]
         
         with self.assertRaises(PopulationEvolutionError):
             self.operator.select(mock_population, 0)
             
     def test_select_agents_count_exceeds_population(self):
-        """Test selection when count exceeds population size."""
+        """
+        Test that selecting more agents than the population size raises a PopulationEvolutionError.
+        """
         mock_population = [Mock() for _ in range(5)]
         
         with self.assertRaises(PopulationEvolutionError):
@@ -682,29 +832,39 @@ class TestPopulationManager(unittest.TestCase):
     """Test suite for PopulationManager class."""
     
     def setUp(self):
-        """Set up test fixtures before each test method."""
+        """
+        Set up a PopulationManager instance with a population size of 10 before each test.
+        """
         self.manager = PopulationManager(size=10)
         
     def test_initialization_success(self):
-        """Test successful population manager initialization."""
+        """
+        Test that the PopulationManager initializes successfully with a specified size and a fitness evaluator.
+        """
         manager = PopulationManager(size=20)
         self.assertEqual(manager.size, 20)
         self.assertIsNotNone(manager.fitness_evaluator)
         
     def test_initialization_invalid_size(self):
-        """Test initialization with invalid size."""
+        """
+        Test that initializing a PopulationManager with an invalid size raises a PopulationEvolutionError.
+        """
         with self.assertRaises(PopulationEvolutionError):
             PopulationManager(size=0)
             
     def test_generate_population_success(self):
-        """Test successful population generation."""
+        """
+        Test that `generate_population` creates a population of the correct size with all elements as `EvolutionaryAgent` instances.
+        """
         population = self.manager.generate_population()
         
         self.assertEqual(len(population), 10)
         self.assertTrue(all(isinstance(agent, EvolutionaryAgent) for agent in population))
         
     def test_evaluate_population_success(self):
-        """Test successful population evaluation."""
+        """
+        Test that evaluating a population assigns the expected fitness value to each agent.
+        """
         mock_population = [Mock() for _ in range(5)]
         
         with patch.object(self.manager.fitness_evaluator, 'evaluate', return_value=0.5):
@@ -714,7 +874,9 @@ class TestPopulationManager(unittest.TestCase):
                 self.assertEqual(agent.fitness, 0.5)
                 
     def test_sort_population_by_fitness(self):
-        """Test sorting population by fitness."""
+        """
+        Test that the population is correctly sorted in descending order by agent fitness.
+        """
         mock_population = [Mock() for _ in range(5)]
         for i, agent in enumerate(mock_population):
             agent.fitness = (4 - i) * 0.2  # Reverse order
@@ -726,7 +888,11 @@ class TestPopulationManager(unittest.TestCase):
             self.assertGreaterEqual(sorted_population[i].fitness, sorted_population[i + 1].fitness)
             
     def test_get_population_statistics(self):
-        """Test getting population statistics."""
+        """
+        Test that population statistics are correctly calculated and returned for a given population.
+        
+        Verifies that the statistics dictionary includes size, best, average, and worst fitness values, and that the population size is accurate.
+        """
         mock_population = [Mock() for _ in range(5)]
         for i, agent in enumerate(mock_population):
             agent.fitness = i * 0.2
@@ -749,26 +915,40 @@ class TestEvolutionaryExceptions(unittest.TestCase):
         self.assertEqual(str(exception), "Test message")
         
     def test_conduit_initialization_error_creation(self):
-        """Test creating ConduitInitializationError."""
+        """
+        Test that a ConduitInitializationError is created with the correct message and inherits from EvolutionaryException.
+        """
         exception = ConduitInitializationError("Initialization failed")
         self.assertEqual(str(exception), "Initialization failed")
         self.assertIsInstance(exception, EvolutionaryException)
         
     def test_agent_evolution_error_creation(self):
-        """Test creating AgentEvolutionError."""
+        """
+        Test that an AgentEvolutionError is created with the correct message and inherits from EvolutionaryException.
+        """
         exception = AgentEvolutionError("Agent evolution failed")
         self.assertEqual(str(exception), "Agent evolution failed")
         self.assertIsInstance(exception, EvolutionaryException)
         
     def test_population_evolution_error_creation(self):
-        """Test creating PopulationEvolutionError."""
+        """
+        Test that a PopulationEvolutionError is created with the correct message and inherits from EvolutionaryException.
+        """
         exception = PopulationEvolutionError("Population evolution failed")
         self.assertEqual(str(exception), "Population evolution failed")
         self.assertIsInstance(exception, EvolutionaryException)
 
 
 def mock_open(read_data=''):
-    """Mock open function for file operations."""
+    """
+    Return a MagicMock object that simulates the built-in open function for file operations.
+    
+    Parameters:
+        read_data (str): Optional string to simulate file contents.
+    
+    Returns:
+        MagicMock: A mock object with the same interface as the built-in open function.
+    """
     return MagicMock(spec=open)
 
 

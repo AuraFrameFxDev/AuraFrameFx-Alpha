@@ -1,4 +1,3 @@
-
 import pytest
 import json
 import tempfile
@@ -12,7 +11,9 @@ class TestGenesisCore:
     """Comprehensive test suite for GenesisCore functionality"""
     
     def setup_method(self):
-        """Setup for each test method"""
+        """
+        Initializes a new GenesisCore instance and a sample configuration dictionary before each test method.
+        """
         self.genesis_core = GenesisCore()
         self.sample_config = {
             "model_name": "test_model",
@@ -22,12 +23,16 @@ class TestGenesisCore:
         }
         
     def teardown_method(self):
-        """Cleanup after each test method"""
+        """
+        Placeholder for cleanup operations after each test method. Currently, no actions are performed.
+        """
         pass
     
     # Configuration Tests
     def test_load_config_valid_file(self):
-        """Test loading valid configuration file"""
+        """
+        Test that a valid configuration file is loaded correctly and updates the internal config state.
+        """
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             json.dump(self.sample_config, f)
             config_path = f.name
@@ -40,12 +45,16 @@ class TestGenesisCore:
             os.unlink(config_path)
     
     def test_load_config_missing_file(self):
-        """Test loading non-existent configuration file"""
+        """
+        Test that loading a non-existent configuration file raises a FileNotFoundError.
+        """
         with pytest.raises(FileNotFoundError):
             self.genesis_core.load_config("nonexistent_config.json")
     
     def test_load_config_invalid_json(self):
-        """Test loading invalid JSON configuration"""
+        """
+        Test that loading a configuration file with invalid JSON content raises a JSONDecodeError.
+        """
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             f.write("invalid json content")
             config_path = f.name
@@ -57,7 +66,9 @@ class TestGenesisCore:
             os.unlink(config_path)
     
     def test_load_config_empty_file(self):
-        """Test loading empty configuration file"""
+        """
+        Test that loading an empty configuration file raises a JSONDecodeError.
+        """
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             f.write("")
             config_path = f.name
@@ -69,28 +80,38 @@ class TestGenesisCore:
             os.unlink(config_path)
     
     def test_validate_config_valid(self):
-        """Test configuration validation with valid config"""
+        """
+        Verify that configuration validation succeeds when provided with a valid configuration dictionary.
+        """
         assert self.genesis_core.validate_config(self.sample_config) == True
     
     def test_validate_config_missing_required_fields(self):
-        """Test configuration validation with missing required fields"""
+        """
+        Test that configuration validation fails when required fields are missing.
+        """
         invalid_config = {"temperature": 0.7}
         assert self.genesis_core.validate_config(invalid_config) == False
     
     def test_validate_config_invalid_temperature(self):
-        """Test configuration validation with invalid temperature"""
+        """
+        Test that configuration validation fails when the temperature value exceeds the allowed maximum.
+        """
         invalid_config = self.sample_config.copy()
         invalid_config["temperature"] = 2.0  # Assuming max is 1.0
         assert self.genesis_core.validate_config(invalid_config) == False
     
     def test_validate_config_negative_max_tokens(self):
-        """Test configuration validation with negative max_tokens"""
+        """
+        Test that configuration validation fails when max_tokens is set to a negative value.
+        """
         invalid_config = self.sample_config.copy()
         invalid_config["max_tokens"] = -100
         assert self.genesis_core.validate_config(invalid_config) == False
     
     def test_validate_config_empty_api_key(self):
-        """Test configuration validation with empty API key"""
+        """
+        Test that configuration validation fails when the API key is empty.
+        """
         invalid_config = self.sample_config.copy()
         invalid_config["api_key"] = ""
         assert self.genesis_core.validate_config(invalid_config) == False
@@ -98,7 +119,9 @@ class TestGenesisCore:
     # Model Initialization Tests
     @patch('app.ai_backend.genesis_core.initialize_model')
     def test_initialize_model_success(self, mock_init):
-        """Test successful model initialization"""
+        """
+        Test that the model is successfully initialized and the correct model object is returned when initialization completes without errors.
+        """
         mock_model = Mock()
         mock_init.return_value = mock_model
         
@@ -108,14 +131,20 @@ class TestGenesisCore:
     
     @patch('app.ai_backend.genesis_core.initialize_model')
     def test_initialize_model_failure(self, mock_init):
-        """Test model initialization failure"""
+        """
+        Test that an exception is raised when model initialization fails.
+        
+        Simulates a failure during model initialization by setting a side effect on the mock and asserts that the expected exception is propagated.
+        """
         mock_init.side_effect = Exception("Model initialization failed")
         
         with pytest.raises(Exception, match="Model initialization failed"):
             self.genesis_core.initialize_model(self.sample_config)
     
     def test_initialize_model_invalid_config(self):
-        """Test model initialization with invalid configuration"""
+        """
+        Test that initializing the model with an invalid configuration raises a ValueError.
+        """
         invalid_config = {"invalid": "config"}
         with pytest.raises(ValueError, match="Invalid configuration"):
             self.genesis_core.initialize_model(invalid_config)
@@ -123,7 +152,9 @@ class TestGenesisCore:
     # Text Generation Tests
     @patch('app.ai_backend.genesis_core.generate_text')
     def test_generate_text_success(self, mock_generate):
-        """Test successful text generation"""
+        """
+        Tests that text generation returns the expected response when the generation backend succeeds.
+        """
         mock_generate.return_value = "Generated text response"
         
         result = self.genesis_core.generate_text("Test prompt")
@@ -132,19 +163,25 @@ class TestGenesisCore:
     
     @patch('app.ai_backend.genesis_core.generate_text')
     def test_generate_text_empty_prompt(self, mock_generate):
-        """Test text generation with empty prompt"""
+        """
+        Test that generating text with an empty prompt raises a ValueError.
+        """
         with pytest.raises(ValueError, match="Prompt cannot be empty"):
             self.genesis_core.generate_text("")
     
     @patch('app.ai_backend.genesis_core.generate_text')
     def test_generate_text_none_prompt(self, mock_generate):
-        """Test text generation with None prompt"""
+        """
+        Test that generating text with a None prompt raises a ValueError.
+        """
         with pytest.raises(ValueError, match="Prompt cannot be None"):
             self.genesis_core.generate_text(None)
     
     @patch('app.ai_backend.genesis_core.generate_text')
     def test_generate_text_long_prompt(self, mock_generate):
-        """Test text generation with very long prompt"""
+        """
+        Test that text generation succeeds when provided with a very long prompt string.
+        """
         long_prompt = "A" * 10000
         mock_generate.return_value = "Response to long prompt"
         
@@ -153,7 +190,9 @@ class TestGenesisCore:
     
     @patch('app.ai_backend.genesis_core.generate_text')
     def test_generate_text_special_characters(self, mock_generate):
-        """Test text generation with special characters"""
+        """
+        Tests that text generation correctly handles prompts containing special characters.
+        """
         special_prompt = "Test with special chars: !@#$%^&*()_+{}[]|\\:;\"'<>,.?/~`"
         mock_generate.return_value = "Response with special chars"
         
@@ -162,7 +201,9 @@ class TestGenesisCore:
     
     @patch('app.ai_backend.genesis_core.generate_text')
     def test_generate_text_unicode(self, mock_generate):
-        """Test text generation with unicode characters"""
+        """
+        Test that text generation correctly handles prompts containing Unicode characters.
+        """
         unicode_prompt = "Test with unicode: 测试 🚀 café naïve"
         mock_generate.return_value = "Unicode response"
         
@@ -172,7 +213,11 @@ class TestGenesisCore:
     # Error Handling Tests
     @patch('app.ai_backend.genesis_core.api_call')
     def test_api_error_handling(self, mock_api):
-        """Test API error handling"""
+        """
+        Test that an exception raised by the API call is properly propagated.
+        
+        Verifies that when the API raises a generic exception, the `GenesisCore.make_api_call` method raises the same exception with the expected message.
+        """
         mock_api.side_effect = Exception("API Error")
         
         with pytest.raises(Exception, match="API Error"):
@@ -180,7 +225,9 @@ class TestGenesisCore:
     
     @patch('app.ai_backend.genesis_core.api_call')
     def test_api_timeout_handling(self, mock_api):
-        """Test API timeout handling"""
+        """
+        Test that a TimeoutError is raised when the API call exceeds the allowed time limit.
+        """
         mock_api.side_effect = TimeoutError("Request timeout")
         
         with pytest.raises(TimeoutError, match="Request timeout"):
@@ -188,7 +235,11 @@ class TestGenesisCore:
     
     @patch('app.ai_backend.genesis_core.api_call')
     def test_api_rate_limit_handling(self, mock_api):
-        """Test API rate limit handling"""
+        """
+        Test that the API call raises an exception when a rate limit is exceeded.
+        
+        Asserts that an exception with the message "Rate limit exceeded" is raised when the API call encounters a rate limit error.
+        """
         mock_api.side_effect = Exception("Rate limit exceeded")
         
         with pytest.raises(Exception, match="Rate limit exceeded"):
@@ -196,7 +247,9 @@ class TestGenesisCore:
     
     # Memory Management Tests
     def test_memory_cleanup(self):
-        """Test memory cleanup functionality"""
+        """
+        Verifies that the memory cleanup method properly clears the memory cache.
+        """
         # Simulate memory usage
         self.genesis_core.memory_cache = {"key1": "value1", "key2": "value2"}
         
@@ -204,7 +257,9 @@ class TestGenesisCore:
         assert len(self.genesis_core.memory_cache) == 0
     
     def test_memory_limit_handling(self):
-        """Test memory limit handling"""
+        """
+        Test that storing data exceeding the allowed memory limit raises a MemoryError.
+        """
         # Test memory limit enforcement
         large_data = "x" * 1000000  # 1MB of data
         
@@ -214,21 +269,27 @@ class TestGenesisCore:
     # Async Operations Tests
     @pytest.mark.asyncio
     async def test_async_generate_text_success(self):
-        """Test async text generation success"""
+        """
+        Test that asynchronous text generation returns the expected response when successful.
+        """
         with patch.object(self.genesis_core, 'async_generate_text', return_value="Async response"):
             result = await self.genesis_core.async_generate_text("Test prompt")
             assert result == "Async response"
     
     @pytest.mark.asyncio
     async def test_async_generate_text_timeout(self):
-        """Test async text generation timeout"""
+        """
+        Test that an asyncio.TimeoutError is raised when async text generation exceeds the allowed time limit.
+        """
         with patch.object(self.genesis_core, 'async_generate_text', side_effect=asyncio.TimeoutError):
             with pytest.raises(asyncio.TimeoutError):
                 await self.genesis_core.async_generate_text("Test prompt")
     
     @pytest.mark.asyncio
     async def test_async_batch_processing(self):
-        """Test async batch processing"""
+        """
+        Test that asynchronous batch processing returns the expected responses for multiple prompts.
+        """
         prompts = ["Prompt 1", "Prompt 2", "Prompt 3"]
         expected_responses = ["Response 1", "Response 2", "Response 3"]
         
@@ -238,7 +299,9 @@ class TestGenesisCore:
     
     # Performance Tests
     def test_performance_metrics(self):
-        """Test performance metrics collection"""
+        """
+        Tests that performance metrics are correctly recorded for an operation, ensuring the duration is positive.
+        """
         start_time = datetime.now()
         
         # Simulate operation
@@ -248,7 +311,9 @@ class TestGenesisCore:
         assert self.genesis_core.performance_metrics["test_operation"]["duration"] > 0
     
     def test_performance_threshold_warning(self):
-        """Test performance threshold warning"""
+        """
+        Tests that a warning is logged when a tracked operation exceeds the performance threshold.
+        """
         slow_operation_time = datetime.now() - timedelta(seconds=10)
         
         with patch('app.ai_backend.genesis_core.logger') as mock_logger:
@@ -257,7 +322,11 @@ class TestGenesisCore:
     
     # Integration Tests
     def test_full_workflow_integration(self):
-        """Test complete workflow integration"""
+        """
+        Tests the end-to-end workflow of loading configuration, initializing the model, and generating text using mocked methods.
+        
+        Asserts that the integrated sequence of operations returns the expected response.
+        """
         with patch.object(self.genesis_core, 'load_config', return_value=self.sample_config):
             with patch.object(self.genesis_core, 'initialize_model', return_value=Mock()):
                 with patch.object(self.genesis_core, 'generate_text', return_value="Integration test response"):
@@ -271,7 +340,9 @@ class TestGenesisCore:
     
     # Edge Cases and Boundary Tests
     def test_max_prompt_length(self):
-        """Test maximum prompt length handling"""
+        """
+        Tests that text generation succeeds when the prompt is exactly at the maximum allowed length.
+        """
         max_prompt = "A" * self.genesis_core.MAX_PROMPT_LENGTH
         
         with patch.object(self.genesis_core, 'generate_text', return_value="Max length response"):
@@ -279,19 +350,28 @@ class TestGenesisCore:
             assert result == "Max length response"
     
     def test_exceed_max_prompt_length(self):
-        """Test exceeding maximum prompt length"""
+        """
+        Test that generating text with a prompt exceeding the maximum allowed length raises a ValueError.
+        """
         oversized_prompt = "A" * (self.genesis_core.MAX_PROMPT_LENGTH + 1)
         
         with pytest.raises(ValueError, match="Prompt exceeds maximum length"):
             self.genesis_core.generate_text(oversized_prompt)
     
     def test_concurrent_requests(self):
-        """Test handling of concurrent requests"""
+        """
+        Test that multiple concurrent text generation requests are handled correctly.
+        
+        Verifies that five concurrent threads invoking `generate_text` each receive a result, ensuring thread safety and correct result collection.
+        """
         import threading
         
         results = []
         
         def make_request():
+            """
+            Calls the `generate_text` method of the `GenesisCore` instance with a fixed prompt and appends the result to the shared results list.
+            """
             result = self.genesis_core.generate_text("Concurrent test")
             results.append(result)
         
@@ -308,12 +388,16 @@ class TestGenesisCore:
     
     # State Management Tests
     def test_state_persistence(self):
-        """Test state persistence across operations"""
+        """
+        Verify that state values set in GenesisCore persist and can be retrieved across operations.
+        """
         self.genesis_core.set_state("key", "value")
         assert self.genesis_core.get_state("key") == "value"
     
     def test_state_isolation(self):
-        """Test state isolation between instances"""
+        """
+        Verify that state changes in one GenesisCore instance do not affect the state of another instance.
+        """
         core1 = GenesisCore()
         core2 = GenesisCore()
         
@@ -325,7 +409,11 @@ class TestGenesisCore:
     
     # Security Tests
     def test_input_sanitization(self):
-        """Test input sanitization"""
+        """
+        Tests that the input sanitization method correctly processes potentially malicious input.
+        
+        Verifies that the `sanitize_input` method returns the expected sanitized output when given a string containing script tags.
+        """
         malicious_input = "<script>alert('xss')</script>"
         
         with patch.object(self.genesis_core, 'sanitize_input', return_value="sanitized_input"):
@@ -333,7 +421,9 @@ class TestGenesisCore:
             assert result == "sanitized_input"
     
     def test_api_key_security(self):
-        """Test API key security handling"""
+        """
+        Verifies that the API key is not present in any log messages when logging configuration data.
+        """
         config_with_key = self.sample_config.copy()
         
         # Ensure API key is not logged
@@ -346,7 +436,9 @@ class TestGenesisCore:
     
     # Resource Management Tests
     def test_resource_cleanup_on_error(self):
-        """Test resource cleanup on error"""
+        """
+        Verify that resources are properly released even when an exception occurs during processing.
+        """
         with patch.object(self.genesis_core, 'acquire_resource', return_value="resource"):
             with patch.object(self.genesis_core, 'release_resource') as mock_release:
                 with pytest.raises(Exception):
@@ -355,7 +447,9 @@ class TestGenesisCore:
                 mock_release.assert_called_once()
     
     def test_connection_pooling(self):
-        """Test connection pooling functionality"""
+        """
+        Test that the connection pooling mechanism reuses the same connection instance for multiple requests.
+        """
         with patch.object(self.genesis_core, 'get_connection') as mock_get_conn:
             mock_conn = Mock()
             mock_get_conn.return_value = mock_conn
@@ -368,7 +462,9 @@ class TestGenesisCore:
     
     # Validation Tests
     def test_response_validation(self):
-        """Test response validation"""
+        """
+        Test that the response validation method correctly identifies valid and invalid response dictionaries.
+        """
         valid_response = {"content": "Valid response", "status": "success"}
         invalid_response = {"error": "Invalid response"}
         
@@ -376,7 +472,9 @@ class TestGenesisCore:
         assert self.genesis_core.validate_response(invalid_response) == False
     
     def test_model_compatibility(self):
-        """Test model compatibility checking"""
+        """
+        Test that the model compatibility check correctly identifies supported and unsupported models.
+        """
         compatible_model = {"version": "1.0", "type": "supported"}
         incompatible_model = {"version": "0.5", "type": "unsupported"}
         
@@ -385,12 +483,16 @@ class TestGenesisCore:
 
 @pytest.fixture
 def genesis_core():
-    """Fixture for GenesisCore instance"""
+    """
+    Provides a pytest fixture that returns a new instance of GenesisCore for use in tests.
+    """
     return GenesisCore()
 
 @pytest.fixture
 def sample_config():
-    """Fixture for sample configuration"""
+    """
+    Provides a sample configuration dictionary for use in tests.
+    """
     return {
         "model_name": "test_model",
         "temperature": 0.7,
@@ -400,7 +502,9 @@ def sample_config():
 
 @pytest.fixture
 def mock_model():
-    """Fixture for mock model"""
+    """
+    Provides a pytest fixture that returns a mock model object with a stubbed `generate` method returning a fixed response.
+    """
     model = Mock()
     model.generate.return_value = "Mock response"
     return model
@@ -408,19 +512,28 @@ def mock_model():
 # Parameterized Tests
 @pytest.mark.parametrize("temperature", [0.0, 0.5, 1.0])
 def test_temperature_values(genesis_core, temperature):
-    """Test various temperature values"""
+    """
+    Verify that the configuration is considered valid for a range of acceptable temperature values.
+    """
     config = {"temperature": temperature, "model_name": "test", "max_tokens": 100, "api_key": "key"}
     assert genesis_core.validate_config(config) == True
 
 @pytest.mark.parametrize("max_tokens", [1, 100, 1000, 4000])
 def test_max_tokens_values(genesis_core, max_tokens):
-    """Test various max_tokens values"""
+    """
+    Validate that the configuration is accepted for a range of valid max_tokens values.
+    
+    Parameters:
+        max_tokens (int): The number of tokens to test in the configuration.
+    """
     config = {"max_tokens": max_tokens, "model_name": "test", "temperature": 0.7, "api_key": "key"}
     assert genesis_core.validate_config(config) == True
 
 @pytest.mark.parametrize("invalid_temp", [-1, 1.5, 2.0, "invalid"])
 def test_invalid_temperature_values(genesis_core, invalid_temp):
-    """Test invalid temperature values"""
+    """
+    Verify that configuration validation fails for invalid temperature values.
+    """
     config = {"temperature": invalid_temp, "model_name": "test", "max_tokens": 100, "api_key": "key"}
     assert genesis_core.validate_config(config) == False
 
@@ -432,7 +545,12 @@ def test_invalid_temperature_values(genesis_core, invalid_temp):
     "Unicode prompt: 测试 🚀"
 ])
 def test_various_prompts(genesis_core, prompt):
-    """Test various prompt formats"""
+    """
+    Test text generation with a variety of prompt formats to ensure consistent response handling.
+    
+    Parameters:
+        prompt: The input prompt string to be tested with the text generation method.
+    """
     with patch.object(genesis_core, 'generate_text', return_value="Response"):
         result = genesis_core.generate_text(prompt)
         assert result == "Response"
