@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import dev.aurakai.auraframefx.R // Already present, good.
+import dev.aurakai.auraframefx.R
 import dev.aurakai.auraframefx.ui.animation.*
 import dev.aurakai.auraframefx.ui.components.CyberMenuItem
 import dev.aurakai.auraframefx.ui.components.CyberpunkText
