@@ -21,9 +21,9 @@ class OracleDriveServiceConnector(private val context: Context) {
 
     private val serviceConnection = object : ServiceConnection {
         /**
-         * Called when the AuraDrive service is connected.
+         * Handles the event when the AuraDrive service is connected.
          *
-         * Obtains the remote `IAuraDriveService` interface from the provided binder and updates the connection status to connected.
+         * Retrieves the remote `IAuraDriveService` interface from the provided binder and marks the service as connected.
          *
          * @param name The component name of the connected service.
          * @param service The binder interface to the connected service.
@@ -36,7 +36,7 @@ class OracleDriveServiceConnector(private val context: Context) {
         /**
          * Handles disconnection from the AuraDrive service.
          *
-         * Clears the remote service reference and marks the connection as disconnected.
+         * Clears the remote service reference and updates the connection status to disconnected.
          */
         override fun onServiceDisconnected(name: ComponentName?) {
             auraDriveService = null
@@ -45,9 +45,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Attempts to bind to the remote AuraDrive service using an explicit intent.
+     * Initiates binding to the remote AuraDrive service using an explicit intent.
      *
-     * If a SecurityException occurs during binding, the connection state is set to false.
+     * Sets the connection state to false if a SecurityException occurs during the binding attempt.
      */
     fun bindService() {
         val intent = Intent().apply {
@@ -64,7 +64,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Unbinds from the AuraDrive service and marks the connection as disconnected.
+     * Unbinds from the AuraDrive service and updates the connection status to disconnected.
      *
      * Any exceptions during unbinding are silently ignored.
      */

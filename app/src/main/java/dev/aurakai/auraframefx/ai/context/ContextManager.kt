@@ -27,14 +27,14 @@ class ContextManager @Inject constructor(
     val contextStats: StateFlow<ContextStats> = _contextStats
 
     /**
-     * Creates and registers a new context chain with an initial context node.
+     * Initializes and registers a new context chain with a single context node.
      *
-     * The new chain is initialized with the specified root context, initial content, agent, and optional metadata (stored as strings). The chain is added to the set of active contexts, and context statistics are updated.
+     * The chain is created with the specified root context, initial content, agent, and optional metadata (all metadata values are stored as strings). It is added to the set of active contexts, and context statistics are updated.
      *
      * @param rootContext The identifier for the root context of the chain.
      * @param initialContext The content of the initial context node.
      * @param agent The agent associated with the initial context.
-     * @param metadata Optional metadata for the context; values are stored as strings.
+     * @param metadata Optional metadata for the context; all values are stored as strings.
      * @return The unique identifier of the newly created context chain.
      */
     fun createContextChain(
@@ -66,9 +66,9 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Appends a new context node to an existing context chain with the specified context, agent, and metadata.
+     * Appends a new context node to an existing context chain with the given context, agent, and optional metadata.
      *
-     * Updates the agent-to-context mapping and refreshes the last updated timestamp for the chain.
+     * Updates the agent-to-context mapping and refreshes the last updated timestamp for the specified chain.
      *
      * @param chainId The unique identifier of the context chain to update.
      * @param newContext The context string to add to the chain.
@@ -106,21 +106,21 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Retrieves the context chain associated with the specified chain ID.
+     * Returns the context chain for the given chain ID, or null if not found.
      *
      * @param chainId The unique identifier of the context chain.
-     * @return The corresponding ContextChain if found, or null otherwise.
+     * @return The matching ContextChain, or null if no such chain exists.
      */
     fun getContextChain(chainId: String): ContextChain? {
         return _activeContexts.value[chainId]
     }
 
     /**
-     * Retrieves the most relevant context chain and related chains based on the specified query.
+     * Retrieves the most relevant context chain and related chains based on the provided query.
      *
-     * Filters active context chains by agent if provided, sorts them by most recent update, and limits the results according to configuration and query parameters. If no matching chains are found, initializes a new chain with the query context. Related chains are further filtered by minimum relevance and limited in number.
+     * Filters active context chains by agent if specified, sorts them by most recent update, and limits the results according to configuration and query parameters. If no matching chains are found, initializes a new chain with the query context. Related chains are further filtered by minimum relevance and limited in number.
      *
-     * @param query The criteria used to filter, sort, and limit context chains.
+     * @param query Criteria for filtering, sorting, and limiting context chains.
      * @return A [ContextChainResult] containing the selected chain, related chains, and the original query.
      */
 
@@ -150,9 +150,9 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Updates context chain statistics, including total chains, number of recently active chains, longest chain length, and the last update timestamp.
+     * Updates statistics for all active context chains, including total count, number of recently active chains, longest chain length, and the timestamp of the last update.
      *
-     * Chains are considered active if updated within a configurable time threshold.
+     * Chains are considered recently active if their last update occurred within a configurable time threshold.
      */
     private fun updateStats() {
         val chains = _activeContexts.value.values
