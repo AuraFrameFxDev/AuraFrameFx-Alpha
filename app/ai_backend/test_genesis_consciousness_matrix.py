@@ -4,10 +4,8 @@ Tests cover initialization, state management, consciousness tracking, and edge c
 """
 
 import unittest
-from unittest.mock import Mock, patch, MagicMock
-import pytest
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime
 import asyncio
 import json
 import tempfile
@@ -25,7 +23,7 @@ try:
         InvalidStateException,
         MatrixInitializationError
     )
-except ImportError as e:
+except ImportError:
     # Mock the classes if import fails during test discovery
     class GenesisConsciousnessMatrix:
         pass
