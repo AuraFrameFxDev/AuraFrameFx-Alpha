@@ -122,6 +122,3422 @@ class AIPipelineProcessorTest {
         @Test
         @DisplayName("should fail initialization with negative timeout")
         fun shouldFailInitializationWithNegativeTimeout() {
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+            // Given
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+            val config = PipelineConfiguration(
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+                stages = listOf(mockPipelineStage),
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+                parallelExecution = false,
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+                timeoutMs = -1L
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+            )
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+            
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+            // When & Then
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+            assertThrows<IllegalArgumentException> {
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+                processor.initialize(config)
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+            }
+
+        @Test
+        @DisplayName("should handle reinitialization with different configuration")
+        fun shouldHandleReinitializationWithDifferentConfiguration() {
+            // Given
+            val config1 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 1000L
+            )
+            val config2 = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = true,
+                timeoutMs = 2000L
+            )
+            
+            // When
+            processor.initialize(config1)
+            val result = processor.initialize(config2)
+            
+            // Then
+            assertTrue(result)
+            assertTrue(processor.isInitialized())
+            assertEquals(2000L, processor.getConfiguration().timeoutMs)
+        }
+        
+        @Test
+        @DisplayName("should fail initialization with zero timeout")
+        fun shouldFailInitializationWithZeroTimeout() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 0L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        
+        @Test
+        @DisplayName("should validate stage ordering for dependencies")
+        fun shouldValidateStageOrderingForDependencies() {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            whenever(stage1.getName()).thenReturn("stage1")
+            whenever(stage2.getName()).thenReturn("stage2")
+            whenever(stage2.getDependencies()).thenReturn(setOf("stage1"))
+            
+            val config = PipelineConfiguration(
+                stages = listOf(stage2, stage1), // Wrong order
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.initialize(config)
+            }
+        }
+        }
+    }
+
+    @Nested
+    @DisplayName("Pipeline Processing Tests")
+    inner class PipelineProcessingTests {
+        
+        @BeforeEach
+        fun setUpProcessor() {
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+        }
+        
+        @Test
+        @DisplayName("should process valid input successfully")
+        fun shouldProcessValidInputSuccessfully() = runTest {
+            // Given
+            val input = "test input"
+            val expectedOutput = "processed output"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn(expectedOutput)
+            whenever(mockOutputProcessor.process(expectedOutput)).thenReturn(expectedOutput)
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals(expectedOutput, result)
+            verify(mockInputProcessor).process(input)
+            verify(mockPipelineStage).execute(any())
+            verify(mockOutputProcessor).process(expectedOutput)
+            verify(mockMetricsCollector).recordProcessingTime(any())
+        }
+        
+        @Test
+        @DisplayName("should handle null input gracefully")
+        fun shouldHandleNullInputGracefully() = runTest {
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                processor.process(null)
+            }
+            verify(mockInputProcessor, never()).process(any())
+        }
+        
+        @Test
+        @DisplayName("should handle empty input")
+        fun shouldHandleEmptyInput() = runTest {
+            // Given
+            val input = ""
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("")
+            whenever(mockOutputProcessor.process("")).thenReturn("")
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("", result)
+            verify(mockInputProcessor).process(input)
+        }
+        
+        @Test
+        @DisplayName("should process without initialization should throw exception")
+        fun shouldProcessWithoutInitializationShouldThrowException() = runTest {
+            // Given
+            val uninitializedProcessor = AIPipelineProcessor(
+                mockInputProcessor, mockOutputProcessor, mockErrorHandler, mockMetricsCollector
+            )
+            
+            // When & Then
+            assertThrows<IllegalStateException> {
+                uninitializedProcessor.process("test")
+            }
+        }
+        
+        @Test
+        @DisplayName("should handle processing timeout")
+        fun shouldHandleProcessingTimeout() = runTest {
+            // Given
+            val input = "test input"
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 100L
+            )
+            processor.initialize(config)
+            
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer { 
+                Thread.sleep(200) // Simulate slow processing
+                "result"
+            }
+            
+            // When & Then
+            assertThrows<TimeoutException> {
+                processor.process(input)
+            }
+            verify(mockErrorHandler).handleTimeout(any())
+        }
+    }
+
+    @Nested
+    @DisplayName("Error Handling Tests")
+    inner class ErrorHandlingTests {
+        
+        @BeforeEach
+        fun setUpProcessor() {
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+        }
+        
+        @Test
+        @DisplayName("should handle input processing exception")
+        fun shouldHandleInputProcessingException() = runTest {
+            // Given
+            val input = "test input"
+            val exception = RuntimeException("Input processing failed")
+            whenever(mockInputProcessor.process(input)).thenThrow(exception)
+            
+            // When & Then
+            assertThrows<RuntimeException> {
+                processor.process(input)
+            }
+            verify(mockErrorHandler).handleProcessingError(exception)
+            verify(mockPipelineStage, never()).execute(any())
+        }
+        
+        @Test
+        @DisplayName("should handle pipeline stage exception")
+        fun shouldHandlePipelineStageException() = runTest {
+            // Given
+            val input = "test input"
+            val exception = IOException("Pipeline stage failed")
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenThrow(exception)
+            
+            // When & Then
+            assertThrows<IOException> {
+                processor.process(input)
+            }
+            verify(mockErrorHandler).handleProcessingError(exception)
+            verify(mockOutputProcessor, never()).process(any())
+        }
+        
+        @Test
+        @DisplayName("should handle output processing exception")
+        fun shouldHandleOutputProcessingException() = runTest {
+            // Given
+            val input = "test input"
+            val stageOutput = "stage output"
+            val exception = IllegalStateException("Output processing failed")
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn(stageOutput)
+            whenever(mockOutputProcessor.process(stageOutput)).thenThrow(exception)
+            
+            // When & Then
+            assertThrows<IllegalStateException> {
+                processor.process(input)
+            }
+            verify(mockErrorHandler).handleProcessingError(exception)
+        }
+        
+        @Test
+        @DisplayName("should retry on transient failures")
+        fun shouldRetryOnTransientFailures() = runTest {
+            // Given
+            val input = "test input"
+            val transientException = IOException("Temporary failure")
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any()))
+                .thenThrow(transientException)
+                .thenReturn("success")
+            whenever(mockOutputProcessor.process("success")).thenReturn("success")
+            
+            processor.setRetryPolicy(RetryPolicy(maxRetries = 1, retryableExceptions = setOf(IOException::class.java)))
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("success", result)
+            verify(mockPipelineStage, times(2)).execute(any())
+            verify(mockErrorHandler).handleRetryableError(transientException)
+        }
+    }
+
+    @Nested
+    @DisplayName("Parallel Processing Tests")
+    inner class ParallelProcessingTests {
+        
+        @Test
+        @DisplayName("should process multiple stages in parallel")
+        fun shouldProcessMultipleStagesInParallel() = runTest {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            val config = PipelineConfiguration(
+                stages = listOf(stage1, stage2),
+                parallelExecution = true,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(stage1.execute(any())).thenReturn("output1")
+            whenever(stage2.execute(any())).thenReturn("output2")
+            whenever(mockOutputProcessor.process(any())).thenReturn("final output")
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("final output", result)
+            verify(stage1).execute(any())
+            verify(stage2).execute(any())
+            verify(mockMetricsCollector).recordParallelExecution(2)
+        }
+        
+        @Test
+        @DisplayName("should handle partial parallel stage failures")
+        fun shouldHandlePartialParallelStageFailures() = runTest {
+            // Given
+            val stage1 = mock<PipelineStage>()
+            val stage2 = mock<PipelineStage>()
+            val config = PipelineConfiguration(
+                stages = listOf(stage1, stage2),
+                parallelExecution = true,
+                timeoutMs = 5000L,
+                failFast = false
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(stage1.execute(any())).thenReturn("output1")
+            whenever(stage2.execute(any())).thenThrow(RuntimeException("Stage 2 failed"))
+            
+            // When & Then
+            assertThrows<RuntimeException> {
+                processor.process(input)
+            }
+            verify(mockErrorHandler).handlePartialFailure(any(), any())
+        }
+    }
+
+    @Nested
+    @DisplayName("Metrics and Monitoring Tests")
+    inner class MetricsAndMonitoringTests {
+        
+        @BeforeEach
+        fun setUpProcessor() {
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+        }
+        
+        @Test
+        @DisplayName("should collect processing metrics")
+        fun shouldCollectProcessingMetrics() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(mockMetricsCollector).recordProcessingTime(any())
+            verify(mockMetricsCollector).recordThroughput(1)
+            verify(mockMetricsCollector).recordStageExecution(any())
+        }
+        
+        @Test
+        @DisplayName("should collect error metrics")
+        fun shouldCollectErrorMetrics() = runTest {
+            // Given
+            val input = "test input"
+            val exception = RuntimeException("Processing failed")
+            whenever(mockInputProcessor.process(input)).thenThrow(exception)
+            
+            // When & Then
+            assertThrows<RuntimeException> {
+                processor.process(input)
+            }
+            verify(mockMetricsCollector).recordError(exception::class.java.simpleName)
+            verify(mockMetricsCollector).recordFailureRate(any())
+        }
+        
+        @Test
+        @DisplayName("should provide processing statistics")
+        fun shouldProvideProcessingStatistics() {
+
+        @Test
+        @DisplayName("should collect detailed performance metrics")
+        fun shouldCollectDetailedPerformanceMetrics() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(mockMetricsCollector).recordProcessingTime(any())
+            verify(mockMetricsCollector).recordMemoryUsage(any())
+            verify(mockMetricsCollector).recordCPUUsage(any())
+            verify(mockMetricsCollector).recordNetworkLatency(any())
+            verify(mockMetricsCollector).recordStageLatency(any(), any())
+        }
+        
+        @Test
+        @DisplayName("should provide real-time monitoring dashboard data")
+        fun shouldProvideRealTimeMonitoringDashboardData() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L,
+                enableRealTimeMonitoring = true
+            )
+            processor.initialize(config)
+            
+            // When
+            val dashboardData = processor.getDashboardData()
+            
+            // Then
+            assertNotNull(dashboardData)
+            assertTrue(dashboardData.containsKey("activeRequests"))
+            assertTrue(dashboardData.containsKey("avgResponseTime"))
+            assertTrue(dashboardData.containsKey("errorRate"))
+            verify(mockMetricsCollector).getDashboardMetrics()
+        }
+        
+        @Test
+        @DisplayName("should handle metrics collection failure gracefully")
+        fun shouldHandleMetricsCollectionFailureGracefully() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            whenever(mockMetricsCollector.recordProcessingTime(any())).thenThrow(RuntimeException("Metrics failure"))
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("output", result) // Processing should still succeed
+            verify(mockErrorHandler).handleMetricsError(any())
+        }
+        
+        @Test
+        @DisplayName("should support custom metrics aggregation")
+        fun shouldSupportCustomMetricsAggregation() = runTest {
+            // Given
+            val customAggregator = mock<MetricsAggregator>()
+            processor.setCustomMetricsAggregator(customAggregator)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(customAggregator).aggregateMetrics(any())
+            verify(mockMetricsCollector).setCustomAggregator(customAggregator)
+        }
+            // When
+
+        @Test
+        @DisplayName("should collect detailed performance metrics")
+        fun shouldCollectDetailedPerformanceMetrics() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(mockMetricsCollector).recordProcessingTime(any())
+            verify(mockMetricsCollector).recordMemoryUsage(any())
+            verify(mockMetricsCollector).recordCPUUsage(any())
+            verify(mockMetricsCollector).recordNetworkLatency(any())
+            verify(mockMetricsCollector).recordStageLatency(any(), any())
+        }
+        
+        @Test
+        @DisplayName("should provide real-time monitoring dashboard data")
+        fun shouldProvideRealTimeMonitoringDashboardData() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L,
+                enableRealTimeMonitoring = true
+            )
+            processor.initialize(config)
+            
+            // When
+            val dashboardData = processor.getDashboardData()
+            
+            // Then
+            assertNotNull(dashboardData)
+            assertTrue(dashboardData.containsKey("activeRequests"))
+            assertTrue(dashboardData.containsKey("avgResponseTime"))
+            assertTrue(dashboardData.containsKey("errorRate"))
+            verify(mockMetricsCollector).getDashboardMetrics()
+        }
+        
+        @Test
+        @DisplayName("should handle metrics collection failure gracefully")
+        fun shouldHandleMetricsCollectionFailureGracefully() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            whenever(mockMetricsCollector.recordProcessingTime(any())).thenThrow(RuntimeException("Metrics failure"))
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("output", result) // Processing should still succeed
+            verify(mockErrorHandler).handleMetricsError(any())
+        }
+        
+        @Test
+        @DisplayName("should support custom metrics aggregation")
+        fun shouldSupportCustomMetricsAggregation() = runTest {
+            // Given
+            val customAggregator = mock<MetricsAggregator>()
+            processor.setCustomMetricsAggregator(customAggregator)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(customAggregator).aggregateMetrics(any())
+            verify(mockMetricsCollector).setCustomAggregator(customAggregator)
+        }
+            val stats = processor.getProcessingStatistics()
+
+        @Test
+        @DisplayName("should collect detailed performance metrics")
+        fun shouldCollectDetailedPerformanceMetrics() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(mockMetricsCollector).recordProcessingTime(any())
+            verify(mockMetricsCollector).recordMemoryUsage(any())
+            verify(mockMetricsCollector).recordCPUUsage(any())
+            verify(mockMetricsCollector).recordNetworkLatency(any())
+            verify(mockMetricsCollector).recordStageLatency(any(), any())
+        }
+        
+        @Test
+        @DisplayName("should provide real-time monitoring dashboard data")
+        fun shouldProvideRealTimeMonitoringDashboardData() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L,
+                enableRealTimeMonitoring = true
+            )
+            processor.initialize(config)
+            
+            // When
+            val dashboardData = processor.getDashboardData()
+            
+            // Then
+            assertNotNull(dashboardData)
+            assertTrue(dashboardData.containsKey("activeRequests"))
+            assertTrue(dashboardData.containsKey("avgResponseTime"))
+            assertTrue(dashboardData.containsKey("errorRate"))
+            verify(mockMetricsCollector).getDashboardMetrics()
+        }
+        
+        @Test
+        @DisplayName("should handle metrics collection failure gracefully")
+        fun shouldHandleMetricsCollectionFailureGracefully() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            whenever(mockMetricsCollector.recordProcessingTime(any())).thenThrow(RuntimeException("Metrics failure"))
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("output", result) // Processing should still succeed
+            verify(mockErrorHandler).handleMetricsError(any())
+        }
+        
+        @Test
+        @DisplayName("should support custom metrics aggregation")
+        fun shouldSupportCustomMetricsAggregation() = runTest {
+            // Given
+            val customAggregator = mock<MetricsAggregator>()
+            processor.setCustomMetricsAggregator(customAggregator)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(customAggregator).aggregateMetrics(any())
+            verify(mockMetricsCollector).setCustomAggregator(customAggregator)
+        }
+            
+
+        @Test
+        @DisplayName("should collect detailed performance metrics")
+        fun shouldCollectDetailedPerformanceMetrics() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(mockMetricsCollector).recordProcessingTime(any())
+            verify(mockMetricsCollector).recordMemoryUsage(any())
+            verify(mockMetricsCollector).recordCPUUsage(any())
+            verify(mockMetricsCollector).recordNetworkLatency(any())
+            verify(mockMetricsCollector).recordStageLatency(any(), any())
+        }
+        
+        @Test
+        @DisplayName("should provide real-time monitoring dashboard data")
+        fun shouldProvideRealTimeMonitoringDashboardData() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L,
+                enableRealTimeMonitoring = true
+            )
+            processor.initialize(config)
+            
+            // When
+            val dashboardData = processor.getDashboardData()
+            
+            // Then
+            assertNotNull(dashboardData)
+            assertTrue(dashboardData.containsKey("activeRequests"))
+            assertTrue(dashboardData.containsKey("avgResponseTime"))
+            assertTrue(dashboardData.containsKey("errorRate"))
+            verify(mockMetricsCollector).getDashboardMetrics()
+        }
+        
+        @Test
+        @DisplayName("should handle metrics collection failure gracefully")
+        fun shouldHandleMetricsCollectionFailureGracefully() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            whenever(mockMetricsCollector.recordProcessingTime(any())).thenThrow(RuntimeException("Metrics failure"))
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("output", result) // Processing should still succeed
+            verify(mockErrorHandler).handleMetricsError(any())
+        }
+        
+        @Test
+        @DisplayName("should support custom metrics aggregation")
+        fun shouldSupportCustomMetricsAggregation() = runTest {
+            // Given
+            val customAggregator = mock<MetricsAggregator>()
+            processor.setCustomMetricsAggregator(customAggregator)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(customAggregator).aggregateMetrics(any())
+            verify(mockMetricsCollector).setCustomAggregator(customAggregator)
+        }
+            // Then
+
+        @Test
+        @DisplayName("should collect detailed performance metrics")
+        fun shouldCollectDetailedPerformanceMetrics() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(mockMetricsCollector).recordProcessingTime(any())
+            verify(mockMetricsCollector).recordMemoryUsage(any())
+            verify(mockMetricsCollector).recordCPUUsage(any())
+            verify(mockMetricsCollector).recordNetworkLatency(any())
+            verify(mockMetricsCollector).recordStageLatency(any(), any())
+        }
+        
+        @Test
+        @DisplayName("should provide real-time monitoring dashboard data")
+        fun shouldProvideRealTimeMonitoringDashboardData() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L,
+                enableRealTimeMonitoring = true
+            )
+            processor.initialize(config)
+            
+            // When
+            val dashboardData = processor.getDashboardData()
+            
+            // Then
+            assertNotNull(dashboardData)
+            assertTrue(dashboardData.containsKey("activeRequests"))
+            assertTrue(dashboardData.containsKey("avgResponseTime"))
+            assertTrue(dashboardData.containsKey("errorRate"))
+            verify(mockMetricsCollector).getDashboardMetrics()
+        }
+        
+        @Test
+        @DisplayName("should handle metrics collection failure gracefully")
+        fun shouldHandleMetricsCollectionFailureGracefully() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            whenever(mockMetricsCollector.recordProcessingTime(any())).thenThrow(RuntimeException("Metrics failure"))
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("output", result) // Processing should still succeed
+            verify(mockErrorHandler).handleMetricsError(any())
+        }
+        
+        @Test
+        @DisplayName("should support custom metrics aggregation")
+        fun shouldSupportCustomMetricsAggregation() = runTest {
+            // Given
+            val customAggregator = mock<MetricsAggregator>()
+            processor.setCustomMetricsAggregator(customAggregator)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(customAggregator).aggregateMetrics(any())
+            verify(mockMetricsCollector).setCustomAggregator(customAggregator)
+        }
+            assertNotNull(stats)
+
+        @Test
+        @DisplayName("should collect detailed performance metrics")
+        fun shouldCollectDetailedPerformanceMetrics() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(mockMetricsCollector).recordProcessingTime(any())
+            verify(mockMetricsCollector).recordMemoryUsage(any())
+            verify(mockMetricsCollector).recordCPUUsage(any())
+            verify(mockMetricsCollector).recordNetworkLatency(any())
+            verify(mockMetricsCollector).recordStageLatency(any(), any())
+        }
+        
+        @Test
+        @DisplayName("should provide real-time monitoring dashboard data")
+        fun shouldProvideRealTimeMonitoringDashboardData() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L,
+                enableRealTimeMonitoring = true
+            )
+            processor.initialize(config)
+            
+            // When
+            val dashboardData = processor.getDashboardData()
+            
+            // Then
+            assertNotNull(dashboardData)
+            assertTrue(dashboardData.containsKey("activeRequests"))
+            assertTrue(dashboardData.containsKey("avgResponseTime"))
+            assertTrue(dashboardData.containsKey("errorRate"))
+            verify(mockMetricsCollector).getDashboardMetrics()
+        }
+        
+        @Test
+        @DisplayName("should handle metrics collection failure gracefully")
+        fun shouldHandleMetricsCollectionFailureGracefully() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            whenever(mockMetricsCollector.recordProcessingTime(any())).thenThrow(RuntimeException("Metrics failure"))
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("output", result) // Processing should still succeed
+            verify(mockErrorHandler).handleMetricsError(any())
+        }
+        
+        @Test
+        @DisplayName("should support custom metrics aggregation")
+        fun shouldSupportCustomMetricsAggregation() = runTest {
+            // Given
+            val customAggregator = mock<MetricsAggregator>()
+            processor.setCustomMetricsAggregator(customAggregator)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(customAggregator).aggregateMetrics(any())
+            verify(mockMetricsCollector).setCustomAggregator(customAggregator)
+        }
+            verify(mockMetricsCollector).getStatistics()
+
+        @Test
+        @DisplayName("should collect detailed performance metrics")
+        fun shouldCollectDetailedPerformanceMetrics() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(mockMetricsCollector).recordProcessingTime(any())
+            verify(mockMetricsCollector).recordMemoryUsage(any())
+            verify(mockMetricsCollector).recordCPUUsage(any())
+            verify(mockMetricsCollector).recordNetworkLatency(any())
+            verify(mockMetricsCollector).recordStageLatency(any(), any())
+        }
+        
+        @Test
+        @DisplayName("should provide real-time monitoring dashboard data")
+        fun shouldProvideRealTimeMonitoringDashboardData() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L,
+                enableRealTimeMonitoring = true
+            )
+            processor.initialize(config)
+            
+            // When
+            val dashboardData = processor.getDashboardData()
+            
+            // Then
+            assertNotNull(dashboardData)
+            assertTrue(dashboardData.containsKey("activeRequests"))
+            assertTrue(dashboardData.containsKey("avgResponseTime"))
+            assertTrue(dashboardData.containsKey("errorRate"))
+            verify(mockMetricsCollector).getDashboardMetrics()
+        }
+        
+        @Test
+        @DisplayName("should handle metrics collection failure gracefully")
+        fun shouldHandleMetricsCollectionFailureGracefully() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            whenever(mockMetricsCollector.recordProcessingTime(any())).thenThrow(RuntimeException("Metrics failure"))
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("output", result) // Processing should still succeed
+            verify(mockErrorHandler).handleMetricsError(any())
+        }
+        
+        @Test
+        @DisplayName("should support custom metrics aggregation")
+        fun shouldSupportCustomMetricsAggregation() = runTest {
+            // Given
+            val customAggregator = mock<MetricsAggregator>()
+            processor.setCustomMetricsAggregator(customAggregator)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(customAggregator).aggregateMetrics(any())
+            verify(mockMetricsCollector).setCustomAggregator(customAggregator)
+        }
+        }
+
+        @Test
+        @DisplayName("should collect detailed performance metrics")
+        fun shouldCollectDetailedPerformanceMetrics() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(mockMetricsCollector).recordProcessingTime(any())
+            verify(mockMetricsCollector).recordMemoryUsage(any())
+            verify(mockMetricsCollector).recordCPUUsage(any())
+            verify(mockMetricsCollector).recordNetworkLatency(any())
+            verify(mockMetricsCollector).recordStageLatency(any(), any())
+        }
+        
+        @Test
+        @DisplayName("should provide real-time monitoring dashboard data")
+        fun shouldProvideRealTimeMonitoringDashboardData() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L,
+                enableRealTimeMonitoring = true
+            )
+            processor.initialize(config)
+            
+            // When
+            val dashboardData = processor.getDashboardData()
+            
+            // Then
+            assertNotNull(dashboardData)
+            assertTrue(dashboardData.containsKey("activeRequests"))
+            assertTrue(dashboardData.containsKey("avgResponseTime"))
+            assertTrue(dashboardData.containsKey("errorRate"))
+            verify(mockMetricsCollector).getDashboardMetrics()
+        }
+        
+        @Test
+        @DisplayName("should handle metrics collection failure gracefully")
+        fun shouldHandleMetricsCollectionFailureGracefully() = runTest {
+            // Given
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            whenever(mockMetricsCollector.recordProcessingTime(any())).thenThrow(RuntimeException("Metrics failure"))
+            
+            // When
+            val result = processor.process(input)
+            
+            // Then
+            assertEquals("output", result) // Processing should still succeed
+            verify(mockErrorHandler).handleMetricsError(any())
+        }
+        
+        @Test
+        @DisplayName("should support custom metrics aggregation")
+        fun shouldSupportCustomMetricsAggregation() = runTest {
+            // Given
+            val customAggregator = mock<MetricsAggregator>()
+            processor.setCustomMetricsAggregator(customAggregator)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenReturn("output")
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            processor.process(input)
+            
+            // Then
+            verify(customAggregator).aggregateMetrics(any())
+            verify(mockMetricsCollector).setCustomAggregator(customAggregator)
+        }
+    }
+
+    @Nested
+    @DisplayName("Lifecycle Management Tests")
+    inner class LifecycleManagementTests {
+        
+        @Test
+        @DisplayName("should shutdown gracefully")
+        fun shouldShutdownGracefully() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            assertFalse(processor.isInitialized())
+            verify(mockPipelineStage).cleanup()
+            verify(mockMetricsCollector).shutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown timeout")
+        fun shouldHandleShutdownTimeout() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(6000) // Simulate slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.shutdown(timeoutMs = 1000L)
+            
+            // Then
+            assertFalse(shutdownResult)
+            verify(mockErrorHandler).handleShutdownTimeout()
+        }
+        
+        @Test
+        @DisplayName("should restart processor after shutdown")
+        fun shouldRestartProcessorAfterShutdown() {
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            // Given
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            val config = PipelineConfiguration(
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+                stages = listOf(mockPipelineStage),
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+                parallelExecution = false,
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+                timeoutMs = 5000L
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            )
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            processor.initialize(config)
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            processor.shutdown()
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            // When
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            val restartResult = processor.initialize(config)
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            // Then
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            assertTrue(restartResult)
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+            assertTrue(processor.isInitialized())
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertFalse(processor.isInitialized())
+            verify(mockErrorHandler).handleForcedShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle shutdown hooks")
+        fun shouldHandleShutdownHooks() {
+            // Given
+            val shutdownHook = mock<Runnable>()
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            processor.addShutdownHook(shutdownHook)
+            
+            // When
+            processor.shutdown()
+            
+            // Then
+            verify(shutdownHook).run()
+            verify(mockPipelineStage).cleanup()
+        }
+        
+        @Test
+        @DisplayName("should handle health check during lifecycle")
+        fun shouldHandleHealthCheckDuringLifecycle() {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            whenever(mockPipelineStage.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthStatus = processor.getHealthStatus()
+            
+            // Then
+            assertTrue(healthStatus.isHealthy)
+            assertEquals("HEALTHY", healthStatus.status)
+            verify(mockPipelineStage).isHealthy()
+        }
+        }
+
+        @Test
+        @DisplayName("should handle graceful shutdown during active processing")
+        fun shouldHandleGracefulShutdownDuringActiveProcessing() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            val input = "test input"
+            whenever(mockInputProcessor.process(input)).thenReturn(input)
+            whenever(mockPipelineStage.execute(any())).thenAnswer {
+                Thread.sleep(2000) // Simulate long processing
+                "output"
+            }
+            whenever(mockOutputProcessor.process("output")).thenReturn("output")
+            
+            // When
+            val processingFuture = CompletableFuture.supplyAsync {
+                runTest { processor.process(input) }
+            }
+            Thread.sleep(100) // Let processing start
+            val shutdownResult = processor.shutdown(timeoutMs = 5000L)
+            
+            // Then
+            assertTrue(shutdownResult)
+            assertEquals("output", processingFuture.get())
+            verify(mockMetricsCollector).recordGracefulShutdown()
+        }
+        
+        @Test
+        @DisplayName("should handle forced shutdown")
+        fun shouldHandleForcedShutdown() = runTest {
+            // Given
+            val config = PipelineConfiguration(
+                stages = listOf(mockPipelineStage),
+                parallelExecution = false,
+                timeoutMs = 5000L
+            )
+            processor.initialize(config)
+            
+            whenever(mockPipelineStage.cleanup()).thenAnswer {
+                Thread.sleep(10000) // Very slow cleanup
+            }
+            
+            // When
+            val shutdownResult = processor.forceShutdown(timeoutMs = 100L)
+            
+            // Then
+            assertTrue(shutdownRe
             // Given
             val config = PipelineConfiguration(
                 stages = listOf(mockPipelineStage),

