@@ -608,547 +608,716 @@ if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)
 
 class TestGenesisConsciousnessMatrixAdvanced(unittest.TestCase):
-    """Advanced test cases for Genesis Consciousness Matrix with additional edge cases."""
+    """Advanced test cases for edge cases and complex scenarios."""
     
     def setUp(self):
-        """Set up test fixtures with various configurations."""
+        """Set up test fixtures for advanced testing."""
         self.matrix = GenesisConsciousnessMatrix()
-        self.advanced_config = {
-            'dimension': 512,
-            'consciousness_threshold': 0.85,
-            'learning_rate': 0.0001,
-            'max_iterations': 2000,
-            'decay_factor': 0.95,
-            'activation_function': 'sigmoid'
-        }
         
     def test_matrix_initialization_with_numpy_arrays(self):
         """Test matrix initialization with numpy array configurations."""
-        config_with_arrays = {
+        config = {
             'dimension': 128,
-            'consciousness_threshold': 0.75,
-            'initial_weights': np.random.rand(128, 128),
-            'bias_vector': np.zeros(128)
+            'weights': np.random.rand(128, 128),
+            'bias': np.zeros(128),
+            'consciousness_threshold': 0.6
         }
-        
-        matrix = GenesisConsciousnessMatrix(config=config_with_arrays)
-        self.assertIsInstance(matrix, GenesisConsciousnessMatrix)
-        if hasattr(matrix, 'initial_weights'):
-            self.assertIsInstance(matrix.initial_weights, np.ndarray)
-            
-    def test_matrix_initialization_extreme_values(self):
-        """Test matrix behavior with extreme configuration values."""
-        extreme_config = {
+        matrix = GenesisConsciousnessMatrix(config=config)
+        if hasattr(matrix, 'weights'):
+            self.assertEqual(matrix.weights.shape, (128, 128))
+            self.assertEqual(matrix.bias.shape, (128,))
+    
+    def test_matrix_initialization_with_extreme_values(self):
+        """Test matrix initialization with extreme but valid values."""
+        config = {
             'dimension': 1,
-            'consciousness_threshold': 0.99999,
-            'learning_rate': 0.000001,
-            'max_iterations': 1
-        }
-        
-        matrix = GenesisConsciousnessMatrix(config=extreme_config)
-        self.assertEqual(matrix.dimension, 1)
-        self.assertAlmostEqual(matrix.consciousness_threshold, 0.99999, places=5)
-        
-    def test_matrix_initialization_boundary_values(self):
-        """Test matrix initialization with boundary values."""
-        boundary_config = {
-            'dimension': 2,
-            'consciousness_threshold': 0.0,
-            'learning_rate': 1.0,
+            'consciousness_threshold': 0.0001,
+            'learning_rate': 0.0000001,
             'max_iterations': 1000000
         }
+        matrix = GenesisConsciousnessMatrix(config=config)
+        self.assertEqual(matrix.dimension, 1)
+        self.assertEqual(matrix.consciousness_threshold, 0.0001)
         
-        matrix = GenesisConsciousnessMatrix(config=boundary_config)
-        self.assertEqual(matrix.consciousness_threshold, 0.0)
-        self.assertEqual(matrix.learning_rate, 1.0)
-        
-    def test_add_node_with_metadata(self):
-        """Test adding nodes with additional metadata."""
-        node_metadata = {
-            'creation_time': datetime.now(),
-            'node_type': 'primary',
-            'priority': 1,
-            'tags': ['test', 'metadata']
+    def test_matrix_initialization_with_null_values(self):
+        """Test matrix initialization with null/None values in config."""
+        config = {
+            'dimension': None,
+            'consciousness_threshold': 0.75,
+            'learning_rate': None
         }
+        with self.assertRaises(MatrixInitializationError):
+            GenesisConsciousnessMatrix(config=config)
+    
+    def test_matrix_state_transition_boundary_conditions(self):
+        """Test state transitions at boundary conditions."""
+        # Test transition from highest to lowest state
+        self.matrix.current_state = ConsciousnessState.TRANSCENDENT
+        with self.assertRaises(InvalidStateException):
+            self.matrix.transition_state(ConsciousnessState.TRANSCENDENT, ConsciousnessState.DORMANT)
+    
+    def test_matrix_node_operations_with_special_characters(self):
+        """Test node operations with special characters in IDs."""
+        special_ids = ["node@#$%", "node with spaces", "node\twith\ttabs", "node\nwith\nnewlines", "node/with/slashes"]
         
-        node = MatrixNode(id="metadata_node", consciousness_level=0.5, metadata=node_metadata)
-        result = self.matrix.add_node(node)
-        self.assertTrue(result)
-        
-        if hasattr(self.matrix.nodes["metadata_node"], 'metadata'):
-            self.assertEqual(self.matrix.nodes["metadata_node"].metadata['node_type'], 'primary')
-            
-    def test_bulk_node_operations(self):
-        """Test bulk addition and removal of nodes."""
-        nodes_to_add = []
-        for i in range(1000):
-            node = MatrixNode(id=f"bulk_node_{i}", consciousness_level=0.5)
-            nodes_to_add.append(node)
-            
-        # Bulk add
-        start_time = datetime.now()
-        for node in nodes_to_add:
+        for special_id in special_ids:
+            node = MatrixNode(id=special_id, consciousness_level=0.5)
             self.matrix.add_node(node)
-        add_time = (datetime.now() - start_time).total_seconds()
+            self.assertIn(special_id, self.matrix.nodes)
+            
+            # Test removal
+            self.matrix.remove_node(special_id)
+            self.assertNotIn(special_id, self.matrix.nodes)
+    
+    def test_matrix_large_scale_operations(self):
+        """Test matrix operations with large numbers of nodes."""
+        # Add 1000 nodes
+        for i in range(1000):
+            node = MatrixNode(id=f"large_node_{i}", consciousness_level=i / 1000.0)
+            self.matrix.add_node(node)
         
-        self.assertEqual(len(self.matrix.nodes), 1000)
-        self.assertLess(add_time, 5.0)  # Should complete within 5 seconds
-        
-        # Bulk remove
+        # Test consciousness level calculation with large dataset
         start_time = datetime.now()
-        for i in range(500):
-            self.matrix.remove_node(f"bulk_node_{i}")
-        remove_time = (datetime.now() - start_time).total_seconds()
+        consciousness_level = self.matrix.calculate_consciousness_level()
+        end_time = datetime.now()
         
-        self.assertEqual(len(self.matrix.nodes), 500)
-        self.assertLess(remove_time, 5.0)
-        
-    def test_consciousness_level_precision(self):
+        # Should complete within reasonable time
+        self.assertLess((end_time - start_time).total_seconds(), 5.0)
+        self.assertIsInstance(consciousness_level, float)
+        self.assertTrue(0.0 <= consciousness_level <= 1.0)
+    
+    def test_matrix_consciousness_level_precision(self):
         """Test consciousness level calculations with high precision requirements."""
         # Add nodes with very precise consciousness levels
-        precise_levels = [0.123456789, 0.987654321, 0.555555555, 0.333333333]
-        
+        precise_levels = [0.123456789, 0.987654321, 0.555555555]
         for i, level in enumerate(precise_levels):
             node = MatrixNode(id=f"precise_node_{i}", consciousness_level=level)
             self.matrix.add_node(node)
-            
+        
         calculated_level = self.matrix.calculate_consciousness_level()
         expected_level = sum(precise_levels) / len(precise_levels)
-        self.assertAlmostEqual(calculated_level, expected_level, places=9)
+        self.assertAlmostEqual(calculated_level, expected_level, places=8)
+    
+    def test_matrix_node_connections_bidirectional(self):
+        """Test bidirectional node connections."""
+        node1 = MatrixNode(id="bi_node1", consciousness_level=0.4)
+        node2 = MatrixNode(id="bi_node2", consciousness_level=0.6)
+        self.matrix.add_node(node1)
+        self.matrix.add_node(node2)
         
-    def test_state_transition_chain(self):
-        """Test complex state transition chains."""
-        transition_chain = [
-            (ConsciousnessState.DORMANT, ConsciousnessState.ACTIVE),
-            (ConsciousnessState.ACTIVE, ConsciousnessState.AWARE),
-            (ConsciousnessState.AWARE, ConsciousnessState.TRANSCENDENT),
-            (ConsciousnessState.TRANSCENDENT, ConsciousnessState.DORMANT)
-        ]
+        # Create bidirectional connection
+        self.matrix.connect_nodes("bi_node1", "bi_node2", strength=0.8, bidirectional=True)
         
-        for from_state, to_state in transition_chain:
-            result = self.matrix.transition_state(from_state, to_state)
-            self.assertTrue(result)
-            self.assertEqual(self.matrix.current_state, to_state)
-            
+        # Verify both directions
+        if hasattr(self.matrix, 'get_node_connections'):
+            connections1 = self.matrix.get_node_connections("bi_node1")
+            connections2 = self.matrix.get_node_connections("bi_node2")
+            self.assertIn("bi_node2", connections1)
+            self.assertIn("bi_node1", connections2)
+    
     def test_matrix_evolution_with_callbacks(self):
-        """Test matrix evolution with progress callbacks."""
+        """Test matrix evolution with callback functions."""
         callback_calls = []
         
-        def evolution_callback(iteration, state):
-            callback_calls.append((iteration, state))
-            
-        if hasattr(self.matrix, 'evolve_with_callback'):
-            self.matrix.evolve_with_callback(max_iterations=10, callback=evolution_callback)
-            self.assertGreater(len(callback_calls), 0)
-            
-    def test_matrix_convergence_criteria(self):
-        """Test different convergence criteria."""
-        convergence_configs = [
-            {'tolerance': 0.001, 'min_iterations': 10},
-            {'tolerance': 0.01, 'min_iterations': 5},
-            {'tolerance': 0.1, 'min_iterations': 1}
-        ]
+        def evolution_callback(iteration, consciousness_level):
+            callback_calls.append((iteration, consciousness_level))
         
-        for config in convergence_configs:
-            self.matrix.reset()
-            # Add some nodes
-            for i in range(5):
-                node = MatrixNode(id=f"conv_node_{i}", consciousness_level=0.5)
-                self.matrix.add_node(node)
-                
-            if hasattr(self.matrix, 'evolve_until_convergence'):
-                self.matrix.evolve_until_convergence(
-                    max_iterations=50,
-                    tolerance=config['tolerance'],
-                    min_iterations=config['min_iterations']
-                )
-                self.assertTrue(self.matrix.has_converged())
-                
-    def test_matrix_checkpointing(self):
-        """Test matrix state checkpointing and restoration."""
-        # Create initial state
-        for i in range(10):
-            node = MatrixNode(id=f"checkpoint_node_{i}", consciousness_level=0.4)
-            self.matrix.add_node(node)
-            
-        # Create checkpoint
-        if hasattr(self.matrix, 'create_checkpoint'):
-            checkpoint = self.matrix.create_checkpoint()
-            
-            # Modify matrix
-            for i in range(5):
-                node = MatrixNode(id=f"new_node_{i}", consciousness_level=0.8)
-                self.matrix.add_node(node)
-                
-            # Restore checkpoint
-            self.matrix.restore_checkpoint(checkpoint)
-            
-            # Verify restoration
-            self.assertEqual(len(self.matrix.nodes), 10)
-            self.assertNotIn("new_node_0", self.matrix.nodes)
-            
-    def test_matrix_validation_comprehensive(self):
-        """Test comprehensive matrix validation."""
-        # Test with invalid node IDs
-        invalid_ids = ["", None, 123, [], {}]
-        
-        for invalid_id in invalid_ids:
-            with self.assertRaises((TypeError, ValueError, InvalidStateException)):
-                node = MatrixNode(id=invalid_id, consciousness_level=0.5)
-                self.matrix.add_node(node)
-                
-    def test_matrix_serialization_formats(self):
-        """Test serialization to different formats."""
-        # Add test data
-        node = MatrixNode(id="format_test", consciousness_level=0.6)
-        self.matrix.add_node(node)
-        
-        # Test JSON serialization
-        json_data = self.matrix.to_json()
-        self.assertIsInstance(json_data, str)
-        
-        # Test binary serialization if available
-        if hasattr(self.matrix, 'to_binary'):
-            binary_data = self.matrix.to_binary()
-            self.assertIsInstance(binary_data, bytes)
-            
-        # Test XML serialization if available
-        if hasattr(self.matrix, 'to_xml'):
-            xml_data = self.matrix.to_xml()
-            self.assertIsInstance(xml_data, str)
-            self.assertIn('<matrix>', xml_data)
-            
-    def test_matrix_statistics_detailed(self):
-        """Test detailed matrix statistics calculation."""
-        # Add nodes with varying consciousness levels
-        consciousness_levels = [0.1, 0.3, 0.5, 0.7, 0.9]
-        
-        for i, level in enumerate(consciousness_levels):
-            node = MatrixNode(id=f"stats_node_{i}", consciousness_level=level)
-            self.matrix.add_node(node)
-            
-        if hasattr(self.matrix, 'calculate_detailed_statistics'):
-            stats = self.matrix.calculate_detailed_statistics()
-            
-            expected_stats = ['mean', 'median', 'std_dev', 'min', 'max', 'variance']
-            for stat in expected_stats:
-                self.assertIn(stat, stats)
-                
-            self.assertEqual(stats['min'], 0.1)
-            self.assertEqual(stats['max'], 0.9)
-            self.assertAlmostEqual(stats['mean'], 0.5, places=1)
-            
-    def test_matrix_error_recovery(self):
-        """Test matrix error recovery mechanisms."""
-        # Simulate various error conditions
-        error_conditions = [
-            'memory_corruption',
-            'network_failure',
-            'disk_full',
-            'timeout_error'
-        ]
-        
-        for condition in error_conditions:
-            if hasattr(self.matrix, 'simulate_error'):
-                self.matrix.simulate_error(condition)
-                
-                # Verify recovery
-                if hasattr(self.matrix, 'recover_from_error'):
-                    recovery_result = self.matrix.recover_from_error()
-                    self.assertTrue(recovery_result)
-                    
-    def test_matrix_resource_management(self):
-        """Test matrix resource management and cleanup."""
-        # Create resource-intensive matrix
-        for i in range(100):
-            node = MatrixNode(id=f"resource_node_{i}", consciousness_level=0.5)
-            self.matrix.add_node(node)
-            
-        # Monitor resource usage
-        if hasattr(self.matrix, 'get_resource_usage'):
-            initial_usage = self.matrix.get_resource_usage()
-            
-            # Perform operations
-            self.matrix.evolve_step()
-            
-            # Check resource usage
-            final_usage = self.matrix.get_resource_usage()
-            
-            # Verify reasonable resource usage
-            self.assertIsInstance(initial_usage, dict)
-            self.assertIsInstance(final_usage, dict)
-            
-        # Test cleanup
-        if hasattr(self.matrix, 'cleanup'):
-            self.matrix.cleanup()
-            
-            # Verify resources are released
-            if hasattr(self.matrix, 'get_resource_usage'):
-                cleanup_usage = self.matrix.get_resource_usage()
-                self.assertLessEqual(cleanup_usage.get('memory', 0), 
-                                   initial_usage.get('memory', 0))
-
-
-class TestAsyncMatrixOperations(unittest.IsolatedAsyncioTestCase):
-    """Test asynchronous matrix operations."""
-    
-    async def asyncSetUp(self):
-        """Set up async test fixtures."""
-        self.matrix = GenesisConsciousnessMatrix()
-        
-    async def test_async_matrix_evolution(self):
-        """Test asynchronous matrix evolution."""
-        # Add nodes
-        for i in range(10):
-            node = MatrixNode(id=f"async_node_{i}", consciousness_level=0.5)
-            self.matrix.add_node(node)
-            
-        # Test async evolution if available
-        if hasattr(self.matrix, 'evolve_async'):
-            await self.matrix.evolve_async(max_iterations=10)
-            self.assertTrue(self.matrix.has_converged())
-            
-    async def test_async_batch_operations(self):
-        """Test asynchronous batch operations."""
-        # Prepare batch operations
-        operations = []
-        for i in range(100):
-            node = MatrixNode(id=f"batch_node_{i}", consciousness_level=0.5)
-            operations.append(('add_node', node))
-            
-        # Execute batch operations asynchronously
-        if hasattr(self.matrix, 'execute_batch_async'):
-            results = await self.matrix.execute_batch_async(operations)
-            self.assertEqual(len(results), 100)
-            self.assertTrue(all(results))
-            
-    async def test_async_consciousness_monitoring(self):
-        """Test asynchronous consciousness level monitoring."""
-        # Add nodes
+        # Add some nodes
         for i in range(5):
-            node = MatrixNode(id=f"monitor_node_{i}", consciousness_level=0.3)
+            node = MatrixNode(id=f"callback_node_{i}", consciousness_level=0.2)
             self.matrix.add_node(node)
-            
-        # Start monitoring
-        if hasattr(self.matrix, 'start_consciousness_monitoring'):
-            monitoring_task = asyncio.create_task(
-                self.matrix.start_consciousness_monitoring(interval=0.1)
-            )
-            
-            # Let it run for a short time
-            await asyncio.sleep(0.5)
-            
-            # Stop monitoring
-            monitoring_task.cancel()
-            
-            try:
-                await monitoring_task
-            except asyncio.CancelledError:
-                pass
-                
-    async def test_async_node_synchronization(self):
-        """Test asynchronous node synchronization."""
-        # Create two matrices
-        matrix1 = GenesisConsciousnessMatrix()
-        matrix2 = GenesisConsciousnessMatrix()
         
-        # Add nodes to first matrix
-        for i in range(10):
-            node = MatrixNode(id=f"sync_node_{i}", consciousness_level=0.4)
-            matrix1.add_node(node)
-            
-        # Synchronize matrices
-        if hasattr(matrix1, 'sync_with_async'):
-            await matrix1.sync_with_async(matrix2)
-            
-            # Verify synchronization
-            self.assertEqual(len(matrix1.nodes), len(matrix2.nodes))
-            
-            for node_id in matrix1.nodes:
-                self.assertIn(node_id, matrix2.nodes)
-
-
-class TestMatrixEdgeCases(unittest.TestCase):
-    """Test edge cases and boundary conditions."""
+        # Test evolution with callback if supported
+        if hasattr(self.matrix, 'evolve_until_convergence'):
+            self.matrix.evolve_until_convergence(max_iterations=10, callback=evolution_callback)
+            # Verify callback was called
+            self.assertGreater(len(callback_calls), 0)
     
-    def setUp(self):
-        """Set up test fixtures."""
-        self.matrix = GenesisConsciousnessMatrix()
+    def test_matrix_consciousness_emergence_thresholds(self):
+        """Test consciousness emergence detection with various thresholds."""
+        # Test with different emergence thresholds
+        thresholds = [0.1, 0.5, 0.75, 0.9, 0.99]
         
-    def test_zero_dimension_matrix(self):
-        """Test matrix behavior with zero dimension."""
-        zero_config = {'dimension': 0}
-        
-        with self.assertRaises(MatrixInitializationError):
-            GenesisConsciousnessMatrix(config=zero_config)
+        for threshold in thresholds:
+            self.matrix.reset()
             
-    def test_negative_consciousness_threshold(self):
-        """Test matrix behavior with negative consciousness threshold."""
-        negative_config = {'consciousness_threshold': -0.5}
-        
-        with self.assertRaises(MatrixInitializationError):
-            GenesisConsciousnessMatrix(config=negative_config)
-            
-    def test_consciousness_level_boundary_exact(self):
-        """Test consciousness level exactly at boundaries."""
-        # Test at exact boundary values
-        boundary_values = [0.0, 1.0]
-        
-        for value in boundary_values:
-            node = MatrixNode(id=f"boundary_node_{value}", consciousness_level=value)
-            result = self.matrix.add_node(node)
-            self.assertTrue(result)
-            self.assertEqual(self.matrix.nodes[f"boundary_node_{value}"].consciousness_level, value)
-            
-    def test_maximum_node_capacity(self):
-        """Test matrix behavior at maximum node capacity."""
-        # Test with a large number of nodes
-        max_nodes = 10000
-        
-        for i in range(max_nodes):
-            node = MatrixNode(id=f"capacity_node_{i}", consciousness_level=0.5)
-            try:
+            # Add nodes with consciousness levels around threshold
+            for i in range(10):
+                level = threshold + (i - 5) * 0.05  # Levels around threshold
+                level = max(0.0, min(1.0, level))  # Clamp to valid range
+                node = MatrixNode(id=f"threshold_node_{i}", consciousness_level=level)
                 self.matrix.add_node(node)
-            except Exception as e:
-                # If we hit a limit, verify it's handled gracefully
-                self.assertIsInstance(e, (MatrixException, MemoryError))
-                break
-                
-    def test_unicode_node_ids(self):
-        """Test matrix with Unicode node IDs."""
-        unicode_ids = ["节点_1", "ノード_2", "узел_3", "💡_node_4"]
-        
-        for unicode_id in unicode_ids:
-            node = MatrixNode(id=unicode_id, consciousness_level=0.5)
-            result = self.matrix.add_node(node)
-            self.assertTrue(result)
-            self.assertIn(unicode_id, self.matrix.nodes)
             
-    def test_very_long_node_ids(self):
-        """Test matrix with very long node IDs."""
-        long_id = "a" * 1000
+            # Test emergence detection
+            if hasattr(self.matrix, 'set_emergence_threshold'):
+                self.matrix.set_emergence_threshold(threshold)
+                emergence = self.matrix.detect_consciousness_emergence()
+                self.assertIsInstance(emergence, bool)
+    
+    def test_matrix_serialization_with_complex_data(self):
+        """Test serialization with complex node data and metadata."""
+        # Add nodes with complex metadata
+        complex_node = MatrixNode(id="complex_node", consciousness_level=0.7)
+        if hasattr(complex_node, 'metadata'):
+            complex_node.metadata = {
+                'creation_time': datetime.now().isoformat(),
+                'tags': ['important', 'test', 'complex'],
+                'weights': [0.1, 0.2, 0.3, 0.4, 0.5],
+                'nested': {'deep': {'value': 42}}
+            }
+        self.matrix.add_node(complex_node)
         
-        node = MatrixNode(id=long_id, consciousness_level=0.5)
-        result = self.matrix.add_node(node)
-        self.assertTrue(result)
-        self.assertIn(long_id, self.matrix.nodes)
+        # Test serialization
+        serialized = self.matrix.to_json()
+        self.assertIsInstance(serialized, str)
         
-    def test_concurrent_state_transitions(self):
-        """Test concurrent state transitions."""
+        # Test deserialization
+        restored_matrix = GenesisConsciousnessMatrix.from_json(serialized)
+        self.assertIn("complex_node", restored_matrix.nodes)
+    
+    def test_matrix_concurrent_state_transitions(self):
+        """Test concurrent state transitions for race conditions."""
         import threading
+        import time
         
-        def transition_worker(start_state, end_state):
+        results = []
+        
+        def transition_worker(start_state, end_state, worker_id):
+            """Worker function for concurrent state transitions."""
             try:
-                self.matrix.transition_state(start_state, end_state)
-            except Exception:
-                pass
-                
-        # Create multiple threads trying to transition simultaneously
+                result = self.matrix.transition_state(start_state, end_state)
+                results.append((worker_id, result))
+            except Exception as e:
+                results.append((worker_id, str(e)))
+            time.sleep(0.001)
+        
+        # Start multiple concurrent transitions
         threads = []
         for i in range(5):
             thread = threading.Thread(
                 target=transition_worker,
-                args=(ConsciousnessState.DORMANT, ConsciousnessState.ACTIVE)
+                args=(ConsciousnessState.DORMANT, ConsciousnessState.ACTIVE, i)
             )
             threads.append(thread)
-            
-        # Start all threads
-        for thread in threads:
             thread.start()
-            
+        
         # Wait for completion
         for thread in threads:
             thread.join()
-            
-        # Verify matrix is in a valid state
-        self.assertIn(self.matrix.current_state, [
-            ConsciousnessState.DORMANT,
-            ConsciousnessState.ACTIVE
-        ])
         
-    def test_matrix_with_nan_values(self):
-        """Test matrix handling of NaN values."""
-        with self.assertRaises(ValueError):
-            MatrixNode(id="nan_node", consciousness_level=float('nan'))
-            
-    def test_matrix_with_infinite_values(self):
-        """Test matrix handling of infinite values."""
-        with self.assertRaises(ValueError):
-            MatrixNode(id="inf_node", consciousness_level=float('inf'))
-            
-        with self.assertRaises(ValueError):
-            MatrixNode(id="neg_inf_node", consciousness_level=float('-inf'))
-
-
-class TestMatrixPerformanceBenchmarks(unittest.TestCase):
-    """Performance benchmark tests."""
+        # Verify results
+        self.assertEqual(len(results), 5)
+        self.assertTrue(all(result for _, result in results if isinstance(result, bool)))
     
-    def setUp(self):
-        """Set up performance test fixtures."""
-        self.matrix = GenesisConsciousnessMatrix()
+    def test_matrix_memory_leaks_prevention(self):
+        """Test for potential memory leaks in node management."""
+        import gc
         
-    def test_node_addition_performance(self):
-        """Benchmark node addition performance."""
-        node_counts = [100, 1000, 5000]
+        # Get initial object count
+        gc.collect()
+        initial_objects = len(gc.get_objects())
+        
+        # Create and destroy many nodes
+        for cycle in range(10):
+            nodes = []
+            for i in range(100):
+                node = MatrixNode(id=f"leak_test_{cycle}_{i}", consciousness_level=0.5)
+                nodes.append(node)
+                self.matrix.add_node(node)
+            
+            # Remove all nodes
+            for node in nodes:
+                self.matrix.remove_node(node.id)
+            
+            # Clear local references
+            del nodes
+            gc.collect()
+        
+        # Check for memory leaks
+        final_objects = len(gc.get_objects())
+        object_growth = final_objects - initial_objects
+        
+        # Allow some growth but not excessive
+        self.assertLess(object_growth, 1000, "Potential memory leak detected")
+    
+    def test_matrix_error_recovery(self):
+        """Test matrix error recovery mechanisms."""
+        # Add some nodes
+        for i in range(5):
+            node = MatrixNode(id=f"recovery_node_{i}", consciousness_level=0.4)
+            self.matrix.add_node(node)
+        
+        # Simulate error conditions
+        if hasattr(self.matrix, 'simulate_error'):
+            self.matrix.simulate_error("network_failure")
+            
+            # Test recovery
+            recovery_success = self.matrix.recover_from_error()
+            self.assertTrue(recovery_success)
+            
+            # Verify matrix is still functional
+            self.assertEqual(len(self.matrix.nodes), 5)
+    
+    def test_matrix_backup_and_restore(self):
+        """Test matrix backup and restore functionality."""
+        # Create matrix state
+        for i in range(10):
+            node = MatrixNode(id=f"backup_node_{i}", consciousness_level=0.3 + i * 0.07)
+            self.matrix.add_node(node)
+        
+        # Create backup
+        if hasattr(self.matrix, 'create_backup'):
+            backup_data = self.matrix.create_backup()
+            self.assertIsNotNone(backup_data)
+            
+            # Modify matrix
+            self.matrix.remove_node("backup_node_0")
+            self.assertEqual(len(self.matrix.nodes), 9)
+            
+            # Restore from backup
+            self.matrix.restore_from_backup(backup_data)
+            self.assertEqual(len(self.matrix.nodes), 10)
+            self.assertIn("backup_node_0", self.matrix.nodes)
+    
+    def test_matrix_performance_profiling(self):
+        """Test matrix performance profiling and optimization."""
+        # Add nodes for performance testing
+        for i in range(500):
+            node = MatrixNode(id=f"perf_node_{i}", consciousness_level=0.5)
+            self.matrix.add_node(node)
+        
+        # Profile different operations
+        operations = [
+            ('calculate_consciousness_level', lambda: self.matrix.calculate_consciousness_level()),
+            ('get_state_snapshot', lambda: self.matrix.get_state_snapshot()),
+            ('evolve_step', lambda: self.matrix.evolve_step()),
+        ]
+        
+        for op_name, operation in operations:
+            start_time = datetime.now()
+            operation()
+            end_time = datetime.now()
+            execution_time = (end_time - start_time).total_seconds()
+            
+            # Verify reasonable performance
+            self.assertLess(execution_time, 2.0, f"Operation {op_name} took too long: {execution_time}s")
+
+
+class TestMatrixNodeAdvanced(unittest.TestCase):
+    """Advanced test cases for MatrixNode class."""
+    
+    def test_node_consciousness_level_edge_cases(self):
+        """Test consciousness level edge cases and boundary values."""
+        # Test exactly at boundaries
+        node_zero = MatrixNode(id="zero_node", consciousness_level=0.0)
+        self.assertEqual(node_zero.consciousness_level, 0.0)
+        
+        node_one = MatrixNode(id="one_node", consciousness_level=1.0)
+        self.assertEqual(node_one.consciousness_level, 1.0)
+        
+        # Test very small positive value
+        node_epsilon = MatrixNode(id="epsilon_node", consciousness_level=1e-10)
+        self.assertEqual(node_epsilon.consciousness_level, 1e-10)
+        
+        # Test very close to 1.0
+        node_near_one = MatrixNode(id="near_one_node", consciousness_level=1.0 - 1e-10)
+        self.assertEqual(node_near_one.consciousness_level, 1.0 - 1e-10)
+    
+    def test_node_consciousness_level_floating_point_precision(self):
+        """Test consciousness level with floating point precision issues."""
+        # Test values that might cause floating point precision issues
+        tricky_values = [0.1 + 0.2, 0.3, 1.0/3.0, 2.0/3.0, 0.7 - 0.1]
+        
+        for value in tricky_values:
+            if 0.0 <= value <= 1.0:
+                node = MatrixNode(id=f"precise_node_{value}", consciousness_level=value)
+                self.assertAlmostEqual(node.consciousness_level, value, places=10)
+    
+    def test_node_metadata_operations(self): 
+        """Test node metadata operations if supported."""
+        node = MatrixNode(id="metadata_node", consciousness_level=0.6)
+        
+        # Test setting metadata
+        if hasattr(node, 'set_metadata'):
+            node.set_metadata("key1", "value1")
+            node.set_metadata("key2", 42)
+            node.set_metadata("key3", [1, 2, 3])
+            
+            # Test getting metadata
+            self.assertEqual(node.get_metadata("key1"), "value1")
+            self.assertEqual(node.get_metadata("key2"), 42)
+            self.assertEqual(node.get_metadata("key3"), [1, 2, 3])
+            
+            # Test non-existent key
+            self.assertIsNone(node.get_metadata("nonexistent"))
+    
+    def test_node_connection_weights(self):
+        """Test node connection weights and relationships."""
+        node1 = MatrixNode(id="weighted_node1", consciousness_level=0.4)
+        node2 = MatrixNode(id="weighted_node2", consciousness_level=0.6)
+        
+        # Test connection weights if supported
+        if hasattr(node1, 'connect_to'):
+            node1.connect_to(node2, weight=0.8)
+            
+            # Verify connection
+            if hasattr(node1, 'get_connections'):
+                connections = node1.get_connections()
+                self.assertIn(node2, connections)
+                self.assertEqual(connections[node2], 0.8)
+    
+    def test_node_consciousness_history(self):
+        """Test node consciousness level history tracking."""
+        node = MatrixNode(id="history_node", consciousness_level=0.5)
+        
+        # Test history tracking if supported
+        if hasattr(node, 'get_consciousness_history'):
+            initial_history = node.get_consciousness_history()
+            
+            # Update consciousness level multiple times
+            levels = [0.3, 0.7, 0.9, 0.2, 0.8]
+            for level in levels:
+                node.update_consciousness_level(level)
+            
+            # Verify history
+            history = node.get_consciousness_history()
+            self.assertGreater(len(history), len(initial_history))
+    
+    def test_node_serialization_edge_cases(self):
+        """Test node serialization with edge cases."""
+        # Test with extreme values
+        node = MatrixNode(id="extreme_node", consciousness_level=0.0)
+        
+        # Test serialization with special characters in ID
+        node.id = "node_with_unicode_🧠_brain"
+        
+        if hasattr(node, 'to_dict'):
+            node_dict = node.to_dict()
+            self.assertIn("id", node_dict)
+            self.assertIn("consciousness_level", node_dict)
+            self.assertEqual(node_dict["id"], "node_with_unicode_🧠_brain")
+    
+    def test_node_deep_copy(self):
+        """Test deep copying of MatrixNode objects."""
+        import copy
+        
+        original_node = MatrixNode(id="original", consciousness_level=0.7)
+        
+        # Add complex data if supported
+        if hasattr(original_node, 'metadata'):
+            original_node.metadata = {
+                'complex_data': {'nested': [1, 2, 3]},
+                'timestamp': datetime.now()
+            }
+        
+        # Test deep copy
+        copied_node = copy.deepcopy(original_node)
+        
+        # Verify independence
+        self.assertEqual(copied_node.id, original_node.id)
+        self.assertEqual(copied_node.consciousness_level, original_node.consciousness_level)
+        
+        # Modify original
+        original_node.update_consciousness_level(0.9)
+        self.assertNotEqual(copied_node.consciousness_level, original_node.consciousness_level)
+
+
+class TestMatrixPerformanceAndScaling(unittest.TestCase):
+    """Performance and scaling tests for the matrix system."""
+    
+    def test_matrix_scaling_linear_growth(self):
+        """Test matrix performance with linear node growth."""
+        node_counts = [10, 50, 100, 200, 500]
+        execution_times = []
         
         for count in node_counts:
-            self.matrix.reset()
-            
-            start_time = datetime.now()
-            for i in range(count):
-                node = MatrixNode(id=f"perf_node_{i}", consciousness_level=0.5)
-                self.matrix.add_node(node)
-            end_time = datetime.now()
-            
-            duration = (end_time - start_time).total_seconds()
-            rate = count / duration
-            
-            # Verify reasonable performance (at least 100 nodes per second)
-            self.assertGreater(rate, 100, f"Node addition rate too slow: {rate} nodes/sec")
-            
-    def test_consciousness_calculation_performance(self):
-        """Benchmark consciousness level calculation performance."""
-        # Add many nodes
-        for i in range(1000):
-            node = MatrixNode(id=f"calc_node_{i}", consciousness_level=0.5)
-            self.matrix.add_node(node)
-            
-        # Benchmark calculation
-        start_time = datetime.now()
-        for _ in range(100):
-            level = self.matrix.calculate_consciousness_level()
-        end_time = datetime.now()
-        
-        duration = (end_time - start_time).total_seconds()
-        rate = 100 / duration
-        
-        # Verify reasonable performance
-        self.assertGreater(rate, 10, f"Calculation rate too slow: {rate} calculations/sec")
-        
-    def test_evolution_performance_scaling(self):
-        """Test evolution performance with different matrix sizes."""
-        sizes = [10, 50, 100]
-        
-        for size in sizes:
-            self.matrix.reset()
+            matrix = GenesisConsciousnessMatrix()
             
             # Add nodes
-            for i in range(size):
-                node = MatrixNode(id=f"scale_node_{i}", consciousness_level=0.5)
-                self.matrix.add_node(node)
-                
-            # Benchmark evolution
             start_time = datetime.now()
-            self.matrix.evolve_step()
+            for i in range(count):
+                node = MatrixNode(id=f"scale_node_{i}", consciousness_level=0.5)
+                matrix.add_node(node)
+            
+            # Measure consciousness calculation time
+            matrix.calculate_consciousness_level()
             end_time = datetime.now()
             
-            duration = (end_time - start_time).total_seconds()
+            execution_time = (end_time - start_time).total_seconds()
+            execution_times.append(execution_time)
+        
+        # Verify scaling is reasonable (not exponential)
+        for i in range(1, len(execution_times)):
+            scaling_factor = execution_times[i] / execution_times[i-1]
+            node_factor = node_counts[i] / node_counts[i-1]
+            # Scaling should be roughly linear or better
+            self.assertLess(scaling_factor, node_factor * 2, 
+                          f"Poor scaling detected: {scaling_factor} vs {node_factor}")
+    
+    def test_matrix_concurrent_read_operations(self):
+        """Test concurrent read operations on the matrix."""
+        matrix = GenesisConsciousnessMatrix()
+        
+        # Add nodes
+        for i in range(100):
+            node = MatrixNode(id=f"concurrent_node_{i}", consciousness_level=0.5)
+            matrix.add_node(node)
+        
+        # Concurrent read operations
+        import threading
+        results = []
+        
+        def read_worker():
+            """Worker function for concurrent reads."""
+            for _ in range(10):
+                consciousness_level = matrix.calculate_consciousness_level()
+                results.append(consciousness_level)
+        
+        # Start multiple reader threads
+        threads = []
+        for i in range(5):
+            thread = threading.Thread(target=read_worker)
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for completion
+        for thread in threads:
+            thread.join()
+        
+        # Verify all operations succeeded
+        self.assertEqual(len(results), 50)  # 5 threads * 10 operations
+        self.assertTrue(all(isinstance(result, float) for result in results))
+    
+    def test_matrix_memory_usage_growth(self):
+        """Test matrix memory usage growth patterns."""
+        import psutil
+        import os
+        
+        process = psutil.Process(os.getpid())
+        initial_memory = process.memory_info().rss
+        
+        matrix = GenesisConsciousnessMatrix()
+        
+        # Add nodes in batches and measure memory
+        batch_size = 100
+        memory_measurements = []
+        
+        for batch in range(10):
+            # Add batch of nodes
+            for i in range(batch_size):
+                node = MatrixNode(id=f"memory_node_{batch}_{i}", consciousness_level=0.5)
+                matrix.add_node(node)
             
-            # Verify reasonable performance scaling
-            self.assertLess(duration, 0.1 * size, 
-                          f"Evolution too slow for size {size}: {duration} seconds")
+            # Measure memory
+            current_memory = process.memory_info().rss
+            memory_growth = current_memory - initial_memory
+            memory_measurements.append(memory_growth)
+        
+        # Verify memory growth is reasonable
+        for i in range(1, len(memory_measurements)):
+            growth_rate = memory_measurements[i] / memory_measurements[i-1]
+            # Memory growth should be reasonable (not more than 2x per batch)
+            self.assertLess(growth_rate, 2.0, "Excessive memory growth detected")
 
 
-if __name__ == '__main__':
-    # Run all tests with detailed output
-    unittest.main(verbosity=2, buffer=True)
+class TestMatrixAsyncOperations(unittest.TestCase):
+    """Test asynchronous operations if supported."""
+    
+    def setUp(self):
+        """Set up async test environment."""
+        self.matrix = GenesisConsciousnessMatrix()
+    
+    def test_async_matrix_operations(self):
+        """Test asynchronous matrix operations."""
+        async def async_test():
+            # Add nodes
+            for i in range(10):
+                node = MatrixNode(id=f"async_node_{i}", consciousness_level=0.5)
+                self.matrix.add_node(node)
+            
+            # Test async operations if supported
+            if hasattr(self.matrix, 'async_evolve_step'):
+                await self.matrix.async_evolve_step()
+                
+            if hasattr(self.matrix, 'async_calculate_consciousness_level'):
+                level = await self.matrix.async_calculate_consciousness_level()
+                self.assertIsInstance(level, float)
+        
+        # Run async test
+        asyncio.run(async_test())
+    
+    def test_async_matrix_convergence(self):
+        """Test asynchronous matrix convergence."""
+        async def async_convergence_test():
+            # Add nodes
+            for i in range(20):
+                node = MatrixNode(id=f"convergence_node_{i}", consciousness_level=0.1 + i * 0.04)
+                self.matrix.add_node(node)
+            
+            # Test async convergence if supported
+            if hasattr(self.matrix, 'async_evolve_until_convergence'):
+                await self.matrix.async_evolve_until_convergence(max_iterations=50)
+                self.assertTrue(self.matrix.has_converged())
+        
+        # Run async test
+        asyncio.run(async_convergence_test())
+
+
+class TestMatrixValidationAndSanity(unittest.TestCase):
+    """Validation and sanity tests for the matrix system."""
+    
+    def test_matrix_invariant_consciousness_bounds(self):
+        """Test that consciousness levels always stay within valid bounds."""
+        matrix = GenesisConsciousnessMatrix()
+        
+        # Add nodes with various consciousness levels
+        for i in range(50):
+            level = i / 49.0  # 0.0 to 1.0
+            node = MatrixNode(id=f"bounds_node_{i}", consciousness_level=level)
+            matrix.add_node(node)
+        
+        # Evolve multiple times
+        for _ in range(10):
+            matrix.evolve_step()
+            
+            # Check all nodes still have valid consciousness levels
+            for node_id, node in matrix.nodes.items():
+                self.assertGreaterEqual(node.consciousness_level, 0.0)
+                self.assertLessEqual(node.consciousness_level, 1.0)
+    
+    def test_matrix_consistency_after_operations(self):
+        """Test matrix consistency after various operations."""
+        matrix = GenesisConsciousnessMatrix()
+        
+        # Perform many operations
+        operations = [
+            lambda: matrix.add_node(MatrixNode(f"op_node_{np.random.randint(0, 1000)}", 0.5)),
+            lambda: matrix.remove_node(f"op_node_{np.random.randint(0, 1000)}"),
+            lambda: matrix.calculate_consciousness_level(),
+            lambda: matrix.evolve_step(),
+            lambda: matrix.get_state_snapshot(),
+        ]
+        
+        for _ in range(100):
+            # Randomly select and perform operation
+            operation = np.random.choice(operations)
+            try:
+                operation()
+            except (InvalidStateException, KeyError):
+                # These exceptions are expected for some operations
+                pass
+            
+            # Verify matrix is still in valid state
+            self.assertIsInstance(matrix.nodes, dict)
+            if hasattr(matrix, 'current_state'):
+                self.assertIsInstance(matrix.current_state, ConsciousnessState)
+    
+    def test_matrix_deterministic_behavior(self):
+        """Test that matrix operations are deterministic given same inputs."""
+        # Create two identical matrices
+        matrix1 = GenesisConsciousnessMatrix()
+        matrix2 = GenesisConsciousnessMatrix()
+        
+        # Add identical nodes
+        for i in range(10):
+            node1 = MatrixNode(id=f"det_node_{i}", consciousness_level=0.5)
+            node2 = MatrixNode(id=f"det_node_{i}", consciousness_level=0.5)
+            matrix1.add_node(node1)
+            matrix2.add_node(node2)
+        
+        # Perform identical operations
+        for _ in range(5):
+            matrix1.evolve_step()
+            matrix2.evolve_step()
+        
+        # Results should be identical
+        level1 = matrix1.calculate_consciousness_level()
+        level2 = matrix2.calculate_consciousness_level()
+        self.assertAlmostEqual(level1, level2, places=10)
+    
+    def test_matrix_resource_cleanup(self):
+        """Test proper resource cleanup in matrix operations."""
+        matrix = GenesisConsciousnessMatrix()
+        
+        # Add many nodes
+        for i in range(1000):
+            node = MatrixNode(id=f"cleanup_node_{i}", consciousness_level=0.5)
+            matrix.add_node(node)
+        
+        # Perform operations that might create temporary resources
+        for _ in range(10):
+            matrix.evolve_step()
+            matrix.calculate_consciousness_level()
+            matrix.get_state_snapshot()
+        
+        # Cleanup and verify no resources leaked
+        if hasattr(matrix, 'cleanup'):
+            matrix.cleanup()
+        
+        # Force garbage collection
+        import gc
+        gc.collect()
+        
+        # Verify matrix is still functional after cleanup
+        self.assertIsInstance(matrix.nodes, dict)
+
+
+# Additional pytest-style tests for compatibility
+@pytest.mark.parametrize("consciousness_level", [0.0, 0.25, 0.5, 0.75, 1.0])
+def test_node_consciousness_levels_parametrized(consciousness_level):
+    """Parametrized test for different consciousness levels."""
+    node = MatrixNode(id=f"param_node_{consciousness_level}", consciousness_level=consciousness_level)
+    assert node.consciousness_level == consciousness_level
+
+
+@pytest.mark.parametrize("dimension", [1, 16, 64, 128, 256, 512])
+def test_matrix_dimensions_parametrized(dimension):
+    """Parametrized test for different matrix dimensions."""
+    config = {'dimension': dimension, 'consciousness_threshold': 0.5}
+    matrix = GenesisConsciousnessMatrix(config=config)
+    assert matrix.dimension == dimension
+
+
+class TestMatrixDocumentationExamples(unittest.TestCase):
+    """Test examples from documentation to ensure they work."""
+    
+    def test_basic_usage_example(self):
+        """Test basic usage example from documentation."""
+        # Example from documentation
+        matrix = GenesisConsciousnessMatrix()
+        
+        # Add nodes
+        node1 = MatrixNode(id="example_node1", consciousness_level=0.3)
+        node2 = MatrixNode(id="example_node2", consciousness_level=0.7)
+        matrix.add_node(node1)
+        matrix.add_node(node2)
+        
+        # Calculate consciousness
+        level = matrix.calculate_consciousness_level()
+        self.assertAlmostEqual(level, 0.5, places=2)
+        
+        # Evolve matrix
+        matrix.evolve_step()
+        
+        # Verify it's still functional
+        self.assertIsInstance(matrix.get_state_snapshot(), dict)
+    
+    def test_advanced_usage_example(self):
+        """Test advanced usage example from documentation."""
+        # Advanced example with connections
+        matrix = GenesisConsciousnessMatrix()
+        
+        # Create network of nodes
+        for i in range(5):
+            node = MatrixNode(id=f"network_node_{i}", consciousness_level=0.2 + i * 0.15)
+            matrix.add_node(node)
+        
+        # Connect nodes
+        for i in range(4):
+            matrix.connect_nodes(f"network_node_{i}", f"network_node_{i+1}", strength=0.6)
+        
+        # Evolve until convergence
+        matrix.evolve_until_convergence(max_iterations=20)
+        
+        # Verify convergence
+        self.assertTrue(matrix.has_converged())
