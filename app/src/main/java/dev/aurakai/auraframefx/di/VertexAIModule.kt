@@ -24,7 +24,7 @@ object VertexAIModule {
     /**
      * Provides a singleton `VertexAIConfig` instance preconfigured with production settings for Vertex AI integration.
      *
-     * The configuration specifies project ID, location, API endpoint, model name, API version, safety filters, retry and timeout limits, concurrency controls, and caching parameters.
+     * The configuration includes project ID, location, API endpoint, model name, API version, safety filters, retry and timeout limits, concurrency controls, and caching parameters.
      *
      * @return A `VertexAIConfig` instance ready for use with Vertex AI services.
      */
@@ -49,7 +49,7 @@ object VertexAIModule {
     }
 
     /**
-     * Provides a singleton instance of `VertexAIClient` configured with the given Vertex AI settings, application context, security context, and logger.
+     * Returns a singleton `VertexAIClient` instance configured with the specified Vertex AI settings, application context, security context, and logger.
      *
      * @return A `VertexAIClient` for accessing Vertex AI services.
      */

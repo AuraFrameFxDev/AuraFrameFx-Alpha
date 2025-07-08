@@ -29,7 +29,7 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates binding to the Oracle Drive service in beta mode.
      *
-     * Updates internal state to indicate that service binding is disabled. No real service connection occurs.
+     * Updates internal state to reflect that service binding is disabled. No actual service connection is performed.
      */
     fun bindService() {
         // Beta stub: No actual binding
@@ -49,7 +49,7 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Updates status, detailed status, and diagnostics log with static messages indicating Oracle Drive features are disabled in beta mode.
+     * Updates the status, detailed status, and diagnostics log with placeholder messages indicating Oracle Drive features are disabled in beta mode.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
