@@ -1,12 +1,8 @@
 package dev.aurakai.auraframefx.ai.services
 
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.AfterEach
@@ -17,7 +13,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.*
-
 import java.io.IOException
 import java.util.concurrent.TimeoutException
 
@@ -25,7 +20,7 @@ import java.util.concurrent.TimeoutException
 interface HttpClient {
     suspend fun post(request: Any): HttpResponse
     suspend fun get(request: Any): HttpResponse
-    suspend fun postStream(request: Any): Flow<String>
+    suspend fun postStream(request: Any): kotlinx.coroutines.flow.Flow<String>
 }
 
 interface ConfigurationService {
@@ -54,7 +49,7 @@ interface HttpResponse {
 interface AuraAIService {
     suspend fun generateResponse(prompt: String, userId: String? = null): String
     suspend fun generateBatchResponses(prompts: List<String>): List<String>
-    suspend fun generateStreamingResponse(prompt: String): Flow<String>
+    suspend fun generateStreamingResponse(prompt: String): kotlinx.coroutines.flow.Flow<String>
     fun updateApiKey(apiKey: String)
     fun updateBaseUrl(baseUrl: String)
     fun updateTimeout(timeout: Long)
@@ -111,7 +106,7 @@ class AuraAIServiceImpl(
         return listOf(response.body)
     }
 
-    override suspend fun generateStreamingResponse(prompt: String): Flow<String> {
+    override suspend fun generateStreamingResponse(prompt: String): kotlinx.coroutines.flow.Flow<String> {
         require(prompt.isNotEmpty()) { "Prompt cannot be empty" }
         logger.info("Starting streaming response for prompt length: ${prompt.length}")
         return httpClient.postStream(prompt)

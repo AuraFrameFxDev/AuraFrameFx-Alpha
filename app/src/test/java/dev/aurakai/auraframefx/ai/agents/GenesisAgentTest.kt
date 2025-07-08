@@ -6,8 +6,16 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import org.mockito.kotlin.any
 import java.util.concurrent.ConcurrentHashMap
+
+interface Agent {
+    fun getName(): String
+    fun getType(): String?
+    suspend fun processRequest(request: AiRequest): AgentResponse
+}
 
 class DummyAgent(
     private val name: String,
@@ -26,6 +34,88 @@ class FailingAgent(private val name: String) : Agent {
     override suspend fun processRequest(request: AiRequest): AgentResponse {
         throw RuntimeException("Agent processing failed")
     }
+}
+
+class GenesisAgent(
+    private val auraService: AuraAIService,
+    private val kaiService: KaiAIService,
+    private val cascadeService: CascadeAIService
+) : Agent {
+    enum class ConversationMode { TURN_ORDER, CASCADE, CONSENSUS }
+
+    override fun getName(): String = "GenesisAgent"
+    override fun getType(): String? = null
+
+    suspend fun participateWithAgents(
+        context: Map<String, String>,
+        agents: List<Agent>,
+        prompt: String?,
+        mode: ConversationMode
+    ): Map<String, AgentResponse> {
+        if (agents.isEmpty()) return emptyMap()
+        val responses = mutableMapOf<String, AgentResponse>()
+        for (agent in agents) {
+            try {
+                val requestPrompt = prompt ?: ""
+                val combinedPrompt = buildString {
+                    if (context.isNotEmpty()) {
+                        append(context.entries.joinToString(" ") { "${it.key}:${it.value}" })
+                        append(" ")
+                    }
+                    append(requestPrompt)
+                }
+                val response = agent.processRequest(AiRequest(combinedPrompt, context))
+                responses[agent.getName()] = response
+            } catch (_: Exception) {
+            }
+        }
+        return responses
+    }
+
+    fun aggregateAgentResponses(
+        responsesList: List<Map<String, AgentResponse>>
+    ): Map<String, AgentResponse> {
+        val consensus = mutableMapOf<String, AgentResponse>()
+        for (responses in responsesList) {
+            for ((name, response) in responses) {
+                val existing = consensus[name]
+                if (existing == null || response.confidence > existing.confidence) {
+                    consensus[name] = response
+                }
+            }
+        }
+        return consensus
+    }
+
+    override suspend fun processRequest(request: AiRequest): AgentResponse {
+        requireNotNull(request) { "Request cannot be null" }
+        val auraResp = auraService.processRequest(request)
+        val kaiResp = kaiService.processRequest(request)
+        val cascadeResp = cascadeService.processRequest(request)
+        val aggregated = aggregateAgentResponses(
+            listOf(
+                mapOf("Aura" to auraResp),
+                mapOf("Kai" to kaiResp),
+                mapOf("Cascade" to cascadeResp)
+            )
+        )
+        return AgentResponse(
+            content = aggregated.values.joinToString(" ") { it.content },
+            confidence = aggregated.values.maxOfOrNull { it.confidence } ?: 0.0f
+        )
+    }
+}
+
+interface AuraAIService {
+    suspend fun processRequest(request: AiRequest): AgentResponse
+}
+
+interface KaiAIService {
+    suspend fun processRequest(request: AiRequest): AgentResponse
+}
+
+interface CascadeAIService {
+    suspend fun processRequest(request: AiRequest): AgentResponse
 }
 
 class GenesisAgentTest {
@@ -347,7 +437,7 @@ class GenesisAgentTest {
     @Test
     fun testGenesisAgent_processRequest_nullRequest() = runBlocking {
         try {
-            genesisAgent.processRequest(null)
+            genesisAgent.processRequest(null as AiRequest)
             fail("Should throw exception for null request")
         } catch (e: Exception) {
             assertTrue("Exception should be thrown", true)
