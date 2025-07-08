@@ -22,6 +22,12 @@ class MemoryManager @Inject constructor(
     private val _memoryStats = MutableStateFlow(MemoryStats())
     val memoryStats: StateFlow<MemoryStats> = _memoryStats
 
+    /**
+     * Stores a canonical memory item and updates memory statistics and recent access tracking.
+     *
+     * @param item The canonical memory item to store.
+     * @return The ID of the stored memory item.
+     */
     fun storeMemory(item: CanonicalMemoryItem): String { // Changed MemoryItem to CanonicalMemoryItem
         memoryStore[item.id] = item
         updateStats()
@@ -29,6 +35,14 @@ class MemoryManager @Inject constructor(
         return item.id
     }
 
+    /**
+     * Retrieves memory items matching the specified query, filtered by agent if provided.
+     *
+     * The results are sorted by descending timestamp and limited to the maximum number of items configured.
+     *
+     * @param query The criteria used to filter and retrieve memory items.
+     * @return A [MemoryRetrievalResult] containing the filtered memory items, their count, and the original query.
+     */
     fun retrieveMemory(query: MemoryQuery): MemoryRetrievalResult {
         val items = memoryStore.values
             .filter { item ->
@@ -45,6 +59,14 @@ class MemoryManager @Inject constructor(
         )
     }
 
+    /**
+     * Retrieves a list of recent memory items within the configured context window.
+     *
+     * Filters memory items to include only those whose timestamps fall within the maximum chain length duration from the current time, sorts them by most recent, and limits the result to the configured maximum chain length.
+     *
+     * @param task The task identifier (currently unused in filtering).
+     * @return A list of recent `CanonicalMemoryItem` objects within the context window.
+     */
     fun getContextWindow(task: String): List<CanonicalMemoryItem> { // Changed MemoryItem to CanonicalMemoryItem
         val recentItems = memoryStore.values
             .filter {
@@ -57,12 +79,19 @@ class MemoryManager @Inject constructor(
         return recentItems
     }
 
+    /**
+     * Returns the current memory statistics snapshot.
+     *
+     * @return The latest `MemoryStats` reflecting the state of the memory store.
+     */
     fun getMemoryStats(): MemoryStats {
         return _memoryStats.value
     }
 
     /**
-     * Updates the memory statistics with the current total item count, recent item count, total memory size, and the timestamp of the update.
+     * Refreshes the memory statistics to reflect the current state of the memory store.
+     *
+     * Updates include the total number of items, the count of recent items within the configured chain length, the aggregate size of all memory content, and the timestamp of the update.
      */
     private fun updateStats() {
         _memoryStats.update { current ->

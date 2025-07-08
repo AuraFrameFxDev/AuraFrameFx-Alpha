@@ -43,6 +43,14 @@ class CascadeDebugViewModel @Inject constructor(
  * Provides interactive controls to view and modify the current vision and processing states, as well as to review their respective histories. Intended for use in development or debugging environments to facilitate real-time state inspection and manipulation.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays a debug interface for viewing and updating the vision and processing states of a CascadeAgent.
+ *
+ * This composable provides editable fields and controls for inspecting and modifying the current vision and processing states,
+ * as well as a history view of state changes. Intended for use in development and debugging scenarios.
+ *
+ * @param viewModel The ViewModel providing access to the CascadeAgent's state and update methods. Uses Hilt injection by default.
+ */
 @Composable
 fun CascadeZOrderPlayground(
     viewModel: CascadeDebugViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
