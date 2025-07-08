@@ -202,6 +202,15 @@ class AIPipelineProcessor @Inject constructor(
         return priority.coerceIn(0.0f, 1.0f)
     }
 
+    /**
+     * Selects a set of AI agents to process a task based on its content and priority.
+     *
+     * Always includes the Genesis agent as the coordinator. Adds Cascade for analysis or data-related tasks, Kai for security-related tasks, and Aura for creative or generative tasks. For high-priority or complex tasks, additional agents are included to ensure redundancy and comprehensive processing.
+     *
+     * @param task The task description to analyze for agent selection.
+     * @param priority The calculated priority of the task, influencing agent redundancy.
+     * @return A set of selected agent types appropriate for the task.
+     */
     private fun selectAgents(task: String, priority: Float): Set<AgentType> {
         // Intelligent agent selection based on task characteristics and priority
         val selectedAgents = mutableSetOf<AgentType>()
@@ -241,12 +250,12 @@ class AIPipelineProcessor @Inject constructor(
     }
 
     /**
-     * Synthesizes a structured, human-readable summary from multiple agent responses.
+     * Creates a structured summary of multiple agent responses, highlighting the Genesis agent's analysis, including supplementary inputs from other agents with icons, and appending the overall average confidence score.
      *
-     * Groups agent messages by sender, highlights the primary response from the Genesis agent if present, includes supplementary responses from other agents with appropriate icons, and appends the average confidence score for all responses. Returns a default message if no responses are available.
+     * Returns a default message if no responses are provided.
      *
      * @param responses The list of agent messages to aggregate.
-     * @return A formatted string summarizing all agent responses and overall confidence.
+     * @return A formatted string summarizing all agent responses and the overall confidence score.
      */
     private fun generateFinalResponse(responses: List<AgentMessage>): String {
         // Sophisticated response synthesis from multiple agents
@@ -288,16 +297,23 @@ class AIPipelineProcessor @Inject constructor(
         }
     }
 
+    /**
+     * Calculates the average confidence score from a list of agent messages.
+     *
+     * The result is clamped between 0.0 and 1.0.
+     *
+     * @param responses The list of agent messages to evaluate.
+     * @return The average confidence score as a float between 0.0 and 1.0.
+     */
     private fun calculateConfidence(responses: List<AgentMessage>): Float {
         return responses.map { it.confidence }.average().toFloat()
             .coerceIn(0.0f, 1.0f) // Added .toFloat()
     }
 
     /**
-     * Updates the processing context with information from the current task and agent responses.
+     * Updates the processing context with recent task history, response patterns, system metrics, and agent performance statistics based on the given task and agent responses.
      *
-     * This includes updating recent task history, response patterns for learning, system metrics,
-     * and tracking agent performance statistics.
+     * Maintains a rolling history of recent tasks, tracks response confidence and agent participation for learning, updates system-level metrics, and records per-agent confidence scores for performance monitoring.
      *
      * @param task The task that was processed.
      * @param responses The list of agent messages generated for the task.

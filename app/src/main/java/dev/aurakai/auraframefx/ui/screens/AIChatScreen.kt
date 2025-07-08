@@ -30,9 +30,9 @@ data class ChatMessage(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays an interactive AI chat interface with persistent message history and input.
+ * Displays an interactive AI chat interface with persistent message history and input field.
  *
- * Shows a scrollable list of chat messages, visually distinguishing between user and AI responses. Users can compose and send messages, which are appended to the conversation along with a simulated AI reply. Both the input field and chat history are preserved across configuration changes and recompositions.
+ * Presents a scrollable conversation view where user and AI messages are visually distinguished. Users can compose and send messages, which are appended to the chat along with a simulated AI response. Both the chat history and input text are retained across configuration changes and recompositions.
  */
 @Composable
 fun AiChatScreen() {
@@ -121,11 +121,11 @@ fun AiChatScreen() {
 }
 
 /**
- * Renders a chat message bubble with alignment, color, and shape determined by the sender.
+ * Displays a single chat message bubble with alignment and styling based on the sender.
  *
- * The bubble is right-aligned and styled as outgoing if sent by the user, or left-aligned and styled as incoming if sent by the AI.
+ * The bubble is right-aligned and styled as outgoing for user messages, or left-aligned and styled as incoming for AI messages.
  *
- * @param message The chat message to render.
+ * @param message The chat message to display.
  */
 @Composable
 fun ChatMessageItem(message: ChatMessage) {
