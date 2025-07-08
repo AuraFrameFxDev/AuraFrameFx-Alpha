@@ -9,7 +9,11 @@ import java.lang.System // Added import
 
 @Serializable
 data class CanonicalMemoryItem( // Renamed from MemoryItem
-    val id: String = "mem_${System.currentTimeMillis()}",
+data class MemoryItem(
+    val id: String = "mem_${Clock.System.now().toEpochMilliseconds()}",
+    val timestamp: Instant       = Clock.System.now(),
+    // … other properties …
+)
     val content: String,
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val agent: AgentType,
