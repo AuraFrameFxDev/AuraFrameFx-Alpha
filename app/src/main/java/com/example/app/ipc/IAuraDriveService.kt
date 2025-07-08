@@ -13,21 +13,21 @@ fun getOracleDriveStatus(): String
     /**
  * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module was successfully toggled, `false` otherwise.
+ * @return `true` if the module's state was successfully changed, `false` otherwise.
  */
 fun toggleLSPosedModule(): Boolean  
     /**
  * Returns a detailed internal status report of the Aura Drive service.
  *
- * The returned string contains comprehensive information useful for diagnostics or monitoring.
+ * The returned string provides comprehensive information for diagnostics or monitoring.
  *
  * @return The detailed internal status of the service.
  */
 fun getDetailedInternalStatus(): String
     /**
- * Returns a list of internal diagnostics log entries for debugging or monitoring purposes.
+ * Returns a list of internal diagnostics log entries for debugging or monitoring.
  *
- * @return A list of strings representing individual diagnostics log entries.
+ * @return A list of strings, each representing a diagnostics log entry.
  */
 fun getInternalDiagnosticsLog(): List<String>
     
@@ -36,7 +36,7 @@ fun getInternalDiagnosticsLog(): List<String>
             /**
              * Returns an `IAuraDriveService` implementation backed by the provided `IBinder`, or null if the binder is null.
              *
-             * The returned implementation serves as a placeholder and does not perform actual service logic.
+             * The returned implementation is a stub and does not perform actual service logic.
              *
              * @param service The `IBinder` representing the remote service, or null.
              * @return An `IAuraDriveService` implementation if the binder is non-null; otherwise, null.
@@ -46,9 +46,9 @@ fun getInternalDiagnosticsLog(): List<String>
                 return if (service != null) {
                     object : IAuraDriveService {
                         /**
- * Returns the IBinder instance backing this interface implementation.
+ * Returns the underlying IBinder associated with this interface implementation.
  *
- * @return The underlying IBinder.
+ * @return The backing IBinder instance.
  */
 override fun asBinder(): IBinder = service
                         /**
@@ -60,9 +60,9 @@ override fun asBinder(): IBinder = service
  */
 override fun getOracleDriveStatus(): String = "Unknown"
                         /**
- * Toggles the enabled or disabled state of the LSPosed module.
+ * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module state was successfully toggled, `false` otherwise.
+ * @return `true` if the module state was successfully changed, `false` otherwise.
  */
 override fun toggleLSPosedModule(): Boolean = false
                         /**
