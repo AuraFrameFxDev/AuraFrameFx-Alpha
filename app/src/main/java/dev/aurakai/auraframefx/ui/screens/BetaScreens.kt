@@ -20,6 +20,11 @@ import androidx.navigation.NavHostController
  *
  * Presents the main interface for the app, including navigation to the AI chat screen and a placeholder for settings.
  */
+/**
+ * Displays the home screen with app information and navigation buttons.
+ *
+ * Shows the app title, subtitle, and status message, along with buttons to navigate to the AI chat screen or settings.
+ */
 @Composable
 fun HomeScreen(navController: NavHostController) {
     Column(

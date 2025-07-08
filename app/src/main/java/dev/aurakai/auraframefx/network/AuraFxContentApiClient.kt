@@ -17,7 +17,7 @@ class AuraFxContentApiClient @Inject constructor(
     private val aiContentApi: AIContentApi,
 ) {
     /**
-     * Asynchronously generates AI-powered text based on the provided prompt.
+     * Asynchronously generates AI-powered text from the given prompt.
      *
      * @param prompt The input prompt for text generation.
      * @param maxTokens Optional maximum number of tokens for the generated text; defaults to 500 if not specified.

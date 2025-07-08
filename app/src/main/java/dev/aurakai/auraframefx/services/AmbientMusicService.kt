@@ -8,7 +8,11 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class AmbientMusicService @Inject constructor() : Service() {
-    // TODO: If this service has dependencies to be injected, add them to the constructor.
+    /**
+     * Always returns null, indicating that this service does not support binding.
+     *
+     * @return Always null.
+     */
 
     override fun onBind(_intent: Intent?): IBinder? { // intent -> _intent
         // TODO: Implement binding if needed, otherwise this service cannot be bound.
@@ -17,9 +21,9 @@ class AmbientMusicService @Inject constructor() : Service() {
     }
 
     /**
-     * Handles requests to start the service and specifies that the service should not be recreated if terminated by the system.
+     * Specifies that the service should not be restarted automatically if terminated by the system.
      *
-     * @return `START_NOT_STICKY`, indicating the service will not restart automatically if killed.
+     * @return `START_NOT_STICKY` to indicate the service will not be recreated after being killed.
      */
     override fun onStartCommand(_intent: Intent?, _flags: Int, _startId: Int): Int {
         // TODO: Implement service logic for starting the service.
@@ -28,9 +32,9 @@ class AmbientMusicService @Inject constructor() : Service() {
     }
 
     /**
-     * Pauses music playback.
+     * Pauses music playback if currently active.
      *
-     * This method is intended to halt the current audio stream if playback is active.
+     * Intended to halt the current audio stream.
      */
     fun pause() {
         // TODO: Implement pause logic. Reported as unused. Implement or remove.
