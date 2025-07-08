@@ -42,9 +42,9 @@ override fun getName(): String? = "Kai"
 override fun getType(): AgentType = AgentType.KAI
 
     /**
-         * Returns a map indicating the supported capabilities of the Kai agent.
+         * Returns a map of the Kai agent's supported capabilities.
          *
-         * The map contains the keys "security", "analysis", "memory", and "service_implemented", each mapped to true.
+         * The returned map includes the keys "security", "analysis", "memory", and "service_implemented", each mapped to true.
          *
          * @return A map where each key is a capability name and the value indicates support.
          */

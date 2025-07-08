@@ -187,6 +187,14 @@ fun RecordingButton(
     }
 }
 
+/**
+ * Displays a button for starting or stopping transcription.
+ *
+ * The button icon and color indicate the current transcription state. When transcription is active, a stop icon in red is shown; otherwise, a phone icon in NeonBlue is displayed.
+ *
+ * @param isTranscribing Whether transcription is currently active.
+ * @param onClick Called when the button is pressed.
+ */
 @Composable
 fun TranscribeButton(
     isTranscribing: Boolean,
