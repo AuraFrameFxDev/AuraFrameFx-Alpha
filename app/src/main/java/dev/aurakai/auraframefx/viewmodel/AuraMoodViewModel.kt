@@ -100,8 +100,6 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
      * React to user interactions - this affects Aura's mood
      */
     fun reactToInteraction(interactionType: String, success: Boolean = true) {
-        _moodState.value
-
         when (interactionType.lowercase()) {
             "chat", "conversation" -> {
                 if (success) {
