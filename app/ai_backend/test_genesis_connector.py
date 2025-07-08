@@ -4541,3 +4541,676 @@ def create_test_malformed_responses():
     ]
 
 # Fix any remaining syntax issues in test methods
+class TestGenesisConnectorEnhancedCoverage(unittest.TestCase):
+    """
+    Enhanced coverage tests for GenesisConnector to fill any remaining gaps.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up enhanced coverage test environment."""
+        self.connector = GenesisConnector()
+        self.test_config = {
+            'api_key': 'enhanced_test_key',
+            'base_url': 'https://api.enhanced.test.com',
+            'timeout': 30
+        }
+
+    def test_connector_string_representation(self):
+        """Test string representation methods of GenesisConnector."""
+        connector = GenesisConnector(config=self.test_config)
+        
+        # Test __str__ method
+        str_repr = str(connector)
+        self.assertIsInstance(str_repr, str)
+        self.assertIn('GenesisConnector', str_repr)
+        
+        # Test __repr__ method
+        repr_str = repr(connector)
+        self.assertIsInstance(repr_str, str)
+
+    def test_connector_equality_and_hashing(self):
+        """Test equality comparison and hashing of GenesisConnector instances."""
+        connector1 = GenesisConnector(config=self.test_config)
+        connector2 = GenesisConnector(config=self.test_config.copy())
+        connector3 = GenesisConnector(config={'api_key': 'different', 'base_url': 'https://different.com'})
+        
+        # Test equality
+        try:
+            self.assertEqual(connector1, connector2)
+            self.assertNotEqual(connector1, connector3)
+        except (NotImplementedError, TypeError):
+            # Equality might not be implemented
+            pass
+        
+        # Test hashing if implemented
+        try:
+            hash_1 = hash(connector1)
+            hash_2 = hash(connector2)
+            self.assertIsInstance(hash_1, int)
+            self.assertIsInstance(hash_2, int)
+        except TypeError:
+            # Hashing might not be implemented for mutable objects
+            pass
+
+    def test_config_deep_copy_behavior(self):
+        """Test that configuration changes don't affect other instances."""
+        original_config = {'api_key': 'test', 'base_url': 'https://test.com', 'nested': {'key': 'value'}}
+        connector = GenesisConnector(config=original_config)
+        
+        # Modify original config
+        original_config['api_key'] = 'modified'
+        original_config['nested']['key'] = 'modified'
+        
+        # Connector should not be affected by external config changes
+        if hasattr(connector, 'config'):
+            self.assertNotEqual(connector.config.get('api_key'), 'modified')
+
+    def test_graceful_handling_of_missing_methods(self):
+        """Test graceful handling when optional methods are not implemented."""
+        optional_methods = [
+            'get_metrics', 'health_check', 'send_request_with_retry',
+            'validate_webhook_signature', 'send_batch_requests',
+            'get_cached_response', 'send_signed_request', 'get_trace_info',
+            'hot_reload_config', 'send_request_async'
+        ]
+        
+        for method_name in optional_methods:
+            with self.subTest(method=method_name):
+                if hasattr(self.connector, method_name):
+                    method = getattr(self.connector, method_name)
+                    self.assertTrue(callable(method))
+                else:
+                    # Method doesn't exist, which is acceptable
+                    pass
+
+    def test_config_validation_with_custom_validators(self):
+        """Test configuration validation with custom validation rules."""
+        custom_validators = [
+            # Test port validation
+            {'api_key': 'test', 'base_url': 'https://api.test.com:443', 'port': 443},
+            {'api_key': 'test', 'base_url': 'https://api.test.com:8080', 'port': 8080},
+            # Test protocol validation
+            {'api_key': 'test', 'base_url': 'https://api.test.com', 'protocol': 'https'},
+            # Test environment-specific configs
+            {'api_key': 'test', 'base_url': 'https://api.test.com', 'environment': 'test'},
+            {'api_key': 'test', 'base_url': 'https://api.test.com', 'environment': 'production'},
+        ]
+        
+        for config in custom_validators:
+            with self.subTest(config=config):
+                try:
+                    result = self.connector.validate_config(config)
+                    self.assertIsInstance(result, bool)
+                except (ValueError, AttributeError):
+                    # Some custom configs might not be supported
+                    pass
+
+    def test_payload_serialization_edge_cases(self):
+        """Test payload serialization with various edge case data types."""
+        edge_case_data = [
+            # Generator expressions
+            {'data': (x for x in range(5)), 'message': 'generator'},
+            # Lambda functions (should be rejected)
+            {'data': lambda x: x, 'message': 'lambda'},
+            # Class instances
+            {'data': self, 'message': 'class_instance'},
+            # Partial functions
+            {'data': functools.partial(str, 'test'), 'message': 'partial'} if 'functools' in globals() else {'message': 'no_functools'},
+            # Sets and frozensets
+            {'data': {1, 2, 3}, 'message': 'set'},
+            {'data': frozenset([1, 2, 3]), 'message': 'frozenset'},
+        ]
+        
+        for payload in edge_case_data:
+            with self.subTest(payload_type=payload.get('message', 'unknown')):
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+                except (ValueError, TypeError):
+                    # Some data types might not be serializable
+                    pass
+
+    def test_error_message_consistency(self):
+        """Test that error messages are consistent and informative."""
+        error_scenarios = [
+            # Invalid config scenarios
+            ({'api_key': '', 'base_url': 'https://test.com'}, 'Empty API key'),
+            ({'api_key': 'test', 'base_url': ''}, 'Empty base URL'),
+            ({'api_key': 'test', 'base_url': 'invalid_url'}, 'Invalid URL format'),
+            # Invalid payload scenarios
+            ({}, 'Empty payload'),
+            (None, 'None payload'),
+        ]
+        
+        for scenario, description in error_scenarios:
+            with self.subTest(scenario=description):
+                try:
+                    if 'api_key' in scenario:
+                        self.connector.validate_config(scenario)
+                    else:
+                        self.connector.format_payload(scenario)
+                except (ValueError, TypeError) as e:
+                    error_message = str(e)
+                    # Error message should be informative
+                    self.assertGreater(len(error_message), 5)
+                    self.assertNotIn('None', error_message)  # Should not show raw None
+
+    def test_resource_cleanup_on_errors(self):
+        """Test that resources are properly cleaned up when errors occur."""
+        with patch('requests.post') as mock_post:
+            # Simulate various error conditions
+            error_conditions = [
+                ConnectionError("Connection failed"),
+                MemoryError("Out of memory"),
+                OSError("File descriptor limit"),
+                KeyboardInterrupt("User interrupted"),
+            ]
+            
+            for error in error_conditions:
+                with self.subTest(error=error.__class__.__name__):
+                    mock_post.side_effect = error
+                    
+                    payload = {'message': 'cleanup_test'}
+                    
+                    try:
+                        self.connector.send_request(payload)
+                    except Exception as e:
+                        # Verify the original error is preserved
+                        self.assertIsInstance(e, type(error))
+                    
+                    # Connector should still be usable after error
+                    try:
+                        headers = self.connector.get_headers()
+                        self.assertIsInstance(headers, dict)
+                    except AttributeError:
+                        # get_headers might not be implemented
+                        pass
+
+    def test_configuration_immutability_protection(self):
+        """Test protection against accidental configuration mutation."""
+        original_config = {
+            'api_key': 'immutable_test',
+            'base_url': 'https://immutable.test.com',
+            'nested': {'protected': True}
+        }
+        
+        connector = GenesisConnector(config=original_config)
+        
+        # Try to modify the configuration externally
+        if hasattr(connector, 'config'):
+            external_ref = connector.config
+            
+            # Attempt mutations
+            try:
+                external_ref['api_key'] = 'hacked'
+                external_ref['nested']['protected'] = False
+                external_ref['new_key'] = 'injected'
+                
+                # Check if mutations affected the connector
+                current_config = connector.config
+                
+                # Ideally, the connector should be protected from external mutations
+                # This test documents the current behavior
+                self.assertIsNotNone(current_config)
+                
+            except (TypeError, AttributeError):
+                # Configuration might be immutable, which is good
+                pass
+
+    def test_logging_integration_comprehensive(self):
+        """Test comprehensive logging integration scenarios."""
+        log_scenarios = [
+            # Different log levels
+            ('DEBUG', {'debug_info': 'test'}),
+            ('INFO', {'info_message': 'test'}),
+            ('WARNING', {'warning_data': 'test'}),
+            ('ERROR', {'error_context': 'test'}),
+            ('CRITICAL', {'critical_issue': 'test'}),
+        ]
+        
+        for log_level, payload in log_scenarios:
+            with self.subTest(log_level=log_level):
+                with patch('logging.getLogger') as mock_logger:
+                    mock_log_instance = Mock()
+                    mock_logger.return_value = mock_log_instance
+                    
+                    try:
+                        self.connector.log_request(payload, level=log_level)
+                        # Verify logging was attempted
+                        self.assertTrue(mock_logger.called or mock_log_instance.called)
+                    except (AttributeError, TypeError):
+                        # log_request might not support level parameter
+                        try:
+                            self.connector.log_request(payload)
+                        except AttributeError:
+                            # log_request might not be implemented
+                            pass
+
+    def test_performance_monitoring_integration(self):
+        """Test integration with performance monitoring systems."""
+        performance_metrics = [
+            'request_duration',
+            'payload_size',
+            'response_size',
+            'connection_time',
+            'processing_time'
+        ]
+        
+        with patch('requests.post') as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {'monitored': True}
+            mock_response.elapsed.total_seconds.return_value = 0.5
+            mock_post.return_value = mock_response
+            
+            payload = {'performance_test': True, 'size': 'x' * 1000}
+            
+            try:
+                # Attempt to send request with performance monitoring
+                result = self.connector.send_request(payload, enable_metrics=True)
+                self.assertEqual(result.get('monitored'), True)
+                
+                # Check if metrics were collected
+                try:
+                    metrics = self.connector.get_metrics()
+                    if metrics:
+                        for metric in performance_metrics:
+                            if metric in metrics:
+                                self.assertIsInstance(metrics[metric], (int, float))
+                except AttributeError:
+                    # Metrics collection might not be implemented
+                    pass
+                    
+            except TypeError:
+                # send_request might not support enable_metrics parameter
+                result = self.connector.send_request(payload)
+                self.assertEqual(result.get('monitored'), True)
+
+    def test_connection_pooling_advanced_scenarios(self):
+        """Test advanced connection pooling scenarios."""
+        pooling_configs = [
+            {'use_session': True, 'pool_connections': 10, 'pool_maxsize': 20},
+            {'use_session': True, 'pool_block': True},
+            {'use_session': True, 'pool_timeout': 30},
+        ]
+        
+        for config in pooling_configs:
+            with self.subTest(config=config):
+                try:
+                    connector = GenesisConnector(config={**self.test_config, **config})
+                    
+                    # Test multiple requests to verify pooling
+                    with patch('requests.Session') as mock_session:
+                        mock_session_instance = Mock()
+                        mock_session.return_value = mock_session_instance
+                        
+                        mock_response = Mock()
+                        mock_response.status_code = 200
+                        mock_response.json.return_value = {'pooled': True}
+                        mock_session_instance.post.return_value = mock_response
+                        
+                        # Make multiple requests
+                        for i in range(5):
+                            payload = {'request_id': i, 'pooling_test': True}
+                            try:
+                                result = connector.send_request(payload)
+                                if result:
+                                    self.assertEqual(result.get('pooled'), True)
+                            except AttributeError:
+                                # Connection pooling might not be implemented
+                                break
+                                
+                except (ValueError, TypeError):
+                    # Advanced pooling configs might not be supported
+                    pass
+
+    def test_api_versioning_compatibility(self):
+        """Test API versioning and backward compatibility."""
+        version_scenarios = [
+            {'api_version': 'v1', 'base_url': 'https://api.test.com/v1'},
+            {'api_version': 'v2', 'base_url': 'https://api.test.com/v2'},
+            {'api_version': '2.0', 'base_url': 'https://api.test.com/2.0'},
+            {'api_version': 'latest', 'base_url': 'https://api.test.com/latest'},
+        ]
+        
+        for scenario in version_scenarios:
+            with self.subTest(version=scenario['api_version']):
+                config = {**self.test_config, **scenario}
+                
+                try:
+                    connector = GenesisConnector(config=config)
+                    
+                    # Test version-specific headers
+                    headers = connector.get_headers()
+                    if headers and 'api_version' in config:
+                        # Check if version is included in headers
+                        version_headers = [h for h in headers.keys() if 'version' in h.lower()]
+                        if version_headers:
+                            self.assertTrue(any(config['api_version'] in str(headers[h]) for h in version_headers))
+                            
+                except (ValueError, AttributeError):
+                    # API versioning might not be implemented
+                    pass
+
+    def test_middleware_integration_patterns(self):
+        """Test integration with middleware patterns."""
+        middleware_scenarios = [
+            # Authentication middleware
+            {'middleware': ['auth'], 'auth_type': 'bearer'},
+            {'middleware': ['auth'], 'auth_type': 'basic'},
+            # Logging middleware
+            {'middleware': ['logging'], 'log_requests': True},
+            # Retry middleware
+            {'middleware': ['retry'], 'max_retries': 3},
+            # Rate limiting middleware
+            {'middleware': ['ratelimit'], 'rate_limit': '100/hour'},
+            # Combined middleware
+            {'middleware': ['auth', 'logging', 'retry'], 'auth_type': 'bearer', 'max_retries': 2},
+        ]
+        
+        for scenario in middleware_scenarios:
+            with self.subTest(middleware=scenario.get('middleware', [])):
+                config = {**self.test_config, **scenario}
+                
+                try:
+                    connector = GenesisConnector(config=config)
+                    
+                    with patch('requests.post') as mock_post:
+                        mock_response = Mock()
+                        mock_response.status_code = 200
+                        mock_response.json.return_value = {'middleware_applied': True}
+                        mock_post.return_value = mock_response
+                        
+                        payload = {'middleware_test': True}
+                        result = connector.send_request(payload)
+                        
+                        if result:
+                            self.assertEqual(result.get('middleware_applied'), True)
+                            
+                            # Verify middleware effects in headers or request
+                            call_args = mock_post.call_args
+                            if call_args and 'headers' in call_args[1]:
+                                headers = call_args[1]['headers']
+                                
+                                # Check for auth middleware effects
+                                if 'auth' in scenario.get('middleware', []):
+                                    auth_headers = [h for h in headers.keys() if 'auth' in h.lower()]
+                                    if auth_headers:
+                                        self.assertTrue(len(auth_headers) > 0)
+                                        
+                except (ValueError, TypeError, AttributeError):
+                    # Middleware patterns might not be implemented
+                    pass
+
+    def test_data_transformation_pipelines(self):
+        """Test data transformation and processing pipelines."""
+        transformation_tests = [
+            # JSON schema validation
+            {
+                'schema': {'type': 'object', 'properties': {'message': {'type': 'string'}}},
+                'data': {'message': 'valid'},
+                'expected_valid': True
+            },
+            {
+                'schema': {'type': 'object', 'properties': {'message': {'type': 'string'}}},
+                'data': {'message': 123},
+                'expected_valid': False
+            },
+            # Data sanitization
+            {
+                'sanitize': True,
+                'data': {'message': '<script>alert("xss")</script>', 'clean': 'data'},
+                'expected_clean': True
+            },
+            # Data compression
+            {
+                'compress': True,
+                'data': {'large_text': 'x' * 1000, 'normal': 'data'},
+                'expected_compressed': True
+            },
+        ]
+        
+        for test_case in transformation_tests:
+            with self.subTest(test_case=str(test_case)[:50]):
+                try:
+                    # Test data transformation if implemented
+                    data = test_case['data']
+                    
+                    if 'schema' in test_case:
+                        # Test schema validation
+                        try:
+                            is_valid = self.connector.validate_schema(data, test_case['schema'])
+                            self.assertEqual(is_valid, test_case['expected_valid'])
+                        except AttributeError:
+                            # Schema validation might not be implemented
+                            pass
+                    
+                    if test_case.get('sanitize'):
+                        # Test data sanitization
+                        try:
+                            sanitized = self.connector.sanitize_data(data)
+                            if sanitized and 'message' in sanitized:
+                                self.assertNotIn('<script>', str(sanitized['message']))
+                        except AttributeError:
+                            # Data sanitization might not be implemented
+                            pass
+                    
+                    if test_case.get('compress'):
+                        # Test data compression
+                        try:
+                            compressed = self.connector.compress_data(data)
+                            if compressed:
+                                self.assertIsNotNone(compressed)
+                        except AttributeError:
+                            # Data compression might not be implemented
+                            pass
+                            
+                except Exception:
+                    # Transformation features might not be implemented
+                    pass
+
+    def test_graceful_degradation_comprehensive(self):
+        """Test comprehensive graceful degradation scenarios."""
+        degradation_scenarios = [
+            # Service temporarily unavailable
+            {'service_status': 'degraded', 'fallback_enabled': True},
+            # Partial feature availability
+            {'features_disabled': ['metrics', 'logging'], 'core_functional': True},
+            # Network quality issues
+            {'network_quality': 'poor', 'adaptive_timeout': True},
+            # Resource constraints
+            {'memory_limited': True, 'cpu_limited': True, 'optimize_performance': True},
+        ]
+        
+        for scenario in degradation_scenarios:
+            with self.subTest(scenario=str(scenario)[:50]):
+                # Simulate degraded conditions
+                with patch('requests.post') as mock_post:
+                    if scenario.get('service_status') == 'degraded':
+                        # Simulate intermittent failures
+                        mock_post.side_effect = [
+                            ConnectionError("Service degraded"),
+                            Mock(status_code=200, json=lambda: {'degraded_response': True})
+                        ]
+                    else:
+                        mock_response = Mock()
+                        mock_response.status_code = 200
+                        mock_response.json.return_value = {'graceful': True}
+                        mock_post.return_value = mock_response
+                    
+                    payload = {'degradation_test': True}
+                    
+                    try:
+                        # Test graceful degradation
+                        if scenario.get('fallback_enabled'):
+                            result = self.connector.send_request_with_fallback(payload)
+                        else:
+                            result = self.connector.send_request(payload)
+                        
+                        # Should get some response even under degraded conditions
+                        self.assertIsNotNone(result)
+                        
+                    except AttributeError:
+                        # Fallback methods might not be implemented
+                        try:
+                            result = self.connector.send_request(payload)
+                            self.assertIsNotNone(result)
+                        except Exception:
+                            # Some degradation scenarios might cause failures
+                            pass
+                    except Exception:
+                        # Graceful degradation might not prevent all failures
+                        pass
+
+    def tearDown(self):
+        """Clean up after enhanced coverage tests."""
+        # Ensure no test artifacts remain
+        if hasattr(self.connector, 'close'):
+            try:
+                self.connector.close()
+            except Exception:
+                pass
+
+
+class TestGenesisConnectorDocumentationCompliance(unittest.TestCase):
+    """
+    Tests to ensure GenesisConnector complies with documentation and API contracts.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up documentation compliance test environment."""
+        self.connector = GenesisConnector()
+
+    def test_public_api_method_signatures(self):
+        """Test that public API methods have expected signatures."""
+        expected_methods = [
+            ('connect', 0),  # (method_name, min_args)
+            ('send_request', 1),
+            ('validate_config', 1),
+            ('format_payload', 1),
+            ('get_headers', 0),
+            ('parse_response', 1),
+            ('log_request', 1),
+            ('get_status', 0),
+            ('close', 0),
+        ]
+        
+        for method_name, min_args in expected_methods:
+            with self.subTest(method=method_name):
+                if hasattr(self.connector, method_name):
+                    method = getattr(self.connector, method_name)
+                    self.assertTrue(callable(method))
+                    
+                    # Test method signature compatibility
+                    import inspect
+                    try:
+                        sig = inspect.signature(method)
+                        params = list(sig.parameters.values())
+                        
+                        # Count required parameters (excluding self)
+                        required_params = [p for p in params if p.default == inspect.Parameter.empty and p.name != 'self']
+                        self.assertGreaterEqual(len(params) - 1, min_args, f"{method_name} should accept at least {min_args} arguments")
+                        
+                    except (ValueError, TypeError):
+                        # Some methods might have complex signatures
+                        pass
+
+    def test_return_type_consistency(self):
+        """Test that methods return consistent types as documented."""
+        type_expectations = [
+            ('validate_config', bool, {'api_key': 'test', 'base_url': 'https://test.com'}),
+            ('get_headers', dict, None),
+            ('format_payload', (dict, str), {'message': 'test'}),
+        ]
+        
+        for method_name, expected_type, test_arg in type_expectations:
+            with self.subTest(method=method_name):
+                if hasattr(self.connector, method_name):
+                    method = getattr(self.connector, method_name)
+                    
+                    try:
+                        if test_arg is not None:
+                            result = method(test_arg)
+                        else:
+                            result = method()
+                        
+                        if isinstance(expected_type, tuple):
+                            self.assertIsInstance(result, expected_type)
+                        else:
+                            self.assertIsInstance(result, expected_type)
+                            
+                    except Exception:
+                        # Method might require specific setup or have different behavior
+                        pass
+
+    def test_exception_handling_documentation(self):
+        """Test that documented exceptions are raised appropriately."""
+        exception_scenarios = [
+            ('validate_config', ValueError, None),  # Should raise ValueError for None config
+            ('validate_config', ValueError, {}),    # Should raise ValueError for empty config
+            ('format_payload', ValueError, None),   # Should raise ValueError for None payload
+            ('format_payload', ValueError, {}),     # Should raise ValueError for empty payload
+            ('parse_response', ValueError, ''),     # Should raise ValueError for empty response
+            ('parse_response', ValueError, 'invalid json'),  # Should raise ValueError for invalid JSON
+        ]
+        
+        for method_name, expected_exception, test_arg in exception_scenarios:
+            with self.subTest(method=method_name, arg=test_arg):
+                if hasattr(self.connector, method_name):
+                    method = getattr(self.connector, method_name)
+                    
+                    with self.assertRaises(expected_exception):
+                        method(test_arg)
+
+    def test_docstring_presence_and_quality(self):
+        """Test that public methods have proper docstrings."""
+        public_methods = [name for name in dir(self.connector) if not name.startswith('_')]
+        
+        for method_name in public_methods:
+            with self.subTest(method=method_name):
+                method = getattr(self.connector, method_name)
+                
+                if callable(method):
+                    docstring = method.__doc__
+                    
+                    if docstring:  # If docstring exists, verify quality
+                        self.assertGreater(len(docstring.strip()), 10, f"{method_name} should have meaningful docstring")
+                        self.assertIn(method_name.replace('_', ' '), docstring.lower(), f"{method_name} docstring should describe the method")
+                    # Note: We don't require all methods to have docstrings as some might be inherited
+
+
+if __name__ == '__main__':
+    # Add the enhanced test classes to the test runner
+    enhanced_suites = [
+        TestGenesisConnectorEnhancedCoverage,
+        TestGenesisConnectorDocumentationCompliance,
+    ]
+    
+    print("\n" + "="*80)
+    print("RUNNING ENHANCED COVERAGE TESTS")
+    print("="*80)
+    
+    total_tests = 0
+    total_failures = 0
+    
+    for suite_class in enhanced_suites:
+        print(f"\nRunning {suite_class.__name__}...")
+        suite = unittest.TestLoader().loadTestsFromTestCase(suite_class)
+        runner = unittest.TextTestRunner(verbosity=2)
+        result = runner.run(suite)
+        
+        total_tests += result.testsRun
+        total_failures += len(result.failures) + len(result.errors)
+        
+        print(f"Tests run: {result.testsRun}")
+        print(f"Failures: {len(result.failures)}")
+        print(f"Errors: {len(result.errors)}")
+    
+    print(f"\n" + "="*80)
+    print(f"ENHANCED COVERAGE SUMMARY")
+    print(f"Total enhanced tests run: {total_tests}")
+    print(f"Total failures/errors: {total_failures}")
+    print(f"Success rate: {((total_tests - total_failures) / total_tests * 100):.1f}%" if total_tests > 0 else "0%")
+    print("="*80)

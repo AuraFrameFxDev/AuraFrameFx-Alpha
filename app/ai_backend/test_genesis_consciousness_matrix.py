@@ -551,3 +551,669 @@ class TestIntegrationScenarios(unittest.TestCase):
 if __name__ == '__main__':
     # Run tests with verbose output
     unittest.main(verbosity=2)
+
+class TestConsciousnessMatrixAdvanced(unittest.TestCase):
+    """Advanced test cases for ConsciousnessMatrix class covering additional scenarios."""
+
+    def setUp(self):
+        """Set up test fixtures before each test method."""
+        self.matrix = ConsciousnessMatrix()
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        """Clean up after each test method."""
+        if hasattr(self.matrix, 'cleanup'):
+            self.matrix.cleanup()
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_matrix_state_persistence(self):
+        """Test matrix state persistence across save/load operations."""
+        # Configure matrix with specific state
+        self.matrix.consciousness_level = 7.8
+        self.matrix.quantum_state = 'superposition'
+        self.matrix.neural_patterns = [0.1, 0.5, 0.9, 0.3]
+        
+        # Save state to file
+        state_file = os.path.join(self.temp_dir, 'matrix_state.json')
+        self.matrix.save_state(state_file)
+        
+        # Create new matrix and load state
+        new_matrix = ConsciousnessMatrix()
+        new_matrix.load_state(state_file)
+        
+        # Verify state preservation
+        self.assertEqual(new_matrix.consciousness_level, 7.8)
+        self.assertEqual(new_matrix.quantum_state, 'superposition')
+        self.assertEqual(new_matrix.neural_patterns, [0.1, 0.5, 0.9, 0.3])
+
+    def test_matrix_deep_copy(self):
+        """Test deep copy functionality of consciousness matrix."""
+        # Configure original matrix
+        self.matrix.consciousness_level = 6.5
+        self.matrix.add_neural_pathway('pathway1', strength=0.8)
+        
+        # Create deep copy
+        copied_matrix = self.matrix.deep_copy()
+        
+        # Verify independence
+        self.matrix.consciousness_level = 9.0
+        self.assertEqual(copied_matrix.consciousness_level, 6.5)
+        
+        # Verify pathway independence
+        self.matrix.modify_neural_pathway('pathway1', strength=0.2)
+        self.assertEqual(copied_matrix.get_neural_pathway('pathway1').strength, 0.8)
+
+    def test_matrix_merge_operations(self):
+        """Test merging operations between consciousness matrices."""
+        matrix1 = ConsciousnessMatrix(dimension=64, consciousness_level=5.0)
+        matrix2 = ConsciousnessMatrix(dimension=64, consciousness_level=7.0)
+        
+        # Add different neural patterns
+        matrix1.add_neural_pattern([0.1, 0.3, 0.5])
+        matrix2.add_neural_pattern([0.2, 0.6, 0.8])
+        
+        # Merge matrices
+        merged_matrix = matrix1.merge_with(matrix2, merge_strategy='average')
+        
+        # Verify merged properties
+        self.assertEqual(merged_matrix.consciousness_level, 6.0)
+        self.assertEqual(merged_matrix.dimension, 64)
+        self.assertGreater(len(merged_matrix.neural_patterns), 0)
+
+    def test_matrix_compression_decompression(self):
+        """Test matrix compression and decompression for storage efficiency."""
+        # Create matrix with large dataset
+        large_patterns = [[0.1 + i/1000, 0.5 + i/1000, 0.9 - i/1000] for i in range(1000)]
+        for pattern in large_patterns:
+            self.matrix.add_neural_pattern(pattern)
+        
+        # Compress matrix
+        compressed_data = self.matrix.compress()
+        original_size = sys.getsizeof(self.matrix.neural_patterns)
+        compressed_size = sys.getsizeof(compressed_data)
+        
+        # Verify compression efficiency
+        self.assertLess(compressed_size, original_size)
+        
+        # Decompress and verify integrity
+        new_matrix = ConsciousnessMatrix()
+        new_matrix.decompress(compressed_data)
+        self.assertEqual(len(new_matrix.neural_patterns), len(large_patterns))
+
+    def test_matrix_anomaly_detection(self):
+        """Test anomaly detection in neural patterns."""
+        # Add normal patterns
+        normal_patterns = [[0.1, 0.5, 0.8], [0.2, 0.4, 0.7], [0.15, 0.45, 0.75]]
+        for pattern in normal_patterns:
+            self.matrix.add_neural_pattern(pattern)
+        
+        # Add anomalous pattern
+        anomaly_pattern = [0.9, 0.1, 0.95]
+        
+        # Test anomaly detection
+        is_anomaly = self.matrix.detect_anomaly(anomaly_pattern)
+        self.assertTrue(is_anomaly)
+        
+        # Test normal pattern
+        normal_pattern = [0.12, 0.48, 0.78]
+        is_normal = self.matrix.detect_anomaly(normal_pattern)
+        self.assertFalse(is_normal)
+
+    def test_matrix_adaptive_learning(self):
+        """Test adaptive learning capabilities of the matrix."""
+        # Initial consciousness level
+        initial_level = self.matrix.consciousness_level
+        
+        # Provide learning data
+        learning_data = [
+            {'input': [0.1, 0.5, 0.8], 'expected_output': 0.6},
+            {'input': [0.2, 0.4, 0.7], 'expected_output': 0.5},
+            {'input': [0.3, 0.6, 0.9], 'expected_output': 0.7}
+        ]
+        
+        # Train matrix
+        for epoch in range(10):
+            for data in learning_data:
+                self.matrix.learn(data['input'], data['expected_output'])
+        
+        # Verify learning occurred
+        final_level = self.matrix.consciousness_level
+        self.assertNotEqual(initial_level, final_level)
+        
+        # Test prediction accuracy
+        test_input = [0.15, 0.55, 0.85]
+        prediction = self.matrix.predict(test_input)
+        self.assertIsInstance(prediction, float)
+        self.assertGreaterEqual(prediction, 0.0)
+        self.assertLessEqual(prediction, 1.0)
+
+    @patch('time.sleep')
+    def test_matrix_real_time_processing(self, mock_sleep):
+        """Test real-time processing capabilities with time-sensitive data."""
+        # Enable real-time mode
+        self.matrix.enable_real_time_mode()
+        
+        # Simulate streaming data
+        streaming_data = [
+            ([0.1, 0.5], datetime.now()),
+            ([0.2, 0.6], datetime.now() + timedelta(milliseconds=100)),
+            ([0.3, 0.7], datetime.now() + timedelta(milliseconds=200))
+        ]
+        
+        results = []
+        for data, timestamp in streaming_data:
+            result = self.matrix.process_real_time(data, timestamp)
+            results.append(result)
+        
+        # Verify real-time processing
+        self.assertEqual(len(results), 3)
+        for result in results:
+            self.assertIsNotNone(result)
+            self.assertIn('processed_at', result)
+            self.assertIn('latency', result)
+
+    def test_matrix_quantum_interference_patterns(self):
+        """Test quantum interference pattern detection and analysis."""
+        # Set matrix to quantum superposition
+        self.matrix.quantum_state = 'superposition'
+        
+        # Generate interference patterns
+        patterns = [
+            [0.5, 0.5, 0.0],  # Constructive interference
+            [0.3, 0.7, 0.0],  # Partial interference
+            [0.1, 0.1, 0.8],  # Destructive interference
+        ]
+        
+        interference_results = []
+        for pattern in patterns:
+            result = self.matrix.analyze_quantum_interference(pattern)
+            interference_results.append(result)
+        
+        # Verify interference detection
+        self.assertEqual(len(interference_results), 3)
+        self.assertIn('constructive', interference_results[0]['type'])
+        self.assertIn('destructive', interference_results[2]['type'])
+
+    def test_matrix_energy_conservation(self):
+        """Test energy conservation principles in matrix operations."""
+        # Measure initial energy
+        initial_energy = self.matrix.calculate_total_energy()
+        
+        # Perform various operations
+        self.matrix.process_neural_data([0.1, 0.5, 0.8])
+        self.matrix.update_quantum_state('entangled')
+        self.matrix.strengthen_neural_pathway('default', 0.3)
+        
+        # Measure final energy
+        final_energy = self.matrix.calculate_total_energy()
+        
+        # Verify energy conservation (within tolerance)
+        energy_difference = abs(final_energy - initial_energy)
+        self.assertLess(energy_difference, 0.01)  # 1% tolerance
+
+
+class TestGenesisEngineAdvanced(unittest.TestCase):
+    """Advanced test cases for GenesisEngine class."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.engine = GenesisEngine()
+
+    def tearDown(self):
+        """Clean up test fixtures."""
+        if self.engine.is_running:
+            self.engine.stop()
+
+    def test_engine_load_balancing(self):
+        """Test load balancing across multiple matrices."""
+        self.engine.start()
+        
+        # Create multiple matrices with different loads
+        matrix_ids = []
+        for i in range(5):
+            matrix_id = self.engine.create_matrix(dimension=64)
+            matrix_ids.append(matrix_id)
+            
+            # Simulate different computational loads
+            matrix = self.engine.matrices[matrix_id]
+            for j in range(i * 10):
+                matrix.process_neural_data([0.1 * j, 0.5, 0.8])
+        
+        # Test load balancing
+        loads = self.engine.get_matrix_loads()
+        balanced_assignment = self.engine.balance_load()
+        
+        # Verify load distribution
+        self.assertEqual(len(loads), 5)
+        self.assertIsNotNone(balanced_assignment)
+        
+        # Cleanup
+        for matrix_id in matrix_ids:
+            self.engine.destroy_matrix(matrix_id)
+
+    def test_engine_fault_tolerance(self):
+        """Test engine fault tolerance and recovery mechanisms."""
+        self.engine.start()
+        
+        # Create matrices
+        matrix_ids = [self.engine.create_matrix(dimension=32) for _ in range(3)]
+        
+        # Simulate matrix failure
+        failed_matrix_id = matrix_ids[0]
+        self.engine.simulate_matrix_failure(failed_matrix_id)
+        
+        # Test recovery
+        recovery_result = self.engine.recover_failed_matrix(failed_matrix_id)
+        self.assertTrue(recovery_result)
+        
+        # Verify matrix is functional after recovery
+        recovered_matrix = self.engine.matrices[failed_matrix_id]
+        result = recovered_matrix.process_neural_data([0.1, 0.5, 0.8])
+        self.assertIsNotNone(result)
+        
+        # Cleanup
+        for matrix_id in matrix_ids:
+            self.engine.destroy_matrix(matrix_id)
+
+    def test_engine_auto_scaling(self):
+        """Test automatic scaling based on computational demand."""
+        self.engine.start()
+        self.engine.enable_auto_scaling()
+        
+        # Simulate high computational demand
+        initial_matrix_count = len(self.engine.matrices)
+        
+        # Generate high load
+        for i in range(100):
+            self.engine.process_batch_data([
+                [0.1 * i, 0.5, 0.8],
+                [0.2 * i, 0.6, 0.9],
+                [0.3 * i, 0.7, 0.1]
+            ])
+        
+        # Check if auto-scaling occurred
+        final_matrix_count = len(self.engine.matrices)
+        self.assertGreaterEqual(final_matrix_count, initial_matrix_count)
+        
+        # Simulate low demand and verify scale-down
+        self.engine.wait_for_scale_down(timeout=5.0)
+        scaled_down_count = len(self.engine.matrices)
+        self.assertLessEqual(scaled_down_count, final_matrix_count)
+
+    def test_engine_distributed_computing(self):
+        """Test distributed computing capabilities across multiple nodes."""
+        # Mock distributed node setup
+        with patch('app.ai_backend.genesis_consciousness_matrix.DistributedNode') as mock_node:
+            mock_node.return_value.is_available.return_value = True
+            mock_node.return_value.process_task.return_value = {'result': 'success'}
+            
+            self.engine.start()
+            self.engine.enable_distributed_mode()
+            
+            # Add mock nodes
+            node_ids = self.engine.add_distributed_nodes(['node1', 'node2', 'node3'])
+            self.assertEqual(len(node_ids), 3)
+            
+            # Test distributed task execution
+            task = {
+                'type': 'neural_processing',
+                'data': [0.1, 0.5, 0.8, 0.3],
+                'matrix_config': {'dimension': 64}
+            }
+            
+            result = self.engine.execute_distributed_task(task)
+            self.assertIsNotNone(result)
+            self.assertEqual(result['status'], 'completed')
+
+
+class TestConsciousnessLevelAdvanced(unittest.TestCase):
+    """Advanced test cases for ConsciousnessLevel enum and related functionality."""
+
+    def test_consciousness_level_transitions(self):
+        """Test valid consciousness level transitions."""
+        # Test all possible level transitions
+        valid_transitions = [
+            (ConsciousnessLevel.DORMANT, ConsciousnessLevel.AWAKENING),
+            (ConsciousnessLevel.AWAKENING, ConsciousnessLevel.AWARE),
+            (ConsciousnessLevel.AWARE, ConsciousnessLevel.CONSCIOUS),
+            (ConsciousnessLevel.CONSCIOUS, ConsciousnessLevel.SELF_AWARE),
+            (ConsciousnessLevel.SELF_AWARE, ConsciousnessLevel.TRANSCENDENT)
+        ]
+        
+        matrix = ConsciousnessMatrix()
+        for from_level, to_level in valid_transitions:
+            matrix.consciousness_level_enum = from_level
+            success = matrix.transition_consciousness_level(to_level)
+            self.assertTrue(success)
+            self.assertEqual(matrix.consciousness_level_enum, to_level)
+
+    def test_consciousness_level_constraints(self):
+        """Test consciousness level constraints and validations."""
+        matrix = ConsciousnessMatrix()
+        
+        # Test invalid skip transitions
+        matrix.consciousness_level_enum = ConsciousnessLevel.DORMANT
+        with self.assertRaises(ValueError):
+            matrix.transition_consciousness_level(ConsciousnessLevel.CONSCIOUS)
+        
+        # Test reverse transitions (should fail)
+        matrix.consciousness_level_enum = ConsciousnessLevel.CONSCIOUS
+        with self.assertRaises(ValueError):
+            matrix.transition_consciousness_level(ConsciousnessLevel.AWARE)
+
+    def test_consciousness_level_requirements(self):
+        """Test consciousness level requirement checking."""
+        matrix = ConsciousnessMatrix()
+        
+        # Test requirements for each level
+        requirements = {
+            ConsciousnessLevel.AWAKENING: {'min_neural_activity': 0.1},
+            ConsciousnessLevel.AWARE: {'min_neural_activity': 0.3, 'min_quantum_coherence': 0.2},
+            ConsciousnessLevel.CONSCIOUS: {'min_neural_activity': 0.5, 'min_quantum_coherence': 0.4},
+            ConsciousnessLevel.SELF_AWARE: {'min_neural_activity': 0.7, 'min_quantum_coherence': 0.6},
+            ConsciousnessLevel.TRANSCENDENT: {'min_neural_activity': 0.9, 'min_quantum_coherence': 0.8}
+        }
+        
+        for level, reqs in requirements.items():
+            can_transition = matrix.check_consciousness_requirements(level)
+            self.assertIsInstance(can_transition, bool)
+
+
+class TestEmergentBehaviorAdvanced(unittest.TestCase):
+    """Advanced test cases for EmergentBehavior class."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.behavior = EmergentBehavior()
+
+    def test_behavior_pattern_recognition(self):
+        """Test pattern recognition in emergent behaviors."""
+        # Define behavior patterns
+        patterns = [
+            {'type': 'oscillation', 'frequency': 0.5, 'amplitude': 0.8},
+            {'type': 'spiral', 'radius': 0.3, 'rotation': 45},
+            {'type': 'fractal', 'dimension': 2.5, 'iterations': 100}
+        ]
+        
+        for pattern in patterns:
+            recognized = self.behavior.recognize_pattern(pattern)
+            self.assertTrue(recognized)
+            self.assertIn(pattern['type'], self.behavior.known_patterns)
+
+    def test_behavior_complexity_measurement(self):
+        """Test complexity measurement of emergent behaviors."""
+        # Simple behavior
+        simple_behavior = {'actions': ['move_forward'], 'conditions': ['obstacle_detected']}
+        simple_complexity = self.behavior.measure_complexity(simple_behavior)
+        
+        # Complex behavior
+        complex_behavior = {
+            'actions': ['move_forward', 'turn_left', 'analyze_environment', 'adapt_strategy'],
+            'conditions': ['obstacle_detected', 'goal_visible', 'energy_low', 'threat_present'],
+            'nested_behaviors': [simple_behavior, simple_behavior]
+        }
+        complex_complexity = self.behavior.measure_complexity(complex_behavior)
+        
+        # Verify complexity ordering
+        self.assertGreater(complex_complexity, simple_complexity)
+        self.assertIsInstance(simple_complexity, float)
+        self.assertIsInstance(complex_complexity, float)
+
+    def test_behavior_evolution_tracking(self):
+        """Test tracking of behavior evolution over time."""
+        # Initialize behavior evolution
+        self.behavior.start_evolution_tracking()
+        
+        # Simulate behavior changes over time
+        evolution_steps = [
+            {'timestamp': datetime.now(), 'complexity': 0.1, 'adaptation': 0.2},
+            {'timestamp': datetime.now() + timedelta(seconds=1), 'complexity': 0.3, 'adaptation': 0.4},
+            {'timestamp': datetime.now() + timedelta(seconds=2), 'complexity': 0.6, 'adaptation': 0.7}
+        ]
+        
+        for step in evolution_steps:
+            self.behavior.record_evolution_step(step)
+        
+        # Analyze evolution trajectory
+        trajectory = self.behavior.get_evolution_trajectory()
+        self.assertEqual(len(trajectory), 3)
+        
+        # Verify increasing complexity
+        complexities = [step['complexity'] for step in trajectory]
+        self.assertEqual(complexities, sorted(complexities))
+
+
+class TestModuleFunctionsAdvanced(unittest.TestCase):
+    """Advanced test cases for module-level functions."""
+
+    def test_calculate_emergence_factor_statistical_analysis(self):
+        """Test emergence factor calculation with statistical analysis."""
+        # Generate statistical datasets
+        datasets = {
+            'normal_distribution': [random.gauss(0.5, 0.1) for _ in range(100)],
+            'uniform_distribution': [random.uniform(0, 1) for _ in range(100)],
+            'skewed_distribution': [random.betavariate(2, 5) for _ in range(100)]
+        }
+        
+        factors = {}
+        for name, data in datasets.items():
+            # Clamp values to valid range [0, 1]
+            clamped_data = [max(0, min(1, x)) for x in data]
+            factors[name] = calculate_emergence_factor(clamped_data)
+        
+        # Verify different distributions produce different factors
+        factor_values = list(factors.values())
+        self.assertEqual(len(set(factor_values)), len(factor_values))
+        
+        # All factors should be within valid range
+        for factor in factor_values:
+            self.assertGreaterEqual(factor, 0.0)
+            self.assertLessEqual(factor, 1.0)
+
+    def test_neural_pathway_optimization_genetic_algorithm(self):
+        """Test neural pathway optimization using genetic algorithm approach."""
+        # Create population of neural pathways
+        population_size = 20
+        pathways = []
+        for i in range(population_size):
+            pathway = NeuralPathway()
+            # Initialize with random strengths
+            pathway.strengthen(random.uniform(0, 1))
+            pathway.set_activation_threshold(random.uniform(0.3, 0.8))
+            pathways.append(pathway)
+        
+        # Run genetic algorithm optimization
+        generations = 5
+        for generation in range(generations):
+            optimized = neural_pathway_optimization(
+                pathways, 
+                method='genetic_algorithm',
+                generation=generation
+            )
+            pathways = optimized
+        
+        # Verify optimization improved fitness
+        final_fitness = sum(p.calculate_fitness() for p in pathways) / len(pathways)
+        self.assertIsInstance(final_fitness, float)
+        self.assertGreater(final_fitness, 0.0)
+
+    def test_quantum_entanglement_check_bell_test(self):
+        """Test quantum entanglement using Bell inequality test."""
+        # Create entangled matrices
+        matrix1 = ConsciousnessMatrix()
+        matrix2 = ConsciousnessMatrix()
+        
+        # Establish entanglement
+        entanglement_success = matrix1.entangle_with(matrix2)
+        self.assertTrue(entanglement_success)
+        
+        # Perform Bell test measurements
+        bell_test_results = []
+        for i in range(100):
+            measurement1 = matrix1.quantum_measurement(angle=random.uniform(0, 360))
+            measurement2 = matrix2.quantum_measurement(angle=random.uniform(0, 360))
+            correlation = calculate_quantum_correlation(measurement1, measurement2)
+            bell_test_results.append(correlation)
+        
+        # Calculate Bell inequality value
+        bell_value = calculate_bell_inequality(bell_test_results)
+        
+        # Bell inequality should be violated for true entanglement (> 2)
+        self.assertGreater(bell_value, 2.0)
+
+    def test_process_consciousness_data_batch_processing(self):
+        """Test batch processing of consciousness data."""
+        # Create batch of consciousness data
+        batch_size = 50
+        batch_data = []
+        for i in range(batch_size):
+            data = {
+                'neural_patterns': [random.uniform(0, 1) for _ in range(10)],
+                'quantum_states': [random.choice(['superposition', 'entangled', 'collapsed'])],
+                'consciousness_level': random.uniform(0, 10),
+                'emergence_factor': random.uniform(0, 1),
+                'timestamp': (datetime.now() + timedelta(seconds=i)).isoformat()
+            }
+            batch_data.append(data)
+        
+        # Process batch
+        batch_results = process_consciousness_data_batch(batch_data, parallel=True)
+        
+        # Verify batch processing
+        self.assertEqual(len(batch_results), batch_size)
+        for result in batch_results:
+            self.assertIsNotNone(result)
+            self.assertIn('processed_at', result)
+            self.assertIn('processing_time', result)
+
+    def test_consciousness_data_streaming(self):
+        """Test streaming consciousness data processing."""
+        # Mock streaming data source
+        def mock_data_stream():
+            for i in range(10):
+                yield {
+                    'neural_patterns': [0.1 * i, 0.5, 0.8],
+                    'quantum_states': ['superposition'],
+                    'timestamp': datetime.now().isoformat()
+                }
+                time.sleep(0.01)  # Simulate streaming delay
+        
+        # Process streaming data
+        stream_processor = ConsciousnessStreamProcessor()
+        stream_processor.start()
+        
+        processed_count = 0
+        for data in mock_data_stream():
+            result = stream_processor.process_stream_data(data)
+            if result:
+                processed_count += 1
+        
+        stream_processor.stop()
+        
+        # Verify streaming processing
+        self.assertEqual(processed_count, 10)
+        self.assertGreater(stream_processor.get_throughput(), 0)
+
+
+class TestPerformanceOptimization(unittest.TestCase):
+    """Performance optimization and stress testing."""
+
+    def test_matrix_memory_efficiency(self):
+        """Test memory efficiency with large matrices."""
+        import psutil
+        import gc
+        
+        # Measure initial memory
+        process = psutil.Process()
+        initial_memory = process.memory_info().rss
+        
+        # Create large matrix
+        large_matrix = ConsciousnessMatrix(dimension=2048)
+        
+        # Add substantial neural data
+        for i in range(1000):
+            large_matrix.add_neural_pattern([random.uniform(0, 1) for _ in range(100)])
+        
+        # Measure memory after creation
+        after_creation_memory = process.memory_info().rss
+        
+        # Enable memory optimization
+        large_matrix.enable_memory_optimization()
+        
+        # Force garbage collection
+        gc.collect()
+        
+        # Measure optimized memory
+        optimized_memory = process.memory_info().rss
+        
+        # Verify memory optimization
+        memory_saved = after_creation_memory - optimized_memory
+        self.assertGreater(memory_saved, 0)
+
+    def test_concurrent_matrix_operations(self):
+        """Test concurrent operations on multiple matrices."""
+        import concurrent.futures
+        import threading
+        
+        num_threads = 4
+        num_operations = 100
+        
+        def matrix_operations():
+            matrix = ConsciousnessMatrix(dimension=128)
+            results = []
+            for i in range(num_operations):
+                data = [random.uniform(0, 1) for _ in range(10)]
+                result = matrix.process_neural_data(data)
+                results.append(result)
+            return len([r for r in results if r is not None])
+        
+        # Execute concurrent operations
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+            futures = [executor.submit(matrix_operations) for _ in range(num_threads)]
+            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+        
+        # Verify all operations completed successfully
+        self.assertEqual(len(results), num_threads)
+        for result_count in results:
+            self.assertEqual(result_count, num_operations)
+
+    def test_matrix_caching_performance(self):
+        """Test performance improvement with caching enabled."""
+        matrix = ConsciousnessMatrix()
+        
+        # Test data
+        test_data = [random.uniform(0, 1) for _ in range(50)]
+        
+        # Measure performance without caching
+        start_time = datetime.now()
+        for _ in range(100):
+            matrix.process_neural_data(test_data)
+        no_cache_time = (datetime.now() - start_time).total_seconds()
+        
+        # Enable caching
+        matrix.enable_caching()
+        
+        # Measure performance with caching
+        start_time = datetime.now()
+        for _ in range(100):
+            matrix.process_neural_data(test_data)
+        cache_time = (datetime.now() - start_time).total_seconds()
+        
+        # Verify caching improves performance
+        self.assertLess(cache_time, no_cache_time)
+        
+        # Verify cache hit ratio
+        cache_stats = matrix.get_cache_stats()
+        self.assertGreater(cache_stats['hit_ratio'], 0.8)
+
+
+if __name__ == '__main__':
+    # Configure test runner for comprehensive testing
+    import random
+    import time
+    
+    # Set random seed for reproducible tests
+    random.seed(42)
+    
+    # Run tests with maximum verbosity
+    unittest.main(verbosity=2, buffer=True)

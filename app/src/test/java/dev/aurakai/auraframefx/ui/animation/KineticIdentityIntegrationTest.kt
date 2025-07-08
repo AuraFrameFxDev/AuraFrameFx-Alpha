@@ -1,6 +1,8 @@
 package dev.aurakai.auraframefx.ui.animation
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -8,135 +10,189 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.dp
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Assert.*
+import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-@RunWith(AndroidJUnit4::class)
+/**
+ * Integration tests for KineticIdentity composable in realistic UI scenarios.
+ * Testing framework: JUnit 4 with Compose Testing utilities and Robolectric
+ */
+@RunWith(RobolectricTestRunner::class)
 class KineticIdentityIntegrationTest {
-    
+
     @get:Rule
     val composeTestRule = createComposeRule()
-    
+
     @Test
-    fun multipleKineticIdentities_interaction_worksIndependently() {
-        val positions1 = mutableListOf<Offset>()
-        val positions2 = mutableListOf<Offset>()
+    fun kineticIdentity_integratesWithComplexLayout() = runTest {
+        var lastPosition: Offset? = null
+        var interactionCount by mutableStateOf(0)
         
         composeTestRule.setContent {
             Column(modifier = Modifier.fillMaxSize()) {
-                KineticIdentity(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .testTag("kinetic1"),
-                    onPositionChange = { positions1.add(it) }
+                Text(
+                    text = "Interactions: $interactionCount",
+                    modifier = Modifier.testTag("interaction-counter")
                 )
-                Spacer(modifier = Modifier.height(20.dp))
-                KineticIdentity(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .testTag("kinetic2"),
-                    onPositionChange = { positions2.add(it) }
-                )
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    KineticIdentity(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(200.dp)
+                            .testTag("kinetic-left"),
+                        onPositionChange = { offset ->
+                            lastPosition = offset
+                            interactionCount++
+                        }
+                    )
+                    KineticIdentity(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(200.dp)
+                            .testTag("kinetic-right"),
+                        onPositionChange = { offset ->
+                            lastPosition = offset
+                            interactionCount++
+                        }
+                    )
+                }
+                Button(
+                    onClick = { interactionCount = 0 },
+                    modifier = Modifier.testTag("reset-button")
+                ) {
+                    Text("Reset")
+                }
             }
         }
         
-        // Interact with first component
-        composeTestRule.onNodeWithTag("kinetic1")
+        // Test interactions with left kinetic identity
+        composeTestRule.onNodeWithTag("kinetic-left")
             .performTouchInput {
-                down(Offset(25f, 25f))
-                up()
-            }
-        
-        // Interact with second component
-        composeTestRule.onNodeWithTag("kinetic2")
-            .performTouchInput {
-                down(Offset(75f, 75f))
+                down(Offset(50f, 100f))
                 up()
             }
         
         composeTestRule.waitForIdle()
         
-        // Verify independent behavior
-        assertTrue("First component should capture events", positions1.isNotEmpty())
-        assertTrue("Second component should capture events", positions2.isNotEmpty())
+        // Verify state updates
+        composeTestRule.onNodeWithTag("interaction-counter")
+            .assertTextContains("1")
+        
+        // Test interactions with right kinetic identity
+        composeTestRule.onNodeWithTag("kinetic-right")
+            .performTouchInput {
+                down(Offset(50f, 100f))
+                up()
+            }
+        
+        composeTestRule.waitForIdle()
+        
+        // Verify state updates again
+        composeTestRule.onNodeWithTag("interaction-counter")
+            .assertTextContains("2")
+        
+        // Test reset functionality
+        composeTestRule.onNodeWithTag("reset-button").performClick()
+        composeTestRule.waitForIdle()
+        
+        composeTestRule.onNodeWithTag("interaction-counter")
+            .assertTextContains("0")
     }
-    
+
     @Test
-    fun kineticIdentityInScrollableContent_maintainsInteractivity() {
-        val capturedPositions = mutableListOf<Offset>()
+    fun kineticIdentity_handlesStateChangesDuringInteraction() = runTest {
+        var isEnabled by mutableStateOf(true)
+        var capturedPositions = mutableListOf<Offset>()
         
         composeTestRule.setContent {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .testTag("scrollable-content")
-            ) {
-                repeat(5) { index ->
+            Column {
+                Button(
+                    onClick = { isEnabled = !isEnabled },
+                    modifier = Modifier.testTag("toggle-button")
+                ) {
+                    Text(if (isEnabled) "Disable" else "Enable")
+                }
+                
+                if (isEnabled) {
                     KineticIdentity(
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(200.dp)
+                            .testTag("conditional-kinetic"),
+                        onPositionChange = { offset ->
+                            capturedPositions.add(offset)
+                        }
+                    )
+                }
+            }
+        }
+        
+        // Initial state - component should be present
+        composeTestRule.onNodeWithTag("conditional-kinetic").assertExists()
+        
+        // Interact with component
+        composeTestRule.onNodeWithTag("conditional-kinetic")
+            .performTouchInput {
+                down(Offset(100f, 100f))
+                up()
+            }
+        
+        composeTestRule.waitForIdle()
+        assertTrue(capturedPositions.isNotEmpty(), "Should capture position when enabled")
+        
+        // Disable component
+        composeTestRule.onNodeWithTag("toggle-button").performClick()
+        composeTestRule.waitForIdle()
+        
+        // Component should no longer exist
+        composeTestRule.onNodeWithTag("conditional-kinetic").assertDoesNotExist()
+        
+        // Re-enable component
+        composeTestRule.onNodeWithTag("toggle-button").performClick()
+        composeTestRule.waitForIdle()
+        
+        // Component should exist again
+        composeTestRule.onNodeWithTag("conditional-kinetic").assertExists()
+    }
+
+    @Test
+    fun kineticIdentity_performanceWithManyInstances() = runTest {
+        val instanceCount = 10
+        val capturedEvents = mutableMapOf<Int, Int>()
+        
+        composeTestRule.setContent {
+            LazyColumn {
+                items(instanceCount) { index ->
+                    KineticIdentity(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
                             .testTag("kinetic-$index"),
-                        onPositionChange = { capturedPositions.add(it) }
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-            }
-        }
-        
-        // Test interaction with components in scrollable content
-        composeTestRule.onNodeWithTag("kinetic-2")
-            .performTouchInput {
-                down(Offset(40f, 40f))
-                up()
-            }
-        
-        composeTestRule.waitForIdle()
-        
-        assertTrue("Should maintain interactivity in scrollable content", 
-                  capturedPositions.isNotEmpty())
-    }
-    
-    @Test
-    fun kineticIdentity_performanceUnderLoad_remainsResponsive() {
-        var totalEvents = 0
-        val testTag = "performance-test"
-        
-        composeTestRule.setContent {
-            // Create multiple nested KineticIdentity components
-            Box(modifier = Modifier.size(200.dp)) {
-                repeat(3) { i ->
-                    KineticIdentity(
-                        modifier = Modifier
-                            .size((150 - i * 30).dp)
-                            .testTag("$testTag-$i"),
-                        onPositionChange = { totalEvents++ }
+                        onPositionChange = {
+                            capturedEvents[index] = (capturedEvents[index] ?: 0) + 1
+                        }
                     )
                 }
             }
         }
         
-        // Perform intensive touch interactions
-        repeat(3) { i ->
-            composeTestRule.onNodeWithTag("$testTag-$i")
+        // Interact with several instances
+        repeat(5) { index ->
+            composeTestRule.onNodeWithTag("kinetic-$index")
                 .performTouchInput {
-                    repeat(5) { j ->
-                        down(Offset(20f + j * 10f, 20f + j * 10f))
-                        up()
-                    }
+                    down(Offset(25f, 25f))
+                    up()
                 }
         }
         
         composeTestRule.waitForIdle()
         
-        // Verify the system remained responsive
-        assertTrue("Should handle intensive interactions", totalEvents > 0)
-        
-        // Verify all components still exist and are functional
-        repeat(3) { i ->
-            composeTestRule.onNodeWithTag("$testTag-$i").assertExists()
-        }
+        // Verify events were captured for interacted instances
+        assertTrue(capturedEvents.isNotEmpty(), "Should capture events from multiple instances")
+        assertTrue(capturedEvents.size <= 5, "Should only have events from interacted instances")
     }
 }
