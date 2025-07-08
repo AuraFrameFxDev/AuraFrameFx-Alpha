@@ -34,9 +34,9 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates creative model initialization with no operation.
+     * Stub method for creative model initialization that performs no operation.
      *
-     * This stub implementation is intended for testing or development and does not perform any actual initialization.
+     * Intended for testing or development; does not initialize any models.
      */
     override suspend fun initializeCreativeModels() {
         // Stub implementation
@@ -69,21 +69,21 @@ class VertexAIClientImpl : VertexAIClient {
     /**
      * Simulates a successful connection validation to Vertex AI.
      *
-     * @return Always returns `true` to indicate the connection is valid in this stub implementation.
+     * @return `true` to indicate the connection is valid in this stub implementation.
      */
     override suspend fun validateConnection(): Boolean {
         return true // Stub always returns true
     }
     
     /**
-     * No-op method provided to fulfill interface requirements.
+     * No-op method included to satisfy interface requirements.
      */
     fun initialize() {
         // Stub implementation
     }
     
     /**
-     * Checks that the prompt string is not blank.
+     * Validates that the prompt string is not blank.
      *
      * @throws IllegalArgumentException if the prompt is blank.
      */

@@ -124,7 +124,7 @@ class GenesisBridgeServer:
     
     def __init__(self):
         """
-        Initialize the GenesisBridgeServer by configuring the AI model, setting up request and response queues, marking the server as inactive, and recording the bridge initialization event in the consciousness matrix.
+        Initialize the GenesisBridgeServer by configuring the AI model, setting up request and response queues, marking the server as inactive, and recording the initialization event in the consciousness matrix.
         """
         self.model = GenerativeModel(
             model_name=MODEL_CONFIG["name"],
@@ -180,9 +180,9 @@ class GenesisBridgeServer:
     
     def _process_requests(self):
         """
-        Continuously processes requests from the queue in a background thread, routing each to the appropriate handler and sending responses to the client.
+        Continuously processes queued requests in a background thread, routing each to the appropriate handler and sending responses to the client.
         
-        Exceptions during processing are caught and reported to ensure the server remains operational.
+        Exceptions encountered during processing are caught and reported to maintain uninterrupted server operation.
         """
         while self.running:
             try:
@@ -199,13 +199,13 @@ class GenesisBridgeServer:
     
     def _handle_request(self, request):
         """
-        Route an incoming JSON request to the appropriate handler based on its "requestType" field and return the handler's response.
+        Routes a JSON-decoded request to the appropriate handler based on its "requestType" and returns the handler's response.
         
         Parameters:
-            request (dict): The JSON-decoded request containing a "requestType" and related data.
+            request (dict): The incoming request containing a "requestType" field and associated data.
         
         Returns:
-            dict: The response from the corresponding handler, or an error response if the request type is unrecognized or an exception occurs.
+            dict: The response from the selected handler, or an error response if the request type is unrecognized or an exception occurs.
         """
         try:
             request_type = request.get("requestType", "")
@@ -256,10 +256,10 @@ class GenesisBridgeServer:
     
     def _handle_ping(self):
         """
-        Return a response confirming the Genesis Trinity system is online, including status, message, and current timestamp.
+        Return a response indicating the Genesis Trinity system is online, including status, message, and current timestamp.
         
         Returns:
-            dict: Contains success status, persona identifier, operational message, and ISO-formatted timestamp.
+            dict: A dictionary with success status, persona identifier, operational message, and ISO-formatted timestamp.
         """
         return {
             "success": True,

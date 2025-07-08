@@ -37,16 +37,16 @@ override fun getName(): String? = "Kai"
     /**
  * Returns the type of this agent.
  *
- * @return `AgentType.KAI`, indicating this agent is of type KAI.
+ * @return The agent type, `AgentType.KAI`.
  */
 override fun getType(): AgentType = AgentType.KAI
 
     /**
          * Returns a map of the agent's supported capabilities.
          *
-         * The returned map includes the capabilities "security", "analysis", "memory", and "service_implemented", each set to `true`.
+         * The map contains the keys "security", "analysis", "memory", and "service_implemented", each mapped to `true`.
          *
-         * @return A map where each key is a capability name and the value is `true` if supported.
+         * @return A map indicating which capabilities are supported by the agent.
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
@@ -57,10 +57,10 @@ override fun getType(): AgentType = AgentType.KAI
         )
 
     /**
-     * Processes an AI request with the provided context and returns a response referencing both.
+     * Processes an AI request using the provided context and returns a response referencing both.
      *
      * @param request The AI request to process.
-     * @param context Additional context information relevant to the request.
+     * @param context Contextual information relevant to the request.
      * @return An AgentResponse containing a message that includes the request query and context, with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context

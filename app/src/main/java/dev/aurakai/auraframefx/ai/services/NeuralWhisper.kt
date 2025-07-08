@@ -57,10 +57,10 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initializes the TextToSpeech engine and updates the initialization state.
+     * Initializes the TextToSpeech engine and updates the initialization status.
      *
      * Attempts to create a TextToSpeech instance and sets the initialization flag based on the result.
-     * Language, voice, and other configuration are not yet implemented.
+     * Language, voice, and other configuration are not currently implemented.
      */
     private fun initializeTts() {
         // TODO: Implement robust TTS initialization, including language availability checks.
@@ -105,7 +105,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Converts audio input to text using speech-to-text processing.
      *
-     * This function is a placeholder and does not perform actual speech recognition. Returns a fixed transcribed text if speech recognition is initialized; otherwise, returns null.
+     * This is a placeholder implementation that returns a fixed transcribed text if speech recognition is initialized; otherwise, it returns null.
      *
      * @param audioInput The audio data or trigger for initiating speech recognition.
      * @return The transcribed text if speech recognition is initialized, or null otherwise.
@@ -132,7 +132,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Attempts to synthesize speech from the provided text using the text-to-speech engine.
      *
-     * This is a placeholder; actual speech synthesis is not performed.
+     * This is a placeholder implementation; no actual speech synthesis is performed.
      *
      * @param text The text to be spoken.
      * @param locale The language and region for speech synthesis (defaults to US English).
@@ -159,9 +159,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Processes a transcribed voice command and returns a placeholder action object.
+     * Processes a transcribed voice command and returns a placeholder action.
      *
-     * Updates the conversation state to indicate processing. This method is intended for future implementation of natural language understanding and command-to-action mapping.
+     * Updates the conversation state to indicate processing. Intended for future implementation of natural language understanding and command-to-action mapping.
      *
      * @param command The transcribed voice command to process.
      * @return A placeholder object representing the result of processing the command.
@@ -182,9 +182,9 @@ class NeuralWhisper @Inject constructor(
     /**
      * Shares context information with the Kai agent or controller.
      *
-     * Updates the conversation state to indicate context sharing. Actual integration with the Kai agent is not implemented.
+     * Updates the conversation state to reflect context sharing. Actual integration with the Kai agent is not implemented.
      *
-     * @param contextText The context information to be shared.
+     * @param contextText The context information to share.
      */
     fun shareContextWithKai(contextText: String) {
         _conversationStateFlow.value = ConversationState.Processing("Sharing with Kai: $contextText")
@@ -194,9 +194,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Starts audio recording for speech recognition.
+     * Attempts to start audio recording for speech recognition.
      *
-     * @return `true` if recording was started successfully, or `false` if an error occurred.
+     * @return `true` if recording starts successfully, `false` if an error occurs.
      */
     fun startRecording(): Boolean {
         return try {
@@ -211,9 +211,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Stops the current audio recording session and returns a message describing the result.
+     * Stops the current audio recording session and returns a message indicating the outcome.
      *
-     * @return A message indicating whether stopping the recording was successful or failed.
+     * @return A message describing whether stopping the recording was successful or failed.
      */
     fun stopRecording(): String {
         return try {
