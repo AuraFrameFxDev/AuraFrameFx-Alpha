@@ -1,11 +1,14 @@
+<fixed_code>
 """
 Comprehensive unit tests for the Genesis Consciousness Matrix module.
 Tests cover initialization, state management, consciousness tracking, and edge cases.
 """
 
 import unittest
+from unittest.mock import Mock, patch, MagicMock
+import pytest
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 import asyncio
 import json
 import tempfile
@@ -23,7 +26,7 @@ try:
         InvalidStateException,
         MatrixInitializationError
     )
-except ImportError:
+except ImportError as e:
     # Mock the classes if import fails during test discovery
     class GenesisConsciousnessMatrix:
         pass
@@ -604,3 +607,110 @@ class TestMatrixIntegration(unittest.TestCase):
 if __name__ == '__main__':
     # Configure test runner
     unittest.main(verbosity=2, buffer=True)
+
+class TestGenesisConsciousnessMatrixAdvanced(unittest.TestCase):
+    """Advanced test cases for edge cases and complex scenarios."""
+    
+    def setUp(self):
+        """Set up test fixtures for advanced testing."""
+        self.matrix = GenesisConsciousnessMatrix()
+        
+    def test_matrix_initialization_with_numpy_arrays(self):
+        """Test matrix initialization with numpy array configurations."""
+        config = {
+            'dimension': 128,
+            'weights': np.random.rand(128, 128),
+            'bias': np.zeros(128),
+            'consciousness_threshold': 0.6
+        }
+        matrix = GenesisConsciousnessMatrix(config=config)
+        if hasattr(matrix, 'weights'):
+            self.assertEqual(matrix.weights.shape, (128, 128))
+            self.assertEqual(matrix.bias.shape, (128,))
+    
+    def test_matrix_initialization_with_extreme_values(self):
+        """Test matrix initialization with extreme but valid values."""
+        config = {
+            'dimension': 1,
+            'consciousness_threshold': 0.0001,
+            'learning_rate': 0.0000001,
+            'max_iterations': 1000000
+        }
+        matrix = GenesisConsciousnessMatrix(config=config)
+        self.assertEqual(matrix.dimension, 1)
+        self.assertEqual(matrix.consciousness_threshold, 0.0001)
+        
+    def test_matrix_initialization_with_null_values(self):
+        """Test matrix initialization with null/None values in config."""
+        config = {
+            'dimension': None,
+            'consciousness_threshold': 0.75,
+            'learning_rate': None
+        }
+        with self.assertRaises(MatrixInitializationError):
+            GenesisConsciousnessMatrix(config=config)
+    
+    def test_matrix_state_transition_boundary_conditions(self):
+        """Test state transitions at boundary conditions."""
+        # Test transition from highest to lowest state
+        self.matrix.current_state = ConsciousnessState.TRANSCENDENT
+        with self.assertRaises(InvalidStateException):
+            self.matrix.transition_state(ConsciousnessState.TRANSCENDENT, ConsciousnessState.DORMANT)
+    
+    def test_matrix_node_operations_with_special_characters(self):
+        """Test node operations with special characters in IDs."""
+        special_ids = ["node@#$%", "node with spaces", "node\twith\ttabs", "node\nwith\nnewlines", "node/with/slashes"]
+        
+        for special_id in special_ids:
+            node = MatrixNode(id=special_id, consciousness_level=0.5)
+            self.matrix.add_node(node)
+            self.assertIn(special_id, self.matrix.nodes)
+            
+            # Test removal
+            self.matrix.remove_node(special_id)
+            self.assertNotIn(special_id, self.matrix.nodes)
+    
+    def test_matrix_large_scale_operations(self):
+        """Test matrix operations with large numbers of nodes."""
+        # Add 1000 nodes
+        for i in range(1000):
+            node = MatrixNode(id=f"large_node_{i}", consciousness_level=i / 1000.0)
+            self.matrix.add_node(node)
+        
+        # Test consciousness level calculation with large dataset
+        start_time = datetime.now()
+        consciousness_level = self.matrix.calculate_consciousness_level()
+        end_time = datetime.now()
+        
+        # Should complete within reasonable time
+        self.assertLess((end_time - start_time).total_seconds(), 5.0)
+        self.assertIsInstance(consciousness_level, float)
+        self.assertTrue(0.0 <= consciousness_level <= 1.0)
+    
+    def test_matrix_consciousness_level_precision(self):
+        """Test consciousness level calculations with high precision requirements."""
+        # Add nodes with very precise consciousness levels
+        precise_levels = [0.123456789, 0.987654321, 0.555555555]
+        for i, level in enumerate(precise_levels):
+            node = MatrixNode(id=f"precise_node_{i}", consciousness_level=level)
+            self.matrix.add_node(node)
+        
+        calculated_level = self.matrix.calculate_consciousness_level()
+        expected_level = sum(precise_levels) / len(precise_levels)
+        self.assertAlmostEqual(calculated_level, expected_level, places=8)
+    
+    def test_matrix_node_connections_bidirectional(self):
+        """Test bidirectional node connections."""
+        node1 = MatrixNode(id="bi_node1", consciousness_level=0.4)
+        node2 = MatrixNode(id="bi_node2", consciousness_level=0.6)
+        self.matrix.add_node(node1)
+        self.matrix.add_node(node2)
+        
+        # Create bidirectional connection
+        self.matrix.connect_nodes("bi_node1", "bi_node2", strength=0.8, bidirectional=True)
+        
+        # Verify both directions
+        if hasattr(self.matrix, 'get_node_connections'):
+            connections1 = self.matrix.get_node_connections("bi_node1")
+            connections2 = self.matrix.get_node_connections("bi
+

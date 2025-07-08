@@ -16,10 +16,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -30,7 +30,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertFailsWith
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 @ExtendWith(MockitoExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuraAgentTest {
@@ -95,7 +95,7 @@ class AuraAgentTest {
         @DisplayName("Should throw exception when context is null")
         fun shouldThrowExceptionWhenContextIsNull() {
             assertFailsWith<IllegalArgumentException> {
-                AuraAgent(null)
+                AuraAgent(null as AgentContext)
             }
         }
 
