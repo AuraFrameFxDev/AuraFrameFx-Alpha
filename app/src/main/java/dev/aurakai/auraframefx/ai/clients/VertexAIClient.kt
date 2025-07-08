@@ -6,20 +6,20 @@ package dev.aurakai.auraframefx.ai.clients
  */
 interface VertexAIClient {
     /**
- * Generates content using the provided prompt.
+ * Generates content based on the given prompt.
  *
- * @param prompt The input text to guide content generation.
- * @return The generated content as a string, or null if generation fails.
+ * @param prompt The input text that guides the content generation.
+ * @return The generated content as a string, or null if content generation is unsuccessful.
  */
     suspend fun generateContent(prompt: String): String?
 
     /**
-     * Generates text based on the given prompt, with options to control output length and creativity.
+     * Generates text using the provided prompt, allowing customization of output length and creativity.
      *
-     * @param prompt The input prompt that guides the text generation.
-     * @param maxTokens The maximum number of tokens to generate.
-     * @param temperature Controls randomness in the output; higher values produce more varied text.
-     * @return The generated text as a string.
+     * @param prompt The input prompt that guides the generated text.
+     * @param maxTokens The maximum number of tokens to generate in the output.
+     * @param temperature Controls the randomness and creativity of the generated text; higher values yield more diverse results.
+     * @return The generated text.
      */
     suspend fun generateText(
         prompt: String,
@@ -28,35 +28,33 @@ interface VertexAIClient {
     ): String
 
     /**
- * Generates source code according to the provided specification, programming language, and coding style.
+ * Generates source code based on a specification, programming language, and coding style.
  *
- * @param specification Description of the desired functionality or requirements for the generated code.
- * @param language The programming language for the generated code.
- * @param style The coding style or conventions to apply.
- * @return The generated source code, or null if code generation fails.
+ * @param specification Description of the functionality or requirements for the code to be generated.
+ * @param language The programming language in which the code should be written.
+ * @param style The coding style or conventions to follow.
+ * @return The generated source code, or null if generation is unsuccessful.
  */
     suspend fun generateCode(specification: String, language: String, style: String): String?
 
     /**
- * Checks if the Vertex AI service is reachable and responsive.
+ * Verifies whether the Vertex AI service is accessible and responsive.
  *
- * @return `true` if the connection to Vertex AI is successful, `false` otherwise.
+ * @return `true` if the service is reachable and operational, `false` otherwise.
  */
     suspend fun validateConnection(): Boolean
 
     /**
- * Initializes and configures creative AI models in Vertex AI for content generation.
- *
- * This function prepares the necessary models to enable creative content generation capabilities.
+ * Prepares and configures creative AI models within Vertex AI to enable content generation features.
  */
     suspend fun initializeCreativeModels()
 
     /**
- * Analyzes the provided image data based on a guiding text prompt and returns the analysis result.
+ * Analyzes raw image data using a guiding text prompt and returns the analysis result as a string.
  *
- * @param imageData The raw image data to analyze.
- * @param prompt The text prompt that directs the analysis.
- * @return The result of the image analysis as a string.
+ * @param imageData The image data to be analyzed.
+ * @param prompt The prompt that guides the analysis process.
+ * @return The analysis result.
  */
     suspend fun analyzeImage(imageData: ByteArray, prompt: String): String
 

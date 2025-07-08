@@ -10,28 +10,33 @@ import androidx.compose.ui.graphics.Color // Added import for Color
  *
  * Placeholder for a cyber edge glow visual effect.
  */
+/**
+ * Placeholder for a cyber edge glow visual effect on the Modifier.
+ *
+ * Currently returns the original Modifier unchanged. Intended for future implementation of a cyber-themed edge glow effect.
+ */
 fun Modifier.cyberEdgeGlow(): Modifier = this /**
-     * Returns the original Modifier without applying a cyber edge glow effect.
+     * Placeholder for a cyber edge glow visual effect using the specified colors.
      *
-     * This is a placeholder implementation. The parameters are currently unused.
+     * Currently returns the original Modifier unchanged. The color parameters are not used.
      *
-     * @param primaryColor The intended primary color for the edge glow effect.
-     * @param secondaryColor The intended secondary color for the edge glow effect.
-     * @return The unmodified Modifier.
+     * @param primaryColor Intended as the main color for the edge glow effect.
+     * @param secondaryColor Intended as the secondary color for the edge glow effect.
+     * @return The original, unmodified Modifier.
      */
 fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier =
     this /**
- * Applies a digital pixelation visual effect to the modifier when visible is true.
+ * Placeholder for a digital pixelation visual effect that can be toggled on or off.
  *
- * @param visible Whether the pixelation effect should be applied.
- * @return The modified Modifier with the pixelation effect if visible is true; otherwise, the original Modifier.
+ * @param visible If true, the pixelation effect would be applied; currently unused.
+ * @return The original Modifier unchanged.
  */
 
 fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this /**
- * Returns the original Modifier without applying any digital glitch effect.
+ * Placeholder for a digital glitch visual effect.
  *
- * This is a placeholder for a future digital glitch visual effect.
- * @return The unmodified Modifier.
+ * Currently returns the original Modifier unchanged. Intended for future implementation of a digital glitch effect.
+ * @return The original Modifier.
  */
 fun Modifier.digitalGlitchEffect(): Modifier = this // Placeholder
 

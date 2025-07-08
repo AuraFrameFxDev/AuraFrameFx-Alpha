@@ -17,12 +17,11 @@ import javax.inject.Singleton
 object DatabaseModule {
 
     /**
-     * Provides a singleton instance of the application's Room database.
+     * Provides a singleton instance of the Room `AppDatabase` configured with the application context and a fixed database name.
      *
-     * Creates and configures the `AppDatabase` using the application context and a fixed database name.
-     * Currently uses destructive migration as a fallback; proper migration strategies should be implemented for production use.
+     * The database is built using destructive migration as a fallback. For production environments, proper migration strategies should be implemented.
      *
-     * @return The singleton instance of `AppDatabase`.
+     * @return The singleton `AppDatabase` instance.
      */
     @Provides
     @Singleton
@@ -39,9 +38,9 @@ object DatabaseModule {
     }
 
     /**
-     * Provides an instance of AgentMemoryDao from the given AppDatabase.
+     * Returns an instance of AgentMemoryDao from the provided AppDatabase.
      *
-     * @return The AgentMemoryDao for accessing agent memory data.
+     * @return The AgentMemoryDao used for accessing agent memory records.
      */
     @Provides
     fun provideAgentMemoryDao(database: AppDatabase): AgentMemoryDao {
