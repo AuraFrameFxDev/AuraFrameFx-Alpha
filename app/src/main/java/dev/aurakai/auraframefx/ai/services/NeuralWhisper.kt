@@ -45,9 +45,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initializes the NeuralWhisper service by setting up text-to-speech and speech-to-text components.
+     * Sets up text-to-speech and speech-to-text components for audio processing and AI interaction.
      *
-     * This method prepares the service for audio processing and AI interaction. Additional initialization steps may be added in the future.
+     * Prepares the NeuralWhisper service for use by initializing required speech engines. Additional initialization steps may be added as the service evolves.
      */
     fun initialize() {
         Log.d(TAG, "Initializing NeuralWhisper...")
@@ -103,9 +103,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Converts audio input to transcribed text using speech-to-text processing.
+     * Converts audio input to text using speech-to-text processing.
      *
-     * This is a placeholder implementation; actual speech recognition logic will be added in the future.
+     * This is a placeholder implementation; actual speech recognition logic will be implemented in the future.
      *
      * @param audioInput The audio data or trigger for initiating speech recognition.
      * @return The transcribed text if successful, or null if speech recognition is not initialized.
@@ -159,11 +159,11 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Processes a transcribed voice command and returns a placeholder action.
+     * Processes a transcribed voice command and returns a placeholder action object.
      *
-     * Updates the conversation state to indicate processing. Intended for future implementation of natural language understanding and command-to-action mapping.
+     * Updates the conversation state to indicate processing of the provided command. This method is intended as a placeholder for future natural language understanding and command-to-action mapping logic.
      *
-     * @param command The transcribed voice command to process.
+     * @param command The transcribed voice command to interpret.
      * @return A placeholder object representing the result of processing the command.
      */
     fun processVoiceCommand(command: String): Any { // Placeholder return type
@@ -182,9 +182,9 @@ class NeuralWhisper @Inject constructor(
     /**
      * Shares context information with the Kai agent or controller.
      *
-     * Updates the conversation state to reflect context sharing. Actual integration with the Kai agent is not implemented.
+     * Updates the conversation state to indicate context sharing. Actual integration with the Kai agent is not implemented.
      *
-     * @param contextText The context information to share.
+     * @param contextText The context information to be shared.
      */
     fun shareContextWithKai(contextText: String) {
         _conversationStateFlow.value = ConversationState.Processing("Sharing with Kai: $contextText")
@@ -196,7 +196,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Attempts to start audio recording for speech recognition.
      *
-     * @return `true` if recording starts successfully; `false` if an error occurs.
+     * @return `true` if recording starts successfully, or `false` if an error occurs.
      */
     fun startRecording(): Boolean {
         return try {
@@ -211,9 +211,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Stops the current audio recording session and returns a message indicating success or failure.
+     * Stops the current audio recording session and returns a message indicating the result.
      *
-     * @return A message describing the result of the stop operation.
+     * @return A message describing whether the recording was stopped successfully or if an error occurred.
      */
     fun stopRecording(): String {
         return try {
