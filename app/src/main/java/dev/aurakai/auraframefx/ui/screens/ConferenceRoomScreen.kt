@@ -187,6 +187,14 @@ fun RecordingButton(
     }
 }
 
+/**
+ * Displays a button for toggling transcription state with an icon and color indicating the current status.
+ *
+ * When transcription is active, shows a red stop icon; otherwise, displays a blue phone icon.
+ *
+ * @param isTranscribing Whether transcription is currently active.
+ * @param onClick Called when the button is pressed.
+ */
 @Composable
 fun TranscribeButton(
     isTranscribing: Boolean,

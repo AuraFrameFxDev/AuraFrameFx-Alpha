@@ -72,6 +72,11 @@ class NeuralWhisper @Inject constructor(
         }
     }
 
+    /**
+     * Initializes the speech-to-text (STT) engine if speech recognition is available on the device.
+     *
+     * Sets up the `SpeechRecognizer` instance and updates the STT initialization flag. Logs an error if speech recognition is not supported.
+     */
     private fun initializeStt() {
         // TODO: Implement STT initialization using Android's SpeechRecognizer or a third-party library.
         // This will involve setting up a SpeechRecognitionListener.
@@ -89,10 +94,10 @@ class NeuralWhisper @Inject constructor(
     /**
      * Converts audio input to transcribed text using speech-to-text processing.
      *
-     * Returns a placeholder transcription if STT is initialized; otherwise, returns null.
+     * Updates the conversation state to indicate listening and processing. Returns a placeholder transcription if speech-to-text is initialized; otherwise, returns null.
      *
      * @param audioInput The audio data or trigger for speech recognition.
-     * @return The transcribed text, or null if STT is not initialized.
+     * @return The transcribed text if STT is initialized, or null otherwise.
      */
     suspend fun speechToText(audioInput: Any /* Placeholder type */): String? {
         // TODO: Implement actual STT logic.
@@ -114,12 +119,12 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initiates text-to-speech synthesis for the given text in the specified locale.
+     * Initiates text-to-speech synthesis for the provided text using the specified locale.
      *
      * Updates the conversation state to "Speaking." Returns `false` if the TTS engine is not initialized; otherwise, returns `true` as a placeholder.
      *
-     * @param text The text to synthesize into speech.
-     * @param locale The locale to use for speech synthesis (default is US English).
+     * @param text The text to be spoken.
+     * @param locale The locale for speech synthesis (default is US English).
      * @return `true` if the synthesis request is accepted (placeholder), or `false` if TTS is not initialized.
      */
     fun textToSpeech(text: String, locale: Locale = Locale.US): Boolean {
@@ -166,9 +171,9 @@ class NeuralWhisper @Inject constructor(
     /**
      * Shares context information with the Kai agent or controller.
      *
-     * Updates the conversation state to indicate that context is being shared. Actual communication with the Kai agent is not implemented.
+     * Updates the conversation state to indicate context sharing. Actual communication with the Kai agent is not implemented.
      *
-     * @param contextText The context information to share.
+     * @param contextText The context information to be shared.
      */
     fun shareContextWithKai(contextText: String) {
         _conversationStateFlow.value = ConversationState.Processing("Sharing with Kai: $contextText")
@@ -199,7 +204,9 @@ class NeuralWhisper @Inject constructor(
     /**
      * Stops the current audio recording session and returns a status message.
      *
-     * @return A message indicating whether the recording was stopped successfully or describing the failure.
+     * Updates the conversation state to "Processing" and returns a message indicating whether the recording was stopped successfully or describing the failure.
+     *
+     * @return A message indicating the result of the stop recording operation.
      */
     fun stopRecording(): String {
         return try {
@@ -216,7 +223,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Releases all resources used by the NeuralWhisper service and resets the conversation state to idle.
      *
-     * Stops and shuts down the text-to-speech engine, destroys the speech recognizer, clears their initialization flags, and updates the conversation state to idle.
+     * Stops and shuts down the text-to-speech engine, destroys the speech recognizer, clears their initialization flags, and sets the conversation state to idle.
      */
     fun cleanup() {
         Log.d(TAG, "Cleaning up NeuralWhisper resources.")

@@ -11,9 +11,12 @@ extern "C" {
 #endif
 
 /**
- * @brief Initializes the language identifier with the specified model path.
+ * @brief Initializes the language identifier using the provided model path.
  *
- * Returns the version string "1.2.0" upon successful initialization, or an empty string if the model path is null.
+ * Returns the version string "1.2.0" if initialization succeeds, or an empty string if the model path is null.
+ *
+ * @param modelPath Path to the language model as a Java string.
+ * @return jstring Version string "1.2.0" on success, or an empty string if modelPath is null.
  */
 JNIEXPORT jstring
 
@@ -38,12 +41,12 @@ Java_com_example_app_language_LanguageIdentifier_nativeInitialize(
 }
 
 /**
- * @brief Detects the language of the given text using heuristic analysis.
+ * @brief Heuristically detects the language of the input text.
  *
- * Analyzes the input text for common words, articles, and character frequency to identify whether it is written in English, Spanish, French, German, Italian, or Portuguese. If the text contains a high proportion of accented (non-ASCII) characters but no clear language match, returns "mul" to indicate multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
+ * Analyzes the input text for language-specific words and articles to identify English, Spanish, French, German, Italian, or Portuguese. If no clear match is found and the text contains a high proportion of accented characters, returns "mul" for multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
  *
- * @param text The input text to analyze.
- * @return jstring A language code ("en", "es", "fr", "de", "it", "pt", "mul", or "und") representing the detected language.
+ * @param text Input text to analyze.
+ * @return jstring Language code ("en", "es", "fr", "de", "it", "pt", "mul", or "und") representing the detected language.
  */
 JNIEXPORT jstring
 
@@ -123,11 +126,11 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
 }
 
 /**
- * @brief Releases resources associated with the language identifier handle.
+ * @brief Releases native resources associated with a language identifier instance.
  *
- * If the provided handle is non-zero, performs cleanup operations for the language identifier instance.
+ * Cleans up resources linked to the provided native handle if it is non-zero.
  *
- * @param handle Native handle representing the language identifier instance to be released.
+ * @param handle Native handle of the language identifier instance to release.
  */
 JNIEXPORT void JNICALL
 Java_com_example_app_language_LanguageIdentifier_nativeRelease(
