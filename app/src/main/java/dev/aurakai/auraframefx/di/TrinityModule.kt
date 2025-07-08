@@ -30,11 +30,11 @@ import javax.inject.Singleton
 object TrinityModule {
 
     /**
-     * Provides a singleton instance of GenesisBridgeService that connects multiple AI services with the Trinity Python backend.
+     * Provides a singleton GenesisBridgeService that integrates multiple AI services with the Trinity Python backend.
      *
-     * The returned service enables integrated communication between AI components, context management, security, and the application environment.
+     * The returned service facilitates unified communication among AI components, manages context and security, and interfaces with the application environment.
      *
-     * @return A configured GenesisBridgeService singleton.
+     * @return A configured singleton instance of GenesisBridgeService.
      */
     @Provides
     @Singleton
@@ -59,9 +59,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton instance of TrinityCoordinatorService to coordinate AI personas within the Trinity AI system.
+     * Provides a singleton instance of TrinityCoordinatorService for orchestrating AI personas and managing their interactions within the Trinity AI system.
      *
-     * @return A configured TrinityCoordinatorService singleton.
+     * @return A configured TrinityCoordinatorService singleton responsible for coordinating AI components and ensuring integrated operation.
      */
     @Provides
     @Singleton
@@ -82,11 +82,11 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton SecurityMonitor for overseeing security operations in the Trinity AI system.
+     * Provides a singleton instance of SecurityMonitor for the Trinity AI system.
      *
-     * The returned SecurityMonitor is configured with the required security context, Genesis bridge service, and logger.
+     * The SecurityMonitor oversees security operations by integrating the security context, Genesis bridge service, and logging capabilities.
      *
-     * @return A configured singleton instance of SecurityMonitor.
+     * @return A configured singleton SecurityMonitor instance.
      */
     @Provides
     @Singleton
