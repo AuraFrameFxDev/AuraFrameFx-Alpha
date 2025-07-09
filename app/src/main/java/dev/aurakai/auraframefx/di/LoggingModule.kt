@@ -23,7 +23,7 @@ object LoggingModule {
      *
      * Constructs and returns an `AuraFxLoggerImpl` using the application context and `KaiAIService`.
      *
-     * @return The singleton `AuraFxLogger` instance.
+     * @return A singleton instance of `AuraFxLogger`.
      */
     @Provides
     @Singleton

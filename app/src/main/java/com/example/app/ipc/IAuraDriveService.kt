@@ -7,36 +7,36 @@ interface IAuraDriveService : IInterface {
     /**
  * Returns a summary string describing the current operational status of the Oracle Drive.
  *
- * @return The Oracle Drive's current status as a string.
+ * @return The current status of the Oracle Drive.
  */
 fun getOracleDriveStatus(): String
     /**
  * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module's enabled state was successfully changed, `false` if the operation failed.
+ * @return `true` if the module's enabled state was successfully changed, or `false` if the operation failed.
  */
 fun toggleLSPosedModule(): Boolean  
     /**
  * Returns a detailed internal status report of the Aura Drive service.
  *
- * The returned string contains comprehensive diagnostic or monitoring information about the service's current state.
+ * The returned string provides comprehensive diagnostic or monitoring information about the service's current state.
  *
- * @return A string with detailed internal status information.
+ * @return A string containing detailed internal status information.
  */
 fun getDetailedInternalStatus(): String
     /**
- * Returns a list of internal diagnostics log entries for debugging or monitoring purposes.
+ * Returns a list of internal diagnostics log entries for debugging or monitoring.
  *
- * @return A list of strings, each representing a diagnostics log entry.
+ * @return A list of strings, each representing an individual diagnostics log entry.
  */
 fun getInternalDiagnosticsLog(): List<String>
     
     companion object {
         object Stub {
             /**
-             * Returns an `IAuraDriveService` implementation backed by the given `IBinder`, or null if the binder is null.
+             * Returns an `IAuraDriveService` implementation backed by the provided `IBinder`, or null if the binder is null.
              *
-             * The returned implementation is a stub that does not perform actual service logic and provides placeholder responses.
+             * The returned implementation is a stub that provides placeholder responses and does not execute actual service logic.
              *
              * @param service The `IBinder` representing the remote service, or null.
              * @return An `IAuraDriveService` implementation if the binder is non-null; otherwise, null.
@@ -46,13 +46,13 @@ fun getInternalDiagnosticsLog(): List<String>
                 return if (service != null) {
                     object : IAuraDriveService {
                         /**
- * Returns the IBinder instance backing this interface implementation.
+ * Returns the underlying IBinder instance associated with this interface implementation.
  *
- * @return The underlying IBinder.
+ * @return The backing IBinder.
  */
 override fun asBinder(): IBinder = service
                         /**
- * Returns the current operational status of the Oracle Drive.
+ * Returns a summary string describing the current operational status of the Oracle Drive.
  *
  * In this stub implementation, always returns "Unknown".
  *
@@ -66,15 +66,15 @@ override fun getOracleDriveStatus(): String = "Unknown"
  */
 override fun toggleLSPosedModule(): Boolean = false
                         /**
- * Returns a detailed string describing the internal status of the Aura Drive service.
+ * Returns a detailed internal status report of the Aura Drive service.
  *
- * @return A detailed report of the service's internal state.
+ * @return A string containing comprehensive diagnostic or monitoring information about the service's internal state.
  */
 override fun getDetailedInternalStatus(): String = "Not implemented"
                         /**
  * Returns a list of internal diagnostics log entries.
  *
- * @return A list of strings representing diagnostics log entries.
+ * @return An empty list, as this stub does not provide actual diagnostics logs.
  */
 override fun getInternalDiagnosticsLog(): List<String> = emptyList()
                     }

@@ -7,7 +7,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 @pytest.fixture
 def sample_ethical_framework():
-    """Fixture providing a sample ethical framework for tests."""
+    """
+    Provides a pytest fixture that returns an `EthicalFramework` instance initialized with a test framework name and a list of ethical principles.
+    """
     from app.ai_backend.test_genesis_ethical_governor import EthicalFramework
     return EthicalFramework(
         "TestFramework",
@@ -16,7 +18,12 @@ def sample_ethical_framework():
 
 @pytest.fixture
 def sample_governance_policies():
-    """Fixture providing sample governance policies for tests."""
+    """
+    Provides a list of sample GovernancePolicy instances for use in tests.
+    
+    Returns:
+        List of GovernancePolicy objects representing privacy and safety policies with example rules.
+    """
     from app.ai_backend.test_genesis_ethical_governor import GovernancePolicy
     return [
         GovernancePolicy("privacy", ["no_pii_without_consent", "data_minimization"]),
@@ -25,6 +32,11 @@ def sample_governance_policies():
 
 @pytest.fixture
 def ethical_governor(sample_ethical_framework, sample_governance_policies):
-    """Fixture providing a configured ethical governor for tests."""
+    """
+    Pytest fixture that returns an `EthicalGovernor` instance initialized with a sample ethical framework and governance policies.
+    
+    Returns:
+        EthicalGovernor: An instance configured for use in tests.
+    """
     from app.ai_backend.test_genesis_ethical_governor import EthicalGovernor
     return EthicalGovernor(sample_ethical_framework, sample_governance_policies)
