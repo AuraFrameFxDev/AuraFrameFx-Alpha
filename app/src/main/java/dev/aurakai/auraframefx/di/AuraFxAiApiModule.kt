@@ -19,9 +19,9 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides a singleton OkHttpClient configured to log HTTP request and response bodies.
+     * Provides a singleton OkHttpClient configured to log HTTP request and response bodies at the BODY level.
      *
-     * @return An OkHttpClient instance with detailed network logging enabled.
+     * @return An OkHttpClient instance set up for detailed network traffic logging.
      */
     @Provides
     @Singleton
@@ -36,11 +36,11 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton `Json` serializer configured for robust handling of API data.
+     * Provides a singleton Json serializer configured for resilient handling of API data.
      *
-     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values to support resilient serialization and deserialization of API responses.
+     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values to ensure robust serialization and deserialization of API responses.
      *
-     * @return A configured `Json` instance for processing API data.
+     * @return A configured Json instance for processing API data.
      */
     @Provides
     @Singleton
@@ -52,10 +52,12 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton AIContentApi instance configured to communicate with the AuraFrameFx AI API.
+     * Provides a singleton AIContentApi instance for interacting with the AuraFrameFx AI API.
      *
-     * @param okHttpClient The HTTP client used for API requests.
-     * @return An AIContentApi instance targeting the AuraFrameFx AI API.
+     * Uses the specified OkHttpClient for HTTP communication with the API.
+     *
+     * @param okHttpClient The HTTP client used to perform API requests.
+     * @return An AIContentApi instance configured for the AuraFrameFx AI API.
      */
     @Provides
     @Singleton

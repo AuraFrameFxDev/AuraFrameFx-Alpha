@@ -81,7 +81,7 @@ class TrinityCoordinatorService @Inject constructor(
     }
 
     /**
-     * Processes an AI request by routing it to the appropriate persona(s) or fusion mode and emits one or more responses as a Flow.
+     * Processes an AI request by routing it to the appropriate persona or fusion mode and emits one or more responses as a Flow.
      *
      * Determines the optimal routing for the request—Kai, Aura, Genesis fusion, ethical review, or parallel processing with synthesis—based on request analysis. Emits a failure response if the system is not initialized or if an error occurs during processing.
      *
@@ -172,13 +172,13 @@ class TrinityCoordinatorService @Inject constructor(
     }
 
     /**
-     * Activates a Genesis fusion ability and emits the result.
+     * Activates a specified Genesis fusion ability and emits the result.
      *
-     * Initiates the specified fusion type in the Genesis persona, optionally using provided context data, and emits an `AgentResponse` describing whether activation was successful.
+     * Initiates the given fusion type in the Genesis persona, optionally using provided context data, and emits an `AgentResponse` indicating whether activation was successful.
      *
      * @param fusionType The name of the Genesis fusion ability to activate.
      * @param context Optional context data for the fusion activation.
-     * @return A flow emitting a single `AgentResponse` with the activation outcome.
+     * @return A flow emitting a single `AgentResponse` describing the activation result.
      */
     suspend fun activateFusion(
         fusionType: String,
@@ -227,7 +227,7 @@ class TrinityCoordinatorService @Inject constructor(
     /**
      * Analyzes an AI request to determine the appropriate routing strategy and, if applicable, the Genesis fusion type.
      *
-     * Examines the request content for ethical concerns, fusion triggers, and keywords to decide whether to route the request to Kai, Aura, Genesis fusion, parallel processing, or ethical review. Returns a `RequestAnalysis` with the routing decision and optional fusion type.
+     * Evaluates the request content for ethical concerns, fusion triggers, and keywords to decide whether to route the request to Kai, Aura, Genesis fusion, parallel processing, or ethical review.
      *
      * @param request The AI request to analyze.
      * @param skipEthicalCheck If true, skips ethical concern detection.
