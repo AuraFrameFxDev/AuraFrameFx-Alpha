@@ -16,19 +16,17 @@ def mock_api_key():
 @pytest.fixture
 def mock_base_url():
     """
-    Return a mock Genesis API base URL string for use in tests.
+    Return a mock Genesis API base URL for use in tests.
     """
     return "https://api.genesis.test"
 
 @pytest.fixture
 def sample_api_response():
     """
-    Return a mock dictionary representing a successful Genesis API chat completion response.
-    
-    The returned dictionary includes response metadata, an assistant message, the finish reason, and token usage statistics.
+    Provides a mock dictionary simulating a successful chat completion response from the Genesis API.
     
     Returns:
-        dict: Mocked Genesis API chat completion response.
+        dict: A dictionary containing response metadata, an assistant message, finish reason, and token usage statistics.
     """
     return {
         "id": "test_response_id",
@@ -55,10 +53,9 @@ def sample_api_response():
 @pytest.fixture
 def sample_error_response():
     """
-    Return a mock dictionary representing a typical error response from the Genesis API.
+    Return a dictionary simulating an error response from the Genesis API.
     
-    Returns:
-        dict: Contains error details such as type, message, parameter, and code.
+    The returned dictionary includes an error object with fields for type, message, parameter, and code.
     """
     return {
         "error": {
@@ -72,9 +69,9 @@ def sample_error_response():
 @pytest.fixture(autouse=True)
 def mock_environment():
     """
-    Automatically sets and cleans up Genesis API environment variables for each test to ensure isolation.
+    Automatically sets and removes Genesis API environment variables before and after each test to ensure test isolation.
     
-    This fixture sets `GENESIS_API_KEY` and `GENESIS_BASE_URL` to test values before each test and removes them afterward, preventing environment variable leakage between tests.
+    This autouse fixture configures `GENESIS_API_KEY` and `GENESIS_BASE_URL` with test values for the duration of each test, then cleans them up to prevent environment leakage.
     """
     os.environ["GENESIS_API_KEY"] = "test_env_key"
     os.environ["GENESIS_BASE_URL"] = "https://api.genesis.test"
