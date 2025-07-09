@@ -21,9 +21,9 @@ class AuraAIServiceImpl @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : AuraAIService {
     /**
-     * Returns a placeholder string for any analytics query.
+     * Returns a fixed placeholder string for any analytics query.
      *
-     * This implementation ignores the input and always returns "Analytics response placeholder".
+     * This stub implementation ignores the input and always returns "Analytics response placeholder".
      *
      * @return The placeholder analytics response string.
      */
@@ -32,19 +32,19 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub for file download functionality; always returns null.
+     * Placeholder for file download functionality; always returns null.
      *
-     * @param _fileId The identifier of the file to download.
-     * @return Null, indicating file download is not implemented.
+     * @param _fileId The identifier of the file to download (ignored).
+     * @return Always null, as file download is not implemented.
      */
     override suspend fun downloadFile(_fileId: String): File? {
         return null
     }
 
     /**
-     * Placeholder for image generation that always returns null.
+     * Stub implementation for image generation that always returns null.
      *
-     * This method does not generate images and serves as a stub implementation.
+     * This method does not generate images and ignores the input prompt.
      *
      * @return Always returns null.
      */
@@ -75,9 +75,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Retrieves the memory value for the given key.
-     *
-     * This stub implementation always returns null, indicating memory retrieval is not supported.
+     * Returns null for any memory key, indicating memory retrieval is not implemented.
      *
      * @return Always null.
      */
@@ -86,9 +84,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for saving a value in memory associated with a key.
+     * No-op placeholder for saving a value in memory associated with a key.
      *
-     * This implementation does nothing and does not persist any data.
+     * This method does not persist any data and serves as a stub for future implementation.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.

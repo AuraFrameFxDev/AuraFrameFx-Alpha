@@ -29,12 +29,12 @@ def mock_base_url():
 @pytest.fixture
 def sample_api_response():
     """
-    Return a mock dictionary representing a successful Genesis API chat completion response.
+    Return a mock dictionary simulating a successful Genesis API chat completion response.
     
-    The dictionary includes fields for response ID, object type, creation timestamp, model name, choices with an assistant message and finish reason, and token usage statistics. Intended for use in tests that require a realistic Genesis API response structure.
+    The returned dictionary includes response metadata, a list of choices with an assistant message, a finish reason, and token usage statistics. Useful for tests that require a realistic Genesis API response structure.
     
     Returns:
-        dict: Mocked Genesis API chat completion response.
+        dict: Simulated Genesis API chat completion response.
     """
     return {
         "id": "test_response_id",

@@ -75,6 +75,13 @@ import androidx.navigation.NavHostController
  *
  * @param navController Used to handle navigation actions from the home screen.
  */
+/**
+ * Displays the main home screen with the app title, subtitle, beta status message, and navigation buttons.
+ *
+ * The screen centers its content and provides buttons to navigate to the AI Chat screen or access settings.
+ *
+ * @param navController Used to handle navigation actions from the home screen.
+ */
 @Composable
 fun HomeScreen(navController: NavHostController) {
     Column(
@@ -116,7 +123,7 @@ fun HomeScreen(navController: NavHostController) {
 /**
  * Displays the AI chat interface screen with a centered headline and status message.
  *
- * Presents a large headline and a status message, both centered vertically and horizontally, using MaterialTheme typography styles.
+ * Shows a large headline and a status message, both centered within the screen using MaterialTheme typography styles.
  */
 @Composable
 fun BetaAiChatScreen() {
