@@ -32,19 +32,19 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder for file download functionality; always returns null.
+     * Stub implementation for file download; always returns null.
      *
-     * @param _fileId The identifier of the file to download (ignored).
-     * @return Always null, as file download is not implemented.
+     * @param _fileId The file identifier (ignored).
+     * @return Null, as file download functionality is not implemented.
      */
     override suspend fun downloadFile(_fileId: String): File? {
         return null
     }
 
     /**
-     * Stub implementation for image generation that always returns null.
+     * Placeholder implementation for image generation that always returns null.
      *
-     * This method does not generate images and ignores the input prompt.
+     * This method does not generate or return any image data, regardless of the input prompt.
      *
      * @return Always returns null.
      */
@@ -55,7 +55,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Returns a fixed placeholder string for any text generation request.
      *
-     * This method does not perform actual text generation and always returns "Generated text placeholder" regardless of the input.
+     * This method ignores the input prompt and options, and always returns "Generated text placeholder".
      *
      * @return The string "Generated text placeholder".
      */
@@ -75,7 +75,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null for any memory key, indicating memory retrieval is not implemented.
+     * Retrieves a value from memory for the given key.
+     *
+     * This stub implementation always returns null, indicating that memory retrieval is not supported.
      *
      * @return Always null.
      */
@@ -84,9 +86,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * No-op placeholder for saving a value in memory associated with a key.
+     * Stub method for saving a value in memory associated with a key.
      *
-     * This method does not persist any data and serves as a stub for future implementation.
+     * This implementation does not persist any data and serves as a placeholder for future functionality.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.
