@@ -38,6 +38,18 @@ import kotlin.math.*
  * @param modifier Modifier to be applied to the graph container.
  * @param contentPadding Padding to apply around the graph content.
  */
+/**
+ * Displays an interactive, zoomable, and pannable graph visualization with animated node selection.
+ *
+ * Renders a graph of nodes and their connections, supporting pinch-to-zoom, pan gestures, and node selection.
+ * The selected node is highlighted with a pulsing animation. Connections and a scalable grid background are drawn behind nodes.
+ *
+ * @param nodes The list of graph nodes to display, each with position and connection data.
+ * @param selectedNodeId The ID of the currently selected node, or null if none is selected.
+ * @param onNodeSelected Callback invoked with the node ID when a node is selected.
+ * @param modifier Modifier for customizing the graph container.
+ * @param contentPadding Padding applied around the graph content.
+ */
 @Composable
 fun InteractiveGraph(
     nodes: List<GraphNode>,
@@ -122,14 +134,14 @@ fun InteractiveGraph(
 }
 
 /**
- * Draws a scalable grid background on the canvas, offset by the current translation.
+ * Draws a zoomable and pannable grid background on the canvas.
  *
- * The grid lines are spaced proportionally to the zoom level and panning offset, providing visual reference for graph navigation.
+ * The grid lines are spaced and offset according to the current zoom (`scale`) and pan (`translation`), providing a visual reference for graph navigation. Line color and thickness are adjusted based on the provided parameters and screen density.
  *
- * @param scale The current zoom level, affecting grid spacing and line thickness.
- * @param translation The current pan offset, shifting the grid accordingly.
- * @param gridLineColor The color to use for the grid lines.
- * @param density The current screen density.
+ * @param scale The current zoom level, controlling grid spacing and line thickness.
+ * @param translation The pan offset applied to the grid.
+ * @param gridLineColor The color used for grid lines.
+ * @param density The current screen density for size calculations.
  */
 private fun DrawScope.drawGrid(scale: Float, translation: ComposeOffset, gridLineColor: Color, density: Density) {
     val gridSize = 40f / scale // This is in Px, no Dp conversion needed for logic
@@ -156,14 +168,13 @@ private fun DrawScope.drawGrid(scale: Float, translation: ComposeOffset, gridLin
 }
 
 /**
- * Draws a single graph node with visual styling and label.
+ * Draws a graph node at its position with visual styling, including selection effects and a label.
  *
- * Renders the node at its position with a colored background, border, and icon placeholder.
- * If the node is selected, a glowing ring is drawn around it. The node's name is displayed below the node.
+ * Renders the node with a colored background, border, and icon placeholder. If the node is selected, a glowing ring is drawn around it. The node's name is displayed below the node using density-aware sizing.
  *
- * @param node The graph node to draw.
- * @param isSelected Whether the node is currently selected, affecting its visual appearance.
- * @param density The current screen density.
+ * @param node The graph node to render.
+ * @param isSelected True if the node is currently selected, which adds a glowing ring effect.
+ * @param density The current screen density for size and position calculations.
  */
 private fun DrawScope.drawNode(node: GraphNode, isSelected: Boolean, density: Density) {
     with(density) {
@@ -233,16 +244,14 @@ private fun DrawScope.drawNode(node: GraphNode, isSelected: Boolean, density: De
 }
 
 /**
- * Draws a connection line with an arrowhead between two graph nodes, styled according to the connection type.
+ * Draws a directional connection between two graph nodes, including a styled line and arrowhead(s) based on the connection type.
  *
- * The connection line is rendered as solid or dashed, with color and arrow direction determined by the connection type.
- * The line starts and ends offset from the node centers by their radii to avoid overlapping node visuals.
- * An arrowhead is drawn at the end of the connection to indicate directionality.
+ * The connection line is rendered as solid or dashed, with color and arrow direction determined by the connection type. The line is offset from each node's center by its radius to prevent overlap with node visuals. An arrowhead is drawn at the target node for all connection types, and at both ends for bidirectional connections.
  *
- * @param from The source node of the connection.
- * @param to The target node of the connection.
+ * @param from The source node.
+ * @param to The target node.
  * @param connection The connection data specifying type and style.
- * @param density The current screen density.
+ * @param density The current screen density for size calculations.
  */
 private fun DrawScope.drawConnection(
     from: GraphNode,
@@ -364,30 +373,30 @@ private fun DrawScope.drawConnection(
 }
 
 /**
- * Returns the sum of this [Offset] and another [Offset] as a new [Offset].
+ * Adds two [ComposeOffset] values component-wise.
  *
- * The resulting [Offset] has its x and y components added element-wise.
- *
- * @return The element-wise sum of the two offsets.
+ * @return A [ComposeOffset] whose x and y are the sums of the corresponding components of this and [other].
  */
 internal operator fun ComposeOffset.plus(other: ComposeOffset): ComposeOffset {
     return ComposeOffset(x + other.x, y + other.y)
 }
 
 /**
- * Returns the vector difference between this [Offset] and another [Offset].
+ * Returns the component-wise difference between this and another [ComposeOffset].
  *
- * @return A new [Offset] representing the component-wise subtraction.
+ * @return A [ComposeOffset] representing the result of subtracting the other offset from this one.
  */
 internal operator fun ComposeOffset.minus(other: ComposeOffset): ComposeOffset {
     return ComposeOffset(x - other.x, y - other.y)
 }
 
 /**
- * Divides the components of this [Offset] by the given scalar value.
+ * Returns a new [ComposeOffset] with each component divided by the given scalar.
+ *
+ * If the scalar is zero, returns a zero offset to prevent division by zero.
  *
  * @param scalar The value to divide both x and y components by.
- * @return A new [Offset] with each component divided by [scalar].
+ * @return The resulting [ComposeOffset] after division.
  */
 internal operator fun ComposeOffset.div(scalar: Float): ComposeOffset {
     if (scalar == 0f) {
@@ -399,10 +408,10 @@ internal operator fun ComposeOffset.div(scalar: Float): ComposeOffset {
 }
 
 /**
- * Multiplies the components of this [Offset] by the given scalar value.
+ * Returns a new [ComposeOffset] with both x and y components multiplied by the specified scalar.
  *
- * @param scalar The value to multiply both x and y components by.
- * @return A new [Offset] with each component multiplied by [scalar].
+ * @param scalar The value to multiply the offset's components by.
+ * @return The scaled [ComposeOffset].
  */
 internal operator fun ComposeOffset.times(scalar: Float): ComposeOffset {
     return ComposeOffset(x * scalar, y * scalar)

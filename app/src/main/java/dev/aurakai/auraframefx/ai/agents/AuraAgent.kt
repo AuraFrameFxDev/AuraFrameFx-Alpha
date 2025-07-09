@@ -263,9 +263,9 @@ class AuraAgent @Inject constructor(
     }
 
     /**
-     * Generates Jetpack Compose animation code and metadata based on the requested animation type and the agent's current mood.
+     * Generates Jetpack Compose animation code and related metadata based on the requested animation type and the agent's current mood.
      *
-     * Constructs an animation specification using the animation type from the request context and the current mood, then generates Kotlin code for the animation. Returns a map containing the generated animation code, timing curve details, possible interaction states, and suggested performance optimization strategies.
+     * Builds an animation specification using the animation type from the request context (defaulting to "transition" if unspecified) and the current mood, then generates Kotlin code for the animation. Returns a map containing the generated animation code, timing curve details, possible interaction states, and recommended performance optimization strategies.
      *
      * @param request The AI request containing animation context details, including the animation type.
      * @return A map with keys: "animation_code" (Kotlin code for the animation), "timing_curves" (timing curve details), "interaction_states" (possible animation states), and "performance_optimization" (optimization strategies).
