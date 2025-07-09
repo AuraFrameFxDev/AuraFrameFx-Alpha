@@ -53,15 +53,13 @@ val LocalMoodGlow = compositionLocalOf { Color.Transparent }
 val LocalMoodState = compositionLocalOf { Emotion.NEUTRAL }
 
 /**
- * Applies the AuraFrameFX theme to the provided composable content.
+ * Applies the AuraFrameFX theme and mood-based dynamic theming to the provided composable content.
  *
- * Chooses a color scheme (dark, light, or dynamic based on device support and parameters), 
- * updates the status bar color and icon appearance to match the theme, supplies the app's typography,
- * and integrates Aura's mood-based dynamic theming system.
+ * Selects an appropriate color scheme (dark, light, or dynamic based on device support and parameters), updates the system status bar appearance, and provides mood-driven glow and emotion state to descendant composables.
  *
- * @param darkTheme Whether to use the dark theme. Defaults to the system setting.
- * @param dynamicColor Whether to use dynamic color schemes on supported devices (Android 12+). Defaults to true.
- * @param moodViewModel The ViewModel managing Aura's mood state. Automatically injected.
+ * @param darkTheme If true, uses the dark theme; otherwise, uses the light theme. Defaults to the system setting.
+ * @param dynamicColor If true, enables dynamic color schemes on supported devices (Android 12+). Defaults to true.
+ * @param moodViewModel The ViewModel managing the current mood state.
  * @param content The composable content to which the theme is applied.
  */
 @Composable
@@ -107,7 +105,9 @@ fun AuraFrameFXTheme(
 }
 
 /**
- * Get the mood-appropriate glow color based on Aura's current emotion
+ * Returns a color with adjusted transparency to visually represent the current emotion and intensity as a glow effect.
+ *
+ * The color and its alpha are determined by the provided emotion and intensity, with a fallback to the theme's primary color for unlisted emotions.
  */
 private fun getMoodGlowColor(
     emotion: Emotion,

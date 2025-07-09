@@ -21,6 +21,11 @@ class CascadeDebugViewModel @Inject constructor(
     val visionState: StateFlow<VisionState> = cascadeAgent.visionState
     val processingState: StateFlow<ProcessingState> = cascadeAgent.processingState
 
+    /**
+     * Updates the current vision state of the Cascade agent.
+     *
+     * @param newState The new vision state to set.
+     */
     fun updateVisionState(newState: VisionState) {
         cascadeAgent.updateVisionState(newState)
     }
@@ -36,6 +41,11 @@ class CascadeDebugViewModel @Inject constructor(
  * Provides interactive controls to view and modify the current vision and processing states, as well as to review their respective histories. Intended for use in development or debugging environments to facilitate real-time state inspection and manipulation.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays a debug interface for viewing and updating the Cascade agent's vision and processing states.
+ *
+ * Presents the current vision and processing states, allows manual input for new state values, and shows the history of state changes. Intended for development and debugging purposes.
+ */
 @Composable
 fun CascadeZOrderPlayground(
     viewModel: CascadeDebugViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
@@ -184,6 +194,9 @@ fun CascadeZOrderPlayground(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays a preview of the Cascade state debugger UI within a Material theme.
+ */
 @Composable
 @Preview(showBackground = true)
 fun CascadeZOrderPlaygroundPreview() {
