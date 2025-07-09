@@ -2,18 +2,20 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-| Method | HTTP request | Description |
-|------------- | ------------- | -------------|
+| Method                                                                | HTTP request                | Description                     |
+|-----------------------------------------------------------------------|-----------------------------|---------------------------------|
 | [**conferenceCreatePost**](ConferenceRoomApi.md#conferenceCreatePost) | **POST** /conference/create | Create a new AI conference room |
 
-
 <a id="conferenceCreatePost"></a>
+
 # **conferenceCreatePost**
+
 > ConferenceRoom conferenceCreatePost(conferenceRoomCreateRequest)
 
 Create a new AI conference room
 
 ### Example
+
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -50,9 +52,9 @@ public class Example {
 
 ### Parameters
 
-| Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **conferenceRoomCreateRequest** | [**ConferenceRoomCreateRequest**](ConferenceRoomCreateRequest.md)|  | |
+| Name                            | Type                                                              | Description | Notes |
+|---------------------------------|-------------------------------------------------------------------|-------------|-------|
+| **conferenceRoomCreateRequest** | [**ConferenceRoomCreateRequest**](ConferenceRoomCreateRequest.md) |             |       |
 
 ### Return type
 
@@ -64,13 +66,14 @@ public class Example {
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-| **201** | Conference room created successfully |  -  |
-| **400** | Invalid request format or parameters |  -  |
-| **401** | Authentication credentials were missing or incorrect |  -  |
+
+| Status code | Description                                          | Response headers |
+|-------------|------------------------------------------------------|------------------|
+| **201**     | Conference room created successfully                 | -                |
+| **400**     | Invalid request format or parameters                 | -                |
+| **401**     | Authentication credentials were missing or incorrect | -                |
 

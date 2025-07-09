@@ -4,10 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import dev.aurakai.auraframefx.ui.transitions.DigitalTransitions
 import dev.aurakai.auraframefx.ui.screens.AiChatScreen
 import dev.aurakai.auraframefx.ui.screens.HomeScreen
-import dev.aurakai.auraframefx.ui.screens.oracledrive.OracleDriveControlScreen
 import dev.aurakai.auraframefx.ui.screens.ProfileScreen
 import dev.aurakai.auraframefx.ui.screens.SettingsScreen
 
@@ -127,7 +125,7 @@ fun AppNavGraph(navController: NavHostController) {
             // Fixed: Use actual OracleDriveControlScreen instead of placeholder
             dev.aurakai.auraframefx.ui.screens.oracledrive.OracleDriveControlScreen()
         }
-        
+
         // Add AI Content navigation
         // aiContentNavigation() // Disabled for beta - AI content will be in main chat
 

@@ -1,6 +1,5 @@
 package dev.aurakai.auraframefx.ui.navigation
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.NavHostController
@@ -8,11 +7,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Assert.*
 
 @RunWith(AndroidJUnit4::class)
 class AppNavGraphTest {
@@ -38,7 +37,11 @@ class AppNavGraphTest {
 
         // Verify initial destination is set correctly
         composeTestRule.waitForIdle()
-        assertEquals("Expected initial destination", "home", navController.currentDestination?.route)
+        assertEquals(
+            "Expected initial destination",
+            "home",
+            navController.currentDestination?.route
+        )
     }
 
     @Test
@@ -50,13 +53,17 @@ class AppNavGraphTest {
 
         // Test navigation to each destination
         val destinations = listOf("home", "profile", "settings", "about")
-        
+
         destinations.forEach { destination ->
             composeTestRule.runOnIdle {
                 navController.navigate(destination)
             }
             composeTestRule.waitForIdle()
-            assertEquals("Navigation to $destination failed", destination, navController.currentDestination?.route)
+            assertEquals(
+                "Navigation to $destination failed",
+                destination,
+                navController.currentDestination?.route
+            )
         }
     }
 
@@ -72,12 +79,12 @@ class AppNavGraphTest {
             navController.navigate("profile")
         }
         composeTestRule.waitForIdle()
-        
+
         composeTestRule.runOnIdle {
             navController.popBackStack()
         }
         composeTestRule.waitForIdle()
-        
+
         assertEquals("Back navigation failed", "home", navController.currentDestination?.route)
     }
 
@@ -93,7 +100,7 @@ class AppNavGraphTest {
             navController.navigate("settings")
         }
         composeTestRule.waitForIdle()
-        
+
         assertEquals("Deep linking failed", "settings", navController.currentDestination?.route)
     }
 
@@ -115,7 +122,7 @@ class AppNavGraphTest {
             }
         }
         composeTestRule.waitForIdle()
-        
+
         // Should remain at current destination or handle gracefully
         assertNotNull("Current destination should not be null", navController.currentDestination)
     }
@@ -133,7 +140,7 @@ class AppNavGraphTest {
             navController.navigate("profile/$userId")
         }
         composeTestRule.waitForIdle()
-        
+
         val currentRoute = navController.currentDestination?.route
         assertTrue("Parametrized navigation failed", currentRoute?.contains("profile") == true)
     }
@@ -147,7 +154,7 @@ class AppNavGraphTest {
 
         // Navigate through multiple screens
         val navigationSequence = listOf("profile", "settings", "about")
-        
+
         navigationSequence.forEach { destination ->
             composeTestRule.runOnIdle {
                 navController.navigate(destination)
@@ -157,7 +164,7 @@ class AppNavGraphTest {
 
         // Verify back stack has correct number of entries
         assertTrue("Back stack should have multiple entries", navController.backQueue.size > 1)
-        
+
         // Navigate back and verify each step
         for (i in navigationSequence.indices.reversed()) {
             if (i > 0) {
@@ -181,9 +188,13 @@ class AppNavGraphTest {
             navController.navigate("profile")
         }
         composeTestRule.waitForIdle()
-        
+
         // Verify navigation completed
-        assertEquals("Navigation with transitions failed", "profile", navController.currentDestination?.route)
+        assertEquals(
+            "Navigation with transitions failed",
+            "profile",
+            navController.currentDestination?.route
+        )
     }
 
     @Test
@@ -198,11 +209,11 @@ class AppNavGraphTest {
             navController.navigate("settings")
         }
         composeTestRule.waitForIdle()
-        
+
         // Save and restore navigation state
         val savedState = navController.saveState()
         assertNotNull("Navigation state should be saveable", savedState)
-        
+
         // In a real scenario, you'd restore this state in a new nav controller
         // This tests the basic state saving functionality
     }
@@ -223,8 +234,12 @@ class AppNavGraphTest {
             }
         }
         composeTestRule.waitForIdle()
-        
-        assertEquals("Conditional navigation failed", "profile", navController.currentDestination?.route)
+
+        assertEquals(
+            "Conditional navigation failed",
+            "profile",
+            navController.currentDestination?.route
+        )
     }
 
     @Test
@@ -235,7 +250,7 @@ class AppNavGraphTest {
         }
 
         val initialBackStackSize = navController.backQueue.size
-        
+
         // Navigate to same destination twice with singleTop
         composeTestRule.runOnIdle {
             navController.navigate("profile") {
@@ -243,17 +258,19 @@ class AppNavGraphTest {
             }
         }
         composeTestRule.waitForIdle()
-        
+
         composeTestRule.runOnIdle {
             navController.navigate("profile") {
                 launchSingleTop = true
             }
         }
         composeTestRule.waitForIdle()
-        
+
         // Should not create duplicate entries
-        assertTrue("SingleTop should prevent duplicates", 
-                   navController.backQueue.size <= initialBackStackSize + 1)
+        assertTrue(
+            "SingleTop should prevent duplicates",
+            navController.backQueue.size <= initialBackStackSize + 1
+        )
     }
 
     @Test
@@ -268,12 +285,12 @@ class AppNavGraphTest {
             navController.navigate("profile")
         }
         composeTestRule.waitForIdle()
-        
+
         composeTestRule.runOnIdle {
             navController.navigate("settings")
         }
         composeTestRule.waitForIdle()
-        
+
         // Navigate with popUpTo
         composeTestRule.runOnIdle {
             navController.navigate("about") {
@@ -283,7 +300,7 @@ class AppNavGraphTest {
             }
         }
         composeTestRule.waitForIdle()
-        
+
         assertEquals("PopUpTo navigation failed", "about", navController.currentDestination?.route)
     }
 
@@ -300,7 +317,7 @@ class AppNavGraphTest {
             navController.navigate("profile/$testArgument")
         }
         composeTestRule.waitForIdle()
-        
+
         val currentRoute = navController.currentDestination?.route
         assertTrue("Argument passing failed", currentRoute?.contains(testArgument) == true)
     }
@@ -317,7 +334,7 @@ class AppNavGraphTest {
             navController.navigate("profile/nested/detail")
         }
         composeTestRule.waitForIdle()
-        
+
         val currentRoute = navController.currentDestination?.route
         assertTrue("Nested navigation failed", currentRoute?.contains("profile") == true)
     }
@@ -334,18 +351,22 @@ class AppNavGraphTest {
             navController.navigate("profile")
         }
         composeTestRule.waitForIdle()
-        
+
         composeTestRule.runOnIdle {
             navController.navigate("settings")
         }
         composeTestRule.waitForIdle()
-        
+
         composeTestRule.runOnIdle {
             navController.popBackStack()
         }
         composeTestRule.waitForIdle()
-        
-        assertEquals("ViewModel state navigation failed", "profile", navController.currentDestination?.route)
+
+        assertEquals(
+            "ViewModel state navigation failed",
+            "profile",
+            navController.currentDestination?.route
+        )
     }
 
     @Test
@@ -357,7 +378,7 @@ class AppNavGraphTest {
 
         // Test error handling in navigation
         var errorOccurred = false
-        
+
         composeTestRule.runOnIdle {
             try {
                 navController.navigate("") // Empty route
@@ -366,9 +387,12 @@ class AppNavGraphTest {
             }
         }
         composeTestRule.waitForIdle()
-        
+
         // Should handle errors gracefully
-        assertNotNull("Navigation should handle errors gracefully", navController.currentDestination)
+        assertNotNull(
+            "Navigation should handle errors gracefully",
+            navController.currentDestination
+        )
     }
 
     @Test
@@ -385,13 +409,13 @@ class AppNavGraphTest {
                 navController.navigate("profile")
             }
             composeTestRule.waitForIdle()
-            
+
             composeTestRule.runOnIdle {
                 navController.popBackStack()
             }
             composeTestRule.waitForIdle()
         }
-        
+
         // In a real scenario, you'd check for memory leaks here
         assertTrue("Memory leak test completed", true)
     }
@@ -409,9 +433,12 @@ class AppNavGraphTest {
             navController.navigate("settings") // This should be handled safely
         }
         composeTestRule.waitForIdle()
-        
+
         // Should handle concurrent navigation safely
-        assertNotNull("Concurrent navigation should be handled safely", navController.currentDestination)
+        assertNotNull(
+            "Concurrent navigation should be handled safely",
+            navController.currentDestination
+        )
     }
 
     @Test
@@ -426,8 +453,12 @@ class AppNavGraphTest {
             navController.navigate("profile")
         }
         composeTestRule.waitForIdle()
-        
+
         // Verify that custom transitions are applied
-        assertEquals("Custom transitions should work", "profile", navController.currentDestination?.route)
+        assertEquals(
+            "Custom transitions should work",
+            "profile",
+            navController.currentDestination?.route
+        )
     }
 }

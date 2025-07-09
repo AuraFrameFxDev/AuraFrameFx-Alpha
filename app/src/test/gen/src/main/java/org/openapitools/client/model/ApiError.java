@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -14,13 +14,16 @@
 package org.openapitools.client.model;
 
 import java.util.Objects;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.util.Arrays;
+
 import org.openapitools.client.model.ApiErrorError;
 
 import com.google.gson.Gson;
@@ -36,6 +39,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 
 import java.lang.reflect.Type;
@@ -52,163 +56,161 @@ import org.openapitools.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class ApiError {
-  public static final String SERIALIZED_NAME_ERROR = "error";
-  @SerializedName(SERIALIZED_NAME_ERROR)
-  private ApiErrorError error;
+    public static final String SERIALIZED_NAME_ERROR = "error";
+    public static HashSet<String> openapiFields;
+    public static HashSet<String> openapiRequiredFields;
 
-  public ApiError() {
-  }
+    static {
+        // a set of all properties/fields (JSON key names)
+        openapiFields = new HashSet<String>();
+        openapiFields.add("error");
 
-  public ApiError error(ApiErrorError error) {
-    this.error = error;
-    return this;
-  }
-
-  /**
-   * Get error
-   * @return error
-   */
-  @javax.annotation.Nonnull
-  public ApiErrorError getError() {
-    return error;
-  }
-
-  public void setError(ApiErrorError error) {
-    this.error = error;
-  }
-
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+        // a set of required properties/fields (JSON key names)
+        openapiRequiredFields = new HashSet<String>();
+        openapiRequiredFields.add("error");
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    @SerializedName(SERIALIZED_NAME_ERROR)
+    private ApiErrorError error;
+
+    public ApiError() {
     }
-    ApiError apiError = (ApiError) o;
-    return Objects.equals(this.error, apiError.error);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(error);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ApiError {\n");
-    sb.append("    error: ").append(toIndentedString(error)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
-
-
-  public static HashSet<String> openapiFields;
-  public static HashSet<String> openapiRequiredFields;
-
-  static {
-    // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("error");
-
-    // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("error");
-  }
-
-  /**
-   * Validates the JSON Element and throws an exception if issues found
-   *
-   * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to ApiError
-   */
-  public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      if (jsonElement == null) {
-        if (!ApiError.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in ApiError is not found in the empty JSON string", ApiError.openapiRequiredFields.toString()));
+    /**
+     * Validates the JSON Element and throws an exception if issues found
+     *
+     * @param jsonElement JSON Element
+     * @throws IOException if the JSON Element is invalid with respect to ApiError
+     */
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+        if (jsonElement == null) {
+            if (!ApiError.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+                throw new IllegalArgumentException(String.format("The required field(s) %s in ApiError is not found in the empty JSON string", ApiError.openapiRequiredFields.toString()));
+            }
         }
-      }
 
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!ApiError.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `ApiError` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+        Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+        // check to see if the JSON string contains additional fields
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            if (!ApiError.openapiFields.contains(entry.getKey())) {
+                throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `ApiError` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+            }
         }
-      }
 
-      // check to make sure all required properties/fields are present in the JSON string
-      for (String requiredField : ApiError.openapiRequiredFields) {
-        if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+        // check to make sure all required properties/fields are present in the JSON string
+        for (String requiredField : ApiError.openapiRequiredFields) {
+            if (jsonElement.getAsJsonObject().get(requiredField) == null) {
+                throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+            }
         }
-      }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      // validate the required field `error`
-      ApiErrorError.validateJsonElement(jsonObj.get("error"));
-  }
-
-  public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!ApiError.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'ApiError' and its subtypes
-       }
-       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<ApiError> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(ApiError.class));
-
-       return (TypeAdapter<T>) new TypeAdapter<ApiError>() {
-           @Override
-           public void write(JsonWriter out, ApiError value) throws IOException {
-             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-             elementAdapter.write(out, obj);
-           }
-
-           @Override
-           public ApiError read(JsonReader in) throws IOException {
-             JsonElement jsonElement = elementAdapter.read(in);
-             validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
-           }
-
-       }.nullSafe();
+        // validate the required field `error`
+        ApiErrorError.validateJsonElement(jsonObj.get("error"));
     }
-  }
 
-  /**
-   * Create an instance of ApiError given an JSON string
-   *
-   * @param jsonString JSON string
-   * @return An instance of ApiError
-   * @throws IOException if the JSON string is invalid with respect to ApiError
-   */
-  public static ApiError fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, ApiError.class);
-  }
+    /**
+     * Create an instance of ApiError given an JSON string
+     *
+     * @param jsonString JSON string
+     * @return An instance of ApiError
+     * @throws IOException if the JSON string is invalid with respect to ApiError
+     */
+    public static ApiError fromJson(String jsonString) throws IOException {
+        return JSON.getGson().fromJson(jsonString, ApiError.class);
+    }
 
-  /**
-   * Convert an instance of ApiError to an JSON string
-   *
-   * @return JSON string
-   */
-  public String toJson() {
-    return JSON.getGson().toJson(this);
-  }
+    public ApiError error(ApiErrorError error) {
+        this.error = error;
+        return this;
+    }
+
+    /**
+     * Get error
+     *
+     * @return error
+     */
+    @javax.annotation.Nonnull
+    public ApiErrorError getError() {
+        return error;
+    }
+
+    public void setError(ApiErrorError error) {
+        this.error = error;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ApiError apiError = (ApiError) o;
+        return Objects.equals(this.error, apiError.error);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(error);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class ApiError {\n");
+        sb.append("    error: ").append(toIndentedString(error)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
+
+    /**
+     * Convert an instance of ApiError to an JSON string
+     *
+     * @return JSON string
+     */
+    public String toJson() {
+        return JSON.getGson().toJson(this);
+    }
+
+    public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (!ApiError.class.isAssignableFrom(type.getRawType())) {
+                return null; // this class only serializes 'ApiError' and its subtypes
+            }
+            final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+            final TypeAdapter<ApiError> thisAdapter
+                    = gson.getDelegateAdapter(this, TypeToken.get(ApiError.class));
+
+            return (TypeAdapter<T>) new TypeAdapter<ApiError>() {
+                @Override
+                public void write(JsonWriter out, ApiError value) throws IOException {
+                    JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+                    elementAdapter.write(out, obj);
+                }
+
+                @Override
+                public ApiError read(JsonReader in) throws IOException {
+                    JsonElement jsonElement = elementAdapter.read(in);
+                    validateJsonElement(jsonElement);
+                    return thisAdapter.fromJsonTree(jsonElement);
+                }
+
+            }.nullSafe();
+        }
+    }
 }
 

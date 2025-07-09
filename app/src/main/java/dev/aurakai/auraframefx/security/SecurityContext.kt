@@ -411,7 +411,9 @@ class SecurityContext @Inject constructor(
             )
             // In a real implementation, this would store events securely
         }
-    }    /**
+    }
+
+    /**
      * Records a security validation event for the given request type and data.
      *
      * This method logs a validation event for auditing purposes. No actual validation of the request is performed.
@@ -421,12 +423,14 @@ class SecurityContext @Inject constructor(
      */
     fun validateRequest(requestType: String, requestData: String) {
         // Log the security validation event
-        logSecurityEvent(SecurityEvent(
-            type = SecurityEventType.VALIDATION,
-            details = "Request validation: $requestType",
-            severity = EventSeverity.INFO
-        ))
-        
+        logSecurityEvent(
+            SecurityEvent(
+                type = SecurityEventType.VALIDATION,
+                details = "Request validation: $requestType",
+                severity = EventSeverity.INFO
+            )
+        )
+
         // For now, we'll just log the validation - can be extended with actual validation logic
         Log.d(TAG, "Validating request of type: $requestType")
     }

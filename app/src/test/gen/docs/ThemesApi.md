@@ -2,19 +2,21 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-| Method | HTTP request | Description |
-|------------- | ------------- | -------------|
-| [**themeApplyPut**](ThemesApi.md#themeApplyPut) | **PUT** /theme/apply | Apply a theme |
-| [**themesGet**](ThemesApi.md#themesGet) | **GET** /themes | Get available themes |
-
+| Method                                          | HTTP request         | Description          |
+|-------------------------------------------------|----------------------|----------------------|
+| [**themeApplyPut**](ThemesApi.md#themeApplyPut) | **PUT** /theme/apply | Apply a theme        |
+| [**themesGet**](ThemesApi.md#themesGet)         | **GET** /themes      | Get available themes |
 
 <a id="themeApplyPut"></a>
+
 # **themeApplyPut**
+
 > themeApplyPut(themeApplyRequest)
 
 Apply a theme
 
 ### Example
+
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -50,9 +52,9 @@ public class Example {
 
 ### Parameters
 
-| Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **themeApplyRequest** | [**ThemeApplyRequest**](ThemeApplyRequest.md)|  | |
+| Name                  | Type                                          | Description | Notes |
+|-----------------------|-----------------------------------------------|-------------|-------|
+| **themeApplyRequest** | [**ThemeApplyRequest**](ThemeApplyRequest.md) |             |       |
 
 ### Return type
 
@@ -64,24 +66,28 @@ null (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-| **200** | Theme applied successfully |  -  |
-| **400** | Invalid request format or parameters |  -  |
-| **401** | Authentication credentials were missing or incorrect |  -  |
-| **404** | Theme not found |  -  |
+
+| Status code | Description                                          | Response headers |
+|-------------|------------------------------------------------------|------------------|
+| **200**     | Theme applied successfully                           | -                |
+| **400**     | Invalid request format or parameters                 | -                |
+| **401**     | Authentication credentials were missing or incorrect | -                |
+| **404**     | Theme not found                                      | -                |
 
 <a id="themesGet"></a>
+
 # **themesGet**
+
 > List&lt;Theme&gt; themesGet()
 
 Get available themes
 
 ### Example
+
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -111,6 +117,7 @@ public class Example {
 ```
 
 ### Parameters
+
 This endpoint does not need any parameter.
 
 ### Return type
@@ -123,11 +130,12 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-| **200** | List of available themes |  -  |
+
+| Status code | Description              | Response headers |
+|-------------|--------------------------|------------------|
+| **200**     | List of available themes | -                |
 

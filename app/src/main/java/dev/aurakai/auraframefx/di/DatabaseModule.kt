@@ -24,10 +24,10 @@ object DatabaseModule {
             AppDatabase::class.java,
             "aura_frame_fx_database"
         )
-        // Add migrations here if/when schema changes:
-        // .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
-        .fallbackToDestructiveMigration() // Placeholder: Consider proper migration strategies for production
-        .build()
+            // Add migrations here if/when schema changes:
+            // .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .fallbackToDestructiveMigration() // Placeholder: Consider proper migration strategies for production
+            .build()
     }
 
     @Provides

@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -14,11 +14,13 @@
 package org.openapitools.client.model;
 
 import java.util.Objects;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -35,6 +37,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 
 import java.lang.reflect.Type;
@@ -51,240 +54,237 @@ import org.openapitools.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class LockScreenConfigAnimation {
-  public static final String SERIALIZED_NAME_ENABLED = "enabled";
-  @SerializedName(SERIALIZED_NAME_ENABLED)
-  private Boolean enabled;
+    public static final String SERIALIZED_NAME_ENABLED = "enabled";
+    public static final String SERIALIZED_NAME_TYPE = "type";
+    public static HashSet<String> openapiFields;
+    public static HashSet<String> openapiRequiredFields;
 
-  /**
-   * Gets or Sets type
-   */
-  @JsonAdapter(TypeEnum.Adapter.class)
-  public enum TypeEnum {
-    FADE("Fade"),
-    
-    SLIDE("Slide"),
-    
-    ZOOM("Zoom");
+    static {
+        // a set of all properties/fields (JSON key names)
+        openapiFields = new HashSet<String>();
+        openapiFields.add("enabled");
+        openapiFields.add("type");
 
-    private String value;
-
-    TypeEnum(String value) {
-      this.value = value;
+        // a set of required properties/fields (JSON key names)
+        openapiRequiredFields = new HashSet<String>();
     }
 
-    public String getValue() {
-      return value;
+    @SerializedName(SERIALIZED_NAME_ENABLED)
+    private Boolean enabled;
+    @SerializedName(SERIALIZED_NAME_TYPE)
+    private TypeEnum type;
+
+    public LockScreenConfigAnimation() {
+    }
+
+    /**
+     * Validates the JSON Element and throws an exception if issues found
+     *
+     * @param jsonElement JSON Element
+     * @throws IOException if the JSON Element is invalid with respect to LockScreenConfigAnimation
+     */
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+        if (jsonElement == null) {
+            if (!LockScreenConfigAnimation.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+                throw new IllegalArgumentException(String.format("The required field(s) %s in LockScreenConfigAnimation is not found in the empty JSON string", LockScreenConfigAnimation.openapiRequiredFields.toString()));
+            }
+        }
+
+        Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+        // check to see if the JSON string contains additional fields
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            if (!LockScreenConfigAnimation.openapiFields.contains(entry.getKey())) {
+                throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `LockScreenConfigAnimation` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+            }
+        }
+        JsonObject jsonObj = jsonElement.getAsJsonObject();
+        if ((jsonObj.get("type") != null && !jsonObj.get("type").isJsonNull()) && !jsonObj.get("type").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `type` to be a primitive type in the JSON string but got `%s`", jsonObj.get("type").toString()));
+        }
+        // validate the optional field `type`
+        if (jsonObj.get("type") != null && !jsonObj.get("type").isJsonNull()) {
+            TypeEnum.validateJsonElement(jsonObj.get("type"));
+        }
+    }
+
+    /**
+     * Create an instance of LockScreenConfigAnimation given an JSON string
+     *
+     * @param jsonString JSON string
+     * @return An instance of LockScreenConfigAnimation
+     * @throws IOException if the JSON string is invalid with respect to LockScreenConfigAnimation
+     */
+    public static LockScreenConfigAnimation fromJson(String jsonString) throws IOException {
+        return JSON.getGson().fromJson(jsonString, LockScreenConfigAnimation.class);
+    }
+
+    public LockScreenConfigAnimation enabled(Boolean enabled) {
+        this.enabled = enabled;
+        return this;
+    }
+
+    /**
+     * Get enabled
+     *
+     * @return enabled
+     */
+    @javax.annotation.Nullable
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public LockScreenConfigAnimation type(TypeEnum type) {
+        this.type = type;
+        return this;
+    }
+
+    /**
+     * Get type
+     *
+     * @return type
+     */
+    @javax.annotation.Nullable
+    public TypeEnum getType() {
+        return type;
+    }
+
+    public void setType(TypeEnum type) {
+        this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        LockScreenConfigAnimation lockScreenConfigAnimation = (LockScreenConfigAnimation) o;
+        return Objects.equals(this.enabled, lockScreenConfigAnimation.enabled) &&
+                Objects.equals(this.type, lockScreenConfigAnimation.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(enabled, type);
     }
 
     @Override
     public String toString() {
-      return String.valueOf(value);
+        StringBuilder sb = new StringBuilder();
+        sb.append("class LockScreenConfigAnimation {\n");
+        sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
+        sb.append("    type: ").append(toIndentedString(type)).append("\n");
+        sb.append("}");
+        return sb.toString();
     }
 
-    public static TypeEnum fromValue(String value) {
-      for (TypeEnum b : TypeEnum.values()) {
-        if (b.value.equals(value)) {
-          return b;
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
         }
-      }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+        return o.toString().replace("\n", "\n    ");
     }
 
-    public static class Adapter extends TypeAdapter<TypeEnum> {
-      @Override
-      public void write(final JsonWriter jsonWriter, final TypeEnum enumeration) throws IOException {
-        jsonWriter.value(enumeration.getValue());
-      }
-
-      @Override
-      public TypeEnum read(final JsonReader jsonReader) throws IOException {
-        String value =  jsonReader.nextString();
-        return TypeEnum.fromValue(value);
-      }
+    /**
+     * Convert an instance of LockScreenConfigAnimation to an JSON string
+     *
+     * @return JSON string
+     */
+    public String toJson() {
+        return JSON.getGson().toJson(this);
     }
 
-    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      String value = jsonElement.getAsString();
-      TypeEnum.fromValue(value);
-    }
-  }
+    /**
+     * Gets or Sets type
+     */
+    @JsonAdapter(TypeEnum.Adapter.class)
+    public enum TypeEnum {
+        FADE("Fade"),
 
-  public static final String SERIALIZED_NAME_TYPE = "type";
-  @SerializedName(SERIALIZED_NAME_TYPE)
-  private TypeEnum type;
+        SLIDE("Slide"),
 
-  public LockScreenConfigAnimation() {
-  }
+        ZOOM("Zoom");
 
-  public LockScreenConfigAnimation enabled(Boolean enabled) {
-    this.enabled = enabled;
-    return this;
-  }
+        private String value;
 
-  /**
-   * Get enabled
-   * @return enabled
-   */
-  @javax.annotation.Nullable
-  public Boolean getEnabled() {
-    return enabled;
-  }
-
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
-  }
-
-
-  public LockScreenConfigAnimation type(TypeEnum type) {
-    this.type = type;
-    return this;
-  }
-
-  /**
-   * Get type
-   * @return type
-   */
-  @javax.annotation.Nullable
-  public TypeEnum getType() {
-    return type;
-  }
-
-  public void setType(TypeEnum type) {
-    this.type = type;
-  }
-
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    LockScreenConfigAnimation lockScreenConfigAnimation = (LockScreenConfigAnimation) o;
-    return Objects.equals(this.enabled, lockScreenConfigAnimation.enabled) &&
-        Objects.equals(this.type, lockScreenConfigAnimation.type);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(enabled, type);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class LockScreenConfigAnimation {\n");
-    sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
-
-
-  public static HashSet<String> openapiFields;
-  public static HashSet<String> openapiRequiredFields;
-
-  static {
-    // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("enabled");
-    openapiFields.add("type");
-
-    // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-  }
-
-  /**
-   * Validates the JSON Element and throws an exception if issues found
-   *
-   * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to LockScreenConfigAnimation
-   */
-  public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      if (jsonElement == null) {
-        if (!LockScreenConfigAnimation.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in LockScreenConfigAnimation is not found in the empty JSON string", LockScreenConfigAnimation.openapiRequiredFields.toString()));
+        TypeEnum(String value) {
+            this.value = value;
         }
-      }
 
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!LockScreenConfigAnimation.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `LockScreenConfigAnimation` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+        public static TypeEnum fromValue(String value) {
+            for (TypeEnum b : TypeEnum.values()) {
+                if (b.value.equals(value)) {
+                    return b;
+                }
+            }
+            throw new IllegalArgumentException("Unexpected value '" + value + "'");
         }
-      }
-        JsonObject jsonObj = jsonElement.getAsJsonObject();
-      if ((jsonObj.get("type") != null && !jsonObj.get("type").isJsonNull()) && !jsonObj.get("type").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `type` to be a primitive type in the JSON string but got `%s`", jsonObj.get("type").toString()));
-      }
-      // validate the optional field `type`
-      if (jsonObj.get("type") != null && !jsonObj.get("type").isJsonNull()) {
-        TypeEnum.validateJsonElement(jsonObj.get("type"));
-      }
-  }
 
-  public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!LockScreenConfigAnimation.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'LockScreenConfigAnimation' and its subtypes
-       }
-       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<LockScreenConfigAnimation> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(LockScreenConfigAnimation.class));
+        public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+            String value = jsonElement.getAsString();
+            TypeEnum.fromValue(value);
+        }
 
-       return (TypeAdapter<T>) new TypeAdapter<LockScreenConfigAnimation>() {
-           @Override
-           public void write(JsonWriter out, LockScreenConfigAnimation value) throws IOException {
-             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-             elementAdapter.write(out, obj);
-           }
+        public String getValue() {
+            return value;
+        }
 
-           @Override
-           public LockScreenConfigAnimation read(JsonReader in) throws IOException {
-             JsonElement jsonElement = elementAdapter.read(in);
-             validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
-           }
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
 
-       }.nullSafe();
+        public static class Adapter extends TypeAdapter<TypeEnum> {
+            @Override
+            public void write(final JsonWriter jsonWriter, final TypeEnum enumeration) throws IOException {
+                jsonWriter.value(enumeration.getValue());
+            }
+
+            @Override
+            public TypeEnum read(final JsonReader jsonReader) throws IOException {
+                String value = jsonReader.nextString();
+                return TypeEnum.fromValue(value);
+            }
+        }
     }
-  }
 
-  /**
-   * Create an instance of LockScreenConfigAnimation given an JSON string
-   *
-   * @param jsonString JSON string
-   * @return An instance of LockScreenConfigAnimation
-   * @throws IOException if the JSON string is invalid with respect to LockScreenConfigAnimation
-   */
-  public static LockScreenConfigAnimation fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, LockScreenConfigAnimation.class);
-  }
+    public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (!LockScreenConfigAnimation.class.isAssignableFrom(type.getRawType())) {
+                return null; // this class only serializes 'LockScreenConfigAnimation' and its subtypes
+            }
+            final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+            final TypeAdapter<LockScreenConfigAnimation> thisAdapter
+                    = gson.getDelegateAdapter(this, TypeToken.get(LockScreenConfigAnimation.class));
 
-  /**
-   * Convert an instance of LockScreenConfigAnimation to an JSON string
-   *
-   * @return JSON string
-   */
-  public String toJson() {
-    return JSON.getGson().toJson(this);
-  }
+            return (TypeAdapter<T>) new TypeAdapter<LockScreenConfigAnimation>() {
+                @Override
+                public void write(JsonWriter out, LockScreenConfigAnimation value) throws IOException {
+                    JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+                    elementAdapter.write(out, obj);
+                }
+
+                @Override
+                public LockScreenConfigAnimation read(JsonReader in) throws IOException {
+                    JsonElement jsonElement = elementAdapter.read(in);
+                    validateJsonElement(jsonElement);
+                    return thisAdapter.fromJsonTree(jsonElement);
+                }
+
+            }.nullSafe();
+        }
+    }
 }
 

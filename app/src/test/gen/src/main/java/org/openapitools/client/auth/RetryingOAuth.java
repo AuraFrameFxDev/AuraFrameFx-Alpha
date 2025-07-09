@@ -29,7 +29,7 @@ public class RetryingOAuth extends OAuth implements Interceptor {
     private TokenRequestBuilder tokenRequestBuilder;
 
     /**
-     * @param client An OkHttp client
+     * @param client              An OkHttp client
      * @param tokenRequestBuilder A token request builder
      */
     public RetryingOAuth(OkHttpClient client, TokenRequestBuilder tokenRequestBuilder) {
@@ -45,13 +45,13 @@ public class RetryingOAuth extends OAuth implements Interceptor {
     }
 
     /**
-     * @param tokenUrl The token URL to be used for this OAuth2 flow.
-     *   Applicable to the following OAuth2 flows: "password", "clientCredentials" and "authorizationCode".
-     *   The value must be an absolute URL.
-     * @param clientId The OAuth2 client ID for the "clientCredentials" flow.
-     * @param flow OAuth flow.
+     * @param tokenUrl     The token URL to be used for this OAuth2 flow.
+     *                     Applicable to the following OAuth2 flows: "password", "clientCredentials" and "authorizationCode".
+     *                     The value must be an absolute URL.
+     * @param clientId     The OAuth2 client ID for the "clientCredentials" flow.
+     * @param flow         OAuth flow.
      * @param clientSecret The OAuth2 client secret for the "clientCredentials" flow.
-     * @param parameters A map of string.
+     * @param parameters   A map of string.
      */
     public RetryingOAuth(
             String tokenUrl,
@@ -77,7 +77,7 @@ public class RetryingOAuth extends OAuth implements Interceptor {
      * @param flow The OAuth flow.
      */
     public void setFlow(OAuthFlow flow) {
-        switch(flow) {
+        switch (flow) {
             case ACCESS_CODE:
                 tokenRequestBuilder.setGrantType(GrantType.AUTHORIZATION_CODE);
                 break;
@@ -140,8 +140,8 @@ public class RetryingOAuth extends OAuth implements Interceptor {
             // 401/403 response codes most likely indicate an expired access token, unless it happens two times in a row
             if (
                     response != null &&
-                            (   response.code() == HttpURLConnection.HTTP_UNAUTHORIZED ||
-                                    response.code() == HttpURLConnection.HTTP_FORBIDDEN     ) &&
+                            (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED ||
+                                    response.code() == HttpURLConnection.HTTP_FORBIDDEN) &&
                             updateTokenAndRetryOnAuthorizationFailure
             ) {
                 try {
@@ -155,8 +155,7 @@ public class RetryingOAuth extends OAuth implements Interceptor {
                 }
             }
             return response;
-        }
-        else {
+        } else {
             return chain.proceed(chain.request());
         }
     }
@@ -204,7 +203,7 @@ public class RetryingOAuth extends OAuth implements Interceptor {
     // Applying authorization to parameters is performed in the retryingIntercept method
     @Override
     public void applyToParams(List<Pair> queryParams, Map<String, String> headerParams, Map<String, String> cookieParams,
-                             String payload, String method, URI uri) throws ApiException {
+                              String payload, String method, URI uri) throws ApiException {
         // No implementation necessary
     }
 }

@@ -33,7 +33,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "24"
+
     }
 
     buildFeatures {
@@ -48,36 +48,36 @@ android {
 dependencies {
     // Core project dependency
     implementation(project(":app"))
-    
+
     // AndroidX Core
-    implementation("androidx.core:core-ktx:1.16.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.1")
-    implementation("androidx.activity:activity-compose:1.10.1")
-    
+    implementation(libs.androidxCoreKtx)
+    implementation(libs.androidxLifecycleRuntimeKtx)
+    implementation(libs.androidxActivityCompose)
+
     // Compose BOM
-    implementation(platform("androidx.compose:compose-bom:2025.06.01"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.animation:animation")
-    implementation("androidx.compose.foundation:foundation")
-    
+    implementation(platform(libs.composeBom))
+    implementation(libs.ui)
+    implementation(libs.uiToolingPreview)
+    implementation(libs.material3)
+    implementation(libs.animation)
+    implementation(libs.foundation)
+
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.9.1")
-    
+    implementation(libs.androidxNavigationCompose)
+
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.56.2")
-    kapt("com.google.dagger:hilt-compiler:2.56.2")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    
+    implementation(libs.hiltAndroid)
+    kapt(libs.hiltCompiler)
+    implementation(libs.hiltNavigationCompose)
+
     // Debug tools
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
-    
+    debugImplementation(libs.uiTooling)
+    debugImplementation(libs.composeUiTestManifest)
+
     // Testing
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2025.06.01"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation(libs.testJunit)
+    androidTestImplementation(libs.androidxTestExtJunit)
+    androidTestImplementation(libs.espressoCore)
+    androidTestImplementation(platform(libs.composeBom))
+    androidTestImplementation(libs.uiTestJunit4)
 }

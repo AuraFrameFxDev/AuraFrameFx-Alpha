@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -14,14 +14,17 @@
 package org.openapitools.client.model;
 
 import java.util.Objects;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+
 import org.openapitools.client.model.AgentType;
 
 import com.google.gson.Gson;
@@ -37,6 +40,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 
 import java.lang.reflect.Type;
@@ -53,220 +57,216 @@ import org.openapitools.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class AgentMessage {
-  public static final String SERIALIZED_NAME_SENDER = "sender";
-  @SerializedName(SERIALIZED_NAME_SENDER)
-  private AgentType sender;
+    public static final String SERIALIZED_NAME_SENDER = "sender";
+    public static final String SERIALIZED_NAME_MESSAGE = "message";
+    public static final String SERIALIZED_NAME_TIMESTAMP = "timestamp";
+    public static HashSet<String> openapiFields;
+    public static HashSet<String> openapiRequiredFields;
 
-  public static final String SERIALIZED_NAME_MESSAGE = "message";
-  @SerializedName(SERIALIZED_NAME_MESSAGE)
-  private String message;
+    static {
+        // a set of all properties/fields (JSON key names)
+        openapiFields = new HashSet<String>();
+        openapiFields.add("sender");
+        openapiFields.add("message");
+        openapiFields.add("timestamp");
 
-  public static final String SERIALIZED_NAME_TIMESTAMP = "timestamp";
-  @SerializedName(SERIALIZED_NAME_TIMESTAMP)
-  private OffsetDateTime timestamp;
-
-  public AgentMessage() {
-  }
-
-  public AgentMessage sender(AgentType sender) {
-    this.sender = sender;
-    return this;
-  }
-
-  /**
-   * Get sender
-   * @return sender
-   */
-  @javax.annotation.Nonnull
-  public AgentType getSender() {
-    return sender;
-  }
-
-  public void setSender(AgentType sender) {
-    this.sender = sender;
-  }
-
-
-  public AgentMessage message(String message) {
-    this.message = message;
-    return this;
-  }
-
-  /**
-   * The content of the message
-   * @return message
-   */
-  @javax.annotation.Nonnull
-  public String getMessage() {
-    return message;
-  }
-
-  public void setMessage(String message) {
-    this.message = message;
-  }
-
-
-  public AgentMessage timestamp(OffsetDateTime timestamp) {
-    this.timestamp = timestamp;
-    return this;
-  }
-
-  /**
-   * ISO 8601 timestamp of the message
-   * @return timestamp
-   */
-  @javax.annotation.Nonnull
-  public OffsetDateTime getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(OffsetDateTime timestamp) {
-    this.timestamp = timestamp;
-  }
-
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+        // a set of required properties/fields (JSON key names)
+        openapiRequiredFields = new HashSet<String>();
+        openapiRequiredFields.add("sender");
+        openapiRequiredFields.add("message");
+        openapiRequiredFields.add("timestamp");
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    @SerializedName(SERIALIZED_NAME_SENDER)
+    private AgentType sender;
+    @SerializedName(SERIALIZED_NAME_MESSAGE)
+    private String message;
+    @SerializedName(SERIALIZED_NAME_TIMESTAMP)
+    private OffsetDateTime timestamp;
+
+    public AgentMessage() {
     }
-    AgentMessage agentMessage = (AgentMessage) o;
-    return Objects.equals(this.sender, agentMessage.sender) &&
-        Objects.equals(this.message, agentMessage.message) &&
-        Objects.equals(this.timestamp, agentMessage.timestamp);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(sender, message, timestamp);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class AgentMessage {\n");
-    sb.append("    sender: ").append(toIndentedString(sender)).append("\n");
-    sb.append("    message: ").append(toIndentedString(message)).append("\n");
-    sb.append("    timestamp: ").append(toIndentedString(timestamp)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
-
-
-  public static HashSet<String> openapiFields;
-  public static HashSet<String> openapiRequiredFields;
-
-  static {
-    // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("sender");
-    openapiFields.add("message");
-    openapiFields.add("timestamp");
-
-    // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("sender");
-    openapiRequiredFields.add("message");
-    openapiRequiredFields.add("timestamp");
-  }
-
-  /**
-   * Validates the JSON Element and throws an exception if issues found
-   *
-   * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to AgentMessage
-   */
-  public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      if (jsonElement == null) {
-        if (!AgentMessage.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in AgentMessage is not found in the empty JSON string", AgentMessage.openapiRequiredFields.toString()));
+    /**
+     * Validates the JSON Element and throws an exception if issues found
+     *
+     * @param jsonElement JSON Element
+     * @throws IOException if the JSON Element is invalid with respect to AgentMessage
+     */
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+        if (jsonElement == null) {
+            if (!AgentMessage.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+                throw new IllegalArgumentException(String.format("The required field(s) %s in AgentMessage is not found in the empty JSON string", AgentMessage.openapiRequiredFields.toString()));
+            }
         }
-      }
 
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!AgentMessage.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `AgentMessage` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+        Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+        // check to see if the JSON string contains additional fields
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            if (!AgentMessage.openapiFields.contains(entry.getKey())) {
+                throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `AgentMessage` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+            }
         }
-      }
 
-      // check to make sure all required properties/fields are present in the JSON string
-      for (String requiredField : AgentMessage.openapiRequiredFields) {
-        if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+        // check to make sure all required properties/fields are present in the JSON string
+        for (String requiredField : AgentMessage.openapiRequiredFields) {
+            if (jsonElement.getAsJsonObject().get(requiredField) == null) {
+                throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+            }
         }
-      }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      // validate the required field `sender`
-      AgentType.validateJsonElement(jsonObj.get("sender"));
-      if (!jsonObj.get("message").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `message` to be a primitive type in the JSON string but got `%s`", jsonObj.get("message").toString()));
-      }
-  }
-
-  public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!AgentMessage.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'AgentMessage' and its subtypes
-       }
-       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<AgentMessage> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(AgentMessage.class));
-
-       return (TypeAdapter<T>) new TypeAdapter<AgentMessage>() {
-           @Override
-           public void write(JsonWriter out, AgentMessage value) throws IOException {
-             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-             elementAdapter.write(out, obj);
-           }
-
-           @Override
-           public AgentMessage read(JsonReader in) throws IOException {
-             JsonElement jsonElement = elementAdapter.read(in);
-             validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
-           }
-
-       }.nullSafe();
+        // validate the required field `sender`
+        AgentType.validateJsonElement(jsonObj.get("sender"));
+        if (!jsonObj.get("message").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `message` to be a primitive type in the JSON string but got `%s`", jsonObj.get("message").toString()));
+        }
     }
-  }
 
-  /**
-   * Create an instance of AgentMessage given an JSON string
-   *
-   * @param jsonString JSON string
-   * @return An instance of AgentMessage
-   * @throws IOException if the JSON string is invalid with respect to AgentMessage
-   */
-  public static AgentMessage fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, AgentMessage.class);
-  }
+    /**
+     * Create an instance of AgentMessage given an JSON string
+     *
+     * @param jsonString JSON string
+     * @return An instance of AgentMessage
+     * @throws IOException if the JSON string is invalid with respect to AgentMessage
+     */
+    public static AgentMessage fromJson(String jsonString) throws IOException {
+        return JSON.getGson().fromJson(jsonString, AgentMessage.class);
+    }
 
-  /**
-   * Convert an instance of AgentMessage to an JSON string
-   *
-   * @return JSON string
-   */
-  public String toJson() {
-    return JSON.getGson().toJson(this);
-  }
+    public AgentMessage sender(AgentType sender) {
+        this.sender = sender;
+        return this;
+    }
+
+    /**
+     * Get sender
+     *
+     * @return sender
+     */
+    @javax.annotation.Nonnull
+    public AgentType getSender() {
+        return sender;
+    }
+
+    public void setSender(AgentType sender) {
+        this.sender = sender;
+    }
+
+    public AgentMessage message(String message) {
+        this.message = message;
+        return this;
+    }
+
+    /**
+     * The content of the message
+     *
+     * @return message
+     */
+    @javax.annotation.Nonnull
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public AgentMessage timestamp(OffsetDateTime timestamp) {
+        this.timestamp = timestamp;
+        return this;
+    }
+
+    /**
+     * ISO 8601 timestamp of the message
+     *
+     * @return timestamp
+     */
+    @javax.annotation.Nonnull
+    public OffsetDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(OffsetDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AgentMessage agentMessage = (AgentMessage) o;
+        return Objects.equals(this.sender, agentMessage.sender) &&
+                Objects.equals(this.message, agentMessage.message) &&
+                Objects.equals(this.timestamp, agentMessage.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sender, message, timestamp);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class AgentMessage {\n");
+        sb.append("    sender: ").append(toIndentedString(sender)).append("\n");
+        sb.append("    message: ").append(toIndentedString(message)).append("\n");
+        sb.append("    timestamp: ").append(toIndentedString(timestamp)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
+
+    /**
+     * Convert an instance of AgentMessage to an JSON string
+     *
+     * @return JSON string
+     */
+    public String toJson() {
+        return JSON.getGson().toJson(this);
+    }
+
+    public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (!AgentMessage.class.isAssignableFrom(type.getRawType())) {
+                return null; // this class only serializes 'AgentMessage' and its subtypes
+            }
+            final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+            final TypeAdapter<AgentMessage> thisAdapter
+                    = gson.getDelegateAdapter(this, TypeToken.get(AgentMessage.class));
+
+            return (TypeAdapter<T>) new TypeAdapter<AgentMessage>() {
+                @Override
+                public void write(JsonWriter out, AgentMessage value) throws IOException {
+                    JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+                    elementAdapter.write(out, obj);
+                }
+
+                @Override
+                public AgentMessage read(JsonReader in) throws IOException {
+                    JsonElement jsonElement = elementAdapter.read(in);
+                    validateJsonElement(jsonElement);
+                    return thisAdapter.fromJsonTree(jsonElement);
+                }
+
+            }.nullSafe();
+        }
+    }
 }
 

@@ -20,14 +20,14 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
  *
- * @param enabled 
- * @param intensity 
+ *
+ * @param enabled
+ * @param intensity
  */
 
 
-data class LockScreenConfigHapticFeedback (
+data class LockScreenConfigHapticFeedback(
 
     @Json(name = "enabled")
     val enabled: kotlin.Boolean? = null,

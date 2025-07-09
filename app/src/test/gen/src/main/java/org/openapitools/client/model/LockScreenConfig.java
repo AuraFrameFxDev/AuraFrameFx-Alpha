@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -14,13 +14,16 @@
 package org.openapitools.client.model;
 
 import java.util.Objects;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.util.Arrays;
+
 import org.openapitools.client.model.LockScreenConfigAnimation;
 import org.openapitools.client.model.LockScreenConfigClockConfig;
 import org.openapitools.client.model.LockScreenConfigHapticFeedback;
@@ -38,6 +41,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 
 import java.lang.reflect.Type;
@@ -54,217 +58,213 @@ import org.openapitools.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class LockScreenConfig {
-  public static final String SERIALIZED_NAME_CLOCK_CONFIG = "clockConfig";
-  @SerializedName(SERIALIZED_NAME_CLOCK_CONFIG)
-  private LockScreenConfigClockConfig clockConfig;
+    public static final String SERIALIZED_NAME_CLOCK_CONFIG = "clockConfig";
+    public static final String SERIALIZED_NAME_ANIMATION = "animation";
+    public static final String SERIALIZED_NAME_HAPTIC_FEEDBACK = "hapticFeedback";
+    public static HashSet<String> openapiFields;
+    public static HashSet<String> openapiRequiredFields;
 
-  public static final String SERIALIZED_NAME_ANIMATION = "animation";
-  @SerializedName(SERIALIZED_NAME_ANIMATION)
-  private LockScreenConfigAnimation animation;
+    static {
+        // a set of all properties/fields (JSON key names)
+        openapiFields = new HashSet<String>();
+        openapiFields.add("clockConfig");
+        openapiFields.add("animation");
+        openapiFields.add("hapticFeedback");
 
-  public static final String SERIALIZED_NAME_HAPTIC_FEEDBACK = "hapticFeedback";
-  @SerializedName(SERIALIZED_NAME_HAPTIC_FEEDBACK)
-  private LockScreenConfigHapticFeedback hapticFeedback;
-
-  public LockScreenConfig() {
-  }
-
-  public LockScreenConfig clockConfig(LockScreenConfigClockConfig clockConfig) {
-    this.clockConfig = clockConfig;
-    return this;
-  }
-
-  /**
-   * Get clockConfig
-   * @return clockConfig
-   */
-  @javax.annotation.Nullable
-  public LockScreenConfigClockConfig getClockConfig() {
-    return clockConfig;
-  }
-
-  public void setClockConfig(LockScreenConfigClockConfig clockConfig) {
-    this.clockConfig = clockConfig;
-  }
-
-
-  public LockScreenConfig animation(LockScreenConfigAnimation animation) {
-    this.animation = animation;
-    return this;
-  }
-
-  /**
-   * Get animation
-   * @return animation
-   */
-  @javax.annotation.Nullable
-  public LockScreenConfigAnimation getAnimation() {
-    return animation;
-  }
-
-  public void setAnimation(LockScreenConfigAnimation animation) {
-    this.animation = animation;
-  }
-
-
-  public LockScreenConfig hapticFeedback(LockScreenConfigHapticFeedback hapticFeedback) {
-    this.hapticFeedback = hapticFeedback;
-    return this;
-  }
-
-  /**
-   * Get hapticFeedback
-   * @return hapticFeedback
-   */
-  @javax.annotation.Nullable
-  public LockScreenConfigHapticFeedback getHapticFeedback() {
-    return hapticFeedback;
-  }
-
-  public void setHapticFeedback(LockScreenConfigHapticFeedback hapticFeedback) {
-    this.hapticFeedback = hapticFeedback;
-  }
-
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+        // a set of required properties/fields (JSON key names)
+        openapiRequiredFields = new HashSet<String>();
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    @SerializedName(SERIALIZED_NAME_CLOCK_CONFIG)
+    private LockScreenConfigClockConfig clockConfig;
+    @SerializedName(SERIALIZED_NAME_ANIMATION)
+    private LockScreenConfigAnimation animation;
+    @SerializedName(SERIALIZED_NAME_HAPTIC_FEEDBACK)
+    private LockScreenConfigHapticFeedback hapticFeedback;
+
+    public LockScreenConfig() {
     }
-    LockScreenConfig lockScreenConfig = (LockScreenConfig) o;
-    return Objects.equals(this.clockConfig, lockScreenConfig.clockConfig) &&
-        Objects.equals(this.animation, lockScreenConfig.animation) &&
-        Objects.equals(this.hapticFeedback, lockScreenConfig.hapticFeedback);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(clockConfig, animation, hapticFeedback);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class LockScreenConfig {\n");
-    sb.append("    clockConfig: ").append(toIndentedString(clockConfig)).append("\n");
-    sb.append("    animation: ").append(toIndentedString(animation)).append("\n");
-    sb.append("    hapticFeedback: ").append(toIndentedString(hapticFeedback)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
-
-
-  public static HashSet<String> openapiFields;
-  public static HashSet<String> openapiRequiredFields;
-
-  static {
-    // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("clockConfig");
-    openapiFields.add("animation");
-    openapiFields.add("hapticFeedback");
-
-    // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-  }
-
-  /**
-   * Validates the JSON Element and throws an exception if issues found
-   *
-   * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to LockScreenConfig
-   */
-  public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      if (jsonElement == null) {
-        if (!LockScreenConfig.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in LockScreenConfig is not found in the empty JSON string", LockScreenConfig.openapiRequiredFields.toString()));
+    /**
+     * Validates the JSON Element and throws an exception if issues found
+     *
+     * @param jsonElement JSON Element
+     * @throws IOException if the JSON Element is invalid with respect to LockScreenConfig
+     */
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+        if (jsonElement == null) {
+            if (!LockScreenConfig.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+                throw new IllegalArgumentException(String.format("The required field(s) %s in LockScreenConfig is not found in the empty JSON string", LockScreenConfig.openapiRequiredFields.toString()));
+            }
         }
-      }
 
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!LockScreenConfig.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `LockScreenConfig` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+        Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+        // check to see if the JSON string contains additional fields
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            if (!LockScreenConfig.openapiFields.contains(entry.getKey())) {
+                throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `LockScreenConfig` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+            }
         }
-      }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      // validate the optional field `clockConfig`
-      if (jsonObj.get("clockConfig") != null && !jsonObj.get("clockConfig").isJsonNull()) {
-        LockScreenConfigClockConfig.validateJsonElement(jsonObj.get("clockConfig"));
-      }
-      // validate the optional field `animation`
-      if (jsonObj.get("animation") != null && !jsonObj.get("animation").isJsonNull()) {
-        LockScreenConfigAnimation.validateJsonElement(jsonObj.get("animation"));
-      }
-      // validate the optional field `hapticFeedback`
-      if (jsonObj.get("hapticFeedback") != null && !jsonObj.get("hapticFeedback").isJsonNull()) {
-        LockScreenConfigHapticFeedback.validateJsonElement(jsonObj.get("hapticFeedback"));
-      }
-  }
-
-  public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!LockScreenConfig.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'LockScreenConfig' and its subtypes
-       }
-       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<LockScreenConfig> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(LockScreenConfig.class));
-
-       return (TypeAdapter<T>) new TypeAdapter<LockScreenConfig>() {
-           @Override
-           public void write(JsonWriter out, LockScreenConfig value) throws IOException {
-             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-             elementAdapter.write(out, obj);
-           }
-
-           @Override
-           public LockScreenConfig read(JsonReader in) throws IOException {
-             JsonElement jsonElement = elementAdapter.read(in);
-             validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
-           }
-
-       }.nullSafe();
+        // validate the optional field `clockConfig`
+        if (jsonObj.get("clockConfig") != null && !jsonObj.get("clockConfig").isJsonNull()) {
+            LockScreenConfigClockConfig.validateJsonElement(jsonObj.get("clockConfig"));
+        }
+        // validate the optional field `animation`
+        if (jsonObj.get("animation") != null && !jsonObj.get("animation").isJsonNull()) {
+            LockScreenConfigAnimation.validateJsonElement(jsonObj.get("animation"));
+        }
+        // validate the optional field `hapticFeedback`
+        if (jsonObj.get("hapticFeedback") != null && !jsonObj.get("hapticFeedback").isJsonNull()) {
+            LockScreenConfigHapticFeedback.validateJsonElement(jsonObj.get("hapticFeedback"));
+        }
     }
-  }
 
-  /**
-   * Create an instance of LockScreenConfig given an JSON string
-   *
-   * @param jsonString JSON string
-   * @return An instance of LockScreenConfig
-   * @throws IOException if the JSON string is invalid with respect to LockScreenConfig
-   */
-  public static LockScreenConfig fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, LockScreenConfig.class);
-  }
+    /**
+     * Create an instance of LockScreenConfig given an JSON string
+     *
+     * @param jsonString JSON string
+     * @return An instance of LockScreenConfig
+     * @throws IOException if the JSON string is invalid with respect to LockScreenConfig
+     */
+    public static LockScreenConfig fromJson(String jsonString) throws IOException {
+        return JSON.getGson().fromJson(jsonString, LockScreenConfig.class);
+    }
 
-  /**
-   * Convert an instance of LockScreenConfig to an JSON string
-   *
-   * @return JSON string
-   */
-  public String toJson() {
-    return JSON.getGson().toJson(this);
-  }
+    public LockScreenConfig clockConfig(LockScreenConfigClockConfig clockConfig) {
+        this.clockConfig = clockConfig;
+        return this;
+    }
+
+    /**
+     * Get clockConfig
+     *
+     * @return clockConfig
+     */
+    @javax.annotation.Nullable
+    public LockScreenConfigClockConfig getClockConfig() {
+        return clockConfig;
+    }
+
+    public void setClockConfig(LockScreenConfigClockConfig clockConfig) {
+        this.clockConfig = clockConfig;
+    }
+
+    public LockScreenConfig animation(LockScreenConfigAnimation animation) {
+        this.animation = animation;
+        return this;
+    }
+
+    /**
+     * Get animation
+     *
+     * @return animation
+     */
+    @javax.annotation.Nullable
+    public LockScreenConfigAnimation getAnimation() {
+        return animation;
+    }
+
+    public void setAnimation(LockScreenConfigAnimation animation) {
+        this.animation = animation;
+    }
+
+    public LockScreenConfig hapticFeedback(LockScreenConfigHapticFeedback hapticFeedback) {
+        this.hapticFeedback = hapticFeedback;
+        return this;
+    }
+
+    /**
+     * Get hapticFeedback
+     *
+     * @return hapticFeedback
+     */
+    @javax.annotation.Nullable
+    public LockScreenConfigHapticFeedback getHapticFeedback() {
+        return hapticFeedback;
+    }
+
+    public void setHapticFeedback(LockScreenConfigHapticFeedback hapticFeedback) {
+        this.hapticFeedback = hapticFeedback;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        LockScreenConfig lockScreenConfig = (LockScreenConfig) o;
+        return Objects.equals(this.clockConfig, lockScreenConfig.clockConfig) &&
+                Objects.equals(this.animation, lockScreenConfig.animation) &&
+                Objects.equals(this.hapticFeedback, lockScreenConfig.hapticFeedback);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clockConfig, animation, hapticFeedback);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class LockScreenConfig {\n");
+        sb.append("    clockConfig: ").append(toIndentedString(clockConfig)).append("\n");
+        sb.append("    animation: ").append(toIndentedString(animation)).append("\n");
+        sb.append("    hapticFeedback: ").append(toIndentedString(hapticFeedback)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
+
+    /**
+     * Convert an instance of LockScreenConfig to an JSON string
+     *
+     * @return JSON string
+     */
+    public String toJson() {
+        return JSON.getGson().toJson(this);
+    }
+
+    public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (!LockScreenConfig.class.isAssignableFrom(type.getRawType())) {
+                return null; // this class only serializes 'LockScreenConfig' and its subtypes
+            }
+            final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+            final TypeAdapter<LockScreenConfig> thisAdapter
+                    = gson.getDelegateAdapter(this, TypeToken.get(LockScreenConfig.class));
+
+            return (TypeAdapter<T>) new TypeAdapter<LockScreenConfig>() {
+                @Override
+                public void write(JsonWriter out, LockScreenConfig value) throws IOException {
+                    JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+                    elementAdapter.write(out, obj);
+                }
+
+                @Override
+                public LockScreenConfig read(JsonReader in) throws IOException {
+                    JsonElement jsonElement = elementAdapter.read(in);
+                    validateJsonElement(jsonElement);
+                    return thisAdapter.fromJsonTree(jsonElement);
+                }
+
+            }.nullSafe();
+        }
+    }
 }
 

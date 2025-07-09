@@ -52,7 +52,7 @@ interface AuraAIService {
             // Basic text generation with configurable options
             val temperature = options?.get("temperature") as? Double ?: 0.7
             val maxTokens = options?.get("max_tokens") as? Int ?: 150
-            
+
             // For now, return a structured response that indicates the service is working
             return buildString {
                 append("Generated text for prompt: \"$prompt\"\n")
@@ -79,8 +79,9 @@ interface AuraAIService {
     ): String? {
         return try {
             val context = options?.get("context") as? String ?: ""
-            val systemPrompt = options?.get("system_prompt") as? String ?: "You are a helpful AI assistant."
-            
+            val systemPrompt =
+                options?.get("system_prompt") as? String ?: "You are a helpful AI assistant."
+
             // Enhanced response with context awareness
             buildString {
                 append("AI Response for: \"$prompt\"\n")
@@ -96,20 +97,20 @@ interface AuraAIService {
     }
 
     /**
- * Retrieves the value stored under the specified memory key.
- *
- * @param memoryKey The unique identifier for the memory entry.
- * @return The associated string value, or null if the key does not exist.
- */
-fun getMemory(memoryKey: String): String?
-    
+     * Retrieves the value stored under the specified memory key.
+     *
+     * @param memoryKey The unique identifier for the memory entry.
+     * @return The associated string value, or null if the key does not exist.
+     */
+    fun getMemory(memoryKey: String): String?
+
     /**
- * Stores a value associated with the given key for later retrieval by the AI service.
- *
- * @param key The unique identifier for the memory entry.
- * @param value The value to store.
- */
-fun saveMemory(key: String, value: Any)
+     * Stores a value associated with the given key for later retrieval by the AI service.
+     *
+     * @param key The unique identifier for the memory entry.
+     * @param value The value to store.
+     */
+    fun saveMemory(key: String, value: Any)
 
     /**
      * Indicates whether the AI service is currently connected.
@@ -130,7 +131,6 @@ fun saveMemory(key: String, value: Any)
     fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing
     }
-
 
 
     /**

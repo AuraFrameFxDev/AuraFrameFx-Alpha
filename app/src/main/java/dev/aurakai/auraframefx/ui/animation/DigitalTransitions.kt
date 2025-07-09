@@ -6,7 +6,9 @@ import androidx.compose.ui.graphics.Color // Added import for Color
 // Moved extension functions to top-level for direct use on Modifier
 
 fun Modifier.cyberEdgeGlow(): Modifier = this // Placeholder implementation
-fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier = this // Placeholder
+fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier =
+    this // Placeholder
+
 fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this // Placeholder
 fun Modifier.digitalGlitchEffect(): Modifier = this // Placeholder
 

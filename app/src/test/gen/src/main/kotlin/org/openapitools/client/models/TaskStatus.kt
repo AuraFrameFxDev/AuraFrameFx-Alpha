@@ -20,17 +20,17 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
+ *
  *
  * @param taskId Unique identifier for the task
- * @param status 
+ * @param status
  * @param progress Percentage completion of the task (0-100)
  * @param result The outcome or output of the task
  * @param errorMessage Error message if the task failed
  */
 
 
-data class TaskStatus (
+data class TaskStatus(
 
     /* Unique identifier for the task */
     @Json(name = "taskId")
@@ -54,17 +54,22 @@ data class TaskStatus (
 ) {
 
     /**
-     * 
+     *
      *
      * Values: PENDING,IN_PROGRESS,COMPLETED,FAILED,CANCELLED
      */
     @JsonClass(generateAdapter = false)
     enum class Status(val value: kotlin.String) {
-        @Json(name = "PENDING") PENDING("PENDING"),
-        @Json(name = "IN_PROGRESS") IN_PROGRESS("IN_PROGRESS"),
-        @Json(name = "COMPLETED") COMPLETED("COMPLETED"),
-        @Json(name = "FAILED") FAILED("FAILED"),
-        @Json(name = "CANCELLED") CANCELLED("CANCELLED");
+        @Json(name = "PENDING")
+        PENDING("PENDING"),
+        @Json(name = "IN_PROGRESS")
+        IN_PROGRESS("IN_PROGRESS"),
+        @Json(name = "COMPLETED")
+        COMPLETED("COMPLETED"),
+        @Json(name = "FAILED")
+        FAILED("FAILED"),
+        @Json(name = "CANCELLED")
+        CANCELLED("CANCELLED");
     }
 
 }

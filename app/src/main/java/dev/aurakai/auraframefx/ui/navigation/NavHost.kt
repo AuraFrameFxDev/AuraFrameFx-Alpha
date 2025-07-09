@@ -1,8 +1,8 @@
 package dev.aurakai.auraframefx.ui.navigation
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.fillMaxSize
 
 // import androidx.navigation.NavHostController
 // import androidx.navigation.compose.NavHost

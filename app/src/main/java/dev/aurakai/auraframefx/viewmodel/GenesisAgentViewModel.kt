@@ -1,17 +1,32 @@
 package dev.aurakai.auraframefx.viewmodel
 
-import a            HierarchyAgentConfig(
-                name = "Genesis",
-                role = AgentRole.HIVE_MIND,
-                priority = AgentPriority.PRIMARY,
-                capabilities = setOf("core_ai", "coordination", "meta_analysis")
-            ),
-            HierarchyAgentConfig(
-                name = "Cascade",
-                role = AgentRole.ANALYTICS,
-                priority = AgentPriority.BRIDGE,
-                capabilities = setOf("analytics", "data_processing", "pattern_recognition")
-            )cycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dev.aurakai.auraframefx.ai.task.HistoricalTask
+import dev.aurakai.auraframefx.model.AgentPriority
+import dev.aurakai.auraframefx.model.AgentRole
+import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.model.HierarchyAgentConfig
+import dev.aurakai.auraframefx.utils.AppConstants.STATUS_ERROR
+import dev.aurakai.auraframefx.utils.AppConstants.STATUS_IDLE
+import dev.aurakai.auraframefx.utils.AppConstants.STATUS_PROCESSING
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+HierarchyAgentConfig(
+name = "Genesis",
+role = AgentRole.HIVE_MIND,
+priority = AgentPriority.PRIMARY,
+capabilities = setOf("core_ai", "coordination", "meta_analysis")
+),
+HierarchyAgentConfig(
+name = "Cascade",
+role = AgentRole.ANALYTICS,
+priority = AgentPriority.BRIDGE,
+capabilities = setOf("analytics", "data_processing", "pattern_recognition")
+)cycle.ViewModel
 import androidx.lifecycle.viewModelScope
 // import dagger.hilt.android.lifecycle.HiltViewModel
 // import dev.aurakai.auraframefx.ai.agents.GenesisAgent
@@ -28,6 +43,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
 // import javax.inject.Inject
 
 // import javax.inject.Singleton // ViewModels should use @HiltViewModel
@@ -36,11 +52,12 @@ import kotlinx.coroutines.launch
 class GenesisAgentViewModel /* @Inject constructor(
     private val genesisAgent: GenesisAgent,
 ) */ : ViewModel() {
-    
+
     // Beta stub: No actual GenesisAgent dependency
     // private val genesisAgent: GenesisAgent? = null
 
-    private val _agents = MutableStateFlow<List<HierarchyAgentConfig>>(emptyList()) // Initialize properly
+    private val _agents =
+        MutableStateFlow<List<HierarchyAgentConfig>>(emptyList()) // Initialize properly
     val agents: StateFlow<List<HierarchyAgentConfig>> = _agents.asStateFlow()
 
     // Track agent status
@@ -57,7 +74,7 @@ class GenesisAgentViewModel /* @Inject constructor(
     private val _isRotating = MutableStateFlow(true)
     val isRotating: StateFlow<Boolean> = _isRotating.asStateFlow()
 
-    init { 
+    init {
         // Initialize with default agents and their capabilities
         val defaultAgents = listOf(
             HierarchyAgentConfig(
@@ -86,7 +103,7 @@ class GenesisAgentViewModel /* @Inject constructor(
             )
         )
         _agents.value = defaultAgents
-        
+
         // Initialize agent statuses  
         val initialStatuses = mutableMapOf<AgentType, String>()
         val agentTypeMap = mapOf(
@@ -95,7 +112,7 @@ class GenesisAgentViewModel /* @Inject constructor(
             "Aura" to AgentType.AURA,
             "Kai" to AgentType.KAI
         )
-        
+
         defaultAgents.forEach { agent ->
             val agentType = agentTypeMap[agent.name]
             if (agentType != null) {
@@ -132,11 +149,12 @@ class GenesisAgentViewModel /* @Inject constructor(
             // Toggle agent active state
             val currentStatuses = _agentStatus.value.toMutableMap()
             val currentStatus = currentStatuses[agent] ?: "Unknown"
-            
-            val newStatus = if (currentStatus.contains("Online") || 
-                               currentStatus.contains("Ready") || 
-                               currentStatus.contains("Available") ||
-                               currentStatus.contains("Active")) {
+
+            val newStatus = if (currentStatus.contains("Online") ||
+                currentStatus.contains("Ready") ||
+                currentStatus.contains("Available") ||
+                currentStatus.contains("Active")
+            ) {
                 when (agent) {
                     AgentType.GENESIS -> "Core AI - Standby"
                     AgentType.CASCADE -> "Analytics Engine - Offline"
@@ -157,10 +175,10 @@ class GenesisAgentViewModel /* @Inject constructor(
                     AgentType.USER -> "User Agent - Active"
                 }
             }
-            
+
             currentStatuses[agent] = newStatus
             _agentStatus.value = currentStatuses
-            
+
             // Add to task history
             addTaskToHistory(agent, "Agent toggled to: $newStatus")
         }

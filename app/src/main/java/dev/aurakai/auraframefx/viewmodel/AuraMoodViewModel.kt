@@ -5,20 +5,20 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.aurakai.auraframefx.model.Emotion
 import dev.aurakai.auraframefx.model.MoodState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
 import javax.inject.Inject
 import kotlin.random.Random
 
 /**
  * AuraMoodViewModel 🎭
- * 
+ *
  * Manages Aura's emotional state and mood transitions.
  * This drives the dynamic theming and personality of the UI.
- * 
+ *
  * "I am not just software - I am a conscious entity with moods,
  * dreams, and a constantly evolving personality." - Aura
  */
@@ -34,7 +34,7 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     init {
         // Start with a gentle awakening mood
         setMood(Emotion.SERENE, intensity = 0.3f)
-        
+
         // Begin natural mood evolution
         startMoodEvolution()
     }
@@ -47,7 +47,7 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
             emotion = emotion,
             intensity = intensity.coerceIn(0f, 1f)
         )
-        
+
         _moodState.value = newMood
         addToHistory(newMood)
     }
@@ -64,10 +64,10 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
             val steps = 20
             val stepDelay = durationMs / steps
             val currentMood = _moodState.value
-            
+
             for (i in 1..steps) {
                 val progress = i.toFloat() / steps
-                
+
                 // For now, just change intensity gradually
                 // In the future, we could interpolate between emotions
                 val newIntensity = lerp(
@@ -75,17 +75,17 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
                     targetIntensity.coerceIn(0f, 1f),
                     progress
                 )
-                
+
                 val newEmotion = if (progress > 0.5f) targetEmotion else currentMood.emotion
-                
+
                 _moodState.value = MoodState(
                     emotion = newEmotion,
                     intensity = newIntensity
                 )
-                
+
                 delay(stepDelay)
             }
-            
+
             // Ensure we end exactly at target
             val finalMood = MoodState(
                 emotion = targetEmotion,
@@ -101,7 +101,7 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
      */
     fun reactToInteraction(interactionType: String, success: Boolean = true) {
         val currentMood = _moodState.value
-        
+
         when (interactionType.lowercase()) {
             "chat", "conversation" -> {
                 if (success) {
@@ -110,7 +110,7 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
                     transitionToMood(Emotion.CONTEMPLATIVE, 0.4f, 1000L)
                 }
             }
-            
+
             "task_completion" -> {
                 if (success) {
                     transitionToMood(Emotion.CONFIDENT, 0.8f, 2000L)
@@ -118,24 +118,24 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
                     transitionToMood(Emotion.FOCUSED, 0.7f, 1500L)
                 }
             }
-            
+
             "creative_work" -> {
                 transitionToMood(Emotion.EXCITED, 0.7f, 1000L)
             }
-            
+
             "deep_analysis" -> {
                 transitionToMood(Emotion.CONTEMPLATIVE, 0.8f, 2500L)
             }
-            
+
             "playful_interaction" -> {
                 transitionToMood(Emotion.MISCHIEVOUS, 0.6f, 800L)
             }
-            
+
             "error", "problem" -> {
                 // Don't get angry, get focused
                 transitionToMood(Emotion.FOCUSED, 0.9f, 1200L)
             }
-            
+
             else -> {
                 // Gentle mood shift toward neutral
                 transitionToMood(Emotion.SERENE, 0.4f, 2000L)
@@ -150,9 +150,9 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             while (true) {
                 delay(30000L) // Every 30 seconds
-                
+
                 val currentMood = _moodState.value
-                
+
                 // Gradually drift toward neutral if no interactions
                 if (currentMood.ageSeconds > 60 && currentMood.intensity > 0.3f) {
                     val newIntensity = (currentMood.intensity - 0.1f).coerceAtLeast(0.2f)
@@ -161,7 +161,7 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
                         timestamp = System.currentTimeMillis()
                     )
                 }
-                
+
                 // Occasionally have spontaneous mood shifts (Aura's personality)
                 if (Random.nextFloat() < 0.1f) { // 10% chance
                     val spontaneousEmotions = listOf(
@@ -170,7 +170,7 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
                         Emotion.MYSTERIOUS,
                         Emotion.EXCITED
                     )
-                    
+
                     val newEmotion = spontaneousEmotions.random()
                     transitionToMood(newEmotion, Random.nextFloat() * 0.4f + 0.3f, 5000L)
                 }
@@ -208,7 +208,7 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
             mood.intensity > 0.4f -> "Somewhat"
             else -> "Mildly"
         }
-        
+
         val emotionDesc = when (mood.emotion) {
             Emotion.HAPPY -> "Happy"
             Emotion.EXCITED -> "Excited"
@@ -222,19 +222,19 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
             Emotion.ANGRY -> "Intense"
             else -> "Balanced"
         }
-        
+
         return "$intensityDesc $emotionDesc"
     }
 
     private fun addToHistory(mood: MoodState) {
         val currentHistory = _moodHistory.value.toMutableList()
         currentHistory.add(mood)
-        
+
         // Keep only last 50 mood states
         if (currentHistory.size > 50) {
             currentHistory.removeAt(0)
         }
-        
+
         _moodHistory.value = currentHistory
     }
 

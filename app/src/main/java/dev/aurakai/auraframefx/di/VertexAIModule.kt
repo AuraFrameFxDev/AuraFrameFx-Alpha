@@ -9,8 +9,8 @@ import dagger.hilt.components.SingletonComponent
 import dev.aurakai.auraframefx.ai.VertexAIConfig
 import dev.aurakai.auraframefx.ai.clients.VertexAIClient
 import dev.aurakai.auraframefx.ai.clients.VertexAIClientImpl
-import dev.aurakai.auraframefx.utils.AuraFxLogger
 import dev.aurakai.auraframefx.security.SecurityContext
+import dev.aurakai.auraframefx.utils.AuraFxLogger
 import javax.inject.Singleton
 
 /**

@@ -23,15 +23,15 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
  *
- * @param clockConfig 
- * @param animation 
- * @param hapticFeedback 
+ *
+ * @param clockConfig
+ * @param animation
+ * @param hapticFeedback
  */
 
 
-data class LockScreenConfig (
+data class LockScreenConfig(
 
     @Json(name = "clockConfig")
     val clockConfig: LockScreenConfigClockConfig? = null,
