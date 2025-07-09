@@ -391,8 +391,6 @@ class OracleDriveControlViewModelTest {
         coVerify(exactly = 0) { mockRepository.updateSpeed(any()) }
     }
 
-    // Additional edge cases and boundary tests
-
     @Test
     fun `should handle rapid state changes gracefully`() = runTest {
         // Given
