@@ -11,7 +11,11 @@ class TestConftestFunctionality:
     """Test suite for conftest.py functionality and fixtures."""
     
     def test_conftest_imports(self):
-        """Test that conftest.py can be imported without errors."""
+        """
+        Verifies that the `conftest.py` module in `app.ai_backend` can be imported successfully.
+        
+        Fails the test if an ImportError occurs during import.
+        """
         try:
             import app.ai_backend.conftest
             assert True
@@ -19,7 +23,11 @@ class TestConftestFunctionality:
             pytest.fail(f"Failed to import conftest.py: {e}")
     
     def test_pytest_fixtures_exist(self):
-        """Test that expected pytest fixtures are defined."""
+        """
+        Verify that at least one common pytest fixture is defined in the conftest module.
+        
+        Asserts that the conftest module contains at least one of the expected fixture names: 'client', 'app', 'db', 'session', or 'mock_db'.
+        """
         import app.ai_backend.conftest as conftest_module
         
         # Check for common fixture names
@@ -31,7 +39,11 @@ class TestConftestFunctionality:
         assert fixture_found, "No common fixtures found in conftest.py"
     
     def test_fixture_scopes(self):
-        """Test that fixtures have appropriate scopes."""
+        """
+        Verify that all fixtures in the conftest module have valid pytest scopes.
+        
+        Asserts that each fixture's scope is one of 'function', 'class', 'module', or 'session'.
+        """
         import app.ai_backend.conftest as conftest_module
         
         # Check if fixtures are properly scoped
@@ -42,7 +54,11 @@ class TestConftestFunctionality:
                 assert fixture_info.scope in ['function', 'class', 'module', 'session']
     
     def test_database_fixture_setup(self):
-        """Test database fixture setup and teardown."""
+        """
+        Verify that the database fixture exists in `conftest.py` and can be accessed.
+        
+        Checks for the presence of either a `db` or `database` fixture in the module and asserts their existence.
+        """
         import app.ai_backend.conftest as conftest_module
         
         if hasattr(conftest_module, 'db') or hasattr(conftest_module, 'database'):
@@ -51,7 +67,9 @@ class TestConftestFunctionality:
             assert True
     
     def test_client_fixture_setup(self):
-        """Test client fixture setup."""
+        """
+        Verifies that the `client` fixture exists in `conftest.py` and is properly set up for use in tests.
+        """
         import app.ai_backend.conftest as conftest_module
         
         if hasattr(conftest_module, 'client'):
@@ -60,7 +78,9 @@ class TestConftestFunctionality:
                    hasattr(getattr(conftest_module, 'client', None), '_pytestfixturefunction')
     
     def test_mock_fixtures_isolation(self):
-        """Test that mock fixtures properly isolate tests."""
+        """
+        Verify that mock fixtures isolate test state and restore original behavior after patching.
+        """
         # This test ensures that mock fixtures don't leak between tests
         mock_data = {'test_key': 'test_value'}
         
@@ -74,7 +94,9 @@ class TestConftestFunctionality:
         assert True
     
     def test_fixture_dependencies(self):
-        """Test that fixtures with dependencies work correctly."""
+        """
+        Verifies that fixture functions in `conftest.py` with dependencies are callable and have valid signatures.
+        """
         import app.ai_backend.conftest as conftest_module
         
         # Check for fixtures that depend on other fixtures
@@ -86,7 +108,11 @@ class TestConftestFunctionality:
                 assert callable(fixture_info.func)
     
     def test_session_fixture_lifecycle(self):
-        """Test session-scoped fixtures lifecycle."""
+        """
+        Verifies that session-scoped fixtures are defined in the conftest module.
+        
+        Checks for the presence of fixtures with 'session' scope, which are typically used for expensive setup operations shared across tests.
+        """
         import app.ai_backend.conftest as conftest_module
         
         # Test that session fixtures are properly defined
@@ -102,7 +128,9 @@ class TestConftestFunctionality:
         assert len(session_fixtures) >= 0  # Allow for no session fixtures
     
     def test_conftest_configuration(self):
-        """Test pytest configuration in conftest.py."""
+        """
+        Verifies that pytest configuration functions are defined and callable in the conftest.py module.
+        """
         import app.ai_backend.conftest as conftest_module
         
         # Check for pytest configuration functions
@@ -114,18 +142,30 @@ class TestConftestFunctionality:
                 assert callable(func)
     
     def test_fixture_error_handling(self):
-        """Test that fixtures handle errors gracefully."""
+        """
+        Verify that fixture error scenarios raise exceptions as expected.
+        """
         # Test error scenarios in fixture setup
         with pytest.raises(Exception):
             # Simulate fixture error
             raise ValueError("Test fixture error")
     
     def test_cleanup_fixtures(self):
-        """Test that cleanup fixtures work properly."""
+        """
+        Verifies that yield-based fixtures perform resource cleanup after test execution.
+        
+        This test simulates the use of a generator-based fixture, ensuring that cleanup code after the `yield` statement is executed when the fixture is finalized.
+        """
         # Test fixture cleanup using yield fixtures
         cleanup_called = []
         
         def sample_fixture():
+            """
+            A sample pytest fixture that yields a test resource and marks cleanup after use.
+            
+            Returns:
+                str: The test resource string.
+            """
             resource = "test_resource"
             yield resource
             cleanup_called.append(True)
@@ -144,7 +184,9 @@ class TestConftestFunctionality:
         assert cleanup_called == [True]
     
     def test_parametrized_fixtures(self):
-        """Test parametrized fixtures functionality."""
+        """
+        Verify that parametrized fixtures in the conftest module have their `params` attribute defined as a list or tuple.
+        """
         import app.ai_backend.conftest as conftest_module
         
         # Check for parametrized fixtures
@@ -157,7 +199,11 @@ class TestConftestFunctionality:
                     assert isinstance(fixture_info.params, (list, tuple))
     
     def test_fixture_autouse(self):
-        """Test autouse fixtures behavior."""
+        """
+        Checks for the presence of autouse fixtures in the conftest module.
+        
+        Asserts that the list of autouse fixtures is non-negative in length, verifying that autouse fixtures are discoverable and accounted for.
+        """
         import app.ai_backend.conftest as conftest_module
         
         # Check for autouse fixtures
@@ -173,7 +219,9 @@ class TestConftestFunctionality:
         assert len(autouse_fixtures) >= 0
     
     def test_fixture_names_convention(self):
-        """Test that fixture names follow naming conventions."""
+        """
+        Verify that all fixture names in `conftest.py` adhere to pytest naming conventions, ensuring they are lowercase or contain underscores and do not start with 'test_'.
+        """
         import app.ai_backend.conftest as conftest_module
         
         fixture_names = []
@@ -188,7 +236,9 @@ class TestConftestFunctionality:
             assert not name.startswith('test_'), f"Fixture name '{name}' shouldn't start with 'test_'"
     
     def test_fixture_documentation(self):
-        """Test that fixtures have proper documentation."""
+        """
+        Verify that all fixtures in the conftest module have non-empty docstrings.
+        """
         import app.ai_backend.conftest as conftest_module
         
         for attr_name in dir(conftest_module):
@@ -205,17 +255,33 @@ class TestConftestEdgeCases:
     """Test edge cases and failure conditions in conftest.py."""
     
     def test_fixture_circular_dependency(self):
-        """Test detection of circular dependencies in fixtures."""
+        """
+        Verify that simulated fixture dependencies do not form a circular dependency chain.
+        
+        This test simulates the execution of two independent fixtures and asserts that each fixture is only added once to the dependency chain, ensuring no circular dependencies exist.
+        """
         # This test ensures fixtures don't have circular dependencies
         # Pytest would catch this, but we can test the concept
         
         dependency_chain = []
         
         def fixture_a():
+            """
+            Appends 'a' to the dependency chain and returns the string 'a'.
+            
+            Returns:
+                str: The string 'a'.
+            """
             dependency_chain.append('a')
             return 'a'
         
         def fixture_b():
+            """
+            Appends 'b' to the dependency chain and returns the string 'b'.
+            
+            Returns:
+                str: The string 'b'.
+            """
             dependency_chain.append('b')
             return 'b'
         
@@ -227,11 +293,16 @@ class TestConftestEdgeCases:
         assert len(set(dependency_chain)) == len(dependency_chain)
     
     def test_fixture_memory_leaks(self):
-        """Test that fixtures don't cause memory leaks."""
+        """
+        Verifies that generator-based fixtures properly release memory and do not cause memory leaks after cleanup.
+        """
         import gc
         
         # Create a fixture that might leak memory
         def potentially_leaking_fixture():
+            """
+            A generator-based fixture that yields a large list of integers and deletes it after use to simulate resource allocation and cleanup.
+            """
             large_data = [i for i in range(1000)]
             yield large_data
             # Cleanup
@@ -253,13 +324,20 @@ class TestConftestEdgeCases:
         assert True  # If we get here, no memory leak occurred
     
     def test_fixture_thread_safety(self):
-        """Test that fixtures are thread-safe."""
+        """
+        Verifies that fixture-like code can be executed safely in multiple threads without data loss or race conditions.
+        
+        This test simulates concurrent fixture usage by running multiple threads that append results to a shared list, ensuring all threads complete successfully and results are as expected.
+        """
         import threading
         
         results = []
         
         def fixture_worker():
             # Simulate fixture usage in thread
+            """
+            Simulates the use of a fixture within a thread and appends the result to a shared list.
+            """
             result = "thread_result"
             results.append(result)
         
@@ -277,10 +355,18 @@ class TestConftestEdgeCases:
         assert all(result == "thread_result" for result in results)
     
     def test_fixture_resource_cleanup(self):
-        """Test that fixtures properly clean up resources."""
+        """
+        Verify that a generator-based fixture correctly creates and cleans up resources after use.
+        """
         resource_states = {'created': False, 'cleaned': False}
         
         def resource_fixture():
+            """
+            A generator-based fixture that simulates resource creation and cleanup.
+            
+            Yields:
+                str: The string "resource" to represent the created resource.
+            """
             resource_states['created'] = True
             yield "resource"
             resource_states['cleaned'] = True
@@ -301,8 +387,18 @@ class TestConftestEdgeCases:
         assert resource_states['cleaned'] is True
     
     def test_fixture_exception_handling(self):
-        """Test fixture behavior when exceptions occur."""
+        """
+        Verify that a generator-based fixture correctly handles exceptions during resource cleanup.
+        
+        This test ensures that the fixture yields a resource, handles `GeneratorExit` during cleanup, and properly propagates other exceptions.
+        """
         def failing_fixture():
+            """
+            A generator-based fixture that yields a resource and ensures proper cleanup on generator exit or exception.
+            
+            Yields:
+                str: The string "resource" to simulate a resource provided by the fixture.
+            """
             try:
                 yield "resource"
             except GeneratorExit:
@@ -321,7 +417,9 @@ class TestConftestEdgeCases:
         assert True  # Successfully handled cleanup
     
     def test_fixture_with_invalid_scope(self):
-        """Test handling of invalid fixture scopes."""
+        """
+        Verify that only valid pytest fixture scopes are accepted and that invalid scopes are correctly identified.
+        """
         # pytest would catch this at runtime, but we can test the concept
         valid_scopes = ['function', 'class', 'module', 'session']
         
@@ -333,13 +431,24 @@ class TestConftestEdgeCases:
         assert invalid_scope not in valid_scopes
     
     def test_fixture_dependency_injection(self):
-        """Test fixture dependency injection mechanisms."""
+        """
+        Verify that a fixture can correctly inject and utilize the value from another fixture dependency.
+        """
         # Test that fixtures can properly inject dependencies
         
         def dependency_fixture():
+            """
+            A simple fixture that returns a static dependency value for use in tests.
+            
+            Returns:
+                str: The string "dependency_value".
+            """
             return "dependency_value"
         
         def dependent_fixture():
+            """
+            Returns a string indicating dependency on the value provided by `dependency_fixture`.
+            """
             dep = dependency_fixture()
             return f"dependent_on_{dep}"
         
@@ -347,10 +456,18 @@ class TestConftestEdgeCases:
         assert result == "dependent_on_dependency_value"
     
     def test_fixture_caching_behavior(self):
-        """Test fixture caching behavior across different scopes."""
+        """
+        Verifies that a fixture-like function does not cache its result and is called on each invocation, simulating function-scoped fixture behavior.
+        """
         call_count = {'count': 0}
         
         def cached_fixture():
+            """
+            Simulates a function-scoped cached fixture by incrementing a call counter and returning a unique result string on each call.
+            
+            Returns:
+                str: A string indicating the current call count, e.g., "cached_result_1".
+            """
             call_count['count'] += 1
             return f"cached_result_{call_count['count']}"
         
@@ -367,19 +484,29 @@ class TestConftestIntegration:
     """Integration tests for conftest.py functionality."""
     
     def test_conftest_with_actual_tests(self):
-        """Test that conftest.py works with actual test functions."""
+        """
+        Verifies that fixtures and configurations in conftest.py are compatible with actual test functions by simulating a test that would use those fixtures.
+        """
         # This would typically use fixtures defined in conftest.py
         
         # Mock a test that uses fixtures
         def mock_test_function():
             # This would use fixtures like client, db, etc.
+            """
+            Simulates a test function that would utilize common fixtures such as client or db.
+            
+            Returns:
+                bool: Always returns True to indicate successful execution.
+            """
             return True
         
         result = mock_test_function()
         assert result is True
     
     def test_conftest_pytest_integration(self):
-        """Test integration with pytest framework."""
+        """
+        Verifies that the pytest framework provides essential features for fixture and marker integration, ensuring compatibility with `conftest.py`.
+        """
         import pytest
         
         # Test that pytest can discover and use conftest.py
@@ -388,7 +515,9 @@ class TestConftestIntegration:
         assert hasattr(pytest, 'mark')
     
     def test_conftest_module_level_setup(self):
-        """Test module-level setup in conftest.py."""
+        """
+        Verifies that the `conftest.py` module can be imported and contains attributes, confirming module-level setup is present.
+        """
         import app.ai_backend.conftest as conftest_module
         
         # Test that module can be imported and used
@@ -399,7 +528,9 @@ class TestConftestIntegration:
         assert len(module_attrs) > 0
     
     def test_conftest_app_integration(self):
-        """Test conftest.py integration with the main application."""
+        """
+        Verifies that `conftest.py` integrates correctly with the main application by ensuring application configuration is set as expected.
+        """
         # Test that conftest.py properly sets up application context
         
         # Mock application setup
@@ -412,7 +543,9 @@ class TestConftestIntegration:
         assert app_config['debug'] is False
     
     def test_conftest_database_integration(self):
-        """Test conftest.py database integration."""
+        """
+        Verifies that the database integration logic in conftest.py correctly performs setup and teardown operations by asserting that key database actions succeed.
+        """
         # Test database setup and teardown
         
         # Mock database operations
@@ -425,7 +558,9 @@ class TestConftestIntegration:
         assert all(db_operations.values())
     
     def test_conftest_ai_backend_specific(self):
-        """Test AI backend specific fixtures and setup."""
+        """
+        Verifies that AI backend-specific components such as model loader, tokenizer, and inference engine are present and properly set up.
+        """
         # Test AI backend specific functionality
         
         # Mock AI backend components

@@ -3585,7 +3585,9 @@ class TestGenesisConnectorAdvancedAsyncOperations(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up async operations test environment."""
+        """
+        Prepare the test environment for advanced async operations by initializing a GenesisConnector with async support enabled.
+        """
         self.connector = GenesisConnector(config={
             'api_key': 'async_test_key',
             'base_url': 'https://api.async.test.com',
@@ -3594,7 +3596,11 @@ class TestGenesisConnectorAdvancedAsyncOperations(unittest.TestCase):
 
     @patch('asyncio.create_task')
     def test_async_request_queue_management(self, mock_create_task):
-        """Test management of async request queues under high load."""
+        """
+        Test that the async request queue can handle a high volume of concurrent requests.
+        
+        Simulates sending 100 asynchronous requests and verifies that all are queued successfully. Skips the test if async methods are not implemented.
+        """
         mock_task = Mock()
         mock_task.result.return_value = {'async_queue': True}
         mock_create_task.return_value = mock_task
@@ -3616,8 +3622,18 @@ class TestGenesisConnectorAdvancedAsyncOperations(unittest.TestCase):
             pass
 
     def test_async_context_manager_behavior(self):
-        """Test async context manager behavior with proper cleanup."""
+        """
+        Tests that the async context manager of the connector performs proper resource cleanup and returns a valid async connection object.
+        
+        Skips the test if the async context manager is not implemented or if no event loop is available.
+        """
         async def async_context_test():
+            """
+            Test entering the async context manager of the connector and performing an asynchronous operation.
+            
+            Returns:
+                True if the async context manager is entered successfully; None if the async context is not implemented.
+            """
             try:
                 async with self.connector.async_context() as async_conn:
                     self.assertIsNotNone(async_conn)
@@ -3645,8 +3661,17 @@ class TestGenesisConnectorAdvancedAsyncOperations(unittest.TestCase):
                 pass
 
     def test_async_error_propagation(self):
-        """Test proper error propagation in async operations."""
+        """
+        Test that asynchronous errors are correctly propagated when sending async requests.
+        
+        This test simulates various asynchronous exceptions, including timeouts, cancellations, and connection errors, to verify that the connector's async request method raises the appropriate exceptions.
+        """
         async def async_error_test():
+            """
+            Tests that the connector's async request method correctly raises and propagates various asynchronous exceptions.
+            
+            Simulates different async error scenarios, including timeout, cancellation, and connection errors, and verifies that the appropriate exception type is raised. Skips the test if async methods are not implemented.
+            """
             try:
                 # Test various async error scenarios
                 error_scenarios = [
@@ -3692,7 +3717,9 @@ class TestGenesisConnectorAdvancedCaching(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up caching test environment."""
+        """
+        Initialize a GenesisConnector instance with caching enabled for use in caching-related tests.
+        """
         self.connector = GenesisConnector(config={
             'api_key': 'cache_test_key',
             'base_url': 'https://api.cache.test.com',
@@ -3701,7 +3728,11 @@ class TestGenesisConnectorAdvancedCaching(unittest.TestCase):
         })
 
     def test_cache_invalidation_strategies(self):
-        """Test various cache invalidation strategies."""
+        """
+        Tests that the connector correctly invalidates cached entries using different invalidation strategies.
+        
+        Verifies that after setting and retrieving a cached value, invalidation with each supported strategy removes the entry from the cache.
+        """
         invalidation_strategies = [
             'time_based',
             'manual',
@@ -3735,7 +3766,11 @@ class TestGenesisConnectorAdvancedCaching(unittest.TestCase):
                     pass
 
     def test_cache_serialization_formats(self):
-        """Test caching with different serialization formats."""
+        """
+        Test that the cache correctly serializes and deserializes data using various formats.
+        
+        Verifies that data stored in the cache with different serialization formats ('json', 'pickle', 'msgpack', 'custom') can be retrieved without loss or corruption. Skips the test if caching methods are not implemented.
+        """
         formats = ['json', 'pickle', 'msgpack', 'custom']
         
         for format_type in formats:
@@ -3768,7 +3803,9 @@ class TestGenesisConnectorAdvancedCaching(unittest.TestCase):
                     pass
 
     def test_cache_memory_pressure_handling(self):
-        """Test cache behavior under memory pressure."""
+        """
+        Test that the cache handles high memory usage by storing multiple large items and verifies eviction or memory management behavior.
+        """
         try:
             # Fill cache with large amounts of data
             large_data_items = []
@@ -3796,7 +3833,11 @@ class TestGenesisConnectorAdvancedCaching(unittest.TestCase):
             pass
 
     def test_distributed_cache_consistency(self):
-        """Test distributed cache consistency across multiple connector instances."""
+        """
+        Tests that cached data remains consistent across multiple GenesisConnector instances, simulating a distributed cache environment.
+        
+        Verifies that setting a cache value in one connector instance is reflected and accessible in other instances, ensuring distributed cache synchronization.
+        """
         try:
             # Create multiple connector instances
             connectors = []
@@ -3830,7 +3871,9 @@ class TestGenesisConnectorAdvancedMetrics(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up metrics test environment."""
+        """
+        Initialize a GenesisConnector instance with metrics enabled for testing.
+        """
         self.connector = GenesisConnector(config={
             'api_key': 'metrics_test_key',
             'base_url': 'https://api.metrics.test.com',
@@ -3839,7 +3882,11 @@ class TestGenesisConnectorAdvancedMetrics(unittest.TestCase):
         })
 
     def test_custom_metrics_collection(self):
-        """Test collection of custom application metrics."""
+        """
+        Test that custom application metrics can be registered, recorded, and retrieved using the connector.
+        
+        Verifies support for different metric types and ensures recorded metrics are present in the connector's metrics collection.
+        """
         try:
             # Define custom metrics
             custom_metrics = [
@@ -3871,7 +3918,11 @@ class TestGenesisConnectorAdvancedMetrics(unittest.TestCase):
             pass
 
     def test_metrics_aggregation_strategies(self):
-        """Test different metrics aggregation strategies."""
+        """
+        Test that the connector correctly aggregates recorded metrics using various strategies such as sum, average, minimum, maximum, and percentile.
+        
+        This test records a series of metric values and verifies that the aggregation results match expected values for each supported strategy. Skips the test if metrics aggregation is not implemented.
+        """
         aggregation_strategies = ['sum', 'avg', 'min', 'max', 'percentile']
         
         for strategy in aggregation_strategies:
@@ -3906,7 +3957,9 @@ class TestGenesisConnectorAdvancedMetrics(unittest.TestCase):
                     pass
 
     def test_metrics_export_formats(self):
-        """Test metrics export in different formats."""
+        """
+        Tests that metrics can be exported in Prometheus, StatsD, JSON, and CSV formats, and verifies the structure of the exported data for each format.
+        """
         export_formats = ['prometheus', 'statsd', 'json', 'csv']
         
         for format_type in export_formats:
@@ -3939,7 +3992,11 @@ class TestGenesisConnectorAdvancedMetrics(unittest.TestCase):
                     pass
 
     def test_real_time_metrics_streaming(self):
-        """Test real-time metrics streaming capabilities."""
+        """
+        Tests the real-time streaming of metrics data through the connector.
+        
+        Verifies that metrics can be streamed to a configured endpoint, metrics are recorded and transmitted, and the streaming status can be retrieved. Skips the test if metrics streaming functionality is not implemented.
+        """
         try:
             # Set up metrics streaming
             stream_config = {
@@ -3974,11 +4031,15 @@ class TestGenesisConnectorAdvancedAuthentication(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up authentication test environment."""
+        """
+        Set up the test environment for authentication-related tests by initializing a GenesisConnector instance.
+        """
         self.connector = GenesisConnector()
 
     def test_oauth2_flow_integration(self):
-        """Test OAuth2 authentication flow integration."""
+        """
+        Tests integration of the OAuth2 authentication flow, including token acquisition using mocked HTTP responses.
+        """
         oauth_configs = [
             {
                 'auth_type': 'oauth2',
@@ -4018,7 +4079,11 @@ class TestGenesisConnectorAdvancedAuthentication(unittest.TestCase):
                     pass
 
     def test_jwt_token_validation(self):
-        """Test JWT token validation and refresh mechanisms."""
+        """
+        Tests the JWT token validation and refresh mechanisms of the GenesisConnector.
+        
+        Creates a valid and an expired JWT token, then verifies that the connector correctly validates the valid token and rejects the expired one.
+        """
         try:
             # Create test JWT token
             import jwt
@@ -4060,7 +4125,11 @@ class TestGenesisConnectorAdvancedAuthentication(unittest.TestCase):
             pass
 
     def test_api_key_rotation(self):
-        """Test automatic API key rotation mechanisms."""
+        """
+        Test that the GenesisConnector correctly performs automatic API key rotation when enabled.
+        
+        Verifies that the connector updates its API key after a successful rotation request and that the new key is set as expected. Skips the test if key rotation functionality is not implemented.
+        """
         try:
             # Set up key rotation config
             rotation_config = {
@@ -4096,7 +4165,9 @@ class TestGenesisConnectorAdvancedAuthentication(unittest.TestCase):
             pass
 
     def test_multi_factor_authentication(self):
-        """Test multi-factor authentication support."""
+        """
+        Tests that the GenesisConnector supports multi-factor authentication (MFA) by simulating an MFA challenge and verifying successful authentication with a provided MFA code.
+        """
         try:
             mfa_config = {
                 'auth_type': 'mfa',
@@ -4145,11 +4216,17 @@ class TestGenesisConnectorAdvancedConfiguration(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up configuration test environment."""
+        """
+        Initialize a new GenesisConnector instance before each configuration management test.
+        """
         self.connector = GenesisConnector()
 
     def test_environment_based_configuration(self):
-        """Test configuration loading from different environments."""
+        """
+        Test that the connector loads and applies configuration settings based on the current environment.
+        
+        Verifies that environment-specific configuration values are correctly set for development, staging, and production environments.
+        """
         environments = ['development', 'staging', 'production']
         
         for env in environments:
@@ -4175,7 +4252,11 @@ class TestGenesisConnectorAdvancedConfiguration(unittest.TestCase):
                     pass
 
     def test_configuration_schema_validation(self):
-        """Test configuration validation against schemas."""
+        """
+        Test that configuration dictionaries are validated correctly against a defined schema.
+        
+        Validates both correct and incorrect configurations, ensuring that valid configs pass and invalid ones raise ValueError. Skips the test if schema validation is not implemented.
+        """
         try:
             # Define configuration schema
             schema = {
@@ -4228,7 +4309,11 @@ class TestGenesisConnectorAdvancedConfiguration(unittest.TestCase):
             pass
 
     def test_configuration_inheritance(self):
-        """Test configuration inheritance and override mechanisms."""
+        """
+        Test that configuration inheritance and override mechanisms correctly apply overrides to the base configuration in GenesisConnector.
+        
+        Verifies that overridden keys are updated while non-overridden keys retain their original values. Skips the test if configuration inheritance is not implemented.
+        """
         try:
             # Base configuration
             base_config = {
@@ -4268,7 +4353,9 @@ class TestGenesisConnectorAdvancedConfiguration(unittest.TestCase):
             pass
 
     def test_configuration_encryption(self):
-        """Test encryption of sensitive configuration values."""
+        """
+        Tests that sensitive configuration values are properly encrypted and can be decrypted to their original values, while non-sensitive fields remain unchanged.
+        """
         try:
             # Configuration with sensitive data
             sensitive_config = {
@@ -4309,11 +4396,15 @@ class TestGenesisConnectorAdvancedNetworking(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up advanced networking test environment."""
+        """
+        Initialize a GenesisConnector instance for advanced networking tests.
+        """
         self.connector = GenesisConnector()
 
     def test_http2_protocol_support(self):
-        """Test HTTP/2 protocol support and features."""
+        """
+        Tests that the GenesisConnector supports HTTP/2 protocol features, including multiplexed requests, by simulating HTTP/2 responses using a mocked HTTPX client.
+        """
         try:
             # Configure HTTP/2
             http2_config = {
@@ -4346,7 +4437,11 @@ class TestGenesisConnectorAdvancedNetworking(unittest.TestCase):
             pass
 
     def test_websocket_connection_handling(self):
-        """Test WebSocket connection establishment and message handling."""
+        """
+        Tests establishing a WebSocket connection and verifies message sending and receiving using the GenesisConnector.
+        
+        This test mocks the WebSocket connection, sends a test message, and checks that a message can be received successfully.
+        """
         try:
             # Configure WebSocket
             ws_config = {
@@ -4381,7 +4476,9 @@ class TestGenesisConnectorAdvancedNetworking(unittest.TestCase):
             pass
 
     def test_grpc_protocol_support(self):
-        """Test gRPC protocol support and streaming."""
+        """
+        Test that the GenesisConnector supports gRPC protocol and streaming by sending a gRPC request and verifying the response.
+        """
         try:
             # Configure gRPC
             grpc_config = {
@@ -4413,10 +4510,24 @@ class TestGenesisConnectorAdvancedNetworking(unittest.TestCase):
             pass
 
     def test_custom_protocol_handlers(self):
-        """Test custom protocol handler registration and usage."""
+        """
+        Tests registration and usage of a custom protocol handler with the GenesisConnector.
+        
+        Verifies that a custom protocol handler can be registered and invoked for requests using a custom protocol, and that the handler processes the request data as expected.
+        """
         try:
             # Define custom protocol handler
             def custom_protocol_handler(request_data, config):
+                """
+                Process request data using a custom protocol handler.
+                
+                Parameters:
+                    request_data: The data to be processed by the custom protocol handler.
+                    config: Configuration settings for the protocol handler.
+                
+                Returns:
+                    dict: A dictionary containing the protocol type, the original request data, and a processed flag.
+                """
                 return {
                     'protocol': 'custom',
                     'data': request_data,
@@ -4446,7 +4557,11 @@ class TestGenesisConnectorAdvancedNetworking(unittest.TestCase):
             pass
 
     def test_network_interface_binding(self):
-        """Test binding to specific network interfaces."""
+        """
+        Test that the GenesisConnector correctly accepts and stores network interface binding configurations, such as specific interfaces or IP addresses.
+        
+        Skips the test if network interface binding is not implemented.
+        """
         try:
             # Test different network interface configurations
             interface_configs = [
@@ -4485,7 +4600,9 @@ class TestGenesisConnectorFileOperations(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up file operations test environment."""
+        """
+        Initialize the test environment for file operations by creating a GenesisConnector instance with file upload enabled.
+        """
         self.connector = GenesisConnector(config={
             'api_key': 'file_test_key',
             'base_url': 'https://api.test.com',
@@ -4493,7 +4610,9 @@ class TestGenesisConnectorFileOperations(unittest.TestCase):
         })
 
     def test_large_file_upload_streaming(self):
-        """Test streaming upload of large files."""
+        """
+        Test that the connector can successfully stream and upload a large file, verifying the response status and file size.
+        """
         try:
             # Create mock large file
             large_file_content = b'x' * (10 * 1024 * 1024)  # 10MB
@@ -4526,7 +4645,11 @@ class TestGenesisConnectorFileOperations(unittest.TestCase):
             pass
 
     def test_multipart_file_upload(self):
-        """Test multipart file upload with metadata."""
+        """
+        Tests that multipart file upload with metadata succeeds and returns the correct metadata and upload status.
+        
+        Verifies that the connector's multipart upload method correctly handles file data and associated metadata, and that the response includes the expected metadata and a successful upload status.
+        """
         try:
             # Test file with metadata
             file_data = b'test file content'
@@ -4562,7 +4685,11 @@ class TestGenesisConnectorFileOperations(unittest.TestCase):
             pass
 
     def test_resumable_file_upload(self):
-        """Test resumable file upload for interrupted transfers."""
+        """
+        Test that the resumable file upload functionality correctly handles interrupted transfers and completes the upload process.
+        
+        Simulates an interrupted upload by mocking HTTP responses for both the initial upload request and the resume request, verifying that the upload completes successfully and all bytes are uploaded.
+        """
         try:
             # Simulate interrupted upload
             file_content = b'x' * (5 * 1024 * 1024)  # 5MB
@@ -4605,7 +4732,11 @@ class TestGenesisConnectorFileOperations(unittest.TestCase):
             pass
 
     def test_file_download_streaming(self):
-        """Test streaming download of large files."""
+        """
+        Test that the connector can stream and download large files in chunks.
+        
+        Verifies that the file download streaming mechanism correctly retrieves large file content in chunks and passes each chunk to a handler, ensuring the complete file is downloaded as expected.
+        """
         try:
             # Mock large file download
             large_content = b'downloaded content' * (1024 * 100)  # ~1.6MB
@@ -4624,6 +4755,12 @@ class TestGenesisConnectorFileOperations(unittest.TestCase):
                 downloaded_data = bytearray()
                 
                 def chunk_handler(chunk):
+                    """
+                    Appends a data chunk to the downloaded data buffer.
+                    
+                    Parameters:
+                        chunk (bytes): The next segment of data to add to the download buffer.
+                    """
                     downloaded_data.extend(chunk)
                 
                 result = self.connector.download_file_stream(
@@ -4639,7 +4776,11 @@ class TestGenesisConnectorFileOperations(unittest.TestCase):
             pass
 
     def test_file_integrity_verification(self):
-        """Test file integrity verification during upload/download."""
+        """
+        Tests that file integrity is correctly verified during upload by comparing the computed hash with the server response.
+        
+        Verifies that the upload operation returns a matching SHA-256 hash and confirms integrity verification status.
+        """
         try:
             import hashlib
             
