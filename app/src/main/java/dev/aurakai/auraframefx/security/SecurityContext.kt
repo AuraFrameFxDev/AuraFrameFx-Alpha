@@ -172,7 +172,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Encrypt sensitive data using Keystore.
+     * Encrypts the provided string data using the Android Keystore.
+     *
+     * Attempts to initialize encryption if not already active. Uses AES encryption with a randomly generated IV.
+     *
+     * @param data The sensitive string data to encrypt.
+     * @return An `EncryptedData` object containing the encrypted bytes, IV, timestamp, and metadata, or `null` if encryption fails.
      */
     fun encrypt(data: String): EncryptedData? {
         if (_encryptionStatus.value != EncryptionStatus.ACTIVE) {
@@ -224,7 +229,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Decrypt previously encrypted data using Keystore.
+     * Decrypts data previously encrypted using the Keystore.
+     *
+     * Attempts to initialize encryption if it is not already active. Returns the decrypted string if successful, or null if decryption fails.
+     *
+     * @param encryptedData The encrypted data and initialization vector to decrypt.
+     * @return The decrypted string, or null if decryption fails.
      */
     fun decrypt(encryptedData: EncryptedData): String? {
         if (_encryptionStatus.value != EncryptionStatus.ACTIVE) {
@@ -265,7 +275,13 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Share a secure context with another agent
+     * Creates a shared secure context for communication with another agent.
+     *
+     * Generates a unique identifier and timestamp, and packages the provided context data for sharing with the specified agent. The context content is not encrypted in this implementation.
+     *
+     * @param agentType The agent with whom the context will be shared.
+     * @param context The context data to be shared.
+     * @return A SharedSecureContext containing the packaged context and associated metadata.
      */
     fun shareSecureContextWith(agentType: AgentType, context: String): SharedSecureContext {
         val secureId = generateSecureId()
@@ -282,7 +298,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Verify the integrity of the application
+     * Verifies the application's integrity by retrieving and hashing its signature.
+     *
+     * Retrieves the app's package information and computes a SHA-256 hash of its signature. Returns an [ApplicationIntegrity] object containing the verification result, app version, signature hash, install and update times, and error information if verification fails.
+     *
+     * @return An [ApplicationIntegrity] object with integrity verification details.
      */
     fun verifyApplicationIntegrity(): ApplicationIntegrity {
         try {
@@ -337,9 +357,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Simulates detection of potential security threats for testing purposes.
+     * Simulates the detection of security threats for testing and beta environments.
      *
-     * @return A list of simulated `SecurityThreat` objects, randomly included to mimic threat detection during beta testing.
+     * @return A randomly generated list of simulated security threats.
      */
     private fun detectThreats(): List<SecurityThreat> {
         // In a real implementation, this would perform actual threat analysis
@@ -363,12 +383,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Calculates the overall threat level based on the highest severity among detected security threats.
+     * Determines the highest threat level present in a list of security threats.
      *
-     * If the list is empty, returns `ThreatLevel.LOW`.
+     * Returns `ThreatLevel.LOW` if the list is empty.
      *
-     * @param threats List of detected security threats.
-     * @return The highest threat level present in the list, or `ThreatLevel.LOW` if none.
+     * @param threats List of detected security threats to evaluate.
+     * @return The highest threat level among the provided threats, or `ThreatLevel.LOW` if none are present.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -386,9 +406,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Generates a random 16-byte hexadecimal string to be used as a secure identifier.
+     * Generates a random 16-byte hexadecimal string to serve as a secure identifier.
      *
-     * @return A securely generated 32-character hexadecimal ID.
+     * @return A 32-character hexadecimal string generated using a cryptographically secure random source.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -399,9 +419,9 @@ class SecurityContext @Inject constructor(
     /**
      * Asynchronously logs a security event for auditing and monitoring purposes.
      *
-     * The event is serialized and written to the debug log. In production, events should be securely persisted.
+     * Serializes the provided event and writes it to the debug log. In production, events should be securely persisted instead of logged.
      *
-     * @param event The security event to log.
+     * @param event The security event to be logged.
      */
     fun logSecurityEvent(event: SecurityEvent) {
         scope.launch {
@@ -412,11 +432,11 @@ class SecurityContext @Inject constructor(
             // In a real implementation, this would store events securely
         }
     }    /**
-     * Records a security validation event for the given request type and data.
+     * Records a security validation event for the given request type and data for auditing purposes.
      *
-     * This method logs a validation event for auditing purposes. No actual validation of the request is performed.
+     * This method logs the validation event but does not perform any actual validation of the request.
      *
-     * @param requestType The type of request being validated.
+     * @param requestType The type of request being logged.
      * @param requestData The data associated with the request.
      */
     fun validateRequest(requestType: String, requestData: String) {

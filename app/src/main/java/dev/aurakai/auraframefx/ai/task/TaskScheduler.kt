@@ -90,6 +90,11 @@ class TaskScheduler @Inject constructor(
         }
     }
 
+    /**
+     * Processes the task queue, executing tasks in order of priority while respecting the maximum number of active tasks.
+     *
+     * Continues scheduling tasks from the queue as long as there are available slots for active tasks and each task's dependencies and agent requirements are met.
+     */
     private fun processQueue() {
         while (_taskQueue.isNotEmpty() && _activeTasks.size < config.maxActiveTasks) {
             val nextTask = _taskQueue.first()
@@ -102,6 +107,11 @@ class TaskScheduler @Inject constructor(
         }
     }
 
+    /**
+     * Checks if a task is eligible for execution based on completion of its dependencies and agent requirements.
+     *
+     * Returns `true` if all dependencies are completed and agent requirements are considered met; otherwise, returns `false`.
+     */
     private fun canExecuteTask(task: Task): Boolean {
         // Check dependencies
         val dependencies = task.dependencies.mapNotNull { _tasks.value[it] }
@@ -119,6 +129,11 @@ class TaskScheduler @Inject constructor(
         return true
     }
 
+    /**
+     * Sets the specified task to in-progress status, assigns its required agents, and updates active and tracked task collections.
+     *
+     * @param task The task to update and mark as in progress.
+     */
     private fun executeTask(task: Task) {
         val updatedTask = task.copy(
             status = TaskStatus.IN_PROGRESS,
@@ -131,6 +146,14 @@ class TaskScheduler @Inject constructor(
         }
     }
 
+    /**
+     * Updates the status of a task and manages its transition between active, completed, and failed states.
+     *
+     * Moves the task to the appropriate collection based on the new status, triggers error handling if the task failed, updates the task record and statistics, and continues scheduling pending tasks.
+     *
+     * @param taskId The unique identifier of the task to update.
+     * @param status The new status to assign to the task.
+     */
     fun updateTaskStatus(taskId: String, status: TaskStatus) {
         val task = _tasks.value[taskId] ?: return
         val updatedTask = task.copy(status = status)
@@ -161,18 +184,41 @@ class TaskScheduler @Inject constructor(
         processQueue()
     }
 
+    /**
+     * Computes the weighted priority score for the given task using its priority value and the configured priority weight.
+     *
+     * @return The weighted priority score.
+     */
     private fun calculatePriorityScore(task: Task): Float {
         return task.priority.value * config.priorityWeight
     }
 
+    /**
+     * Computes the weighted urgency score for the given task using its urgency value and the configured urgency weight.
+     *
+     * @param task The task for which to calculate the urgency score.
+     * @return The weighted urgency score.
+     */
     private fun calculateUrgencyScore(task: Task): Float {
         return task.urgency.value * config.urgencyWeight
     }
 
+    /**
+     * Computes the weighted importance score for the given task using its importance value and the configured importance weight.
+     *
+     * @return The calculated importance score.
+     */
     private fun calculateImportanceScore(task: Task): Float {
         return task.importance.value * config.importanceWeight
     }
 
+    /**
+     * Updates the aggregated task statistics to reflect the current state after a task is added or its status changes.
+     *
+     * Increments the total task count, updates counts for active, completed, and pending tasks, refreshes the last updated timestamp, and adjusts the count for the task's current status.
+     *
+     * @param task The task whose addition or status change triggers the statistics update.
+     */
     private fun updateStats(task: Task) {
         _taskStats.update { current ->
             current.copy(
