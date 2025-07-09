@@ -1,10 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
-<<<<<<< HEAD
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
-=======
  * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -31,13 +27,8 @@ public interface ApiCallback<T> {
     /**
      * This is called when the API call fails.
      *
-<<<<<<< HEAD
-     * @param e               The exception causing the failure
-     * @param statusCode      Status code of the response if available, otherwise it would be 0
-=======
      * @param e The exception causing the failure
      * @param statusCode Status code of the response if available, otherwise it would be 0
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @param responseHeaders Headers of the response if available, otherwise it would be null
      */
     void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders);
@@ -45,13 +36,8 @@ public interface ApiCallback<T> {
     /**
      * This is called when the API call succeeded.
      *
-<<<<<<< HEAD
-     * @param result          The result deserialized from response
-     * @param statusCode      Status code of the response
-=======
      * @param result The result deserialized from response
      * @param statusCode Status code of the response
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @param responseHeaders Headers of the response
      */
     void onSuccess(T result, int statusCode, Map<String, List<String>> responseHeaders);
@@ -59,30 +45,18 @@ public interface ApiCallback<T> {
     /**
      * This is called when the API upload processing.
      *
-<<<<<<< HEAD
-     * @param bytesWritten  bytes Written
-     * @param contentLength content length of request body
-     * @param done          write end
-=======
      * @param bytesWritten bytes Written
      * @param contentLength content length of request body
      * @param done write end
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     void onUploadProgress(long bytesWritten, long contentLength, boolean done);
 
     /**
      * This is called when the API download processing.
      *
-<<<<<<< HEAD
-     * @param bytesRead     bytes Read
-     * @param contentLength content length of the response
-     * @param done          Read end
-=======
      * @param bytesRead bytes Read
      * @param contentLength content length of the response
      * @param done Read end
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     void onDownloadProgress(long bytesRead, long contentLength, boolean done);
 }

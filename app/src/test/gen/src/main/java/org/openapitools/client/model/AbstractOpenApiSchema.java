@@ -1,10 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
-<<<<<<< HEAD
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
-=======
  * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -18,9 +14,6 @@
 package org.openapitools.client.model;
 
 import org.openapitools.client.ApiException;
-<<<<<<< HEAD
-
-=======
 >>>>>>> origin/coderabbitai/docstrings/78f34ad
 import java.util.Objects;
 import java.lang.reflect.Type;
@@ -32,15 +25,6 @@ import java.util.Map;
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public abstract class AbstractOpenApiSchema {
 
-<<<<<<< HEAD
-    // schema type (e.g. oneOf, anyOf)
-    private final String schemaType;
-    // store the actual instance of the schema/object
-    private Object instance;
-    // is nullable
-    private Boolean isNullable;
-
-=======
     // store the actual instance of the schema/object
     private Object instance;
 
@@ -50,7 +34,6 @@ public abstract class AbstractOpenApiSchema {
     // schema type (e.g. oneOf, anyOf)
     private final String schemaType;
 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
     public AbstractOpenApiSchema(String schemaType, Boolean isNullable) {
         this.schemaType = schemaType;
         this.isNullable = isNullable;
@@ -69,26 +52,14 @@ public abstract class AbstractOpenApiSchema {
      * @return an instance of the actual schema/object
      */
     //@JsonValue
-<<<<<<< HEAD
-    public Object getActualInstance() {
-        return instance;
-    }
-=======
     public Object getActualInstance() {return instance;}
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     /**
      * Set the actual instance
      *
      * @param instance the actual instance of the schema/object
      */
-<<<<<<< HEAD
-    public void setActualInstance(Object instance) {
-        this.instance = instance;
-    }
-=======
     public void setActualInstance(Object instance) {this.instance = instance;}
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     /**
      * Get the instant recursively when the schemas defined in oneOf/anyof happen to be oneOf/anyOf schema as well
@@ -103,11 +74,7 @@ public abstract class AbstractOpenApiSchema {
         if (object.getActualInstance() == null) {
             return null;
         } else if (object.getActualInstance() instanceof AbstractOpenApiSchema) {
-<<<<<<< HEAD
-            return getActualInstanceRecursively((AbstractOpenApiSchema) object.getActualInstance());
-=======
             return getActualInstanceRecursively((AbstractOpenApiSchema)object.getActualInstance());
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         } else {
             return object.getActualInstance();
         }
@@ -153,13 +120,8 @@ public abstract class AbstractOpenApiSchema {
         }
         AbstractOpenApiSchema a = (AbstractOpenApiSchema) o;
         return Objects.equals(this.instance, a.instance) &&
-<<<<<<< HEAD
-                Objects.equals(this.isNullable, a.isNullable) &&
-                Objects.equals(this.schemaType, a.schemaType);
-=======
             Objects.equals(this.isNullable, a.isNullable) &&
             Objects.equals(this.schemaType, a.schemaType);
->>>>>>> origin/coderabbitai/docstrings/78f34ad
     }
 
     @Override
@@ -181,8 +143,4 @@ public abstract class AbstractOpenApiSchema {
     }
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 }

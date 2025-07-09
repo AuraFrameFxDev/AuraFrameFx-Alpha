@@ -2,16 +2,6 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-<<<<<<< HEAD
-| Method                                     | HTTP request        | Description                                       |
-|--------------------------------------------|---------------------|---------------------------------------------------|
-| [**adlRelayPost**](AdlApi.md#adlRelayPost) | **POST** /adl/relay | Relay a request to the Android Device Layer (ADL) |
-
-<a id="adlRelayPost"></a>
-
-# **adlRelayPost**
-
-=======
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
 | [**adlRelayPost**](AdlApi.md#adlRelayPost) | **POST** /adl/relay | Relay a request to the Android Device Layer (ADL) |
@@ -19,15 +9,11 @@ All URIs are relative to *https://api.auraframefx.com/v1*
 
 <a id="adlRelayPost"></a>
 # **adlRelayPost**
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 > ADLRelayResponse adlRelayPost(adLRelayRequest)
 
 Relay a request to the Android Device Layer (ADL)
 
 ### Example
-<<<<<<< HEAD
-
-=======
 >>>>>>> origin/coderabbitai/docstrings/78f34ad
 ```java
 // Import classes:
@@ -67,15 +53,9 @@ public class Example {
 
 ### Parameters
 
-<<<<<<< HEAD
-| Name                | Type                                      | Description | Notes |
-|---------------------|-------------------------------------------|-------------|-------|
-| **adLRelayRequest** | [**ADLRelayRequest**](ADLRelayRequest.md) |             |       |
-=======
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **adLRelayRequest** | [**ADLRelayRequest**](ADLRelayRequest.md)|  | |
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
 ### Return type
 
@@ -87,19 +67,6 @@ public class Example {
 
 ### HTTP request headers
 
-<<<<<<< HEAD
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-### HTTP response details
-
-| Status code | Description                                          | Response headers |
-|-------------|------------------------------------------------------|------------------|
-| **200**     | ADL relay successful                                 | -                |
-| **400**     | Invalid request format or parameters                 | -                |
-| **401**     | Authentication credentials were missing or incorrect | -                |
-| **500**     | Internal server error                                | -                |
-=======
  - **Content-Type**: application/json
  - **Accept**: application/json
 
@@ -110,5 +77,4 @@ public class Example {
 | **400** | Invalid request format or parameters |  -  |
 | **401** | Authentication credentials were missing or incorrect |  -  |
 | **500** | Internal server error |  -  |
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 

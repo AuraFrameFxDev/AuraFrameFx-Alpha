@@ -1,10 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
-<<<<<<< HEAD
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
-=======
  * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -53,12 +49,7 @@ public class HttpBasicAuth implements Authentication {
             return;
         }
         headerParams.put("Authorization", Credentials.basic(
-<<<<<<< HEAD
-                username == null ? "" : username,
-                password == null ? "" : password));
-=======
             username == null ? "" : username,
             password == null ? "" : password));
->>>>>>> origin/coderabbitai/docstrings/78f34ad
     }
 }

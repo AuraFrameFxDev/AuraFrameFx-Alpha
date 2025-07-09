@@ -1,10 +1,7 @@
 package dev.aurakai.auraframefx.xposed.hooks
 
+import android.util.Log
 import dev.aurakai.auraframefx.system.overlay.model.NotchBarConfig
-
-class NotchBarHooker(
-    private val classLoader: ClassLoader,
-import android.util.Log // Added import
 
 class NotchBarHooker(
     private val classLoader: ClassLoader,

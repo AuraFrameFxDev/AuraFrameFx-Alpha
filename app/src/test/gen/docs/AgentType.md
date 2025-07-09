@@ -1,16 +1,4 @@
-<<<<<<< HEAD
-=======
 
-
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-# AgentType
-
-## Enum
-
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 * `AURA` (value: `"Aura"`)
 
 * `KAI` (value: `"Kai"`)

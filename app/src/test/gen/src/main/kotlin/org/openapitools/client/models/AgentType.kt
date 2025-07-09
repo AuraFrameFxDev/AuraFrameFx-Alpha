@@ -68,17 +68,10 @@ enum class AgentType(val value: kotlin.String) {
          * Returns a valid [AgentType] for [data], null otherwise.
          */
         fun decode(data: kotlin.Any?): AgentType? = data?.let {
-<<<<<<< HEAD
-            val normalizedData = "$it".lowercase()
-            values().firstOrNull { value ->
-                it == value || normalizedData == "$value".lowercase()
-            }
-=======
           val normalizedData = "$it".lowercase()
           values().firstOrNull { value ->
             it == value || normalizedData == "$value".lowercase()
           }
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
     }
 }

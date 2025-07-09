@@ -2,17 +2,6 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-<<<<<<< HEAD
-| Method                                                                               | HTTP request                      | Description                      |
-|--------------------------------------------------------------------------------------|-----------------------------------|----------------------------------|
-| [**systemLockscreenConfigGet**](SystemCustomizationApi.md#systemLockscreenConfigGet) | **GET** /system/lockscreen-config | Get lock screen configuration    |
-| [**systemLockscreenConfigPut**](SystemCustomizationApi.md#systemLockscreenConfigPut) | **PUT** /system/lockscreen-config | Update lock screen configuration |
-
-<a id="systemLockscreenConfigGet"></a>
-
-# **systemLockscreenConfigGet**
-
-=======
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
 | [**systemLockscreenConfigGet**](SystemCustomizationApi.md#systemLockscreenConfigGet) | **GET** /system/lockscreen-config | Get lock screen configuration |
@@ -21,15 +10,11 @@ All URIs are relative to *https://api.auraframefx.com/v1*
 
 <a id="systemLockscreenConfigGet"></a>
 # **systemLockscreenConfigGet**
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 > LockScreenConfig systemLockscreenConfigGet()
 
 Get lock screen configuration
 
 ### Example
-<<<<<<< HEAD
-
-=======
 >>>>>>> origin/coderabbitai/docstrings/78f34ad
 ```java
 // Import classes:
@@ -65,10 +50,6 @@ public class Example {
 ```
 
 ### Parameters
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 This endpoint does not need any parameter.
 
 ### Return type
@@ -81,22 +62,6 @@ This endpoint does not need any parameter.
 
 ### HTTP request headers
 
-<<<<<<< HEAD
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-### HTTP response details
-
-| Status code | Description                                          | Response headers |
-|-------------|------------------------------------------------------|------------------|
-| **200**     | Lock screen configuration retrieved successfully     | -                |
-| **401**     | Authentication credentials were missing or incorrect | -                |
-
-<a id="systemLockscreenConfigPut"></a>
-
-# **systemLockscreenConfigPut**
-
-=======
  - **Content-Type**: Not defined
  - **Accept**: application/json
 
@@ -108,16 +73,11 @@ This endpoint does not need any parameter.
 
 <a id="systemLockscreenConfigPut"></a>
 # **systemLockscreenConfigPut**
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 > systemLockscreenConfigPut(lockScreenConfig)
 
 Update lock screen configuration
 
 ### Example
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -153,15 +113,9 @@ public class Example {
 
 ### Parameters
 
-<<<<<<< HEAD
-| Name                 | Type                                        | Description | Notes |
-|----------------------|---------------------------------------------|-------------|-------|
-| **lockScreenConfig** | [**LockScreenConfig**](LockScreenConfig.md) |             |       |
-=======
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **lockScreenConfig** | [**LockScreenConfig**](LockScreenConfig.md)|  | |
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
 ### Return type
 
@@ -173,18 +127,6 @@ null (empty response body)
 
 ### HTTP request headers
 
-<<<<<<< HEAD
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-### HTTP response details
-
-| Status code | Description                                          | Response headers |
-|-------------|------------------------------------------------------|------------------|
-| **200**     | Lock screen configuration updated successfully       | -                |
-| **400**     | Invalid request format or parameters                 | -                |
-| **401**     | Authentication credentials were missing or incorrect | -                |
-=======
  - **Content-Type**: application/json
  - **Accept**: application/json
 
@@ -194,5 +136,4 @@ null (empty response body)
 | **200** | Lock screen configuration updated successfully |  -  |
 | **400** | Invalid request format or parameters |  -  |
 | **401** | Authentication credentials were missing or incorrect |  -  |
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 

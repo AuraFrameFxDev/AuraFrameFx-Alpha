@@ -38,33 +38,17 @@ import org.openapitools.client.infrastructure.ResponseType
 import org.openapitools.client.infrastructure.Success
 import org.openapitools.client.infrastructure.toMultiValue
 
-<<<<<<< HEAD
-class SystemCustomizationApi(
-    basePath: kotlin.String = defaultBasePath,
-    client: OkHttpClient = ApiClient.defaultClient
-) : ApiClient(basePath, client) {
-    companion object {
-        @JvmStatic
-        val defaultBasePath: String by lazy {
-            System.getProperties()
-                .getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
-=======
 class SystemCustomizationApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient = ApiClient.defaultClient) : ApiClient(basePath, client) {
     companion object {
         @JvmStatic
         val defaultBasePath: String by lazy {
             System.getProperties().getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
     }
 
     /**
      * Get lock screen configuration
-<<<<<<< HEAD
-     *
-=======
      * 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return LockScreenConfig
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
@@ -73,19 +57,8 @@ class SystemCustomizationApi(basePath: kotlin.String = defaultBasePath, client: 
      * @throws ServerException If the API returns a server error response
      */
     @Suppress("UNCHECKED_CAST")
-<<<<<<< HEAD
-    @Throws(
-        IllegalStateException::class,
-        IOException::class,
-        UnsupportedOperationException::class,
-        ClientException::class,
-        ServerException::class
-    )
-    fun systemLockscreenConfigGet(): LockScreenConfig {
-=======
     @Throws(IllegalStateException::class, IOException::class, UnsupportedOperationException::class, ClientException::class, ServerException::class)
     fun systemLockscreenConfigGet() : LockScreenConfig {
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         val localVarResponse = systemLockscreenConfigGetWithHttpInfo()
 
         return when (localVarResponse.responseType) {
@@ -94,50 +67,25 @@ class SystemCustomizationApi(basePath: kotlin.String = defaultBasePath, client: 
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {
                 val localVarError = localVarResponse as ClientError<*>
-<<<<<<< HEAD
-                throw ClientException(
-                    "Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
-            }
-
-            ResponseType.ServerError -> {
-                val localVarError = localVarResponse as ServerError<*>
-                throw ServerException(
-                    "Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
-=======
                 throw ClientException("Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}", localVarError.statusCode, localVarResponse)
             }
             ResponseType.ServerError -> {
                 val localVarError = localVarResponse as ServerError<*>
                 throw ServerException("Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}", localVarError.statusCode, localVarResponse)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             }
         }
     }
 
     /**
      * Get lock screen configuration
-<<<<<<< HEAD
-     *
-=======
      * 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return ApiResponse<LockScreenConfig?>
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
      */
     @Suppress("UNCHECKED_CAST")
     @Throws(IllegalStateException::class, IOException::class)
-<<<<<<< HEAD
-    fun systemLockscreenConfigGetWithHttpInfo(): ApiResponse<LockScreenConfig?> {
-=======
     fun systemLockscreenConfigGetWithHttpInfo() : ApiResponse<LockScreenConfig?> {
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         val localVariableConfig = systemLockscreenConfigGetRequestConfig()
 
         return request<Unit, LockScreenConfig>(
@@ -150,11 +98,7 @@ class SystemCustomizationApi(basePath: kotlin.String = defaultBasePath, client: 
      *
      * @return RequestConfig
      */
-<<<<<<< HEAD
-    fun systemLockscreenConfigGetRequestConfig(): RequestConfig<Unit> {
-=======
     fun systemLockscreenConfigGetRequestConfig() : RequestConfig<Unit> {
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         val localVariableBody = null
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -172,13 +116,8 @@ class SystemCustomizationApi(basePath: kotlin.String = defaultBasePath, client: 
 
     /**
      * Update lock screen configuration
-<<<<<<< HEAD
-     *
-     * @param lockScreenConfig
-=======
      * 
      * @param lockScreenConfig 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return void
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
@@ -186,22 +125,9 @@ class SystemCustomizationApi(basePath: kotlin.String = defaultBasePath, client: 
      * @throws ClientException If the API returns a client error response
      * @throws ServerException If the API returns a server error response
      */
-<<<<<<< HEAD
-    @Throws(
-        IllegalStateException::class,
-        IOException::class,
-        UnsupportedOperationException::class,
-        ClientException::class,
-        ServerException::class
-    )
-    fun systemLockscreenConfigPut(lockScreenConfig: LockScreenConfig): Unit {
-        val localVarResponse =
-            systemLockscreenConfigPutWithHttpInfo(lockScreenConfig = lockScreenConfig)
-=======
     @Throws(IllegalStateException::class, IOException::class, UnsupportedOperationException::class, ClientException::class, ServerException::class)
     fun systemLockscreenConfigPut(lockScreenConfig: LockScreenConfig) : Unit {
         val localVarResponse = systemLockscreenConfigPutWithHttpInfo(lockScreenConfig = lockScreenConfig)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
         return when (localVarResponse.responseType) {
             ResponseType.Success -> Unit
@@ -209,54 +135,26 @@ class SystemCustomizationApi(basePath: kotlin.String = defaultBasePath, client: 
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {
                 val localVarError = localVarResponse as ClientError<*>
-<<<<<<< HEAD
-                throw ClientException(
-                    "Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
-            }
-
-            ResponseType.ServerError -> {
-                val localVarError = localVarResponse as ServerError<*>
-                throw ServerException(
-                    "Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
-=======
                 throw ClientException("Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}", localVarError.statusCode, localVarResponse)
             }
             ResponseType.ServerError -> {
                 val localVarError = localVarResponse as ServerError<*>
                 throw ServerException("Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}", localVarError.statusCode, localVarResponse)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             }
         }
     }
 
     /**
      * Update lock screen configuration
-<<<<<<< HEAD
-     *
-     * @param lockScreenConfig
-=======
      * 
      * @param lockScreenConfig 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return ApiResponse<Unit?>
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
      */
     @Throws(IllegalStateException::class, IOException::class)
-<<<<<<< HEAD
-    fun systemLockscreenConfigPutWithHttpInfo(lockScreenConfig: LockScreenConfig): ApiResponse<Unit?> {
-        val localVariableConfig =
-            systemLockscreenConfigPutRequestConfig(lockScreenConfig = lockScreenConfig)
-=======
     fun systemLockscreenConfigPutWithHttpInfo(lockScreenConfig: LockScreenConfig) : ApiResponse<Unit?> {
         val localVariableConfig = systemLockscreenConfigPutRequestConfig(lockScreenConfig = lockScreenConfig)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
         return request<LockScreenConfig, Unit>(
             localVariableConfig
@@ -266,17 +164,10 @@ class SystemCustomizationApi(basePath: kotlin.String = defaultBasePath, client: 
     /**
      * To obtain the request config of the operation systemLockscreenConfigPut
      *
-<<<<<<< HEAD
-     * @param lockScreenConfig
-     * @return RequestConfig
-     */
-    fun systemLockscreenConfigPutRequestConfig(lockScreenConfig: LockScreenConfig): RequestConfig<LockScreenConfig> {
-=======
      * @param lockScreenConfig 
      * @return RequestConfig
      */
     fun systemLockscreenConfigPutRequestConfig(lockScreenConfig: LockScreenConfig) : RequestConfig<LockScreenConfig> {
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         val localVariableBody = lockScreenConfig
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -295,10 +186,5 @@ class SystemCustomizationApi(basePath: kotlin.String = defaultBasePath, client: 
 
 
     private fun encodeURIComponent(uriComponent: kotlin.String): kotlin.String =
-<<<<<<< HEAD
-        HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent)
-            .build().encodedPathSegments[0]
-=======
         HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent).build().encodedPathSegments[0]
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 }

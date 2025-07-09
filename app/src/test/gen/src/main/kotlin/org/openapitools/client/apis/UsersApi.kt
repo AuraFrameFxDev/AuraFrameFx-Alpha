@@ -39,33 +39,17 @@ import org.openapitools.client.infrastructure.ResponseType
 import org.openapitools.client.infrastructure.Success
 import org.openapitools.client.infrastructure.toMultiValue
 
-<<<<<<< HEAD
-class UsersApi(
-    basePath: kotlin.String = defaultBasePath,
-    client: OkHttpClient = ApiClient.defaultClient
-) : ApiClient(basePath, client) {
-    companion object {
-        @JvmStatic
-        val defaultBasePath: String by lazy {
-            System.getProperties()
-                .getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
-=======
 class UsersApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient = ApiClient.defaultClient) : ApiClient(basePath, client) {
     companion object {
         @JvmStatic
         val defaultBasePath: String by lazy {
             System.getProperties().getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
     }
 
     /**
      * Get current user information
-<<<<<<< HEAD
-     *
-=======
      * 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return User
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
@@ -74,19 +58,8 @@ class UsersApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient =
      * @throws ServerException If the API returns a server error response
      */
     @Suppress("UNCHECKED_CAST")
-<<<<<<< HEAD
-    @Throws(
-        IllegalStateException::class,
-        IOException::class,
-        UnsupportedOperationException::class,
-        ClientException::class,
-        ServerException::class
-    )
-    fun userGet(): User {
-=======
     @Throws(IllegalStateException::class, IOException::class, UnsupportedOperationException::class, ClientException::class, ServerException::class)
     fun userGet() : User {
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         val localVarResponse = userGetWithHttpInfo()
 
         return when (localVarResponse.responseType) {
@@ -95,50 +68,25 @@ class UsersApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient =
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {
                 val localVarError = localVarResponse as ClientError<*>
-<<<<<<< HEAD
-                throw ClientException(
-                    "Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
-            }
-
-            ResponseType.ServerError -> {
-                val localVarError = localVarResponse as ServerError<*>
-                throw ServerException(
-                    "Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
-=======
                 throw ClientException("Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}", localVarError.statusCode, localVarResponse)
             }
             ResponseType.ServerError -> {
                 val localVarError = localVarResponse as ServerError<*>
                 throw ServerException("Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}", localVarError.statusCode, localVarResponse)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             }
         }
     }
 
     /**
      * Get current user information
-<<<<<<< HEAD
-     *
-=======
      * 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return ApiResponse<User?>
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
      */
     @Suppress("UNCHECKED_CAST")
     @Throws(IllegalStateException::class, IOException::class)
-<<<<<<< HEAD
-    fun userGetWithHttpInfo(): ApiResponse<User?> {
-=======
     fun userGetWithHttpInfo() : ApiResponse<User?> {
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         val localVariableConfig = userGetRequestConfig()
 
         return request<Unit, User>(
@@ -151,11 +99,7 @@ class UsersApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient =
      *
      * @return RequestConfig
      */
-<<<<<<< HEAD
-    fun userGetRequestConfig(): RequestConfig<Unit> {
-=======
     fun userGetRequestConfig() : RequestConfig<Unit> {
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         val localVariableBody = null
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -173,13 +117,8 @@ class UsersApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient =
 
     /**
      * Update user preferences
-<<<<<<< HEAD
-     *
-     * @param userPreferencesUpdate
-=======
      * 
      * @param userPreferencesUpdate 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return void
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
@@ -187,22 +126,9 @@ class UsersApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient =
      * @throws ClientException If the API returns a client error response
      * @throws ServerException If the API returns a server error response
      */
-<<<<<<< HEAD
-    @Throws(
-        IllegalStateException::class,
-        IOException::class,
-        UnsupportedOperationException::class,
-        ClientException::class,
-        ServerException::class
-    )
-    fun userPreferencesPut(userPreferencesUpdate: UserPreferencesUpdate): Unit {
-        val localVarResponse =
-            userPreferencesPutWithHttpInfo(userPreferencesUpdate = userPreferencesUpdate)
-=======
     @Throws(IllegalStateException::class, IOException::class, UnsupportedOperationException::class, ClientException::class, ServerException::class)
     fun userPreferencesPut(userPreferencesUpdate: UserPreferencesUpdate) : Unit {
         val localVarResponse = userPreferencesPutWithHttpInfo(userPreferencesUpdate = userPreferencesUpdate)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
         return when (localVarResponse.responseType) {
             ResponseType.Success -> Unit
@@ -210,54 +136,26 @@ class UsersApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient =
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {
                 val localVarError = localVarResponse as ClientError<*>
-<<<<<<< HEAD
-                throw ClientException(
-                    "Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
-            }
-
-            ResponseType.ServerError -> {
-                val localVarError = localVarResponse as ServerError<*>
-                throw ServerException(
-                    "Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
-=======
                 throw ClientException("Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}", localVarError.statusCode, localVarResponse)
             }
             ResponseType.ServerError -> {
                 val localVarError = localVarResponse as ServerError<*>
                 throw ServerException("Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}", localVarError.statusCode, localVarResponse)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             }
         }
     }
 
     /**
      * Update user preferences
-<<<<<<< HEAD
-     *
-     * @param userPreferencesUpdate
-=======
      * 
      * @param userPreferencesUpdate 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return ApiResponse<Unit?>
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
      */
     @Throws(IllegalStateException::class, IOException::class)
-<<<<<<< HEAD
-    fun userPreferencesPutWithHttpInfo(userPreferencesUpdate: UserPreferencesUpdate): ApiResponse<Unit?> {
-        val localVariableConfig =
-            userPreferencesPutRequestConfig(userPreferencesUpdate = userPreferencesUpdate)
-=======
     fun userPreferencesPutWithHttpInfo(userPreferencesUpdate: UserPreferencesUpdate) : ApiResponse<Unit?> {
         val localVariableConfig = userPreferencesPutRequestConfig(userPreferencesUpdate = userPreferencesUpdate)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
         return request<UserPreferencesUpdate, Unit>(
             localVariableConfig
@@ -267,17 +165,10 @@ class UsersApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient =
     /**
      * To obtain the request config of the operation userPreferencesPut
      *
-<<<<<<< HEAD
-     * @param userPreferencesUpdate
-     * @return RequestConfig
-     */
-    fun userPreferencesPutRequestConfig(userPreferencesUpdate: UserPreferencesUpdate): RequestConfig<UserPreferencesUpdate> {
-=======
      * @param userPreferencesUpdate 
      * @return RequestConfig
      */
     fun userPreferencesPutRequestConfig(userPreferencesUpdate: UserPreferencesUpdate) : RequestConfig<UserPreferencesUpdate> {
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         val localVariableBody = userPreferencesUpdate
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -296,10 +187,5 @@ class UsersApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient =
 
 
     private fun encodeURIComponent(uriComponent: kotlin.String): kotlin.String =
-<<<<<<< HEAD
-        HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent)
-            .build().encodedPathSegments[0]
-=======
         HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent).build().encodedPathSegments[0]
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 }

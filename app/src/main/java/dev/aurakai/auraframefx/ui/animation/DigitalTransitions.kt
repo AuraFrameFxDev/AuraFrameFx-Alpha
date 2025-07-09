@@ -20,39 +20,12 @@ import androidx.compose.ui.graphics.Color // Added import for Color
      * @param secondaryColor The intended secondary color for the edge glow effect.
      * @return The unmodified Modifier.
      */
-/**
-     * Placeholder for applying a cyber edge glow effect to a UI element.
-     *
-     * Intended to add a glowing edge using the specified primary and secondary colors, but currently returns the original Modifier without modification.
-     *
-     * @param primaryColor The main color for the glow effect.
-     * @param secondaryColor The accent color for the glow effect.
-     * @return The original Modifier, unchanged.
-     */
-    /**
-     * Placeholder for applying a cyber edge glow effect to a UI element using the specified primary and secondary colors.
-     *
-     * Currently, this function does not modify the modifier or apply any visual effect.
-     *
-     * @param primaryColor The main color intended for the edge glow.
-     * @param secondaryColor The secondary color to complement the glow effect.
-     * @return The original modifier, unchanged.
-     */
-    /**
-     * Placeholder for a cyber edge glow visual effect on a UI element.
-     *
-     * Intended to apply a glowing edge effect using the specified primary and secondary colors, but currently returns the original Modifier unchanged.
-     *
-     * @param primaryColor The main color intended for the glow effect.
-     * @param secondaryColor The secondary color intended to complement the glow effect.
-     * @return The original Modifier without any visual modification.
-     */
-    fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier =
+fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier =
     this /**
- * Placeholder extension for a digital pixelation visual effect on a Modifier.
+ * Applies a digital pixelation visual effect to the modifier when visible is true.
  *
- * @param visible Controls the intended visibility of the effect; currently has no effect.
- * @return The original Modifier instance unchanged.
+ * @param visible Whether the pixelation effect should be applied.
+ * @return The modified Modifier with the pixelation effect if visible is true; otherwise, the original Modifier.
  */
 
 fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this /**

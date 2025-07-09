@@ -167,9 +167,9 @@ class AuraFxLogger @Inject constructor(
         loggerScope.launch { writeLogEntry("VERBOSE", tag, message, throwable) }
 
     /**
-     * Retrieves the contents of all log files in the internal logs directory.
+     * Reads and returns the contents of all log files in the internal logs directory.
      *
-     * @return A map where each key is a log filename (matching the log filename prefix) and the value is its content, sorted with the newest files first.
+     * @return A map where each key is a log filename and the value is its content. Only files matching the log filename prefix are included. The map is sorted with the newest files first.
      */
     suspend fun readAllLogs(): Map<String, String> = withContext(Dispatchers.IO) {
         val logs = mutableMapOf<String, String>()
@@ -201,9 +201,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Returns the contents of the current day's log file as a string.
+     * Reads and returns the contents of the current day's log file.
      *
-     * @return The log contents for today, or an empty string if the file does not exist or cannot be read.
+     * @return The contents of today's log file, or an empty string if the file does not exist or cannot be read.
      */
     suspend fun readCurrentDayLogs(): String = withContext(Dispatchers.IO) {
         val fileName = getCurrentLogFileName()
@@ -213,9 +213,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Removes log files from the internal logs directory that are older than the configured retention period.
+     * Deletes log files older than the retention period from the internal logs directory.
      *
-     * Only files with the designated log filename prefix are considered for deletion. Logs the outcome of the cleanup process.
+     * Scans the log directory for files matching the log filename prefix and removes those whose last modified time exceeds the configured retention period.
      */
     private suspend fun cleanupOldLogs() = withContext(Dispatchers.IO) {
         // Use injected context
@@ -245,7 +245,7 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Cancels all ongoing logging operations and terminates the logger's coroutine scope.
+     * Cancels all ongoing logging and maintenance operations, stopping the logger.
      *
      * After this method is called, no further log entries will be processed or written.
      */
@@ -255,9 +255,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Returns the log entries for a specific date as a list of lines.
+     * Retrieves the log entries for a specific date.
      *
-     * @param date The date in `yyyyMMdd` format for which to retrieve log entries.
+     * @param date The date in `yyyyMMdd` format for which to retrieve logs.
      * @return A list of log lines for the specified date, or an empty list if the log file does not exist or an error occurs.
      */
     suspend fun getLogsForDate(date: String): List<String> {
@@ -272,18 +272,18 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Returns all log files and their contents, sorted with the newest files first.
+     * Retrieves all available log files and their contents.
      *
-     * @return A map where each key is a log filename and each value is the content of that file.
+     * @return A map where each key is a log filename and each value is the file's content, with the newest files first.
      */
     suspend fun getAllLogs(): Map<String, String> {
         return readAllLogs()
     }
 
     /**
-     * Removes all log files with the designated prefix from the internal logs directory.
+     * Deletes all log files in the internal logs directory that match the log filename prefix.
      *
-     * Any errors encountered during deletion are logged to Android Logcat.
+     * Any exceptions encountered during deletion are logged as errors.
      */
     suspend fun clearAllLogs() {
         try {
@@ -301,12 +301,12 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Writes text content to a file in the app's internal storage, creating parent directories if necessary.
+     * Writes content to a file in the app's internal storage, creating parent directories if needed.
      *
-     * @param filePath The relative path to the target file within internal storage.
+     * @param filePath Relative path to the file within internal storage.
      * @param content The text content to write.
-     * @param append If true, appends the content to the file; if false, overwrites the file.
-     * @return True if the write operation succeeds; false otherwise.
+     * @param append If true, appends to the file; otherwise, overwrites it.
+     * @return True if the write operation succeeds, false otherwise.
      */
     private fun writeToFileInternal(filePath: String, content: String, append: Boolean): Boolean {
         return try {

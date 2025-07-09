@@ -18,11 +18,6 @@ import dev.aurakai.auraframefx.ui.theme.NeonPurple
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
 
 @OptIn(ExperimentalMaterial3Api::class)
-/**
- * Displays the main conference room interface with agent selection, recording and transcribing controls, chat area, and message input.
- *
- * Manages local UI state for the selected agent, recording, and transcribing status. Provides interactive controls for agent selection, toggling recording and transcribing, and a message input area. Chat functionality and message handling are placeholders for future implementation.
- */
 @Composable
 fun ConferenceRoomScreen() {
     var selectedAgent by remember { mutableStateOf("Aura") }
@@ -144,13 +139,6 @@ fun ConferenceRoomScreen() {
     }
 }
 
-/**
- * Displays a button for selecting an agent, with visual highlighting when selected.
- *
- * @param agent The name of the agent to display on the button.
- * @param isSelected Whether the button should appear highlighted to indicate selection.
- * @param onClick Callback invoked when the button is pressed.
- */
 @Composable
 fun AgentButton(
     agent: String,
@@ -178,10 +166,10 @@ fun AgentButton(
 }
 
 /**
- * Displays an icon button for toggling the recording state, updating its icon and color based on whether recording is active.
+ * Displays a button for toggling the recording state with an appropriate icon and color.
  *
- * @param isRecording True if recording is currently active; false otherwise.
- * @param onClick Invoked when the button is pressed to toggle recording.
+ * @param isRecording Whether recording is currently active.
+ * @param onClick Called when the button is pressed to toggle recording.
  */
 @Composable
 fun RecordingButton(
@@ -205,14 +193,6 @@ fun RecordingButton(
     }
 }
 
-/**
- * Renders an icon button that toggles the transcribing state in the UI.
- *
- * Displays a red stop icon when transcribing is active, or a blue phone icon when inactive.
- *
- * @param isTranscribing True if transcribing is currently active; false otherwise.
- * @param onClick Callback invoked when the button is pressed.
- */
 @Composable
 fun TranscribeButton(
     isTranscribing: Boolean,

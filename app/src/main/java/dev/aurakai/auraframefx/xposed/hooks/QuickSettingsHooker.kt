@@ -1,10 +1,7 @@
 package dev.aurakai.auraframefx.xposed.hooks
 
+import android.util.Log
 import dev.aurakai.auraframefx.system.quicksettings.model.QuickSettingsConfig
-
-class QuickSettingsHooker(
-    private val classLoader: ClassLoader,
-import android.util.Log // Added import
 
 class QuickSettingsHooker(
     private val classLoader: ClassLoader,

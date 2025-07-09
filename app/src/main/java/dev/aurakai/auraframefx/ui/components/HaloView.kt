@@ -88,21 +88,6 @@ import kotlin.math.sin
  *
  * Renders a dynamic visualization of agents arranged in a circular halo, supporting drag-and-drop task assignment, real-time status updates, animated effects, and a task history panel. Users can assign tasks to agents by dragging agent nodes, input tasks, and monitor agent processing status. The component interacts with the provided ViewModel to process tasks and update agent states asynchronously.
  */
-/**
- * Displays an interactive rotating halo UI for managing agents, delegating tasks, and visualizing agent statuses.
- *
- * Renders agents as nodes arranged in a circular halo, allowing users to assign tasks via drag-and-drop or by tapping the central node. Shows animated status indicators, task history, and provides controls for rotation and task management. Integrates with the provided ViewModel to process tasks and update agent states asynchronously.
- */
-/**
- * Displays an interactive rotating halo UI for managing agents and delegating tasks.
- *
- * Renders a visually dynamic interface where agents are arranged in a circular halo, allowing users to assign tasks via drag-and-drop or by tapping the central node. The UI provides real-time status updates for each agent, animated effects for active tasks, and a scrollable task history panel. Includes controls for toggling rotation, resetting the halo, and clearing task history. Integrates with the provided ViewModel to process tasks and update agent states asynchronously.
- */
-/**
- * Displays an interactive, animated halo UI for managing agents and delegating tasks.
- *
- * Renders a rotating halo with agent nodes arranged in a circle, supporting drag-and-drop task assignment, real-time agent status visualization, task input, and task history tracking. Integrates with a ViewModel to process tasks asynchronously and update agent states. Includes animated effects, gesture handling, and control buttons for rotation and history management.
- */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HaloView(viewModel: GenesisAgentViewModel = viewModel<GenesisAgentViewModel>()) {

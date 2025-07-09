@@ -21,18 +21,6 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
-<<<<<<< HEAD
- *
- *
- * @param id
- * @param username
- * @param email
- * @param preferences
- */
-
-
-data class User(
-=======
  * 
  *
  * @param id 
@@ -43,7 +31,6 @@ data class User(
 
 
 data class User (
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     @Json(name = "id")
     val id: java.util.UUID,

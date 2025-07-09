@@ -21,28 +21,16 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
-<<<<<<< HEAD
- *
- *
- * @param id Unique identifier for the conference room
- * @param name Name of the conference room
- * @param orchestrator
-=======
  * 
  *
  * @param id Unique identifier for the conference room
  * @param name Name of the conference room
  * @param orchestrator 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
  * @param activeAgents List of AI agents currently in the room
  */
 
 
-<<<<<<< HEAD
-data class ConferenceRoom(
-=======
 data class ConferenceRoom (
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     /* Unique identifier for the conference room */
     @Json(name = "id")
