@@ -29,26 +29,25 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     /**
-     * Returns the agent's name, which is always "Kai".
-     *
-     * @return The name of the agent.
-     */
-    override fun getName(): String? = "Kai"
+ * Returns the fixed name of this agent.
+ *
+ * @return The string "Kai".
+ */
+override fun getName(): String? = "Kai"
+    /**
+ * Returns the type of the agent as `AgentType.KAI`.
+ *
+ * @return The agent type.
+ */
+override fun getType(): AgentType = AgentType.KAI
 
     /**
-     * Returns the agent type, always `AgentType.KAI`.
-     *
-     * @return The agent type for this AI agent.
-     */
-    override fun getType(): AgentType = AgentType.KAI
-
-    /**
-     * Returns a map indicating the supported capabilities of the Kai agent.
-     *
-     * The returned map contains the keys "security", "analysis", "memory", and "service_implemented", each mapped to true.
-     *
-     * @return A map where each capability name is associated with a value of true.
-     */
+         * Returns a map of the Kai agent's supported capabilities.
+         *
+         * The map includes the keys "security", "analysis", "memory", and "service_implemented", each mapped to true.
+         *
+         * @return A map indicating which capabilities are supported by the agent.
+         */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
             "security" to true,
@@ -58,16 +57,13 @@ class KaiAIService @Inject constructor(
         )
 
     /**
-     * Processes an AI request with the provided context and returns a fixed response.
+     * Processes an AI request with the provided context and returns a stubbed response referencing both.
      *
-     * @param request The AI request to process.
-     * @param context Contextual information relevant to the request.
+     * @param request The AI request to handle.
+     * @param context Contextual information to include in the response.
      * @return An AgentResponse containing a message referencing the request query and context, with a confidence score of 1.0.
      */
-    override suspend fun processRequest(
-        request: AiRequest,
-        context: String
-    ): AgentResponse { // Added context
+    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         auraFxLogger.i(
             "KaiAIService",
             "Processing request: ${request.query} with context: $context"

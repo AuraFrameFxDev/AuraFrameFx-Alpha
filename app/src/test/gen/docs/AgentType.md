@@ -1,3 +1,10 @@
+
+
+# AgentType
+
+## Enum
+
+
 * `AURA` (value: `"Aura"`)
 
 * `KAI` (value: `"Kai"`)

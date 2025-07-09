@@ -5,10 +5,10 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.googleServices)
-    alias(libs.plugins.kotlinCompose)
-    alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.openapiGenerator)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.openapi.generator)
 }
 
 android {
@@ -33,10 +33,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 
@@ -46,7 +43,9 @@ android {
     }
 
     kotlinOptions {
+        @Suppress("DEPRECATION")
         jvmTarget = "24"
+        @Suppress("DEPRECATION")
         freeCompilerArgs = listOf(
             "-opt-in=kotlin.RequiresOptIn",
             "-Xjvm-default=all"
@@ -107,7 +106,7 @@ dependencies {
     kspTest(libs.daggerHiltAndroidCompiler)
 
     // Time and Date
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
 
     // AndroidX & Compose
     implementation(libs.androidxCoreKtx)
@@ -123,7 +122,7 @@ dependencies {
 
     // Animation
     implementation(libs.androidxComposeAnimation)
-    debugImplementation(libs.animationTooling)
+    debugImplementation(libs.composeUiTooling)
 
     // Lifecycle
     implementation(libs.lifecycleViewmodelCompose)
@@ -140,10 +139,10 @@ dependencies {
     ksp(libs.androidxRoomCompiler)
 
     // Security
-    implementation("androidx.security:security-crypto:1.1.0-beta01")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     // Google AI
-    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
 
     // Firebase
     implementation(platform(libs.firebaseBom))

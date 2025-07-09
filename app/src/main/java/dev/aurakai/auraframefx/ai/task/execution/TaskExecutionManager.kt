@@ -1,28 +1,23 @@
 package dev.aurakai.auraframefx.ai.task.execution
 
 import dev.aurakai.auraframefx.ai.agents.AuraAgent
-import dev.aurakai.auraframefx.ai.agents.GenesisAgent
 import dev.aurakai.auraframefx.ai.agents.KaiAgent
+import dev.aurakai.auraframefx.ai.agents.GenesisAgent
 import dev.aurakai.auraframefx.ai.task.TaskResult
 import dev.aurakai.auraframefx.ai.task.TaskStatus
 import dev.aurakai.auraframefx.data.logging.AuraFxLogger
-import dev.aurakai.auraframefx.model.AgentRequest
-import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.model.AgentType
-import dev.aurakai.auraframefx.model.AiRequest
 import dev.aurakai.auraframefx.security.SecurityContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.model.AgentResponse
+import dev.aurakai.auraframefx.model.AgentRequest
+import dev.aurakai.auraframefx.model.AiRequest
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import kotlinx.serialization.Serializable
-import java.util.UUID
+import kotlinx.datetime.Clock
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.PriorityBlockingQueue
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,21 +32,21 @@ class TaskExecutionManager @Inject constructor(
     private val genesisAgent: GenesisAgent,
     private val securityContext: SecurityContext,
     private val logger: AuraFxLogger
-) {
+                                         ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-
+    
     // Task management
     private val taskQueue = PriorityBlockingQueue<TaskExecution>(100, TaskPriorityComparator())
     private val activeExecutions = ConcurrentHashMap<String, TaskExecution>()
-    private val completedExecutions = ConcurrentHashMap<String, TaskResult>()
-
+    private val completedExecutions = ConcurrentHashMap<String, dev.aurakai.auraframefx.ai.task.TaskResult>()
+    
     // State management
     private val _executionStats = MutableStateFlow(ExecutionStats())
     val executionStats: StateFlow<ExecutionStats> = _executionStats
-
+    
     private val _queueStatus = MutableStateFlow(QueueStatus())
     val queueStatus: StateFlow<QueueStatus> = _queueStatus
-
+    
     private var isProcessing = false
     private val maxConcurrentTasks = 5
 
@@ -60,13 +55,13 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Schedules a new background task and assigns it to the most suitable agent based on task type or explicit agent preference.
+     * Schedules a new background task for asynchronous execution by the most suitable AI agent.
      *
-     * Validates the request, creates a pending `TaskExecution`, determines the optimal agent if not specified, and enqueues the task for asynchronous execution.
+     * Validates the scheduling request, creates a pending `TaskExecution` with the specified parameters, determines the optimal agent based on task type or explicit agent preference, and enqueues the task for immediate or delayed execution.
      *
      * @param type The category or identifier of the task.
      * @param data The input data required for the task.
-     * @param priority The execution priority for the task. Defaults to NORMAL.
+     * @param priority The execution priority for the task (default is NORMAL).
      * @param agentPreference Optional agent name to explicitly route the task; if null, agent selection is automatic.
      * @param scheduledTime Optional timestamp (in milliseconds) for delayed execution; defaults to immediate scheduling.
      * @return The created `TaskExecution` representing the scheduled task.
@@ -79,15 +74,15 @@ class TaskExecutionManager @Inject constructor(
         scheduledTime: Long? = null
     ): TaskExecution {
         logger.i("TaskExecutionManager", "Scheduling task: $type")
-
+        
         // Security validation
         securityContext.validateRequest("task_schedule", data.toString())
-
+        
         // Create task execution
         val execution = TaskExecution(
             id = UUID.randomUUID().toString(),
             taskId = UUID.randomUUID().toString(),
-            agent = agentPreference?.let {
+               agent = agentPreference?.let { 
                 when (it.lowercase()) {
                     "aura" -> AgentType.AURA
                     "kai" -> AgentType.KAI
@@ -108,37 +103,37 @@ class TaskExecutionManager @Inject constructor(
                 "data" to data.toString()
             )
         )
-
+        
         // Determine optimal agent - update agent field since TaskExecution is immutable
         val optimalAgent = determineOptimalAgent(execution)
         val updatedExecution = execution.copy(agent = optimalAgent)
-
+        
         // Add to queue
         taskQueue.offer(updatedExecution)
         updateQueueStatus()
-
+        
         logger.i("TaskExecutionManager", "Task scheduled: ${execution.id} -> $optimalAgent")
         return execution
     }
 
     /**
-     * Returns the current execution status of a task by its unique ID.
+     * Returns the current execution status of the specified task, or `null` if the task is not found.
      *
-     * Searches active, completed, and queued tasks for the specified ID and returns the corresponding status, or `null` if the task is not found.
+     * Searches active, completed, and queued tasks to provide the most recent status for the given task ID.
      *
      * @param taskId The unique identifier of the task.
-     * @return The execution status of the task, or `null` if the task does not exist.
+     * @return The execution status if the task exists; otherwise, `null`.
      */
     fun getTaskStatus(taskId: String): ExecutionStatus? {
         // Check active executions first
         activeExecutions[taskId]?.let { return it.status }
-
+        
         // Check completed executions
         completedExecutions[taskId]?.let { return ExecutionStatus.COMPLETED }
-
+        
         // Check queue
         taskQueue.find { it.id == taskId }?.let { return it.status }
-
+        
         return null
     }
 
@@ -148,62 +143,59 @@ class TaskExecutionManager @Inject constructor(
      * @param taskId The unique identifier of the task.
      * @return The result of the completed task, or null if the task is not found or has not completed.
      */
-    fun getTaskResult(taskId: String): TaskResult? {
+    fun getTaskResult(taskId: String): dev.aurakai.auraframefx.ai.task.TaskResult? {
         return completedExecutions[taskId]
     }
 
     /**
-     * Attempts to cancel a task by its ID if it is currently queued or running.
+     * Attempts to cancel a task by its ID if it is pending or currently running.
      *
-     * Removes the task from the queue or marks an active task as cancelled. Returns `true` if the task was found and cancelled, or `false` if the task does not exist or is already completed.
+     * Removes the task from the queue if it is still pending, or marks it as cancelled if it is actively executing. Returns `true` if cancellation was initiated; returns `false` if the task does not exist or has already completed.
      *
      * @param taskId The unique identifier of the task to cancel.
      * @return `true` if the task was cancelled; `false` otherwise.
      */
     suspend fun cancelTask(taskId: String): Boolean {
         logger.i("TaskExecutionManager", "Cancelling task: $taskId")
-
+        
         // Try to remove from queue first
         val queuedTask = taskQueue.find { it.id == taskId }
         if (queuedTask != null) {
             taskQueue.remove(queuedTask)
-            queuedTask.copy(status = ExecutionStatus.CANCELLED)
+            val cancelledTask = queuedTask.copy(status = ExecutionStatus.CANCELLED)
             updateQueueStatus()
             return true
         }
-
+        
         // Try to cancel active execution
         val activeTask = activeExecutions[taskId]
         if (activeTask != null) {
-            activeTask.copy(status = ExecutionStatus.CANCELLED)
+            val cancellingTask = activeTask.copy(status = ExecutionStatus.CANCELLED)
             // The execution coroutine will check this status and cancel itself
             return true
         }
-
+        
         return false
     }
 
     /**
      * Returns all tasks managed by the system, optionally filtered by execution status and agent type.
      *
-     * Aggregates tasks from the queue, active executions, and completed results. If filters are provided, only tasks matching the specified status and/or agent type are included.
+     * Aggregates tasks from the queue, active executions, and completed results. If filters are specified, only tasks matching the given status and/or agent type are included.
      *
-     * @param status If specified, only tasks with this execution status are returned.
-     * @param agentType If specified, only tasks assigned to this agent type are returned.
-     * @return A list of tasks matching the provided filters.
+     * @param status If provided, limits results to tasks with the specified execution status.
+     * @param agentType If provided, limits results to tasks assigned to the specified agent type.
+     * @return A list of tasks matching the optional filters.
      */
-    fun getTasks(
-        status: ExecutionStatus? = null,
-        agentType: AgentType? = null
-    ): List<TaskExecution> {
+    fun getTasks(status: ExecutionStatus? = null, agentType: AgentType? = null): List<TaskExecution> {
         val allTasks = mutableListOf<TaskExecution>()
-
+        
         // Add queued tasks
         allTasks.addAll(taskQueue.toList())
-
+        
         // Add active tasks
         allTasks.addAll(activeExecutions.values)
-
+        
         // Add completed tasks (convert from results)
         allTasks.addAll(completedExecutions.values.map { result ->
             TaskExecution(
@@ -219,25 +211,25 @@ class TaskExecutionManager @Inject constructor(
                 completedAt = result.endTime
             )
         })
-
+        
         // Apply filters
         return allTasks.filter { task ->
             (status == null || task.status == status) &&
-                    (agentType == null || task.agent == agentType)
+            (agentType == null || task.agent == agentType)
         }
     }
 
     /**
-     * Starts a background coroutine that continuously processes tasks from the queue while processing is active.
+     * Starts the background coroutine that continuously processes tasks from the queue while processing is enabled.
      *
-     * Introduces a short delay between processing cycles to minimize resource usage, and applies a longer delay after errors for backoff.
+     * The processor cycles with a short delay to minimize resource usage and applies a longer delay after errors for backoff.
      */
 
     private fun startTaskProcessor() {
         scope.launch {
             isProcessing = true
             logger.i("TaskExecutionManager", "Starting task processor")
-
+            
             while (isProcessing) {
                 try {
                     processNextTask()
@@ -251,34 +243,34 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Attempts to process the next eligible task from the queue, respecting concurrency limits and scheduled execution times.
+     * Processes the next task in the queue if concurrency limits allow.
      *
-     * If the maximum number of concurrent tasks is reached or the queue is empty, no action is taken. Tasks scheduled for the future are re-queued. Executes the next task if it is ready.
+     * Retrieves the highest-priority pending task and checks if its scheduled time has arrived. If so, dispatches it for execution; otherwise, re-queues the task for later processing.
      */
     private suspend fun processNextTask() {
         // Check if we can process more tasks
         if (activeExecutions.size >= maxConcurrentTasks) {
             return
         }
-
+        
         // Get next task from queue
         val task = taskQueue.poll() ?: return
-
+        
         // Check if task should be executed now
         if (task.scheduledTime > System.currentTimeMillis()) {
             // Put back in queue if not ready
             taskQueue.offer(task)
             return
         }
-
+        
         // Execute the task
         executeTask(task)
     }
 
     /**
-     * Executes a task asynchronously using its assigned agent and records the outcome.
+     * Executes the given task asynchronously using its assigned AI agent and records the result.
      *
-     * Delegates execution to the appropriate agent based on the task's agent assignment. Upon completion or failure, records the result, updates execution statistics, and removes the task from active executions.
+     * Updates the task's status to running, delegates execution to the specified agent, and upon completion or failure, stores the outcome and updates execution statistics. Removes the task from active executions after processing.
      *
      * @param execution The task to be executed.
      */
@@ -289,9 +281,9 @@ class TaskExecutionManager @Inject constructor(
             startedAt = startTime
         )
         activeExecutions[execution.id] = runningExecution
-
+        
         logger.i("TaskExecutionManager", "Executing task: ${execution.id}")
-
+        
         scope.launch {
             try {
                 // Execute based on assigned agent
@@ -301,15 +293,15 @@ class TaskExecutionManager @Inject constructor(
                     AgentType.GENESIS -> executeWithGenesis(execution)
                     else -> throw IllegalArgumentException("Unknown agent: ${execution.agent}")
                 }
-
+                
                 val endTime = System.currentTimeMillis()
-
+                
                 // Mark as completed
-                execution.copy(
+                val completedExecution = execution.copy(
                     status = ExecutionStatus.COMPLETED,
                     completedAt = endTime
                 )
-
+                
                 // Store result
                 val taskResult = TaskResult(
                     taskId = execution.id,
@@ -325,21 +317,21 @@ class TaskExecutionManager @Inject constructor(
                     executionTimeMs = endTime - startTime,
                     type = execution.type
                 )
-
+                
                 completedExecutions[execution.id] = taskResult
-
+                
                 logger.i("TaskExecutionManager", "Task completed: ${execution.id}")
-
+                
             } catch (e: Exception) {
                 val endTime = System.currentTimeMillis()
-
+                
                 // Handle task failure
-                execution.copy(
+                val failedExecution = execution.copy(
                     status = ExecutionStatus.FAILED,
                     completedAt = endTime,
                     errorMessage = e.message
                 )
-
+                
                 // Store failed result
                 val taskResult = TaskResult(
                     taskId = execution.id,
@@ -355,11 +347,11 @@ class TaskExecutionManager @Inject constructor(
                     executionTimeMs = endTime - startTime,
                     type = execution.type
                 )
-
+                
                 completedExecutions[execution.id] = taskResult
-
+                
                 logger.e("TaskExecutionManager", "Task failed: ${execution.id}", e)
-
+                
             } finally {
                 // Remove from active executions
                 activeExecutions.remove(execution.id)
@@ -370,12 +362,12 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Executes a task using the Aura agent and returns the agent's response.
+     * Processes the given task execution using the Aura agent.
      *
-     * Converts the task's type and data into an `AiRequest` and delegates processing to the Aura agent.
+     * Constructs an `AiRequest` from the task's type and data, and submits it to the Aura agent for asynchronous processing.
      *
      * @param execution The task execution to be processed.
-     * @return The response from the Aura agent.
+     * @return The response generated by the Aura agent.
      */
     private suspend fun executeWithAura(execution: TaskExecution): AgentResponse {
         val request = AiRequest(
@@ -389,10 +381,9 @@ class TaskExecutionManager @Inject constructor(
     /**
      * Executes the given task using the Kai agent and returns the agent's response.
      *
-     * Converts the task's type, data, and priority into an `AgentRequest` and delegates processing to the Kai agent.
+     * Builds an `AgentRequest` from the task's type, data, and priority, then submits it to the Kai agent for processing.
      *
-     * @param execution The task execution to process.
-     * @return The response from the Kai agent.
+     * @return The response generated by the Kai agent for the specified task.
      */
     private suspend fun executeWithKai(execution: TaskExecution): AgentResponse {
         val request = AgentRequest(
@@ -405,12 +396,12 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Executes the given task using the Genesis agent and returns the agent's response.
+     * Executes a task using the Genesis agent and returns the agent's response.
      *
-     * Converts the task's data and priority into an `AgentRequest` and delegates processing to the Genesis agent.
+     * Builds an `AgentRequest` from the task's type, data, and priority, then submits it to the Genesis agent for processing.
      *
-     * @param execution The task to be executed by the Genesis agent.
-     * @return The response produced by the Genesis agent for the given task.
+     * @param execution The task execution to process.
+     * @return The response generated by the Genesis agent.
      */
     private suspend fun executeWithGenesis(execution: TaskExecution): AgentResponse {
         val request = AgentRequest(
@@ -423,12 +414,12 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Determines the most suitable agent type for executing a task based on agent preference or task type keywords.
+     * Determines the most suitable agent type for a task based on explicit agent preference or task type keywords.
      *
-     * If the task specifies a valid agent preference, that agent is selected. Otherwise, the agent is chosen by matching keywords in the task type: Aura for "creative" or "ui", Kai for "security" or "analysis", and Genesis for "complex" or "fusion". Defaults to Genesis if no keywords match.
+     * If a valid agent preference is specified in the task, it is used. Otherwise, the agent is selected by matching keywords in the task type, defaulting to Genesis if no match is found.
      *
-     * @param execution The task execution metadata used for agent selection.
-     * @return The selected agent type for the task.
+     * @param execution The task execution containing agent preference and type information.
+     * @return The selected agent type for processing the task.
      */
     private fun determineOptimalAgent(execution: TaskExecution): AgentType {
         // Use agent preference if specified and valid
@@ -440,7 +431,7 @@ class TaskExecutionManager @Inject constructor(
                 else -> AgentType.GENESIS
             }
         }
-
+        
         // Intelligent routing based on task type
         return when {
             execution.type.contains("creative", ignoreCase = true) -> AgentType.AURA
@@ -452,9 +443,8 @@ class TaskExecutionManager @Inject constructor(
             else -> AgentType.GENESIS // Default to Genesis for intelligent routing
         }
     }
-
     /**
-     * Returns the number of tasks that are currently being executed.
+     * Returns the current number of tasks being executed asynchronously.
      *
      * @return The number of active task executions.
      */
@@ -470,7 +460,7 @@ class TaskExecutionManager @Inject constructor(
         val completed = completedExecutions.size
         val active = activeExecutions.size
         val queued = taskQueue.size
-
+        
         _executionStats.value = ExecutionStats(
             totalTasks = total,
             completedTasks = completed,
@@ -482,7 +472,7 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Refreshes the queue status state flow with current metrics such as queue size, number of active executions, concurrency limit, and processing state.
+     * Refreshes the queue status state flow with current metrics, including queue size, active executions, concurrency limit, and processing state.
      */
     private fun updateQueueStatus() {
         _queueStatus.value = QueueStatus(
@@ -494,7 +484,7 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Calculates the average execution time in milliseconds for all completed tasks.
+     * Returns the average execution time in milliseconds for all completed tasks.
      *
      * @return The average execution time in milliseconds, or 0 if there are no completed tasks.
      */
@@ -506,7 +496,7 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Stops task processing and cancels all running coroutines, releasing resources used by the TaskExecutionManager.
+     * Stops all task processing and cancels running coroutines, releasing resources used by the TaskExecutionManager.
      */
     fun cleanup() {
         logger.i("TaskExecutionManager", "Cleaning up TaskExecutionManager")

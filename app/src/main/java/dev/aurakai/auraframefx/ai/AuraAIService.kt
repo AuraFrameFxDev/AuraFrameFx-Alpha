@@ -6,10 +6,10 @@ import java.io.File
 interface AuraAIService {
 
     /**
-     * Executes an analytics query and returns a placeholder response string.
+     * Returns a fixed placeholder response for analytics queries.
      *
-     * @param _query The analytics query to execute.
-     * @return A fixed placeholder string representing the analytics response.
+     * @param _query The analytics query string.
+     * @return A placeholder string indicating analytics query functionality is not implemented.
      */
     fun analyticsQuery(_query: String): String {
         // TODO: Implement analytics query
@@ -17,9 +17,9 @@ interface AuraAIService {
     }
 
     /**
-     * Asynchronously downloads a file by its unique identifier.
+     * Asynchronously downloads a file using its unique identifier.
      *
-     * @param _fileId The identifier of the file to download.
+     * @param _fileId The unique identifier of the file to download.
      * @return The downloaded file, or null if the file cannot be retrieved.
      */
     suspend fun downloadFile(_fileId: String): File? {
@@ -28,10 +28,10 @@ interface AuraAIService {
     }
 
     /**
-     * Asynchronously generates an image based on a textual prompt.
+     * Asynchronously generates image data based on a textual prompt.
      *
-     * @param _prompt The description used to generate the image.
-     * @return The generated image data as a byte array, or null if image generation is not implemented or fails.
+     * @param _prompt The text description used to guide image generation.
+     * @return The generated image as a ByteArray, or null if image generation is not available.
      */
     suspend fun generateImage(_prompt: String): ByteArray? { // Returns URL or path to image -> ByteArray?
         // TODO: Implement image generation
@@ -39,18 +39,20 @@ interface AuraAIService {
     }
 
     /**
-     * Generates AI text from a prompt with optional configuration for temperature and maximum tokens.
+     * Asynchronously generates a structured text response based on the provided prompt and optional configuration.
+     *
+     * The response includes the original prompt, applied generation options ("temperature" and "max_tokens"), and a status message. Returns an error message string if text generation fails.
      *
      * @param prompt The input prompt for text generation.
-     * @param options Optional configuration map supporting "temperature" (Double) and "max_tokens" (Int).
-     * @return A structured string with the generated text, configuration details, and status, or an error message if generation fails.
+     * @param options Optional configuration parameters: "temperature" (Double) and "max_tokens" (Int).
+     * @return A structured string summarizing the generated text, configuration, or an error message if generation fails.
      */
     suspend fun generateText(prompt: String, options: Map<String, Any>? = null): String {
         try {
             // Basic text generation with configurable options
             val temperature = options?.get("temperature") as? Double ?: 0.7
             val maxTokens = options?.get("max_tokens") as? Int ?: 150
-
+            
             // For now, return a structured response that indicates the service is working
             return buildString {
                 append("Generated text for prompt: \"$prompt\"\n")
@@ -63,13 +65,13 @@ interface AuraAIService {
     }
 
     /**
-     * Generates a formatted AI response string based on the provided prompt and optional context or system instructions.
+     * Generates a formatted AI response string using the provided prompt, with optional context and system instructions.
      *
-     * If the options map includes "context" or "system_prompt" keys, these values are incorporated into the response formatting. Returns an error message string if an exception occurs.
+     * The response includes the original prompt, any supplied context, and a system prompt (defaulting to "You are a helpful AI assistant."). Returns an error message string if an exception occurs.
      *
      * @param prompt The input prompt for the AI.
-     * @param options Optional map with "context" and "system_prompt" keys to customize the response.
-     * @return The formatted AI response string, or an error message if an exception occurs.
+     * @param options Optional map that may include "context" (String) and "system_prompt" (String) to customize the response.
+     * @return The generated AI response string, or an error message if generation fails.
      */
     fun getAIResponse(
         prompt: String,
@@ -77,9 +79,8 @@ interface AuraAIService {
     ): String? {
         return try {
             val context = options?.get("context") as? String ?: ""
-            val systemPrompt =
-                options?.get("system_prompt") as? String ?: "You are a helpful AI assistant."
-
+            val systemPrompt = options?.get("system_prompt") as? String ?: "You are a helpful AI assistant."
+            
             // Enhanced response with context awareness
             buildString {
                 append("AI Response for: \"$prompt\"\n")
@@ -95,29 +96,25 @@ interface AuraAIService {
     }
 
     /**
-     * Retrieves the stored memory value associated with the given key.
-     *
-     * @param memoryKey The key identifying the memory entry to retrieve.
-     * @return The stored value as a string, or null if the key does not exist.
-     */
-    fun getMemory(memoryKey: String): String?
+ * Retrieves the value associated with the specified memory key.
+ *
+ * @param memoryKey The unique key identifying the memory entry.
+ * @return The stored value as a string, or null if no value is found for the key.
+ */
+fun getMemory(memoryKey: String): String?
+    
+    /**
+ * Persists a value under the specified key for future retrieval by the AI service.
+ *
+ * @param key The unique identifier for the stored value.
+ * @param value The value to associate with the key.
+ */
+fun saveMemory(key: String, value: Any)
 
     /**
-     * Saves a value in memory under the specified key.
+     * Returns whether the AI service is considered connected.
      *
-     * Implementations should allow retrieval of the stored value using the same key.
-     *
-     * @param key The identifier for the memory entry.
-     * @param value The value to store.
-     */
-    fun saveMemory(key: String, value: Any)
-
-    /**
-     * Indicates whether the AI service is currently connected.
-     *
-     * Always returns true in this implementation.
-     *
-     * @return True, indicating the service is considered connected.
+     * @return Always returns true, indicating the service is available.
      */
     fun isConnected(): Boolean {
         // TODO: Implement actual connection check if necessary, though report implies always true.
@@ -128,18 +125,19 @@ interface AuraAIService {
      * Publishes a message to the specified Pub/Sub topic.
      *
      * @param _topic The name of the topic to publish to.
-     * @param _message The message content to be published.
+     * @param _message The message content to be sent.
      */
     fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing
     }
 
 
+
     /**
-     * Asynchronously uploads a file and returns its identifier or URL if successful.
+     * Asynchronously uploads a file and returns its unique identifier or URL.
      *
      * @param _file The file to upload.
-     * @return The file's identifier or URL, or null if the upload fails or is not implemented.
+     * @return The unique identifier or URL of the uploaded file, or null if not implemented.
      */
     suspend fun uploadFile(_file: File): String? { // Returns file ID or URL
         // TODO: Implement file upload

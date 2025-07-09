@@ -39,22 +39,18 @@ import org.openapitools.client.infrastructure.ResponseType
 import org.openapitools.client.infrastructure.Success
 import org.openapitools.client.infrastructure.toMultiValue
 
-class ThemesApi(
-    basePath: kotlin.String = defaultBasePath,
-    client: OkHttpClient = ApiClient.defaultClient
-) : ApiClient(basePath, client) {
+class ThemesApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient = ApiClient.defaultClient) : ApiClient(basePath, client) {
     companion object {
         @JvmStatic
         val defaultBasePath: String by lazy {
-            System.getProperties()
-                .getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
+            System.getProperties().getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
         }
     }
 
     /**
      * Apply a theme
-     *
-     * @param themeApplyRequest
+     * 
+     * @param themeApplyRequest 
      * @return void
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
@@ -62,14 +58,8 @@ class ThemesApi(
      * @throws ClientException If the API returns a client error response
      * @throws ServerException If the API returns a server error response
      */
-    @Throws(
-        IllegalStateException::class,
-        IOException::class,
-        UnsupportedOperationException::class,
-        ClientException::class,
-        ServerException::class
-    )
-    fun themeApplyPut(themeApplyRequest: ThemeApplyRequest): Unit {
+    @Throws(IllegalStateException::class, IOException::class, UnsupportedOperationException::class, ClientException::class, ServerException::class)
+    fun themeApplyPut(themeApplyRequest: ThemeApplyRequest) : Unit {
         val localVarResponse = themeApplyPutWithHttpInfo(themeApplyRequest = themeApplyRequest)
 
         return when (localVarResponse.responseType) {
@@ -78,34 +68,25 @@ class ThemesApi(
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {
                 val localVarError = localVarResponse as ClientError<*>
-                throw ClientException(
-                    "Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
+                throw ClientException("Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}", localVarError.statusCode, localVarResponse)
             }
-
             ResponseType.ServerError -> {
                 val localVarError = localVarResponse as ServerError<*>
-                throw ServerException(
-                    "Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
+                throw ServerException("Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}", localVarError.statusCode, localVarResponse)
             }
         }
     }
 
     /**
      * Apply a theme
-     *
-     * @param themeApplyRequest
+     * 
+     * @param themeApplyRequest 
      * @return ApiResponse<Unit?>
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
      */
     @Throws(IllegalStateException::class, IOException::class)
-    fun themeApplyPutWithHttpInfo(themeApplyRequest: ThemeApplyRequest): ApiResponse<Unit?> {
+    fun themeApplyPutWithHttpInfo(themeApplyRequest: ThemeApplyRequest) : ApiResponse<Unit?> {
         val localVariableConfig = themeApplyPutRequestConfig(themeApplyRequest = themeApplyRequest)
 
         return request<ThemeApplyRequest, Unit>(
@@ -116,10 +97,10 @@ class ThemesApi(
     /**
      * To obtain the request config of the operation themeApplyPut
      *
-     * @param themeApplyRequest
+     * @param themeApplyRequest 
      * @return RequestConfig
      */
-    fun themeApplyPutRequestConfig(themeApplyRequest: ThemeApplyRequest): RequestConfig<ThemeApplyRequest> {
+    fun themeApplyPutRequestConfig(themeApplyRequest: ThemeApplyRequest) : RequestConfig<ThemeApplyRequest> {
         val localVariableBody = themeApplyRequest
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -138,7 +119,7 @@ class ThemesApi(
 
     /**
      * Get available themes
-     *
+     * 
      * @return kotlin.collections.List<Theme>
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
@@ -147,14 +128,8 @@ class ThemesApi(
      * @throws ServerException If the API returns a server error response
      */
     @Suppress("UNCHECKED_CAST")
-    @Throws(
-        IllegalStateException::class,
-        IOException::class,
-        UnsupportedOperationException::class,
-        ClientException::class,
-        ServerException::class
-    )
-    fun themesGet(): kotlin.collections.List<Theme> {
+    @Throws(IllegalStateException::class, IOException::class, UnsupportedOperationException::class, ClientException::class, ServerException::class)
+    fun themesGet() : kotlin.collections.List<Theme> {
         val localVarResponse = themesGetWithHttpInfo()
 
         return when (localVarResponse.responseType) {
@@ -163,34 +138,25 @@ class ThemesApi(
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {
                 val localVarError = localVarResponse as ClientError<*>
-                throw ClientException(
-                    "Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
+                throw ClientException("Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}", localVarError.statusCode, localVarResponse)
             }
-
             ResponseType.ServerError -> {
                 val localVarError = localVarResponse as ServerError<*>
-                throw ServerException(
-                    "Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
+                throw ServerException("Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}", localVarError.statusCode, localVarResponse)
             }
         }
     }
 
     /**
      * Get available themes
-     *
+     * 
      * @return ApiResponse<kotlin.collections.List<Theme>?>
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
      */
     @Suppress("UNCHECKED_CAST")
     @Throws(IllegalStateException::class, IOException::class)
-    fun themesGetWithHttpInfo(): ApiResponse<kotlin.collections.List<Theme>?> {
+    fun themesGetWithHttpInfo() : ApiResponse<kotlin.collections.List<Theme>?> {
         val localVariableConfig = themesGetRequestConfig()
 
         return request<Unit, kotlin.collections.List<Theme>>(
@@ -203,7 +169,7 @@ class ThemesApi(
      *
      * @return RequestConfig
      */
-    fun themesGetRequestConfig(): RequestConfig<Unit> {
+    fun themesGetRequestConfig() : RequestConfig<Unit> {
         val localVariableBody = null
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -221,6 +187,5 @@ class ThemesApi(
 
 
     private fun encodeURIComponent(uriComponent: kotlin.String): kotlin.String =
-        HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent)
-            .build().encodedPathSegments[0]
+        HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent).build().encodedPathSegments[0]
 }

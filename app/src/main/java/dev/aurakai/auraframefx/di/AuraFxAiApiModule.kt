@@ -19,9 +19,9 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides a singleton OkHttpClient configured to log HTTP request and response bodies at the BODY level.
+     * Provides a singleton OkHttpClient configured to log full HTTP request and response bodies.
      *
-     * @return A singleton OkHttpClient instance with detailed network traffic logging enabled.
+     * @return An OkHttpClient instance with detailed logging enabled for debugging network interactions.
      */
     @Provides
     @Singleton
@@ -29,14 +29,14 @@ object AuraFxAiApiModule {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
-
+        
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .build()
     }
 
     /**
-     * Provides a singleton Json serializer configured for resilient handling of API data.
+     * Provides a singleton Json serializer configured for resilient API data handling.
      *
      * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values to ensure robust serialization and deserialization of API responses.
      *
@@ -52,17 +52,17 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton instance of AIContentApi configured to communicate with the AuraFrameFx AI API.
+     * Provides a singleton instance of AIContentApi configured to interact with the AuraFrameFx AI API using the specified OkHttpClient.
      *
-     * @param okHttpClient The HTTP client used for API requests.
-     * @return An AIContentApi instance set up with the AuraFrameFx API base URL and the provided HTTP client.
+     * @param okHttpClient The HTTP client used for making API requests.
+     * @return A configured AIContentApi instance for AuraFrameFx AI API communication.
      */
     @Provides
     @Singleton
     fun provideAiContentApi(okHttpClient: OkHttpClient): AIContentApi {
 
         val baseUrl = "https://api.auraframefx.com/v1"
-
+        
         return AIContentApi(basePath = baseUrl, client = okHttpClient)
     }
 

@@ -1,10 +1,13 @@
+
+
 # UserPreferencesUpdate
+
 
 ## Properties
 
-| Name            | Type                                      | Description | Notes      |
-|-----------------|-------------------------------------------|-------------|------------|
-| **preferences** | [**UserPreferences**](UserPreferences.md) |             | [optional] |
+| Name | Type | Description | Notes |
+|------------ | ------------- | ------------- | -------------|
+|**preferences** | [**UserPreferences**](UserPreferences.md) |  |  [optional] |
 
 
 

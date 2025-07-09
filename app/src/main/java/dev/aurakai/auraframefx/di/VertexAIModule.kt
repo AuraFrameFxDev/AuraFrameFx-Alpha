@@ -9,8 +9,8 @@ import dagger.hilt.components.SingletonComponent
 import dev.aurakai.auraframefx.ai.VertexAIConfig
 import dev.aurakai.auraframefx.ai.clients.VertexAIClient
 import dev.aurakai.auraframefx.ai.clients.VertexAIClientImpl
-import dev.aurakai.auraframefx.security.SecurityContext
 import dev.aurakai.auraframefx.utils.AuraFxLogger
+import dev.aurakai.auraframefx.security.SecurityContext
 import javax.inject.Singleton
 
 /**
@@ -24,9 +24,9 @@ object VertexAIModule {
     /**
      * Provides a singleton `VertexAIConfig` instance preconfigured for production use with Vertex AI.
      *
-     * The configuration includes project ID, location, API endpoint, model name, API version, safety filters, retry and timeout settings, concurrency limits, and caching parameters.
+     * The configuration includes project identification, API endpoint, model selection, versioning, security options, retry policy, timeout, concurrency limits, and caching settings.
      *
-     * @return A `VertexAIConfig` instance for Vertex AI integration.
+     * @return A `VertexAIConfig` instance ready for integration with Vertex AI services.
      */
     @Provides
     @Singleton
@@ -49,11 +49,11 @@ object VertexAIModule {
     }
 
     /**
-     * Provides a singleton `VertexAIClient` instance for interacting with Vertex AI services.
+     * Provides a singleton instance of `VertexAIClient` for interacting with Vertex AI services.
      *
-     * Constructs and returns a `VertexAIClientImpl` configured for use within the application.
+     * The client is configured using the supplied `VertexAIConfig`, application context, and security context.
      *
-     * @return A singleton `VertexAIClient` for Vertex AI integration.
+     * @return A singleton `VertexAIClient` instance.
      */
     @Provides
     @Singleton

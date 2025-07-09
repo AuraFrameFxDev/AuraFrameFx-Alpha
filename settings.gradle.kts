@@ -1,3 +1,4 @@
+// settings.gradle.kts
 pluginManagement {
     repositories {
         google()
@@ -18,7 +19,6 @@ dependencyResolutionManagement {
 rootProject.name = "AuraFrameFX"
 
 include(":app")
-
 include(":sandbox-ui")
 
 include(":lib-ai")

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Information -->
-    <string name="app_name">AuraFrameFX</string> <!-- Ensured app_name -->
     <string name="app_title">AURAFRAMEFX</string>
-    <string name="ai_chat_placeholder">Engage AI Dialogue</string> <!-- Added missing string -->
 
     <!-- Common UI Elements -->
     <string name="oracle_drive_connected">Connected to OracleDrive</string>

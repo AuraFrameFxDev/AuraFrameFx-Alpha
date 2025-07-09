@@ -3,6 +3,7 @@ package dev.aurakai.auraframefx.ui.components
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color // For direct color usage if needed
 import dev.aurakai.auraframefx.ui.theme.CyberpunkTextColor
 import dev.aurakai.auraframefx.ui.theme.CyberpunkTextStyle
 

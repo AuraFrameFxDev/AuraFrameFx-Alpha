@@ -8,12 +8,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -58,14 +53,16 @@ val LocalMoodGlow = compositionLocalOf { Color.Transparent }
 val LocalMoodState = compositionLocalOf { Emotion.NEUTRAL }
 
 /**
- * Applies the AuraFrameFX theme and mood-based dynamic theming to the given composable content.
+ * Applies the AuraFrameFX theme to the provided composable content.
  *
- * Selects a color scheme (dark, light, or dynamic based on device support and parameters), updates the status bar color and icon appearance to match the theme, and provides mood-driven glow color and emotion state throughout the Compose hierarchy. Integrates the app's typography and Material3 theming.
+ * Chooses a color scheme (dark, light, or dynamic based on device support and parameters), 
+ * updates the status bar color and icon appearance to match the theme, supplies the app's typography,
+ * and integrates Aura's mood-based dynamic theming system.
  *
- * @param darkTheme If true, applies the dark theme; otherwise, uses the light theme. Defaults to the system setting.
- * @param dynamicColor If true, enables dynamic color schemes on supported devices (Android 12+). Defaults to true.
- * @param moodViewModel ViewModel supplying Aura's current mood state.
- * @param content The composable content to which the theme and mood effects are applied.
+ * @param darkTheme Whether to use the dark theme. Defaults to the system setting.
+ * @param dynamicColor Whether to use dynamic color schemes on supported devices (Android 12+). Defaults to true.
+ * @param moodViewModel The ViewModel managing Aura's mood state. Automatically injected.
+ * @param content The composable content to which the theme is applied.
  */
 @Composable
 fun AuraFrameFXTheme(
@@ -81,7 +78,6 @@ fun AuraFrameFXTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
@@ -111,15 +107,7 @@ fun AuraFrameFXTheme(
 }
 
 /**
- * Returns a glow color corresponding to the given emotion and intensity.
- *
- * The color is selected based on the emotion and its transparency is adjusted according to the intensity.
- * If the emotion is not recognized, the primary color from the provided color scheme is used with reduced alpha.
- *
- * @param emotion The current emotion to represent.
- * @param intensity The strength of the emotion, affecting the alpha transparency (clamped between 0.1 and 0.5).
- * @param baseColorScheme The color scheme to use as a fallback for unrecognized emotions.
- * @return The computed glow color with appropriate alpha.
+ * Get the mood-appropriate glow color based on Aura's current emotion
  */
 private fun getMoodGlowColor(
     emotion: Emotion,
@@ -127,7 +115,7 @@ private fun getMoodGlowColor(
     baseColorScheme: androidx.compose.material3.ColorScheme
 ): Color {
     val baseAlpha = (intensity * 0.4f).coerceIn(0.1f, 0.5f)
-
+    
     return when (emotion) {
         Emotion.HAPPY -> Color(0xFFFFD700).copy(alpha = baseAlpha) // Gold
         Emotion.EXCITED -> Color(0xFFFF6B35).copy(alpha = baseAlpha) // Orange

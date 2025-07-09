@@ -1,51 +1,23 @@
 package dev.aurakai.auraframefx.ui.components
 
-// import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.gestures.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.Delete // Explicit import
+import androidx.compose.material.icons.filled.PlayArrow // Explicit import
+import androidx.compose.material.icons.filled.Refresh // Explicit import
+import androidx.compose.runtime.*
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.material3.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -55,12 +27,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+// import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonPink
-import dev.aurakai.auraframefx.ui.theme.NeonPurple
-import dev.aurakai.auraframefx.ui.theme.NeonTeal
+import dev.aurakai.auraframefx.ui.theme.NeonPurple // Added import
+import dev.aurakai.auraframefx.ui.theme.NeonTeal // Added import
 import dev.aurakai.auraframefx.viewmodel.GenesisAgentViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,10 +41,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Locale
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
+import java.util.*
+import kotlin.math.*
 
 /**
  * Displays an interactive rotating halo interface for managing agents and delegating tasks.
@@ -86,17 +57,47 @@ import kotlin.math.sin
 /**
  * Displays an interactive rotating halo UI for managing agents and delegating tasks.
  *
- * Renders a dynamic visualization of agents arranged in a circular halo, supporting drag-and-drop task assignment, real-time status updates, animated effects, and a task history panel. Users can assign tasks to agents by dragging agent nodes, input tasks, and monitor agent processing status. The component interacts with the provided ViewModel to process tasks and update agent states asynchronously.
+ * Renders a circular arrangement of agent nodes around a central "GENESIS" node, allowing users to assign tasks to agents via drag-and-drop gestures, input task descriptions, and monitor agent statuses and task history. The halo rotates continuously unless paused, and agent statuses update in real time as tasks are assigned and processed.
+ *
+ * @param viewModel The view model providing agent data and task processing logic. Defaults to a local GenesisAgentViewModel instance.
  */
 /**
- * Displays an interactive, animated halo interface for managing agents and delegating tasks.
+ * Displays an interactive rotating halo UI for managing agents and delegating tasks.
  *
- * Renders a rotating halo with agent nodes, enabling drag-and-drop task assignment, real-time agent status visualization, and task history tracking. Integrates with the provided ViewModel to process tasks asynchronously and update agent states. Includes animated effects, gesture handling, and control buttons for rotation and history management.
+ * Renders a circular arrangement of agent nodes with animated rotation, drag-and-drop task assignment, pulsing status effects, and a central "GENESIS" node. Users can assign tasks to agents by dragging and dropping, or by tapping the center node. Includes a task history panel, agent status indicators, and controls for rotation and history management. Integrates real-time state updates, gesture handling, and animated visual effects.
  */
 /**
- * Displays an interactive, animated halo interface for managing agents and delegating tasks.
+ * Displays an interactive rotating halo UI for managing agents and delegating tasks.
  *
- * Renders a rotating halo with agent nodes, supports drag-and-drop task assignment, visualizes agent statuses, and maintains a task history panel. Integrates with the provided ViewModel to process tasks and update agent states asynchronously. Includes controls for rotation, resetting, and clearing task history.
+ * Renders agent nodes arranged in a circular halo, supporting drag-and-drop task assignment, real-time status updates, animated effects, task input, history tracking, and control buttons for rotation and history management. Integrates gesture detection, state management, and coroutine-based asynchronous task simulation.
+ */
+/**
+ * Displays an interactive rotating halo UI for managing agents and delegating tasks.
+ *
+ * This composable arranges agent nodes in a circular halo around a central "GENESIS" node, allowing users to assign tasks via drag-and-drop or by tapping the center. It features animated rotation, pulsing visual effects for active agents, real-time status indicators, task input overlays, and a scrollable task history panel. Users can control rotation, reset the halo, and clear task history using provided buttons. Agent statuses and task processing are updated in real time, with asynchronous simulation of task completion.
+ *
+ * @param viewModel The view model providing agent data and task processing logic. Defaults to a local instance.
+ */
+/**
+ * Displays an interactive rotating halo UI for managing agents and delegating tasks.
+ *
+ * Renders agent nodes arranged in a circular halo around a central "GENESIS" node, supporting drag-and-drop task assignment, animated rotation, pulsing effects for active agents, real-time status updates, and a scrollable task history panel. Users can assign tasks to agents by dragging or tapping, view agent statuses, and control rotation and history via on-screen buttons.
+ *
+ * @param viewModel Provides agent data and task processing logic. Defaults to a local instance.
+ */
+/**
+ * Displays an interactive rotating halo UI for managing agents and delegating tasks.
+ *
+ * Renders a circular arrangement of agent nodes around a central "GENESIS" node, supporting drag-and-drop and tap-based task assignment. Features animated rotation, pulsing effects for active agents, real-time status indicators, a task input overlay, a scrollable task history panel, and control buttons for rotation and history management.
+ *
+ * @param viewModel Provides agent data and task processing logic. Defaults to a local instance.
+ */
+/**
+ * Displays an interactive rotating halo UI for managing agents and delegating tasks.
+ *
+ * Renders a circular arrangement of agent nodes around a central "GENESIS" node, supporting drag-and-drop and tap-based task assignment. Features include animated rotation, pulsing visual effects for active agents, real-time status indicators, a task input overlay, a scrollable task history panel, and control buttons for rotation and history management.
+ *
+ * @param viewModel Provides agent data and task processing logic. Defaults to a local instance.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -589,15 +590,10 @@ fun HaloView(viewModel: GenesisAgentViewModel = viewModel<GenesisAgentViewModel>
             val agentNameFromHistory = task.substringAfter("[").substringBefore("]")
             // Compare by name string to find the AgentConfig
             val foundAgentConfig =
-                agents.find {
-                    it.name.lowercase(Locale.ROOT) == agentNameFromHistory.lowercase(
-                        Locale.ROOT
-                    )
-                }
+                agents.find { it.name.lowercase(Locale.ROOT) == agentNameFromHistory.lowercase(Locale.ROOT) }
             if (foundAgentConfig != null) {
                 try {
-                    val actualAgentType =
-                        AgentType.valueOf(foundAgentConfig.name.uppercase(Locale.ROOT))
+                    val actualAgentType = AgentType.valueOf(foundAgentConfig.name.uppercase(Locale.ROOT))
                     agentStatus[actualAgentType] = "processing"
                     // Simulate task completion after a delay
                     coroutineScope.launch {

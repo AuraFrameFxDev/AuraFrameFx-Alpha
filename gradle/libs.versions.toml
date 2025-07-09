@@ -31,9 +31,9 @@ firebaseConfigKtx = "22.1.2"
 firebaseStorageKtx = "21.0.2"
 kotlinxCoroutines = "1.10.2"
 kotlinxSerializationJson = "1.9.0"
-kotlinxDatetime = "0.7.1-0.6.x-compat"
+kotlinxDatetime = "0.7.0"
 retrofit = "3.0.0"
-okhttp = "5.1.0"
+okhttp = "5.0.0"
 converterGson = "3.0.0"
 retrofitKotlinxSerializationConverter = "1.0.0"
 coilCompose = "2.7.0"
@@ -48,8 +48,6 @@ mockk = "1.14.4"
 
 # --- Build Logic Plugins ---
 openapiGeneratorPlugin = "7.14.0"
-
-
 firebaseCrashlyticsPlugin = "3.0.4"
 firebasePerfPlugin = "1.4.2"
 toolchainsFoojayResolver = "1.0.0"
@@ -70,10 +68,9 @@ androidxUiGraphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidxUiToolingPreview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidxMaterial3 = { group = "androidx.compose.material3", name = "material3" }
 androidxComposeAnimation = { group = "androidx.compose.animation", name = "animation" }
-animationTooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 composeUiTestJunit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 composeUiTooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-composeUiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version = "1.8.3" }
+composeUiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 
 # AndroidX
 androidxCoreKtx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -94,14 +91,14 @@ androidxRoomCompiler = { module = "androidx.room:room-compiler", version.ref = "
 androidxWorkRuntimeKtx = { module = "androidx.work:work-runtime-ktx", version.ref = "workManager" }
 androidxDatastorePreferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidxDatastoreCore = { module = "androidx.datastore:datastore-core", version.ref = "datastoreCore" }
-androidxSecurityCrypto = { module = "androidx.security:security-crypto", version = "1.1.0-beta01" }
+androidxSecurityCrypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 
 # Firebase
 firebaseBom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBomVersion" }
-firebaseAnalyticsKtx = { group = "com.google.firebase", name = "firebase-analytics-ktx", version = "22.5.0" }
-firebaseCrashlyticsKtx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx", version = "19.4.4" }
-firebasePerfKtx = { group = "com.google.firebase", name = "firebase-perf-ktx", version = "21.0.5" }
-firebaseMessagingKtx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version = "24.1.2" }
+firebaseAnalyticsKtx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
+firebaseCrashlyticsKtx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+firebasePerfKtx = { group = "com.google.firebase", name = "firebase-perf-ktx" }
+firebaseMessagingKtx = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
 firebaseConfigKtx = { module = "com.google.firebase:firebase-config-ktx", version.ref = "firebaseConfigKtx" }
 firebaseStorageKtx = { module = "com.google.firebase:firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 
@@ -137,27 +134,15 @@ mockkAndroid = { module = "io.mockk:mockk-android", version.ref = "mockk" }
 mockkAgent = { module = "io.mockk:mockk-agent-jvm", version.ref = "mockk" }
 
 [plugins]
-# Android
 androidApplication = { id = "com.android.application", version.ref = "agp" }
-androidLibrary = { id = "com.android.library", version.ref = "agp" }
-
-# Kotlin
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-kotlinCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
-# Hilt
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-
-# Google Services
-googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
-firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
-firebasePerf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerfPlugin" }
-
-# OpenAPI Generator
-openapiGenerator = { id = "org.openapi.generator", version.ref = "openapiGeneratorPlugin" }
-
-# Toolchains
-gradleToolchainsFoojayResolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "toolchainsFoojayResolver" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+openapi-generator = { id = "org.openapi.generator", version.ref = "openapiGeneratorPlugin" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
+firebase-perf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerfPlugin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" } # Corrected from composeCompiler to kotlin
+gradle-toolchains-foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "toolchainsFoojayResolver" }
 

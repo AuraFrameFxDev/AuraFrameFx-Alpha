@@ -1,6 +1,7 @@
 package com.example.app.ipc
 
 // Explicitly import the AIDL interface
+import com.example.app.ipc.IAuraDriveService
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -19,10 +20,10 @@ class OracleDriveServiceConnector(private val context: Context) {
     val isServiceConnected: StateFlow<Boolean> = _isServiceConnected.asStateFlow()
 
     private val serviceConnection = object : ServiceConnection {
-        /****
+        /**
          * Called when the AuraDrive service is connected.
          *
-         * Obtains the remote `IAuraDriveService` interface from the provided binder and updates the connection state to indicate the service is connected.
+         * Retrieves the remote `IAuraDriveService` interface from the provided binder and sets the connection state to connected.
          *
          * @param name The component name of the connected service.
          * @param service The binder interface to the connected service.
@@ -33,9 +34,9 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
 
         /**
-         * Called when the AuraDrive service is disconnected, clearing the service reference and updating the connection state.
+         * Called when the connection to the AuraDrive service is lost.
          *
-         * @param name The component name of the disconnected service.
+         * Clears the reference to the remote service and updates the connection state to disconnected.
          */
         override fun onServiceDisconnected(name: ComponentName?) {
             auraDriveService = null
@@ -46,7 +47,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Attempts to bind to the remote AuraDrive service using an explicit intent.
      *
-     * Sets the connection state to disconnected if a security exception occurs during binding.
+     * Sets the connection state to disconnected if a SecurityException occurs during binding.
      */
     fun bindService() {
         val intent = Intent().apply {
@@ -63,9 +64,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Unbinds from the AuraDrive service and marks the connection as disconnected.
+     * Unbinds from the AuraDrive service and updates the connection state to disconnected.
      *
-     * Any exceptions during unbinding are ignored.
+     * Any exceptions thrown during unbinding are ignored.
      */
     fun unbindService() {
         try {
@@ -90,13 +91,13 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Toggles the LSPosed module on the connected Oracle Drive service using the service's default logic.
-     *
-     * The `packageName` and `enable` parameters are ignored.
-     *
-     * @return "Success" if the module was toggled successfully, "Failed" if the operation did not succeed, or null if the service is unavailable or a remote exception occurs.
-     */
-    suspend fun toggleModuleOnOracleDrive(packageName: String, enable: Boolean): String? =
+         * Toggles the LSPosed module on the connected Oracle Drive service using the service's default logic.
+         *
+         * The `packageName` and `enable` parameters are ignored.
+         *
+         * @return "Success" if the module was toggled successfully, "Failed" if the operation did not succeed, or null if the service is unavailable or a remote exception occurs.
+         */
+        suspend fun toggleModuleOnOracleDrive(packageName: String, enable: Boolean): String? =
         withContext(Dispatchers.IO) {
             try {
                 val result = auraDriveService?.toggleLSPosedModule()
@@ -109,7 +110,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Retrieves a detailed internal status report from the remote AuraDrive service.
      *
-     * @return The detailed status string, or null if the service is unavailable or a remote exception occurs.
+     * @return The detailed status string, or null if the service is unavailable or a RemoteException occurs.
      */
     suspend fun getDetailedInternalStatus(): String? = withContext(Dispatchers.IO) {
         try {

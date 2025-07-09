@@ -3,12 +3,13 @@ package dev.aurakai.auraframefx.ai.error
 import dev.aurakai.auraframefx.ai.context.ContextManager
 import dev.aurakai.auraframefx.ai.pipeline.AIPipelineConfig
 import dev.aurakai.auraframefx.model.AgentType
-import dev.aurakai.auraframefx.serialization.InstantSerializer
+import dev.aurakai.auraframefx.model.InteractionResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,14 +26,15 @@ class ErrorHandler @Inject constructor(
     val errorStats: StateFlow<ErrorStats> = _errorStats
 
     /**
-     * Handles an error by categorizing it, recording its details, updating error statistics, and triggering recovery actions.
+     * Handles an error by categorizing it, recording its details, updating error statistics, and initiating recovery actions.
      *
      * All metadata values are converted to strings before being stored in the error record.
      *
-     * @param agent The agent associated with the error event.
-     * @param context Description of where or how the error occurred.
-     * @param metadata Additional information about the error; all values are stringified.
-     * @return The AIError instance representing the recorded error.
+     * @param error The exception or error to process.
+     * @param agent The agent associated with the error.
+     * @param context A description of where or how the error occurred.
+     * @param metadata Additional metadata about the error; all values are stringified.
+     * @return The created and recorded AIError instance.
      */
     fun handleError(
         error: Throwable,

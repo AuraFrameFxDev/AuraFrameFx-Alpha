@@ -9,21 +9,21 @@ import java.time.Instant
  */
 object TimeUtils {
     val systemClock: Clock = Clock.systemUTC()
-
+    
     /**
-     * Returns the current instant using the system UTC clock.
-     *
-     * @return The current point in time as an [Instant].
-     */
-    fun now(): Instant = Instant.now(systemClock)
-
+ * Returns the current instant using the system UTC clock.
+ *
+ * @return The current point in time as an [Instant].
+ */
+fun now(): Instant = Instant.now(systemClock)
+    
     /**
-     * Returns the current time in milliseconds since the Unix epoch.
-     *
-     * @return The current timestamp in milliseconds.
-     */
-    fun currentTimestamp(): Long = System.currentTimeMillis()
-
+ * Returns the current time in milliseconds since the Unix epoch.
+ *
+ * @return The current timestamp in milliseconds.
+ */
+fun currentTimestamp(): Long = System.currentTimeMillis()
+    
     /**
      * Returns the duration elapsed from the specified instant to the current time.
      *
