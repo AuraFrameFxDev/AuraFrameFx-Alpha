@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Circle // Explicit import
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -61,13 +62,6 @@ class CascadeDebugViewModel @Inject constructor(
  * @param viewModel Supplies the agent's state data and manages updates for the visualization.
  */
 @OptIn(ExperimentalMaterial3Api::class)
-/**
- * Displays an interactive visualization of the Cascade agent's subsystems and their states.
- *
- * Renders a force-directed graph of agent components, allowing users to select nodes and view detailed state information. The graph and details panel update reactively based on the agent's vision and processing states from the provided ViewModel.
- *
- * @param viewModel The ViewModel providing agent state and updates. Defaults to the Hilt-injected instance.
- */
 @Composable
 fun CascadeZOrderPlayground(
     viewModel: CascadeDebugViewModel = hiltViewModel(),
@@ -224,9 +218,9 @@ fun CascadeZOrderPlayground(
 }
 
 /**
- * Displays detailed information about a graph node, including its name, current state, last updated timestamp, and connections.
+ * Shows a detailed panel with information about the given graph node, including its name, state, last updated time, and connections.
  *
- * @param node The graph node whose details are shown in the panel.
+ * @param node The graph node whose details are displayed.
  */
 @Composable
 private fun NodeDetails(node: GraphNode) {

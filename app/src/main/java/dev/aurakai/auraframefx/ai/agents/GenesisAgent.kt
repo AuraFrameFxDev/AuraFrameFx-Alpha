@@ -382,12 +382,12 @@ class GenesisAgent @Inject constructor(
     }
 
     /**
-     * Classifies the complexity of an agent request based on context size, fusion requirements, and request type.
+     * Determines the complexity level of an agent request based on its context size, fusion requirements, and request type.
      *
-     * Returns `TRANSCENDENT` if the context is large, `COMPLEX` if fusion is required, `MODERATE` for analysis-related types, and `SIMPLE` otherwise.
+     * Returns `TRANSCENDENT` for requests with large contexts, `COMPLEX` if fusion is required, `MODERATE` for analysis-related types, and `SIMPLE` otherwise.
      *
-     * @param request The agent request to classify.
-     * @return The determined request complexity.
+     * @param request The agent request to evaluate.
+     * @return The classified complexity of the request.
      */
     private fun analyzeRequestComplexity(request: AgentRequest): RequestComplexity {
         // Analyze complexity based on request characteristics
