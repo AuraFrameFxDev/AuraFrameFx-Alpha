@@ -109,6 +109,6 @@ enum class TaskPriority {
     NORMAL,
     HIGH,
     URGENT;
-    
+
     val value: Int get() = ordinal
 }

@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -18,9 +18,13 @@ public class Pair {
     private String name = "";
     private String value = "";
 
-    public Pair (String name, String value) {
+    public Pair(String name, String value) {
         setName(name);
         setValue(value);
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     private void setName(String name) {
@@ -31,20 +35,16 @@ public class Pair {
         this.name = name;
     }
 
+    public String getValue() {
+        return this.value;
+    }
+
     private void setValue(String value) {
         if (!isValidString(value)) {
             return;
         }
 
         this.value = value;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getValue() {
-        return this.value;
     }
 
     private boolean isValidString(String arg) {

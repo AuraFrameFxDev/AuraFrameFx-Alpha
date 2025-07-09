@@ -29,7 +29,7 @@ object AuraFxAiApiModule {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
-        
+
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .build()
@@ -62,7 +62,7 @@ object AuraFxAiApiModule {
     fun provideAiContentApi(okHttpClient: OkHttpClient): AIContentApi {
 
         val baseUrl = "https://api.auraframefx.com/v1"
-        
+
         return AIContentApi(basePath = baseUrl, client = okHttpClient)
     }
 

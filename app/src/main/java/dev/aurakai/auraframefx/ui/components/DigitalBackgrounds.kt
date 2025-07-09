@@ -1,7 +1,6 @@
 package dev.aurakai.auraframefx.ui.components
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -104,12 +103,12 @@ private fun DrawScope.drawHexagonGrid(color: Color) {
     // Simple hexagon grid pattern
     val radius = 30f
     val spacing = radius * 1.5f
-    
+
     for (row in 0 until (size.height / spacing).toInt()) {
         for (col in 0 until (size.width / spacing).toInt()) {
             val x = col * spacing + if (row % 2 == 1) spacing / 2 else 0f
             val y = row * spacing
-            
+
             if (x < size.width && y < size.height) {
                 drawHexagon(
                     center = androidx.compose.ui.geometry.Offset(x, y),
@@ -140,7 +139,7 @@ private fun DrawScope.drawHexagon(
         val angle = i * 60.0 * Math.PI / 180.0
         val x = center.x + radius * cos(angle).toFloat()
         val y = center.y + radius * sin(angle).toFloat()
-        
+
         if (i == 0) {
             path.moveTo(x, y)
         } else {
@@ -148,7 +147,7 @@ private fun DrawScope.drawHexagon(
         }
     }
     path.close()
-    
+
     drawPath(
         path = path,
         color = color,

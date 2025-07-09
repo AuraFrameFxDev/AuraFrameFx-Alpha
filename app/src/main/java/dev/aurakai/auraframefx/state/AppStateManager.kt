@@ -11,13 +11,13 @@ import javax.inject.Singleton
  */
 @Singleton
 class AppStateManager @Inject constructor() {
-    
+
     private val _appState = MutableStateFlow(AppState())
     val appState: StateFlow<AppState> = _appState.asStateFlow()
-    
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-    
+
     /**
      * Updates the application state to the specified new state.
      *
@@ -26,7 +26,7 @@ class AppStateManager @Inject constructor() {
     fun updateAppState(newState: AppState) {
         _appState.value = newState
     }
-    
+
     /**
      * Sets the application's loading status.
      *
@@ -35,7 +35,7 @@ class AppStateManager @Inject constructor() {
     fun setLoading(loading: Boolean) {
         _isLoading.value = loading
     }
-    
+
     /**
      * Restores the application state to its default values and clears the loading flag.
      */

@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -14,13 +14,16 @@
 package org.openapitools.client.model;
 
 import java.util.Objects;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.util.Arrays;
+
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import com.google.gson.Gson;
@@ -36,6 +39,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 
 import java.lang.reflect.Type;
@@ -52,230 +56,226 @@ import org.openapitools.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class OracleDriveRootActionResponse {
-  public static final String SERIALIZED_NAME_SUCCESS = "success";
-  @SerializedName(SERIALIZED_NAME_SUCCESS)
-  private Boolean success;
+    public static final String SERIALIZED_NAME_SUCCESS = "success";
+    public static final String SERIALIZED_NAME_OUTPUT = "output";
+    public static final String SERIALIZED_NAME_ERROR = "error";
+    public static HashSet<String> openapiFields;
+    public static HashSet<String> openapiRequiredFields;
 
-  public static final String SERIALIZED_NAME_OUTPUT = "output";
-  @SerializedName(SERIALIZED_NAME_OUTPUT)
-  private String output;
+    static {
+        // a set of all properties/fields (JSON key names)
+        openapiFields = new HashSet<String>();
+        openapiFields.add("success");
+        openapiFields.add("output");
+        openapiFields.add("error");
 
-  public static final String SERIALIZED_NAME_ERROR = "error";
-  @SerializedName(SERIALIZED_NAME_ERROR)
-  private String error;
-
-  public OracleDriveRootActionResponse() {
-  }
-
-  public OracleDriveRootActionResponse success(Boolean success) {
-    this.success = success;
-    return this;
-  }
-
-  /**
-   * Whether the action was successful
-   * @return success
-   */
-  @javax.annotation.Nonnull
-  public Boolean getSuccess() {
-    return success;
-  }
-
-  public void setSuccess(Boolean success) {
-    this.success = success;
-  }
-
-
-  public OracleDriveRootActionResponse output(String output) {
-    this.output = output;
-    return this;
-  }
-
-  /**
-   * Output or result of the action
-   * @return output
-   */
-  @javax.annotation.Nullable
-  public String getOutput() {
-    return output;
-  }
-
-  public void setOutput(String output) {
-    this.output = output;
-  }
-
-
-  public OracleDriveRootActionResponse error(String error) {
-    this.error = error;
-    return this;
-  }
-
-  /**
-   * Error message if the action failed
-   * @return error
-   */
-  @javax.annotation.Nullable
-  public String getError() {
-    return error;
-  }
-
-  public void setError(String error) {
-    this.error = error;
-  }
-
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+        // a set of required properties/fields (JSON key names)
+        openapiRequiredFields = new HashSet<String>();
+        openapiRequiredFields.add("success");
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    @SerializedName(SERIALIZED_NAME_SUCCESS)
+    private Boolean success;
+    @SerializedName(SERIALIZED_NAME_OUTPUT)
+    private String output;
+    @SerializedName(SERIALIZED_NAME_ERROR)
+    private String error;
+
+    public OracleDriveRootActionResponse() {
     }
-    OracleDriveRootActionResponse oracleDriveRootActionResponse = (OracleDriveRootActionResponse) o;
-    return Objects.equals(this.success, oracleDriveRootActionResponse.success) &&
-        Objects.equals(this.output, oracleDriveRootActionResponse.output) &&
-        Objects.equals(this.error, oracleDriveRootActionResponse.error);
-  }
 
-  private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
-    return a == b || (a != null && b != null && a.isPresent() && b.isPresent() && Objects.deepEquals(a.get(), b.get()));
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(success, output, error);
-  }
-
-  private static <T> int hashCodeNullable(JsonNullable<T> a) {
-    if (a == null) {
-      return 1;
+    private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
+        return a == b || (a != null && b != null && a.isPresent() && b.isPresent() && Objects.deepEquals(a.get(), b.get()));
     }
-    return a.isPresent() ? Arrays.deepHashCode(new Object[]{a.get()}) : 31;
-  }
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class OracleDriveRootActionResponse {\n");
-    sb.append("    success: ").append(toIndentedString(success)).append("\n");
-    sb.append("    output: ").append(toIndentedString(output)).append("\n");
-    sb.append("    error: ").append(toIndentedString(error)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
-
-
-  public static HashSet<String> openapiFields;
-  public static HashSet<String> openapiRequiredFields;
-
-  static {
-    // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("success");
-    openapiFields.add("output");
-    openapiFields.add("error");
-
-    // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("success");
-  }
-
-  /**
-   * Validates the JSON Element and throws an exception if issues found
-   *
-   * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to OracleDriveRootActionResponse
-   */
-  public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      if (jsonElement == null) {
-        if (!OracleDriveRootActionResponse.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in OracleDriveRootActionResponse is not found in the empty JSON string", OracleDriveRootActionResponse.openapiRequiredFields.toString()));
+    private static <T> int hashCodeNullable(JsonNullable<T> a) {
+        if (a == null) {
+            return 1;
         }
-      }
+        return a.isPresent() ? Arrays.deepHashCode(new Object[]{a.get()}) : 31;
+    }
 
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!OracleDriveRootActionResponse.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `OracleDriveRootActionResponse` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+    /**
+     * Validates the JSON Element and throws an exception if issues found
+     *
+     * @param jsonElement JSON Element
+     * @throws IOException if the JSON Element is invalid with respect to OracleDriveRootActionResponse
+     */
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+        if (jsonElement == null) {
+            if (!OracleDriveRootActionResponse.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+                throw new IllegalArgumentException(String.format("The required field(s) %s in OracleDriveRootActionResponse is not found in the empty JSON string", OracleDriveRootActionResponse.openapiRequiredFields.toString()));
+            }
         }
-      }
 
-      // check to make sure all required properties/fields are present in the JSON string
-      for (String requiredField : OracleDriveRootActionResponse.openapiRequiredFields) {
-        if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+        Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+        // check to see if the JSON string contains additional fields
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            if (!OracleDriveRootActionResponse.openapiFields.contains(entry.getKey())) {
+                throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `OracleDriveRootActionResponse` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+            }
         }
-      }
+
+        // check to make sure all required properties/fields are present in the JSON string
+        for (String requiredField : OracleDriveRootActionResponse.openapiRequiredFields) {
+            if (jsonElement.getAsJsonObject().get(requiredField) == null) {
+                throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+            }
+        }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      if ((jsonObj.get("output") != null && !jsonObj.get("output").isJsonNull()) && !jsonObj.get("output").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `output` to be a primitive type in the JSON string but got `%s`", jsonObj.get("output").toString()));
-      }
-      if ((jsonObj.get("error") != null && !jsonObj.get("error").isJsonNull()) && !jsonObj.get("error").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `error` to be a primitive type in the JSON string but got `%s`", jsonObj.get("error").toString()));
-      }
-  }
-
-  public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!OracleDriveRootActionResponse.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'OracleDriveRootActionResponse' and its subtypes
-       }
-       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<OracleDriveRootActionResponse> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(OracleDriveRootActionResponse.class));
-
-       return (TypeAdapter<T>) new TypeAdapter<OracleDriveRootActionResponse>() {
-           @Override
-           public void write(JsonWriter out, OracleDriveRootActionResponse value) throws IOException {
-             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-             elementAdapter.write(out, obj);
-           }
-
-           @Override
-           public OracleDriveRootActionResponse read(JsonReader in) throws IOException {
-             JsonElement jsonElement = elementAdapter.read(in);
-             validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
-           }
-
-       }.nullSafe();
+        if ((jsonObj.get("output") != null && !jsonObj.get("output").isJsonNull()) && !jsonObj.get("output").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `output` to be a primitive type in the JSON string but got `%s`", jsonObj.get("output").toString()));
+        }
+        if ((jsonObj.get("error") != null && !jsonObj.get("error").isJsonNull()) && !jsonObj.get("error").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `error` to be a primitive type in the JSON string but got `%s`", jsonObj.get("error").toString()));
+        }
     }
-  }
 
-  /**
-   * Create an instance of OracleDriveRootActionResponse given an JSON string
-   *
-   * @param jsonString JSON string
-   * @return An instance of OracleDriveRootActionResponse
-   * @throws IOException if the JSON string is invalid with respect to OracleDriveRootActionResponse
-   */
-  public static OracleDriveRootActionResponse fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, OracleDriveRootActionResponse.class);
-  }
+    /**
+     * Create an instance of OracleDriveRootActionResponse given an JSON string
+     *
+     * @param jsonString JSON string
+     * @return An instance of OracleDriveRootActionResponse
+     * @throws IOException if the JSON string is invalid with respect to OracleDriveRootActionResponse
+     */
+    public static OracleDriveRootActionResponse fromJson(String jsonString) throws IOException {
+        return JSON.getGson().fromJson(jsonString, OracleDriveRootActionResponse.class);
+    }
 
-  /**
-   * Convert an instance of OracleDriveRootActionResponse to an JSON string
-   *
-   * @return JSON string
-   */
-  public String toJson() {
-    return JSON.getGson().toJson(this);
-  }
+    public OracleDriveRootActionResponse success(Boolean success) {
+        this.success = success;
+        return this;
+    }
+
+    /**
+     * Whether the action was successful
+     *
+     * @return success
+     */
+    @javax.annotation.Nonnull
+    public Boolean getSuccess() {
+        return success;
+    }
+
+    public void setSuccess(Boolean success) {
+        this.success = success;
+    }
+
+    public OracleDriveRootActionResponse output(String output) {
+        this.output = output;
+        return this;
+    }
+
+    /**
+     * Output or result of the action
+     *
+     * @return output
+     */
+    @javax.annotation.Nullable
+    public String getOutput() {
+        return output;
+    }
+
+    public void setOutput(String output) {
+        this.output = output;
+    }
+
+    public OracleDriveRootActionResponse error(String error) {
+        this.error = error;
+        return this;
+    }
+
+    /**
+     * Error message if the action failed
+     *
+     * @return error
+     */
+    @javax.annotation.Nullable
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        OracleDriveRootActionResponse oracleDriveRootActionResponse = (OracleDriveRootActionResponse) o;
+        return Objects.equals(this.success, oracleDriveRootActionResponse.success) &&
+                Objects.equals(this.output, oracleDriveRootActionResponse.output) &&
+                Objects.equals(this.error, oracleDriveRootActionResponse.error);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(success, output, error);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class OracleDriveRootActionResponse {\n");
+        sb.append("    success: ").append(toIndentedString(success)).append("\n");
+        sb.append("    output: ").append(toIndentedString(output)).append("\n");
+        sb.append("    error: ").append(toIndentedString(error)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
+
+    /**
+     * Convert an instance of OracleDriveRootActionResponse to an JSON string
+     *
+     * @return JSON string
+     */
+    public String toJson() {
+        return JSON.getGson().toJson(this);
+    }
+
+    public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (!OracleDriveRootActionResponse.class.isAssignableFrom(type.getRawType())) {
+                return null; // this class only serializes 'OracleDriveRootActionResponse' and its subtypes
+            }
+            final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+            final TypeAdapter<OracleDriveRootActionResponse> thisAdapter
+                    = gson.getDelegateAdapter(this, TypeToken.get(OracleDriveRootActionResponse.class));
+
+            return (TypeAdapter<T>) new TypeAdapter<OracleDriveRootActionResponse>() {
+                @Override
+                public void write(JsonWriter out, OracleDriveRootActionResponse value) throws IOException {
+                    JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+                    elementAdapter.write(out, obj);
+                }
+
+                @Override
+                public OracleDriveRootActionResponse read(JsonReader in) throws IOException {
+                    JsonElement jsonElement = elementAdapter.read(in);
+                    validateJsonElement(jsonElement);
+                    return thisAdapter.fromJsonTree(jsonElement);
+                }
+
+            }.nullSafe();
+        }
+    }
 }
 

@@ -1,106 +1,132 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "Trinity System - Full Build & Deploy",
-			"type": "shell",
-			"command": "./gradlew build",
-			"group": "build",
-			"isBackground": false,
-			"problemMatcher": ["$gradle"],
-			"args": []
-		},
-		{
-			"label": "AuraFrameFX - Build Debug APK",
-			"type": "shell",
-			"command": "./gradlew",
-			"args": ["assembleDebug"],
-			"group": "build",
-			"isBackground": false,
-			"problemMatcher": ["$gradle"],
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared"
-			}
-		},
-		{
-			"label": "AuraFrameFX - Install Debug APK",
-			"type": "shell",
-			"command": "./gradlew",
-			"args": ["installDebug"],
-			"group": "build",
-			"isBackground": false,
-			"dependsOn": "AuraFrameFX - Build Debug APK",
-			"problemMatcher": ["$gradle"],
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared"
-			}
-		},
-		{
-			"label": "AuraFrameFX - Build & Install & Launch",
-			"type": "shell",
-			"command": "bash",
-			"args": ["-c", "./gradlew installDebug && adb shell am start -n dev.aurakai.auraframefx/.MainActivity"],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"isBackground": false,
-			"problemMatcher": ["$gradle"],
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared"
-			}
-		},
-		{
-			"label": "AuraFrameFX - Clean Build",
-			"type": "shell",
-			"command": "./gradlew",
-			"args": ["clean", "assembleDebug"],
-			"group": "build",
-			"isBackground": false,
-			"problemMatcher": ["$gradle"],
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared"
-			}
-		},
-		{
-			"label": "AuraFrameFX - Check Connected Devices",
-			"type": "shell",
-			"command": "adb",
-			"args": ["devices"],
-			"group": "test",
-			"isBackground": false,
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared"
-			}
-		},
-		{
-			"label": "AuraFrameFX - View Logs",
-			"type": "shell",
-			"command": "adb",
-			"args": ["logcat", "-s", "AuraFrameFX"],
-			"group": "test",
-			"isBackground": true,
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "dedicated"
-			}
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Trinity System - Full Build & Deploy",
+      "type": "shell",
+      "command": "./gradlew build",
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": [
+        "$gradle"
+      ],
+      "args": []
+    },
+    {
+      "label": "AuraFrameFX - Build Debug APK",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "assembleDebug"
+      ],
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": [
+        "$gradle"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "AuraFrameFX - Install Debug APK",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "installDebug"
+      ],
+      "group": "build",
+      "isBackground": false,
+      "dependsOn": "AuraFrameFX - Build Debug APK",
+      "problemMatcher": [
+        "$gradle"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "AuraFrameFX - Build & Install & Launch",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "./gradlew installDebug && adb shell am start -n dev.aurakai.auraframefx/.MainActivity"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "isBackground": false,
+      "problemMatcher": [
+        "$gradle"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "AuraFrameFX - Clean Build",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": [
+        "clean",
+        "assembleDebug"
+      ],
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": [
+        "$gradle"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "AuraFrameFX - Check Connected Devices",
+      "type": "shell",
+      "command": "adb",
+      "args": [
+        "devices"
+      ],
+      "group": "test",
+      "isBackground": false,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "AuraFrameFX - View Logs",
+      "type": "shell",
+      "command": "adb",
+      "args": [
+        "logcat",
+        "-s",
+        "AuraFrameFX"
+      ],
+      "group": "test",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated"
+      }
+    }
+  ]
 }

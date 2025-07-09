@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -14,11 +14,13 @@
 package org.openapitools.client.model;
 
 import java.util.Objects;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -35,6 +37,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 
 import java.lang.reflect.Type;
@@ -51,164 +54,162 @@ import org.openapitools.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class ThemeApplyRequest {
-  public static final String SERIALIZED_NAME_THEME_ID = "themeId";
-  @SerializedName(SERIALIZED_NAME_THEME_ID)
-  private String themeId;
+    public static final String SERIALIZED_NAME_THEME_ID = "themeId";
+    public static HashSet<String> openapiFields;
+    public static HashSet<String> openapiRequiredFields;
 
-  public ThemeApplyRequest() {
-  }
+    static {
+        // a set of all properties/fields (JSON key names)
+        openapiFields = new HashSet<String>();
+        openapiFields.add("themeId");
 
-  public ThemeApplyRequest themeId(String themeId) {
-    this.themeId = themeId;
-    return this;
-  }
-
-  /**
-   * Get themeId
-   * @return themeId
-   */
-  @javax.annotation.Nonnull
-  public String getThemeId() {
-    return themeId;
-  }
-
-  public void setThemeId(String themeId) {
-    this.themeId = themeId;
-  }
-
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+        // a set of required properties/fields (JSON key names)
+        openapiRequiredFields = new HashSet<String>();
+        openapiRequiredFields.add("themeId");
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    @SerializedName(SERIALIZED_NAME_THEME_ID)
+    private String themeId;
+
+    public ThemeApplyRequest() {
     }
-    ThemeApplyRequest themeApplyRequest = (ThemeApplyRequest) o;
-    return Objects.equals(this.themeId, themeApplyRequest.themeId);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(themeId);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ThemeApplyRequest {\n");
-    sb.append("    themeId: ").append(toIndentedString(themeId)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
-
-
-  public static HashSet<String> openapiFields;
-  public static HashSet<String> openapiRequiredFields;
-
-  static {
-    // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("themeId");
-
-    // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("themeId");
-  }
-
-  /**
-   * Validates the JSON Element and throws an exception if issues found
-   *
-   * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to ThemeApplyRequest
-   */
-  public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      if (jsonElement == null) {
-        if (!ThemeApplyRequest.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in ThemeApplyRequest is not found in the empty JSON string", ThemeApplyRequest.openapiRequiredFields.toString()));
+    /**
+     * Validates the JSON Element and throws an exception if issues found
+     *
+     * @param jsonElement JSON Element
+     * @throws IOException if the JSON Element is invalid with respect to ThemeApplyRequest
+     */
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+        if (jsonElement == null) {
+            if (!ThemeApplyRequest.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+                throw new IllegalArgumentException(String.format("The required field(s) %s in ThemeApplyRequest is not found in the empty JSON string", ThemeApplyRequest.openapiRequiredFields.toString()));
+            }
         }
-      }
 
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!ThemeApplyRequest.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `ThemeApplyRequest` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+        Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+        // check to see if the JSON string contains additional fields
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            if (!ThemeApplyRequest.openapiFields.contains(entry.getKey())) {
+                throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `ThemeApplyRequest` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+            }
         }
-      }
 
-      // check to make sure all required properties/fields are present in the JSON string
-      for (String requiredField : ThemeApplyRequest.openapiRequiredFields) {
-        if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+        // check to make sure all required properties/fields are present in the JSON string
+        for (String requiredField : ThemeApplyRequest.openapiRequiredFields) {
+            if (jsonElement.getAsJsonObject().get(requiredField) == null) {
+                throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+            }
         }
-      }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      if (!jsonObj.get("themeId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `themeId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("themeId").toString()));
-      }
-  }
-
-  public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!ThemeApplyRequest.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'ThemeApplyRequest' and its subtypes
-       }
-       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<ThemeApplyRequest> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(ThemeApplyRequest.class));
-
-       return (TypeAdapter<T>) new TypeAdapter<ThemeApplyRequest>() {
-           @Override
-           public void write(JsonWriter out, ThemeApplyRequest value) throws IOException {
-             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-             elementAdapter.write(out, obj);
-           }
-
-           @Override
-           public ThemeApplyRequest read(JsonReader in) throws IOException {
-             JsonElement jsonElement = elementAdapter.read(in);
-             validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
-           }
-
-       }.nullSafe();
+        if (!jsonObj.get("themeId").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `themeId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("themeId").toString()));
+        }
     }
-  }
 
-  /**
-   * Create an instance of ThemeApplyRequest given an JSON string
-   *
-   * @param jsonString JSON string
-   * @return An instance of ThemeApplyRequest
-   * @throws IOException if the JSON string is invalid with respect to ThemeApplyRequest
-   */
-  public static ThemeApplyRequest fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, ThemeApplyRequest.class);
-  }
+    /**
+     * Create an instance of ThemeApplyRequest given an JSON string
+     *
+     * @param jsonString JSON string
+     * @return An instance of ThemeApplyRequest
+     * @throws IOException if the JSON string is invalid with respect to ThemeApplyRequest
+     */
+    public static ThemeApplyRequest fromJson(String jsonString) throws IOException {
+        return JSON.getGson().fromJson(jsonString, ThemeApplyRequest.class);
+    }
 
-  /**
-   * Convert an instance of ThemeApplyRequest to an JSON string
-   *
-   * @return JSON string
-   */
-  public String toJson() {
-    return JSON.getGson().toJson(this);
-  }
+    public ThemeApplyRequest themeId(String themeId) {
+        this.themeId = themeId;
+        return this;
+    }
+
+    /**
+     * Get themeId
+     *
+     * @return themeId
+     */
+    @javax.annotation.Nonnull
+    public String getThemeId() {
+        return themeId;
+    }
+
+    public void setThemeId(String themeId) {
+        this.themeId = themeId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ThemeApplyRequest themeApplyRequest = (ThemeApplyRequest) o;
+        return Objects.equals(this.themeId, themeApplyRequest.themeId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(themeId);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class ThemeApplyRequest {\n");
+        sb.append("    themeId: ").append(toIndentedString(themeId)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
+
+    /**
+     * Convert an instance of ThemeApplyRequest to an JSON string
+     *
+     * @return JSON string
+     */
+    public String toJson() {
+        return JSON.getGson().toJson(this);
+    }
+
+    public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (!ThemeApplyRequest.class.isAssignableFrom(type.getRawType())) {
+                return null; // this class only serializes 'ThemeApplyRequest' and its subtypes
+            }
+            final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+            final TypeAdapter<ThemeApplyRequest> thisAdapter
+                    = gson.getDelegateAdapter(this, TypeToken.get(ThemeApplyRequest.class));
+
+            return (TypeAdapter<T>) new TypeAdapter<ThemeApplyRequest>() {
+                @Override
+                public void write(JsonWriter out, ThemeApplyRequest value) throws IOException {
+                    JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+                    elementAdapter.write(out, obj);
+                }
+
+                @Override
+                public ThemeApplyRequest read(JsonReader in) throws IOException {
+                    JsonElement jsonElement = elementAdapter.read(in);
+                    validateJsonElement(jsonElement);
+                    return thisAdapter.fromJsonTree(jsonElement);
+                }
+
+            }.nullSafe();
+        }
+    }
 }
 

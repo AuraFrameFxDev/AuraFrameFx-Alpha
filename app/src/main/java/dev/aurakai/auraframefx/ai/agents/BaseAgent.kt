@@ -5,7 +5,7 @@ import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
- 
+
 
 /**
  * Base implementation of the [Agent] interface.
@@ -17,7 +17,7 @@ open class BaseAgent(
     private val _agentName: String,
     private val _agentType: String,
 
-) : Agent {
+    ) : Agent {
 
     /**
      * Retrieves the agent's name.

@@ -1,13 +1,15 @@
 # OpenAPI Code Generation Guide for AuraFrameFX
 
-This document explains how to use the OpenAPI generator to create client libraries for your AuraFrameFX ecosystem.
+This document explains how to use the OpenAPI generator to create client libraries for your
+AuraFrameFX ecosystem.
 
 ## 🎯 Overview
 
-The AuraFrameFX project uses OpenAPI 3.0 to define the API specification and automatically generate client libraries in multiple languages:
+The AuraFrameFX project uses OpenAPI 3.0 to define the API specification and automatically generate
+client libraries in multiple languages:
 
 - **Kotlin**: For Android app integration
-- **TypeScript**: For web clients and frontend applications  
+- **TypeScript**: For web clients and frontend applications
 - **Java**: For backend services and enterprise integration
 
 ## 📁 Project Structure
@@ -33,6 +35,7 @@ AuraFrameFx-Beta-main/
 ## 🚀 Quick Start
 
 ### 1. Generate All Clients
+
 ```powershell
 # Generate all three clients (Kotlin, TypeScript, Java)
 .\generate-apis.ps1
@@ -42,6 +45,7 @@ AuraFrameFx-Beta-main/
 ```
 
 ### 2. Generate Specific Clients
+
 ```powershell
 # Generate only Kotlin client
 .\generate-apis.ps1 -Target kotlin
@@ -54,6 +58,7 @@ AuraFrameFx-Beta-main/
 ```
 
 ### 3. Clean and Regenerate
+
 ```powershell
 # Clean old generated files and regenerate all
 .\generate-apis.ps1 -Clean
@@ -62,6 +67,7 @@ AuraFrameFx-Beta-main/
 ## 🔧 Configuration Details
 
 ### Kotlin Client Configuration
+
 Located in `app/build.gradle.kts`:
 
 ```kotlin
@@ -69,17 +75,20 @@ openApiGenerate {
     generatorName.set("kotlin")
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
     outputDir.set("$buildDir/generated/source/openapi")
-    
-    configOptions.set(mapOf(
-        "library" to "jvm-retrofit2",
-        "useCoroutines" to "true",
-        "serializationLibrary" to "kotlinx_serialization",
-        "dateLibrary" to "kotlinx-datetime"
-    ))
+
+    configOptions.set(
+        mapOf(
+            "library" to "jvm-retrofit2",
+            "useCoroutines" to "true",
+            "serializationLibrary" to "kotlinx_serialization",
+            "dateLibrary" to "kotlinx-datetime"
+        )
+    )
 }
 ```
 
 **Features:**
+
 - Uses Retrofit2 for HTTP client
 - Kotlin Coroutines support
 - kotlinx.serialization for JSON
@@ -92,17 +101,20 @@ openApiGenerate {
 tasks.register<GenerateTask>("generateTypeScriptClient") {
     generatorName.set("typescript-fetch")
     outputDir.set("$buildDir/generated/typescript")
-    
-    configOptions.set(mapOf(
-        "npmName" to "@auraframefx/api-client",
-        "supportsES6" to "true",
-        "withInterfaces" to "true",
-        "typescriptThreePlus" to "true"
-    ))
+
+    configOptions.set(
+        mapOf(
+            "npmName" to "@auraframefx/api-client",
+            "supportsES6" to "true",
+            "withInterfaces" to "true",
+            "typescriptThreePlus" to "true"
+        )
+    )
 }
 ```
 
 **Features:**
+
 - Modern TypeScript 3+ syntax
 - Fetch API for HTTP requests
 - Full type definitions
@@ -115,17 +127,20 @@ tasks.register<GenerateTask>("generateTypeScriptClient") {
 tasks.register<GenerateTask>("generateJavaClient") {
     generatorName.set("java")
     outputDir.set("$buildDir/generated/java")
-    
-    configOptions.set(mapOf(
-        "library" to "retrofit2",
-        "serializationLibrary" to "gson",
-        "dateLibrary" to "java8",
-        "java8" to "true"
-    ))
+
+    configOptions.set(
+        mapOf(
+            "library" to "retrofit2",
+            "serializationLibrary" to "gson",
+            "dateLibrary" to "java8",
+            "java8" to "true"
+        )
+    )
 }
 ```
 
 **Features:**
+
 - Retrofit2 HTTP client
 - Gson for JSON serialization
 - Java 8+ date/time API
@@ -134,6 +149,7 @@ tasks.register<GenerateTask>("generateJavaClient") {
 ## 📋 Generated Code Structure
 
 ### Kotlin Client (`app/build/generated/source/openapi/`)
+
 ```
 src/main/java/dev/aurakai/auraframefx/api/
 ├── client/          # HTTP client configuration
@@ -147,6 +163,7 @@ src/main/java/dev/aurakai/auraframefx/api/
 ```
 
 ### TypeScript Client (`app/build/generated/typescript/`)
+
 ```
 src/
 ├── apis/           # API classes
@@ -156,6 +173,7 @@ src/
 ```
 
 ### Java Client (`app/build/generated/java/`)
+
 ```
 src/main/java/dev/aurakai/auraframefx/java/
 ├── client/         # Client configuration
@@ -173,7 +191,7 @@ src/main/java/dev/aurakai/auraframefx/java/
 @Module
 @InstallIn(SingletonComponent::class)
 object ApiModule {
-    
+
     @Provides
     @Singleton
     fun provideApiClient(): ApiClient {
@@ -181,7 +199,7 @@ object ApiModule {
             setBasePath("https://api.auraframefx.com/v1")
         }
     }
-    
+
     @Provides
     fun provideUsersApi(client: ApiClient): UsersApi {
         return client.createService(UsersApi::class.java)
@@ -196,7 +214,7 @@ class UserRepository @Inject constructor(
     suspend fun getCurrentUser(): User {
         return usersApi.userGet()
     }
-    
+
     suspend fun updatePreferences(preferences: UserPreferencesUpdate) {
         usersApi.userPreferencesPut(preferences)
     }
@@ -207,7 +225,7 @@ class UserRepository @Inject constructor(
 class UserViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
-    
+
     fun loadUser() {
         viewModelScope.launch {
             try {
@@ -252,8 +270,12 @@ async function loadUserProfile() {
 ```java
 // Configure the client
 ApiClient client = new ApiClient();
-client.setBasePath("https://api.auraframefx.com/v1");
-client.setAccessToken("your-access-token");
+client.
+
+setBasePath("https://api.auraframefx.com/v1");
+client.
+
+setAccessToken("your-access-token");
 
 UsersApi usersApi = new UsersApi(client);
 AiAgentsApi agentsApi = new AiAgentsApi(client);
@@ -261,11 +283,11 @@ AiAgentsApi agentsApi = new AiAgentsApi(client);
 // Use in your service
 @Service
 public class AuraFrameFxService {
-    
+
     public User getUserById(String userId) throws ApiException {
         return usersApi.userGet();
     }
-    
+
     public AgentMessage processAgentRequest(AgentType agent, AgentProcessRequest request) throws ApiException {
         return agentsApi.agentAgentTypeProcessRequestPost(agent, request);
     }
@@ -275,24 +297,29 @@ public class AuraFrameFxService {
 ## 🔄 Development Workflow
 
 ### 1. Update the API Specification
+
 When you modify the API:
+
 1. Edit `api-spec/aura-framefx-api.yaml`
 2. Validate the spec using online tools or IDE extensions
 3. Regenerate clients
 
 ### 2. Regenerate Clients
+
 ```powershell
 # After updating the OpenAPI spec
 .\generate-apis.ps1 -Clean  # Clean and regenerate all
 ```
 
 ### 3. Update Application Code
+
 1. Review generated code for breaking changes
 2. Update your application's imports and usage
 3. Test the integration
 4. Commit both spec and generated code changes
 
 ### 4. Build and Test
+
 ```powershell
 # Build the Android project
 .\gradlew build
@@ -304,10 +331,12 @@ When you modify the API:
 ## 🎨 Customization Options
 
 ### Adding Custom Templates
+
 You can customize the generated code by:
 
 1. Creating custom templates in `templates/` directory
 2. Modifying the generator configuration:
+
 ```kotlin
 openApiGenerate {
     templateDir.set("$projectDir/templates/kotlin")
@@ -316,6 +345,7 @@ openApiGenerate {
 ```
 
 ### Environment-Specific Configuration
+
 For different environments (dev, staging, prod):
 
 ```kotlin
@@ -336,22 +366,23 @@ android {
 ### Common Issues
 
 1. **Generation fails with "spec not found"**
-   - Ensure you're running from project root
-   - Check that `api-spec/aura-framefx-api.yaml` exists
+    - Ensure you're running from project root
+    - Check that `api-spec/aura-framefx-api.yaml` exists
 
 2. **Compilation errors after generation**
-   - Clean and rebuild: `.\gradlew clean build`
-   - Check for version conflicts in dependencies
+    - Clean and rebuild: `.\gradlew clean build`
+    - Check for version conflicts in dependencies
 
 3. **Missing dependencies**
-   - Ensure all required dependencies are in `app/build.gradle.kts`
-   - Run `.\gradlew dependencies` to check dependency tree
+    - Ensure all required dependencies are in `app/build.gradle.kts`
+    - Run `.\gradlew dependencies` to check dependency tree
 
 4. **Generated code not found in IDE**
-   - Sync Gradle: File → Sync Project with Gradle Files
-   - Check that generated source directories are added to sourceSets
+    - Sync Gradle: File → Sync Project with Gradle Files
+    - Check that generated source directories are added to sourceSets
 
 ### Debug Mode
+
 Add debug logging to see what's happening:
 
 ```kotlin
@@ -387,4 +418,5 @@ openApiGenerate {
 
 ---
 
-**Need help?** Check the troubleshooting section above or ask for assistance with specific integration issues!
+**Need help?** Check the troubleshooting section above or ask for assistance with specific
+integration issues!

@@ -120,46 +120,46 @@ class AuraFxLogger @Inject constructor(
         loggerScope.launch { writeLogEntry("DEBUG", tag, message, throwable) }
 
     /**
-         * Asynchronously logs an informational message with the given tag and optional throwable.
-         *
-         * The message is written to both Android Logcat and the current day's log file.
-         *
-         * @param tag Identifies the source of the log message.
-         * @param message The informational message to log.
-         * @param throwable Optional exception whose stack trace will be included in the log entry.
-         */
+     * Asynchronously logs an informational message with the given tag and optional throwable.
+     *
+     * The message is written to both Android Logcat and the current day's log file.
+     *
+     * @param tag Identifies the source of the log message.
+     * @param message The informational message to log.
+     * @param throwable Optional exception whose stack trace will be included in the log entry.
+     */
     fun i(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("INFO", tag, message, throwable) }
 
     /**
-         * Logs a warning message asynchronously to both Android Logcat and the internal daily log file.
-         *
-         * @param tag The source identifier for the log message.
-         * @param message The warning message to record.
-         * @param throwable An optional exception to include in the log entry.
-         */
+     * Logs a warning message asynchronously to both Android Logcat and the internal daily log file.
+     *
+     * @param tag The source identifier for the log message.
+     * @param message The warning message to record.
+     * @param throwable An optional exception to include in the log entry.
+     */
     fun w(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("WARN", tag, message, throwable) }
 
     /**
-         * Asynchronously logs an error message with the specified tag and optional exception.
-         *
-         * The message is recorded in both Android Logcat and the current day's log file.
-         *
-         * @param tag The source identifier for the log entry.
-         * @param message The error message to log.
-         * @param throwable An optional exception whose stack trace will be included in the log entry.
-         */
+     * Asynchronously logs an error message with the specified tag and optional exception.
+     *
+     * The message is recorded in both Android Logcat and the current day's log file.
+     *
+     * @param tag The source identifier for the log entry.
+     * @param message The error message to log.
+     * @param throwable An optional exception whose stack trace will be included in the log entry.
+     */
     fun e(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("ERROR", tag, message, throwable) }
 
     /**
-         * Logs a verbose-level message asynchronously to both Android Logcat and the current day's log file.
-         *
-         * @param tag The source identifier for the log message.
-         * @param message The message to log.
-         * @param throwable An optional exception to include its stack trace in the log entry.
-         */
+     * Logs a verbose-level message asynchronously to both Android Logcat and the current day's log file.
+     *
+     * @param tag The source identifier for the log message.
+     * @param message The message to log.
+     * @param throwable An optional exception to include its stack trace in the log entry.
+     */
     fun v(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("VERBOSE", tag, message, throwable) }
 

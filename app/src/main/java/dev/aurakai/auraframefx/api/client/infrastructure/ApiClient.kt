@@ -1,6 +1,5 @@
 package dev.aurakai.auraframefx.api.client.infrastructure
 
-import kotlinx.serialization.encodeToString
 import okhttp3.Call
 import okhttp3.FormBody
 import okhttp3.Headers.Builder

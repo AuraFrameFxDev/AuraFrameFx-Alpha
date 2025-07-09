@@ -1,7 +1,6 @@
 package dev.aurakai.auraframefx.viewmodel
 
 // Import for SimpleDateFormat and Date if not already covered by other viewmodel files
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -61,7 +60,11 @@ class DiagnosticsViewModel @Inject constructor(
                     put(
                         "Last Full Sync (Offline Data)",
                         if (offlineData?.lastFullSyncTimestamp != null) {
-                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(offlineData.lastFullSyncTimestamp))
+                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(
+                                Date(
+                                    offlineData.lastFullSyncTimestamp
+                                )
+                            )
                         } else {
                             "N/A"
                         }
@@ -69,7 +72,11 @@ class DiagnosticsViewModel @Inject constructor(
                     put(
                         "Offline AI Config Version (Timestamp)",
                         if (offlineData?.aiConfig?.lastSyncTimestamp != null && offlineData.aiConfig.lastSyncTimestamp != 0L) {
-                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(offlineData.aiConfig.lastSyncTimestamp))
+                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(
+                                Date(
+                                    offlineData.aiConfig.lastSyncTimestamp
+                                )
+                            )
                         } else {
                             "N/A"
                         }
@@ -81,7 +88,11 @@ class DiagnosticsViewModel @Inject constructor(
                     put(
                         "Contextual Memory Last Update",
                         if (offlineData?.contextualMemory?.lastUpdateTimestamp != null && offlineData.contextualMemory.lastUpdateTimestamp != 0L) {
-                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(offlineData.contextualMemory.lastUpdateTimestamp))
+                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(
+                                Date(
+                                    offlineData.contextualMemory.lastUpdateTimestamp
+                                )
+                            )
                         } else {
                             "N/A"
                         }
@@ -109,7 +120,7 @@ class DiagnosticsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _currentLogs.value = "Loading logs..."
-                
+
                 // Try to get logs from the logger service
                 val todayLogs = try {
                     auraFxLogger.getLogsForDate(
@@ -120,7 +131,7 @@ class DiagnosticsViewModel @Inject constructor(
                     auraFxLogger.e("DiagnosticsVM", "Failed to retrieve logs: ${e.message}")
                     emptyList()
                 }
-                
+
                 _currentLogs.value = if (todayLogs.isNotEmpty()) {
                     todayLogs.joinToString("\n")
                 } else {
@@ -144,7 +155,7 @@ class DiagnosticsViewModel @Inject constructor(
             listOf("Error retrieving all logs: ${e.message}")
         }
     }
-    
+
     /**
      * Filters logs by severity level.
      */
@@ -159,7 +170,7 @@ class DiagnosticsViewModel @Inject constructor(
             listOf("Error filtering logs: ${e.message}")
         }
     }
-    
+
     /**
      * Clears all logs with confirmation.
      */
@@ -175,7 +186,7 @@ class DiagnosticsViewModel @Inject constructor(
             }
         }
     }
-    
+
     /**
      * Triggers a manual cloud reachability check.
      */
@@ -197,7 +208,7 @@ class DiagnosticsViewModel @Inject constructor(
             }
         }
     }
-    
+
     /**
      * Loads and displays detailed configuration from offline data manager.
      */

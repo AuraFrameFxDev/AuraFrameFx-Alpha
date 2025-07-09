@@ -1,5 +1,7 @@
 package dev.aurakai.auraframefx.ai.context
 
+// import kotlinx.serialization.Contextual // No longer needed for Instant here
+// dev.aurakai.auraframefx.model.AgentType is already imported by line 4, removing duplicate
 import dev.aurakai.auraframefx.ai.memory.MemoryManager
 import dev.aurakai.auraframefx.ai.pipeline.AIPipelineConfig
 import dev.aurakai.auraframefx.model.AgentType
@@ -8,10 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-// import kotlinx.serialization.Contextual // No longer needed for Instant here
 import kotlinx.serialization.Serializable
-import dev.aurakai.auraframefx.serialization.InstantSerializer // Ensure this is imported
-// dev.aurakai.auraframefx.model.AgentType is already imported by line 4, removing duplicate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -122,7 +121,7 @@ class ContextManager @Inject constructor(
      * @return A [ContextChainResult] containing the selected chain, related chains, and the original query.
      */
 
-  
+
     fun queryContext(query: ContextQuery): ContextChainResult {
         val chains = _activeContexts.value.values
             .filter { chain ->

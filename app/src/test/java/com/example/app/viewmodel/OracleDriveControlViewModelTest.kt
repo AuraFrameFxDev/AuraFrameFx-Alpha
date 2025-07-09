@@ -10,7 +10,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.DispatchersResetter
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -203,7 +202,11 @@ class OracleDriveControlViewModelTest {
     fun `changeDirection should handle repository error`() = runTest {
         val direction = Direction.REVERSE
         val errorMessage = "Failed to change direction"
-        coEvery { mockRepository.changeDirection(direction) } returns Result.failure(Exception(errorMessage))
+        coEvery { mockRepository.changeDirection(direction) } returns Result.failure(
+            Exception(
+                errorMessage
+            )
+        )
 
         viewModel.changeDirection(direction)
         testDispatcher.scheduler.advanceUntilIdle()

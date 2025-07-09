@@ -17,6 +17,7 @@ extern "C" {
  *
  * @return jstring The native library version string "1.2.0", or an empty string if the model path is null.
 
+
  */
 JNIEXPORT jstring
 
@@ -52,6 +53,13 @@ Java_com_example_app_language_LanguageIdentifier_nativeInitialize(
  *
  * @param text Input text to analyze for language identification.
  * @return jstring ISO 639-1 language code: "en", "es", "fr", "de", "it", "pt", "mul", or "und".
+
+ * @brief Identifies the language of the input text using heuristic keyword and character analysis.
+ *
+ * Examines the input string for language-specific keywords and articles to detect Spanish ("es"), French ("fr"), German ("de"), Italian ("it"), or Portuguese ("pt"). Defaults to English ("en") if no match is found. If the text contains a high proportion of non-ASCII characters and no language is matched, returns "mul" for multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
+ *
+ * @param text Input text to analyze for language identification.
+ * @return jstring Detected language code: "en", "es", "fr", "de", "it", "pt", "mul", or "und".
  */
 JNIEXPORT jstring
 
@@ -75,7 +83,7 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
     // Enhanced language detection using multiple heuristics
     std::string textStr(nativeText);
     std::string result = "en"; // Default to English
-    
+
     // Convert to lowercase for case-insensitive matching
     std::transform(textStr.begin(), textStr.end(), textStr.begin(), ::tolower);
 
@@ -84,6 +92,9 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
     if (textStr.find(" el ") != std::string::npos ||
         textStr.find(" la ") != std::string::npos ||
         textStr.find(" de ") != std::string::npos || // Also in Portuguese, but more prominent in Spanish start
+
+        textStr.find(" de ") != std::string::npos ||
+        // Also in Portuguese, but more prominent in Spanish start
         textStr.find(" que ") != std::string::npos || // Also in French/Portuguese
         textStr.find(" es ") != std::string::npos ||
         textStr.find(" con ") != std::string::npos || // Also in Italian
@@ -137,15 +148,17 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
                textStr.find(" de ") != std::string::npos) { // Also in Spanish
         result = "pt"; // Portuguese
     }
-    
+
     // Additional character frequency analysis for better accuracy
     int accentCount = 0;
     for (char c : textStr) {
+
+
         // Basic check for non-ASCII characters. A more sophisticated approach might
         // involve checking specific Unicode ranges for common accented characters.
         if (c < 0 || c > 127) accentCount++; // Non-ASCII characters
     }
-    
+
     // If a significant portion of the text contains non-ASCII characters (potential accents)
     // and no specific language was detected via keywords (still "en"), classify as "mul".
     if (accentCount > textStr.length() * 0.1 && result == "en") {
@@ -159,7 +172,9 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
 /**
  * @brief Placeholder for releasing resources associated with a language identifier handle.
  *
- * This function currently performs no action, as the language identification implementation is stateless and does not allocate resources. It exists for future compatibility if resource management is introduced.
+
+ * Currently, this function does not perform any resource deallocation, as the implementation is stateless and does not allocate resources. Intended for future use if resource management is added.
+
  *
  * @param handle Native handle for the language identifier instance.
 
@@ -189,6 +204,15 @@ Java_com_example_app_language_LanguageIdentifier_nativeRelease(
 
  *
  * @return jstring The version string "1.2.0" as a Java string.
+        LOGI("Language identifier resources cleaned up for handle: %lld (Placeholder - no specific resources allocated)",
+             (long long) handle);
+    }
+}
+
+/**
+ * @brief Retrieves the version string of the native language identifier library.
+ *
+ * @return jstring The version string, such as "1.2.0".
  */
 JNIEXPORT jstring
 

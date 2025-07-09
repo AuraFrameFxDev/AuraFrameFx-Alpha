@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -14,11 +14,13 @@
 package org.openapitools.client.model;
 
 import java.util.Objects;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,6 +39,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 
 import java.lang.reflect.Type;
@@ -53,199 +56,196 @@ import org.openapitools.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class ADLRelayRequest {
-  public static final String SERIALIZED_NAME_MESSAGE_TYPE = "messageType";
-  @SerializedName(SERIALIZED_NAME_MESSAGE_TYPE)
-  private String messageType;
+    public static final String SERIALIZED_NAME_MESSAGE_TYPE = "messageType";
+    public static final String SERIALIZED_NAME_PAYLOAD = "payload";
+    public static HashSet<String> openapiFields;
+    public static HashSet<String> openapiRequiredFields;
 
-  public static final String SERIALIZED_NAME_PAYLOAD = "payload";
-  @SerializedName(SERIALIZED_NAME_PAYLOAD)
-  private Map<String, Object> payload = new HashMap<>();
+    static {
+        // a set of all properties/fields (JSON key names)
+        openapiFields = new HashSet<String>();
+        openapiFields.add("messageType");
+        openapiFields.add("payload");
 
-  public ADLRelayRequest() {
-  }
-
-  public ADLRelayRequest messageType(String messageType) {
-    this.messageType = messageType;
-    return this;
-  }
-
-  /**
-   * Type of ADL message (e.g., request, response, event)
-   * @return messageType
-   */
-  @javax.annotation.Nonnull
-  public String getMessageType() {
-    return messageType;
-  }
-
-  public void setMessageType(String messageType) {
-    this.messageType = messageType;
-  }
-
-
-  public ADLRelayRequest payload(Map<String, Object> payload) {
-    this.payload = payload;
-    return this;
-  }
-
-  public ADLRelayRequest putPayloadItem(String key, Object payloadItem) {
-    if (this.payload == null) {
-      this.payload = new HashMap<>();
+        // a set of required properties/fields (JSON key names)
+        openapiRequiredFields = new HashSet<String>();
+        openapiRequiredFields.add("messageType");
+        openapiRequiredFields.add("payload");
     }
-    this.payload.put(key, payloadItem);
-    return this;
-  }
 
-  /**
-   * The payload to relay to ADL
-   * @return payload
-   */
-  @javax.annotation.Nonnull
-  public Map<String, Object> getPayload() {
-    return payload;
-  }
+    @SerializedName(SERIALIZED_NAME_MESSAGE_TYPE)
+    private String messageType;
+    @SerializedName(SERIALIZED_NAME_PAYLOAD)
+    private Map<String, Object> payload = new HashMap<>();
 
-  public void setPayload(Map<String, Object> payload) {
-    this.payload = payload;
-  }
-
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public ADLRelayRequest() {
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    ADLRelayRequest adLRelayRequest = (ADLRelayRequest) o;
-    return Objects.equals(this.messageType, adLRelayRequest.messageType) &&
-        Objects.equals(this.payload, adLRelayRequest.payload);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(messageType, payload);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ADLRelayRequest {\n");
-    sb.append("    messageType: ").append(toIndentedString(messageType)).append("\n");
-    sb.append("    payload: ").append(toIndentedString(payload)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
-
-
-  public static HashSet<String> openapiFields;
-  public static HashSet<String> openapiRequiredFields;
-
-  static {
-    // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("messageType");
-    openapiFields.add("payload");
-
-    // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("messageType");
-    openapiRequiredFields.add("payload");
-  }
-
-  /**
-   * Validates the JSON Element and throws an exception if issues found
-   *
-   * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to ADLRelayRequest
-   */
-  public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      if (jsonElement == null) {
-        if (!ADLRelayRequest.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in ADLRelayRequest is not found in the empty JSON string", ADLRelayRequest.openapiRequiredFields.toString()));
+    /**
+     * Validates the JSON Element and throws an exception if issues found
+     *
+     * @param jsonElement JSON Element
+     * @throws IOException if the JSON Element is invalid with respect to ADLRelayRequest
+     */
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+        if (jsonElement == null) {
+            if (!ADLRelayRequest.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+                throw new IllegalArgumentException(String.format("The required field(s) %s in ADLRelayRequest is not found in the empty JSON string", ADLRelayRequest.openapiRequiredFields.toString()));
+            }
         }
-      }
 
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!ADLRelayRequest.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `ADLRelayRequest` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+        Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+        // check to see if the JSON string contains additional fields
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            if (!ADLRelayRequest.openapiFields.contains(entry.getKey())) {
+                throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `ADLRelayRequest` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+            }
         }
-      }
 
-      // check to make sure all required properties/fields are present in the JSON string
-      for (String requiredField : ADLRelayRequest.openapiRequiredFields) {
-        if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+        // check to make sure all required properties/fields are present in the JSON string
+        for (String requiredField : ADLRelayRequest.openapiRequiredFields) {
+            if (jsonElement.getAsJsonObject().get(requiredField) == null) {
+                throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+            }
         }
-      }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      if (!jsonObj.get("messageType").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `messageType` to be a primitive type in the JSON string but got `%s`", jsonObj.get("messageType").toString()));
-      }
-  }
-
-  public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!ADLRelayRequest.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'ADLRelayRequest' and its subtypes
-       }
-       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<ADLRelayRequest> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(ADLRelayRequest.class));
-
-       return (TypeAdapter<T>) new TypeAdapter<ADLRelayRequest>() {
-           @Override
-           public void write(JsonWriter out, ADLRelayRequest value) throws IOException {
-             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-             elementAdapter.write(out, obj);
-           }
-
-           @Override
-           public ADLRelayRequest read(JsonReader in) throws IOException {
-             JsonElement jsonElement = elementAdapter.read(in);
-             validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
-           }
-
-       }.nullSafe();
+        if (!jsonObj.get("messageType").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `messageType` to be a primitive type in the JSON string but got `%s`", jsonObj.get("messageType").toString()));
+        }
     }
-  }
 
-  /**
-   * Create an instance of ADLRelayRequest given an JSON string
-   *
-   * @param jsonString JSON string
-   * @return An instance of ADLRelayRequest
-   * @throws IOException if the JSON string is invalid with respect to ADLRelayRequest
-   */
-  public static ADLRelayRequest fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, ADLRelayRequest.class);
-  }
+    /**
+     * Create an instance of ADLRelayRequest given an JSON string
+     *
+     * @param jsonString JSON string
+     * @return An instance of ADLRelayRequest
+     * @throws IOException if the JSON string is invalid with respect to ADLRelayRequest
+     */
+    public static ADLRelayRequest fromJson(String jsonString) throws IOException {
+        return JSON.getGson().fromJson(jsonString, ADLRelayRequest.class);
+    }
 
-  /**
-   * Convert an instance of ADLRelayRequest to an JSON string
-   *
-   * @return JSON string
-   */
-  public String toJson() {
-    return JSON.getGson().toJson(this);
-  }
+    public ADLRelayRequest messageType(String messageType) {
+        this.messageType = messageType;
+        return this;
+    }
+
+    /**
+     * Type of ADL message (e.g., request, response, event)
+     *
+     * @return messageType
+     */
+    @javax.annotation.Nonnull
+    public String getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
+    }
+
+    public ADLRelayRequest payload(Map<String, Object> payload) {
+        this.payload = payload;
+        return this;
+    }
+
+    public ADLRelayRequest putPayloadItem(String key, Object payloadItem) {
+        if (this.payload == null) {
+            this.payload = new HashMap<>();
+        }
+        this.payload.put(key, payloadItem);
+        return this;
+    }
+
+    /**
+     * The payload to relay to ADL
+     *
+     * @return payload
+     */
+    @javax.annotation.Nonnull
+    public Map<String, Object> getPayload() {
+        return payload;
+    }
+
+    public void setPayload(Map<String, Object> payload) {
+        this.payload = payload;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ADLRelayRequest adLRelayRequest = (ADLRelayRequest) o;
+        return Objects.equals(this.messageType, adLRelayRequest.messageType) &&
+                Objects.equals(this.payload, adLRelayRequest.payload);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(messageType, payload);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class ADLRelayRequest {\n");
+        sb.append("    messageType: ").append(toIndentedString(messageType)).append("\n");
+        sb.append("    payload: ").append(toIndentedString(payload)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
+
+    /**
+     * Convert an instance of ADLRelayRequest to an JSON string
+     *
+     * @return JSON string
+     */
+    public String toJson() {
+        return JSON.getGson().toJson(this);
+    }
+
+    public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (!ADLRelayRequest.class.isAssignableFrom(type.getRawType())) {
+                return null; // this class only serializes 'ADLRelayRequest' and its subtypes
+            }
+            final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+            final TypeAdapter<ADLRelayRequest> thisAdapter
+                    = gson.getDelegateAdapter(this, TypeToken.get(ADLRelayRequest.class));
+
+            return (TypeAdapter<T>) new TypeAdapter<ADLRelayRequest>() {
+                @Override
+                public void write(JsonWriter out, ADLRelayRequest value) throws IOException {
+                    JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+                    elementAdapter.write(out, obj);
+                }
+
+                @Override
+                public ADLRelayRequest read(JsonReader in) throws IOException {
+                    JsonElement jsonElement = elementAdapter.read(in);
+                    validateJsonElement(jsonElement);
+                    return thisAdapter.fromJsonTree(jsonElement);
+                }
+
+            }.nullSafe();
+        }
+    }
 }
 

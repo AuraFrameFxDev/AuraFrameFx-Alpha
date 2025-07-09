@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -14,11 +14,13 @@
 package org.openapitools.client.model;
 
 import java.util.Objects;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -35,6 +37,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 
 import java.lang.reflect.Type;
@@ -51,234 +54,229 @@ import org.openapitools.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class LockScreenConfigClockConfig {
-  public static final String SERIALIZED_NAME_CUSTOM_TEXT_COLOR_ENABLED = "customTextColorEnabled";
-  @SerializedName(SERIALIZED_NAME_CUSTOM_TEXT_COLOR_ENABLED)
-  private Boolean customTextColorEnabled;
+    public static final String SERIALIZED_NAME_CUSTOM_TEXT_COLOR_ENABLED = "customTextColorEnabled";
+    public static final String SERIALIZED_NAME_CUSTOM_TEXT_COLOR = "customTextColor";
+    public static final String SERIALIZED_NAME_CUSTOM_TEXT_SIZE_ENABLED = "customTextSizeEnabled";
+    public static final String SERIALIZED_NAME_CUSTOM_TEXT_SIZE = "customTextSize";
+    public static HashSet<String> openapiFields;
+    public static HashSet<String> openapiRequiredFields;
 
-  public static final String SERIALIZED_NAME_CUSTOM_TEXT_COLOR = "customTextColor";
-  @SerializedName(SERIALIZED_NAME_CUSTOM_TEXT_COLOR)
-  private String customTextColor;
+    static {
+        // a set of all properties/fields (JSON key names)
+        openapiFields = new HashSet<String>();
+        openapiFields.add("customTextColorEnabled");
+        openapiFields.add("customTextColor");
+        openapiFields.add("customTextSizeEnabled");
+        openapiFields.add("customTextSize");
 
-  public static final String SERIALIZED_NAME_CUSTOM_TEXT_SIZE_ENABLED = "customTextSizeEnabled";
-  @SerializedName(SERIALIZED_NAME_CUSTOM_TEXT_SIZE_ENABLED)
-  private Boolean customTextSizeEnabled;
-
-  public static final String SERIALIZED_NAME_CUSTOM_TEXT_SIZE = "customTextSize";
-  @SerializedName(SERIALIZED_NAME_CUSTOM_TEXT_SIZE)
-  private Float customTextSize;
-
-  public LockScreenConfigClockConfig() {
-  }
-
-  public LockScreenConfigClockConfig customTextColorEnabled(Boolean customTextColorEnabled) {
-    this.customTextColorEnabled = customTextColorEnabled;
-    return this;
-  }
-
-  /**
-   * Get customTextColorEnabled
-   * @return customTextColorEnabled
-   */
-  @javax.annotation.Nullable
-  public Boolean getCustomTextColorEnabled() {
-    return customTextColorEnabled;
-  }
-
-  public void setCustomTextColorEnabled(Boolean customTextColorEnabled) {
-    this.customTextColorEnabled = customTextColorEnabled;
-  }
-
-
-  public LockScreenConfigClockConfig customTextColor(String customTextColor) {
-    this.customTextColor = customTextColor;
-    return this;
-  }
-
-  /**
-   * Get customTextColor
-   * @return customTextColor
-   */
-  @javax.annotation.Nullable
-  public String getCustomTextColor() {
-    return customTextColor;
-  }
-
-  public void setCustomTextColor(String customTextColor) {
-    this.customTextColor = customTextColor;
-  }
-
-
-  public LockScreenConfigClockConfig customTextSizeEnabled(Boolean customTextSizeEnabled) {
-    this.customTextSizeEnabled = customTextSizeEnabled;
-    return this;
-  }
-
-  /**
-   * Get customTextSizeEnabled
-   * @return customTextSizeEnabled
-   */
-  @javax.annotation.Nullable
-  public Boolean getCustomTextSizeEnabled() {
-    return customTextSizeEnabled;
-  }
-
-  public void setCustomTextSizeEnabled(Boolean customTextSizeEnabled) {
-    this.customTextSizeEnabled = customTextSizeEnabled;
-  }
-
-
-  public LockScreenConfigClockConfig customTextSize(Float customTextSize) {
-    this.customTextSize = customTextSize;
-    return this;
-  }
-
-  /**
-   * Get customTextSize
-   * @return customTextSize
-   */
-  @javax.annotation.Nullable
-  public Float getCustomTextSize() {
-    return customTextSize;
-  }
-
-  public void setCustomTextSize(Float customTextSize) {
-    this.customTextSize = customTextSize;
-  }
-
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+        // a set of required properties/fields (JSON key names)
+        openapiRequiredFields = new HashSet<String>();
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    @SerializedName(SERIALIZED_NAME_CUSTOM_TEXT_COLOR_ENABLED)
+    private Boolean customTextColorEnabled;
+    @SerializedName(SERIALIZED_NAME_CUSTOM_TEXT_COLOR)
+    private String customTextColor;
+    @SerializedName(SERIALIZED_NAME_CUSTOM_TEXT_SIZE_ENABLED)
+    private Boolean customTextSizeEnabled;
+    @SerializedName(SERIALIZED_NAME_CUSTOM_TEXT_SIZE)
+    private Float customTextSize;
+
+    public LockScreenConfigClockConfig() {
     }
-    LockScreenConfigClockConfig lockScreenConfigClockConfig = (LockScreenConfigClockConfig) o;
-    return Objects.equals(this.customTextColorEnabled, lockScreenConfigClockConfig.customTextColorEnabled) &&
-        Objects.equals(this.customTextColor, lockScreenConfigClockConfig.customTextColor) &&
-        Objects.equals(this.customTextSizeEnabled, lockScreenConfigClockConfig.customTextSizeEnabled) &&
-        Objects.equals(this.customTextSize, lockScreenConfigClockConfig.customTextSize);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(customTextColorEnabled, customTextColor, customTextSizeEnabled, customTextSize);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class LockScreenConfigClockConfig {\n");
-    sb.append("    customTextColorEnabled: ").append(toIndentedString(customTextColorEnabled)).append("\n");
-    sb.append("    customTextColor: ").append(toIndentedString(customTextColor)).append("\n");
-    sb.append("    customTextSizeEnabled: ").append(toIndentedString(customTextSizeEnabled)).append("\n");
-    sb.append("    customTextSize: ").append(toIndentedString(customTextSize)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
-
-
-  public static HashSet<String> openapiFields;
-  public static HashSet<String> openapiRequiredFields;
-
-  static {
-    // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("customTextColorEnabled");
-    openapiFields.add("customTextColor");
-    openapiFields.add("customTextSizeEnabled");
-    openapiFields.add("customTextSize");
-
-    // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-  }
-
-  /**
-   * Validates the JSON Element and throws an exception if issues found
-   *
-   * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to LockScreenConfigClockConfig
-   */
-  public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      if (jsonElement == null) {
-        if (!LockScreenConfigClockConfig.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in LockScreenConfigClockConfig is not found in the empty JSON string", LockScreenConfigClockConfig.openapiRequiredFields.toString()));
+    /**
+     * Validates the JSON Element and throws an exception if issues found
+     *
+     * @param jsonElement JSON Element
+     * @throws IOException if the JSON Element is invalid with respect to LockScreenConfigClockConfig
+     */
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+        if (jsonElement == null) {
+            if (!LockScreenConfigClockConfig.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+                throw new IllegalArgumentException(String.format("The required field(s) %s in LockScreenConfigClockConfig is not found in the empty JSON string", LockScreenConfigClockConfig.openapiRequiredFields.toString()));
+            }
         }
-      }
 
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!LockScreenConfigClockConfig.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `LockScreenConfigClockConfig` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+        Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+        // check to see if the JSON string contains additional fields
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            if (!LockScreenConfigClockConfig.openapiFields.contains(entry.getKey())) {
+                throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `LockScreenConfigClockConfig` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+            }
         }
-      }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      if ((jsonObj.get("customTextColor") != null && !jsonObj.get("customTextColor").isJsonNull()) && !jsonObj.get("customTextColor").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `customTextColor` to be a primitive type in the JSON string but got `%s`", jsonObj.get("customTextColor").toString()));
-      }
-  }
-
-  public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!LockScreenConfigClockConfig.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'LockScreenConfigClockConfig' and its subtypes
-       }
-       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<LockScreenConfigClockConfig> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(LockScreenConfigClockConfig.class));
-
-       return (TypeAdapter<T>) new TypeAdapter<LockScreenConfigClockConfig>() {
-           @Override
-           public void write(JsonWriter out, LockScreenConfigClockConfig value) throws IOException {
-             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-             elementAdapter.write(out, obj);
-           }
-
-           @Override
-           public LockScreenConfigClockConfig read(JsonReader in) throws IOException {
-             JsonElement jsonElement = elementAdapter.read(in);
-             validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
-           }
-
-       }.nullSafe();
+        if ((jsonObj.get("customTextColor") != null && !jsonObj.get("customTextColor").isJsonNull()) && !jsonObj.get("customTextColor").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `customTextColor` to be a primitive type in the JSON string but got `%s`", jsonObj.get("customTextColor").toString()));
+        }
     }
-  }
 
-  /**
-   * Create an instance of LockScreenConfigClockConfig given an JSON string
-   *
-   * @param jsonString JSON string
-   * @return An instance of LockScreenConfigClockConfig
-   * @throws IOException if the JSON string is invalid with respect to LockScreenConfigClockConfig
-   */
-  public static LockScreenConfigClockConfig fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, LockScreenConfigClockConfig.class);
-  }
+    /**
+     * Create an instance of LockScreenConfigClockConfig given an JSON string
+     *
+     * @param jsonString JSON string
+     * @return An instance of LockScreenConfigClockConfig
+     * @throws IOException if the JSON string is invalid with respect to LockScreenConfigClockConfig
+     */
+    public static LockScreenConfigClockConfig fromJson(String jsonString) throws IOException {
+        return JSON.getGson().fromJson(jsonString, LockScreenConfigClockConfig.class);
+    }
 
-  /**
-   * Convert an instance of LockScreenConfigClockConfig to an JSON string
-   *
-   * @return JSON string
-   */
-  public String toJson() {
-    return JSON.getGson().toJson(this);
-  }
+    public LockScreenConfigClockConfig customTextColorEnabled(Boolean customTextColorEnabled) {
+        this.customTextColorEnabled = customTextColorEnabled;
+        return this;
+    }
+
+    /**
+     * Get customTextColorEnabled
+     *
+     * @return customTextColorEnabled
+     */
+    @javax.annotation.Nullable
+    public Boolean getCustomTextColorEnabled() {
+        return customTextColorEnabled;
+    }
+
+    public void setCustomTextColorEnabled(Boolean customTextColorEnabled) {
+        this.customTextColorEnabled = customTextColorEnabled;
+    }
+
+    public LockScreenConfigClockConfig customTextColor(String customTextColor) {
+        this.customTextColor = customTextColor;
+        return this;
+    }
+
+    /**
+     * Get customTextColor
+     *
+     * @return customTextColor
+     */
+    @javax.annotation.Nullable
+    public String getCustomTextColor() {
+        return customTextColor;
+    }
+
+    public void setCustomTextColor(String customTextColor) {
+        this.customTextColor = customTextColor;
+    }
+
+    public LockScreenConfigClockConfig customTextSizeEnabled(Boolean customTextSizeEnabled) {
+        this.customTextSizeEnabled = customTextSizeEnabled;
+        return this;
+    }
+
+    /**
+     * Get customTextSizeEnabled
+     *
+     * @return customTextSizeEnabled
+     */
+    @javax.annotation.Nullable
+    public Boolean getCustomTextSizeEnabled() {
+        return customTextSizeEnabled;
+    }
+
+    public void setCustomTextSizeEnabled(Boolean customTextSizeEnabled) {
+        this.customTextSizeEnabled = customTextSizeEnabled;
+    }
+
+    public LockScreenConfigClockConfig customTextSize(Float customTextSize) {
+        this.customTextSize = customTextSize;
+        return this;
+    }
+
+    /**
+     * Get customTextSize
+     *
+     * @return customTextSize
+     */
+    @javax.annotation.Nullable
+    public Float getCustomTextSize() {
+        return customTextSize;
+    }
+
+    public void setCustomTextSize(Float customTextSize) {
+        this.customTextSize = customTextSize;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        LockScreenConfigClockConfig lockScreenConfigClockConfig = (LockScreenConfigClockConfig) o;
+        return Objects.equals(this.customTextColorEnabled, lockScreenConfigClockConfig.customTextColorEnabled) &&
+                Objects.equals(this.customTextColor, lockScreenConfigClockConfig.customTextColor) &&
+                Objects.equals(this.customTextSizeEnabled, lockScreenConfigClockConfig.customTextSizeEnabled) &&
+                Objects.equals(this.customTextSize, lockScreenConfigClockConfig.customTextSize);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(customTextColorEnabled, customTextColor, customTextSizeEnabled, customTextSize);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class LockScreenConfigClockConfig {\n");
+        sb.append("    customTextColorEnabled: ").append(toIndentedString(customTextColorEnabled)).append("\n");
+        sb.append("    customTextColor: ").append(toIndentedString(customTextColor)).append("\n");
+        sb.append("    customTextSizeEnabled: ").append(toIndentedString(customTextSizeEnabled)).append("\n");
+        sb.append("    customTextSize: ").append(toIndentedString(customTextSize)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
+
+    /**
+     * Convert an instance of LockScreenConfigClockConfig to an JSON string
+     *
+     * @return JSON string
+     */
+    public String toJson() {
+        return JSON.getGson().toJson(this);
+    }
+
+    public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (!LockScreenConfigClockConfig.class.isAssignableFrom(type.getRawType())) {
+                return null; // this class only serializes 'LockScreenConfigClockConfig' and its subtypes
+            }
+            final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+            final TypeAdapter<LockScreenConfigClockConfig> thisAdapter
+                    = gson.getDelegateAdapter(this, TypeToken.get(LockScreenConfigClockConfig.class));
+
+            return (TypeAdapter<T>) new TypeAdapter<LockScreenConfigClockConfig>() {
+                @Override
+                public void write(JsonWriter out, LockScreenConfigClockConfig value) throws IOException {
+                    JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+                    elementAdapter.write(out, obj);
+                }
+
+                @Override
+                public LockScreenConfigClockConfig read(JsonReader in) throws IOException {
+                    JsonElement jsonElement = elementAdapter.read(in);
+                    validateJsonElement(jsonElement);
+                    return thisAdapter.fromJsonTree(jsonElement);
+                }
+
+            }.nullSafe();
+        }
+    }
 }
 

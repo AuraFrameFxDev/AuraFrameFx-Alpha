@@ -1,18 +1,20 @@
 package dev.aurakai.auraframefx.context
 
-import dev.aurakai.auraframefx.utils.AuraFxLogger
-import dev.aurakai.auraframefx.ai.*
-import dev.aurakai.auraframefx.model.InteractionData
 import dev.aurakai.auraframefx.model.EnhancedInteractionData
+import dev.aurakai.auraframefx.model.InteractionData
 import dev.aurakai.auraframefx.model.InteractionResponse
 import dev.aurakai.auraframefx.model.InteractionType
 import dev.aurakai.auraframefx.model.SecurityAnalysis
 import dev.aurakai.auraframefx.model.ThreatLevel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import dev.aurakai.auraframefx.utils.AuraFxLogger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.json.Json
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,20 +28,20 @@ class ContextManager @Inject constructor(
     private val logger: AuraFxLogger
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    
+
     // Context storage
     private val activeContexts = ConcurrentHashMap<String, ContextData>()
     private val conversationHistory = mutableListOf<ConversationEntry>()
     private val memoryStore = ConcurrentHashMap<String, Memory>()
     private val insightStore = mutableListOf<Insight>()
-    
+
     // State management
     private val _isCreativeModeEnabled = MutableStateFlow(false)
     val isCreativeModeEnabled: StateFlow<Boolean> = _isCreativeModeEnabled
-    
+
     private val _isUnifiedModeEnabled = MutableStateFlow(false)
     val isUnifiedModeEnabled: StateFlow<Boolean> = _isUnifiedModeEnabled
-    
+
     private val _currentMood = MutableStateFlow("balanced")
     val currentMood: StateFlow<String> = _currentMood
 
@@ -53,7 +55,7 @@ class ContextManager @Inject constructor(
      */
     fun createContext(contextId: String, initialData: Map<String, Any> = emptyMap()) {
         logger.info("ContextManager", "Creating context: $contextId")
-        
+
         val contextData = ContextData(
             id = contextId,
             createdAt = System.currentTimeMillis(),
@@ -61,7 +63,7 @@ class ContextManager @Inject constructor(
             accessCount = 0,
             lastAccessTime = System.currentTimeMillis()
         )
-        
+
         activeContexts[contextId] = contextData
     }
 
@@ -75,12 +77,12 @@ class ContextManager @Inject constructor(
      */
     suspend fun enhanceContext(contextId: String): String {
         logger.debug("ContextManager", "Enhancing context: $contextId")
-        
+
         val context = activeContexts[contextId]
         return if (context != null) {
             context.accessCount++
             context.lastAccessTime = System.currentTimeMillis()
-            
+
             // Build enhanced context string
             buildEnhancedContextString(context)
         } else {
@@ -99,17 +101,20 @@ class ContextManager @Inject constructor(
      */
     suspend fun enhanceInteraction(interaction: InteractionData): EnhancedInteractionData {
         logger.debug("ContextManager", "Enhancing interaction")
-        
+
         // Analyze interaction for context
         val relevantContext = findRelevantContext(interaction.content)
         val suggestedAgent = suggestOptimalAgent(interaction)
-        
+
         return EnhancedInteractionData(
             content = interaction.content,
             type = InteractionType.TEXT,
             timestamp = System.currentTimeMillis().toString(),
             context = mapOf("relevant" to relevantContext),
-            enrichmentData = mapOf("suggested_agent" to suggestedAgent, "priority" to calculatePriority(interaction).toString())
+            enrichmentData = mapOf(
+                "suggested_agent" to suggestedAgent,
+                "priority" to calculatePriority(interaction).toString()
+            )
         )
     }
 
@@ -123,7 +128,7 @@ class ContextManager @Inject constructor(
      */
     fun recordInteraction(interaction: InteractionData, response: InteractionResponse) {
         logger.debug("ContextManager", "Recording interaction for learning")
-        
+
         val entry = ConversationEntry(
             timestamp = System.currentTimeMillis(),
             userInput = interaction.content,
@@ -132,9 +137,9 @@ class ContextManager @Inject constructor(
             confidence = response.confidence,
             metadata = mapOf("interaction_data" to interaction.content)
         )
-        
+
         conversationHistory.add(entry)
-        
+
         // Extract and store memories
         extractMemoriesFromInteraction(entry)
     }
@@ -149,11 +154,11 @@ class ContextManager @Inject constructor(
      */
     suspend fun searchMemories(query: String): List<Memory> {
         logger.debug("ContextManager", "Searching memories for: $query")
-        
+
         return memoryStore.values
-            .filter { memory -> 
+            .filter { memory ->
                 memory.content.contains(query, ignoreCase = true) ||
-                memory.tags.any { it.contains(query, ignoreCase = true) }
+                        memory.tags.any { it.contains(query, ignoreCase = true) }
             }
             .sortedByDescending { it.relevanceScore }
             .take(10) // Limit to top 10 relevant memories
@@ -170,7 +175,7 @@ class ContextManager @Inject constructor(
      */
     fun recordInsight(request: String, response: String, complexity: String) {
         logger.info("ContextManager", "Recording insight for evolution")
-        
+
         val insight = Insight(
             timestamp = System.currentTimeMillis(),
             request = request,
@@ -178,9 +183,9 @@ class ContextManager @Inject constructor(
             complexity = complexity,
             extractedPatterns = extractPatterns(request, response)
         )
-        
+
         insightStore.add(insight)
-        
+
         // Trigger learning if enough insights accumulated
         if (insightStore.size % 10 == 0) {
             scope.launch {
@@ -223,7 +228,7 @@ class ContextManager @Inject constructor(
     fun updateMood(newMood: String) {
         logger.info("ContextManager", "Updating system mood to: $newMood")
         _currentMood.value = newMood
-        
+
         // Broadcast mood change to all active contexts
         activeContexts.values.forEach { context ->
             context.data["current_mood"] = newMood
@@ -240,7 +245,7 @@ class ContextManager @Inject constructor(
      */
     fun recordSecurityEvent(alertDetails: String, analysis: SecurityAnalysis) {
         logger.security("ContextManager", "Recording security event")
-        
+
         val securityMemory = Memory(
             id = "security_${System.currentTimeMillis()}",
             content = "Security event: $alertDetails. Analysis: ${analysis.description}",
@@ -250,9 +255,13 @@ class ContextManager @Inject constructor(
                 ThreatLevel.LOW -> 0.4f
             },
             timestamp = System.currentTimeMillis(),
-            tags = listOf("security", "threat_level_${analysis.threatLevel}", "confidence_${analysis.confidence}")
+            tags = listOf(
+                "security",
+                "threat_level_${analysis.threatLevel}",
+                "confidence_${analysis.confidence}"
+            )
         )
-        
+
         memoryStore[securityMemory.id] = securityMemory
     }
 
@@ -301,9 +310,27 @@ class ContextManager @Inject constructor(
      */
     private fun suggestOptimalAgent(interaction: InteractionData): String {
         return when {
-            interaction.content.contains(Regex("creative|art|design", RegexOption.IGNORE_CASE)) -> "aura"
-            interaction.content.contains(Regex("security|threat|protect", RegexOption.IGNORE_CASE)) -> "kai"
-            interaction.content.contains(Regex("complex|analyze|understand", RegexOption.IGNORE_CASE)) -> "genesis"
+            interaction.content.contains(
+                Regex(
+                    "creative|art|design",
+                    RegexOption.IGNORE_CASE
+                )
+            ) -> "aura"
+
+            interaction.content.contains(
+                Regex(
+                    "security|threat|protect",
+                    RegexOption.IGNORE_CASE
+                )
+            ) -> "kai"
+
+            interaction.content.contains(
+                Regex(
+                    "complex|analyze|understand",
+                    RegexOption.IGNORE_CASE
+                )
+            ) -> "genesis"
+
             else -> "genesis" // Default to Genesis for routing
         }
     }
@@ -319,7 +346,7 @@ class ContextManager @Inject constructor(
     private fun calculatePriority(interaction: InteractionData): Int {
         return when (interaction.type) {
             "security" -> 10
-            "analysis" -> 8  
+            "analysis" -> 8
             "creative" -> 6
             "text" -> 4
             else -> 2
@@ -343,7 +370,7 @@ class ContextManager @Inject constructor(
                 timestamp = entry.timestamp,
                 tags = listOf("interaction", entry.agentType, "high_confidence")
             )
-            
+
             memoryStore[memory.id] = memory
         }
     }

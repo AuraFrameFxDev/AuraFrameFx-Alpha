@@ -29,25 +29,26 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     /**
- * Returns the name of the agent.
- *
- * @return The string "Kai".
- */
-override fun getName(): String? = "Kai"
-    /**
- * Retrieves the type of the agent.
- *
- * @return The agent type, which is always `AgentType.KAI`.
- */
-override fun getType(): AgentType = AgentType.KAI
+     * Returns the name of the agent.
+     *
+     * @return The string "Kai".
+     */
+    override fun getName(): String? = "Kai"
 
     /**
-         * Retrieves a map of the Kai agent's supported capabilities.
-         *
-         * The returned map includes the keys "security", "analysis", "memory", and "service_implemented", each mapped to true.
-         *
-         * @return A map where each key is a capability name and the value indicates support (true).
-         */
+     * Retrieves the type of the agent.
+     *
+     * @return The agent type, which is always `AgentType.KAI`.
+     */
+    override fun getType(): AgentType = AgentType.KAI
+
+    /**
+     * Retrieves a map of the Kai agent's supported capabilities.
+     *
+     * The returned map includes the keys "security", "analysis", "memory", and "service_implemented", each mapped to true.
+     *
+     * @return A map where each key is a capability name and the value indicates support (true).
+     */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
             "security" to true,
@@ -63,7 +64,10 @@ override fun getType(): AgentType = AgentType.KAI
      * @param context Additional context information for the request.
      * @return An AgentResponse containing a message that includes the request query and context, with a confidence score of 1.0.
      */
-    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
+    override suspend fun processRequest(
+        request: AiRequest,
+        context: String
+    ): AgentResponse { // Added context
         auraFxLogger.i(
             "KaiAIService",
             "Processing request: ${request.query} with context: $context"

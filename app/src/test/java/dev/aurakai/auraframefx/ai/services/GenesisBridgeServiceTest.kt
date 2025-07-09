@@ -1,11 +1,17 @@
 package dev.aurakai.auraframefx.ai.services
 
 import io.mockk.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.AfterEach
+
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -18,6 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.catch
+
 import java.io.IOException
 import java.net.ConnectException
 import java.util.concurrent.TimeoutException
@@ -99,7 +106,12 @@ class GenesisBridgeServiceTest {
             val endpoint = "https://api.genesis.example.com"
             every { mockConfiguration.getApiKey() } returns apiKey
             every { mockConfiguration.getEndpoint() } returns endpoint
-            every { mockHttpClient.connect(endpoint, apiKey) } throws TimeoutException("Connection timeout")
+            every {
+                mockHttpClient.connect(
+                    endpoint,
+                    apiKey
+                )
+            } throws TimeoutException("Connection timeout")
 
             assertThrows<TimeoutException> {
                 genesisBridgeService.connect()
@@ -115,7 +127,12 @@ class GenesisBridgeServiceTest {
             val endpoint = "https://api.genesis.example.com"
             every { mockConfiguration.getApiKey() } returns apiKey
             every { mockConfiguration.getEndpoint() } returns endpoint
-            every { mockHttpClient.connect(endpoint, apiKey) } throws ConnectException("Network unreachable")
+            every {
+                mockHttpClient.connect(
+                    endpoint,
+                    apiKey
+                )
+            } throws ConnectException("Network unreachable")
 
             assertThrows<ConnectException> {
                 genesisBridgeService.connect()
@@ -346,7 +363,12 @@ class GenesisBridgeServiceTest {
                 genesisBridgeService.processDataWithRetry(inputData)
             }
             verify(exactly = 2) { mockHttpClient.post(any(), any()) }
-            verify { mockLogger.error("Max retries exceeded. Final attempt failed", any<IOException>()) }
+            verify {
+                mockLogger.error(
+                    "Max retries exceeded. Final attempt failed",
+                    any<IOException>()
+                )
+            }
             verify { mockMetrics.incrementCounter("genesis_max_retries_exceeded") }
         }
 

@@ -8,7 +8,12 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -76,6 +81,7 @@ fun AuraFrameFXTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
@@ -120,7 +126,7 @@ private fun getMoodGlowColor(
     baseColorScheme: androidx.compose.material3.ColorScheme
 ): Color {
     val baseAlpha = (intensity * 0.4f).coerceIn(0.1f, 0.5f)
-    
+
     return when (emotion) {
         Emotion.HAPPY -> Color(0xFFFFD700).copy(alpha = baseAlpha) // Gold
         Emotion.EXCITED -> Color(0xFFFF6B35).copy(alpha = baseAlpha) // Orange

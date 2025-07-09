@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -14,16 +14,19 @@
 package org.openapitools.client.model;
 
 import java.util.Objects;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
 import org.openapitools.client.model.AgentType;
 
 import com.google.gson.Gson;
@@ -39,6 +42,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 
 import java.lang.reflect.Type;
@@ -55,264 +59,259 @@ import org.openapitools.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class ConferenceRoom {
-  public static final String SERIALIZED_NAME_ID = "id";
-  @SerializedName(SERIALIZED_NAME_ID)
-  private UUID id;
+    public static final String SERIALIZED_NAME_ID = "id";
+    public static final String SERIALIZED_NAME_NAME = "name";
+    public static final String SERIALIZED_NAME_ORCHESTRATOR = "orchestrator";
+    public static final String SERIALIZED_NAME_ACTIVE_AGENTS = "activeAgents";
+    public static HashSet<String> openapiFields;
+    public static HashSet<String> openapiRequiredFields;
 
-  public static final String SERIALIZED_NAME_NAME = "name";
-  @SerializedName(SERIALIZED_NAME_NAME)
-  private String name;
+    static {
+        // a set of all properties/fields (JSON key names)
+        openapiFields = new HashSet<String>();
+        openapiFields.add("id");
+        openapiFields.add("name");
+        openapiFields.add("orchestrator");
+        openapiFields.add("activeAgents");
 
-  public static final String SERIALIZED_NAME_ORCHESTRATOR = "orchestrator";
-  @SerializedName(SERIALIZED_NAME_ORCHESTRATOR)
-  private AgentType orchestrator;
-
-  public static final String SERIALIZED_NAME_ACTIVE_AGENTS = "activeAgents";
-  @SerializedName(SERIALIZED_NAME_ACTIVE_AGENTS)
-  private List<AgentType> activeAgents = new ArrayList<>();
-
-  public ConferenceRoom() {
-  }
-
-  public ConferenceRoom id(UUID id) {
-    this.id = id;
-    return this;
-  }
-
-  /**
-   * Unique identifier for the conference room
-   * @return id
-   */
-  @javax.annotation.Nonnull
-  public UUID getId() {
-    return id;
-  }
-
-  public void setId(UUID id) {
-    this.id = id;
-  }
-
-
-  public ConferenceRoom name(String name) {
-    this.name = name;
-    return this;
-  }
-
-  /**
-   * Name of the conference room
-   * @return name
-   */
-  @javax.annotation.Nonnull
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-
-  public ConferenceRoom orchestrator(AgentType orchestrator) {
-    this.orchestrator = orchestrator;
-    return this;
-  }
-
-  /**
-   * Get orchestrator
-   * @return orchestrator
-   */
-  @javax.annotation.Nonnull
-  public AgentType getOrchestrator() {
-    return orchestrator;
-  }
-
-  public void setOrchestrator(AgentType orchestrator) {
-    this.orchestrator = orchestrator;
-  }
-
-
-  public ConferenceRoom activeAgents(List<AgentType> activeAgents) {
-    this.activeAgents = activeAgents;
-    return this;
-  }
-
-  public ConferenceRoom addActiveAgentsItem(AgentType activeAgentsItem) {
-    if (this.activeAgents == null) {
-      this.activeAgents = new ArrayList<>();
+        // a set of required properties/fields (JSON key names)
+        openapiRequiredFields = new HashSet<String>();
+        openapiRequiredFields.add("id");
+        openapiRequiredFields.add("name");
+        openapiRequiredFields.add("orchestrator");
+        openapiRequiredFields.add("activeAgents");
     }
-    this.activeAgents.add(activeAgentsItem);
-    return this;
-  }
 
-  /**
-   * List of AI agents currently in the room
-   * @return activeAgents
-   */
-  @javax.annotation.Nonnull
-  public List<AgentType> getActiveAgents() {
-    return activeAgents;
-  }
+    @SerializedName(SERIALIZED_NAME_ID)
+    private UUID id;
+    @SerializedName(SERIALIZED_NAME_NAME)
+    private String name;
+    @SerializedName(SERIALIZED_NAME_ORCHESTRATOR)
+    private AgentType orchestrator;
+    @SerializedName(SERIALIZED_NAME_ACTIVE_AGENTS)
+    private List<AgentType> activeAgents = new ArrayList<>();
 
-  public void setActiveAgents(List<AgentType> activeAgents) {
-    this.activeAgents = activeAgents;
-  }
-
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public ConferenceRoom() {
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    ConferenceRoom conferenceRoom = (ConferenceRoom) o;
-    return Objects.equals(this.id, conferenceRoom.id) &&
-        Objects.equals(this.name, conferenceRoom.name) &&
-        Objects.equals(this.orchestrator, conferenceRoom.orchestrator) &&
-        Objects.equals(this.activeAgents, conferenceRoom.activeAgents);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, name, orchestrator, activeAgents);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ConferenceRoom {\n");
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    orchestrator: ").append(toIndentedString(orchestrator)).append("\n");
-    sb.append("    activeAgents: ").append(toIndentedString(activeAgents)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
-
-
-  public static HashSet<String> openapiFields;
-  public static HashSet<String> openapiRequiredFields;
-
-  static {
-    // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("id");
-    openapiFields.add("name");
-    openapiFields.add("orchestrator");
-    openapiFields.add("activeAgents");
-
-    // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("id");
-    openapiRequiredFields.add("name");
-    openapiRequiredFields.add("orchestrator");
-    openapiRequiredFields.add("activeAgents");
-  }
-
-  /**
-   * Validates the JSON Element and throws an exception if issues found
-   *
-   * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to ConferenceRoom
-   */
-  public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      if (jsonElement == null) {
-        if (!ConferenceRoom.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in ConferenceRoom is not found in the empty JSON string", ConferenceRoom.openapiRequiredFields.toString()));
+    /**
+     * Validates the JSON Element and throws an exception if issues found
+     *
+     * @param jsonElement JSON Element
+     * @throws IOException if the JSON Element is invalid with respect to ConferenceRoom
+     */
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+        if (jsonElement == null) {
+            if (!ConferenceRoom.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+                throw new IllegalArgumentException(String.format("The required field(s) %s in ConferenceRoom is not found in the empty JSON string", ConferenceRoom.openapiRequiredFields.toString()));
+            }
         }
-      }
 
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!ConferenceRoom.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `ConferenceRoom` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+        Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+        // check to see if the JSON string contains additional fields
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            if (!ConferenceRoom.openapiFields.contains(entry.getKey())) {
+                throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `ConferenceRoom` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+            }
         }
-      }
 
-      // check to make sure all required properties/fields are present in the JSON string
-      for (String requiredField : ConferenceRoom.openapiRequiredFields) {
-        if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+        // check to make sure all required properties/fields are present in the JSON string
+        for (String requiredField : ConferenceRoom.openapiRequiredFields) {
+            if (jsonElement.getAsJsonObject().get(requiredField) == null) {
+                throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+            }
         }
-      }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      if (!jsonObj.get("id").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("id").toString()));
-      }
-      if (!jsonObj.get("name").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
-      }
-      // validate the required field `orchestrator`
-      AgentType.validateJsonElement(jsonObj.get("orchestrator"));
-      // ensure the required json array is present
-      if (jsonObj.get("activeAgents") == null) {
-        throw new IllegalArgumentException("Expected the field `linkedContent` to be an array in the JSON string but got `null`");
-      } else if (!jsonObj.get("activeAgents").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `activeAgents` to be an array in the JSON string but got `%s`", jsonObj.get("activeAgents").toString()));
-      }
-  }
-
-  public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!ConferenceRoom.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'ConferenceRoom' and its subtypes
-       }
-       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<ConferenceRoom> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(ConferenceRoom.class));
-
-       return (TypeAdapter<T>) new TypeAdapter<ConferenceRoom>() {
-           @Override
-           public void write(JsonWriter out, ConferenceRoom value) throws IOException {
-             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-             elementAdapter.write(out, obj);
-           }
-
-           @Override
-           public ConferenceRoom read(JsonReader in) throws IOException {
-             JsonElement jsonElement = elementAdapter.read(in);
-             validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
-           }
-
-       }.nullSafe();
+        if (!jsonObj.get("id").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("id").toString()));
+        }
+        if (!jsonObj.get("name").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
+        }
+        // validate the required field `orchestrator`
+        AgentType.validateJsonElement(jsonObj.get("orchestrator"));
+        // ensure the required json array is present
+        if (jsonObj.get("activeAgents") == null) {
+            throw new IllegalArgumentException("Expected the field `linkedContent` to be an array in the JSON string but got `null`");
+        } else if (!jsonObj.get("activeAgents").isJsonArray()) {
+            throw new IllegalArgumentException(String.format("Expected the field `activeAgents` to be an array in the JSON string but got `%s`", jsonObj.get("activeAgents").toString()));
+        }
     }
-  }
 
-  /**
-   * Create an instance of ConferenceRoom given an JSON string
-   *
-   * @param jsonString JSON string
-   * @return An instance of ConferenceRoom
-   * @throws IOException if the JSON string is invalid with respect to ConferenceRoom
-   */
-  public static ConferenceRoom fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, ConferenceRoom.class);
-  }
+    /**
+     * Create an instance of ConferenceRoom given an JSON string
+     *
+     * @param jsonString JSON string
+     * @return An instance of ConferenceRoom
+     * @throws IOException if the JSON string is invalid with respect to ConferenceRoom
+     */
+    public static ConferenceRoom fromJson(String jsonString) throws IOException {
+        return JSON.getGson().fromJson(jsonString, ConferenceRoom.class);
+    }
 
-  /**
-   * Convert an instance of ConferenceRoom to an JSON string
-   *
-   * @return JSON string
-   */
-  public String toJson() {
-    return JSON.getGson().toJson(this);
-  }
+    public ConferenceRoom id(UUID id) {
+        this.id = id;
+        return this;
+    }
+
+    /**
+     * Unique identifier for the conference room
+     *
+     * @return id
+     */
+    @javax.annotation.Nonnull
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public ConferenceRoom name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    /**
+     * Name of the conference room
+     *
+     * @return name
+     */
+    @javax.annotation.Nonnull
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public ConferenceRoom orchestrator(AgentType orchestrator) {
+        this.orchestrator = orchestrator;
+        return this;
+    }
+
+    /**
+     * Get orchestrator
+     *
+     * @return orchestrator
+     */
+    @javax.annotation.Nonnull
+    public AgentType getOrchestrator() {
+        return orchestrator;
+    }
+
+    public void setOrchestrator(AgentType orchestrator) {
+        this.orchestrator = orchestrator;
+    }
+
+    public ConferenceRoom activeAgents(List<AgentType> activeAgents) {
+        this.activeAgents = activeAgents;
+        return this;
+    }
+
+    public ConferenceRoom addActiveAgentsItem(AgentType activeAgentsItem) {
+        if (this.activeAgents == null) {
+            this.activeAgents = new ArrayList<>();
+        }
+        this.activeAgents.add(activeAgentsItem);
+        return this;
+    }
+
+    /**
+     * List of AI agents currently in the room
+     *
+     * @return activeAgents
+     */
+    @javax.annotation.Nonnull
+    public List<AgentType> getActiveAgents() {
+        return activeAgents;
+    }
+
+    public void setActiveAgents(List<AgentType> activeAgents) {
+        this.activeAgents = activeAgents;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ConferenceRoom conferenceRoom = (ConferenceRoom) o;
+        return Objects.equals(this.id, conferenceRoom.id) &&
+                Objects.equals(this.name, conferenceRoom.name) &&
+                Objects.equals(this.orchestrator, conferenceRoom.orchestrator) &&
+                Objects.equals(this.activeAgents, conferenceRoom.activeAgents);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, orchestrator, activeAgents);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class ConferenceRoom {\n");
+        sb.append("    id: ").append(toIndentedString(id)).append("\n");
+        sb.append("    name: ").append(toIndentedString(name)).append("\n");
+        sb.append("    orchestrator: ").append(toIndentedString(orchestrator)).append("\n");
+        sb.append("    activeAgents: ").append(toIndentedString(activeAgents)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
+
+    /**
+     * Convert an instance of ConferenceRoom to an JSON string
+     *
+     * @return JSON string
+     */
+    public String toJson() {
+        return JSON.getGson().toJson(this);
+    }
+
+    public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (!ConferenceRoom.class.isAssignableFrom(type.getRawType())) {
+                return null; // this class only serializes 'ConferenceRoom' and its subtypes
+            }
+            final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+            final TypeAdapter<ConferenceRoom> thisAdapter
+                    = gson.getDelegateAdapter(this, TypeToken.get(ConferenceRoom.class));
+
+            return (TypeAdapter<T>) new TypeAdapter<ConferenceRoom>() {
+                @Override
+                public void write(JsonWriter out, ConferenceRoom value) throws IOException {
+                    JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+                    elementAdapter.write(out, obj);
+                }
+
+                @Override
+                public ConferenceRoom read(JsonReader in) throws IOException {
+                    JsonElement jsonElement = elementAdapter.read(in);
+                    validateJsonElement(jsonElement);
+                    return thisAdapter.fromJsonTree(jsonElement);
+                }
+
+            }.nullSafe();
+        }
+    }
 }
 

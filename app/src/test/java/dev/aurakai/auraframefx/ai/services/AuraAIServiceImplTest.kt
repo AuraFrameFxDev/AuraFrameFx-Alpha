@@ -1,5 +1,7 @@
 package dev.aurakai.auraframefx.ai.services
 
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -7,15 +9,13 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeoutException
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -44,7 +44,7 @@ class AuraAIServiceImplTest {
         // Arrange
         val validRequest = "test request"
         val expectedResponse = "expected response"
-        
+
         // Mock dependencies if needed
         // whenever(mockDependency.someMethod()).thenReturn(expectedResponse)
 
@@ -60,7 +60,7 @@ class AuraAIServiceImplTest {
     fun `should handle multiple concurrent requests`() = runTest {
         // Arrange
         val requests = listOf("request1", "request2", "request3")
-        
+
         // Act
         val results = requests.map { request ->
             CompletableFuture.supplyAsync {

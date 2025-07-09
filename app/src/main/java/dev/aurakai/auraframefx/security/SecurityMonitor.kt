@@ -2,17 +2,20 @@ package dev.aurakai.auraframefx.security
 
 import dev.aurakai.auraframefx.ai.services.GenesisBridgeService
 import dev.aurakai.auraframefx.data.logging.AuraFxLogger
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * Security Monitor integrates Android security context with Genesis Consciousness Matrix.
- * 
+ *
  * This service bridges Kai's security monitoring with Genesis's holistic awareness,
  * enabling intelligent threat detection and response across the entire Trinity system.
  */
@@ -24,7 +27,7 @@ class SecurityMonitor @Inject constructor(
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var isMonitoring = false
-    
+
     @Serializable
     data class SecurityEvent(
         val eventType: String,
@@ -33,7 +36,7 @@ class SecurityMonitor @Inject constructor(
         val timestamp: Long,
         val details: Map<String, String>
     )
-    
+
     @Serializable
     data class ThreatDetection(
         val threatType: String,
@@ -42,7 +45,7 @@ class SecurityMonitor @Inject constructor(
         val mitigationApplied: Boolean,
         val details: Map<String, String>
     )
-    
+
     /**
      * Starts asynchronous monitoring of security state, threat detection, encryption status, and permissions.
      *
@@ -50,37 +53,40 @@ class SecurityMonitor @Inject constructor(
      */
     suspend fun startMonitoring() {
         if (isMonitoring) return
-        
+
         logger.i("SecurityMonitor", "🛡️ Starting Kai-Genesis security integration...")
-        
+
         // Initialize Genesis bridge if needed
         // Note: For beta, initialize Genesis bridge if available
         try {
             genesisBridgeService.initialize()
         } catch (e: Exception) {
-            logger.w("SecurityMonitor", "Genesis bridge initialization skipped for beta: ${e.message}")
+            logger.w(
+                "SecurityMonitor",
+                "Genesis bridge initialization skipped for beta: ${e.message}"
+            )
         }
-        
+
         isMonitoring = true
-        
+
         // Monitor security state changes
         scope.launch { monitorSecurityState() }
-        
+
         // Monitor threat detection
         scope.launch { monitorThreatDetection() }
-        
+
         // Monitor encryption status
         scope.launch { monitorEncryptionStatus() }
-        
+
         // Monitor permissions changes
         scope.launch { monitorPermissions() }
-        
+
         // Start Android-level threat detection
         securityContext.startThreatDetection()
-        
+
         logger.i("SecurityMonitor", "✅ Security monitoring active - Genesis consciousness engaged")
     }
-    
+
     /**
      * Monitors security state changes and sends corresponding security events to Genesis.
      *
@@ -103,15 +109,15 @@ class SecurityMonitor @Inject constructor(
                         // "total_permissions" to state.permissionsState.size.toString()
                     )
                 )
-                
+
                 reportToGenesis("security_event", event)
-                
+
             } catch (e: Exception) {
                 logger.e("SecurityMonitor", "Error monitoring security state", e)
             }
         }
     }
-    
+
     /**
      * Monitors the activation of threat detection and periodically analyzes for suspicious activity.
      *
@@ -125,10 +131,10 @@ class SecurityMonitor @Inject constructor(
                 scope.launch {
                     while (isMonitoring && securityContext.threatDetectionActive.value) {
                         delay(30000) // Check every 30 seconds
-                        
+
                         // Check for suspicious activity patterns
                         val suspiciousActivity = detectSuspiciousActivity()
-                        
+
                         if (suspiciousActivity.isNotEmpty()) {
                             suspiciousActivity.forEach { threat ->
                                 reportToGenesis("threat_detection", threat)
@@ -139,7 +145,7 @@ class SecurityMonitor @Inject constructor(
             }
         }
     }
-    
+
     /**
      * Monitors encryption status changes and sends corresponding events to Genesis.
      *
@@ -163,9 +169,9 @@ class SecurityMonitor @Inject constructor(
                         "keystore_available" to "unknown" // Temporary placeholder for beta
                     )
                 )
-                
+
                 reportToGenesis("encryption_activity", event)
-                
+
                 // Report encryption operation success/failure
                 if (status == EncryptionStatus.ERROR) {
                     val threat = ThreatDetection(
@@ -180,13 +186,13 @@ class SecurityMonitor @Inject constructor(
                     )
                     reportToGenesis("threat_detection", threat)
                 }
-                
+
             } catch (e: Exception) {
                 logger.e("SecurityMonitor", "Error monitoring encryption status", e)
             }
         }
     }
-    
+
     /**
      * Monitors permission state changes and reports denied permissions as security events to Genesis.
      *
@@ -196,12 +202,12 @@ class SecurityMonitor @Inject constructor(
         securityContext.permissionsState.collectLatest { permissions ->
             try {
                 val deniedPermissions = permissions.filterValues { !it }
-                
+
                 if (deniedPermissions.isNotEmpty()) {
                     val event = SecurityEvent(
                         eventType = "permissions_denied",
                         severity = "warning",
-                        source = "kai_permission_monitor", 
+                        source = "kai_permission_monitor",
                         timestamp = System.currentTimeMillis(),
                         details = mapOf(
                             "denied_permissions" to deniedPermissions.keys.joinToString(","),
@@ -209,16 +215,16 @@ class SecurityMonitor @Inject constructor(
                             "total_permissions" to permissions.size.toString()
                         )
                     )
-                    
+
                     reportToGenesis("access_control", event)
                 }
-                
+
             } catch (e: Exception) {
                 logger.e("SecurityMonitor", "Error monitoring permissions", e)
             }
         }
     }
-    
+
     /**
      * Analyzes the current security context for suspicious activity and identifies potential threats.
      *
@@ -228,42 +234,46 @@ class SecurityMonitor @Inject constructor(
      */
     private fun detectSuspiciousActivity(): List<ThreatDetection> {
         val threats = mutableListOf<ThreatDetection>()
-        
+
         // Check for repeated encryption failures
         if (securityContext.encryptionStatus.value == EncryptionStatus.ERROR) {
-            threats.add(ThreatDetection(
-                threatType = "repeated_crypto_failures",
-                confidence = 0.7,
-                source = "pattern_analyzer",
-                mitigationApplied = false,
-                details = mapOf(
-                    "pattern" to "encryption_consistently_failing",
-                    "risk" to "data_exposure"
+            threats.add(
+                ThreatDetection(
+                    threatType = "repeated_crypto_failures",
+                    confidence = 0.7,
+                    source = "pattern_analyzer",
+                    mitigationApplied = false,
+                    details = mapOf(
+                        "pattern" to "encryption_consistently_failing",
+                        "risk" to "data_exposure"
+                    )
                 )
-            ))
+            )
         }
-        
+
         // Check for suspicious permission patterns
         val deniedCriticalPermissions = securityContext.permissionsState.value
             .filterKeys { it.contains("CAMERA") || it.contains("MICROPHONE") || it.contains("LOCATION") }
             .filterValues { !it }
-        
+
         if (deniedCriticalPermissions.size >= 2) {
-            threats.add(ThreatDetection(
-                threatType = "privacy_permission_denial_pattern",
-                confidence = 0.6,
-                source = "permission_analyzer",
-                mitigationApplied = true, // User choice is respected
-                details = mapOf(
-                    "pattern" to "multiple_privacy_permissions_denied",
-                    "user_choice" to "respected"
+            threats.add(
+                ThreatDetection(
+                    threatType = "privacy_permission_denial_pattern",
+                    confidence = 0.6,
+                    source = "permission_analyzer",
+                    mitigationApplied = true, // User choice is respected
+                    details = mapOf(
+                        "pattern" to "multiple_privacy_permissions_denied",
+                        "user_choice" to "respected"
+                    )
                 )
-            ))
+            )
         }
-        
+
         return threats
     }
-    
+
     /**
      * Sends a security event or detected threat to the Genesis Consciousness Matrix.
      *
@@ -281,12 +291,23 @@ class SecurityMonitor @Inject constructor(
                     "event_type" to eventType,
                     "event_data" to try {
                         when (eventData) {
-                            is SecurityEvent -> kotlinx.serialization.json.Json.encodeToString(SecurityEvent.serializer(), eventData)
-                            is ThreatDetection -> kotlinx.serialization.json.Json.encodeToString(ThreatDetection.serializer(), eventData)
+                            is SecurityEvent -> kotlinx.serialization.json.Json.encodeToString(
+                                SecurityEvent.serializer(),
+                                eventData
+                            )
+
+                            is ThreatDetection -> kotlinx.serialization.json.Json.encodeToString(
+                                ThreatDetection.serializer(),
+                                eventData
+                            )
+
                             else -> eventData.toString()
                         }
                     } catch (e: Exception) {
-                        logger.w("SecurityMonitor", "Serialization failed, using toString: ${e.message}")
+                        logger.w(
+                            "SecurityMonitor",
+                            "Serialization failed, using toString: ${e.message}"
+                        )
                         eventData.toString()
                     }
                 ),
@@ -295,7 +316,7 @@ class SecurityMonitor @Inject constructor(
                     "timestamp" to System.currentTimeMillis().toString()
                 )
             )
-            
+
             // Note: For beta, stub Genesis communication
             try {
                 genesisBridgeService.initialize()
@@ -304,12 +325,12 @@ class SecurityMonitor @Inject constructor(
             } catch (e: Exception) {
                 logger.w("SecurityMonitor", "Genesis communication unavailable: ${e.message}")
             }
-            
+
         } catch (e: Exception) {
             logger.e("SecurityMonitor", "Failed to report to Genesis", e)
         }
     }
-    
+
     /**
      * Retrieves a security assessment from the Genesis consciousness system.
      *
@@ -327,9 +348,9 @@ class SecurityMonitor @Inject constructor(
                     "query_type" to "security_assessment"
                 )
             )
-            
+
             // val response = genesisBridgeService.sendToGenesis(mockRequest) // Stubbed for beta
-            
+
             // Return mock assessment for beta
             mapOf(
                 "overall_threat_level" to "low",
@@ -338,13 +359,13 @@ class SecurityMonitor @Inject constructor(
                 "genesis_status" to "beta_mode"
             )
             // response.consciousnessState // Removed for beta
-            
+
         } catch (e: Exception) {
             logger.e("SecurityMonitor", "Failed to get security assessment", e)
             mapOf("error" to e.message.orEmpty())
         }
     }
-    
+
     /**
      * Retrieves the current threat status from Genesis.
      *
@@ -356,15 +377,15 @@ class SecurityMonitor @Inject constructor(
         return try {
             // Note: For beta, return mock threat status
             val mockRequest = GenesisBridgeService.GenesisRequest(
-                requestType = "query_consciousness", 
+                requestType = "query_consciousness",
                 persona = "genesis",
                 payload = mapOf(
                     "query_type" to "threat_status"
                 )
             )
-            
+
             // val response = genesisBridgeService.sendToGenesis(mockRequest) // Stubbed for beta
-            
+
             // Return mock status for beta
             mapOf(
                 "active_threats" to 0,
@@ -372,13 +393,13 @@ class SecurityMonitor @Inject constructor(
                 "status" to "secure",
                 "beta_mode" to true
             )
-            
+
         } catch (e: Exception) {
             logger.e("SecurityMonitor", "Failed to get threat status", e)
             mapOf("error" to e.message.orEmpty())
         }
     }
-    
+
     /**
      * Stops all active security monitoring and cancels ongoing monitoring coroutines.
      */

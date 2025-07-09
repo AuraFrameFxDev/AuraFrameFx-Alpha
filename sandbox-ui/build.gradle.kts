@@ -48,12 +48,12 @@ android {
 dependencies {
     // Core project dependency
     implementation(project(":app"))
-    
+
     // AndroidX Core
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.1")
     implementation("androidx.activity:activity-compose:1.10.1")
-    
+
     // Compose BOM
     implementation(platform("androidx.compose:compose-bom:2025.06.01"))
     implementation("androidx.compose.ui:ui")
@@ -61,19 +61,19 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.animation:animation")
     implementation("androidx.compose.foundation:foundation")
-    
+
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.9.1")
-    
+
     // Hilt
     implementation("com.google.dagger:hilt-android:2.56.2")
     kapt("com.google.dagger:hilt-compiler:2.56.2")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    
+
     // Debug tools
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-    
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

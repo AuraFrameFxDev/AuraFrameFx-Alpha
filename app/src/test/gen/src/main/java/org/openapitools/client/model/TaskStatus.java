@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -14,15 +14,18 @@
 package org.openapitools.client.model;
 
 import java.util.Objects;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import com.google.gson.Gson;
@@ -38,6 +41,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
 
 import java.lang.reflect.Type;
@@ -54,356 +58,350 @@ import org.openapitools.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-06-24T00:25:27.807757200-06:00[America/Denver]", comments = "Generator version: 7.7.0")
 public class TaskStatus {
-  public static final String SERIALIZED_NAME_TASK_ID = "taskId";
-  @SerializedName(SERIALIZED_NAME_TASK_ID)
-  private String taskId;
+    public static final String SERIALIZED_NAME_TASK_ID = "taskId";
+    public static final String SERIALIZED_NAME_STATUS = "status";
+    public static final String SERIALIZED_NAME_PROGRESS = "progress";
+    public static final String SERIALIZED_NAME_RESULT = "result";
+    public static final String SERIALIZED_NAME_ERROR_MESSAGE = "errorMessage";
+    public static HashSet<String> openapiFields;
+    public static HashSet<String> openapiRequiredFields;
 
-  /**
-   * Gets or Sets status
-   */
-  @JsonAdapter(StatusEnum.Adapter.class)
-  public enum StatusEnum {
-    PENDING("PENDING"),
-    
-    IN_PROGRESS("IN_PROGRESS"),
-    
-    COMPLETED("COMPLETED"),
-    
-    FAILED("FAILED"),
-    
-    CANCELLED("CANCELLED");
+    static {
+        // a set of all properties/fields (JSON key names)
+        openapiFields = new HashSet<String>();
+        openapiFields.add("taskId");
+        openapiFields.add("status");
+        openapiFields.add("progress");
+        openapiFields.add("result");
+        openapiFields.add("errorMessage");
 
-    private String value;
-
-    StatusEnum(String value) {
-      this.value = value;
+        // a set of required properties/fields (JSON key names)
+        openapiRequiredFields = new HashSet<String>();
+        openapiRequiredFields.add("taskId");
+        openapiRequiredFields.add("status");
     }
 
-    public String getValue() {
-      return value;
+    @SerializedName(SERIALIZED_NAME_TASK_ID)
+    private String taskId;
+    @SerializedName(SERIALIZED_NAME_STATUS)
+    private StatusEnum status;
+    @SerializedName(SERIALIZED_NAME_PROGRESS)
+    private Integer progress;
+    @SerializedName(SERIALIZED_NAME_RESULT)
+    private Map<String, Object> result;
+    @SerializedName(SERIALIZED_NAME_ERROR_MESSAGE)
+    private String errorMessage;
+
+    public TaskStatus() {
+    }
+
+    private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
+        return a == b || (a != null && b != null && a.isPresent() && b.isPresent() && Objects.deepEquals(a.get(), b.get()));
+    }
+
+    private static <T> int hashCodeNullable(JsonNullable<T> a) {
+        if (a == null) {
+            return 1;
+        }
+        return a.isPresent() ? Arrays.deepHashCode(new Object[]{a.get()}) : 31;
+    }
+
+    /**
+     * Validates the JSON Element and throws an exception if issues found
+     *
+     * @param jsonElement JSON Element
+     * @throws IOException if the JSON Element is invalid with respect to TaskStatus
+     */
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+        if (jsonElement == null) {
+            if (!TaskStatus.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+                throw new IllegalArgumentException(String.format("The required field(s) %s in TaskStatus is not found in the empty JSON string", TaskStatus.openapiRequiredFields.toString()));
+            }
+        }
+
+        Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
+        // check to see if the JSON string contains additional fields
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            if (!TaskStatus.openapiFields.contains(entry.getKey())) {
+                throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `TaskStatus` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+            }
+        }
+
+        // check to make sure all required properties/fields are present in the JSON string
+        for (String requiredField : TaskStatus.openapiRequiredFields) {
+            if (jsonElement.getAsJsonObject().get(requiredField) == null) {
+                throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+            }
+        }
+        JsonObject jsonObj = jsonElement.getAsJsonObject();
+        if (!jsonObj.get("taskId").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `taskId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("taskId").toString()));
+        }
+        if (!jsonObj.get("status").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `status` to be a primitive type in the JSON string but got `%s`", jsonObj.get("status").toString()));
+        }
+        // validate the required field `status`
+        StatusEnum.validateJsonElement(jsonObj.get("status"));
+        if ((jsonObj.get("errorMessage") != null && !jsonObj.get("errorMessage").isJsonNull()) && !jsonObj.get("errorMessage").isJsonPrimitive()) {
+            throw new IllegalArgumentException(String.format("Expected the field `errorMessage` to be a primitive type in the JSON string but got `%s`", jsonObj.get("errorMessage").toString()));
+        }
+    }
+
+    /**
+     * Create an instance of TaskStatus given an JSON string
+     *
+     * @param jsonString JSON string
+     * @return An instance of TaskStatus
+     * @throws IOException if the JSON string is invalid with respect to TaskStatus
+     */
+    public static TaskStatus fromJson(String jsonString) throws IOException {
+        return JSON.getGson().fromJson(jsonString, TaskStatus.class);
+    }
+
+    public TaskStatus taskId(String taskId) {
+        this.taskId = taskId;
+        return this;
+    }
+
+    /**
+     * Unique identifier for the task
+     *
+     * @return taskId
+     */
+    @javax.annotation.Nonnull
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
+    }
+
+    public TaskStatus status(StatusEnum status) {
+        this.status = status;
+        return this;
+    }
+
+    /**
+     * Get status
+     *
+     * @return status
+     */
+    @javax.annotation.Nonnull
+    public StatusEnum getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusEnum status) {
+        this.status = status;
+    }
+
+    public TaskStatus progress(Integer progress) {
+        this.progress = progress;
+        return this;
+    }
+
+    /**
+     * Percentage completion of the task (0-100)
+     * minimum: 0
+     * maximum: 100
+     *
+     * @return progress
+     */
+    @javax.annotation.Nullable
+    public Integer getProgress() {
+        return progress;
+    }
+
+    public void setProgress(Integer progress) {
+        this.progress = progress;
+    }
+
+    public TaskStatus result(Map<String, Object> result) {
+        this.result = result;
+        return this;
+    }
+
+    public TaskStatus putResultItem(String key, Object resultItem) {
+        if (this.result == null) {
+            this.result = new HashMap<>();
+        }
+        this.result.put(key, resultItem);
+        return this;
+    }
+
+    /**
+     * The outcome or output of the task
+     *
+     * @return result
+     */
+    @javax.annotation.Nullable
+    public Map<String, Object> getResult() {
+        return result;
+    }
+
+    public void setResult(Map<String, Object> result) {
+        this.result = result;
+    }
+
+    public TaskStatus errorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+        return this;
+    }
+
+    /**
+     * Error message if the task failed
+     *
+     * @return errorMessage
+     */
+    @javax.annotation.Nullable
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TaskStatus taskStatus = (TaskStatus) o;
+        return Objects.equals(this.taskId, taskStatus.taskId) &&
+                Objects.equals(this.status, taskStatus.status) &&
+                Objects.equals(this.progress, taskStatus.progress) &&
+                Objects.equals(this.result, taskStatus.result) &&
+                Objects.equals(this.errorMessage, taskStatus.errorMessage);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(taskId, status, progress, result, errorMessage);
     }
 
     @Override
     public String toString() {
-      return String.valueOf(value);
+        StringBuilder sb = new StringBuilder();
+        sb.append("class TaskStatus {\n");
+        sb.append("    taskId: ").append(toIndentedString(taskId)).append("\n");
+        sb.append("    status: ").append(toIndentedString(status)).append("\n");
+        sb.append("    progress: ").append(toIndentedString(progress)).append("\n");
+        sb.append("    result: ").append(toIndentedString(result)).append("\n");
+        sb.append("    errorMessage: ").append(toIndentedString(errorMessage)).append("\n");
+        sb.append("}");
+        return sb.toString();
     }
 
-    public static StatusEnum fromValue(String value) {
-      for (StatusEnum b : StatusEnum.values()) {
-        if (b.value.equals(value)) {
-          return b;
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
         }
-      }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+        return o.toString().replace("\n", "\n    ");
     }
 
-    public static class Adapter extends TypeAdapter<StatusEnum> {
-      @Override
-      public void write(final JsonWriter jsonWriter, final StatusEnum enumeration) throws IOException {
-        jsonWriter.value(enumeration.getValue());
-      }
-
-      @Override
-      public StatusEnum read(final JsonReader jsonReader) throws IOException {
-        String value =  jsonReader.nextString();
-        return StatusEnum.fromValue(value);
-      }
+    /**
+     * Convert an instance of TaskStatus to an JSON string
+     *
+     * @return JSON string
+     */
+    public String toJson() {
+        return JSON.getGson().toJson(this);
     }
 
-    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      String value = jsonElement.getAsString();
-      StatusEnum.fromValue(value);
-    }
-  }
+    /**
+     * Gets or Sets status
+     */
+    @JsonAdapter(StatusEnum.Adapter.class)
+    public enum StatusEnum {
+        PENDING("PENDING"),
 
-  public static final String SERIALIZED_NAME_STATUS = "status";
-  @SerializedName(SERIALIZED_NAME_STATUS)
-  private StatusEnum status;
+        IN_PROGRESS("IN_PROGRESS"),
 
-  public static final String SERIALIZED_NAME_PROGRESS = "progress";
-  @SerializedName(SERIALIZED_NAME_PROGRESS)
-  private Integer progress;
+        COMPLETED("COMPLETED"),
 
-  public static final String SERIALIZED_NAME_RESULT = "result";
-  @SerializedName(SERIALIZED_NAME_RESULT)
-  private Map<String, Object> result;
+        FAILED("FAILED"),
 
-  public static final String SERIALIZED_NAME_ERROR_MESSAGE = "errorMessage";
-  @SerializedName(SERIALIZED_NAME_ERROR_MESSAGE)
-  private String errorMessage;
+        CANCELLED("CANCELLED");
 
-  public TaskStatus() {
-  }
+        private String value;
 
-  public TaskStatus taskId(String taskId) {
-    this.taskId = taskId;
-    return this;
-  }
-
-  /**
-   * Unique identifier for the task
-   * @return taskId
-   */
-  @javax.annotation.Nonnull
-  public String getTaskId() {
-    return taskId;
-  }
-
-  public void setTaskId(String taskId) {
-    this.taskId = taskId;
-  }
-
-
-  public TaskStatus status(StatusEnum status) {
-    this.status = status;
-    return this;
-  }
-
-  /**
-   * Get status
-   * @return status
-   */
-  @javax.annotation.Nonnull
-  public StatusEnum getStatus() {
-    return status;
-  }
-
-  public void setStatus(StatusEnum status) {
-    this.status = status;
-  }
-
-
-  public TaskStatus progress(Integer progress) {
-    this.progress = progress;
-    return this;
-  }
-
-  /**
-   * Percentage completion of the task (0-100)
-   * minimum: 0
-   * maximum: 100
-   * @return progress
-   */
-  @javax.annotation.Nullable
-  public Integer getProgress() {
-    return progress;
-  }
-
-  public void setProgress(Integer progress) {
-    this.progress = progress;
-  }
-
-
-  public TaskStatus result(Map<String, Object> result) {
-    this.result = result;
-    return this;
-  }
-
-  public TaskStatus putResultItem(String key, Object resultItem) {
-    if (this.result == null) {
-      this.result = new HashMap<>();
-    }
-    this.result.put(key, resultItem);
-    return this;
-  }
-
-  /**
-   * The outcome or output of the task
-   * @return result
-   */
-  @javax.annotation.Nullable
-  public Map<String, Object> getResult() {
-    return result;
-  }
-
-  public void setResult(Map<String, Object> result) {
-    this.result = result;
-  }
-
-
-  public TaskStatus errorMessage(String errorMessage) {
-    this.errorMessage = errorMessage;
-    return this;
-  }
-
-  /**
-   * Error message if the task failed
-   * @return errorMessage
-   */
-  @javax.annotation.Nullable
-  public String getErrorMessage() {
-    return errorMessage;
-  }
-
-  public void setErrorMessage(String errorMessage) {
-    this.errorMessage = errorMessage;
-  }
-
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    TaskStatus taskStatus = (TaskStatus) o;
-    return Objects.equals(this.taskId, taskStatus.taskId) &&
-        Objects.equals(this.status, taskStatus.status) &&
-        Objects.equals(this.progress, taskStatus.progress) &&
-        Objects.equals(this.result, taskStatus.result) &&
-        Objects.equals(this.errorMessage, taskStatus.errorMessage);
-  }
-
-  private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
-    return a == b || (a != null && b != null && a.isPresent() && b.isPresent() && Objects.deepEquals(a.get(), b.get()));
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(taskId, status, progress, result, errorMessage);
-  }
-
-  private static <T> int hashCodeNullable(JsonNullable<T> a) {
-    if (a == null) {
-      return 1;
-    }
-    return a.isPresent() ? Arrays.deepHashCode(new Object[]{a.get()}) : 31;
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class TaskStatus {\n");
-    sb.append("    taskId: ").append(toIndentedString(taskId)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    progress: ").append(toIndentedString(progress)).append("\n");
-    sb.append("    result: ").append(toIndentedString(result)).append("\n");
-    sb.append("    errorMessage: ").append(toIndentedString(errorMessage)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
-
-
-  public static HashSet<String> openapiFields;
-  public static HashSet<String> openapiRequiredFields;
-
-  static {
-    // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("taskId");
-    openapiFields.add("status");
-    openapiFields.add("progress");
-    openapiFields.add("result");
-    openapiFields.add("errorMessage");
-
-    // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("taskId");
-    openapiRequiredFields.add("status");
-  }
-
-  /**
-   * Validates the JSON Element and throws an exception if issues found
-   *
-   * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to TaskStatus
-   */
-  public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      if (jsonElement == null) {
-        if (!TaskStatus.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in TaskStatus is not found in the empty JSON string", TaskStatus.openapiRequiredFields.toString()));
+        StatusEnum(String value) {
+            this.value = value;
         }
-      }
 
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!TaskStatus.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `TaskStatus` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
+        public static StatusEnum fromValue(String value) {
+            for (StatusEnum b : StatusEnum.values()) {
+                if (b.value.equals(value)) {
+                    return b;
+                }
+            }
+            throw new IllegalArgumentException("Unexpected value '" + value + "'");
         }
-      }
 
-      // check to make sure all required properties/fields are present in the JSON string
-      for (String requiredField : TaskStatus.openapiRequiredFields) {
-        if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+        public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+            String value = jsonElement.getAsString();
+            StatusEnum.fromValue(value);
         }
-      }
-        JsonObject jsonObj = jsonElement.getAsJsonObject();
-      if (!jsonObj.get("taskId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `taskId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("taskId").toString()));
-      }
-      if (!jsonObj.get("status").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `status` to be a primitive type in the JSON string but got `%s`", jsonObj.get("status").toString()));
-      }
-      // validate the required field `status`
-      StatusEnum.validateJsonElement(jsonObj.get("status"));
-      if ((jsonObj.get("errorMessage") != null && !jsonObj.get("errorMessage").isJsonNull()) && !jsonObj.get("errorMessage").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `errorMessage` to be a primitive type in the JSON string but got `%s`", jsonObj.get("errorMessage").toString()));
-      }
-  }
 
-  public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!TaskStatus.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'TaskStatus' and its subtypes
-       }
-       final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<TaskStatus> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(TaskStatus.class));
+        public String getValue() {
+            return value;
+        }
 
-       return (TypeAdapter<T>) new TypeAdapter<TaskStatus>() {
-           @Override
-           public void write(JsonWriter out, TaskStatus value) throws IOException {
-             JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
-             elementAdapter.write(out, obj);
-           }
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
 
-           @Override
-           public TaskStatus read(JsonReader in) throws IOException {
-             JsonElement jsonElement = elementAdapter.read(in);
-             validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
-           }
+        public static class Adapter extends TypeAdapter<StatusEnum> {
+            @Override
+            public void write(final JsonWriter jsonWriter, final StatusEnum enumeration) throws IOException {
+                jsonWriter.value(enumeration.getValue());
+            }
 
-       }.nullSafe();
+            @Override
+            public StatusEnum read(final JsonReader jsonReader) throws IOException {
+                String value = jsonReader.nextString();
+                return StatusEnum.fromValue(value);
+            }
+        }
     }
-  }
 
-  /**
-   * Create an instance of TaskStatus given an JSON string
-   *
-   * @param jsonString JSON string
-   * @return An instance of TaskStatus
-   * @throws IOException if the JSON string is invalid with respect to TaskStatus
-   */
-  public static TaskStatus fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, TaskStatus.class);
-  }
+    public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+            if (!TaskStatus.class.isAssignableFrom(type.getRawType())) {
+                return null; // this class only serializes 'TaskStatus' and its subtypes
+            }
+            final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
+            final TypeAdapter<TaskStatus> thisAdapter
+                    = gson.getDelegateAdapter(this, TypeToken.get(TaskStatus.class));
 
-  /**
-   * Convert an instance of TaskStatus to an JSON string
-   *
-   * @return JSON string
-   */
-  public String toJson() {
-    return JSON.getGson().toJson(this);
-  }
+            return (TypeAdapter<T>) new TypeAdapter<TaskStatus>() {
+                @Override
+                public void write(JsonWriter out, TaskStatus value) throws IOException {
+                    JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+                    elementAdapter.write(out, obj);
+                }
+
+                @Override
+                public TaskStatus read(JsonReader in) throws IOException {
+                    JsonElement jsonElement = elementAdapter.read(in);
+                    validateJsonElement(jsonElement);
+                    return thisAdapter.fromJsonTree(jsonElement);
+                }
+
+            }.nullSafe();
+        }
+    }
 }
 

@@ -1,23 +1,51 @@
 package dev.aurakai.auraframefx.ui.components
 
+// import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete // Explicit import
-import androidx.compose.material.icons.filled.PlayArrow // Explicit import
-import androidx.compose.material.icons.filled.Refresh // Explicit import
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.material3.*
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.Path
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -27,13 +55,12 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-// import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonPink
-import dev.aurakai.auraframefx.ui.theme.NeonPurple // Added import
-import dev.aurakai.auraframefx.ui.theme.NeonTeal // Added import
+import dev.aurakai.auraframefx.ui.theme.NeonPurple
+import dev.aurakai.auraframefx.ui.theme.NeonTeal
 import dev.aurakai.auraframefx.viewmodel.GenesisAgentViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,8 +68,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.*
-import kotlin.math.*
+import java.util.Locale
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Displays an interactive rotating halo interface for managing agents and delegating tasks.
@@ -555,10 +584,15 @@ fun HaloView(viewModel: GenesisAgentViewModel = viewModel<GenesisAgentViewModel>
             val agentNameFromHistory = task.substringAfter("[").substringBefore("]")
             // Compare by name string to find the AgentConfig
             val foundAgentConfig =
-                agents.find { it.name.lowercase(Locale.ROOT) == agentNameFromHistory.lowercase(Locale.ROOT) }
+                agents.find {
+                    it.name.lowercase(Locale.ROOT) == agentNameFromHistory.lowercase(
+                        Locale.ROOT
+                    )
+                }
             if (foundAgentConfig != null) {
                 try {
-                    val actualAgentType = AgentType.valueOf(foundAgentConfig.name.uppercase(Locale.ROOT))
+                    val actualAgentType =
+                        AgentType.valueOf(foundAgentConfig.name.uppercase(Locale.ROOT))
                     agentStatus[actualAgentType] = "processing"
                     // Simulate task completion after a delay
                     coroutineScope.launch {

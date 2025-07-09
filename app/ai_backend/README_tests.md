@@ -8,6 +8,7 @@
 ## Test Coverage
 
 The test suite now includes comprehensive coverage for:
+
 - Basic functionality and configuration
 - HTTP request/response handling
 - Error handling and edge cases
