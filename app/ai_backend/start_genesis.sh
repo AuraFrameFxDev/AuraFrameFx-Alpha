@@ -20,7 +20,7 @@ print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
 
-# print_success prints a message to stdout with a green [SUCCESS] prefix to indicate a successful operation.
+# print_success prints a message to stdout with a green [SUCCESS] prefix.
 print_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
@@ -35,7 +35,7 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# print_genesis prints a Genesis Layer notification to stdout with a purple [GENESIS] prefix.
+# print_genesis prints a message to stdout with a purple [GENESIS] prefix.
 print_genesis() {
     echo -e "${PURPLE}[GENESIS]${NC} $1"
 }

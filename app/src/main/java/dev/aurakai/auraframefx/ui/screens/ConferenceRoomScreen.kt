@@ -139,6 +139,15 @@ fun ConferenceRoomScreen() {
     }
 }
 
+/**
+ * Displays a selectable button for an agent with dynamic styling based on selection state.
+ *
+ * The button highlights when selected and invokes the provided callback when clicked.
+ *
+ * @param agent The name of the agent to display on the button.
+ * @param isSelected Whether this agent is currently selected.
+ * @param onClick Callback invoked when the button is pressed.
+ */
 @Composable
 fun AgentButton(
     agent: String,
@@ -166,12 +175,12 @@ fun AgentButton(
 }
 
 /**
- * A button that toggles the recording state.
+ * Displays a button for toggling the recording state in the conference room UI.
  *
- * Displays a stop icon with a red tint when recording is active, or a circle icon with a purple tint when inactive.
+ * Shows a red stop icon when recording is active, or a purple circle icon when inactive. The button invokes the provided callback when pressed.
  *
- * @param isRecording Whether recording is currently active.
- * @param onClick Callback invoked when the button is pressed.
+ * @param isRecording Indicates whether recording is currently active.
+ * @param onClick Called when the button is pressed.
  */
 @Composable
 fun RecordingButton(
@@ -196,12 +205,12 @@ fun RecordingButton(
 }
 
 /**
- * Renders a button that toggles the transcription state.
+ * Displays a button for toggling the transcription state in the conference room UI.
  *
- * The button displays a red stop icon when transcription is active, or a NeonBlue phone icon when inactive.
+ * Shows a red stop icon when transcription is active, or a NeonBlue phone icon when inactive.
  *
- * @param isTranscribing True if transcription is currently active.
- * @param onClick Invoked when the button is pressed.
+ * @param isTranscribing Indicates whether transcription is currently active.
+ * @param onClick Called when the button is pressed.
  */
 @Composable
 fun TranscribeButton(
@@ -226,7 +235,7 @@ fun TranscribeButton(
 }
 
 /**
- * Displays a design-time preview of the ConferenceRoomScreen composable within a MaterialTheme.
+ * Provides a preview of the ConferenceRoomScreen composable wrapped in a MaterialTheme for design-time visualization.
  */
 @Composable
 @Preview(showBackground = true)
