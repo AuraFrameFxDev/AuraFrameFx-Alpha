@@ -132,6 +132,14 @@ class TaskScheduler @Inject constructor(
         }
     }
 
+    /**
+     * Updates the status of a task and manages its lifecycle transitions.
+     *
+     * If the status is `COMPLETED`, moves the task to the completed collection. If the status is `FAILED`, removes it from active tasks and reports the failure using the error handler. Updates the task in the main task map, refreshes task statistics, and triggers processing of the task queue.
+     *
+     * @param taskId The unique identifier of the task to update.
+     * @param status The new status to assign to the task.
+     */
     fun updateTaskStatus(taskId: String, status: TaskStatus) {
         val task = _tasks.value[taskId] ?: return
         val updatedTask = task.copy(status = status)
@@ -162,23 +170,37 @@ class TaskScheduler @Inject constructor(
         processQueue()
     }
 
+    /**
+     * Calculates the priority score for a task based on its priority value and the configured priority weight.
+     *
+     * @return The computed priority score as a Float.
+     */
     private fun calculatePriorityScore(task: Task): Float {
         return task.priority.value * config.priorityWeight
     }
 
+    /**
+     * Calculates the urgency score for a task based on its urgency value and the configured urgency weight.
+     *
+     * @return The computed urgency score as a Float.
+     */
     private fun calculateUrgencyScore(task: Task): Float {
         return task.urgency.value * config.urgencyWeight
     }
 
+    /**
+     * Calculates the importance score for a task based on its importance value and the configured importance weight.
+     *
+     * @return The computed importance score as a Float.
+     */
     private fun calculateImportanceScore(task: Task): Float {
         return task.importance.value * config.importanceWeight
     }
 
     /**
-     * Updates the task statistics to reflect the current state after a task change.
+     * Updates task statistics to reflect the latest task state.
      *
-     * Increments the total task count, updates counts for active, completed, and pending tasks,
-     * refreshes the per-status task counts, and sets the last updated timestamp.
+     * Increments the total task count, updates counts for active, completed, and pending tasks, refreshes per-status counts, and sets the last updated timestamp.
      */
     private fun updateStats(task: Task) {
         _taskStats.update { current ->

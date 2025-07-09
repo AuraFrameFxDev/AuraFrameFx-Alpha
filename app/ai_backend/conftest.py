@@ -23,10 +23,10 @@ def mock_base_url():
 @pytest.fixture
 def sample_api_response():
     """
-    Return a mock dictionary simulating a successful Genesis API chat completion response.
+    Return a mock dictionary representing a successful Genesis API chat completion response.
     
     Returns:
-        dict: Contains response metadata, an assistant message, finish reason, and token usage statistics.
+        dict: A simulated API response containing metadata, an assistant message, finish reason, and token usage statistics.
     """
     return {
         "id": "test_response_id",
@@ -53,10 +53,10 @@ def sample_api_response():
 @pytest.fixture
 def sample_error_response():
     """
-    Return a sample error response dictionary simulating a typical Genesis API error.
+    Return a mock error response dictionary representing a typical Genesis API error.
     
     Returns:
-        dict: Dictionary with error details including type, message, parameter, and code.
+        dict: Contains an "error" object with fields for type, message, parameter, and code.
     """
     return {
         "error": {
@@ -70,9 +70,9 @@ def sample_error_response():
 @pytest.fixture(autouse=True)
 def mock_environment():
     """
-    Automatically sets and removes test environment variables for Genesis API client tests.
+    Automatically sets and cleans up Genesis API environment variables for each test.
     
-    This autouse fixture ensures that `GENESIS_API_KEY` and `GENESIS_BASE_URL` are set to test values before each test and deleted afterward, maintaining test isolation.
+    This autouse fixture ensures that `GENESIS_API_KEY` and `GENESIS_BASE_URL` are set to test values before each test and removed afterward to maintain test isolation.
     """
     os.environ["GENESIS_API_KEY"] = "test_env_key"
     os.environ["GENESIS_BASE_URL"] = "https://api.genesis.test"
