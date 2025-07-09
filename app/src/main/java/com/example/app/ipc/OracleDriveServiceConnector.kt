@@ -23,7 +23,7 @@ class OracleDriveServiceConnector(private val context: Context) {
         /**
          * Called when the AuraDrive service is connected.
          *
-         * Retrieves the remote `IAuraDriveService` interface from the provided binder and updates the connection state to connected.
+         * Obtains the remote `IAuraDriveService` interface from the provided binder and updates the connection state to reflect a successful connection.
          *
          * @param name The component name of the connected service.
          * @param service The binder interface to the connected service.
@@ -34,9 +34,9 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
 
         /**
-         * Handles disconnection from the AuraDrive service.
+         * Called when the AuraDrive service is disconnected.
          *
-         * Clears the remote service reference and sets the connection state to disconnected.
+         * Clears the reference to the remote service and updates the connection state to reflect disconnection.
          */
         override fun onServiceDisconnected(name: ComponentName?) {
             auraDriveService = null
@@ -47,7 +47,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Attempts to bind to the remote AuraDrive service using an explicit intent.
      *
-     * If a SecurityException occurs during binding, updates the connection state to disconnected.
+     * If a SecurityException occurs during binding, sets the connection state to disconnected.
      */
     fun bindService() {
         val intent = Intent().apply {
@@ -64,7 +64,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Unbinds from the AuraDrive service and sets the connection state to disconnected.
+     * Unbinds from the AuraDrive service and updates the connection state to disconnected.
      *
      * Any exceptions thrown during unbinding are ignored.
      */
@@ -110,7 +110,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Retrieves a detailed internal status report from the remote AuraDrive service.
      *
-     * @return The detailed status string, or null if the service is unavailable or a RemoteException occurs.
+     * @return The detailed status string, or `null` if the service is unavailable or a RemoteException occurs.
      */
     suspend fun getDetailedInternalStatus(): String? = withContext(Dispatchers.IO) {
         try {
