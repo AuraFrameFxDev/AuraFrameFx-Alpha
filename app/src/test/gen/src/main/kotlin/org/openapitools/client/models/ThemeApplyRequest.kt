@@ -20,15 +20,6 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
-<<<<<<< HEAD
- *
- *
- * @param themeId
- */
-
-
-data class ThemeApplyRequest(
-=======
  * 
  *
  * @param themeId 
@@ -36,7 +27,6 @@ data class ThemeApplyRequest(
 
 
 data class ThemeApplyRequest (
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     @Json(name = "themeId")
     val themeId: kotlin.String

@@ -21,18 +21,6 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
-<<<<<<< HEAD
- *
- *
- * @param taskType The type of task
- * @param agentType
- * @param details Specific parameters for the task
- * @param priority
- */
-
-
-data class TaskScheduleRequest(
-=======
  * 
  *
  * @param taskType The type of task
@@ -43,7 +31,6 @@ data class TaskScheduleRequest(
 
 
 data class TaskScheduleRequest (
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     /* The type of task */
     @Json(name = "taskType")
@@ -62,28 +49,15 @@ data class TaskScheduleRequest (
 ) {
 
     /**
-<<<<<<< HEAD
-     *
-=======
      * 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      *
      * Values: HIGH,NORMAL,LOW
      */
     @JsonClass(generateAdapter = false)
     enum class Priority(val value: kotlin.String) {
-<<<<<<< HEAD
-        @Json(name = "HIGH")
-        HIGH("HIGH"),
-        @Json(name = "NORMAL")
-        NORMAL("NORMAL"),
-        @Json(name = "LOW")
-        LOW("LOW");
-=======
         @Json(name = "HIGH") HIGH("HIGH"),
         @Json(name = "NORMAL") NORMAL("NORMAL"),
         @Json(name = "LOW") LOW("LOW");
->>>>>>> origin/coderabbitai/docstrings/78f34ad
     }
 
 }

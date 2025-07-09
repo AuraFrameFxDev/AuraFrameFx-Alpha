@@ -1,10 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
-<<<<<<< HEAD
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
-=======
  * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -22,21 +18,11 @@ public class Pair {
     private String name = "";
     private String value = "";
 
-<<<<<<< HEAD
-    public Pair(String name, String value) {
-=======
     public Pair (String name, String value) {
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         setName(name);
         setValue(value);
     }
 
-<<<<<<< HEAD
-    public String getName() {
-        return this.name;
-    }
-
-=======
 >>>>>>> origin/coderabbitai/docstrings/78f34ad
     private void setName(String name) {
         if (!isValidString(name)) {
@@ -46,13 +32,6 @@ public class Pair {
         this.name = name;
     }
 
-<<<<<<< HEAD
-    public String getValue() {
-        return this.value;
-    }
-
-=======
->>>>>>> origin/coderabbitai/docstrings/78f34ad
     private void setValue(String value) {
         if (!isValidString(value)) {
             return;
@@ -61,8 +40,6 @@ public class Pair {
         this.value = value;
     }
 
-<<<<<<< HEAD
-=======
     public String getName() {
         return this.name;
     }
@@ -71,7 +48,6 @@ public class Pair {
         return this.value;
     }
 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
     private boolean isValidString(String arg) {
         if (arg == null) {
             return false;

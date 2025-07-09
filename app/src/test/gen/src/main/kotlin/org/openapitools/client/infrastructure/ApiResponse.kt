@@ -6,26 +6,16 @@ enum class ResponseType {
 
 interface Response
 
-<<<<<<< HEAD
-abstract class ApiResponse<T>(val responseType: ResponseType) : Response {
-    abstract val statusCode: Int
-    abstract val headers: Map<String, List<String>>
-=======
 abstract class ApiResponse<T>(val responseType: ResponseType): Response {
     abstract val statusCode: Int
     abstract val headers: Map<String,List<String>>
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 }
 
 class Success<T>(
     val data: T,
     override val statusCode: Int = -1,
     override val headers: Map<String, List<String>> = mapOf()
-<<<<<<< HEAD
-) : ApiResponse<T>(ResponseType.Success)
-=======
 ): ApiResponse<T>(ResponseType.Success)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
 class Informational<T>(
     val statusText: String,
@@ -50,8 +40,4 @@ class ServerError<T>(
     val body: Any? = null,
     override val statusCode: Int = -1,
     override val headers: Map<String, List<String>>
-<<<<<<< HEAD
-) : ApiResponse<T>(ResponseType.ServerError)
-=======
 ): ApiResponse<T>(ResponseType.ServerError)
->>>>>>> origin/coderabbitai/docstrings/78f34ad

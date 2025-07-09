@@ -2,16 +2,6 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-<<<<<<< HEAD
-| Method                                                                       | HTTP request                      | Description                                 |
-|------------------------------------------------------------------------------|-----------------------------------|---------------------------------------------|
-| [**oracledriveRootActionPost**](OracledriveApi.md#oracledriveRootActionPost) | **POST** /oracledrive/root-action | Perform a root-level action via OracleDrive |
-
-<a id="oracledriveRootActionPost"></a>
-
-# **oracledriveRootActionPost**
-
-=======
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
 | [**oracledriveRootActionPost**](OracledriveApi.md#oracledriveRootActionPost) | **POST** /oracledrive/root-action | Perform a root-level action via OracleDrive |
@@ -19,15 +9,11 @@ All URIs are relative to *https://api.auraframefx.com/v1*
 
 <a id="oracledriveRootActionPost"></a>
 # **oracledriveRootActionPost**
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 > OracleDriveRootActionResponse oracledriveRootActionPost(oracleDriveRootActionRequest)
 
 Perform a root-level action via OracleDrive
 
 ### Example
-<<<<<<< HEAD
-
-=======
 >>>>>>> origin/coderabbitai/docstrings/78f34ad
 ```java
 // Import classes:
@@ -67,15 +53,9 @@ public class Example {
 
 ### Parameters
 
-<<<<<<< HEAD
-| Name                             | Type                                                                | Description | Notes |
-|----------------------------------|---------------------------------------------------------------------|-------------|-------|
-| **oracleDriveRootActionRequest** | [**OracleDriveRootActionRequest**](OracleDriveRootActionRequest.md) |             |       |
-=======
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **oracleDriveRootActionRequest** | [**OracleDriveRootActionRequest**](OracleDriveRootActionRequest.md)|  | |
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
 ### Return type
 
@@ -87,19 +67,6 @@ public class Example {
 
 ### HTTP request headers
 
-<<<<<<< HEAD
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-### HTTP response details
-
-| Status code | Description                                          | Response headers |
-|-------------|------------------------------------------------------|------------------|
-| **200**     | Root action performed successfully                   | -                |
-| **400**     | Invalid request format or parameters                 | -                |
-| **401**     | Authentication credentials were missing or incorrect | -                |
-| **500**     | Internal server error                                | -                |
-=======
  - **Content-Type**: application/json
  - **Accept**: application/json
 
@@ -110,5 +77,4 @@ public class Example {
 | **400** | Invalid request format or parameters |  -  |
 | **401** | Authentication credentials were missing or incorrect |  -  |
 | **500** | Internal server error |  -  |
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 

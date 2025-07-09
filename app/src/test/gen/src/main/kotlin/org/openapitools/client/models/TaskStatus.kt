@@ -20,28 +20,17 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
-<<<<<<< HEAD
- *
- *
- * @param taskId Unique identifier for the task
- * @param status
-=======
  * 
  *
  * @param taskId Unique identifier for the task
  * @param status 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
  * @param progress Percentage completion of the task (0-100)
  * @param result The outcome or output of the task
  * @param errorMessage Error message if the task failed
  */
 
 
-<<<<<<< HEAD
-data class TaskStatus(
-=======
 data class TaskStatus (
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     /* Unique identifier for the task */
     @Json(name = "taskId")
@@ -65,34 +54,17 @@ data class TaskStatus (
 ) {
 
     /**
-<<<<<<< HEAD
-     *
-=======
      * 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      *
      * Values: PENDING,IN_PROGRESS,COMPLETED,FAILED,CANCELLED
      */
     @JsonClass(generateAdapter = false)
     enum class Status(val value: kotlin.String) {
-<<<<<<< HEAD
-        @Json(name = "PENDING")
-        PENDING("PENDING"),
-        @Json(name = "IN_PROGRESS")
-        IN_PROGRESS("IN_PROGRESS"),
-        @Json(name = "COMPLETED")
-        COMPLETED("COMPLETED"),
-        @Json(name = "FAILED")
-        FAILED("FAILED"),
-        @Json(name = "CANCELLED")
-        CANCELLED("CANCELLED");
-=======
         @Json(name = "PENDING") PENDING("PENDING"),
         @Json(name = "IN_PROGRESS") IN_PROGRESS("IN_PROGRESS"),
         @Json(name = "COMPLETED") COMPLETED("COMPLETED"),
         @Json(name = "FAILED") FAILED("FAILED"),
         @Json(name = "CANCELLED") CANCELLED("CANCELLED");
->>>>>>> origin/coderabbitai/docstrings/78f34ad
     }
 
 }

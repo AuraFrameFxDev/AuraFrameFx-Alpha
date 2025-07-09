@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-# ApiError
-
-## Properties
-
-| Name      | Type                                  | Description | Notes |
-|-----------|---------------------------------------|-------------|-------|
-| **error** | [**ApiErrorError**](ApiErrorError.md) |             |       |
-=======
 
 
 # ApiError
@@ -17,7 +8,6 @@
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 |**error** | [**ApiErrorError**](ApiErrorError.md) |  |  |
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
 
 

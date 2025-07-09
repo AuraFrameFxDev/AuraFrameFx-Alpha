@@ -2,16 +2,6 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-<<<<<<< HEAD
-| Method                                                 | HTTP request             | Description         |
-|--------------------------------------------------------|--------------------------|---------------------|
-| [**tasksSchedulePost**](TasksApi.md#tasksSchedulePost) | **POST** /tasks/schedule | Schedule a new task |
-
-<a id="tasksSchedulePost"></a>
-
-# **tasksSchedulePost**
-
-=======
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
 | [**tasksSchedulePost**](TasksApi.md#tasksSchedulePost) | **POST** /tasks/schedule | Schedule a new task |
@@ -19,15 +9,11 @@ All URIs are relative to *https://api.auraframefx.com/v1*
 
 <a id="tasksSchedulePost"></a>
 # **tasksSchedulePost**
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 > TaskStatus tasksSchedulePost(taskScheduleRequest)
 
 Schedule a new task
 
 ### Example
-<<<<<<< HEAD
-
-=======
 >>>>>>> origin/coderabbitai/docstrings/78f34ad
 ```java
 // Import classes:
@@ -65,15 +51,9 @@ public class Example {
 
 ### Parameters
 
-<<<<<<< HEAD
-| Name                    | Type                                              | Description | Notes |
-|-------------------------|---------------------------------------------------|-------------|-------|
-| **taskScheduleRequest** | [**TaskScheduleRequest**](TaskScheduleRequest.md) |             |       |
-=======
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **taskScheduleRequest** | [**TaskScheduleRequest**](TaskScheduleRequest.md)|  | |
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
 ### Return type
 
@@ -85,19 +65,6 @@ public class Example {
 
 ### HTTP request headers
 
-<<<<<<< HEAD
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-### HTTP response details
-
-| Status code | Description                                          | Response headers |
-|-------------|------------------------------------------------------|------------------|
-| **202**     | Task scheduled successfully                          | -                |
-| **400**     | Invalid request format or parameters                 | -                |
-| **401**     | Authentication credentials were missing or incorrect | -                |
-| **429**     | Rate limit exceeded                                  | -                |
-=======
  - **Content-Type**: application/json
  - **Accept**: application/json
 
@@ -108,5 +75,4 @@ public class Example {
 | **400** | Invalid request format or parameters |  -  |
 | **401** | Authentication credentials were missing or incorrect |  -  |
 | **429** | Rate limit exceeded |  -  |
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 

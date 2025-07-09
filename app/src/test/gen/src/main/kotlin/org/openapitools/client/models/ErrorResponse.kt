@@ -20,11 +20,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
-<<<<<<< HEAD
- *
-=======
  * 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
  *
  * @param code Error code
  * @param message Error message
@@ -32,11 +28,7 @@ import com.squareup.moshi.JsonClass
  */
 
 
-<<<<<<< HEAD
-data class ErrorResponse(
-=======
 data class ErrorResponse (
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
     /* Error code */
     @Json(name = "code")

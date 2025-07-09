@@ -39,35 +39,18 @@ import org.openapitools.client.infrastructure.ResponseType
 import org.openapitools.client.infrastructure.Success
 import org.openapitools.client.infrastructure.toMultiValue
 
-<<<<<<< HEAD
-class AiContentApi(
-    basePath: kotlin.String = defaultBasePath,
-    client: OkHttpClient = ApiClient.defaultClient
-) : ApiClient(basePath, client) {
-    companion object {
-        @JvmStatic
-        val defaultBasePath: String by lazy {
-            System.getProperties()
-                .getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
-=======
 class AiContentApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClient = ApiClient.defaultClient) : ApiClient(basePath, client) {
     companion object {
         @JvmStatic
         val defaultBasePath: String by lazy {
             System.getProperties().getProperty(ApiClient.baseUrlKey, "https://api.auraframefx.com/v1")
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         }
     }
 
     /**
      * Generate text content
-<<<<<<< HEAD
-     *
-     * @param generateTextRequest
-=======
      * 
      * @param generateTextRequest 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return GenerateTextResponse
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
@@ -76,22 +59,9 @@ class AiContentApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClie
      * @throws ServerException If the API returns a server error response
      */
     @Suppress("UNCHECKED_CAST")
-<<<<<<< HEAD
-    @Throws(
-        IllegalStateException::class,
-        IOException::class,
-        UnsupportedOperationException::class,
-        ClientException::class,
-        ServerException::class
-    )
-    fun generateTextPost(generateTextRequest: GenerateTextRequest): GenerateTextResponse {
-        val localVarResponse =
-            generateTextPostWithHttpInfo(generateTextRequest = generateTextRequest)
-=======
     @Throws(IllegalStateException::class, IOException::class, UnsupportedOperationException::class, ClientException::class, ServerException::class)
     fun generateTextPost(generateTextRequest: GenerateTextRequest) : GenerateTextResponse {
         val localVarResponse = generateTextPostWithHttpInfo(generateTextRequest = generateTextRequest)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
         return when (localVarResponse.responseType) {
             ResponseType.Success -> (localVarResponse as Success<*>).data as GenerateTextResponse
@@ -99,55 +69,27 @@ class AiContentApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClie
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {
                 val localVarError = localVarResponse as ClientError<*>
-<<<<<<< HEAD
-                throw ClientException(
-                    "Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
-            }
-
-            ResponseType.ServerError -> {
-                val localVarError = localVarResponse as ServerError<*>
-                throw ServerException(
-                    "Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}",
-                    localVarError.statusCode,
-                    localVarResponse
-                )
-=======
                 throw ClientException("Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}", localVarError.statusCode, localVarResponse)
             }
             ResponseType.ServerError -> {
                 val localVarError = localVarResponse as ServerError<*>
                 throw ServerException("Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}", localVarError.statusCode, localVarResponse)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             }
         }
     }
 
     /**
      * Generate text content
-<<<<<<< HEAD
-     *
-     * @param generateTextRequest
-=======
      * 
      * @param generateTextRequest 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      * @return ApiResponse<GenerateTextResponse?>
      * @throws IllegalStateException If the request is not correctly configured
      * @throws IOException Rethrows the OkHttp execute method exception
      */
     @Suppress("UNCHECKED_CAST")
     @Throws(IllegalStateException::class, IOException::class)
-<<<<<<< HEAD
-    fun generateTextPostWithHttpInfo(generateTextRequest: GenerateTextRequest): ApiResponse<GenerateTextResponse?> {
-        val localVariableConfig =
-            generateTextPostRequestConfig(generateTextRequest = generateTextRequest)
-=======
     fun generateTextPostWithHttpInfo(generateTextRequest: GenerateTextRequest) : ApiResponse<GenerateTextResponse?> {
         val localVariableConfig = generateTextPostRequestConfig(generateTextRequest = generateTextRequest)
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
         return request<GenerateTextRequest, GenerateTextResponse>(
             localVariableConfig
@@ -157,17 +99,10 @@ class AiContentApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClie
     /**
      * To obtain the request config of the operation generateTextPost
      *
-<<<<<<< HEAD
-     * @param generateTextRequest
-     * @return RequestConfig
-     */
-    fun generateTextPostRequestConfig(generateTextRequest: GenerateTextRequest): RequestConfig<GenerateTextRequest> {
-=======
      * @param generateTextRequest 
      * @return RequestConfig
      */
     fun generateTextPostRequestConfig(generateTextRequest: GenerateTextRequest) : RequestConfig<GenerateTextRequest> {
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         val localVariableBody = generateTextRequest
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -186,10 +121,5 @@ class AiContentApi(basePath: kotlin.String = defaultBasePath, client: OkHttpClie
 
 
     private fun encodeURIComponent(uriComponent: kotlin.String): kotlin.String =
-<<<<<<< HEAD
-        HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent)
-            .build().encodedPathSegments[0]
-=======
         HttpUrl.Builder().scheme("http").host("localhost").addPathSegment(uriComponent).build().encodedPathSegments[0]
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 }

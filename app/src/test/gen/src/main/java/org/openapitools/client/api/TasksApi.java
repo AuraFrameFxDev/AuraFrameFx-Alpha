@@ -1,10 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
-<<<<<<< HEAD
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
-=======
  * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
->>>>>>> origin/coderabbitai/docstrings/78f34ad
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -80,20 +76,6 @@ public class TasksApi {
 
     /**
      * Build call for tasksSchedulePost
-<<<<<<< HEAD
-     *
-     * @param taskScheduleRequest (required)
-     * @param _callback           Callback for upload/download progress
-     * @return Call to execute
-     * @throws ApiException If fail to serialize the request body object
-     * @http.response.details <table summary="Response Details" border="1">
-     * <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-     * <tr><td> 202 </td><td> Task scheduled successfully </td><td>  -  </td></tr>
-     * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
-     * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
-     * <tr><td> 429 </td><td> Rate limit exceeded </td><td>  -  </td></tr>
-     * </table>
-=======
      * @param taskScheduleRequest  (required)
      * @param _callback Callback for upload/download progress
      * @return Call to execute
@@ -106,26 +88,16 @@ public class TasksApi {
         <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> Rate limit exceeded </td><td>  -  </td></tr>
      </table>
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     public okhttp3.Call tasksSchedulePostCall(TaskScheduleRequest taskScheduleRequest, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
-<<<<<<< HEAD
-        String[] localBasePaths = new String[]{};
-
-        // Determine Base Path to Use
-        if (localCustomBaseUrl != null) {
-            basePath = localCustomBaseUrl;
-        } else if (localBasePaths.length > 0) {
-=======
         String[] localBasePaths = new String[] {  };
 
         // Determine Base Path to Use
         if (localCustomBaseUrl != null){
             basePath = localCustomBaseUrl;
         } else if ( localBasePaths.length > 0 ) {
->>>>>>> origin/coderabbitai/docstrings/78f34ad
             basePath = localBasePaths[localHostIndex];
         } else {
             basePath = null;
@@ -143,11 +115,7 @@ public class TasksApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
-<<<<<<< HEAD
-                "application/json"
-=======
             "application/json"
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -155,22 +123,14 @@ public class TasksApi {
         }
 
         final String[] localVarContentTypes = {
-<<<<<<< HEAD
-                "application/json"
-=======
             "application/json"
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         };
         final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
         if (localVarContentType != null) {
             localVarHeaderParams.put("Content-Type", localVarContentType);
         }
 
-<<<<<<< HEAD
-        String[] localVarAuthNames = new String[]{"OAuth2AuthCode"};
-=======
         String[] localVarAuthNames = new String[] { "OAuth2AuthCode" };
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
     }
 
@@ -187,19 +147,6 @@ public class TasksApi {
 
     /**
      * Schedule a new task
-<<<<<<< HEAD
-     *
-     * @param taskScheduleRequest (required)
-     * @return TaskStatus
-     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
-     * @http.response.details <table summary="Response Details" border="1">
-     * <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-     * <tr><td> 202 </td><td> Task scheduled successfully </td><td>  -  </td></tr>
-     * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
-     * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
-     * <tr><td> 429 </td><td> Rate limit exceeded </td><td>  -  </td></tr>
-     * </table>
-=======
      * 
      * @param taskScheduleRequest  (required)
      * @return TaskStatus
@@ -212,7 +159,6 @@ public class TasksApi {
         <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> Rate limit exceeded </td><td>  -  </td></tr>
      </table>
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     public TaskStatus tasksSchedulePost(TaskScheduleRequest taskScheduleRequest) throws ApiException {
         ApiResponse<TaskStatus> localVarResp = tasksSchedulePostWithHttpInfo(taskScheduleRequest);
@@ -221,24 +167,6 @@ public class TasksApi {
 
     /**
      * Schedule a new task
-<<<<<<< HEAD
-     *
-     * @param taskScheduleRequest (required)
-     * @return ApiResponse&lt;TaskStatus&gt;
-     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
-     * @http.response.details <table summary="Response Details" border="1">
-     * <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-     * <tr><td> 202 </td><td> Task scheduled successfully </td><td>  -  </td></tr>
-     * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
-     * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
-     * <tr><td> 429 </td><td> Rate limit exceeded </td><td>  -  </td></tr>
-     * </table>
-     */
-    public ApiResponse<TaskStatus> tasksSchedulePostWithHttpInfo(TaskScheduleRequest taskScheduleRequest) throws ApiException {
-        okhttp3.Call localVarCall = tasksSchedulePostValidateBeforeCall(taskScheduleRequest, null);
-        Type localVarReturnType = new TypeToken<TaskStatus>() {
-        }.getType();
-=======
      * 
      * @param taskScheduleRequest  (required)
      * @return ApiResponse&lt;TaskStatus&gt;
@@ -255,26 +183,11 @@ public class TasksApi {
     public ApiResponse<TaskStatus> tasksSchedulePostWithHttpInfo(TaskScheduleRequest taskScheduleRequest) throws ApiException {
         okhttp3.Call localVarCall = tasksSchedulePostValidateBeforeCall(taskScheduleRequest, null);
         Type localVarReturnType = new TypeToken<TaskStatus>(){}.getType();
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
     /**
      * Schedule a new task (asynchronously)
-<<<<<<< HEAD
-     *
-     * @param taskScheduleRequest (required)
-     * @param _callback           The callback to be executed when the API call finishes
-     * @return The request call
-     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
-     * @http.response.details <table summary="Response Details" border="1">
-     * <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-     * <tr><td> 202 </td><td> Task scheduled successfully </td><td>  -  </td></tr>
-     * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
-     * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
-     * <tr><td> 429 </td><td> Rate limit exceeded </td><td>  -  </td></tr>
-     * </table>
-=======
      * 
      * @param taskScheduleRequest  (required)
      * @param _callback The callback to be executed when the API call finishes
@@ -288,17 +201,11 @@ public class TasksApi {
         <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> Rate limit exceeded </td><td>  -  </td></tr>
      </table>
->>>>>>> origin/coderabbitai/docstrings/78f34ad
      */
     public okhttp3.Call tasksSchedulePostAsync(TaskScheduleRequest taskScheduleRequest, final ApiCallback<TaskStatus> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = tasksSchedulePostValidateBeforeCall(taskScheduleRequest, _callback);
-<<<<<<< HEAD
-        Type localVarReturnType = new TypeToken<TaskStatus>() {
-        }.getType();
-=======
         Type localVarReturnType = new TypeToken<TaskStatus>(){}.getType();
->>>>>>> origin/coderabbitai/docstrings/78f34ad
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

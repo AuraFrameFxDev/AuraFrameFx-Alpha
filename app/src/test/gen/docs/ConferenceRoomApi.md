@@ -2,16 +2,6 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-<<<<<<< HEAD
-| Method                                                                | HTTP request                | Description                     |
-|-----------------------------------------------------------------------|-----------------------------|---------------------------------|
-| [**conferenceCreatePost**](ConferenceRoomApi.md#conferenceCreatePost) | **POST** /conference/create | Create a new AI conference room |
-
-<a id="conferenceCreatePost"></a>
-
-# **conferenceCreatePost**
-
-=======
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
 | [**conferenceCreatePost**](ConferenceRoomApi.md#conferenceCreatePost) | **POST** /conference/create | Create a new AI conference room |
@@ -19,15 +9,11 @@ All URIs are relative to *https://api.auraframefx.com/v1*
 
 <a id="conferenceCreatePost"></a>
 # **conferenceCreatePost**
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 > ConferenceRoom conferenceCreatePost(conferenceRoomCreateRequest)
 
 Create a new AI conference room
 
 ### Example
-<<<<<<< HEAD
-
-=======
 >>>>>>> origin/coderabbitai/docstrings/78f34ad
 ```java
 // Import classes:
@@ -65,15 +51,9 @@ public class Example {
 
 ### Parameters
 
-<<<<<<< HEAD
-| Name                            | Type                                                              | Description | Notes |
-|---------------------------------|-------------------------------------------------------------------|-------------|-------|
-| **conferenceRoomCreateRequest** | [**ConferenceRoomCreateRequest**](ConferenceRoomCreateRequest.md) |             |       |
-=======
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **conferenceRoomCreateRequest** | [**ConferenceRoomCreateRequest**](ConferenceRoomCreateRequest.md)|  | |
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
 ### Return type
 
@@ -85,18 +65,6 @@ public class Example {
 
 ### HTTP request headers
 
-<<<<<<< HEAD
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-### HTTP response details
-
-| Status code | Description                                          | Response headers |
-|-------------|------------------------------------------------------|------------------|
-| **201**     | Conference room created successfully                 | -                |
-| **400**     | Invalid request format or parameters                 | -                |
-| **401**     | Authentication credentials were missing or incorrect | -                |
-=======
  - **Content-Type**: application/json
  - **Accept**: application/json
 
@@ -106,5 +74,4 @@ public class Example {
 | **201** | Conference room created successfully |  -  |
 | **400** | Invalid request format or parameters |  -  |
 | **401** | Authentication credentials were missing or incorrect |  -  |
->>>>>>> origin/coderabbitai/docstrings/78f34ad
 
