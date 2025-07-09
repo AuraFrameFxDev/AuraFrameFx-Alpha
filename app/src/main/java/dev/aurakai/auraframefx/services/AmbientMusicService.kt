@@ -8,7 +8,11 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class AmbientMusicService @Inject constructor() : Service() {
-    // TODO: If this service has dependencies to be injected, add them to the constructor.
+    /**
+     * Returns null to indicate that binding to this service is not supported.
+     *
+     * @return Always returns null, as this service does not allow binding.
+     */
 
     override fun onBind(_intent: Intent?): IBinder? { // intent -> _intent
         // TODO: Implement binding if needed, otherwise this service cannot be bound.
@@ -16,23 +20,44 @@ class AmbientMusicService @Inject constructor() : Service() {
         return null
     }
 
+    /**
+     * Handles the request to start the service.
+     *
+     * Returns `START_NOT_STICKY`, indicating the system should not recreate the service if it is killed.
+     *
+     * @return The start mode for the service.
+     */
     override fun onStartCommand(_intent: Intent?, _flags: Int, _startId: Int): Int {
         // TODO: Implement service logic for starting the service.
         // TODO: Utilize parameters (_intent, _flags, _startId) or remove if not needed by actual implementation.
         return START_NOT_STICKY
     }
 
+    /**
+     * Initializes the service when it is first created.
+     *
+     * Called by the system to perform one-time setup before the service starts handling commands.
+     */
     override fun onCreate() {
         super.onCreate()
         // TODO: Initialization code for the service.
     }
 
+    /**
+     * Called when the service is being destroyed.
+     *
+     * Performs cleanup operations before the service is terminated.
+     */
     override fun onDestroy() {
         super.onDestroy()
         // TODO: Cleanup code for the service.
     }
 
-    // Example methods that might be relevant for a music service
+    /**
+     * Pauses music playback.
+     *
+     * This method is a placeholder and currently unimplemented.
+     */
     fun pause() {
         // TODO: Implement pause logic. Reported as unused. Implement or remove.
     }

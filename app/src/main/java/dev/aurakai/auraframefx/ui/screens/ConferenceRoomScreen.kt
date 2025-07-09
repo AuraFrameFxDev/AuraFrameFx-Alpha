@@ -1,5 +1,3 @@
-
-
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.layout.*
@@ -19,6 +17,11 @@ import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonPurple
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
 
+/**
+ * Displays the main conference room UI, including agent selection, recording and transcription controls, chat area, and message input.
+ *
+ * This composable manages internal state for the selected agent, recording, and transcription status. It provides interactive controls for selecting an agent, starting/stopping recording and transcription, and a placeholder chat interface with a message input field.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConferenceRoomScreen() {
@@ -141,6 +144,15 @@ fun ConferenceRoomScreen() {
     }
 }
 
+/**
+ * Displays a selectable button representing an agent, visually indicating selection state.
+ *
+ * The button's background and text color change based on whether it is selected.
+ *
+ * @param agent The name of the agent to display on the button.
+ * @param isSelected Whether this agent is currently selected.
+ * @param onClick Callback invoked when the button is clicked.
+ */
 @Composable
 fun AgentButton(
     agent: String,
@@ -167,6 +179,11 @@ fun AgentButton(
     }
 }
 
+/**
+ * Displays a button for toggling the recording state, showing a stop icon when recording and a circle icon otherwise.
+ *
+ * The icon and its color change based on the current recording state for visual feedback.
+ */
 @Composable
 fun RecordingButton(
     isRecording: Boolean,
@@ -189,6 +206,15 @@ fun RecordingButton(
     }
 }
 
+/**
+ * Displays a button for toggling transcription state with dynamic icon and color.
+ *
+ * The button shows a stop icon in red when transcription is active, and a phone icon in NeonBlue when inactive.
+ * The content description updates for accessibility based on the transcription state.
+ *
+ * @param isTranscribing Whether transcription is currently active.
+ * @param onClick Called when the button is pressed.
+ */
 @Composable
 fun TranscribeButton(
     isTranscribing: Boolean,
@@ -211,6 +237,9 @@ fun TranscribeButton(
     }
 }
 
+/**
+ * Displays a preview of the ConferenceRoomScreen composable within a MaterialTheme for design-time inspection.
+ */
 @Composable
 @Preview(showBackground = true)
 fun ConferenceRoomScreenPreview() {
