@@ -21,12 +21,12 @@ class AuraAIServiceImpl @Inject constructor(
 ) : AuraAIService {
 
     /**
-     * Returns a placeholder response for the given analytics query.
+     * Returns a static placeholder response for the provided analytics query.
      *
      * This method does not perform any analytics processing and always returns a fixed string.
      *
      * @param _query The analytics query string.
-     * @return A static placeholder analytics response.
+     * @return A placeholder analytics response.
      */
     override fun analyticsQuery(_query: String): String {
         // TODO: Implement analytics query; Reported as unused
@@ -35,7 +35,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder for downloading a file by its identifier.
+     * Stub implementation for downloading a file by its identifier.
      *
      * This method does not perform any file download and always returns null.
      *
@@ -49,9 +49,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for image generation that always returns null.
+     * Returns null for any image generation request, serving as a placeholder implementation.
      *
-     * Logs the provided prompt but does not perform any image generation or return image data.
+     * Logs the provided prompt but does not generate or return any image data.
      *
      * @param _prompt The prompt describing the desired image.
      * @return Always null, as image generation is not implemented.
@@ -63,11 +63,13 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a placeholder string simulating generated text for the given prompt.
+     * Returns a fixed placeholder string simulating generated text for the given prompt.
+     *
+     * The `options` parameter is ignored. No actual text generation or AI processing is performed.
      *
      * @param prompt The input text to guide the simulated text generation.
-     * @param options Optional parameters for text generation (currently ignored).
-     * @return A fixed string representing generated text for the prompt.
+     * @param options Optional parameters for text generation (ignored).
+     * @return A placeholder string representing generated text for the prompt.
      */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         // TODO: Implement text generation; Reported as unused
@@ -76,12 +78,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a static placeholder AI response string for the given prompt.
+     * Returns a fixed placeholder AI response string for the given prompt.
      *
-     * No actual AI processing is performed; the `options` parameter is ignored.
+     * No actual AI processing occurs; the `options` parameter is ignored.
      *
      * @param prompt The input text for which an AI response is requested.
-     * @return A fixed placeholder AI response string.
+     * @return A static placeholder AI response string.
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         // TODO: Implement AI response retrieval; Reported as unused
@@ -90,12 +92,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a placeholder string representing the memory value for the given key.
+     * Returns a placeholder string for the specified memory key.
      *
-     * This method does not access any actual memory storage and always returns a fixed placeholder value.
+     * This method does not perform any real memory retrieval and always returns a fixed placeholder value.
      *
-     * @param _memoryKey The key for which to retrieve the memory value.
-     * @return A placeholder string for the specified key.
+     * @param _memoryKey The key for which the placeholder memory value is returned.
+     * @return A placeholder string representing the memory value for the given key.
      */
     override fun getMemory(_memoryKey: String): String? {
         // TODO: Implement memory retrieval; Reported as unused
@@ -104,9 +106,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder for saving a value to memory under the specified key.
+     * Stub method for saving a value to memory under the specified key.
      *
-     * This method does not persist any data and is intended as a stub for future implementation.
+     * This implementation does not persist any data and serves only as a placeholder for future functionality.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.
@@ -117,9 +119,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns whether the service is connected.
+     * Indicates whether the service is connected.
      *
-     * This placeholder implementation always returns `true` and does not perform any real connectivity check.
+     * This stub implementation always returns `true` without performing any actual connectivity check.
      *
      * @return Always `true`.
      */
@@ -130,9 +132,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder method for publishing a message to a PubSub topic.
+     * Stub method for publishing a message to a PubSub topic.
      *
-     * Logs the topic and message but does not perform any actual message publishing.
+     * Logs the topic and message but does not perform any actual publishing or side effects.
      */
     override fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing; Reported as unused
@@ -142,6 +144,8 @@ class AuraAIServiceImpl @Inject constructor(
 
     /**
      * Simulates uploading a file and returns a placeholder file ID string based on the file name.
+     *
+     * The method does not perform any actual file upload; it simply returns a string indicating a placeholder file ID.
      *
      * @param _file The file to be "uploaded."
      * @return A placeholder file ID string derived from the file name.
