@@ -34,9 +34,9 @@ class AIPipelineProcessor @Inject constructor(
     val taskPriority: StateFlow<Float> = _taskPriority
 
     /**
-     * Processes an AI task by coordinating multiple specialized agents, aggregating their responses, and updating the pipeline's state and context.
+     * Processes an AI task by orchestrating multiple specialized agents, aggregating their responses, and updating the pipeline's state and context.
      *
-     * Executes the complete lifecycle for the given task: retrieves enriched context, calculates task priority, selects relevant agents, gathers and synthesizes agent responses, updates internal context and metrics, and returns all agent messages including the final aggregated result.
+     * Executes the full lifecycle for the given task: retrieves enriched context, calculates priority, selects relevant agents, gathers and synthesizes agent responses, updates internal context and metrics, and returns all agent messages including the final aggregated result.
      *
      * @param task The description of the AI task to process.
      * @return A list of agent messages containing individual agent responses and the final aggregated result.
@@ -130,10 +130,10 @@ class AIPipelineProcessor @Inject constructor(
     }
 
     /**
-     * Builds a comprehensive context map for a given task, including its category, recent history, user preferences, and current system state.
+     * Constructs a detailed context map for the specified task, incorporating its category, recent task history, user preferences, and current system state.
      *
-     * @param task The task description for which to construct the context.
-     * @return A map containing task details, category, timestamp, recent history, a contextual summary, user preferences, and system state.
+     * @param task The description of the task to contextualize.
+     * @return A map containing the task, its category, timestamp, recent history, a contextual summary, user preferences, and system state.
      */
     private fun retrieveContext(task: String): Map<String, Any> {
         // Enhanced context retrieval with task categorization and history
@@ -152,12 +152,12 @@ class AIPipelineProcessor @Inject constructor(
     }
     
     /**
-     * Categorizes a task description into a predefined type based on keyword matching.
+     * Determines the category of a task description by matching specific keywords.
      *
-     * Returns "generation", "analysis", "explanation", "assistance", "creation", or "general" if no relevant keywords are found.
+     * Returns one of: "generation", "analysis", "explanation", "assistance", "creation", or "general" if no relevant keywords are present.
      *
-     * @param task The task description to evaluate.
-     * @return The determined category for the task.
+     * @param task The task description to categorize.
+     * @return The category assigned to the task.
      */
     private fun categorizeTask(task: String): String {
         return when {
@@ -171,39 +171,41 @@ class AIPipelineProcessor @Inject constructor(
     }
     
     /**
-     * Provides a static list of recent task history or user interactions for use in context enrichment.
+     * Returns a static list representing recent task history or user interactions for context enrichment.
      *
-     * @return A list of strings representing previous tasks or interactions.
+     * @return A list of strings describing previous tasks or interactions.
      */
     private fun getRecentTaskHistory(): List<String> {
         return listOf("Previous task context", "Recent user interactions")
     }
     
     /**
-     * Retrieves user preferences relevant to AI task processing.
+     * Returns a map of user preferences for AI task processing, including response style and preferred agents.
      *
-     * @return A map containing user settings such as response style and preferred agents.
+     * @return A map with keys such as "response_style" and "preferred_agents" representing user settings.
      */
     private fun getUserPreferences(): Map<String, Any> {
         return mapOf("response_style" to "detailed", "preferred_agents" to listOf("Genesis", "Cascade"))
     }
     
     /**
-     * Returns a simulated snapshot of the current system state, including load status, number of available agents, and processing queue length.
+     * Returns a simulated map representing the current system state.
      *
-     * @return A map containing the keys "load", "available_agents", and "processing_queue" with their respective simulated values.
+     * The map includes keys for system load status, the number of available agents, and the length of the processing queue.
+     *
+     * @return A map with "load", "available_agents", and "processing_queue" keys and their simulated values.
      */
     private fun getSystemState(): Map<String, Any> {
         return mapOf("load" to "normal", "available_agents" to 3, "processing_queue" to 0)
     }
 
     /**
-     * Calculates a priority score for a given task using its type, system load, and urgency indicators.
+     * Computes a priority score for a task based on its type, system load, and urgency indicators.
      *
-     * The score is higher for tasks related to assistance, generation, or those containing urgency keywords, and is reduced if the system load is high. The result is clamped between 0.0 and 1.0, where higher values indicate greater priority.
+     * The score increases for tasks related to assistance, generation, or those containing urgency keywords, and decreases if the system load is high. The result is clamped between 0.0 and 1.0, with higher values indicating greater priority.
      *
-     * @param task The task description to evaluate.
-     * @param context Contextual information including task type and system state.
+     * @param task The description of the task to evaluate.
+     * @param context A map containing contextual information such as task type and system state.
      * @return A float between 0.0 and 1.0 representing the computed priority of the task.
      */
     private fun calculatePriority(task: String, context: Map<String, Any>): Float {
@@ -241,12 +243,12 @@ class AIPipelineProcessor @Inject constructor(
     }
 
     /**
-     * Determines which AI agents should process a given task based on its content and calculated priority.
+     * Selects a set of AI agents to process a task based on its content and calculated priority.
      *
-     * Genesis is always selected. Cascade is added for analytical or data-related tasks, Kai for security-related tasks, and Aura for creative or generative tasks. High-priority or complex tasks trigger inclusion of additional agents for broader coverage.
+     * Genesis is always included. Cascade is added for analytical or data-related tasks, Kai for security-related tasks, and Aura for creative or generative tasks. High-priority or complex tasks result in additional agents being selected for broader coverage.
      *
-     * @param task The task description used to assess agent relevance.
-     * @param priority The computed priority score influencing agent selection.
+     * @param task The task description used to determine relevant agents.
+     * @param priority The computed priority score that influences agent selection.
      * @return A set of agent types chosen to handle the task.
      */
     private fun selectAgents(task: String, priority: Float): Set<AgentType> {
@@ -288,11 +290,11 @@ class AIPipelineProcessor @Inject constructor(
     }
 
     /**
-     * Generates a formatted summary string by aggregating responses from multiple AI agents.
+     * Aggregates multiple agent responses into a formatted summary string.
      *
-     * Emphasizes the Genesis agent's analysis as the primary response, includes supplementary responses from other agents with distinct icons, and displays the overall average confidence score. Returns a default message if no agent responses are present.
+     * Highlights the Genesis agent's analysis as the primary response, includes supplementary responses from other agents with unique icons, and displays the average confidence score. Returns a default message if no agent responses are provided.
      *
-     * @param responses The list of agent messages to aggregate.
+     * @param responses List of agent messages to aggregate.
      * @return A formatted summary string combining all agent responses and their average confidence.
      */
     private fun generateFinalResponse(responses: List<AgentMessage>): String {
@@ -336,10 +338,10 @@ class AIPipelineProcessor @Inject constructor(
     }
 
     /**
-     * Calculates the average confidence score from a list of agent messages, ensuring the result is between 0.0 and 1.0.
+     * Computes the average confidence score from a list of agent messages, clamped between 0.0 and 1.0.
      *
-     * @param responses The list of agent messages to evaluate.
-     * @return The clamped average confidence score.
+     * @param responses The agent messages whose confidence scores are averaged.
+     * @return The average confidence score, clamped to the range 0.0 to 1.0.
      */
     private fun calculateConfidence(responses: List<AgentMessage>): Float {
         return responses.map { it.confidence }.average().toFloat()

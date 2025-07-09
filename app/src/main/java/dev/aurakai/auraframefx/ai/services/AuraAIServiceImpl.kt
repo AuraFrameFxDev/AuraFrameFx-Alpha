@@ -32,19 +32,19 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub for file download functionality; always returns null.
+     * Placeholder for file download functionality; always returns null.
      *
      * @param _fileId The identifier of the file to download.
-     * @return Null, indicating file download is not implemented.
+     * @return Always null, as file download is not implemented.
      */
     override suspend fun downloadFile(_fileId: String): File? {
         return null
     }
 
     /**
-     * Placeholder for image generation that always returns null.
+     * Stub implementation for image generation that always returns null.
      *
-     * This method does not generate images and serves as a stub implementation.
+     * This method does not generate images and is intended as a placeholder.
      *
      * @return Always returns null.
      */
@@ -55,7 +55,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Returns a fixed placeholder string for any text generation request.
      *
-     * This method does not perform actual text generation and always returns "Generated text placeholder" regardless of the input.
+     * This stub implementation does not perform actual text generation and always returns "Generated text placeholder" regardless of the input.
      *
      * @return The string "Generated text placeholder".
      */
@@ -75,10 +75,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Retrieves the memory value for the given key.
+     * Retrieves the memory value associated with the specified key.
      *
-     * This stub implementation always returns null, indicating memory retrieval is not supported.
+     * This stub implementation always returns null, indicating that memory retrieval is not supported.
      *
+     * @param _memoryKey The key for which to retrieve the memory value.
      * @return Always null.
      */
     override fun getMemory(_memoryKey: String): String? {
@@ -86,9 +87,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for saving a value in memory associated with a key.
+     * Stub implementation for saving a value in memory associated with a key.
      *
-     * This implementation does nothing and does not persist any data.
+     * This method does not perform any operation or persist data.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.
