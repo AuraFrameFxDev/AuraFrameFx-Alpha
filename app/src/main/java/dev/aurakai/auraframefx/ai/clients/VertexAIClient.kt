@@ -14,9 +14,9 @@ interface VertexAIClient {
     suspend fun generateContent(prompt: String): String?
 
     /**
- * Generates text from a prompt with configurable maximum length and randomness.
+ * Generates text from a prompt with configurable maximum token length and randomness.
  *
- * @param prompt The text prompt that guides the generated output.
+ * @param prompt The text prompt to guide generation.
  * @param maxTokens The maximum number of tokens to generate.
  * @param temperature The degree of randomness in the output; higher values yield more diverse text.
  * @return The generated text.
@@ -29,14 +29,14 @@ interface VertexAIClient {
  * @param specification Description of the desired functionality or requirements for the code.
  * @param language The programming language in which to generate the code.
  * @param style The coding style or conventions to apply.
- * @return The generated source code, or null if generation fails.
+ * @return The generated source code as a string, or null if generation fails.
  */
     suspend fun generateCode(specification: String, language: String, style: String): String?
 
     /**
- * Verifies whether the Vertex AI service is accessible and responsive.
+ * Verifies whether the Vertex AI service is accessible.
  *
- * @return `true` if the service can be reached; `false` otherwise.
+ * @return `true` if the service is accessible; `false` otherwise.
  */
     suspend fun validateConnection(): Boolean
 
@@ -46,10 +46,10 @@ interface VertexAIClient {
     suspend fun initializeCreativeModels()
 
     /**
- * Analyzes image data using a text prompt and returns the analysis result as a string.
+ * Analyzes image data using a guiding text prompt and returns the analysis result as a string.
  *
  * @param imageData Raw bytes of the image to be analyzed.
- * @param prompt Text prompt guiding the analysis.
+ * @param prompt Text prompt that guides the analysis.
  * @return The analysis result as a string.
  */
     suspend fun analyzeImage(imageData: ByteArray, prompt: String): String

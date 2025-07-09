@@ -21,7 +21,7 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
 /**
  * Composes the main conference room interface with agent selection, recording and transcription controls, chat area, and message input.
  *
- * Manages local UI state for the selected agent, recording, and transcription status. Provides interactive controls for agent selection and toggling recording or transcription. Includes a placeholder chat area and input field; chat functionality and settings actions are not yet implemented.
+ * Manages local UI state for the selected agent, recording, and transcription status. Provides interactive controls for agent selection and toggling recording or transcription. Includes a placeholder chat area and input field; chat functionality and settings are not yet implemented.
  */
 @Composable
 fun ConferenceRoomScreen() {
@@ -145,13 +145,13 @@ fun ConferenceRoomScreen() {
 }
 
 /**
- * Displays a button for selecting an agent, with visual feedback for selection state.
+ * Displays a button for selecting an agent, visually highlighting the selected state.
  *
- * The button highlights when selected and triggers the provided callback when pressed.
+ * The button updates its background and text color based on whether it is selected, and triggers the provided callback when clicked.
  *
  * @param agent The name or label of the agent to display on the button.
- * @param isSelected Whether this agent is currently selected, affecting the button's appearance.
- * @param onClick Invoked when the button is clicked.
+ * @param isSelected Whether this agent is currently selected.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun AgentButton(
@@ -210,9 +210,9 @@ fun RecordingButton(
 }
 
 /**
- * Displays a button for toggling transcription in the conference room UI.
+ * Displays a button for toggling the transcription state in the conference room UI.
  *
- * Shows a red stop icon when transcription is active, or a NeonBlue phone icon when inactive. The icon's content description changes for accessibility based on the transcription state.
+ * Shows a red stop icon when transcription is active, or a neon blue phone icon when inactive. The icon's content description changes for accessibility based on the transcription state.
  *
  * @param isTranscribing Indicates whether transcription is currently active.
  * @param onClick Called when the button is pressed.
@@ -240,7 +240,9 @@ fun TranscribeButton(
 }
 
 /**
- * Provides a preview of the ConferenceRoomScreen composable wrapped in a MaterialTheme for design-time visualization.
+ * Displays a design-time preview of the ConferenceRoomScreen composable within a MaterialTheme.
+ *
+ * Intended for use in IDE previews to visualize the UI layout and appearance.
  */
 @Composable
 @Preview(showBackground = true)

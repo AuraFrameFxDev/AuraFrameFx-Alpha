@@ -29,7 +29,7 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates binding to the Oracle Drive service in beta mode.
      *
-     * Updates internal state to indicate that service binding is disabled. No actual service connection is performed.
+     * Updates the internal state to indicate that service binding is disabled. Does not perform any real service connection.
      */
     fun bindService() {
         // Beta stub: No actual binding
@@ -49,9 +49,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Simulates a status refresh by setting status, detailed status, and diagnostics log to static placeholder messages.
+     * Updates status, detailed status, and diagnostics log with static placeholder messages for beta UI testing.
      *
-     * All updates are for UI testing in beta mode; no actual status or diagnostics data is retrieved.
+     * No actual status or diagnostics data is retrieved; all updates are simulated and do not reflect real Oracle Drive functionality.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -63,10 +63,10 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates toggling a module by updating the diagnostics log with a placeholder message.
      *
-     * Provides simulated feedback for UI testing in beta mode without affecting any actual module state.
+     * Intended for UI testing in beta mode; does not change any actual module state.
      *
      * @param packageName The name of the module to simulate toggling.
-     * @param enable If `true`, simulates enabling the module; if `false`, simulates disabling it.
+     * @param enable `true` to simulate enabling the module, `false` to simulate disabling it.
      */
     fun toggleModule(packageName: String, enable: Boolean) {
         // Beta stub: Just log the action without actually doing anything

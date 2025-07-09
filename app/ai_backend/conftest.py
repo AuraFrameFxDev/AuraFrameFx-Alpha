@@ -31,7 +31,7 @@ def sample_api_response():
     """
     Return a mock dictionary representing a successful Genesis API chat completion response.
     
-    The response includes metadata such as an ID, object type, creation timestamp, model name, a list of choices with an assistant message and finish reason, and token usage statistics. Intended for use in integration tests that require a realistic API response structure.
+    The dictionary includes response metadata, assistant message content, finish reason, and token usage statistics, suitable for use in integration tests.
     
     Returns:
         dict: Simulated Genesis API chat completion response.
@@ -63,7 +63,7 @@ def sample_error_response():
     """
     Return a mock error response dictionary emulating a Genesis API error.
     
-    The dictionary includes an `error` object with fields for error type, message, parameter, and code, suitable for testing error handling in integration tests.
+    The dictionary includes error details such as type, message, parameter, and code, and is intended for use in testing error handling in integration tests.
     
     Returns:
         dict: Simulated Genesis API error response.
@@ -80,9 +80,9 @@ def sample_error_response():
 @pytest.fixture(autouse=True)
 def mock_environment():
     """
-    Pytest autouse fixture that sets up and cleans up environment variables for Genesis API integration tests.
+    Pytest autouse fixture that sets and cleans up Genesis API environment variables for each test.
     
-    Before each test, assigns test values to the `GENESIS_API_KEY` and `GENESIS_BASE_URL` environment variables. After the test, removes these variables to maintain test isolation.
+    Before each test, sets the `GENESIS_API_KEY` and `GENESIS_BASE_URL` environment variables to test values. After the test, removes these variables to maintain test isolation.
     """
     os.environ["GENESIS_API_KEY"] = "test_env_key"
     os.environ["GENESIS_BASE_URL"] = "https://api.genesis.test"
