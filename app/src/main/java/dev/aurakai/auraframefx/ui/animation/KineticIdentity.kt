@@ -220,9 +220,9 @@ object KineticIdentity {
     )
 
     /**
-     * Returns a tween animation spec with linear easing for glitch or shake effects.
+     * Returns a linear tween animation spec for glitch or shake effects.
      *
-     * The `intensity` parameter is included for API consistency but is not used in the animation.
+     * The `intensity` parameter is included for API consistency but does not affect the animation.
      *
      * @param durationMillis Duration of the animation in milliseconds. Defaults to [MICRO_DURATION].
      * @param intensity Intended shake intensity (unused).
@@ -239,9 +239,9 @@ object KineticIdentity {
     /**
      * Creates an animation spec that introduces a pause before executing the specified action animation, using a dramatic cubic bezier easing.
      *
-     * @param pauseDurationMillis The duration of the pause before the action animation, in milliseconds.
+     * @param pauseDurationMillis The duration of the initial pause in milliseconds.
      * @param actionSpec The animation spec to perform after the pause.
-     * @return An animation spec with a total duration equal to the pause plus the action, applying dramatic easing.
+     * @return An animation spec with total duration equal to the pause plus the action animation, using dramatic easing.
      */
     fun createDramaticPause(
         pauseDurationMillis: Int = 500,

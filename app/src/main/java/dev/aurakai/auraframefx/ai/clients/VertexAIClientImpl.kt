@@ -9,12 +9,12 @@ import kotlinx.coroutines.delay
 class VertexAIClientImpl : VertexAIClient {
     
     /**
-     * Generates a simulated AI text response tailored to the input prompt, adapting style and content based on detected keywords.
+     * Simulates AI text generation by returning a context-aware stub response tailored to the input prompt.
      *
-     * Produces a context-aware stub output such as a code example, explanation, or analysis, depending on the prompt content. The response length is limited to a maximum of 500 tokens, and the temperature parameter adjusts the creativity of the generated text. Includes a brief delay to mimic API latency.
+     * Depending on keywords in the prompt, produces a simulated code example, explanation, analysis, or a generic response. The output length is capped at 500 tokens, and the temperature parameter influences the creativity of the response. Includes a short delay to mimic API latency.
      *
      * @param prompt The input prompt for which to generate a simulated response.
-     * @param maxTokens The maximum number of tokens to include in the response (capped at 500).
+     * @param maxTokens The maximum number of tokens to include in the response (up to 500).
      * @param temperature The creativity level for the response, as a float between 0 and 1.
      * @return A simulated AI-generated response string relevant to the prompt.
      */
@@ -67,7 +67,7 @@ class VertexAIClientImpl : VertexAIClient {
      * Simulates image analysis and returns a placeholder response referencing the provided prompt.
      *
      * @param imageData The image data to analyze.
-     * @param prompt The prompt describing the analysis context.
+     * @param prompt The context or instructions for the simulated analysis.
      * @return A stub string indicating simulated image analysis for the given prompt.
      */
     override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String {
@@ -76,19 +76,19 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates initialization of creative AI models without performing any operation.
+     * Stub method for initializing creative AI models; does nothing.
      *
-     * Serves as a placeholder for future implementation in development or testing environments.
+     * Serves as a placeholder in development or testing environments where real model initialization is unnecessary.
      */
     override suspend fun initializeCreativeModels() {
         // Stub implementation
     }
     
     /**
-     * Simulates AI content generation by returning a placeholder string containing the provided prompt.
+     * Returns a simulated AI-generated content string referencing the provided prompt.
      *
-     * @param prompt The input prompt to include in the simulated content.
-     * @return A stub content string referencing the prompt.
+     * @param prompt The input prompt to include in the generated content.
+     * @return A placeholder content string containing the prompt.
      */
     override suspend fun generateContent(prompt: String): String? {
         delay(100)
@@ -98,7 +98,7 @@ class VertexAIClientImpl : VertexAIClient {
     /**
      * Returns a simulated code snippet in the specified language based on the provided specification.
      *
-     * The response is a placeholder string referencing the specification and language, intended for development or testing purposes.
+     * The returned string is a placeholder and does not represent actual generated code.
      *
      * @param specification Description of the code to generate.
      * @param language Programming language for the generated code.
@@ -120,9 +120,9 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Initializes the Vertex AI client.
+     * Initializes the stub Vertex AI client.
      *
-     * This stub implementation performs no operation.
+     * This method is required by the interface but does not perform any actions in this stub implementation.
      */
     fun initialize() {
         // Stub implementation

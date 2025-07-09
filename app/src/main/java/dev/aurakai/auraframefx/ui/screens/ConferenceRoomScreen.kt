@@ -21,7 +21,7 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
 /**
  * Composes the main conference room interface with agent selection, recording and transcription controls, chat area, and message input.
  *
- * Manages local UI state for the selected agent, recording, and transcription status. Provides interactive controls for agent selection and toggling recording or transcription. Includes a placeholder chat area and input field; chat functionality and settings actions are not yet implemented.
+ * Manages local UI state for the selected agent, recording, and transcription status. Provides interactive controls for agent selection, toggling recording and transcription, and a placeholder chat interface with an input area. Some features, such as chat message handling and settings, are not yet implemented.
  */
 @Composable
 fun ConferenceRoomScreen() {
@@ -145,13 +145,13 @@ fun ConferenceRoomScreen() {
 }
 
 /**
- * Displays a button for selecting an agent, with visual feedback for selection state.
+ * Displays a selectable button for an agent, highlighting it if selected and invoking a callback on click.
  *
- * The button highlights when selected and triggers the provided callback when pressed.
+ * The button visually distinguishes the selected agent using color changes.
  *
- * @param agent The name or label of the agent to display on the button.
- * @param isSelected Whether this agent is currently selected, affecting the button's appearance.
- * @param onClick Invoked when the button is clicked.
+ * @param agent The name or label of the agent to display.
+ * @param isSelected Whether this agent is currently selected.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun AgentButton(
@@ -182,7 +182,7 @@ fun AgentButton(
 /**
  * Displays a button for toggling the recording state in the conference room UI.
  *
- * Shows a red stop icon when recording is active and a purple circle icon when inactive. The icon's content description changes for accessibility based on the current state.
+ * Shows a red stop icon when recording is active, or a purple circle icon when inactive. The icon's content description changes for accessibility based on the current state.
  *
  * @param isRecording Indicates whether recording is currently active.
  * @param onClick Called when the button is pressed.

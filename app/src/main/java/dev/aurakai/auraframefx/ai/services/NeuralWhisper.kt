@@ -45,9 +45,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initializes the text-to-speech and speech recognition engines for audio processing and AI interaction.
+     * Initializes the NeuralWhisper service by setting up text-to-speech and speech recognition engines.
      *
-     * Prepares the NeuralWhisper service by setting up required audio components. Additional initialization steps may be added in the future.
+     * Prepares the service for audio processing and AI interaction by initializing required components. Additional setup steps can be added as needed.
      */
     fun initialize() {
         Log.d(TAG, "Initializing NeuralWhisper...")
@@ -161,7 +161,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Processes a transcribed voice command and returns a placeholder response.
      *
-     * Updates the conversation state to indicate the command is being understood. This method currently serves as a stub for future natural language understanding and command-to-action mapping.
+     * Updates the conversation state to indicate the command is being understood. This method currently acts as a stub for future natural language understanding and command-to-action mapping.
      *
      * @param command The transcribed voice command to process.
      * @return A placeholder string representing the result of command processing.
@@ -182,9 +182,9 @@ class NeuralWhisper @Inject constructor(
     /**
      * Updates the conversation state to reflect sharing context information with the Kai agent.
      *
-     * Logs the sharing action but does not initiate actual communication with the Kai agent.
+     * Logs the sharing action but does not perform any actual communication with the Kai agent.
      *
-     * @param contextText The context information intended for sharing with the Kai agent.
+     * @param contextText The context information intended to be shared.
      */
     fun shareContextWithKai(contextText: String) {
         _conversationStateFlow.value = ConversationState.Processing("Sharing with Kai: $contextText")
@@ -215,9 +215,9 @@ class NeuralWhisper @Inject constructor(
     /**
      * Stops the current audio recording session and returns a status message.
      *
-     * Sets the conversation state to "Processing" while stopping the recording.
+     * Updates the conversation state to "Processing" during the stop operation.
      *
-     * @return A message indicating the result of the stop operation, or an error message if stopping fails.
+     * @return A message indicating whether the recording was stopped successfully or describing the failure.
      */
     fun stopRecording(): String {
         return try {
