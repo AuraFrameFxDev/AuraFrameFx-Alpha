@@ -1,7 +1,11 @@
 package dev.aurakai.auraframefx.ui.debug
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -9,22 +13,27 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.aurakai.auraframefx.R
 import dev.aurakai.auraframefx.ai.agents.CascadeAgent
 import dev.aurakai.auraframefx.model.agent_states.ProcessingState
 import dev.aurakai.auraframefx.model.agent_states.VisionState
 import dev.aurakai.auraframefx.ui.debug.component.InteractiveGraph
 import dev.aurakai.auraframefx.ui.debug.model.*
+import dev.aurakai.auraframefx.ui.theme.LocalSpacing
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.sqrt
-import java.util.Date
-import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import dev.aurakai.auraframefx.ui.debug.model.Offset as GraphOffset
@@ -64,12 +73,25 @@ class CascadeDebugViewModel @Inject constructor(
 @Composable
 fun CascadeZOrderPlayground(
     viewModel: CascadeDebugViewModel = hiltViewModel(),
+    modifier: Modifier = Modifier
 ) {
+    val coroutineScope = rememberCoroutineScope()
     var selectedNodeId by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    // Simulate loading
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            delay(800) // Simulate network/data loading
+            isLoading = false
+        }
+    }
     
     // Sample graph nodes - in a real app, these would be derived from your actual agent state
     val nodes = remember {
-        mutableStateListOf(
+        try {
+            mutableStateListOf(
             GraphNode(
                 id = "vision",
                 name = "Vision",
@@ -126,36 +148,114 @@ fun CascadeZOrderPlayground(
                     )
                 )
             )
-        )
+            )
+        } catch (e: Exception) {
+            errorMessage = "Failed to load nodes: ${e.localizedMessage}"
+            mutableStateListOf()
+        }
     }
 
-    // Collect state updates
+    // Collect state updates with error handling
     val visionState by viewModel.visionState.collectAsState()
     val processingState by viewModel.processingState.collectAsState()
 
     // Update node states when view model states change
     LaunchedEffect(visionState, processingState) {
-        nodes.find { it.type == NodeType.VISION }?.state = visionState
-        nodes.find { it.type == NodeType.PROCESSING }?.state = processingState
+        try {
+            nodes.find { it.type == NodeType.VISION }?.let { node ->
+                node.state = visionState
+                node.lastUpdated = System.currentTimeMillis()
+            }
+            nodes.find { it.type == NodeType.PROCESSING }?.let { node ->
+                node.state = processingState
+                node.lastUpdated = System.currentTimeMillis()
+            }
+        } catch (e: Exception) {
+            errorMessage = "Error updating node states: ${e.localizedMessage}"
+        }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Agent State Visualizer") },
+                title = { 
+                    Text(
+                        "Agent State Visualizer",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                    titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                actions = {
+                    if (errorMessage != null) {
+                        IconButton(onClick = { errorMessage = null }) {
+                            Icon(
+                                imageVector = Icons.Default.ErrorOutline,
+                                contentDescription = "Error occurred. Click to dismiss.",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                    IconButton(onClick = { 
+                        isLoading = true
+                        coroutineScope.launch {
+                            delay(500) // Simulate refresh
+                            isLoading = false
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh"
+                        )
+                    }
+                }
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
+        Box(
+            modifier = Modifier
+                .padding(padding)
+                .then(modifier)
+        ) {
+            // Show loading indicator
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            
+            // Show error message if any
+            errorMessage?.let { message ->
+                Snackbar(
+                    modifier = Modifier.padding(16.dp),
+                    action = {
+                        TextButton(onClick = { errorMessage = null }) {
+                            Text("DISMISS")
+                        }
+                    }
+                ) {
+                    Text(message)
+                }
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                // Graph Visualization
+                // Graph Visualization with loading state
+                val graphAlpha by animateFloatAsState(
+                    targetValue = if (isLoading) 0.5f else 1f,
+                    label = "graphAlpha"
+                )
+                
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -165,6 +265,7 @@ fun CascadeZOrderPlayground(
                             shape = RoundedCornerShape(8.dp)
                         )
                         .padding(8.dp)
+                        .alpha(graphAlpha)
                 ) {
                     InteractiveGraph(
                         nodes = nodes,
@@ -176,34 +277,28 @@ fun CascadeZOrderPlayground(
                     )
                 }
 
-                // State Details Panel
+                // State Details Panel with animation
+                val detailsAlpha by animateFloatAsState(
+                    targetValue = if (isLoading) 0.5f else 1f,
+                    label = "detailsAlpha"
+                )
+                
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
-                        .padding(top = 8.dp),
+                        .padding(top = 8.dp)
+                        .alpha(detailsAlpha),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     selectedNodeId?.let { nodeId ->
                         val node = nodes.find { it.id == nodeId }
                         if (node != null) {
-                            NodeDetails(node)
+                            NodeDetails(node = node)
                         } else {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Text("No node selected")
-                            }
+                            EmptyState("Node not found")
                         }
-                    } ?: run {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            Text("Select a node to view details")
-                        }
-                    }
+                    } ?: EmptyState("Select a node to view details")
                 }
             }
         }
@@ -329,6 +424,25 @@ private fun NodeDetails(node: GraphNode) {
 fun CascadeZOrderPlaygroundPreview() {
     MaterialTheme {
         CascadeZOrderPlayground()
+    }
+}
+
+@Composable
+private fun EmptyState(
+    message: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize()
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
 
