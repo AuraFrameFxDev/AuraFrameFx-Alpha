@@ -8,10 +8,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 @pytest.fixture
 def sample_ethical_framework():
     """
-    Provides a pytest fixture that returns an EthicalFramework instance with predefined ethical principles for testing purposes.
+    Return an EthicalFramework instance named "TestFramework" with the principles fairness, transparency, accountability, and privacy for use in tests.
     
     Returns:
-        EthicalFramework: An instance named "TestFramework" with principles: fairness, transparency, accountability, and privacy.
+        EthicalFramework: The test ethical framework instance.
     """
     from app.ai_backend.test_genesis_ethical_governor import EthicalFramework
     return EthicalFramework(
@@ -22,10 +22,10 @@ def sample_ethical_framework():
 @pytest.fixture
 def sample_governance_policies():
     """
-    Provides a list of sample GovernancePolicy objects for use in tests.
+    Return a list of sample GovernancePolicy instances representing privacy and safety policies.
     
     Returns:
-        List[GovernancePolicy]: Sample policies covering privacy and safety principles.
+        List[GovernancePolicy]: Two policies, one for privacy with rules on PII and data minimization, and one for safety with harm prevention and risk assessment rules.
     """
     from app.ai_backend.test_genesis_ethical_governor import GovernancePolicy
     return [
@@ -36,10 +36,10 @@ def sample_governance_policies():
 @pytest.fixture
 def ethical_governor(sample_ethical_framework, sample_governance_policies):
     """
-    Pytest fixture that returns an EthicalGovernor instance configured with a sample ethical framework and governance policies.
+    Pytest fixture that provides an EthicalGovernor instance initialized with sample ethical framework and governance policies.
     
     Returns:
-        EthicalGovernor: An instance initialized with the provided ethical framework and governance policies for use in tests.
+        EthicalGovernor: An instance configured for use in ethical governance tests.
     """
     from app.ai_backend.test_genesis_ethical_governor import EthicalGovernor
     return EthicalGovernor(sample_ethical_framework, sample_governance_policies)
