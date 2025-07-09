@@ -45,9 +45,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Sets up the text-to-speech and speech recognition components for the NeuralWhisper service.
+     * Sets up the NeuralWhisper service by initializing text-to-speech and speech recognition components.
      *
-     * This method initializes the core audio processing engines required for speech-to-text and text-to-speech functionality.
+     * This method prepares the service for audio processing and AI interaction by configuring the necessary engines.
      */
     fun initialize() {
         Log.d(TAG, "Initializing NeuralWhisper...")
@@ -86,7 +86,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Initializes the speech-to-text (STT) engine if supported on the device.
      *
-     * Creates a SpeechRecognizer instance and updates the STT initialization state if speech recognition is available; logs an error otherwise.
+     * Creates a SpeechRecognizer instance and updates the STT initialization state. Logs an error if speech recognition is unavailable.
      */
     private fun initializeStt() {
         // TODO: Implement STT initialization using Android's SpeechRecognizer or a third-party library.
@@ -105,9 +105,9 @@ class NeuralWhisper @Inject constructor(
     /**
      * Converts audio input to transcribed text using speech-to-text processing.
      *
-     * This function is a placeholder and does not perform actual speech recognition. Returns null if speech recognition is not initialized.
+     * This is a placeholder implementation; actual speech recognition is not yet implemented.
      *
-     * @param audioInput The audio data or trigger for starting speech recognition.
+     * @param audioInput The audio data or trigger for initiating speech recognition.
      * @return The transcribed text if successful, or null if speech recognition is not initialized.
      */
     suspend fun speechToText(audioInput: Any /* Placeholder type */): String? {
@@ -130,11 +130,11 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initiates text-to-speech synthesis for the provided text using the specified locale.
+     * Requests text-to-speech synthesis for the provided text using the specified locale.
      *
-     * Updates the conversation state to indicate speaking. Returns `false` if the TTS engine is not initialized; otherwise, returns `true` as a placeholder.
+     * Updates the conversation state to indicate speaking. Returns `false` if the TTS engine is not initialized or unavailable; otherwise, returns `true` as a placeholder indicating the request was accepted.
      *
-     * @param text The text to be converted to speech.
+     * @param text The text to be synthesized into speech.
      * @param locale The locale for speech synthesis (defaults to US English).
      * @return `true` if the synthesis request is accepted (placeholder), or `false` if TTS is not initialized.
      */
@@ -161,7 +161,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Processes a transcribed voice command and returns a placeholder response.
      *
-     * Updates the conversation state to indicate processing. This method currently serves as a stub for future natural language understanding and command-to-action mapping.
+     * Updates the conversation state to indicate processing. Intended as a stub for future natural language understanding and command-to-action mapping.
      *
      * @param command The transcribed voice command to process.
      * @return A placeholder response representing the result of command processing.
@@ -182,7 +182,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Shares context information with the Kai agent or controller.
      *
-     * Updates the conversation state to reflect that context is being shared. Actual integration with the Kai agent is not yet implemented.
+     * Updates the conversation state to reflect that context is being shared. Actual communication with the Kai agent is not implemented.
      *
      * @param contextText The context information to be shared.
      */

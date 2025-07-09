@@ -55,7 +55,7 @@ val LocalMoodState = compositionLocalOf { Emotion.NEUTRAL }
 /**
  * Applies the AuraFrameFX theme and mood-adaptive dynamic theming to the provided composable content.
  *
- * Selects and applies a color scheme (dark, light, or dynamic based on device support and parameters), updates the system status bar appearance to match the theme, and supplies mood-driven glow color and emotion state to the composition. Integrates Aura's mood system for adaptive UI theming.
+ * Selects and applies a color scheme (dark, light, or dynamic based on device support and parameters), updates the system status bar appearance, and supplies mood-driven glow color and emotion state to the composition. Integrates Aura's mood system for adaptive UI theming.
  *
  * @param darkTheme Whether to use the dark theme; defaults to the system setting.
  * @param dynamicColor Whether to enable dynamic color schemes on supported devices (Android 12+); defaults to true.
@@ -105,15 +105,14 @@ fun AuraFrameFXTheme(
 }
 
 /**
- * Computes the glow color for a given emotion and intensity, using the provided color scheme as a fallback.
+ * Computes the color to use for a mood glow effect based on the specified emotion, intensity, and color scheme.
  *
- * The returned color is selected based on the emotion, with its alpha transparency modulated by the intensity value.
- * If the emotion is not recognized, the primary color from the base color scheme is used with reduced alpha.
+ * The returned color is selected according to the emotion, with its transparency proportional to the intensity. If the emotion is not recognized, the primary color of the provided color scheme is used with reduced alpha.
  *
  * @param emotion The current emotion to represent.
- * @param intensity The strength of the emotion, affecting the color's transparency.
- * @param baseColorScheme The color scheme to use for fallback coloring.
- * @return The computed glow color with appropriate transparency.
+ * @param intensity The strength of the emotion, affecting the alpha of the color.
+ * @param baseColorScheme The color scheme to use for fallback and context.
+ * @return The color to use for the mood glow effect.
  */
 private fun getMoodGlowColor(
     emotion: Emotion,

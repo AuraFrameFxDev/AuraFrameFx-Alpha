@@ -172,12 +172,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Encrypts the provided string using the Android Keystore with AES/CBC/PKCS7Padding.
+     * Encrypts the provided string data using the Android Keystore.
      *
-     * Attempts to initialize the encryption subsystem if it is not already active. Returns an `EncryptedData` object containing the encrypted bytes, initialization vector, timestamp, and metadata, or null if encryption fails.
+     * Attempts to initialize encryption if not already active. Uses AES encryption with a randomly generated IV.
      *
-     * @param data The plaintext string to encrypt.
-     * @return The encrypted data and associated metadata, or null if encryption is unsuccessful.
+     * @param data The sensitive string data to encrypt.
+     * @return An `EncryptedData` object containing the encrypted bytes, IV, timestamp, and metadata, or `null` if encryption fails.
      */
     fun encrypt(data: String): EncryptedData? {
         if (_encryptionStatus.value != EncryptionStatus.ACTIVE) {
@@ -229,9 +229,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Decrypts data previously encrypted with the Keystore.
+     * Decrypts data previously encrypted using the Keystore.
      *
-     * Attempts to initialize encryption if not already active. Returns the decrypted string if successful, or null if decryption fails.
+     * Attempts to initialize encryption if it is not already active. Returns the decrypted string if successful, or null if decryption fails.
      *
      * @param encryptedData The encrypted data and initialization vector to decrypt.
      * @return The decrypted string, or null if decryption fails.
@@ -275,12 +275,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Creates a shared secure context for communication with a specified agent.
+     * Creates a shared secure context for communication with another agent.
      *
-     * Generates a unique identifier and timestamp, and packages the provided context data for sharing. The content is included as a byte array and is not encrypted in this implementation.
+     * Generates a unique identifier and timestamp, and packages the provided context data for sharing with the specified agent. The context content is not encrypted in this implementation.
      *
      * @param agentType The agent with whom the context will be shared.
-     * @param context The context data to share.
+     * @param context The context data to be shared.
      * @return A SharedSecureContext containing the packaged context and associated metadata.
      */
     fun shareSecureContextWith(agentType: AgentType, context: String): SharedSecureContext {
@@ -298,11 +298,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Verifies the application's integrity by retrieving its signature, computing a SHA-256 hash, and collecting app metadata.
+     * Verifies the application's integrity by retrieving and hashing its signature.
      *
-     * Returns an [ApplicationIntegrity] object containing the verification result, app version, signature hash, install and update times, and error information if verification fails.
+     * Retrieves the app's package information and computes a SHA-256 hash of its signature. Returns an [ApplicationIntegrity] object containing the verification result, app version, signature hash, install and update times, and error information if verification fails.
      *
-     * @return An [ApplicationIntegrity] instance with integrity verification details and metadata.
+     * @return An [ApplicationIntegrity] object with integrity verification details.
      */
     fun verifyApplicationIntegrity(): ApplicationIntegrity {
         try {
@@ -383,12 +383,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Determines the overall threat level based on the highest severity among the provided security threats.
+     * Determines the highest threat level present in a list of security threats.
      *
      * Returns `ThreatLevel.LOW` if the list is empty.
      *
      * @param threats List of detected security threats to evaluate.
-     * @return The highest threat level present, or `ThreatLevel.LOW` if no threats are provided.
+     * @return The highest threat level among the provided threats, or `ThreatLevel.LOW` if none are present.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -408,7 +408,7 @@ class SecurityContext @Inject constructor(
     /**
      * Generates a random 16-byte hexadecimal string to serve as a secure identifier.
      *
-     * @return A securely generated 32-character hexadecimal ID.
+     * @return A 32-character hexadecimal string generated using a cryptographically secure random source.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -419,7 +419,7 @@ class SecurityContext @Inject constructor(
     /**
      * Asynchronously logs a security event for auditing and monitoring purposes.
      *
-     * The event is serialized and written to the debug log. In production, events should be securely persisted rather than logged.
+     * Serializes the provided event and writes it to the debug log. In production, events should be securely persisted instead of logged.
      *
      * @param event The security event to be logged.
      */
@@ -434,9 +434,9 @@ class SecurityContext @Inject constructor(
     }    /**
      * Records a security validation event for the given request type and data for auditing purposes.
      *
-     * This function logs the validation event but does not perform any actual validation of the request.
+     * This method logs the validation event but does not perform any actual validation of the request.
      *
-     * @param requestType The type of request being audited.
+     * @param requestType The type of request being logged.
      * @param requestData The data associated with the request.
      */
     fun validateRequest(requestType: String, requestData: String) {
