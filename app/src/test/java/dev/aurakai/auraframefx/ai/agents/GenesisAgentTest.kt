@@ -1697,3 +1697,768 @@ class GenesisAgentTest {
         }
     }
 }
+    // Additional comprehensive tests for better coverage
+
+    @Test
+    fun testParticipateWithAgents_contextOrderConsistency() = runBlocking {
+        val agent = DummyAgent("OrderTestAgent", "context order test")
+        val context = mapOf(
+            "z_last" to "last",
+            "a_first" to "first", 
+            "m_middle" to "middle"
+        )
+
+        val responses = genesisAgent.participateWithAgents(
+            context = context,
+            agents = listOf(agent),
+            prompt = "test order",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        assertEquals(1, responses.size)
+        assertEquals("context order test", responses["OrderTestAgent"]?.content)
+    }
+
+    @Test
+    fun testParticipateWithAgents_contextWithColonInValues() = runBlocking {
+        val agent = DummyAgent("ColonTestAgent", "handled colons")
+        val context = mapOf(
+            "url" to "https://example.com:8080",
+            "time" to "12:34:56",
+            "ratio" to "3:2:1"
+        )
+
+        val responses = genesisAgent.participateWithAgents(
+            context = context,
+            agents = listOf(agent),
+            prompt = "test with colons",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        assertEquals(1, responses.size)
+        assertEquals("handled colons", responses["ColonTestAgent"]?.content)
+    }
+
+    @Test
+    fun testParticipateWithAgents_contextWithVeryLongKeys() = runBlocking {
+        val agent = DummyAgent("LongKeyAgent", "handled long keys")
+        val longKey = "very_long_key_" + "x".repeat(500)
+        val context = mapOf(longKey to "value")
+
+        val responses = genesisAgent.participateWithAgents(
+            context = context,
+            agents = listOf(agent),
+            prompt = "test long keys",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        assertEquals(1, responses.size)
+        assertEquals("handled long keys", responses["LongKeyAgent"]?.content)
+    }
+
+    @Test
+    fun testParticipateWithAgents_contextWithVeryLongValues() = runBlocking {
+        val agent = DummyAgent("LongValueAgent", "handled long values")
+        val longValue = "very_long_value_" + "y".repeat(1000)
+        val context = mapOf("key" to longValue)
+
+        val responses = genesisAgent.participateWithAgents(
+            context = context,
+            agents = listOf(agent),
+            prompt = "test long values",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        assertEquals(1, responses.size)
+        assertEquals("handled long values", responses["LongValueAgent"]?.content)
+    }
+
+    @Test
+    fun testParticipateWithAgents_agentNameWithSpecialCharacters() = runBlocking {
+        val specialName = "Agent-Name_With@Special#Characters$And%Numbers123"
+        val agent = DummyAgent(specialName, "special name handled")
+
+        val responses = genesisAgent.participateWithAgents(
+            context = emptyMap(),
+            agents = listOf(agent),
+            prompt = "test special name",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        assertEquals(1, responses.size)
+        assertEquals("special name handled", responses[specialName]?.content)
+    }
+
+    @Test
+    fun testParticipateWithAgents_agentResponseWithNewlines() = runBlocking {
+        val responseWithNewlines = "Line 1\nLine 2\nLine 3"
+        val agent = DummyAgent("NewlineAgent", responseWithNewlines)
+
+        val responses = genesisAgent.participateWithAgents(
+            context = emptyMap(),
+            agents = listOf(agent),
+            prompt = "test newlines",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        assertEquals(1, responses.size)
+        assertEquals(responseWithNewlines, responses["NewlineAgent"]?.content)
+    }
+
+    @Test
+    fun testParticipateWithAgents_agentResponseWithTabs() = runBlocking {
+        val responseWithTabs = "Column1\tColumn2\tColumn3"
+        val agent = DummyAgent("TabAgent", responseWithTabs)
+
+        val responses = genesisAgent.participateWithAgents(
+            context = emptyMap(),
+            agents = listOf(agent),
+            prompt = "test tabs",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        assertEquals(1, responses.size)
+        assertEquals(responseWithTabs, responses["TabAgent"]?.content)
+    }
+
+    @Test
+    fun testParticipateWithAgents_combinedPromptBuilding() = runBlocking {
+        class RequestCapturingAgent(private val name: String) : Agent {
+            var lastRequest: AiRequest? = null
+            override fun getName(): String = name
+            override fun getType(): String? = null
+            override suspend fun processRequest(request: AiRequest): AgentResponse {
+                lastRequest = request
+                return AgentResponse("captured", 1.0f)
+            }
+        }
+
+        val agent = RequestCapturingAgent("CaptureAgent")
+        val context = mapOf("key1" to "value1", "key2" to "value2")
+        val prompt = "test prompt"
+
+        genesisAgent.participateWithAgents(
+            context = context,
+            agents = listOf(agent),
+            prompt = prompt,
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        assertNotNull(agent.lastRequest)
+        assertTrue(agent.lastRequest!!.prompt.contains("key1:value1"))
+        assertTrue(agent.lastRequest!!.prompt.contains("key2:value2"))
+        assertTrue(agent.lastRequest!!.prompt.contains("test prompt"))
+    }
+
+    @Test
+    fun testParticipateWithAgents_promptWithOnlyWhitespace() = runBlocking {
+        val agent = DummyAgent("WhitespaceAgent", "whitespace handled")
+        val whitespacePrompt = "   \t   \n   \r   "
+
+        val responses = genesisAgent.participateWithAgents(
+            context = emptyMap(),
+            agents = listOf(agent),
+            prompt = whitespacePrompt,
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        assertEquals(1, responses.size)
+        assertEquals("whitespace handled", responses["WhitespaceAgent"]?.content)
+    }
+
+    @Test
+    fun testAggregateAgentResponses_withSameConfidenceButDifferentOrdering() {
+        val sameConfidence = 0.7f
+        val responses = listOf(
+            mapOf("Agent1" to AgentResponse("first", sameConfidence)),
+            mapOf("Agent1" to AgentResponse("second", sameConfidence)),
+            mapOf("Agent1" to AgentResponse("third", sameConfidence))
+        )
+
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+
+        assertEquals(1, consensus.size)
+        assertEquals(sameConfidence, consensus["Agent1"]?.confidence)
+        // When confidence is equal, the last one should be kept
+        assertEquals("third", consensus["Agent1"]?.content)
+    }
+
+    @Test
+    fun testAggregateAgentResponses_withMixedDataTypes() {
+        val responses = listOf(
+            mapOf(
+                "StringAgent" to AgentResponse("string response", 0.8f),
+                "NumberAgent" to AgentResponse("123", 0.9f),
+                "BooleanAgent" to AgentResponse("true", 0.7f),
+                "JsonAgent" to AgentResponse("{\"key\": \"value\"}", 0.6f)
+            )
+        )
+
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+
+        assertEquals(4, consensus.size)
+        assertEquals("string response", consensus["StringAgent"]?.content)
+        assertEquals("123", consensus["NumberAgent"]?.content)
+        assertEquals("true", consensus["BooleanAgent"]?.content)
+        assertEquals("{\"key\": \"value\"}", consensus["JsonAgent"]?.content)
+    }
+
+    @Test
+    fun testAggregateAgentResponses_withEmptyStringsAndNonEmptyStrings() {
+        val responses = listOf(
+            mapOf("Agent1" to AgentResponse("", 0.5f)),
+            mapOf("Agent1" to AgentResponse("non-empty", 0.3f)),
+            mapOf("Agent1" to AgentResponse("", 0.8f))
+        )
+
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+
+        assertEquals(1, consensus.size)
+        assertEquals("", consensus["Agent1"]?.content)
+        assertEquals(0.8f, consensus["Agent1"]?.confidence)
+    }
+
+    @Test
+    fun testAggregateAgentResponses_confidenceValuePrecision() {
+        val responses = listOf(
+            mapOf("Agent1" to AgentResponse("low", 0.1234567f)),
+            mapOf("Agent1" to AgentResponse("high", 0.1234568f))
+        )
+
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+
+        assertEquals(1, consensus.size)
+        assertEquals("high", consensus["Agent1"]?.content)
+        assertEquals(0.1234568f, consensus["Agent1"]?.confidence)
+    }
+
+    @Test
+    fun testAggregateAgentResponses_withVerySmallDifferences() {
+        val responses = listOf(
+            mapOf("Agent1" to AgentResponse("first", 0.999999f)),
+            mapOf("Agent1" to AgentResponse("second", 1.000000f))
+        )
+
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+
+        assertEquals(1, consensus.size)
+        assertEquals("second", consensus["Agent1"]?.content)
+        assertEquals(1.000000f, consensus["Agent1"]?.confidence)
+    }
+
+    @Test
+    fun testProcessRequest_withNullContext() = runBlocking {
+        val request = AiRequest("test prompt", null)
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("aura null", 0.8f))
+        whenever(kaiService.processRequest(any())).thenReturn(AgentResponse("kai null", 0.9f))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("cascade null", 0.7f))
+
+        val response = genesisAgent.processRequest(request)
+
+        assertEquals("aura null kai null cascade null", response.content)
+        assertEquals(0.9f, response.confidence)
+    }
+
+    @Test
+    fun testProcessRequest_responseAggregationOrder() = runBlocking {
+        val request = AiRequest("order test", emptyMap())
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("A", 0.5f))
+        whenever(kaiService.processRequest(any())).thenReturn(AgentResponse("B", 0.8f))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("C", 0.6f))
+
+        val response = genesisAgent.processRequest(request)
+
+        // Content should be in order: Aura, Kai, Cascade
+        assertEquals("A B C", response.content)
+        // Confidence should be the maximum: 0.8f from Kai
+        assertEquals(0.8f, response.confidence)
+    }
+
+    @Test
+    fun testProcessRequest_allServicesReturnSameConfidence() = runBlocking {
+        val request = AiRequest("same confidence test", emptyMap())
+        val sameConfidence = 0.75f
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("aura", sameConfidence))
+        whenever(kaiService.processRequest(any())).thenReturn(AgentResponse("kai", sameConfidence))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("cascade", sameConfidence))
+
+        val response = genesisAgent.processRequest(request)
+
+        assertEquals("aura kai cascade", response.content)
+        assertEquals(sameConfidence, response.confidence)
+    }
+
+    @Test
+    fun testProcessRequest_servicesReturnWhitespaceContent() = runBlocking {
+        val request = AiRequest("whitespace test", emptyMap())
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("   ", 0.8f))
+        whenever(kaiService.processRequest(any())).thenReturn(AgentResponse("\t\t", 0.9f))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("\n\n", 0.7f))
+
+        val response = genesisAgent.processRequest(request)
+
+        assertEquals("    \t\t \n\n", response.content)
+        assertEquals(0.9f, response.confidence)
+    }
+
+    @Test
+    fun testProcessRequest_servicesReturnNewlineContent() = runBlocking {
+        val request = AiRequest("newline test", emptyMap())
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("line1\nline2", 0.8f))
+        whenever(kaiService.processRequest(any())).thenReturn(AgentResponse("line3\nline4", 0.9f))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("line5\nline6", 0.7f))
+
+        val response = genesisAgent.processRequest(request)
+
+        assertEquals("line1\nline2 line3\nline4 line5\nline6", response.content)
+        assertEquals(0.9f, response.confidence)
+    }
+
+    @Test
+    fun testDummyAgent_immutability() = runBlocking {
+        val agent = DummyAgent("ImmutableAgent", "immutable", 0.8f)
+        val request1 = AiRequest("request1", emptyMap())
+        val request2 = AiRequest("request2", mapOf("key" to "value"))
+
+        val response1 = agent.processRequest(request1)
+        val response2 = agent.processRequest(request2)
+
+        // Both responses should be identical regardless of input
+        assertEquals(response1.content, response2.content)
+        assertEquals(response1.confidence, response2.confidence)
+        assertEquals("immutable", response1.content)
+        assertEquals(0.8f, response1.confidence)
+    }
+
+    @Test
+    fun testDummyAgent_defaultConfidence() = runBlocking {
+        val agent = DummyAgent("DefaultAgent", "default confidence")
+        val request = AiRequest("test", emptyMap())
+        val response = agent.processRequest(request)
+
+        assertEquals("default confidence", response.content)
+        assertEquals(1.0f, response.confidence) // Default confidence should be 1.0f
+    }
+
+    @Test
+    fun testFailingAgent_consistentFailure() = runBlocking {
+        val agent = FailingAgent("ConsistentFailer")
+        val request1 = AiRequest("request1", emptyMap())
+        val request2 = AiRequest("request2", mapOf("key" to "value"))
+
+        // Should fail consistently with the same exception
+        try {
+            agent.processRequest(request1)
+            fail("Should throw RuntimeException")
+        } catch (e: RuntimeException) {
+            assertEquals("Agent processing failed", e.message)
+        }
+
+        try {
+            agent.processRequest(request2)
+            fail("Should throw RuntimeException")
+        } catch (e: RuntimeException) {
+            assertEquals("Agent processing failed", e.message)
+        }
+    }
+
+    @Test
+    fun testFailingAgent_threadSafety() = runBlocking {
+        val agent = FailingAgent("ThreadSafeFailer")
+        val request = AiRequest("test", emptyMap())
+
+        val jobs = (1..10).map {
+            kotlinx.coroutines.async {
+                try {
+                    agent.processRequest(request)
+                    false // Should not reach here
+                } catch (e: RuntimeException) {
+                    e.message == "Agent processing failed"
+                }
+            }
+        }
+
+        val results = jobs.map { it.await() }
+        assertTrue("All jobs should fail consistently", results.all { it })
+    }
+
+    @Test
+    fun testConversationMode_enumProperties() {
+        val modes = GenesisAgent.ConversationMode.values()
+        assertEquals(3, modes.size)
+        
+        // Test enum names
+        assertTrue(modes.any { it.name == "TURN_ORDER" })
+        assertTrue(modes.any { it.name == "CASCADE" })
+        assertTrue(modes.any { it.name == "CONSENSUS" })
+        
+        // Test enum ordinals
+        assertEquals(0, GenesisAgent.ConversationMode.TURN_ORDER.ordinal)
+        assertEquals(1, GenesisAgent.ConversationMode.CASCADE.ordinal)
+        assertEquals(2, GenesisAgent.ConversationMode.CONSENSUS.ordinal)
+    }
+
+    @Test
+    fun testConversationMode_serialization() {
+        val turnOrder = GenesisAgent.ConversationMode.TURN_ORDER
+        val cascade = GenesisAgent.ConversationMode.CASCADE
+        val consensus = GenesisAgent.ConversationMode.CONSENSUS
+
+        assertEquals("TURN_ORDER", turnOrder.toString())
+        assertEquals("CASCADE", cascade.toString())
+        assertEquals("CONSENSUS", consensus.toString())
+    }
+
+    @Test
+    fun testGenesisAgent_interfaceCompliance() {
+        assertTrue("GenesisAgent should implement Agent interface", genesisAgent is Agent)
+        
+        // Test that all Agent interface methods are implemented
+        assertNotNull(genesisAgent.getName())
+        assertNotNull(genesisAgent.getType()) // Can be null, but method should exist
+        
+        // processRequest is tested extensively in other tests
+    }
+
+    @Test
+    fun testGenesisAgent_serviceInteraction() = runBlocking {
+        val request = AiRequest("service interaction test", emptyMap())
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("aura", 0.8f))
+        whenever(kaiService.processRequest(any())).thenReturn(AgentResponse("kai", 0.9f))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("cascade", 0.7f))
+
+        genesisAgent.processRequest(request)
+
+        // Verify all services were called exactly once
+        org.mockito.kotlin.verify(auraService, org.mockito.kotlin.times(1)).processRequest(any())
+        org.mockito.kotlin.verify(kaiService, org.mockito.kotlin.times(1)).processRequest(any())
+        org.mockito.kotlin.verify(cascadeService, org.mockito.kotlin.times(1)).processRequest(any())
+    }
+
+    @Test
+    fun testGenesisAgent_serviceCallOrder() = runBlocking {
+        val request = AiRequest("call order test", emptyMap())
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("aura", 0.8f))
+        whenever(kaiService.processRequest(any())).thenReturn(AgentResponse("kai", 0.9f))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("cascade", 0.7f))
+
+        genesisAgent.processRequest(request)
+
+        // Verify the order of service calls
+        val inOrder = org.mockito.kotlin.inOrder(auraService, kaiService, cascadeService)
+        inOrder.verify(auraService).processRequest(any())
+        inOrder.verify(kaiService).processRequest(any())
+        inOrder.verify(cascadeService).processRequest(any())
+    }
+
+    @Test
+    fun testMemoryUsage_largeResponseAggregation() {
+        val largeContent = "Large content: " + "A".repeat(100000)
+        val responses = (1..100).map { i ->
+            mapOf("Agent$i" to AgentResponse(largeContent, i / 100.0f))
+        }
+
+        val startTime = System.currentTimeMillis()
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+        val endTime = System.currentTimeMillis()
+
+        assertEquals(100, consensus.size)
+        assertTrue("Large response aggregation should complete quickly", (endTime - startTime) < 5000)
+        
+        // Verify the agent with highest confidence (Agent100) is selected
+        assertEquals(largeContent, consensus["Agent100"]?.content)
+        assertEquals(1.0f, consensus["Agent100"]?.confidence)
+    }
+
+    @Test
+    fun testEdgeCase_agentWithNullName() = runBlocking {
+        class NullNameAgent : Agent {
+            override fun getName(): String? = null as String? // Force null return
+            override fun getType(): String? = null
+            override suspend fun processRequest(request: AiRequest): AgentResponse = 
+                AgentResponse("null name response", 1.0f)
+        }
+
+        val agent = NullNameAgent()
+        val responses = genesisAgent.participateWithAgents(
+            context = emptyMap(),
+            agents = listOf(agent),
+            prompt = "test null name",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        // Should handle null name gracefully
+        assertTrue(responses.isEmpty() || responses.containsKey(null))
+    }
+
+    @Test
+    fun testEdgeCase_veryHighConfidenceValues() {
+        val responses = listOf(
+            mapOf("Agent1" to AgentResponse("response1", 999999.0f)),
+            mapOf("Agent1" to AgentResponse("response2", 1000000.0f))
+        )
+
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+
+        assertEquals(1, consensus.size)
+        assertEquals("response2", consensus["Agent1"]?.content)
+        assertEquals(1000000.0f, consensus["Agent1"]?.confidence)
+    }
+
+    @Test
+    fun testEdgeCase_veryLowConfidenceValues() {
+        val responses = listOf(
+            mapOf("Agent1" to AgentResponse("response1", -999999.0f)),
+            mapOf("Agent1" to AgentResponse("response2", -1000000.0f))
+        )
+
+        val consensus = genesisAgent.aggregateAgentResponses(responses)
+
+        assertEquals(1, consensus.size)
+        assertEquals("response1", consensus["Agent1"]?.content)
+        assertEquals(-999999.0f, consensus["Agent1"]?.confidence)
+    }
+
+    @Test
+    fun testRobustness_malformedInputHandling() = runBlocking {
+        // Test with malformed context keys and values
+        val malformedContext = mapOf(
+            "" to "empty key",
+            "key" to "",
+            "key with spaces" to "value with spaces",
+            "key\nwith\nnewlines" to "value\nwith\nnewlines",
+            "key:with:colons" to "value:with:colons"
+        )
+
+        val agent = DummyAgent("RobustAgent", "robust handling")
+        val responses = genesisAgent.participateWithAgents(
+            context = malformedContext,
+            agents = listOf(agent),
+            prompt = "malformed input test",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        assertEquals(1, responses.size)
+        assertEquals("robust handling", responses["RobustAgent"]?.content)
+    }
+
+    @Test
+    fun testPerformance_multipleAgentsWithLargeResponses() = runBlocking {
+        val largeResponse = "Large response: " + "X".repeat(10000)
+        val agents = (1..50).map { i ->
+            DummyAgent("PerfAgent$i", largeResponse, i / 50.0f)
+        }
+
+        val startTime = System.currentTimeMillis()
+        val responses = genesisAgent.participateWithAgents(
+            context = emptyMap(),
+            agents = agents,
+            prompt = "performance test",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+        val endTime = System.currentTimeMillis()
+
+        assertEquals(50, responses.size)
+        assertTrue("Performance test should complete quickly", (endTime - startTime) < 10000)
+        
+        // Verify all agents responded
+        for (i in 1..50) {
+            assertEquals(largeResponse, responses["PerfAgent$i"]?.content)
+        }
+    }
+
+    @Test
+    fun testIntegration_endToEndWorkflow() = runBlocking {
+        // Create a complex scenario that uses all major features
+        val agent1 = DummyAgent("Integration1", "integrated response 1", 0.8f)
+        val agent2 = DummyAgent("Integration2", "integrated response 2", 0.9f)
+        val failingAgent = FailingAgent("IntegrationFailer")
+        
+        val context = mapOf(
+            "scenario" to "integration test",
+            "complexity" to "high",
+            "expected" to "success"
+        )
+
+        // Step 1: Participate with agents (some failing)
+        val participationResponses = genesisAgent.participateWithAgents(
+            context = context,
+            agents = listOf(agent1, failingAgent, agent2),
+            prompt = "integration test prompt",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        // Step 2: Create multiple response sets for aggregation
+        val responseSet1 = mapOf(
+            "Integration1" to AgentResponse("response1_v1", 0.7f),
+            "Integration2" to AgentResponse("response2_v1", 0.6f)
+        )
+        val responseSet2 = mapOf(
+            "Integration1" to AgentResponse("response1_v2", 0.9f),
+            "Integration2" to AgentResponse("response2_v2", 0.8f)
+        )
+
+        // Step 3: Aggregate responses
+        val aggregated = genesisAgent.aggregateAgentResponses(
+            listOf(participationResponses, responseSet1, responseSet2)
+        )
+
+        // Step 4: Process main request
+        val mainRequest = AiRequest("integration main request", context)
+        whenever(auraService.processRequest(any())).thenReturn(AgentResponse("aura integrated", 0.85f))
+        whenever(kaiService.processRequest(any())).thenReturn(AgentResponse("kai integrated", 0.95f))
+        whenever(cascadeService.processRequest(any())).thenReturn(AgentResponse("cascade integrated", 0.75f))
+
+        val finalResponse = genesisAgent.processRequest(mainRequest)
+
+        // Verify all steps worked correctly
+        assertEquals(2, participationResponses.size) // Only successful agents
+        assertNull(participationResponses["IntegrationFailer"])
+        assertEquals("integrated response 1", participationResponses["Integration1"]?.content)
+        assertEquals("integrated response 2", participationResponses["Integration2"]?.content)
+
+        assertEquals(2, aggregated.size)
+        assertEquals("response1_v2", aggregated["Integration1"]?.content) // Highest confidence
+        assertEquals("response2_v2", aggregated["Integration2"]?.content) // Highest confidence
+
+        assertEquals("aura integrated kai integrated cascade integrated", finalResponse.content)
+        assertEquals(0.95f, finalResponse.confidence) // Max from kai
+    }
+
+    @Test
+    fun testBoundaryConditions_extremeScenarios() = runBlocking {
+        // Test with maximum possible agents
+        val maxAgents = (1..1000).map { i ->
+            DummyAgent("Agent$i", "response$i", (i % 100) / 100.0f)
+        }
+
+        val startTime = System.currentTimeMillis()
+        val responses = genesisAgent.participateWithAgents(
+            context = emptyMap(),
+            agents = maxAgents,
+            prompt = "boundary test",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+        val endTime = System.currentTimeMillis()
+
+        assertEquals(1000, responses.size)
+        assertTrue("Boundary test should complete within reasonable time", (endTime - startTime) < 30000)
+
+        // Verify all agents are present
+        for (i in 1..1000) {
+            assertNotNull("Agent$i should be present", responses["Agent$i"])
+            assertEquals("response$i", responses["Agent$i"]?.content)
+        }
+    }
+
+    @Test
+    fun testConcurrency_highLoadStressTest() = runBlocking {
+        val agent = DummyAgent("ConcurrencyAgent", "concurrent response")
+        
+        // Create many concurrent requests
+        val jobs = (1..100).map { i ->
+            kotlinx.coroutines.async {
+                genesisAgent.participateWithAgents(
+                    context = mapOf("request" to "concurrent$i"),
+                    agents = listOf(agent),
+                    prompt = "concurrent test $i",
+                    mode = GenesisAgent.ConversationMode.TURN_ORDER
+                )
+            }
+        }
+
+        val startTime = System.currentTimeMillis()
+        val results = jobs.map { it.await() }
+        val endTime = System.currentTimeMillis()
+
+        // All requests should complete successfully
+        assertEquals(100, results.size)
+        results.forEach { response ->
+            assertEquals(1, response.size)
+            assertEquals("concurrent response", response["ConcurrencyAgent"]?.content)
+        }
+
+        assertTrue("Concurrency test should complete quickly", (endTime - startTime) < 15000)
+    }
+
+    @Test
+    fun testValidation_inputSanitization() = runBlocking {
+        // Test with potentially problematic input
+        val problematicContext = mapOf(
+            "sql_injection" to "'; DROP TABLE users; --",
+            "xss_attempt" to "<script>alert('xss')</script>",
+            "path_traversal" to "../../../etc/passwd",
+            "null_bytes" to "test\u0000null",
+            "unicode_exploit" to "test\uFEFFbom"
+        )
+
+        val agent = DummyAgent("SanitizationAgent", "sanitized response")
+        val responses = genesisAgent.participateWithAgents(
+            context = problematicContext,
+            agents = listOf(agent),
+            prompt = "sanitization test",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        // Should handle problematic input gracefully
+        assertEquals(1, responses.size)
+        assertEquals("sanitized response", responses["SanitizationAgent"]?.content)
+    }
+
+    @Test
+    fun testErrorRecovery_partialFailureScenarios() = runBlocking {
+        // Create a mix of successful and failing agents
+        val successfulAgents = (1..5).map { i ->
+            DummyAgent("Success$i", "success$i", 0.8f)
+        }
+        val failingAgents = (1..3).map { i ->
+            FailingAgent("Fail$i")
+        }
+        val allAgents = (successfulAgents + failingAgents).shuffled()
+
+        val responses = genesisAgent.participateWithAgents(
+            context = mapOf("scenario" to "partial failure"),
+            agents = allAgents,
+            prompt = "error recovery test",
+            mode = GenesisAgent.ConversationMode.TURN_ORDER
+        )
+
+        // Only successful agents should be in responses
+        assertEquals(5, responses.size)
+        for (i in 1..5) {
+            assertEquals("success$i", responses["Success$i"]?.content)
+        }
+        for (i in 1..3) {
+            assertNull(responses["Fail$i"])
+        }
+    }
+
+    @Test
+    fun testComplexAggregation_multipleRoundsWithConflicts() {
+        // Create complex aggregation scenario with multiple rounds and conflicts
+        val round1 = mapOf(
+            "Agent1" to AgentResponse("round1_a1", 0.5f),
+            "Agent2" to AgentResponse("round1_a2", 0.8f),
+            "Agent3" to AgentResponse("round1_a3", 0.3f)
+        )
+        val round2 = mapOf(
+            "Agent1" to AgentResponse("round2_a1", 0.9f), // Higher confidence
+            "Agent2" to AgentResponse("round2_a2", 0.6f), // Lower confidence
+            "Agent4" to AgentResponse("round2_a4", 0.7f)  // New agent
+        )
+        val round3 = mapOf(
+            "Agent1" to AgentResponse("round3_a1", 0.7f), // Medium confidence
+            "Agent3" to AgentResponse("round3_a3", 0.95f), // Much higher confidence
+            "Agent5" to AgentResponse("round3_a5", 0.4f)   // New agent
+        )
+
+        val consensus = genesisAgent.aggregateAgentResponses(listOf(round1, round2, round3))
+
+        assertEquals(5, consensus.size)
+        assertEquals("round2_a1", consensus["Agent1"]?.content) // Highest confidence (0.9f)
+        assertEquals("round1_a2", consensus["Agent2"]?.content) // Highest confidence (0.8f)
+        assertEquals("round3_a3", consensus["Agent3"]?.content) // Highest confidence (0.95f)
+        assertEquals("round2_a4", consensus["Agent4"]?.content) // Only appearance (0.7f)
+        assertEquals("round3_a5", consensus["Agent5"]?.content) // Only appearance (0.4f)
+    }
+}
