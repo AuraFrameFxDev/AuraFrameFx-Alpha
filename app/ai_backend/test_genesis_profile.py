@@ -2836,815 +2836,1018 @@ if __name__ == '__main__':
     # Run comprehensive test suite
     unittest.main(argv=[''], exit=False, verbosity=2)
 
-class TestSecurityAndValidationScenarios(unittest.TestCase):
-    """Test security-related scenarios and advanced validation"""
+class TestProfileDataValidationExtended(unittest.TestCase):
+    """Extended validation tests for comprehensive input validation"""
     
     def setUp(self):
-        """Set up test fixtures for security tests"""
+        """Set up test fixtures for extended validation tests"""
         self.manager = ProfileManager()
         self.validator = ProfileValidator()
         
-    def test_profile_data_sanitization(self):
-        """Test that profile data is properly sanitized against injection attacks"""
-        malicious_data_cases = [
+    def test_profile_id_security_validation(self):
+        """Test profile ID validation against potential security issues"""
+        malicious_ids = [
+            '../../../etc/passwd',  # Path traversal
+            'profile; DROP TABLE profiles;',  # SQL injection attempt
+            '<script>alert("xss")</script>',  # XSS attempt
+            'profile\x00null',  # Null byte injection
+            'profile\r\ninjection',  # CRLF injection
+            'profile' + 'A' * 10000,  # Extremely long ID
+            'profile\u0000',  # Unicode null
+            'profile\u202e',  # Unicode RLO (Right-to-Left Override)
+        ]
+        
+        for malicious_id in malicious_ids:
+            with self.subTest(profile_id=malicious_id):
+                try:
+                    self.manager.create_profile(malicious_id, {
+                        'name': 'test',
+                        'version': '1.0.0',
+                        'settings': {}
+                    })
+                    # If it doesn't raise an exception, verify the ID is properly escaped/sanitized
+                    profile = self.manager.get_profile(malicious_id)
+                    if profile:
+                        self.assertEqual(profile.profile_id, malicious_id)
+                except (ValueError, TypeError, ProfileError):
+                    # Expected for malicious inputs
+                    pass
+                    
+    def test_settings_data_injection_prevention(self):
+        """Test that settings data cannot be used for injection attacks"""
+        injection_payloads = [
+            {'command': '__import__("os").system("rm -rf /")'},
+            {'eval_payload': 'eval("print(1)")'},
+            {'exec_payload': 'exec("import sys; sys.exit()")'},
+            {'pickle_payload': b'\x80\x03}q\x00.'},  # Malicious pickle
+            {'format_string': '{__class__.__bases__[0].__subclasses__()}'},
+            {'path_traversal': '../../../sensitive_file'},
+        ]
+        
+        for payload in injection_payloads:
+            with self.subTest(payload=str(payload)[:50]):
+                try:
+                    profile = self.manager.create_profile('injection_test', {
+                        'name': 'injection_test',
+                        'version': '1.0.0',
+                        'settings': payload
+                    })
+                    # Verify data is stored as-is without execution
+                    self.assertEqual(profile.data['settings'], payload)
+                except (ValueError, TypeError, ProfileError):
+                    # Some payloads might be rejected by validation
+                    pass
+                    
+    def test_unicode_normalization_consistency(self):
+        """Test that Unicode normalization is handled consistently"""
+        unicode_variants = [
+            'café',  # NFC normalization
+            'café',  # NFD normalization (same visual, different bytes)
+            'Åström',  # Various Unicode combining forms
+            '🚀🌟✨',  # Emoji sequences
+            'Test\u200b\u200c\u200d',  # Zero-width characters
+            'Test\u0301\u0302\u0303',  # Combining diacritical marks
+        ]
+        
+        for variant in unicode_variants:
+            with self.subTest(unicode_text=variant):
+                profile = self.manager.create_profile(f'unicode_test_{hash(variant)}', {
+                    'name': variant,
+                    'version': '1.0.0',
+                    'settings': {'unicode_field': variant}
+                })
+                
+                # Verify Unicode data is preserved
+                self.assertEqual(profile.data['name'], variant)
+                self.assertEqual(profile.data['settings']['unicode_field'], variant)
+                
+    def test_circular_reference_deep_detection(self):
+        """Test detection and handling of circular references in nested data"""
+        # Create circular reference scenarios
+        circular_data = {
+            'name': 'circular_test',
+            'version': '1.0.0',
+            'settings': {}
+        }
+        
+        # Self-reference
+        circular_data['settings']['self_ref'] = circular_data
+        
+        # Mutual reference
+        obj1 = {'name': 'obj1'}
+        obj2 = {'name': 'obj2', 'ref': obj1}
+        obj1['ref'] = obj2
+        
+        circular_scenarios = [
+            circular_data,
             {
-                'name': 'test_profile',
+                'name': 'mutual_ref_test',
                 'version': '1.0.0',
                 'settings': {
-                    'script_injection': '<script>alert("xss")</script>',
-                    'sql_injection': "'; DROP TABLE users; --",
-                    'command_injection': '$(rm -rf /)',
-                    'path_traversal': '../../etc/passwd'
+                    'obj1': obj1,
+                    'obj2': obj2
+                }
+            }
+        ]
+        
+        for scenario in circular_scenarios:
+            with self.subTest(scenario=scenario['name']):
+                try:
+                    profile = self.manager.create_profile('circular_test', scenario)
+                    # If successful, verify basic functionality
+                    self.assertIsNotNone(profile)
+                except (ValueError, TypeError, RecursionError):
+                    # Expected for circular references
+                    pass
+                    
+    def test_memory_exhaustion_prevention(self):
+        """Test that extremely large data doesn't cause memory exhaustion"""
+        large_data_scenarios = [
+            {
+                'name': 'memory_test_1',
+                'version': '1.0.0',
+                'settings': {
+                    'large_string': 'x' * (10 ** 6),  # 1MB string
+                    'large_list': [i for i in range(100000)],  # 100K items
+                    'large_dict': {f'key_{i}': f'value_{i}' for i in range(50000)}  # 50K keys
                 }
             },
             {
-                'name': 'test_profile',
+                'name': 'memory_test_2',
                 'version': '1.0.0',
                 'settings': {
-                    'template_injection': '{{ 7*7 }}',
-                    'yaml_injection': '!!python/object/apply:os.system ["rm -rf /"]',
-                    'ldap_injection': '(|(objectClass=*)(password=*))',
-                    'regex_dos': 'a' * 10000 + '!'
+                    'nested_depth': self._create_deeply_nested_dict(1000)  # 1000 levels deep
                 }
             }
         ]
         
-        for malicious_data in malicious_data_cases:
-            with self.subTest(malicious_data=malicious_data):
-                # System should handle malicious data gracefully
+        for scenario in large_data_scenarios:
+            with self.subTest(scenario=scenario['name']):
                 try:
-                    profile = self.manager.create_profile('security_test', malicious_data)
-                    # Data should be stored as-is but not executed
+                    import psutil
+                    import os
+                    
+                    process = psutil.Process(os.getpid())
+                    memory_before = process.memory_info().rss
+                    
+                    profile = self.manager.create_profile('memory_test', scenario)
+                    
+                    memory_after = process.memory_info().rss
+                    memory_increase = memory_after - memory_before
+                    
+                    # Verify profile was created
                     self.assertIsNotNone(profile)
-                    self.assertEqual(profile.data['settings']['script_injection'], '<script>alert("xss")</script>')
-                except Exception as e:
-                    # Or system should reject it with proper error handling
-                    self.assertIsInstance(e, (ValueError, TypeError, ProfileError))
+                    
+                    # Verify memory increase is reasonable (less than 100MB)
+                    self.assertLess(memory_increase, 100 * 1024 * 1024, 
+                                  f"Memory increase too large: {memory_increase} bytes")
+                    
+                except ImportError:
+                    # psutil not available, just test basic functionality
+                    profile = self.manager.create_profile('memory_test', scenario)
+                    self.assertIsNotNone(profile)
+                except (MemoryError, RecursionError):
+                    # Expected for extremely large data
+                    pass
+                    
+    def _create_deeply_nested_dict(self, depth):
+        """Helper method to create deeply nested dictionary"""
+        if depth <= 0:
+            return "bottom"
+        return {"level": depth, "nested": self._create_deeply_nested_dict(depth - 1)}
+
+
+class TestProfileManagerAdvancedOperations(unittest.TestCase):
+    """Advanced operations testing for ProfileManager"""
     
-    def test_profile_size_limits(self):
-        """Test profile size limits to prevent DoS attacks"""
-        # Test extremely large profile names
-        large_name = 'a' * 100000
-        large_version = '1.' + '0' * 100000
+    def setUp(self):
+        """Set up test fixtures"""
+        self.manager = ProfileManager()
         
-        large_profile_data = {
-            'name': large_name,
-            'version': large_version,
-            'settings': {
-                'large_field': 'x' * 1000000  # 1MB string
-            }
-        }
-        
-        # System should either handle large data or reject it gracefully
-        try:
-            profile = self.manager.create_profile('large_test', large_profile_data)
-            # If accepted, verify it's stored correctly
-            self.assertEqual(len(profile.data['name']), 100000)
-        except (ValueError, TypeError, MemoryError) as e:
-            # If rejected, should be with appropriate error
-            self.assertIsInstance(e, (ValueError, TypeError, MemoryError))
-    
-    def test_profile_field_type_validation(self):
-        """Test strict type validation for profile fields"""
-        invalid_type_cases = [
-            # Non-string name
-            {'name': 123, 'version': '1.0.0', 'settings': {}},
-            {'name': ['list'], 'version': '1.0.0', 'settings': {}},
-            {'name': {'dict': 'value'}, 'version': '1.0.0', 'settings': {}},
-            # Non-string version
-            {'name': 'test', 'version': 123, 'settings': {}},
-            {'name': 'test', 'version': ['1.0.0'], 'settings': {}},
-            # Non-dict settings
-            {'name': 'test', 'version': '1.0.0', 'settings': 'string'},
-            {'name': 'test', 'version': '1.0.0', 'settings': 123},
-            {'name': 'test', 'version': '1.0.0', 'settings': ['list']},
+    def test_profile_bulk_operations(self):
+        """Test bulk create, update, and delete operations"""
+        profiles_data = [
+            {
+                'id': f'bulk_profile_{i}',
+                'data': {
+                    'name': f'bulk_profile_{i}',
+                    'version': f'1.{i}.0',
+                    'settings': {'index': i, 'batch': 'bulk_test'}
+                }
+            } for i in range(100)
         ]
         
-        for invalid_data in invalid_type_cases:
-            with self.subTest(invalid_data=invalid_data):
-                # Should either validate type or handle gracefully
-                try:
-                    result = ProfileValidator.validate_profile_data(invalid_data)
-                    if isinstance(result, bool):
-                        # If validation returns boolean, should be False for invalid types
-                        self.assertFalse(result)
-                    else:
-                        # Or should handle invalid types gracefully
-                        self.assertIsInstance(result, bool)
-                except (TypeError, AttributeError):
-                    # Expected for invalid types
-                    pass
-
-
-class TestAdvancedProfileBuilderPatterns(unittest.TestCase):
-    """Test advanced builder patterns and factory methods"""
-    
-    def setUp(self):
-        """Set up builder test fixtures"""
-        self.builder = ProfileBuilder()
-        
-    def test_conditional_builder_methods(self):
-        """Test builder methods with conditional logic"""
-        def create_conditional_profile(environment='development'):
-            """Create profile with environment-specific settings"""
-            builder = ProfileBuilder().with_name('conditional_profile').with_version('1.0.0')
+        # Bulk create
+        created_profiles = []
+        for profile_data in profiles_data:
+            profile = self.manager.create_profile(profile_data['id'], profile_data['data'])
+            created_profiles.append(profile)
             
-            if environment == 'production':
-                builder = builder.with_settings({
-                    'debug': False,
-                    'logging_level': 'ERROR',
-                    'cache_enabled': True,
-                    'security_strict': True
-                })
-            elif environment == 'staging':
-                builder = builder.with_settings({
-                    'debug': True,
-                    'logging_level': 'WARN',
-                    'cache_enabled': True,
-                    'security_strict': False
-                })
-            else:  # development
-                builder = builder.with_settings({
-                    'debug': True,
-                    'logging_level': 'DEBUG',
-                    'cache_enabled': False,
-                    'security_strict': False
-                })
+        # Verify all profiles were created
+        self.assertEqual(len(created_profiles), 100)
+        self.assertEqual(len(self.manager.profiles), 100)
+        
+        # Bulk update
+        for i, profile_data in enumerate(profiles_data):
+            updated_profile = self.manager.update_profile(
+                profile_data['id'], 
+                {'settings': {'index': i, 'batch': 'bulk_test', 'updated': True}}
+            )
+            self.assertTrue(updated_profile.data['settings']['updated'])
             
-            return builder.build()
+        # Bulk delete (every other profile)
+        deleted_count = 0
+        for i, profile_data in enumerate(profiles_data):
+            if i % 2 == 0:
+                result = self.manager.delete_profile(profile_data['id'])
+                self.assertTrue(result)
+                deleted_count += 1
+                
+        # Verify final state
+        self.assertEqual(len(self.manager.profiles), 100 - deleted_count)
         
-        # Test different environments
-        prod_profile = create_conditional_profile('production')
-        self.assertFalse(prod_profile['settings']['debug'])
-        self.assertEqual(prod_profile['settings']['logging_level'], 'ERROR')
-        
-        dev_profile = create_conditional_profile('development')
-        self.assertTrue(dev_profile['settings']['debug'])
-        self.assertEqual(dev_profile['settings']['logging_level'], 'DEBUG')
-        
-        staging_profile = create_conditional_profile('staging')
-        self.assertTrue(staging_profile['settings']['debug'])
-        self.assertEqual(staging_profile['settings']['logging_level'], 'WARN')
-    
-    def test_builder_validation_chain(self):
-        """Test builder with integrated validation chain"""
-        def create_validated_profile(name, version, settings):
-            """Create profile with built-in validation"""
-            builder = ProfileBuilder()
-            
-            # Add validation at each step
-            if not name or not isinstance(name, str):
-                raise ValueError("Name must be a non-empty string")
-            builder = builder.with_name(name)
-            
-            if not version or not isinstance(version, str):
-                raise ValueError("Version must be a non-empty string")
-            builder = builder.with_version(version)
-            
-            if not isinstance(settings, dict):
-                raise ValueError("Settings must be a dictionary")
-            builder = builder.with_settings(settings)
-            
-            # Final validation
-            profile_data = builder.build()
-            if not ProfileValidator.validate_profile_data(profile_data):
-                raise ValidationError("Profile data validation failed")
-            
-            return profile_data
-        
-        # Test valid profile
-        valid_profile = create_validated_profile('test', '1.0.0', {'key': 'value'})
-        self.assertEqual(valid_profile['name'], 'test')
-        
-        # Test invalid cases
-        with self.assertRaises(ValueError):
-            create_validated_profile('', '1.0.0', {})
-        
-        with self.assertRaises(ValueError):
-            create_validated_profile('test', '', {})
-        
-        with self.assertRaises(ValueError):
-            create_validated_profile('test', '1.0.0', 'not_dict')
-    
-    def test_builder_inheritance_pattern(self):
-        """Test builder inheritance for specialized profile types"""
-        class AIModelProfileBuilder(ProfileBuilder):
-            """Specialized builder for AI model profiles"""
-            
-            def __init__(self):
-                super().__init__()
-                # Set AI-specific defaults
-                self.with_settings({
-                    'model_type': 'transformer',
-                    'parameters': {},
-                    'training_config': {},
-                    'inference_config': {}
-                })
-            
-            def with_model_type(self, model_type):
-                """Set the AI model type"""
-                current_settings = self.data.get('settings', {})
-                current_settings['model_type'] = model_type
-                return self.with_settings(current_settings)
-            
-            def with_parameters(self, parameters):
-                """Set model parameters"""
-                current_settings = self.data.get('settings', {})
-                current_settings['parameters'] = parameters
-                return self.with_settings(current_settings)
-            
-            def with_training_config(self, config):
-                """Set training configuration"""
-                current_settings = self.data.get('settings', {})
-                current_settings['training_config'] = config
-                return self.with_settings(current_settings)
-        
-        # Test specialized builder
-        ai_profile = (AIModelProfileBuilder()
-                     .with_name('ai_test_model')
-                     .with_version('1.0.0')
-                     .with_model_type('bert')
-                     .with_parameters({'hidden_size': 768, 'num_layers': 12})
-                     .with_training_config({'batch_size': 32, 'learning_rate': 0.001})
-                     .build())
-        
-        self.assertEqual(ai_profile['name'], 'ai_test_model')
-        self.assertEqual(ai_profile['settings']['model_type'], 'bert')
-        self.assertEqual(ai_profile['settings']['parameters']['hidden_size'], 768)
-        self.assertEqual(ai_profile['settings']['training_config']['batch_size'], 32)
-
-
-class TestAdvancedDataTypeHandling(unittest.TestCase):
-    """Test advanced data type handling and serialization"""
-    
-    def setUp(self):
-        """Set up data type test fixtures"""
-        self.manager = ProfileManager()
-        
-    def test_complex_nested_data_structures(self):
-        """Test handling of complex nested data structures"""
-        complex_data = {
-            'name': 'complex_nested_test',
-            'version': '1.0.0',
-            'settings': {
-                'matrix_data': [
-                    [[1, 2, 3], [4, 5, 6]],
-                    [[7, 8, 9], [10, 11, 12]]
-                ],
-                'graph_structure': {
-                    'nodes': [
-                        {'id': 1, 'label': 'A', 'properties': {'weight': 0.5}},
-                        {'id': 2, 'label': 'B', 'properties': {'weight': 0.8}}
-                    ],
-                    'edges': [
-                        {'from': 1, 'to': 2, 'weight': 0.3, 'type': 'directed'}
-                    ]
-                },
-                'recursive_structure': {
-                    'level1': {
-                        'level2': {
-                            'level3': {
-                                'level4': {
-                                    'level5': {
-                                        'data': 'deep_value',
-                                        'metadata': {
-                                            'created': '2023-01-01',
-                                            'tags': ['deep', 'nested', 'test']
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        profile = self.manager.create_profile('complex_nested', complex_data)
-        
-        # Verify complex structures are preserved
-        self.assertEqual(profile.data['settings']['matrix_data'][0][0][0], 1)
-        self.assertEqual(profile.data['settings']['graph_structure']['nodes'][0]['id'], 1)
-        self.assertEqual(
-            profile.data['settings']['recursive_structure']['level1']['level2']['level3']['level4']['level5']['data'],
-            'deep_value'
-        )
-    
-    def test_profile_with_callable_objects(self):
-        """Test handling of callable objects in profile data"""
-        def sample_function(x):
-            return x * 2
-        
-        class SampleClass:
-            def __init__(self, value):
-                self.value = value
-            
-            def method(self):
-                return self.value
-        
-        # Test with callable objects
-        data_with_callables = {
-            'name': 'callable_test',
-            'version': '1.0.0',
-            'settings': {
-                'function_ref': sample_function,
-                'class_instance': SampleClass(42),
-                'lambda_function': lambda x: x + 1,
-                'method_ref': SampleClass(10).method
-            }
-        }
-        
-        # System should handle callables gracefully
-        try:
-            profile = self.manager.create_profile('callable_test', data_with_callables)
-            # If accepted, verify structure
-            self.assertIsNotNone(profile)
-            self.assertEqual(profile.data['name'], 'callable_test')
-        except (TypeError, ValueError) as e:
-            # If rejected, should be with appropriate error
-            self.assertIsInstance(e, (TypeError, ValueError))
-    
-    def test_profile_with_custom_objects(self):
-        """Test handling of custom objects and classes"""
-        class CustomConfig:
-            def __init__(self, name, value):
-                self.name = name
-                self.value = value
-            
-            def __repr__(self):
-                return f"CustomConfig(name='{self.name}', value={self.value})"
-            
-            def __eq__(self, other):
-                return isinstance(other, CustomConfig) and self.name == other.name and self.value == other.value
-        
-        from enum import Enum
-        
-        class Priority(Enum):
-            LOW = 1
-            MEDIUM = 2
-            HIGH = 3
-        
-        custom_data = {
-            'name': 'custom_objects_test',
-            'version': '1.0.0',
-            'settings': {
-                'config_object': CustomConfig('test_config', 100),
-                'priority_enum': Priority.HIGH,
-                'tuple_data': (1, 'string', 3.14),
-                'named_tuple_data': {'name': 'test', 'value': 42},
-                'complex_number': complex(1, 2),
-                'byte_string': b'binary_data',
-                'frozen_set': frozenset([1, 2, 3, 4])
-            }
-        }
-        
-        profile = self.manager.create_profile('custom_objects', custom_data)
-        
-        # Verify custom objects are handled
-        self.assertEqual(profile.data['name'], 'custom_objects_test')
-        self.assertIsInstance(profile.data['settings']['config_object'], CustomConfig)
-        self.assertEqual(profile.data['settings']['priority_enum'], Priority.HIGH)
-        self.assertEqual(profile.data['settings']['tuple_data'], (1, 'string', 3.14))
-
-
-class TestConcurrencyAndThreadSafety(unittest.TestCase):
-    """Test concurrency scenarios and thread safety"""
-    
-    def setUp(self):
-        """Set up concurrency test fixtures"""
-        self.manager = ProfileManager()
-        self.results = []
-        self.errors = []
-        
-    def test_simulated_concurrent_profile_creation(self):
-        """Test simulated concurrent profile creation"""
-        import threading
-        import time
-        
-        def create_profiles_batch(thread_id, batch_size=100):
-            """Create a batch of profiles in a thread"""
-            try:
-                for i in range(batch_size):
-                    profile_id = f'thread_{thread_id}_profile_{i}'
-                    data = {
-                        'name': f'profile_{thread_id}_{i}',
-                        'version': '1.0.0',
-                        'settings': {
-                            'thread_id': thread_id,
-                            'index': i,
-                            'created_at': time.time()
-                        }
-                    }
-                    profile = self.manager.create_profile(profile_id, data)
-                    self.results.append(profile.profile_id)
-            except Exception as e:
-                self.errors.append(f"Thread {thread_id}: {str(e)}")
-        
-        # Create multiple threads
-        threads = []
-        num_threads = 5
-        
-        for i in range(num_threads):
-            thread = threading.Thread(target=create_profiles_batch, args=(i, 50))
-            threads.append(thread)
-            thread.start()
-        
-        # Wait for all threads to complete
-        for thread in threads:
-            thread.join()
-        
-        # Verify results
-        self.assertEqual(len(self.errors), 0, f"Errors occurred: {self.errors}")
-        self.assertEqual(len(self.results), num_threads * 50)
-        self.assertEqual(len(self.manager.profiles), num_threads * 50)
-    
-    def test_concurrent_read_write_operations(self):
-        """Test concurrent read and write operations"""
-        import threading
-        import time
-        
-        # Create initial profiles
-        for i in range(10):
-            self.manager.create_profile(f'concurrent_test_{i}', {
-                'name': f'test_{i}',
-                'version': '1.0.0',
-                'settings': {'counter': 0}
-            })
-        
-        def reader_thread(thread_id):
-            """Thread that reads profiles continuously"""
-            try:
-                for i in range(100):
-                    profile_id = f'concurrent_test_{i % 10}'
-                    profile = self.manager.get_profile(profile_id)
-                    if profile:
-                        self.results.append(f"read_{thread_id}_{i}")
-                    time.sleep(0.001)  # Small delay
-            except Exception as e:
-                self.errors.append(f"Reader {thread_id}: {str(e)}")
-        
-        def writer_thread(thread_id):
-            """Thread that updates profiles continuously"""
-            try:
-                for i in range(50):
-                    profile_id = f'concurrent_test_{i % 10}'
-                    try:
-                        self.manager.update_profile(profile_id, {
-                            'settings': {'counter': i, 'updated_by': thread_id}
-                        })
-                        self.results.append(f"write_{thread_id}_{i}")
-                    except ProfileNotFoundError:
-                        # Profile might have been deleted, skip
-                        pass
-                    time.sleep(0.002)  # Small delay
-            except Exception as e:
-                self.errors.append(f"Writer {thread_id}: {str(e)}")
-        
-        # Start reader and writer threads
-        threads = []
-        
-        # Start 3 reader threads
-        for i in range(3):
-            thread = threading.Thread(target=reader_thread, args=(i,))
-            threads.append(thread)
-            thread.start()
-        
-        # Start 2 writer threads
-        for i in range(2):
-            thread = threading.Thread(target=writer_thread, args=(i,))
-            threads.append(thread)
-            thread.start()
-        
-        # Wait for all threads to complete
-        for thread in threads:
-            thread.join()
-        
-        # Verify no errors occurred
-        self.assertEqual(len(self.errors), 0, f"Errors occurred: {self.errors}")
-        self.assertGreater(len(self.results), 0)
-
-
-class TestProfileManagerAdvancedFeatures(unittest.TestCase):
-    """Test advanced ProfileManager features"""
-    
-    def setUp(self):
-        """Set up advanced features test fixtures"""
-        self.manager = ProfileManager()
-        
-    def test_profile_lifecycle_callbacks(self):
-        """Test profile lifecycle callbacks simulation"""
-        callback_log = []
-        
-        def on_profile_created(profile):
-            callback_log.append(f"created: {profile.profile_id}")
-        
-        def on_profile_updated(profile):
-            callback_log.append(f"updated: {profile.profile_id}")
-        
-        def on_profile_deleted(profile_id):
-            callback_log.append(f"deleted: {profile_id}")
-        
-        class ProfileManagerWithCallbacks(ProfileManager):
-            """Extended ProfileManager with callback support"""
-            
-            def __init__(self):
-                super().__init__()
-                self.callbacks = {
-                    'created': [],
-                    'updated': [],
-                    'deleted': []
-                }
-            
-            def add_callback(self, event, callback):
-                if event in self.callbacks:
-                    self.callbacks[event].append(callback)
-            
-            def create_profile(self, profile_id, data):
-                profile = super().create_profile(profile_id, data)
-                for callback in self.callbacks['created']:
-                    callback(profile)
-                return profile
-            
-            def update_profile(self, profile_id, data):
-                profile = super().update_profile(profile_id, data)
-                for callback in self.callbacks['updated']:
-                    callback(profile)
-                return profile
-            
-            def delete_profile(self, profile_id):
-                result = super().delete_profile(profile_id)
-                if result:
-                    for callback in self.callbacks['deleted']:
-                        callback(profile_id)
-                return result
-        
-        # Test with callbacks
-        callback_manager = ProfileManagerWithCallbacks()
-        callback_manager.add_callback('created', on_profile_created)
-        callback_manager.add_callback('updated', on_profile_updated)
-        callback_manager.add_callback('deleted', on_profile_deleted)
-        
-        # Test lifecycle
-        profile = callback_manager.create_profile('callback_test', {
-            'name': 'test',
-            'version': '1.0.0',
-            'settings': {}
-        })
-        
-        callback_manager.update_profile('callback_test', {'name': 'updated'})
-        callback_manager.delete_profile('callback_test')
-        
-        # Verify callbacks were called
-        self.assertIn('created: callback_test', callback_log)
-        self.assertIn('updated: callback_test', callback_log)
-        self.assertIn('deleted: callback_test', callback_log)
-    
-    def test_profile_indexing_and_search(self):
-        """Test advanced profile indexing and search capabilities"""
-        # Create profiles with searchable content
-        profiles_data = [
+    def test_profile_search_and_filter_advanced(self):
+        """Test advanced search and filtering capabilities"""
+        # Create diverse profiles for testing
+        test_profiles = [
             {
                 'id': 'ai_model_gpt4',
                 'data': {
                     'name': 'GPT-4 Model',
-                    'version': '1.0.0',
+                    'version': '4.0.0',
                     'settings': {
                         'type': 'language_model',
+                        'parameters': 1750000000000,
                         'capabilities': ['text_generation', 'code_completion', 'reasoning'],
-                        'parameters': 175000000000,
-                        'tags': ['nlp', 'transformer', 'large_model']
+                        'training_data': 'web_crawl_2023',
+                        'tags': ['production', 'high_performance']
                     }
                 }
             },
             {
-                'id': 'ai_model_bert',
+                'id': 'ai_model_claude',
                 'data': {
-                    'name': 'BERT Base',
-                    'version': '1.1.0',
+                    'name': 'Claude Model',
+                    'version': '3.0.0',
                     'settings': {
                         'type': 'language_model',
-                        'capabilities': ['text_classification', 'named_entity_recognition'],
-                        'parameters': 110000000,
-                        'tags': ['nlp', 'transformer', 'base_model']
+                        'parameters': 500000000000,
+                        'capabilities': ['text_generation', 'analysis', 'reasoning'],
+                        'training_data': 'constitutional_ai_2023',
+                        'tags': ['beta', 'safety_focused']
                     }
                 }
             },
             {
                 'id': 'workflow_etl',
                 'data': {
-                    'name': 'ETL Pipeline',
-                    'version': '2.0.0',
+                    'name': 'ETL Workflow',
+                    'version': '2.1.0',
                     'settings': {
                         'type': 'data_workflow',
-                        'capabilities': ['data_extraction', 'data_transformation', 'data_loading'],
+                        'stages': ['extract', 'transform', 'load'],
                         'schedule': 'daily',
-                        'tags': ['data_pipeline', 'etl', 'automation']
+                        'data_sources': ['database', 'api', 'files'],
+                        'tags': ['production', 'data_engineering']
                     }
                 }
             }
         ]
         
-        for profile_data in profiles_data:
+        # Create profiles
+        for profile_data in test_profiles:
             self.manager.create_profile(profile_data['id'], profile_data['data'])
-        
-        def search_profiles_by_capability(manager, capability):
+            
+        # Test complex search scenarios
+        def search_by_capability(capability):
             """Search profiles by capability"""
             results = []
-            for profile in manager.profiles.values():
+            for profile_id, profile in self.manager.profiles.items():
                 capabilities = profile.data.get('settings', {}).get('capabilities', [])
                 if capability in capabilities:
                     results.append(profile)
             return results
-        
-        def search_profiles_by_tag(manager, tag):
+            
+        def search_by_tag(tag):
             """Search profiles by tag"""
             results = []
-            for profile in manager.profiles.values():
+            for profile_id, profile in self.manager.profiles.items():
                 tags = profile.data.get('settings', {}).get('tags', [])
                 if tag in tags:
                     results.append(profile)
             return results
-        
-        def search_profiles_by_parameter_range(manager, min_params, max_params):
-            """Search profiles by parameter count range"""
+            
+        def search_by_version_range(min_version, max_version):
+            """Search profiles by version range"""
             results = []
-            for profile in manager.profiles.values():
-                params = profile.data.get('settings', {}).get('parameters', 0)
-                if min_params <= params <= max_params:
+            for profile_id, profile in self.manager.profiles.items():
+                version = profile.data.get('version', '0.0.0')
+                if min_version <= version <= max_version:
                     results.append(profile)
             return results
+            
+        # Test searches
+        reasoning_models = search_by_capability('reasoning')
+        self.assertEqual(len(reasoning_models), 2)
         
-        # Test various search scenarios
-        text_gen_models = search_profiles_by_capability(self.manager, 'text_generation')
-        self.assertEqual(len(text_gen_models), 1)
-        self.assertEqual(text_gen_models[0].profile_id, 'ai_model_gpt4')
+        production_profiles = search_by_tag('production')
+        self.assertEqual(len(production_profiles), 2)
         
-        transformer_models = search_profiles_by_tag(self.manager, 'transformer')
-        self.assertEqual(len(transformer_models), 2)
+        recent_versions = search_by_version_range('3.0.0', '5.0.0')
+        self.assertEqual(len(recent_versions), 2)
         
-        large_models = search_profiles_by_parameter_range(self.manager, 100000000, 200000000000)
-        self.assertEqual(len(large_models), 2)
-        
-        small_models = search_profiles_by_parameter_range(self.manager, 0, 150000000)
-        self.assertEqual(len(small_models), 1)
-    
-    def test_profile_metadata_management(self):
-        """Test advanced profile metadata management"""
-        metadata_profile = {
-            'name': 'metadata_test',
+    def test_profile_relationship_mapping(self):
+        """Test mapping relationships between profiles"""
+        # Create profiles with relationships
+        parent_profile = self.manager.create_profile('parent_model', {
+            'name': 'Parent Model',
             'version': '1.0.0',
             'settings': {
-                'basic_setting': 'value'
-            },
-            'metadata': {
-                'created_by': 'test_user',
-                'department': 'engineering',
-                'project': 'genesis_ai',
-                'tags': ['test', 'development', 'ai'],
-                'permissions': {
-                    'read': ['engineering', 'data_science'],
-                    'write': ['engineering'],
-                    'delete': ['admin']
+                'type': 'base_model',
+                'children': ['child_model_1', 'child_model_2']
+            }
+        })
+        
+        child_profile_1 = self.manager.create_profile('child_model_1', {
+            'name': 'Child Model 1',
+            'version': '1.0.0',
+            'settings': {
+                'type': 'derived_model',
+                'parent': 'parent_model',
+                'specialization': 'text_classification'
+            }
+        })
+        
+        child_profile_2 = self.manager.create_profile('child_model_2', {
+            'name': 'Child Model 2',
+            'version': '1.0.0',
+            'settings': {
+                'type': 'derived_model',
+                'parent': 'parent_model',
+                'specialization': 'sentiment_analysis'
+            }
+        })
+        
+        # Test relationship queries
+        def get_children(parent_id):
+            """Get child profiles of a parent"""
+            parent = self.manager.get_profile(parent_id)
+            if not parent:
+                return []
+            
+            child_ids = parent.data.get('settings', {}).get('children', [])
+            return [self.manager.get_profile(child_id) for child_id in child_ids if self.manager.get_profile(child_id)]
+            
+        def get_parent(child_id):
+            """Get parent profile of a child"""
+            child = self.manager.get_profile(child_id)
+            if not child:
+                return None
+            
+            parent_id = child.data.get('settings', {}).get('parent')
+            return self.manager.get_profile(parent_id) if parent_id else None
+            
+        # Test relationship queries
+        children = get_children('parent_model')
+        self.assertEqual(len(children), 2)
+        
+        parent = get_parent('child_model_1')
+        self.assertIsNotNone(parent)
+        self.assertEqual(parent.profile_id, 'parent_model')
+
+
+class TestProfileValidatorAdvancedScenarios(unittest.TestCase):
+    """Advanced validation scenarios for ProfileValidator"""
+    
+    def setUp(self):
+        """Set up test fixtures"""
+        self.validator = ProfileValidator()
+        
+    def test_conditional_validation_rules(self):
+        """Test validation rules that depend on other field values"""
+        conditional_scenarios = [
+            {
+                'name': 'version_dependent_settings',
+                'data': {
+                    'name': 'test_profile',
+                    'version': '2.0.0',
+                    'settings': {
+                        'feature_flags': {
+                            'new_feature': True,  # Only valid in v2.0+
+                            'legacy_support': False
+                        }
+                    }
                 },
-                'audit_trail': [
-                    {'action': 'created', 'timestamp': '2023-01-01T10:00:00Z', 'user': 'test_user'},
-                    {'action': 'updated', 'timestamp': '2023-01-02T11:00:00Z', 'user': 'test_user'}
-                ]
+                'should_validate': True
+            },
+            {
+                'name': 'type_dependent_fields',
+                'data': {
+                    'name': 'ai_model',
+                    'version': '1.0.0',
+                    'settings': {
+                        'type': 'language_model',
+                        'model_parameters': {  # Required for language models
+                            'temperature': 0.7,
+                            'max_tokens': 1000
+                        }
+                    }
+                },
+                'should_validate': True
+            },
+            {
+                'name': 'environment_dependent_config',
+                'data': {
+                    'name': 'production_config',
+                    'version': '1.0.0',
+                    'settings': {
+                        'environment': 'production',
+                        'debug_mode': False,  # Must be False in production
+                        'logging_level': 'INFO'
+                    }
+                },
+                'should_validate': True
+            }
+        ]
+        
+        for scenario in conditional_scenarios:
+            with self.subTest(scenario=scenario['name']):
+                result = ProfileValidator.validate_profile_data(scenario['data'])
+                self.assertEqual(result, scenario['should_validate'])
+                
+    def test_data_type_consistency_validation(self):
+        """Test validation of data type consistency within settings"""
+        type_consistency_scenarios = [
+            {
+                'name': 'numeric_ranges',
+                'data': {
+                    'name': 'numeric_test',
+                    'version': '1.0.0',
+                    'settings': {
+                        'temperature': 0.7,  # Should be float 0.0-1.0
+                        'max_tokens': 1000,  # Should be positive integer
+                        'batch_size': 32     # Should be positive integer
+                    }
+                },
+                'should_validate': True
+            },
+            {
+                'name': 'string_formats',
+                'data': {
+                    'name': 'string_test',
+                    'version': '1.0.0',
+                    'settings': {
+                        'api_endpoint': 'https://api.example.com',  # Should be valid URL
+                        'model_name': 'gpt-4',                      # Should be valid model name
+                        'environment': 'production'                 # Should be valid environment
+                    }
+                },
+                'should_validate': True
+            },
+            {
+                'name': 'collection_types',
+                'data': {
+                    'name': 'collection_test',
+                    'version': '1.0.0',
+                    'settings': {
+                        'capabilities': ['text_generation', 'reasoning'],  # Should be list of strings
+                        'model_weights': {'layer1': 0.5, 'layer2': 0.3},  # Should be dict of floats
+                        'training_epochs': [10, 20, 30]                    # Should be list of integers
+                    }
+                },
+                'should_validate': True
+            }
+        ]
+        
+        for scenario in type_consistency_scenarios:
+            with self.subTest(scenario=scenario['name']):
+                result = ProfileValidator.validate_profile_data(scenario['data'])
+                self.assertEqual(result, scenario['should_validate'])
+                
+    def test_business_logic_validation(self):
+        """Test validation of business logic constraints"""
+        business_logic_scenarios = [
+            {
+                'name': 'model_parameter_constraints',
+                'data': {
+                    'name': 'model_test',
+                    'version': '1.0.0',
+                    'settings': {
+                        'temperature': 0.7,     # Must be between 0.0 and 1.0
+                        'max_tokens': 1000,     # Must be positive
+                        'top_p': 0.9,          # Must be between 0.0 and 1.0
+                        'frequency_penalty': 0.0  # Must be between -2.0 and 2.0
+                    }
+                },
+                'should_validate': True
+            },
+            {
+                'name': 'workflow_dependency_validation',
+                'data': {
+                    'name': 'workflow_test',
+                    'version': '1.0.0',
+                    'settings': {
+                        'stages': ['extract', 'transform', 'load'],
+                        'stage_dependencies': {
+                            'transform': ['extract'],      # Transform depends on extract
+                            'load': ['transform']          # Load depends on transform
+                        }
+                    }
+                },
+                'should_validate': True
+            }
+        ]
+        
+        for scenario in business_logic_scenarios:
+            with self.subTest(scenario=scenario['name']):
+                result = ProfileValidator.validate_profile_data(scenario['data'])
+                self.assertEqual(result, scenario['should_validate'])
+
+
+class TestProfileBuilderAdvancedPatterns(unittest.TestCase):
+    """Advanced patterns and scenarios for ProfileBuilder"""
+    
+    def setUp(self):
+        """Set up test fixtures"""
+        self.builder = ProfileBuilder()
+        
+    def test_builder_plugin_pattern(self):
+        """Test plugin-style extensions to ProfileBuilder"""
+        def add_ai_model_settings(builder, model_type='gpt-4'):
+            """Plugin to add AI model specific settings"""
+            ai_settings = {
+                'ai_model': {
+                    'type': model_type,
+                    'parameters': {
+                        'temperature': 0.7,
+                        'max_tokens': 1000,
+                        'top_p': 0.9
+                    }
+                }
+            }
+            current_settings = builder.data.get('settings', {})
+            current_settings.update(ai_settings)
+            return builder.with_settings(current_settings)
+            
+        def add_security_settings(builder, security_level='high'):
+            """Plugin to add security settings"""
+            security_settings = {
+                'security': {
+                    'level': security_level,
+                    'encryption': 'AES-256',
+                    'authentication': {
+                        'required': True,
+                        'multi_factor': security_level == 'high'
+                    }
+                }
+            }
+            current_settings = builder.data.get('settings', {})
+            current_settings.update(security_settings)
+            return builder.with_settings(current_settings)
+            
+        def add_monitoring_settings(builder, monitoring_enabled=True):
+            """Plugin to add monitoring settings"""
+            monitoring_settings = {
+                'monitoring': {
+                    'enabled': monitoring_enabled,
+                    'metrics': ['latency', 'throughput', 'error_rate'],
+                    'alerting': {
+                        'enabled': True,
+                        'thresholds': {
+                            'latency_ms': 1000,
+                            'error_rate_percent': 1.0
+                        }
+                    }
+                }
+            }
+            current_settings = builder.data.get('settings', {})
+            current_settings.update(monitoring_settings)
+            return builder.with_settings(current_settings)
+            
+        # Test plugin composition
+        profile_data = (self.builder
+                       .with_name('plugin_test')
+                       .with_version('1.0.0'))
+        
+        # Apply plugins in sequence
+        profile_data = add_ai_model_settings(profile_data, 'gpt-4')
+        profile_data = add_security_settings(profile_data, 'high')
+        profile_data = add_monitoring_settings(profile_data, True)
+        
+        result = profile_data.build()
+        
+        # Verify all plugins were applied
+        self.assertEqual(result['name'], 'plugin_test')
+        self.assertIn('ai_model', result['settings'])
+        self.assertIn('security', result['settings'])
+        self.assertIn('monitoring', result['settings'])
+        self.assertEqual(result['settings']['ai_model']['type'], 'gpt-4')
+        self.assertEqual(result['settings']['security']['level'], 'high')
+        self.assertTrue(result['settings']['monitoring']['enabled'])
+        
+    def test_builder_configuration_inheritance(self):
+        """Test configuration inheritance patterns"""
+        # Base configuration
+        base_config = {
+            'common_settings': {
+                'logging': {
+                    'level': 'INFO',
+                    'format': 'json'
+                },
+                'networking': {
+                    'timeout': 30,
+                    'retries': 3
+                }
             }
         }
         
-        profile = self.manager.create_profile('metadata_test', metadata_profile)
-        
-        # Verify metadata is preserved
-        self.assertEqual(profile.data['metadata']['created_by'], 'test_user')
-        self.assertEqual(profile.data['metadata']['department'], 'engineering')
-        self.assertIn('test', profile.data['metadata']['tags'])
-        self.assertIn('engineering', profile.data['metadata']['permissions']['read'])
-        self.assertEqual(len(profile.data['metadata']['audit_trail']), 2)
-        
-        # Test metadata-based filtering
-        def filter_profiles_by_department(manager, department):
-            """Filter profiles by department metadata"""
-            results = []
-            for profile in manager.profiles.values():
-                meta_dept = profile.data.get('metadata', {}).get('department')
-                if meta_dept == department:
-                    results.append(profile)
-            return results
-        
-        def filter_profiles_by_tag(manager, tag):
-            """Filter profiles by metadata tag"""
-            results = []
-            for profile in manager.profiles.values():
-                tags = profile.data.get('metadata', {}).get('tags', [])
-                if tag in tags:
-                    results.append(profile)
-            return results
-        
-        # Test metadata filtering
-        eng_profiles = filter_profiles_by_department(self.manager, 'engineering')
-        self.assertEqual(len(eng_profiles), 1)
-        
-        dev_profiles = filter_profiles_by_tag(self.manager, 'development')
-        self.assertEqual(len(dev_profiles), 1)
-
-
-# Add parametrized tests for comprehensive edge case coverage
-@pytest.mark.parametrize("data_type,data_value,expected_behavior", [
-    ("string", "test_string", "accept"),
-    ("int", 42, "accept"),
-    ("float", 3.14, "accept"),
-    ("bool", True, "accept"),
-    ("list", [1, 2, 3], "accept"),
-    ("dict", {"key": "value"}, "accept"),
-    ("none", None, "accept"),
-    ("tuple", (1, 2, 3), "accept"),
-    ("set", {1, 2, 3}, "accept_or_convert"),
-    ("complex", complex(1, 2), "accept"),
-    ("bytes", b"binary", "accept_or_convert"),
-])
-def test_profile_data_type_handling_parametrized(data_type, data_value, expected_behavior):
-    """Parametrized test for various data types in profile settings"""
-    manager = ProfileManager()
-    
-    profile_data = {
-        'name': f'data_type_test_{data_type}',
-        'version': '1.0.0',
-        'settings': {
-            'test_field': data_value
+        # Environment-specific configurations
+        dev_config = {
+            'environment': 'development',
+            'debug_mode': True,
+            'logging': {
+                'level': 'DEBUG',  # Override base
+                'format': 'json'
+            }
         }
-    }
-    
-    try:
-        profile = manager.create_profile(f'test_{data_type}', profile_data)
         
-        if expected_behavior == "accept":
-            assert profile is not None
-            assert profile.data['settings']['test_field'] == data_value
-        elif expected_behavior == "accept_or_convert":
-            assert profile is not None
-            # Data might be converted but should be preserved in some form
-            assert 'test_field' in profile.data['settings']
+        prod_config = {
+            'environment': 'production',
+            'debug_mode': False,
+            'performance': {
+                'caching': True,
+                'compression': True
+            }
+        }
         
-    except Exception as e:
-        if expected_behavior == "accept":
-            pytest.fail(f"Unexpected error for {data_type}: {e}")
+        def create_environment_builder(env_config):
+            """Create builder with environment-specific configuration"""
+            builder = ProfileBuilder()
+            
+            # Merge base configuration
+            merged_settings = base_config.copy()
+            merged_settings.update(env_config)
+            
+            return builder.with_settings(merged_settings)
+            
+        # Test development environment
+        dev_builder = create_environment_builder(dev_config)
+        dev_profile = (dev_builder
+                      .with_name('dev_service')
+                      .with_version('1.0.0-dev')
+                      .build())
+        
+        self.assertEqual(dev_profile['settings']['environment'], 'development')
+        self.assertTrue(dev_profile['settings']['debug_mode'])
+        
+        # Test production environment
+        prod_builder = create_environment_builder(prod_config)
+        prod_profile = (prod_builder
+                       .with_name('prod_service')
+                       .with_version('1.0.0')
+                       .build())
+        
+        self.assertEqual(prod_profile['settings']['environment'], 'production')
+        self.assertFalse(prod_profile['settings']['debug_mode'])
+        self.assertTrue(prod_profile['settings']['performance']['caching'])
+        
+    def test_builder_validation_integration_advanced(self):
+        """Test advanced integration between ProfileBuilder and validation"""
+        def create_validated_builder():
+            """Create a builder that validates at each step"""
+            class ValidatedProfileBuilder(ProfileBuilder):
+                def with_name(self, name):
+                    if not name or not isinstance(name, str):
+                        raise ValueError("Name must be a non-empty string")
+                    return super().with_name(name)
+                    
+                def with_version(self, version):
+                    if not version or not isinstance(version, str):
+                        raise ValueError("Version must be a non-empty string")
+                    # Basic semantic version validation
+                    if not version.replace('.', '').replace('-', '').replace('+', '').replace('alpha', '').replace('beta', '').replace('rc', '').isalnum():
+                        raise ValueError("Invalid version format")
+                    return super().with_version(version)
+                    
+                def with_settings(self, settings):
+                    if not isinstance(settings, dict):
+                        raise ValueError("Settings must be a dictionary")
+                    return super().with_settings(settings)
+                    
+                def build(self):
+                    result = super().build()
+                    if not ProfileValidator.validate_profile_data(result):
+                        raise ValidationError("Built profile failed validation")
+                    return result
+            
+            return ValidatedProfileBuilder()
+            
+        # Test successful validation
+        validated_builder = create_validated_builder()
+        valid_profile = (validated_builder
+                        .with_name('validated_test')
+                        .with_version('1.0.0')
+                        .with_settings({'test': 'value'})
+                        .build())
+        
+        self.assertEqual(valid_profile['name'], 'validated_test')
+        
+        # Test validation failures
+        with self.assertRaises(ValueError):
+            create_validated_builder().with_name('')
+            
+        with self.assertRaises(ValueError):
+            create_validated_builder().with_name('test').with_version('')
+            
+        with self.assertRaises(ValueError):
+            create_validated_builder().with_name('test').with_version('1.0.0').with_settings('not_a_dict')
 
 
-@pytest.mark.parametrize("profile_count,operation_type,expected_performance", [
-    (100, "create", 1.0),
-    (1000, "create", 5.0),
-    (100, "read", 0.5),
-    (1000, "read", 2.0),
-    (100, "update", 1.0),
-    (1000, "update", 5.0),
-    (100, "delete", 0.5),
-    (1000, "delete", 2.0),
-])
-def test_profile_operation_performance_parametrized(profile_count, operation_type, expected_performance):
-    """Parametrized performance tests for various operations"""
-    import time
+class TestProfileSystemMetrics(unittest.TestCase):
+    """Test system metrics and monitoring capabilities"""
     
-    manager = ProfileManager()
+    def setUp(self):
+        """Set up test fixtures"""
+        self.manager = ProfileManager()
+        
+    def test_profile_usage_metrics(self):
+        """Test collection of profile usage metrics"""
+        # Create profiles with different usage patterns
+        profiles_data = [
+            {
+                'id': 'high_usage_profile',
+                'data': {
+                    'name': 'High Usage Profile',
+                    'version': '1.0.0',
+                    'settings': {'usage_tier': 'high'}
+                }
+            },
+            {
+                'id': 'low_usage_profile',
+                'data': {
+                    'name': 'Low Usage Profile',
+                    'version': '1.0.0',
+                    'settings': {'usage_tier': 'low'}
+                }
+            }
+        ]
+        
+        # Create profiles
+        for profile_data in profiles_data:
+            self.manager.create_profile(profile_data['id'], profile_data['data'])
+            
+        # Simulate usage tracking
+        def track_profile_access(profile_id):
+            """Simulate tracking profile access"""
+            profile = self.manager.get_profile(profile_id)
+            if profile:
+                access_count = profile.data.get('access_count', 0)
+                self.manager.update_profile(profile_id, {'access_count': access_count + 1})
+                return True
+            return False
+            
+        # Simulate different usage patterns
+        for _ in range(100):
+            track_profile_access('high_usage_profile')
+            
+        for _ in range(10):
+            track_profile_access('low_usage_profile')
+            
+        # Verify metrics
+        high_usage = self.manager.get_profile('high_usage_profile')
+        low_usage = self.manager.get_profile('low_usage_profile')
+        
+        self.assertEqual(high_usage.data['access_count'], 100)
+        self.assertEqual(low_usage.data['access_count'], 10)
+        
+    def test_profile_health_monitoring(self):
+        """Test profile health monitoring capabilities"""
+        # Create profiles with various health states
+        healthy_profile = self.manager.create_profile('healthy_profile', {
+            'name': 'Healthy Profile',
+            'version': '1.0.0',
+            'settings': {
+                'health_status': 'healthy',
+                'last_health_check': datetime.now().isoformat(),
+                'error_count': 0
+            }
+        })
+        
+        unhealthy_profile = self.manager.create_profile('unhealthy_profile', {
+            'name': 'Unhealthy Profile',
+            'version': '1.0.0',
+            'settings': {
+                'health_status': 'unhealthy',
+                'last_health_check': datetime.now().isoformat(),
+                'error_count': 5,
+                'errors': ['connection_timeout', 'validation_failed']
+            }
+        })
+        
+        def get_system_health():
+            """Get overall system health metrics"""
+            healthy_count = 0
+            unhealthy_count = 0
+            total_errors = 0
+            
+            for profile in self.manager.profiles.values():
+                status = profile.data.get('settings', {}).get('health_status', 'unknown')
+                if status == 'healthy':
+                    healthy_count += 1
+                elif status == 'unhealthy':
+                    unhealthy_count += 1
+                    
+                total_errors += profile.data.get('settings', {}).get('error_count', 0)
+                
+            return {
+                'healthy_profiles': healthy_count,
+                'unhealthy_profiles': unhealthy_count,
+                'total_errors': total_errors,
+                'health_score': healthy_count / (healthy_count + unhealthy_count) if (healthy_count + unhealthy_count) > 0 else 0
+            }
+            
+        health_metrics = get_system_health()
+        
+        self.assertEqual(health_metrics['healthy_profiles'], 1)
+        self.assertEqual(health_metrics['unhealthy_profiles'], 1)
+        self.assertEqual(health_metrics['total_errors'], 5)
+        self.assertEqual(health_metrics['health_score'], 0.5)
+
+
+class TestProfileSystemRecovery(unittest.TestCase):
+    """Test system recovery and resilience capabilities"""
     
-    # Setup profiles for operations that need them
-    if operation_type in ['read', 'update', 'delete']:
-        for i in range(profile_count):
-            manager.create_profile(f'perf_test_{i}', {
-                'name': f'profile_{i}',
+    def setUp(self):
+        """Set up test fixtures"""
+        self.manager = ProfileManager()
+        
+    def test_profile_corruption_recovery(self):
+        """Test recovery from profile data corruption"""
+        # Create a valid profile
+        profile = self.manager.create_profile('test_profile', {
+            'name': 'Test Profile',
+            'version': '1.0.0',
+            'settings': {'test': 'value'}
+        })
+        
+        # Simulate corruption by modifying internal data
+        original_data = profile.data.copy()
+        profile.data['corrupted_field'] = 'corrupted_value'
+        profile.data['settings'] = 'this_should_be_a_dict'
+        
+        def detect_corruption(profile):
+            """Detect if profile data is corrupted"""
+            try:
+                # Check if settings is a dict
+                if not isinstance(profile.data.get('settings'), dict):
+                    return True
+                
+                # Check if required fields exist
+                if not ProfileValidator.validate_profile_data(profile.data):
+                    return True
+                    
+                return False
+            except Exception:
+                return True
+                
+        def recover_profile(profile_id, backup_data):
+            """Recover profile from backup data"""
+            try:
+                self.manager.update_profile(profile_id, backup_data)
+                return True
+            except Exception:
+                return False
+                
+        # Test corruption detection
+        is_corrupted = detect_corruption(profile)
+        self.assertTrue(is_corrupted)
+        
+        # Test recovery
+        recovery_success = recover_profile('test_profile', original_data)
+        self.assertTrue(recovery_success)
+        
+        # Verify recovery
+        recovered_profile = self.manager.get_profile('test_profile')
+        self.assertEqual(recovered_profile.data['settings'], {'test': 'value'})
+        
+    def test_system_state_recovery(self):
+        """Test recovery of overall system state"""
+        # Create initial state
+        initial_profiles = [
+            ('profile_1', {'name': 'Profile 1', 'version': '1.0.0', 'settings': {'id': 1}}),
+            ('profile_2', {'name': 'Profile 2', 'version': '1.0.0', 'settings': {'id': 2}}),
+            ('profile_3', {'name': 'Profile 3', 'version': '1.0.0', 'settings': {'id': 3}})
+        ]
+        
+        for profile_id, profile_data in initial_profiles:
+            self.manager.create_profile(profile_id, profile_data)
+            
+        # Create system state snapshot
+        def create_system_snapshot():
+            """Create a snapshot of current system state"""
+            snapshot = {}
+            for profile_id, profile in self.manager.profiles.items():
+                snapshot[profile_id] = {
+                    'data': profile.data.copy(),
+                    'created_at': profile.created_at.isoformat(),
+                    'updated_at': profile.updated_at.isoformat()
+                }
+            return snapshot
+            
+        system_snapshot = create_system_snapshot()
+        
+        # Simulate system corruption
+        self.manager.profiles.clear()
+        self.assertEqual(len(self.manager.profiles), 0)
+        
+        # Restore from snapshot
+        def restore_from_snapshot(snapshot):
+            """Restore system state from snapshot"""
+            restored_count = 0
+            for profile_id, profile_info in snapshot.items():
+                try:
+                    self.manager.create_profile(profile_id, profile_info['data'])
+                    restored_count += 1
+                except Exception:
+                    pass
+            return restored_count
+            
+        restored_count = restore_from_snapshot(system_snapshot)
+        
+        # Verify restoration
+        self.assertEqual(restored_count, 3)
+        self.assertEqual(len(self.manager.profiles), 3)
+        
+        # Verify profile data integrity
+        for profile_id, expected_data in initial_profiles:
+            profile = self.manager.get_profile(profile_id)
+            self.assertIsNotNone(profile)
+            self.assertEqual(profile.data['name'], expected_data['name'])
+            self.assertEqual(profile.data['settings']['id'], expected_data['settings']['id'])
+
+
+# Add comprehensive import test for the actual implementation
+class TestActualImplementationImport(unittest.TestCase):
+    """Test importing and using the actual implementation"""
+    
+    def test_import_actual_genesis_profile(self):
+        """Test importing the actual genesis_profile module"""
+        try:
+            from app.ai_backend.genesis_profile import (
+                GenesisProfile,
+                ProfileManager,
+                ProfileValidator,
+                ProfileBuilder,
+                ProfileError,
+                ValidationError,
+                ProfileNotFoundError
+            )
+            
+            # Test basic functionality with actual implementation
+            manager = ProfileManager()
+            profile_data = {
+                'name': 'import_test',
                 'version': '1.0.0',
-                'settings': {'index': i}
-            })
-    
-    start_time = time.time()
-    
-    if operation_type == "create":
-        for i in range(profile_count):
-            manager.create_profile(f'create_test_{i}', {
-                'name': f'created_profile_{i}',
-                'version': '1.0.0',
-                'settings': {'index': i}
-            })
-    
-    elif operation_type == "read":
-        for i in range(profile_count):
-            manager.get_profile(f'perf_test_{i}')
-    
-    elif operation_type == "update":
-        for i in range(profile_count):
-            manager.update_profile(f'perf_test_{i}', {'settings': {'index': i, 'updated': True}})
-    
-    elif operation_type == "delete":
-        for i in range(profile_count):
-            manager.delete_profile(f'perf_test_{i}')
-    
-    end_time = time.time()
-    duration = end_time - start_time
-    
-    assert duration < expected_performance, f"{operation_type} operation took {duration}s, expected < {expected_performance}s"
-
-
-if __name__ == '__main__':
-    # Run the extended test suite
-    unittest.main(argv=[''], exit=False, verbosity=2)
-    pytest.main([__file__, '-v'])
+                'settings': {'test': True}
+            }
+            
+            # Test validation
+            is_valid = ProfileValidator.validate_profile_data(profile_data)
+            self.assertTrue(is_valid)
+            
+            # Test profile creation
+            profile = manager.create_profile('import_test', profile_data)
+            self.assertIsNotNone(profile)
+            self.assertEqual(profile.profile_id, 'import_test')
+            
+            # Test profile retrieval
+            retrieved = manager.get_profile('import_test')
+            self.assertEqual(retrieved.profile_id, 'import_test')
+            
+            # Test profile builder
+            builder = ProfileBuilder()
+            built_data = (builder
+                         .with_name('builder_test')
+                         .with_version('1.0.0')
+                         .with_settings({'built': True})
+                         .build())
+            
+            self.assertEqual(built_data['name'], 'builder_test')
+            self.assertTrue(built_data['settings']['built'])
+            
+        except ImportError as e:
+            # If actual implementation is not available, skip this test
+            self.skipTest(f"Actual implementation not available: {e}")
+            
+    def test_mock_vs_actual_compatibility(self):
+        """Test compatibility between mock and actual implementation"""
+        try:
+            # Try to import actual implementation
+            from app.ai_backend.genesis_profile import ProfileManager as ActualProfileManager
+            
+            # Test that mock and actual have same interface
+            actual_manager = ActualProfileManager()
+            mock_manager = ProfileManager()  # Mock from this file
+            
+            # Test same methods exist
+            self
