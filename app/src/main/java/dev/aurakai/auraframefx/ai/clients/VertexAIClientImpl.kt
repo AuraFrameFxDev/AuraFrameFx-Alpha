@@ -64,11 +64,11 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates image analysis and returns a stub response referencing the given prompt.
+     * Simulates image analysis and returns a placeholder response referencing the provided prompt.
      *
-     * @param imageData The image data to be analyzed.
-     * @param prompt The instructions or context for the simulated analysis.
-     * @return A placeholder string indicating simulated analysis for the specified prompt.
+     * @param imageData The image data to analyze.
+     * @param prompt The prompt or instructions for the simulated analysis.
+     * @return A stub string indicating simulated analysis for the given prompt.
      */
     override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String {
         delay(100) // Simulate API call
@@ -76,18 +76,18 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Stub method for initializing creative AI models; performs no operation.
+     * Stub implementation for initializing creative AI models; does nothing.
      *
-     * Intended for use in development or testing environments where actual model initialization is not required.
+     * Intended for use in development or testing environments where actual model initialization is unnecessary.
      */
     override suspend fun initializeCreativeModels() {
         // Stub implementation
     }
     
     /**
-     * Simulates content generation by returning a placeholder string referencing the provided prompt.
+     * Simulates content generation by returning a placeholder string referencing the input prompt.
      *
-     * @param prompt The input prompt for which to generate simulated content.
+     * @param prompt The prompt to include in the simulated content.
      * @return A stub string containing the prompt.
      */
     override suspend fun generateContent(prompt: String): String? {
@@ -96,9 +96,9 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates code generation by returning a placeholder code comment referencing the given specification and language.
+     * Returns a placeholder code comment referencing the provided specification and programming language.
      *
-     * Intended for development or testing; does not produce actual code output.
+     * This stub simulates code generation for development or testing purposes and does not generate actual code.
      *
      * @param specification Description of the code to generate.
      * @param language Programming language for the generated code.
@@ -111,9 +111,9 @@ class VertexAIClientImpl : VertexAIClient {
     }
     
     /**
-     * Simulates a connection check to Vertex AI, always indicating a successful connection.
+     * Simulates a connection check to Vertex AI and always returns `true`.
      *
-     * @return `true` to represent a successful connection in this stub implementation.
+     * @return `true` to indicate a successful connection in this stub implementation.
      */
     override suspend fun validateConnection(): Boolean {
         return true // Stub always returns true
@@ -122,16 +122,16 @@ class VertexAIClientImpl : VertexAIClient {
     /**
      * Initializes the Vertex AI client.
      *
-     * This stub implementation performs no action and is provided to fulfill interface requirements.
+     * This stub implementation does nothing and exists solely to satisfy interface requirements.
      */
     fun initialize() {
         // Stub implementation
     }
     
     /**
-     * Validates that the prompt string is not blank.
+     * Checks that the prompt string is not blank.
      *
-     * @param prompt The prompt string to check.
+     * @param prompt The prompt string to validate.
      * @throws IllegalArgumentException if the prompt is blank.
      */
     private fun validatePrompt(prompt: String) {

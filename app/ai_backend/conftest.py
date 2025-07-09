@@ -19,7 +19,7 @@ def mock_api_key():
 @pytest.fixture
 def mock_base_url():
     """
-    Provides a static mock base URL for the Genesis API for use in integration tests.
+    Returns a static mock base URL representing the Genesis API endpoint for use in integration tests.
     
     Returns:
         str: The mock Genesis API endpoint URL.
@@ -29,9 +29,9 @@ def mock_base_url():
 @pytest.fixture
 def sample_api_response():
     """
-    Return a mock dictionary simulating a successful Genesis API chat completion response.
+    Return a mock dictionary representing a successful Genesis API chat completion response.
     
-    The returned dictionary includes response metadata, a list of choices with an assistant message, a finish reason, and token usage statistics. Useful for tests that require a realistic Genesis API response structure.
+    The dictionary includes metadata, a list of choices with an assistant message, a finish reason, and token usage statistics. Intended for use in tests requiring a realistic Genesis API response structure.
     
     Returns:
         dict: Simulated Genesis API chat completion response.
@@ -80,9 +80,9 @@ def sample_error_response():
 @pytest.fixture(autouse=True)
 def mock_environment():
     """
-    Automatically sets up and cleans up Genesis API environment variables for each test.
+    Automatically sets and removes Genesis API environment variables before and after each test.
     
-    This autouse pytest fixture assigns test values to the `GENESIS_API_KEY` and `GENESIS_BASE_URL` environment variables before each test runs, and removes them after the test completes to maintain test isolation.
+    This autouse pytest fixture ensures that `GENESIS_API_KEY` and `GENESIS_BASE_URL` are set to test values at the start of every test and are cleaned up afterward, maintaining isolation between tests.
     """
     os.environ["GENESIS_API_KEY"] = "test_env_key"
     os.environ["GENESIS_BASE_URL"] = "https://api.genesis.test"
