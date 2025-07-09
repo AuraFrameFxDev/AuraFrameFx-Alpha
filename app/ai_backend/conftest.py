@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 @pytest.fixture
 def mock_api_key():
     """
-    Return a static mock API key string for use in Genesis API integration tests.
+    Provides a static mock API key string for use in Genesis API integration tests.
     
     Returns:
         str: The mock API key value.
@@ -29,12 +29,12 @@ def mock_base_url():
 @pytest.fixture
 def sample_api_response():
     """
-    Return a mock dictionary simulating a successful Genesis API chat completion response.
+    Return a dictionary that mimics a successful Genesis API chat completion response.
     
-    The returned dictionary includes response metadata, a list of choices with an assistant message, a finish reason, and token usage statistics. Useful for tests that require a realistic Genesis API response structure.
+    The mock response includes metadata, a list of choices with an assistant message and finish reason, and token usage statistics. Intended for use in tests that require a realistic Genesis API response format.
     
     Returns:
-        dict: Simulated Genesis API chat completion response.
+        dict: A simulated Genesis API chat completion response.
     """
     return {
         "id": "test_response_id",
@@ -61,12 +61,12 @@ def sample_api_response():
 @pytest.fixture
 def sample_error_response():
     """
-    Return a mock error response dictionary simulating a Genesis API error.
+    Return a dictionary simulating an error response from the Genesis API.
     
-    The dictionary includes an `error` object with fields for error type, message, parameter, and code, suitable for testing error handling in Genesis API integration tests.
+    The returned dictionary contains an `error` object with fields for error type, message, parameter, and code, useful for testing error handling scenarios in Genesis API integrations.
     
     Returns:
-        dict: Simulated Genesis API error response.
+        dict: Mock Genesis API error response.
     """
     return {
         "error": {
