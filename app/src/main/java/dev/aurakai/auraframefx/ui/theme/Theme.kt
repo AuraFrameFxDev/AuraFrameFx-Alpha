@@ -53,16 +53,14 @@ val LocalMoodGlow = compositionLocalOf { Color.Transparent }
 val LocalMoodState = compositionLocalOf { Emotion.NEUTRAL }
 
 /**
- * Applies the AuraFrameFX theme to the provided composable content.
+ * Applies the AuraFrameFX theme and mood-based dynamic theming to the given composable content.
  *
- * Chooses a color scheme (dark, light, or dynamic based on device support and parameters), 
- * updates the status bar color and icon appearance to match the theme, supplies the app's typography,
- * and integrates Aura's mood-based dynamic theming system.
+ * Selects a color scheme (dark, light, or dynamic based on device support and parameters), updates the system status bar appearance, and provides mood-driven glow and emotion state to the composition. Integrates Aura's mood system for adaptive UI theming.
  *
- * @param darkTheme Whether to use the dark theme. Defaults to the system setting.
- * @param dynamicColor Whether to use dynamic color schemes on supported devices (Android 12+). Defaults to true.
- * @param moodViewModel The ViewModel managing Aura's mood state. Automatically injected.
- * @param content The composable content to which the theme is applied.
+ * @param darkTheme If true, uses the dark theme; otherwise, uses the light theme. Defaults to the system setting.
+ * @param dynamicColor If true, enables dynamic color schemes on supported devices (Android 12+). Defaults to true.
+ * @param moodViewModel ViewModel managing the current mood state.
+ * @param content The composable content to which the theme and mood context are applied.
  */
 @Composable
 fun AuraFrameFXTheme(
@@ -107,7 +105,9 @@ fun AuraFrameFXTheme(
 }
 
 /**
- * Get the mood-appropriate glow color based on Aura's current emotion
+ * Returns a color for the mood glow effect based on the given emotion, intensity, and color scheme.
+ *
+ * The color and its transparency are determined by the emotion and intensity, with a fallback to the primary color of the provided color scheme.
  */
 private fun getMoodGlowColor(
     emotion: Emotion,
