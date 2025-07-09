@@ -20,9 +20,10 @@ extern "C" {
 JNIEXPORT jstring
 
 JNICALL
-Java_com_example_app_language_LanguageIdentifier_nativeInitialize(
+Java_dev_aurakai_auraframefx_core_NativeLib_nativeInitialize(
         JNIEnv *env,
-        jobject /* this */,
+        jobject /* this */, // Should be jclass if called from companion object static context,
+                            // or jobject if from an instance. For NativeLib companion, it's effectively static.
         jstring modelPath) {
     const char *path = env->GetStringUTFChars(modelPath, nullptr);
     if (path == nullptr) {
@@ -52,10 +53,10 @@ Java_com_example_app_language_LanguageIdentifier_nativeInitialize(
 JNIEXPORT jstring
 
 JNICALL
-Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
+Java_dev_aurakai_auraframefx_core_NativeLib_nativeDetectLanguage(
         JNIEnv *env,
         jobject /* this */,
-        jlong handle,
+        jlong handle, // This 'handle' parameter might need reconsideration if nativeInitialize doesn't return one
         jstring text) {
     if (text == nullptr) {
         return env->NewStringUTF("und");
@@ -158,11 +159,10 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
  * Currently, this function does not perform any resource deallocation, as the implementation is stateless and does not allocate resources per handle. Intended for future use if resource management becomes necessary.
  */
 JNIEXPORT void JNICALL
-Java_com_example_app_language_LanguageIdentifier_nativeRelease(
-        JNIEnv
-        *env,
+Java_dev_aurakai_auraframefx_core_NativeLib_nativeRelease(
+        JNIEnv *env,
         jobject /* this */,
-        jlong handle
+        jlong handle // This 'handle' parameter might need reconsideration
 ) {
     // Clean up resources if needed.
     // In the current implementation, nativeInitialize does not allocate any specific resources
@@ -183,9 +183,9 @@ Java_com_example_app_language_LanguageIdentifier_nativeRelease(
 JNIEXPORT jstring
 
 JNICALL
-Java_com_example_app_language_LanguageIdentifier_nativeGetVersion(
+Java_dev_aurakai_auraframefx_core_NativeLib_nativeGetVersion(
         JNIEnv *env,
-        jclass /* clazz */) {
+        jclass /* clazz */) { // jclass is correct for a static/companion object method
     return env->NewStringUTF("1.2.0"); // Standardized version
 }
 

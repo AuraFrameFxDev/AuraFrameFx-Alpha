@@ -83,6 +83,58 @@ fun SettingsScreen() {
                 onCheckedChange = { privacyEnabled = it }
             )
         }
+
+        Spacer(modifier = Modifier.height(AppDimensions.spacing_medium))
+
+        IncantationSettingsCard()
+    }
+}
+
+@Composable
+private fun IncantationSettingsCard() {
+    var wakeWordEnabled by remember { mutableStateOf(false) }
+    var customWakeWord by remember { mutableStateOf("Aura Activate") } // Default wake-word
+
+    SettingsCard(
+        title = "Incantation & Voice", // TODO: Use stringResource
+        description = "Configure the \"Aura Activate\" wake-word and voice settings." // TODO: Use stringResource
+    ) {
+        Column(horizontalAlignment = Alignment.End) {
+            Switch(
+                checked = wakeWordEnabled,
+                onCheckedChange = { wakeWordEnabled = it }
+            )
+        }
+    }
+    // Add TextField and Button below the card, or integrate more deeply if design allows
+    // For simplicity, adding below the card for now.
+    // A more integrated approach might pass more complex content to SettingsCard's content lambda.
+    if (wakeWordEnabled) {
+        Spacer(modifier = Modifier.height(AppDimensions.spacing_small))
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(AppDimensions.spacing_medium)) {
+                androidx.compose.material3.OutlinedTextField(
+                    value = customWakeWord,
+                    onValueChange = { customWakeWord = it },
+                    label = { Text("Custom Wake-Word") }, // TODO: Use stringResource
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(AppDimensions.spacing_small))
+                androidx.compose.material3.Button(
+                    onClick = {
+                        // TODO: Implement save logic for the wake-word
+                        // This would typically involve calling a ViewModel method
+                        // which then saves to DataStore or other persistence.
+                        // For now, it just updates local state if needed, but state is already updated.
+                        println("Wake-word saved: $customWakeWord (Enabled: $wakeWordEnabled)")
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Save Wake-Word") // TODO: Use stringResource
+                }
+            }
+        }
     }
 }
 

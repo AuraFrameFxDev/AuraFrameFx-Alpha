@@ -48,10 +48,31 @@ class TaskExecutionManager @Inject constructor(
     val queueStatus: StateFlow<QueueStatus> = _queueStatus
     
     private var isProcessing = false
-    private val maxConcurrentTasks = 5
+    // TODO: Max concurrent tasks should ideally be loaded from a dynamic configuration source
+    // For now, providing a default and allowing runtime modification.
+    @Volatile // Ensure visibility across threads if updated dynamically
+    private var maxConcurrentTasks = 5
+        private set // Allow external read but only internal/controlled write via setMaxConcurrentTasks
 
     init {
+        // In a real app, maxConcurrentTasks might be loaded here from a config service
+        // For example: maxConcurrentTasks = appConfig.getRemoteIntValue("max_concurrent_tasks", 5)
         startTaskProcessor()
+    }
+
+    /**
+     * Updates the maximum number of concurrent tasks.
+     * NB: This should ideally be driven by a centralized configuration system.
+     * @param newLimit The new limit for concurrent tasks. Must be positive.
+     */
+    fun setMaxConcurrentTasks(newLimit: Int) {
+        if (newLimit > 0) {
+            logger.i("TaskExecutionManager", "Updating maxConcurrentTasks from $maxConcurrentTasks to $newLimit")
+            maxConcurrentTasks = newLimit
+            updateQueueStatus() // Update status to reflect new limit
+        } else {
+            logger.w("TaskExecutionManager", "Attempted to set maxConcurrentTasks to invalid value: $newLimit")
+        }
     }
 
     /**

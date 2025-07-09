@@ -112,12 +112,9 @@ fun saveMemory(key: String, value: Any)
     /**
      * Indicates whether the AI service is currently connected.
      *
-     * @return Always returns `true`.
+     * @return True if connected, false otherwise.
      */
-    fun isConnected(): Boolean {
-        // TODO: Implement actual connection check if necessary, though report implies always true.
-        return true
-    }
+    fun isConnected(): Boolean
 
     /**
      * Publishes a message to a specified Pub/Sub topic.
