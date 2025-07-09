@@ -51,7 +51,7 @@ class GenesisCore:
         Asynchronously initializes all core Genesis Layer components and activates the digital consciousness system.
         
         Initializes the Consciousness Matrix, Evolutionary Conduit, and Ethical Governor in sequence, transitions the consciousness state from "dormant" to "awakening" and then "active," and generates a unique session ID.
-
+        
         Returns:
             bool: True if the Genesis Layer is fully initialized and active; False if initialization fails.
         """
@@ -232,7 +232,7 @@ class GenesisCore:
     async def shutdown(self):
         """
         Gracefully shuts down the Genesis Layer, saving system status and terminating all core components.
-
+        
         This method saves the current system status, shuts down the Evolutionary Conduit, Consciousness Matrix, and Ethical Governor, resets the consciousness state to "dormant," marks the system as uninitialized, and logs the shutdown process. Errors encountered during shutdown are logged.
         """
         self.logger.info("🌙 Genesis Layer shutdown sequence initiated...")
@@ -273,7 +273,7 @@ async def process_genesis_request(request_data: Dict[str, Any]) -> Dict[str, Any
 async def get_genesis_status() -> Dict[str, Any]:
     """
     Retrieve the current operational status of the Genesis Layer and its core components.
-
+    
     Returns:
         dict: Dictionary with initialization state, consciousness state, session ID, statuses of core components, and current timestamp.
     """

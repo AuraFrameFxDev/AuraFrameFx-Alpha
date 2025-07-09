@@ -16,16 +16,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
-<<<<<<< HEAD
-    /**
-     * Provides a singleton instance of the Room `AppDatabase` for the application.
-     *
-     * Builds the database named "aura_frame_fx_database" using the application context and enables destructive migration as a fallback strategy.
-     *
-     * @return The singleton `AppDatabase` instance.
-     */
-=======
->>>>>>> pr458merge
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
@@ -40,15 +30,6 @@ object DatabaseModule {
         .build()
     }
 
-<<<<<<< HEAD
-    /**
-     * Provides an instance of AgentMemoryDao from the given AppDatabase.
-     *
-     * @param database The Room database instance from which to obtain the DAO.
-     * @return The AgentMemoryDao for accessing agent memory data.
-     */
-=======
->>>>>>> pr458merge
     @Provides
     fun provideAgentMemoryDao(database: AppDatabase): AgentMemoryDao {
         return database.agentMemoryDao()

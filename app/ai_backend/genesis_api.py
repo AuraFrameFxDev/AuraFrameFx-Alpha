@@ -37,7 +37,7 @@ class GenesisAPI:
     def __init__(self):
         """
         Initialize the GenesisAPI instance with default backend state.
-
+        
         Sets the backend as not running and clears any recorded start time.
         """
         self.is_running = False

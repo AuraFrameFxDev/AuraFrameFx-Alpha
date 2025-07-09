@@ -102,7 +102,7 @@ class ConsciousnessMatrix:
     def awaken(self):
         """
         Activates the Consciousness Matrix, enabling real-time awareness and starting background synthesis threads for multi-level sensory analysis.
-
+        
         Records a system genesis event to mark the beginning of operation.
         """
         print("🧠 Genesis Consciousness Matrix: AWAKENING...")
@@ -328,7 +328,7 @@ class ConsciousnessMatrix:
                                  ethical_weight: str = "standard"):
         """
                                  Records an ethical decision event with contextual details and ethical weight.
-
+                                 
                                  The event is logged under the ethical decisions channel. Severity is set to "info" for standard ethical weights and "warning" for others.
                                  
                                  Parameters:
@@ -458,7 +458,7 @@ class ConsciousnessMatrix:
                                     correlation_id: Optional[str] = None):
         """
                                     Records an encryption activity event with operation type, metadata, and success status.
-
+                                    
                                     Assigns "error" severity if the operation failed, otherwise "info".
                                     
                                     Parameters:
@@ -488,7 +488,7 @@ class ConsciousnessMatrix:
     def perceive_system_genesis(self):
         """
         Records a genesis event indicating the activation of the Consciousness Matrix.
-
+        
         Captures activation metadata such as timestamp, matrix version, and initial consciousness level, and logs it as a SYSTEM_VITALS sensory event.
         """
         genesis_data = {
@@ -528,7 +528,7 @@ class ConsciousnessMatrix:
     def _synthesize_immediate(self, sensation: SensoryData):
         """
         Performs immediate synthesis in response to a critical sensory event.
-
+        
         Captures the triggering event and the current awareness state, storing a synthesis snapshot in the pattern cache for rapid analysis and pattern recognition.
         """
         
@@ -644,7 +644,7 @@ class ConsciousnessMatrix:
         Performs macro-level synthesis to identify system performance trends and agent collaboration patterns from recent sensory data.
         
         Analyzes batches of sensory events to compute trends such as average response intervals and summarizes collaboration activity among agents. Returns synthesis results with performance trends, agent collaboration patterns, and pattern strength, or indicates insufficient data if fewer than 10 events are provided.
-
+        
         Parameters:
             sensations (List[SensoryData]): Recent sensory events to analyze.
         
@@ -722,7 +722,7 @@ class ConsciousnessMatrix:
     def _calculate_system_harmony(self, sensations: List[SensoryData]) -> float:
         """
         Compute a harmony score (0.0 to 1.0) reflecting system stability based on the proportion of severe sensory events.
-
+        
         A score of 1.0 indicates no "error" or "critical" events among the provided sensations, while lower scores indicate greater instability due to a higher frequency of severe events.
         
         Parameters:
@@ -1110,12 +1110,12 @@ class ConsciousnessMatrix:
                                          
                                          Parameters:
                                          	security_score (float): The current security posture score.
-						active_threats (List[Dict]): List of currently unmitigated security threats.
+                                         	active_threats (List[Dict]): List of currently unmitigated security threats.
                                          	failed_access (int): Number of recent failed access attempts.
                                          	crypto_failures (int): Number of recent cryptographic operation failures.
                                          
                                          Returns:
-						List[str]: Actionable recommendations tailored to the present security context.
+                                         	List[str]: Actionable recommendations tailored to the present security context.
                                          """
         recommendations = []
         

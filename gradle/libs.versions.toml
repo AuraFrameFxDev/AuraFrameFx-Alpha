@@ -1,7 +1,6 @@
 [versions]
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
 agp = "8.11.0"
-generativeai = "0.9.0"
 kotlin = "2.2.0"
 ksp = "2.2.0-2.0.2"
 hilt = "2.56.2"
@@ -32,9 +31,9 @@ firebaseConfigKtx = "22.1.2"
 firebaseStorageKtx = "21.0.2"
 kotlinxCoroutines = "1.10.2"
 kotlinxSerializationJson = "1.9.0"
-kotlinxDatetime = "0.7.1"
+kotlinxDatetime = "0.7.0"
 retrofit = "3.0.0"
-okhttp = "5.1.0"
+okhttp = "5.0.0"
 converterGson = "3.0.0"
 retrofitKotlinxSerializationConverter = "1.0.0"
 coilCompose = "2.7.0"
@@ -55,11 +54,6 @@ toolchainsFoojayResolver = "1.0.0"
 
 [libraries]
 # Hilt (Core & Testing)
-androidxComposeUiUiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview" }
-androidxUiTooling = { module = "androidx.compose.ui:ui-tooling" }
-animation = { module = "androidx.compose.animation:animation" }
-foundation = { module = "androidx.compose.foundation:foundation" }
-generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hiltCompiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" } # KSP
 hiltNavigationCompose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
@@ -117,7 +111,6 @@ kotlinxSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serializati
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
 # Network
-material3 = { module = "androidx.compose.material3:material3" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 converterGson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 retrofitKotlinxSerializationConverter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofitKotlinxSerializationConverter" }
@@ -139,11 +132,6 @@ androidxTestExtJunit = { module = "androidx.test.ext:junit", version.ref = "andr
 espressoCore = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
 mockkAndroid = { module = "io.mockk:mockk-android", version.ref = "mockk" }
 mockkAgent = { module = "io.mockk:mockk-agent-jvm", version.ref = "mockk" }
-ui = { module = "androidx.compose.ui:ui" }
-uiTestJunit4 = { module = "androidx.compose.ui:ui-test-junit4" }
-uiTestManifest = { module = "androidx.compose.ui:ui-test-manifest" }
-uiTooling = { module = "androidx.compose.ui:ui-tooling" }
-uiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

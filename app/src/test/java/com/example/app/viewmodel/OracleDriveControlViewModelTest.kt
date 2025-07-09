@@ -433,11 +433,8 @@ class OracleDriveControlViewModelTest {
         
         // When
         viewModel.updateSpeed(infiniteSpeed)
-<<<<<<< HEAD
-        testDispa
-=======
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockErrorObserver.onChanged("Speed exceeds maximum limit: $infiniteSpeed") }
         coVerify(exactly = 0) { mockRepository.updateSpeed(any()) }
@@ -447,11 +444,11 @@ class OracleDriveControlViewModelTest {
     fun `should handle negative infinite speed values`() = runTest {
         // Given
         val negativeInfiniteSpeed = Double.NEGATIVE_INFINITY
-
+        
         // When
         viewModel.updateSpeed(negativeInfiniteSpeed)
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockErrorObserver.onChanged("Invalid speed value: $negativeInfiniteSpeed") }
         coVerify(exactly = 0) { mockRepository.updateSpeed(any()) }
@@ -462,11 +459,11 @@ class OracleDriveControlViewModelTest {
         // Given
         val maxValidSpeed = 99.9
         coEvery { mockRepository.updateSpeed(maxValidSpeed) } returns Result.success(Unit)
-
+        
         // When
         viewModel.updateSpeed(maxValidSpeed)
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         coVerify { mockRepository.updateSpeed(maxValidSpeed) }
     }
@@ -476,11 +473,11 @@ class OracleDriveControlViewModelTest {
         // Given
         val minValidSpeed = 0.1
         coEvery { mockRepository.updateSpeed(minValidSpeed) } returns Result.success(Unit)
-
+        
         // When
         viewModel.updateSpeed(minValidSpeed)
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         coVerify { mockRepository.updateSpeed(minValidSpeed) }
     }
@@ -492,7 +489,7 @@ class OracleDriveControlViewModelTest {
         directions.forEach { direction ->
             coEvery { mockRepository.changeDirection(direction) } returns Result.success(Unit)
         }
-
+        
         // When & Then
         directions.forEach { direction ->
             viewModel.changeDirection(direction)
@@ -506,11 +503,11 @@ class OracleDriveControlViewModelTest {
         // Given
         val timeoutException = java.util.concurrent.TimeoutException("Operation timed out")
         coEvery { mockRepository.startDrive(any()) } returns Result.failure(timeoutException)
-
+        
         // When
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockErrorObserver.onChanged("Operation timed out") }
         verify { mockStateObserver.onChanged(DriveState.ERROR) }
@@ -521,11 +518,11 @@ class OracleDriveControlViewModelTest {
         // Given
         val interruptedException = InterruptedException("Operation interrupted")
         coEvery { mockRepository.pauseDrive() } returns Result.failure(interruptedException)
-
+        
         // When
         viewModel.pauseDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockErrorObserver.onChanged("Operation interrupted") }
         verify { mockStateObserver.onChanged(DriveState.ERROR) }
@@ -536,11 +533,11 @@ class OracleDriveControlViewModelTest {
         // Given
         val illegalStateException = IllegalStateException("Invalid state transition")
         coEvery { mockRepository.resumeDrive() } returns Result.failure(illegalStateException)
-
+        
         // When
         viewModel.resumeDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockErrorObserver.onChanged("Invalid state transition") }
         verify { mockStateObserver.onChanged(DriveState.ERROR) }
@@ -551,11 +548,11 @@ class OracleDriveControlViewModelTest {
         // Given
         val illegalArgumentException = IllegalArgumentException("Invalid argument provided")
         coEvery { mockRepository.updateSpeed(any()) } returns Result.failure(illegalArgumentException)
-
+        
         // When
         viewModel.updateSpeed(50.0)
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockErrorObserver.onChanged("Invalid argument provided") }
     }
@@ -565,11 +562,11 @@ class OracleDriveControlViewModelTest {
         // Given
         every { mockNetworkManager.isConnected() } returns false
         coEvery { mockRepository.startDrive(any()) } returns Result.failure(Exception("Network unavailable"))
-
+        
         // When
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockErrorObserver.onChanged("Network unavailable") }
         verify { mockStateObserver.onChanged(DriveState.ERROR) }
@@ -580,20 +577,20 @@ class OracleDriveControlViewModelTest {
         // Given
         val mockSecondStateObserver: Observer<DriveState> = mockk(relaxed = true)
         val mockSecondErrorObserver: Observer<String> = mockk(relaxed = true)
-
+        
         viewModel.driveState.observeForever(mockSecondStateObserver)
         viewModel.errorMessage.observeForever(mockSecondErrorObserver)
-
+        
         coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
-
+        
         // When
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockStateObserver.onChanged(DriveState.DRIVING) }
         verify { mockSecondStateObserver.onChanged(DriveState.DRIVING) }
-
+        
         // Cleanup
         viewModel.driveState.removeObserver(mockSecondStateObserver)
         viewModel.errorMessage.removeObserver(mockSecondErrorObserver)
@@ -615,13 +612,13 @@ class OracleDriveControlViewModelTest {
             callOrder.add("changeDirection")
             Result.success(Unit)
         }
-
+        
         // When
         viewModel.startDrive()
         viewModel.updateSpeed(25.0)
         viewModel.changeDirection(Direction.FORWARD)
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         coVerify(ordering = Ordering.ORDERED) {
             mockRepository.startDrive(any())
@@ -636,11 +633,11 @@ class OracleDriveControlViewModelTest {
         coEvery { mockRepository.startDrive(any()) } returns Result.failure(Exception("Initial error"))
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // When
         viewModel.reset()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockStateObserver.onChanged(DriveState.ERROR) }
         verify { mockStateObserver.onChanged(DriveState.IDLE) }
@@ -652,11 +649,11 @@ class OracleDriveControlViewModelTest {
         coEvery { mockRepository.emergencyStop() } returns Result.success(Unit)
         viewModel.emergencyStop()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // When
         viewModel.reset()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockStateObserver.onChanged(DriveState.EMERGENCY_STOP) }
         verify { mockStateObserver.onChanged(DriveState.IDLE) }
@@ -666,11 +663,11 @@ class OracleDriveControlViewModelTest {
     fun `should handle invalid state transitions gracefully`() = runTest {
         // Given - trying to resume without being paused
         coEvery { mockRepository.resumeDrive() } returns Result.failure(IllegalStateException("Cannot resume from idle state"))
-
+        
         // When
         viewModel.resumeDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockErrorObserver.onChanged("Cannot resume from idle state") }
         verify { mockStateObserver.onChanged(DriveState.ERROR) }
@@ -680,11 +677,11 @@ class OracleDriveControlViewModelTest {
     fun `should handle pause from idle state gracefully`() = runTest {
         // Given - trying to pause from idle state
         coEvery { mockRepository.pauseDrive() } returns Result.failure(IllegalStateException("Cannot pause from idle state"))
-
+        
         // When
         viewModel.pauseDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockErrorObserver.onChanged("Cannot pause from idle state") }
         verify { mockStateObserver.onChanged(DriveState.ERROR) }
@@ -694,12 +691,12 @@ class OracleDriveControlViewModelTest {
     fun `should handle double start drive calls correctly`() = runTest {
         // Given
         coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
-
+        
         // When
         viewModel.startDrive()
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then - should only call repository once due to state management
         coVerify(exactly = 2) { mockRepository.startDrive(any()) }
         verify { mockStateObserver.onChanged(DriveState.DRIVING) }
@@ -710,15 +707,15 @@ class OracleDriveControlViewModelTest {
         // Given
         coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
         coEvery { mockRepository.stopDrive() } returns Result.success(Unit)
-
+        
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // When
         viewModel.stopDrive()
         viewModel.stopDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         coVerify(exactly = 2) { mockRepository.stopDrive() }
         verify { mockStateObserver.onChanged(DriveState.IDLE) }
@@ -729,11 +726,11 @@ class OracleDriveControlViewModelTest {
         // Given
         val verySmallSpeed = 0.001
         coEvery { mockRepository.updateSpeed(verySmallSpeed) } returns Result.success(Unit)
-
+        
         // When
         viewModel.updateSpeed(verySmallSpeed)
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         coVerify { mockRepository.updateSpeed(verySmallSpeed) }
     }
@@ -745,22 +742,22 @@ class OracleDriveControlViewModelTest {
         coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
         coEvery { mockRepository.pauseDrive() } returns Result.success(Unit)
         coEvery { mockRepository.updateSpeed(speed) } returns Result.success(Unit)
-
+        
         // When - updating speed while driving
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
         viewModel.updateSpeed(speed)
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         coVerify { mockRepository.updateSpeed(speed) }
-
+        
         // When - updating speed while paused
         viewModel.pauseDrive()
         testDispatcher.scheduler.advanceUntilIdle()
         viewModel.updateSpeed(speed)
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         coVerify(exactly = 2) { mockRepository.updateSpeed(speed) }
     }
@@ -771,13 +768,13 @@ class OracleDriveControlViewModelTest {
         val direction = Direction.REVERSE
         coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
         coEvery { mockRepository.changeDirection(direction) } returns Result.success(Unit)
-
+        
         // When - changing direction while driving
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
         viewModel.changeDirection(direction)
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         coVerify { mockRepository.changeDirection(direction) }
     }
@@ -786,23 +783,23 @@ class OracleDriveControlViewModelTest {
     fun `should handle emergency stop during different states`() = runTest {
         // Given
         coEvery { mockRepository.emergencyStop() } returns Result.success(Unit)
-
+        
         // Test emergency stop from idle
         viewModel.emergencyStop()
         testDispatcher.scheduler.advanceUntilIdle()
         verify { mockStateObserver.onChanged(DriveState.EMERGENCY_STOP) }
-
+        
         // Reset and test emergency stop from driving
         viewModel.reset()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         viewModel.emergencyStop()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify(exactly = 2) { mockStateObserver.onChanged(DriveState.EMERGENCY_STOP) }
         coVerify(exactly = 2) { mockRepository.emergencyStop() }
@@ -815,12 +812,12 @@ class OracleDriveControlViewModelTest {
             kotlinx.coroutines.delay(50)
             Result.success(Unit)
         }
-
+        
         // When
         viewModel.startDrive()
         viewModel.driveState.removeObserver(mockStateObserver)
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then - observer should not receive the final state change
         verify(exactly = 0) { mockStateObserver.onChanged(DriveState.DRIVING) }
     }
@@ -832,13 +829,13 @@ class OracleDriveControlViewModelTest {
             kotlinx.coroutines.delay(1000)
             Result.success(Unit)
         }
-
+        
         // When
         val job = viewModel.startDrive()
         kotlinx.coroutines.delay(100)
         job.cancel()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then - should handle cancellation without throwing exceptions
         verify { mockLoadingObserver.onChanged(true) }
         // Loading state should eventually be set to false even after cancellation
@@ -849,11 +846,11 @@ class OracleDriveControlViewModelTest {
     fun `should handle empty error messages gracefully`() = runTest {
         // Given
         coEvery { mockRepository.startDrive(any()) } returns Result.failure(Exception(""))
-
+        
         // When
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockErrorObserver.onChanged("") }
         verify { mockStateObserver.onChanged(DriveState.ERROR) }
@@ -863,11 +860,11 @@ class OracleDriveControlViewModelTest {
     fun `should handle null exception messages gracefully`() = runTest {
         // Given
         coEvery { mockRepository.startDrive(any()) } returns Result.failure(Exception(null))
-
+        
         // When
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockErrorObserver.onChanged(any()) }
         verify { mockStateObserver.onChanged(DriveState.ERROR) }
@@ -877,11 +874,11 @@ class OracleDriveControlViewModelTest {
     fun `should handle repository returning success with null result`() = runTest {
         // Given
         coEvery { mockRepository.startDrive(any()) } returns Result.success(null)
-
+        
         // When
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockStateObserver.onChanged(DriveState.DRIVING) }
     }
@@ -892,13 +889,13 @@ class OracleDriveControlViewModelTest {
         coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
         coEvery { mockRepository.updateSpeed(any()) } returns Result.failure(Exception("Speed update failed"))
         coEvery { mockRepository.changeDirection(any()) } returns Result.success(Unit)
-
+        
         // When
         viewModel.startDrive()
         viewModel.updateSpeed(25.0)
         viewModel.changeDirection(Direction.FORWARD)
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // Then
         verify { mockStateObserver.onChanged(DriveState.DRIVING) }
         verify { mockErrorObserver.onChanged("Speed update failed") }
@@ -909,11 +906,11 @@ class OracleDriveControlViewModelTest {
     fun `should handle repository method calls with proper parameter validation`() = runTest {
         // Given
         val validSpeeds = listOf(0.0, 25.5, 50.0, 99.9)
-
+        
         validSpeeds.forEach { speed ->
             coEvery { mockRepository.updateSpeed(speed) } returns Result.success(Unit)
         }
-
+        
         // When & Then
         validSpeeds.forEach { speed ->
             viewModel.updateSpeed(speed)
@@ -926,11 +923,11 @@ class OracleDriveControlViewModelTest {
     fun `should handle network state changes during operations`() = runTest {
         // Given
         every { mockNetworkManager.isConnected() } returns true andThen false
-
+        
         // When
         val firstResult = viewModel.isNetworkAvailable()
         val secondResult = viewModel.isNetworkAvailable()
-
+        
         // Then
         assertTrue(firstResult)
         assertFalse(secondResult)
@@ -943,14 +940,13 @@ class OracleDriveControlViewModelTest {
         coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
-
+        
         // When - simulating onCleared
         viewModel.driveState.removeObserver(mockStateObserver)
         viewModel.errorMessage.removeObserver(mockErrorObserver)
         viewModel.isLoading.removeObserver(mockLoadingObserver)
-
+        
         // Then - should not crash and should handle cleanup gracefully
         assertTrue(true) // Test passes if no exceptions are thrown
     }
 }
->>>>>>> pr458merge

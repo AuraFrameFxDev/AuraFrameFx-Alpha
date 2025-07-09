@@ -37,15 +37,19 @@ android {
         }
     }
 
-    kotlin {
-        jvmToolchain(17)
-        compilerOptions {
-            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
-            freeCompilerArgs.addAll(
-                "-opt-in=kotlin.RequiresOptIn",
-                "-Xjvm-default=all"
-            )
-        }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_24
+        targetCompatibility = JavaVersion.VERSION_24
+    }
+
+    kotlinOptions {
+        @Suppress("DEPRECATION")
+        jvmTarget = "24"
+        @Suppress("DEPRECATION")
+        freeCompilerArgs = listOf(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xjvm-default=all"
+        )
     }
 
     buildFeatures {
@@ -102,7 +106,7 @@ dependencies {
     kspTest(libs.daggerHiltAndroidCompiler)
 
     // Time and Date
-    implementation(libs.kotlinxDatetime)
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
 
     // AndroidX & Compose
     implementation(libs.androidxCoreKtx)
@@ -118,9 +122,7 @@ dependencies {
 
     // Animation
     implementation(libs.androidxComposeAnimation)
-    debugImplementation(platform(libs.composeBom))
-    debugImplementation(libs.uiTooling)
-    debugImplementation(libs.uiToolingPreview)
+    debugImplementation(libs.composeUiTooling)
 
     // Lifecycle
     implementation(libs.lifecycleViewmodelCompose)
@@ -137,10 +139,10 @@ dependencies {
     ksp(libs.androidxRoomCompiler)
 
     // Security
-    implementation(libs.androidxSecurityCrypto)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     // Google AI
-    implementation(libs.generativeai)
+    implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
 
     // Firebase
     implementation(platform(libs.firebaseBom))
@@ -196,3 +198,4 @@ dependencies {
     debugImplementation(libs.composeUiTooling)
     debugImplementation(libs.composeUiTestManifest)
 }
+

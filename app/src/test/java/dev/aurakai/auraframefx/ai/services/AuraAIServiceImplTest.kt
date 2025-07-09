@@ -2260,8 +2260,6 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             assertEquals(stats1.keys, finalStats.keys)
         }
     }
-<<<<<<< HEAD
-=======
 }
     @Nested
     @DisplayName("Advanced Validation and Input Sanitization Tests")
@@ -2277,10 +2275,10 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 "Test\u001Bescape",
                 "Test\u007FDel"
             )
-
+            
             val mockResponse = mockHttpResponse(200, "Control char response")
             whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
-
+            
             controlCharPrompts.forEach { prompt ->
                 val result = auraAIService.generateResponse(prompt)
                 assertEquals("Control char response", result)
@@ -2308,7 +2306,7 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 "javascript://example.com",
                 "vbscript://example.com"
             )
-
+            
             invalidSchemes.forEach { url ->
                 assertThrows<IllegalArgumentException> {
                     auraAIService.updateBaseUrl(url)
@@ -2325,7 +2323,7 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 "https://api.example.com:9000",
                 "https://localhost:8443"
             )
-
+            
             urlsWithPorts.forEach { url ->
                 auraAIService.updateBaseUrl(url)
                 verify(mockConfigurationService).updateBaseUrl(url)
@@ -2343,7 +2341,7 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 "stream" to true,
                 "user" to "user123"
             )
-
+            
             auraAIService.updateModelParameters(nestedParams)
             verify(mockConfigurationService).updateModelParameters(nestedParams)
             verify(mockLogger).info("Model parameters updated: $nestedParams")
@@ -2359,14 +2357,14 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             // Simulate cascading failure where health check fails, then config reload fails
             whenever(mockHttpClient.get(any())).thenThrow(IOException("Health check failed"))
             whenever(mockConfigurationService.getApiKey()).thenReturn(null)
-
+            
             val healthResult = auraAIService.healthCheck()
             assertFalse(healthResult.isHealthy)
-
+            
             assertThrows<ConfigurationException> {
                 auraAIService.reloadConfiguration()
             }
-
+            
             // Service should still be able to perform basic operations
             auraAIService.clearCache()
             val stats = auraAIService.getServiceStatistics()
@@ -2386,16 +2384,16 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                     mockHttpResponse(200, "Success $callCount")
                 }
             }
-
+            
             // First call should succeed
             val result1 = auraAIService.generateResponse("Test 1")
             assertEquals("Success 1", result1)
-
+            
             // Second call should fail
             assertThrows<IOException> {
                 auraAIService.generateResponse("Test 2")
             }
-
+            
             // Third call should succeed again
             val result3 = auraAIService.generateResponse("Test 3")
             assertEquals("Success 3", result3)
@@ -2408,15 +2406,15 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             whenever(mockConfigurationService.updateApiKey(any())).thenThrow(RuntimeException("Config service down"))
             whenever(mockConfigurationService.updateBaseUrl(any())).thenThrow(RuntimeException("Config service down"))
             whenever(mockConfigurationService.updateTimeout(any())).thenThrow(RuntimeException("Config service down"))
-
+            
             assertThrows<RuntimeException> {
                 auraAIService.updateApiKey("test-key")
             }
-
+            
             assertThrows<RuntimeException> {
                 auraAIService.updateBaseUrl("https://test.com")
             }
-
+            
             assertThrows<RuntimeException> {
                 auraAIService.updateTimeout(1000L)
             }
@@ -2430,26 +2428,26 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             whenever(mockLogger.error(any())).thenThrow(RuntimeException("Logger failed"))
             whenever(mockLogger.debug(any(), *anyVararg())).thenThrow(RuntimeException("Logger failed"))
             whenever(mockLogger.warn(any())).thenThrow(RuntimeException("Logger failed"))
-
+            
             val mockResponse = mockHttpResponse(200, "Success despite logger failure")
             whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
             whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(200, "Health OK"))
-
+            
             // All operations should still work despite logger failures
             val result = auraAIService.generateResponse("Test")
             assertEquals("Success despite logger failure", result)
-
+            
             val batchResult = auraAIService.generateBatchResponses(listOf("Test"))
             assertEquals(listOf("Success despite logger failure"), batchResult)
-
+            
             val healthResult = auraAIService.healthCheck()
             assertTrue(healthResult.isHealthy)
-
+            
             // Configuration operations should still work
             auraAIService.updateApiKey("test-key")
             auraAIService.updateBaseUrl("https://test.com")
             auraAIService.updateTimeout(1000L)
-
+            
             // Cache operations should still work
             auraAIService.clearCache()
             auraAIService.expireCache()
@@ -2465,33 +2463,33 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         fun shouldHandleConcurrentConfigurationChangesAndRequests() = runTest {
             val mockResponse = mockHttpResponse(200, "Concurrent response")
             whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
-
+            
             // Start multiple concurrent operations
             val requestOperations = (1..10).map { i ->
                 kotlinx.coroutines.async {
                     auraAIService.generateResponse("Request $i")
                 }
             }
-
+            
             val configOperations = (1..10).map { i ->
                 kotlinx.coroutines.async {
                     auraAIService.updateApiKey("key-$i")
                     auraAIService.updateTimeout(1000L + i)
                 }
             }
-
+            
             val cacheOperations = (1..10).map {
                 kotlinx.coroutines.async {
                     auraAIService.clearCache()
                     auraAIService.expireCache()
                 }
             }
-
+            
             // Wait for all operations to complete
             val requestResults = requestOperations.map { it.await() }
             configOperations.forEach { it.await() }
             cacheOperations.forEach { it.await() }
-
+            
             // Verify all requests succeeded
             assertEquals(10, requestResults.size)
             requestResults.forEach { assertEquals("Concurrent response", it) }
@@ -2511,7 +2509,7 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                             }
                         }
                     })
-
+                    
                     val chunks = mutableListOf<String>()
                     try {
                         auraAIService.generateStreamingResponse("Stream $i").collect { chunks.add(it) }
@@ -2521,13 +2519,13 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                     chunks
                 }
             }
-
+            
             val results = streams.map { it.await() }
-
+            
             // Some streams should have completed successfully, others should have been interrupted
             val completedStreams = results.filter { it.size == 10 }
             val interruptedStreams = results.filter { it.size < 10 }
-
+            
             assertTrue(completedStreams.isNotEmpty())
             assertTrue(interruptedStreams.isNotEmpty())
         }
@@ -2544,19 +2542,19 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                     else -> throw IOException("Connection failed")
                 }
             }
-
+            
             val healthChecks = (1..30).map {
                 kotlinx.coroutines.async {
                     auraAIService.healthCheck()
                 }
             }
-
+            
             val results = healthChecks.map { it.await() }
-
+            
             // Should have a mix of healthy and unhealthy results
             val healthyCount = results.count { it.isHealthy }
             val unhealthyCount = results.count { !it.isHealthy }
-
+            
             assertTrue(healthyCount > 0)
             assertTrue(unhealthyCount > 0)
             assertEquals(30, healthyCount + unhealthyCount)
@@ -2579,15 +2577,15 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 "javascript:alert(1)",
                 "data:text/html,<script>alert(1)</script>"
             )
-
+            
             val mockResponse = mockHttpResponse(200, "Safe response")
             whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
-
+            
             injectionPayloads.forEach { payload ->
                 // Test in prompt
                 val result = auraAIService.generateResponse(payload)
                 assertEquals("Safe response", result)
-
+                
                 // Test in API key (should not throw security exception, just validation)
                 auraAIService.updateApiKey(payload)
                 verify(mockConfigurationService).updateApiKey(payload)
@@ -2604,10 +2602,10 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 "\u0000" * 1000, // 1K null bytes
                 "X".repeat(Int.MAX_VALUE / 1000) // Very large string
             )
-
+            
             val mockResponse = mockHttpResponse(200, "Buffer handled")
             whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
-
+            
             bufferOverflowAttempts.forEach { attempt ->
                 try {
                     val result = auraAIService.generateResponse(attempt)
@@ -2630,7 +2628,7 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 "https://legitimate.com?redirect=http://attacker.com",
                 "https://legitimate.com/path;jsessionid=12345?param=value#fragment"
             )
-
+            
             manipulationAttempts.forEach { url ->
                 // Current implementation only checks for https:// prefix
                 // These should be accepted but ideally should have more validation
@@ -2650,7 +2648,7 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 "custom_array" to listOf("value1", "value2"),
                 "custom_object" to mapOf("nested" to "value")
             )
-
+            
             auraAIService.updateModelParameters(pollutedParams)
             verify(mockConfigurationService).updateModelParameters(pollutedParams)
         }
@@ -2664,16 +2662,16 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         fun shouldHandleRapidFireRequests() = runTest {
             val mockResponse = mockHttpResponse(200, "Rapid response")
             whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
-
+            
             val startTime = System.currentTimeMillis()
             val results = (1..1000).map { i ->
                 auraAIService.generateResponse("Rapid request $i")
             }
             val endTime = System.currentTimeMillis()
-
+            
             assertEquals(1000, results.size)
             results.forEach { assertEquals("Rapid response", it) }
-
+            
             // Should complete within reasonable time (this is more of a smoke test)
             assertTrue(endTime - startTime < 10000) // Less than 10 seconds
         }
@@ -2683,13 +2681,13 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         fun shouldHandleMemoryIntensiveBatchOperations() = runTest {
             val largeBatchSize = 100000
             val largePrompts = (1..largeBatchSize).map { "Batch prompt $it" }
-
+            
             val mockResponse = mockHttpResponse(200, "Large batch processed")
             whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
-
+            
             val result = auraAIService.generateBatchResponses(largePrompts)
             assertEquals(listOf("Large batch processed"), result)
-
+            
             verify(mockHttpClient).post(largePrompts)
             verify(mockLogger).info("Generating batch AI responses for $largeBatchSize prompts")
         }
@@ -2698,14 +2696,14 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         @DisplayName("Should handle high-frequency configuration changes")
         fun shouldHandleHighFrequencyConfigurationChanges() {
             val iterations = 10000
-
+            
             repeat(iterations) { i ->
                 auraAIService.updateApiKey("key-$i")
                 auraAIService.updateBaseUrl("https://api$i.com")
                 auraAIService.updateTimeout(1000L + i)
                 auraAIService.updateModelParameters(mapOf("iteration" to i))
             }
-
+            
             verify(mockConfigurationService, times(iterations)).updateApiKey(any())
             verify(mockConfigurationService, times(iterations)).updateBaseUrl(any())
             verify(mockConfigurationService, times(iterations)).updateTimeout(any())
@@ -2717,7 +2715,7 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         fun shouldHandleSustainedStreamingOperations() = runTest {
             val streamDuration = 1000 // 1000 chunks per stream
             val concurrentStreams = 5
-
+            
             val streams = (1..concurrentStreams).map { streamId ->
                 kotlinx.coroutines.async {
                     whenever(mockHttpClient.postStream("Stream $streamId")).thenReturn(flow {
@@ -2727,15 +2725,15 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                             kotlinx.coroutines.delay(1)
                         }
                     })
-
+                    
                     val chunks = mutableListOf<String>()
                     auraAIService.generateStreamingResponse("Stream $streamId").collect { chunks.add(it) }
                     chunks
                 }
             }
-
+            
             val results = streams.map { it.await() }
-
+            
             assertEquals(concurrentStreams, results.size)
             results.forEach { chunks ->
                 assertEquals(streamDuration, chunks.size)
@@ -2758,16 +2756,16 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 "max_tokens" to 1000,
                 "top_p" to 0.9
             ))
-
+            
             // Phase 2: Health check and validation
             whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(200, "Pipeline healthy"))
             val healthResult = auraAIService.healthCheck()
             assertTrue(healthResult.isHealthy)
-
+            
             // Phase 3: Cache management
             auraAIService.clearCache()
             auraAIService.expireCache()
-
+            
             // Phase 4: AI operations
             val mockResponse = mockHttpResponse(200, "Pipeline response")
             whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
@@ -2776,28 +2774,28 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 emit("Pipeline stream 2")
                 emit("Pipeline stream 3")
             })
-
+            
             val singleResult = auraAIService.generateResponse("Pipeline single prompt")
             val batchResult = auraAIService.generateBatchResponses(listOf("Pipeline batch 1", "Pipeline batch 2"))
             val streamChunks = mutableListOf<String>()
             auraAIService.generateStreamingResponse("Pipeline stream prompt").collect { streamChunks.add(it) }
-
+            
             // Phase 5: Statistics and monitoring
             val stats = auraAIService.getServiceStatistics()
             auraAIService.resetStatistics()
-
+            
             // Phase 6: Configuration reload
             whenever(mockConfigurationService.getApiKey()).thenReturn("reloaded-key")
             whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://reloaded.api.com")
             whenever(mockConfigurationService.getTimeout()).thenReturn(20000L)
             auraAIService.reloadConfiguration()
-
+            
             // Verify all operations completed successfully
             assertEquals("Pipeline response", singleResult)
             assertEquals(listOf("Pipeline response"), batchResult)
             assertEquals(listOf("Pipeline stream 1", "Pipeline stream 2", "Pipeline stream 3"), streamChunks)
             assertNotNull(stats)
-
+            
             // Verify comprehensive logging
             verify(mockLogger, atLeastOnce()).info(any())
             verify(mockLogger, atLeastOnce()).debug(any(), *anyVararg())
@@ -2810,33 +2808,33 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             whenever(mockHttpClient.get(any())).thenThrow(IOException("Service completely down"))
             whenever(mockHttpClient.post(any())).thenThrow(IOException("Service completely down"))
             whenever(mockHttpClient.postStream(any())).thenReturn(flow { throw IOException("Service completely down") })
-
+            
             // All operations should fail
             val healthResult1 = auraAIService.healthCheck()
             assertFalse(healthResult1.isHealthy)
-
+            
             assertThrows<IOException> {
                 auraAIService.generateResponse("Test during failure")
             }
-
+            
             assertThrows<IOException> {
                 auraAIService.generateBatchResponses(listOf("Test during failure"))
             }
-
+            
             assertThrows<IOException> {
                 auraAIService.generateStreamingResponse("Test during failure").collect()
             }
-
+            
             // Phase 2: Partial recovery (health check works)
             whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(200, "Partially recovered"))
             val healthResult2 = auraAIService.healthCheck()
             assertTrue(healthResult2.isHealthy)
-
+            
             // AI operations still fail
             assertThrows<IOException> {
                 auraAIService.generateResponse("Test during partial recovery")
             }
-
+            
             // Phase 3: Full recovery
             val mockResponse = mockHttpResponse(200, "Fully recovered")
             whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
@@ -2844,12 +2842,12 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 emit("Recovery stream 1")
                 emit("Recovery stream 2")
             })
-
+            
             val recoveredResult = auraAIService.generateResponse("Test after recovery")
             val recoveredBatch = auraAIService.generateBatchResponses(listOf("Test batch after recovery"))
             val recoveredStream = mutableListOf<String>()
             auraAIService.generateStreamingResponse("Test stream after recovery").collect { recoveredStream.add(it) }
-
+            
             // Verify full recovery
             assertEquals("Fully recovered", recoveredResult)
             assertEquals(listOf("Fully recovered"), recoveredBatch)
@@ -2865,42 +2863,42 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 kotlinx.coroutines.delay(100) // Simulate slow operation
                 mockResponse
             }
-
+            
             whenever(mockHttpClient.postStream(any())).thenReturn(flow {
                 repeat(100) { i ->
                     emit("Long stream chunk $i")
                     kotlinx.coroutines.delay(10)
                 }
             })
-
+            
             val longOperations = (1..10).map { i ->
                 kotlinx.coroutines.async {
                     auraAIService.generateResponse("Long operation $i")
                 }
             }
-
+            
             val longStream = kotlinx.coroutines.async {
                 val chunks = mutableListOf<String>()
                 auraAIService.generateStreamingResponse("Long stream").collect { chunks.add(it) }
                 chunks
             }
-
+            
             // Change configuration while operations are running
             kotlinx.coroutines.delay(50)
             auraAIService.updateApiKey("new-key-during-ops")
             auraAIService.updateBaseUrl("https://new-during-ops.com")
             auraAIService.updateTimeout(5000L)
             auraAIService.clearCache()
-
+            
             // Wait for operations to complete
             val operationResults = longOperations.map { it.await() }
             val streamResult = longStream.await()
-
+            
             // All operations should complete successfully
             assertEquals(10, operationResults.size)
             operationResults.forEach { assertEquals("Long operation response", it) }
             assertEquals(100, streamResult.size)
-
+            
             // Configuration changes should have been applied
             verify(mockConfigurationService).updateApiKey("new-key-during-ops")
             verify(mockConfigurationService).updateBaseUrl("https://new-during-ops.com")
@@ -2918,33 +2916,33 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             whenever(mockConfigurationService.getApiKey()).thenThrow(RuntimeException("Config service failed"))
             whenever(mockConfigurationService.getBaseUrl()).thenThrow(RuntimeException("Config service failed"))
             whenever(mockConfigurationService.getTimeout()).thenThrow(RuntimeException("Config service failed"))
-
+            
             // HTTP client fails
             whenever(mockHttpClient.get(any())).thenThrow(IOException("HTTP client failed"))
             whenever(mockHttpClient.post(any())).thenThrow(IOException("HTTP client failed"))
             whenever(mockHttpClient.postStream(any())).thenReturn(flow { throw IOException("HTTP client failed") })
-
+            
             // Logger fails
             whenever(mockLogger.info(any())).thenThrow(RuntimeException("Logger failed"))
             whenever(mockLogger.error(any())).thenThrow(RuntimeException("Logger failed"))
             whenever(mockLogger.debug(any(), *anyVararg())).thenThrow(RuntimeException("Logger failed"))
-
+            
             // All operations should handle the failures gracefully
             assertThrows<ConfigurationException> {
                 auraAIService.reloadConfiguration()
             }
-
+            
             val healthResult = auraAIService.healthCheck()
             assertFalse(healthResult.isHealthy)
-
+            
             assertThrows<IOException> {
                 auraAIService.generateResponse("Test")
             }
-
+            
             assertThrows<IOException> {
                 auraAIService.generateBatchResponses(listOf("Test"))
             }
-
+            
             assertThrows<IOException> {
                 auraAIService.generateStreamingResponse("Test").collect()
             }
@@ -2956,16 +2954,16 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             // Simulate resource exhaustion
             whenever(mockHttpClient.post(any())).thenThrow(OutOfMemoryError("Memory exhausted"))
             whenever(mockHttpClient.get(any())).thenThrow(OutOfMemoryError("Memory exhausted"))
-
+            
             // Operations should fail with appropriate errors
             assertThrows<OutOfMemoryError> {
                 auraAIService.generateResponse("Test")
             }
-
+            
             assertThrows<OutOfMemoryError> {
                 auraAIService.healthCheck()
             }
-
+            
             // Non-network operations should still work
             auraAIService.clearCache()
             auraAIService.expireCache()
@@ -2980,11 +2978,11 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 Thread.currentThread().interrupt()
                 throw InterruptedException("Thread interrupted")
             }
-
+            
             assertThrows<InterruptedException> {
                 auraAIService.generateResponse("Test")
             }
-
+            
             // Thread interruption should be handled gracefully
             assertTrue(Thread.currentThread().isInterrupted)
         }
@@ -2996,11 +2994,11 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             whenever(mockHttpClient.post(any())).thenAnswer {
                 throw StackOverflowError("Stack overflow")
             }
-
+            
             assertThrows<StackOverflowError> {
                 auraAIService.generateResponse("Test")
             }
-
+            
             // Service should remain functional for other operations
             auraAIService.clearCache()
             val stats = auraAIService.getServiceStatistics()
@@ -3016,7 +3014,7 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         fun shouldMaintainConsistencyAcrossConcurrentOperations() = runTest {
             val mockResponse = mockHttpResponse(200, "Consistent response")
             whenever(mockHttpClient.post(any())).thenReturn(mockResponse)
-
+            
             // Perform many concurrent operations
             val operations = (1..100).map { i ->
                 kotlinx.coroutines.async {
@@ -3030,14 +3028,14 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                     }
                 }
             }
-
+            
             val results = operations.map { it.await() }
-
+            
             // Verify consistency in results
             val responseResults = results.filterIsInstance<String>()
             val batchResults = results.filterIsInstance<List<*>>()
             val statsResults = results.filterIsInstance<Map<*, *>>()
-
+            
             responseResults.forEach { assertEquals("Consistent response", it) }
             batchResults.forEach { assertEquals(listOf("Consistent response"), it) }
             statsResults.forEach { assertTrue(it.containsKey("totalRequests")) }
@@ -3054,10 +3052,10 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
                 mockHttpResponse(200, "�"),  // Invalid UTF-8
                 mockHttpResponse(200, "Response with\nnull\u0000byte")  // Mixed content
             )
-
+            
             corruptedResponses.forEach { response ->
                 whenever(mockHttpClient.post(any())).thenReturn(response)
-
+                
                 val result = auraAIService.generateResponse("Test corruption")
                 // Service should handle corrupted data gracefully
                 // The exact behavior depends on implementation
@@ -3072,31 +3070,30 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             val initialKey = "initial-key"
             val initialUrl = "https://initial.com"
             val initialTimeout = 1000L
-
+            
             // Set initial state
             auraAIService.updateApiKey(initialKey)
             auraAIService.updateBaseUrl(initialUrl)
             auraAIService.updateTimeout(initialTimeout)
-
+            
             // Verify configuration was set
             verify(mockConfigurationService).updateApiKey(initialKey)
             verify(mockConfigurationService).updateBaseUrl(initialUrl)
             verify(mockConfigurationService).updateTimeout(initialTimeout)
-
+            
             // Perform other operations
             auraAIService.clearCache()
             auraAIService.expireCache()
             auraAIService.resetStatistics()
-
+            
             // Configuration should still be consistent
             whenever(mockConfigurationService.getApiKey()).thenReturn(initialKey)
             whenever(mockConfigurationService.getBaseUrl()).thenReturn(initialUrl)
             whenever(mockConfigurationService.getTimeout()).thenReturn(initialTimeout)
-
+            
             // Reload should succeed with consistent state
             auraAIService.reloadConfiguration()
             verify(mockLogger).info("Configuration reloaded successfully")
         }
     }
->>>>>>> pr458merge
 }

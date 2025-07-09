@@ -12,11 +12,7 @@ class TestConftestFunctionality:
     
     def test_conftest_imports(self):
         """
-<<<<<<< HEAD
-        Verify that the `app.ai_backend.conftest` module can be imported without raising an ImportError.
-=======
         Test that the `app.ai_backend.conftest` module imports successfully without raising ImportError.
->>>>>>> pr458merge
         """
         try:
             import app.ai_backend.conftest
@@ -26,11 +22,7 @@ class TestConftestFunctionality:
     
     def test_pytest_fixtures_exist(self):
         """
-<<<<<<< HEAD
-        Verify that at least one common pytest fixture ('client', 'app', 'db', 'session', or 'mock_db') is defined in the conftest module.
-=======
         Checks that at least one standard fixture ('client', 'app', 'db', 'session', or 'mock_db') is present in the conftest module.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -44,15 +36,9 @@ class TestConftestFunctionality:
     
     def test_fixture_scopes(self):
         """
-<<<<<<< HEAD
-        Verify that all fixtures in `conftest.py` declare a valid pytest scope.
-        
-        Asserts that each fixture's scope is one of: 'function', 'class', 'module', or 'session'.
-=======
         Checks that every fixture defined in `conftest.py` has a valid pytest scope.
-
+        
         Asserts that each fixture's scope is one of 'function', 'class', 'module', or 'session'.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -65,11 +51,7 @@ class TestConftestFunctionality:
     
     def test_database_fixture_setup(self):
         """
-<<<<<<< HEAD
-        Verify that the `conftest` module defines a database fixture named `db` or `database` and that it is accessible.
-=======
         Test that a database fixture named `db` or `database` is present and accessible in the `conftest` module.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -80,11 +62,7 @@ class TestConftestFunctionality:
     
     def test_client_fixture_setup(self):
         """
-<<<<<<< HEAD
-        Checks that the `client` fixture exists in `conftest.py` and is either callable or registered as a pytest fixture.
-=======
         Checks that the `client` fixture is defined in `conftest.py` and is either callable or registered as a pytest fixture.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -95,11 +73,7 @@ class TestConftestFunctionality:
     
     def test_mock_fixtures_isolation(self):
         """
-<<<<<<< HEAD
-        Ensures that mock fixtures in conftest.py isolate test state and restore original behavior after patching.
-=======
         Verify that mock fixtures in `conftest.py` properly isolate test state and restore original behavior after patching.
->>>>>>> pr458merge
         """
         # This test ensures that mock fixtures don't leak between tests
         mock_data = {'test_key': 'test_value'}
@@ -115,11 +89,7 @@ class TestConftestFunctionality:
     
     def test_fixture_dependencies(self):
         """
-<<<<<<< HEAD
-        Checks that all fixtures in `conftest.py` with dependencies have valid callable function signatures.
-=======
         Verifies that all fixtures with dependencies in `conftest.py` have valid callable function signatures.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -133,11 +103,7 @@ class TestConftestFunctionality:
     
     def test_session_fixture_lifecycle(self):
         """
-<<<<<<< HEAD
-        Verify that session-scoped fixtures in the conftest module can be detected and that having zero or more such fixtures is acceptable.
-=======
         Checks that session-scoped fixtures in the conftest module can be detected and that having zero or more session-scoped fixtures is valid.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -155,15 +121,9 @@ class TestConftestFunctionality:
     
     def test_conftest_configuration(self):
         """
-<<<<<<< HEAD
-        Verify that pytest configuration hook functions are present and callable in the `conftest.py` module.
-        
-        Ensures that `pytest_configure`, `pytest_runtest_setup`, and `pytest_runtest_teardown` are defined and properly integrated for pytest lifecycle management.
-=======
         Verify that pytest configuration hook functions are defined and callable in the `conftest.py` module.
-
+        
         Checks for the presence and callability of `pytest_configure`, `pytest_runtest_setup`, and `pytest_runtest_teardown` to ensure proper pytest integration.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -177,15 +137,9 @@ class TestConftestFunctionality:
     
     def test_fixture_error_handling(self):
         """
-<<<<<<< HEAD
-        Verifies that exceptions raised during fixture setup are correctly handled by pytest.
-        
-        Ensures that pytest captures and reports errors occurring in fixture initialization.
-=======
         Verify that pytest correctly captures and reports exceptions raised during fixture setup.
-
+        
         This test simulates an error during fixture initialization and asserts that pytest handles the exception as expected.
->>>>>>> pr458merge
         """
         # Test error scenarios in fixture setup
         with pytest.raises(Exception):
@@ -194,22 +148,14 @@ class TestConftestFunctionality:
     
     def test_cleanup_fixtures(self):
         """
-<<<<<<< HEAD
-        Verifies that yield-based fixtures execute their cleanup logic after resource usage, ensuring proper resource finalization.
-=======
         Test that yield-based fixtures execute their cleanup logic after resource usage, confirming proper resource finalization.
->>>>>>> pr458merge
         """
         # Test fixture cleanup using yield fixtures
         cleanup_called = []
         
         def sample_fixture():
             """
-<<<<<<< HEAD
-            A pytest fixture that yields a test resource string and records when cleanup is executed.
-=======
             A pytest fixture that provides a test resource string and tracks cleanup execution.
->>>>>>> pr458merge
             
             Yields:
                 str: The test resource string.
@@ -233,11 +179,7 @@ class TestConftestFunctionality:
     
     def test_parametrized_fixtures(self):
         """
-<<<<<<< HEAD
-        Verify that all parametrized fixtures in `conftest.py` have their `params` attribute defined as a list or tuple.
-=======
         Verify that all parametrized fixtures in `conftest.py` define their `params` attribute as a list or tuple.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -252,15 +194,9 @@ class TestConftestFunctionality:
     
     def test_fixture_autouse(self):
         """
-<<<<<<< HEAD
-        Ensures that autouse fixtures defined in the conftest module are detected and do not cause test failures.
-        
-        This test verifies that the presence or absence of autouse fixtures in `conftest.py` does not introduce errors during test execution.
-=======
         Verify that autouse fixtures are present in the conftest module and do not cause test failures.
-
+        
         Ensures that the presence of autouse fixtures in `conftest.py` does not introduce errors during test execution.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -278,11 +214,7 @@ class TestConftestFunctionality:
     
     def test_fixture_names_convention(self):
         """
-<<<<<<< HEAD
-        Checks that all fixture names in `conftest.py` use only lowercase letters or underscores and do not start with 'test_'.
-=======
         Verify that all fixture names in `conftest.py` use only lowercase letters or underscores and do not begin with 'test_', enforcing pytest fixture naming conventions.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -299,15 +231,9 @@ class TestConftestFunctionality:
     
     def test_fixture_documentation(self):
         """
-<<<<<<< HEAD
-        Verify that every pytest fixture in the conftest module has a non-empty docstring.
-        
-        Ensures all fixtures are documented to maintain code clarity and enforce documentation standards.
-=======
         Verify that every pytest fixture in the conftest module includes a non-empty docstring.
-
+        
         Ensures all fixtures are properly documented to promote maintainability and adherence to documentation standards.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -326,11 +252,7 @@ class TestConftestEdgeCases:
     
     def test_fixture_circular_dependency(self):
         """
-<<<<<<< HEAD
-        Verifies that simulated fixture functions do not create circular dependencies by ensuring each is called only once.
-=======
         Test that simulated fixture functions do not introduce circular dependencies by confirming each is invoked only once.
->>>>>>> pr458merge
         """
         # This test ensures fixtures don't have circular dependencies
         # Pytest would catch this, but we can test the concept
@@ -366,11 +288,7 @@ class TestConftestEdgeCases:
     
     def test_fixture_memory_leaks(self):
         """
-<<<<<<< HEAD
-        Verifies that a generator-based fixture yielding a large list does not cause memory leaks after cleanup and garbage collection.
-=======
         Test that a generator-based fixture yielding a large list does not cause memory leaks after cleanup and garbage collection.
->>>>>>> pr458merge
         """
         import gc
         
@@ -380,11 +298,7 @@ class TestConftestEdgeCases:
             A generator-based fixture that yields a large list of integers to simulate memory allocation for memory leak testing.
             
             Yields:
-<<<<<<< HEAD
-                list: A list of integers from 0 to 999 used to assess memory management and cleanup behavior in tests.
-=======
                 list: A list of integers from 0 to 999 for assessing memory management and cleanup behavior.
->>>>>>> pr458merge
             """
             large_data = [i for i in range(1000)]
             yield large_data
@@ -408,11 +322,7 @@ class TestConftestEdgeCases:
     
     def test_fixture_thread_safety(self):
         """
-<<<<<<< HEAD
-        Verifies that fixture-like operations can be executed concurrently in multiple threads without data loss or race conditions by ensuring all threads append their results as expected.
-=======
         Test that fixture-like code can be safely executed in multiple threads without data loss or race conditions by verifying all threads append their results as expected.
->>>>>>> pr458merge
         """
         import threading
         
@@ -421,11 +331,7 @@ class TestConftestEdgeCases:
         def fixture_worker():
             # Simulate fixture usage in thread
             """
-<<<<<<< HEAD
-            Appends a simulated fixture result to a shared list to represent fixture usage in a multithreaded test scenario.
-=======
             Appends a simulated fixture result to a shared list to mimic fixture usage in a multithreaded test scenario.
->>>>>>> pr458merge
             """
             result = "thread_result"
             results.append(result)
@@ -445,31 +351,18 @@ class TestConftestEdgeCases:
     
     def test_fixture_resource_cleanup(self):
         """
-<<<<<<< HEAD
-        Verify that a generator-based fixture properly executes its cleanup logic after yielding a resource.
-        
-        Simulates a fixture that creates a resource, yields it, and asserts that cleanup code is executed after the fixture is exhausted.
-=======
         Test that a generator-based fixture executes its cleanup logic after yielding a resource.
-
+        
         Simulates a fixture that creates a resource, yields it, and verifies that cleanup code runs after the fixture is exhausted.
->>>>>>> pr458merge
         """
         resource_states = {'created': False, 'cleaned': False}
         
         def resource_fixture():
             """
-<<<<<<< HEAD
-            Simulates creation and cleanup of a test resource for verifying fixture lifecycle behavior.
+            Simulates the creation and cleanup of a test resource for validating fixture lifecycle behavior.
             
             Yields:
-                str: The string "resource" to represent the active resource during the test.
-=======
-            Simulates the creation and cleanup of a test resource for validating fixture lifecycle behavior.
-
-            Yields:
                 str: The string "resource" representing the active resource during the test.
->>>>>>> pr458merge
             """
             resource_states['created'] = True
             yield "resource"
@@ -492,19 +385,11 @@ class TestConftestEdgeCases:
     
     def test_fixture_exception_handling(self):
         """
-<<<<<<< HEAD
-        Verifies that a generator-based fixture executes its cleanup logic when closed or when an exception occurs during its lifecycle.
-        """
-        def failing_fixture():
-            """
-            A generator-based fixture that yields the string "resource" and ensures cleanup on closure or exception.
-=======
         Test that a generator-based fixture executes its cleanup logic when closed or when an exception occurs during its lifecycle.
         """
         def failing_fixture():
             """
             A generator-based fixture that yields the string "resource" and ensures cleanup logic is executed when the generator is closed or an exception occurs.
->>>>>>> pr458merge
             
             Yields:
                 str: The string "resource".
@@ -528,11 +413,7 @@ class TestConftestEdgeCases:
     
     def test_fixture_with_invalid_scope(self):
         """
-<<<<<<< HEAD
-        Test that only valid pytest fixture scopes are accepted and invalid scopes are correctly rejected.
-=======
         Verify that only valid pytest fixture scopes are accepted and that invalid scopes are properly rejected.
->>>>>>> pr458merge
         """
         # pytest would catch this at runtime, but we can test the concept
         valid_scopes = ['function', 'class', 'module', 'session']
@@ -554,11 +435,7 @@ class TestConftestEdgeCases:
         
         def dependency_fixture():
             """
-<<<<<<< HEAD
-            Provides a static string value to simulate a fixture dependency in tests.
-=======
             Provides a static string value for simulating fixture dependency in tests.
->>>>>>> pr458merge
             
             Returns:
                 str: The string "dependency_value".
@@ -567,17 +444,10 @@ class TestConftestEdgeCases:
         
         def dependent_fixture():
             """
-<<<<<<< HEAD
-            Return a string indicating dependency on the value from `dependency_fixture`.
+            Return a string indicating this fixture depends on the value from `dependency_fixture`.
             
             Returns:
-                str: A string in the format 'dependent_on_{dep}', where {dep} is the value returned by `dependency_fixture`.
-=======
-            Return a string indicating this fixture depends on the value from `dependency_fixture`.
-
-            Returns:
                 str: A string formatted as 'dependent_on_{dep}', where {dep} is the value returned by `dependency_fixture`.
->>>>>>> pr458merge
             """
             dep = dependency_fixture()
             return f"dependent_on_{dep}"
@@ -587,21 +457,13 @@ class TestConftestEdgeCases:
     
     def test_fixture_caching_behavior(self):
         """
-<<<<<<< HEAD
-        Verify that a fixture-like function is invoked on each call and does not cache its result, emulating function-scoped fixture behavior.
-=======
         Test that a fixture-like function returns a new result on each call, confirming there is no unintended result caching.
->>>>>>> pr458merge
         """
         call_count = {'count': 0}
         
         def cached_fixture():
             """
-<<<<<<< HEAD
-            Simulates a fixture-like function that returns a unique result string with an incrementing call count.
-=======
             Simulates a fixture-like function that returns a unique string with an incrementing call count.
->>>>>>> pr458merge
             
             Returns:
                 str: A string indicating the current call count, such as "cached_result_1".
@@ -623,11 +485,7 @@ class TestConftestIntegration:
     
     def test_conftest_with_actual_tests(self):
         """
-<<<<<<< HEAD
-        Simulates the use of fixtures from conftest.py within a test function and verifies their accessibility and correct behavior.
-=======
         Simulates the usage of fixtures from conftest.py in a test function and verifies that they are accessible and function as expected.
->>>>>>> pr458merge
         """
         # This would typically use fixtures defined in conftest.py
         
@@ -647,11 +505,7 @@ class TestConftestIntegration:
     
     def test_conftest_pytest_integration(self):
         """
-<<<<<<< HEAD
-        Verify that the pytest framework provides the `fixture` and `mark` attributes for fixture and marker support.
-=======
         Verifies that the pytest framework exposes the `fixture` and `mark` attributes, ensuring support for fixtures and markers.
->>>>>>> pr458merge
         """
         import pytest
         
@@ -662,11 +516,7 @@ class TestConftestIntegration:
     
     def test_conftest_module_level_setup(self):
         """
-<<<<<<< HEAD
-        Verify that the `conftest.py` module in `app.ai_backend` can be imported and contains at least one attribute, indicating successful module-level setup.
-=======
         Verifies that the `conftest.py` module imports without errors and exposes at least one attribute, confirming correct module-level setup.
->>>>>>> pr458merge
         """
         import app.ai_backend.conftest as conftest_module
         
@@ -679,11 +529,7 @@ class TestConftestIntegration:
     
     def test_conftest_app_integration(self):
         """
-<<<<<<< HEAD
-        Verify that the application configuration from `conftest.py` enables testing mode and disables debug mode.
-=======
         Verifies that the application configuration enables testing mode and disables debug mode as expected from `conftest.py`.
->>>>>>> pr458merge
         """
         # Test that conftest.py properly sets up application context
         
@@ -698,11 +544,7 @@ class TestConftestIntegration:
     
     def test_conftest_database_integration(self):
         """
-<<<<<<< HEAD
-        Verify that the mocked database setup, teardown, and rollback operations defined in conftest.py execute successfully during integration tests.
-=======
         Verifies that the mocked database setup, teardown, and rollback operations defined in `conftest.py` are executed correctly during integration tests.
->>>>>>> pr458merge
         """
         # Test database setup and teardown
         
@@ -717,13 +559,7 @@ class TestConftestIntegration:
     
     def test_conftest_ai_backend_specific(self):
         """
-<<<<<<< HEAD
-        Checks that AI backend-specific components—model loader, tokenizer, and inference engine—are present and initialized.
-        
-        This test simulates the presence of these components to ensure the AI backend setup is complete.
-=======
         Test that AI backend-specific components—model loader, tokenizer, and inference engine—are present and properly initialized.
->>>>>>> pr458merge
         """
         # Test AI backend specific functionality
         
