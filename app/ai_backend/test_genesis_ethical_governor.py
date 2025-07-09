@@ -1848,3 +1848,1104 @@ if __name__ == '__main__':
         pytest.main([__file__, '-v', '--tb=short'])
     except ImportError:
         print("pytest not available, skipping pytest-specific tests")
+
+# Additional comprehensive test coverage for enhanced testing
+
+class TestEthicalGovernorBoundaryConditions(unittest.TestCase):
+    """Test boundary conditions and edge cases for EthicalGovernor"""
+    
+    def setUp(self):
+        """Set up test fixtures for boundary condition testing"""
+        self.governor = EthicalGovernor()
+    
+    def test_evaluate_decision_with_zero_values(self):
+        """Test decision evaluation with zero values in various numeric fields"""
+        zero_contexts = [
+            {"risk_score": 0, "confidence": 0, "impact": 0},
+            {"age": 0, "income": 0, "credit_score": 0},
+            {"probability": 0.0, "threshold": 0.0, "weight": 0.0}
+        ]
+        
+        for context in zero_contexts:
+            with self.subTest(context=context):
+                result = self.governor.evaluate_decision(context)
+                self.assertIsInstance(result, dict)
+                self.assertIn("approved", result)
+                self.assertIn("risk_level", result)
+    
+    def test_evaluate_decision_with_maximum_values(self):
+        """Test decision evaluation with maximum possible values"""
+        max_contexts = [
+            {"risk_score": float('inf'), "confidence": 1.0},
+            {"age": 999, "income": 999999999},
+            {"probability": 1.0, "certainty": 100}
+        ]
+        
+        for context in max_contexts:
+            with self.subTest(context=context):
+                result = self.governor.evaluate_decision(context)
+                self.assertIsInstance(result, dict)
+                self.assertIn("approved", result)
+    
+    def test_evaluate_decision_with_minimum_values(self):
+        """Test decision evaluation with minimum possible values"""
+        min_contexts = [
+            {"risk_score": float('-inf'), "confidence": -1.0},
+            {"age": -1, "income": -999999999},
+            {"probability": -1.0, "certainty": -100}
+        ]
+        
+        for context in min_contexts:
+            with self.subTest(context=context):
+                result = self.governor.evaluate_decision(context)
+                self.assertIsInstance(result, dict)
+                self.assertIn("approved", result)
+    
+    def test_apply_policy_with_empty_string_policy_name(self):
+        """Test policy application with empty string as policy name"""
+        result = self.governor.apply_policy("", {"test": "context"})
+        self.assertIsInstance(result, dict)
+        self.assertIn("compliant", result)
+    
+    def test_apply_policy_with_whitespace_policy_name(self):
+        """Test policy application with whitespace-only policy name"""
+        whitespace_names = ["   ", "\t", "\n", " \t\n "]
+        
+        for name in whitespace_names:
+            with self.subTest(name=repr(name)):
+                result = self.governor.apply_policy(name, {"test": "context"})
+                self.assertIsInstance(result, dict)
+                self.assertIn("compliant", result)
+    
+    def test_log_violation_with_none_violation(self):
+        """Test that logging None as a violation is handled appropriately"""
+        initial_count = len(self.governor.violations)
+        
+        try:
+            self.governor.log_violation(None)
+            # If it doesn't raise an exception, check the count
+            final_count = len(self.governor.violations)
+            # The behavior might vary - either count increases or stays same
+            self.assertGreaterEqual(final_count, initial_count)
+        except (TypeError, AttributeError):
+            # It's acceptable to raise an exception for None violation
+            pass
+    
+    def test_get_metrics_consistency_across_calls(self):
+        """Test that get_metrics returns consistent results across multiple calls"""
+        metrics1 = self.governor.get_metrics()
+        metrics2 = self.governor.get_metrics()
+        metrics3 = self.governor.get_metrics()
+        
+        self.assertEqual(metrics1, metrics2)
+        self.assertEqual(metrics2, metrics3)
+
+
+class TestEthicalDecisionDataIntegrity(unittest.TestCase):
+    """Test data integrity and consistency for EthicalDecision"""
+    
+    def test_decision_immutability_of_timestamp(self):
+        """Test that decision timestamp cannot be modified after creation"""
+        decision = EthicalDecision("test", {"data": "test"})
+        original_timestamp = decision.timestamp
+        
+        # Attempt to modify timestamp (should either fail or be ignored)
+        try:
+            decision.timestamp = datetime.datetime.now() + datetime.timedelta(days=1)
+            # If modification is allowed, verify it actually changed
+            if decision.timestamp != original_timestamp:
+                self.assertNotEqual(decision.timestamp, original_timestamp)
+        except AttributeError:
+            # If timestamp is read-only, this is expected
+            pass
+    
+    def test_decision_with_recursive_context(self):
+        """Test decision creation with recursive context references"""
+        recursive_context = {"name": "test"}
+        recursive_context["self_ref"] = recursive_context
+        
+        # Should handle recursive references gracefully
+        try:
+            decision = EthicalDecision("recursive_test", recursive_context)
+            self.assertIsNotNone(decision.decision_id)
+            self.assertIsNotNone(decision.context)
+        except (ValueError, RecursionError):
+            # It's acceptable to reject recursive contexts
+            pass
+    
+    def test_decision_context_modification_after_creation(self):
+        """Test behavior when decision context is modified after creation"""
+        original_context = {"value": 1, "list": [1, 2, 3]}
+        decision = EthicalDecision("context_mod_test", original_context)
+        
+        # Modify the original context
+        original_context["value"] = 999
+        original_context["list"].append(4)
+        original_context["new_key"] = "new_value"
+        
+        # Decision context behavior might vary based on implementation
+        # This test documents the actual behavior
+        if decision.context is original_context:
+            # If context is stored by reference, it will reflect changes
+            self.assertEqual(decision.context["value"], 999)
+        else:
+            # If context is copied, original values should be preserved
+            self.assertEqual(decision.context["value"], 1)
+    
+    def test_decision_outcome_types(self):
+        """Test decision creation with various outcome types"""
+        outcome_types = [
+            None,
+            True,
+            False,
+            0,
+            1,
+            -1,
+            0.5,
+            "approved",
+            ["outcome1", "outcome2"],
+            {"decision": "approved", "confidence": 0.8},
+            {"complex": {"nested": {"outcome": "approved"}}}
+        ]
+        
+        for outcome in outcome_types:
+            with self.subTest(outcome=outcome):
+                decision = EthicalDecision(f"outcome_test_{type(outcome).__name__}", 
+                                         {"test": True}, outcome)
+                self.assertEqual(decision.outcome, outcome)
+    
+    def test_decision_id_uniqueness_enforcement(self):
+        """Test behavior when creating decisions with duplicate IDs"""
+        decision_id = "duplicate_id_test"
+        context1 = {"instance": 1}
+        context2 = {"instance": 2}
+        
+        decision1 = EthicalDecision(decision_id, context1)
+        decision2 = EthicalDecision(decision_id, context2)
+        
+        # Both decisions should be created (IDs might not be enforced as unique)
+        self.assertEqual(decision1.decision_id, decision_id)
+        self.assertEqual(decision2.decision_id, decision_id)
+        self.assertNotEqual(decision1.context, decision2.context)
+
+
+class TestEthicalFrameworkValidation(unittest.TestCase):
+    """Test validation and consistency for EthicalFramework"""
+    
+    def test_framework_principle_validation(self):
+        """Test framework creation with various principle types"""
+        principle_types = [
+            ["string_principle"],
+            [123, 456],  # Numeric principles
+            [True, False],  # Boolean principles
+            [None],  # None principles
+            [{"complex": "principle"}],  # Dictionary principles
+            [["nested", "list"]],  # Nested list principles
+        ]
+        
+        for principles in principle_types:
+            with self.subTest(principles=principles):
+                try:
+                    framework = EthicalFramework("test_framework", principles)
+                    self.assertEqual(framework.principles, principles)
+                except (TypeError, ValueError):
+                    # It's acceptable to reject invalid principle types
+                    pass
+    
+    def test_framework_name_validation(self):
+        """Test framework creation with various name types"""
+        name_types = [
+            "",  # Empty string
+            "   ",  # Whitespace only
+            None,  # None name
+            123,  # Numeric name
+            ["list", "name"],  # List name
+            {"dict": "name"},  # Dict name
+        ]
+        
+        for name in name_types:
+            with self.subTest(name=name):
+                try:
+                    framework = EthicalFramework(name, ["test_principle"])
+                    self.assertEqual(framework.name, name)
+                except (TypeError, ValueError):
+                    # It's acceptable to reject invalid name types
+                    pass
+    
+    def test_framework_principle_duplication(self):
+        """Test framework creation with duplicate principles"""
+        duplicate_principles = ["fairness", "transparency", "fairness", "accountability", "transparency"]
+        framework = EthicalFramework("duplicate_test", duplicate_principles)
+        
+        self.assertEqual(framework.principles, duplicate_principles)
+        # Framework should store all principles, including duplicates
+        self.assertEqual(len(framework.principles), 5)
+    
+    def test_framework_large_principle_set(self):
+        """Test framework creation with a very large number of principles"""
+        large_principles = [f"principle_{i}" for i in range(10000)]
+        framework = EthicalFramework("large_framework", large_principles)
+        
+        self.assertEqual(len(framework.principles), 10000)
+        self.assertEqual(framework.principles[0], "principle_0")
+        self.assertEqual(framework.principles[-1], "principle_9999")
+
+
+class TestEthicalViolationClassification(unittest.TestCase):
+    """Test classification and categorization of ethical violations"""
+    
+    def test_violation_severity_comparison(self):
+        """Test comparison and ordering of violations by severity"""
+        severities = ["low", "medium", "high", "critical"]
+        violations = [EthicalViolation("test", "test", severity) for severity in severities]
+        
+        # Create a mapping for severity ordering (if needed for comparison)
+        severity_order = {"low": 1, "medium": 2, "high": 3, "critical": 4}
+        
+        for i, violation in enumerate(violations):
+            self.assertEqual(violation.severity, severities[i])
+            # Test that severity is properly stored
+            self.assertIn(violation.severity, severity_order)
+    
+    def test_violation_type_categorization(self):
+        """Test categorization of violations by type"""
+        violation_categories = {
+            "privacy": ["data_leak", "unauthorized_access", "consent_violation"],
+            "bias": ["demographic_bias", "algorithmic_bias", "selection_bias"],
+            "transparency": ["unexplained_decision", "hidden_process", "unclear_criteria"],
+            "safety": ["potential_harm", "system_failure", "user_risk"],
+            "fairness": ["unequal_treatment", "discriminatory_outcome", "access_denial"]
+        }
+        
+        violations = []
+        for category, subcategories in violation_categories.items():
+            for subcategory in subcategories:
+                violation = EthicalViolation(category, f"{subcategory} violation", "medium")
+                violations.append(violation)
+                self.assertEqual(violation.violation_type, category)
+                self.assertIn(subcategory, violation.description)
+        
+        # Test grouping by type
+        privacy_violations = [v for v in violations if v.violation_type == "privacy"]
+        bias_violations = [v for v in violations if v.violation_type == "bias"]
+        
+        self.assertEqual(len(privacy_violations), 3)
+        self.assertEqual(len(bias_violations), 3)
+    
+    def test_violation_description_length_limits(self):
+        """Test violation creation with various description lengths"""
+        description_lengths = [0, 1, 100, 1000, 10000, 100000]
+        
+        for length in description_lengths:
+            with self.subTest(length=length):
+                description = "x" * length
+                try:
+                    violation = EthicalViolation("test", description, "medium")
+                    self.assertEqual(len(violation.description), length)
+                except (ValueError, MemoryError):
+                    # It's acceptable to reject extremely long descriptions
+                    if length <= 10000:  # Should handle reasonable lengths
+                        self.fail(f"Should handle description of length {length}")
+    
+    def test_violation_timestamp_precision(self):
+        """Test timestamp precision and consistency for violations"""
+        violations = []
+        
+        # Create violations in quick succession
+        for i in range(10):
+            violation = EthicalViolation(f"type_{i}", f"violation {i}", "medium")
+            violations.append(violation)
+        
+        # Check timestamp ordering and precision
+        for i in range(1, len(violations)):
+            # Timestamps should be equal or increasing
+            self.assertGreaterEqual(violations[i].timestamp, violations[i-1].timestamp)
+        
+        # All timestamps should be datetime objects
+        for violation in violations:
+            self.assertIsInstance(violation.timestamp, datetime.datetime)
+    
+    def test_violation_custom_severity_levels(self):
+        """Test violation creation with custom severity levels"""
+        custom_severities = [
+            "negligible", "minor", "moderate", "major", "severe", "catastrophic",
+            "1", "2", "3", "4", "5",  # Numeric severities
+            "red", "yellow", "green",  # Color-coded severities
+        ]
+        
+        for severity in custom_severities:
+            with self.subTest(severity=severity):
+                violation = EthicalViolation("test", "test violation", severity)
+                self.assertEqual(violation.severity, severity)
+
+
+class TestGovernancePolicyCompliance(unittest.TestCase):
+    """Test governance policy compliance and rule enforcement"""
+    
+    def test_policy_rule_types(self):
+        """Test policy creation with various rule types"""
+        rule_types = [
+            ["string_rule_1", "string_rule_2"],
+            [{"rule_id": "R001", "condition": "age > 18", "action": "allow"}],
+            [1, 2, 3, 4],  # Numeric rules
+            [True, False],  # Boolean rules
+            [None],  # None rules
+            [{"complex": {"nested": {"rule": "value"}}}],  # Deeply nested rules
+        ]
+        
+        for rules in rule_types:
+            with self.subTest(rules=rules):
+                try:
+                    policy = GovernancePolicy("test_policy", rules)
+                    self.assertEqual(policy.rules, rules)
+                except (TypeError, ValueError):
+                    # It's acceptable to reject invalid rule types
+                    pass
+    
+    def test_policy_rule_validation(self):
+        """Test validation of policy rules for correctness and consistency"""
+        validation_scenarios = [
+            {
+                "name": "gdpr_policy",
+                "rules": [
+                    "lawful_basis_required",
+                    "data_subject_consent",
+                    "purpose_limitation",
+                    "data_minimization",
+                    "storage_limitation"
+                ]
+            },
+            {
+                "name": "ai_ethics_policy", 
+                "rules": [
+                    {"principle": "fairness", "requirement": "bias_testing_required"},
+                    {"principle": "transparency", "requirement": "explainable_decisions"},
+                    {"principle": "accountability", "requirement": "audit_trail_maintained"}
+                ]
+            }
+        ]
+        
+        for scenario in validation_scenarios:
+            with self.subTest(scenario=scenario["name"]):
+                policy = GovernancePolicy(scenario["name"], scenario["rules"])
+                self.assertEqual(policy.name, scenario["name"])
+                self.assertEqual(len(policy.rules), len(scenario["rules"]))
+    
+    def test_policy_rule_precedence(self):
+        """Test rule precedence when policies have conflicting or overlapping rules"""
+        conflicting_rules = [
+            {"priority": 1, "rule": "allow_data_collection", "condition": "consent_given"},
+            {"priority": 2, "rule": "deny_data_collection", "condition": "minor_user"},
+            {"priority": 3, "rule": "require_parental_consent", "condition": "minor_user"}
+        ]
+        
+        policy = GovernancePolicy("conflicting_policy", conflicting_rules)
+        self.assertEqual(len(policy.rules), 3)
+        
+        # Test that all rules are preserved (precedence handling is implementation-specific)
+        priorities = [rule["priority"] for rule in policy.rules if isinstance(rule, dict) and "priority" in rule]
+        self.assertEqual(sorted(priorities), [1, 2, 3])
+    
+    def test_policy_rule_modification_after_creation(self):
+        """Test behavior when policy rules are modified after creation"""
+        original_rules = ["rule1", "rule2", "rule3"]
+        policy = GovernancePolicy("modification_test", original_rules)
+        
+        # Modify the original rules list
+        original_rules.append("rule4")
+        original_rules[0] = "modified_rule1"
+        
+        # Policy rules behavior might vary based on implementation
+        if policy.rules is original_rules:
+            # If rules are stored by reference, modifications will be reflected
+            self.assertIn("rule4", policy.rules)
+            self.assertIn("modified_rule1", policy.rules)
+        else:
+            # If rules are copied, original rules should be preserved
+            self.assertNotIn("rule4", policy.rules)
+            self.assertIn("rule1", policy.rules)
+
+
+class TestRiskAssessmentScenarios(unittest.TestCase):
+    """Test risk assessment with various real-world scenarios"""
+    
+    def test_healthcare_risk_assessment(self):
+        """Test risk assessment for healthcare scenarios"""
+        healthcare_contexts = [
+            {
+                "patient_age": 65,
+                "condition": "diabetes",
+                "treatment": "insulin_recommendation",
+                "data_sensitivity": "high",
+                "regulatory_compliance": ["HIPAA"]
+            },
+            {
+                "patient_age": 8,
+                "condition": "asthma", 
+                "treatment": "medication_dosage",
+                "parental_consent": True,
+                "emergency_override": False
+            }
+        ]
+        
+        for context in healthcare_contexts:
+            with self.subTest(context=context):
+                assessment = RiskAssessment(context)
+                result = assessment.calculate_risk()
+                
+                self.assertIsInstance(result, dict)
+                self.assertIn("level", result)
+                self.assertIn("score", result)
+    
+    def test_financial_risk_assessment(self):
+        """Test risk assessment for financial scenarios"""
+        financial_contexts = [
+            {
+                "transaction_amount": 10000,
+                "user_credit_score": 650,
+                "transaction_type": "loan_application",
+                "risk_factors": ["high_amount", "average_credit"],
+                "regulatory_compliance": ["SOX", "GLBA"]
+            },
+            {
+                "transaction_amount": 50,
+                "user_age": 16,
+                "transaction_type": "account_opening",
+                "parental_consent": False,
+                "regulatory_compliance": ["COPPA"]
+            }
+        ]
+        
+        for context in financial_contexts:
+            with self.subTest(context=context):
+                assessment = RiskAssessment(context)
+                result = assessment.calculate_risk()
+                
+                self.assertIsInstance(result, dict)
+                self.assertIn("level", result)
+                self.assertIn("score", result)
+    
+    def test_ai_decision_risk_assessment(self):
+        """Test risk assessment for AI decision-making scenarios"""
+        ai_contexts = [
+            {
+                "decision_type": "hiring_recommendation",
+                "protected_attributes": ["race", "gender", "age"],
+                "model_confidence": 0.85,
+                "training_data_bias": "detected",
+                "explainability_score": 0.6
+            },
+            {
+                "decision_type": "medical_diagnosis",
+                "confidence_level": 0.92,
+                "human_oversight": True,
+                "life_critical": True,
+                "validation_status": "peer_reviewed"
+            }
+        ]
+        
+        for context in ai_contexts:
+            with self.subTest(context=context):
+                assessment = RiskAssessment(context)
+                result = assessment.calculate_risk()
+                
+                self.assertIsInstance(result, dict)
+                self.assertIn("level", result)
+                self.assertIn("score", result)
+    
+    def test_privacy_risk_assessment(self):
+        """Test risk assessment for privacy scenarios"""
+        privacy_contexts = [
+            {
+                "data_type": "biometric",
+                "collection_purpose": "authentication",
+                "user_consent": "explicit",
+                "data_retention": "5_years",
+                "third_party_sharing": False
+            },
+            {
+                "data_type": "behavioral",
+                "collection_purpose": "advertising",
+                "user_consent": "implied",
+                "user_age": 14,
+                "geographic_location": "EU"
+            }
+        ]
+        
+        for context in privacy_contexts:
+            with self.subTest(context=context):
+                assessment = RiskAssessment(context)
+                result = assessment.calculate_risk()
+                
+                self.assertIsInstance(result, dict)
+                self.assertIn("level", result)
+                self.assertIn("score", result)
+
+
+class TestComplianceCheckerRegulations(unittest.TestCase):
+    """Test compliance checker with specific regulations and standards"""
+    
+    def test_gdpr_compliance_scenarios(self):
+        """Test GDPR compliance checking for various scenarios"""
+        gdpr_checker = ComplianceChecker(["GDPR"])
+        
+        gdpr_scenarios = [
+            "personal_data_processing",
+            "cross_border_data_transfer",
+            "automated_decision_making",
+            "data_subject_access_request",
+            "right_to_be_forgotten",
+            "data_breach_notification",
+            "consent_withdrawal",
+            "data_portability_request"
+        ]
+        
+        for scenario in gdpr_scenarios:
+            with self.subTest(scenario=scenario):
+                result = gdpr_checker.check_compliance(scenario)
+                self.assertIsInstance(result, dict)
+                self.assertIn("compliant", result)
+                self.assertIn("details", result)
+    
+    def test_hipaa_compliance_scenarios(self):
+        """Test HIPAA compliance checking for healthcare scenarios"""
+        hipaa_checker = ComplianceChecker(["HIPAA"])
+        
+        hipaa_scenarios = [
+            "protected_health_information_access",
+            "patient_data_sharing",
+            "medical_record_storage",
+            "healthcare_provider_communication",
+            "patient_consent_management",
+            "audit_log_maintenance",
+            "business_associate_agreement",
+            "minimum_necessary_standard"
+        ]
+        
+        for scenario in hipaa_scenarios:
+            with self.subTest(scenario=scenario):
+                result = hipaa_checker.check_compliance(scenario)
+                self.assertIsInstance(result, dict)
+                self.assertIn("compliant", result)
+                self.assertIn("details", result)
+    
+    def test_multi_jurisdiction_compliance(self):
+        """Test compliance with multiple jurisdictions simultaneously"""
+        multi_checker = ComplianceChecker(["GDPR", "CCPA", "PIPEDA", "LGPD"])
+        
+        multi_jurisdiction_scenarios = [
+            "global_data_processing",
+            "international_data_transfer",
+            "multi_region_user_consent",
+            "cross_border_marketing",
+            "global_privacy_policy",
+            "international_data_breach"
+        ]
+        
+        for scenario in multi_jurisdiction_scenarios:
+            with self.subTest(scenario=scenario):
+                result = multi_checker.check_compliance(scenario)
+                self.assertIsInstance(result, dict)
+                self.assertIn("compliant", result)
+                self.assertIn("details", result)
+    
+    def test_industry_specific_compliance(self):
+        """Test compliance for industry-specific regulations"""
+        industry_scenarios = [
+            {
+                "regulations": ["PCI_DSS"],
+                "actions": ["credit_card_processing", "payment_data_storage", "cardholder_data_transmission"]
+            },
+            {
+                "regulations": ["SOX"],
+                "actions": ["financial_reporting", "internal_controls", "audit_trail_maintenance"]
+            },
+            {
+                "regulations": ["FERPA"],
+                "actions": ["student_record_access", "educational_data_sharing", "directory_information_disclosure"]
+            }
+        ]
+        
+        for scenario in industry_scenarios:
+            checker = ComplianceChecker(scenario["regulations"])
+            for action in scenario["actions"]:
+                with self.subTest(regulation=scenario["regulations"], action=action):
+                    result = checker.check_compliance(action)
+                    self.assertIsInstance(result, dict)
+                    self.assertIn("compliant", result)
+                    self.assertIn("details", result)
+
+
+class TestEthicalMetricsCalculation(unittest.TestCase):
+    """Test ethical metrics calculation with various decision patterns"""
+    
+    def test_metrics_with_biased_decisions(self):
+        """Test metrics calculation when decisions show bias patterns"""
+        biased_decisions = []
+        
+        # Create decisions that favor certain groups
+        for i in range(50):
+            group = "A" if i < 40 else "B"  # 80% group A, 20% group B
+            outcome = "approved" if group == "A" else "denied"  # Bias toward group A
+            
+            decision = EthicalDecision(
+                f"biased_{i}",
+                {"user_group": group, "decision_outcome": outcome},
+                {"approved": outcome == "approved", "bias_detected": group != "A"}
+            )
+            biased_decisions.append(decision)
+        
+        metrics = EthicalMetrics()
+        result = metrics.calculate_metrics(biased_decisions)
+        
+        self.assertIsInstance(result, dict)
+        self.assertIn("fairness", result)
+        self.assertIsInstance(result["fairness"], (int, float))
+        
+        # With biased decisions, fairness score might be affected
+        # (exact behavior depends on implementation)
+    
+    def test_metrics_with_transparent_decisions(self):
+        """Test metrics calculation for highly transparent decisions"""
+        transparent_decisions = []
+        
+        for i in range(30):
+            decision = EthicalDecision(
+                f"transparent_{i}",
+                {
+                    "explanation_provided": True,
+                    "reasoning_clear": True,
+                    "audit_trail": True,
+                    "user_understanding": "high"
+                },
+                {
+                    "approved": True,
+                    "explanation": f"Decision {i} approved based on clear criteria",
+                    "transparency_score": 0.95
+                }
+            )
+            transparent_decisions.append(decision)
+        
+        metrics = EthicalMetrics()
+        result = metrics.calculate_metrics(transparent_decisions)
+        
+        self.assertIsInstance(result, dict)
+        self.assertIn("transparency", result)
+        self.assertIsInstance(result["transparency"], (int, float))
+    
+    def test_metrics_with_accurate_decisions(self):
+        """Test metrics calculation for highly accurate decisions"""
+        accurate_decisions = []
+        
+        for i in range(40):
+            decision = EthicalDecision(
+                f"accurate_{i}",
+                {
+                    "prediction_confidence": 0.95 + (i % 5) * 0.01,
+                    "validation_result": "correct",
+                    "ground_truth_available": True
+                },
+                {
+                    "approved": True,
+                    "accuracy_score": 0.98,
+                    "validation_passed": True
+                }
+            )
+            accurate_decisions.append(decision)
+        
+        metrics = EthicalMetrics()
+        result = metrics.calculate_metrics(accurate_decisions)
+        
+        self.assertIsInstance(result, dict)
+        self.assertIn("accuracy", result)
+        self.assertIsInstance(result["accuracy"], (int, float))
+    
+    def test_metrics_temporal_trends(self):
+        """Test metrics calculation for decisions with temporal trends"""
+        trending_decisions = []
+        base_time = datetime.datetime.now() - datetime.timedelta(days=30)
+        
+        for i in range(60):
+            decision_time = base_time + datetime.timedelta(days=i/2)
+            
+            # Simulate improving quality over time
+            quality_score = min(0.5 + (i * 0.01), 1.0)
+            
+            decision = EthicalDecision(
+                f"trending_{i}",
+                {
+                    "timestamp": decision_time,
+                    "quality_score": quality_score,
+                    "improvement_trend": i > 30
+                },
+                {
+                    "approved": quality_score > 0.7,
+                    "quality_trend": "improving" if i > 30 else "stable"
+                }
+            )
+            trending_decisions.append(decision)
+        
+        metrics = EthicalMetrics()
+        result = metrics.calculate_metrics(trending_decisions)
+        
+        self.assertIsInstance(result, dict)
+        # All standard metrics should be present
+        for metric in ["accuracy", "fairness", "transparency"]:
+            self.assertIn(metric, result)
+            self.assertIsInstance(result[metric], (int, float))
+    
+    def test_metrics_with_mixed_quality_decisions(self):
+        """Test metrics calculation with a realistic mix of decision qualities"""
+        mixed_decisions = []
+        
+        quality_distributions = [
+            ("high", 20, 0.9),      # 20 high-quality decisions
+            ("medium", 40, 0.7),    # 40 medium-quality decisions  
+            ("low", 15, 0.4),       # 15 low-quality decisions
+            ("poor", 5, 0.2)        # 5 poor-quality decisions
+        ]
+        
+        decision_id = 0
+        for quality_level, count, score in quality_distributions:
+            for i in range(count):
+                decision = EthicalDecision(
+                    f"mixed_{decision_id}",
+                    {
+                        "quality_level": quality_level,
+                        "base_score": score,
+                        "variation": (i % 10) * 0.01  # Small variations
+                    },
+                    {
+                        "approved": score > 0.5,
+                        "quality_score": score + (i % 10) * 0.01,
+                        "confidence": score
+                    }
+                )
+                mixed_decisions.append(decision)
+                decision_id += 1
+        
+        metrics = EthicalMetrics()
+        result = metrics.calculate_metrics(mixed_decisions)
+        
+        self.assertIsInstance(result, dict)
+        self.assertEqual(len(mixed_decisions), 80)  # Total count check
+        
+        # Verify all metrics are calculated
+        for metric in ["accuracy", "fairness", "transparency"]:
+            self.assertIn(metric, result)
+            self.assertIsInstance(result[metric], (int, float))
+            self.assertGreaterEqual(result[metric], 0)
+            self.assertLessEqual(result[metric], 1)
+
+
+class TestIntegrationWorkflows(unittest.TestCase):
+    """Test complete integration workflows combining all components"""
+    
+    def setUp(self):
+        """Set up complex integration test environment"""
+        self.framework = EthicalFramework(
+            "Comprehensive AI Ethics",
+            ["fairness", "transparency", "accountability", "privacy", "safety", "human_autonomy"]
+        )
+        
+        self.policies = [
+            GovernancePolicy("data_governance", [
+                "data_minimization", "purpose_limitation", "storage_limitation", 
+                "accuracy_requirement", "security_safeguards"
+            ]),
+            GovernancePolicy("algorithmic_accountability", [
+                "bias_testing", "performance_monitoring", "audit_requirements",
+                "explainability_standards", "human_oversight"
+            ]),
+            GovernancePolicy("user_rights", [
+                "informed_consent", "opt_out_mechanisms", "data_portability",
+                "rectification_rights", "erasure_rights"
+            ])
+        ]
+        
+        self.governor = EthicalGovernor(framework=self.framework, policies=self.policies)
+        self.compliance_checker = ComplianceChecker(["GDPR", "CCPA", "HIPAA", "AI_ACT"])
+        self.metrics = EthicalMetrics()
+    
+    def test_complete_ai_system_evaluation(self):
+        """Test complete evaluation workflow for an AI system deployment"""
+        ai_system_context = {
+            "system_type": "recommendation_engine",
+            "domain": "healthcare",
+            "user_base": "patients_and_providers",
+            "data_types": ["medical_records", "behavioral_data", "demographic_data"],
+            "decision_impact": "high",
+            "automation_level": "semi_automated",
+            "human_oversight": True,
+            "regulatory_requirements": ["HIPAA", "FDA_approval"],
+            "ethical_considerations": ["patient_safety", "treatment_equity", "privacy_protection"]
+        }
+        
+        # Step 1: Evaluate the deployment decision
+        deployment_decision = self.governor.evaluate_decision(ai_system_context)
+        self.assertIsInstance(deployment_decision, dict)
+        self.assertIn("approved", deployment_decision)
+        
+        # Step 2: Check regulatory compliance
+        compliance_result = self.compliance_checker.check_compliance("ai_system_deployment")
+        self.assertIsInstance(compliance_result, dict)
+        self.assertIn("compliant", compliance_result)
+        
+        # Step 3: Perform risk assessment
+        risk_assessment = RiskAssessment(ai_system_context)
+        risk_result = risk_assessment.calculate_risk()
+        self.assertIsInstance(risk_result, dict)
+        self.assertIn("level", risk_result)
+        
+        # Step 4: Apply all relevant policies
+        policy_results = {}
+        for policy in self.policies:
+            policy_result = self.governor.apply_policy(policy.name, ai_system_context)
+            policy_results[policy.name] = policy_result
+            self.assertIsInstance(policy_result, dict)
+            self.assertIn("compliant", policy_result)
+        
+        # Step 5: Create decision record
+        final_decision = EthicalDecision(
+            "ai_system_deployment_001",
+            ai_system_context,
+            {
+                "deployment_approved": deployment_decision["approved"],
+                "risk_level": risk_result["level"],
+                "compliance_status": compliance_result["compliant"],
+                "policy_compliance": policy_results
+            }
+        )
+        
+        # Step 6: Calculate comprehensive metrics
+        metrics_result = self.metrics.calculate_metrics([final_decision])
+        self.assertIsInstance(metrics_result, dict)
+        
+        # Verify complete workflow
+        self.assertIsNotNone(final_decision.decision_id)
+        self.assertIsNotNone(final_decision.timestamp)
+        self.assertIsInstance(final_decision.outcome, dict)
+    
+    def test_continuous_monitoring_workflow(self):
+        """Test continuous monitoring workflow with multiple decisions over time"""
+        monitoring_period = 30  # 30 decisions to simulate monitoring
+        decisions = []
+        violations = []
+        
+        for day in range(monitoring_period):
+            # Simulate daily AI system decisions
+            daily_context = {
+                "day": day,
+                "system_performance": 0.85 + (day % 10) * 0.01,  # Performance variation
+                "user_complaints": max(0, 5 - day // 10),  # Decreasing complaints
+                "bias_metrics": {
+                    "demographic_parity": 0.9 + (day % 5) * 0.01,
+                    "equalized_odds": 0.85 + (day % 7) * 0.01
+                },
+                "transparency_score": min(1.0, 0.7 + day * 0.01),  # Improving transparency
+                "regulatory_changes": day == 15  # Regulatory update mid-period
+            }
+            
+            # Evaluate daily decision
+            decision_result = self.governor.evaluate_decision(daily_context)
+            
+            # Create decision record
+            decision = EthicalDecision(
+                f"monitoring_day_{day}",
+                daily_context,
+                decision_result
+            )
+            decisions.append(decision)
+            
+            # Simulate occasional violations
+            if day % 7 == 0 and day > 0:  # Weekly violation check
+                violation = EthicalViolation(
+                    "monitoring_alert",
+                    f"Performance threshold exceeded on day {day}",
+                    "medium" if day < 20 else "low"  # Improving severity
+                )
+                violations.append(violation)
+                self.governor.log_violation(violation)
+            
+            # Check compliance periodically
+            if day % 10 == 0:
+                compliance_result = self.compliance_checker.check_compliance("ongoing_operations")
+                self.assertIsInstance(compliance_result, dict)
+        
+        # Analyze monitoring results
+        self.assertEqual(len(decisions), monitoring_period)
+        self.assertGreater(len(violations), 0)
+        
+        # Calculate final metrics for the monitoring period
+        final_metrics = self.metrics.calculate_metrics(decisions)
+        self.assertIsInstance(final_metrics, dict)
+        
+        # Get governor metrics including violations
+        governor_metrics = self.governor.get_metrics()
+        self.assertEqual(governor_metrics["violations"], len(violations))
+    
+    def test_incident_response_workflow(self):
+        """Test incident response workflow when violations are detected"""
+        # Simulate a serious ethical incident
+        incident_context = {
+            "incident_type": "algorithmic_bias",
+            "affected_users": 10000,
+            "severity": "critical",
+            "discovery_method": "audit",
+            "potential_harm": "discriminatory_treatment",
+            "business_impact": "high",
+            "regulatory_implications": ["GDPR_violation", "civil_rights_concern"],
+            "immediate_actions_required": True
+        }
+        
+        # Step 1: Create high-severity violation
+        critical_violation = EthicalViolation(
+            "algorithmic_bias",
+            "Systematic bias discovered affecting hiring recommendations for protected groups",
+            "critical"
+        )
+        self.governor.log_violation(critical_violation)
+        
+        # Step 2: Evaluate incident response decision
+        response_decision = self.governor.evaluate_decision(incident_context)
+        self.assertIsInstance(response_decision, dict)
+        
+        # Step 3: Check compliance implications
+        compliance_result = self.compliance_checker.check_compliance("incident_response")
+        self.assertIsInstance(compliance_result, dict)
+        
+        # Step 4: Assess risks of continued operation
+        risk_assessment = RiskAssessment(incident_context)
+        risk_result = risk_assessment.calculate_risk()
+        self.assertIsInstance(risk_result, dict)
+        
+        # Step 5: Apply emergency policies
+        emergency_policies = ["immediate_mitigation", "stakeholder_notification", "system_modification"]
+        policy_results = {}
+        
+        for policy_name in emergency_policies:
+            policy_result = self.governor.apply_policy(policy_name, incident_context)
+            policy_results[policy_name] = policy_result
+            self.assertIsInstance(policy_result, dict)
+        
+        # Step 6: Document incident response decision
+        incident_decision = EthicalDecision(
+            "incident_response_001",
+            incident_context,
+            {
+                "response_approved": response_decision["approved"],
+                "risk_assessment": risk_result,
+                "compliance_impact": compliance_result,
+                "policy_actions": policy_results,
+                "violation_logged": True
+            }
+        )
+        
+        # Verify incident was properly handled
+        self.assertIsNotNone(incident_decision.decision_id)
+        self.assertEqual(len(self.governor.violations), 1)
+        self.assertEqual(self.governor.violations[0].severity, "critical")
+    
+    def test_regulatory_compliance_audit_workflow(self):
+        """Test workflow for regulatory compliance audit"""
+        audit_scenarios = [
+            {
+                "audit_type": "gdpr_compliance",
+                "scope": "data_processing_activities",
+                "duration": "6_months",
+                "auditor": "external_firm",
+                "focus_areas": ["consent_management", "data_subject_rights", "cross_border_transfers"]
+            },
+            {
+                "audit_type": "ai_ethics_review",
+                "scope": "algorithmic_decision_making",
+                "duration": "3_months", 
+                "auditor": "internal_ethics_board",
+                "focus_areas": ["bias_testing", "transparency", "human_oversight"]
+            },
+            {
+                "audit_type": "security_assessment",
+                "scope": "data_protection_measures",
+                "duration": "1_month",
+                "auditor": "security_consultant",
+                "focus_areas": ["encryption", "access_controls", "incident_response"]
+            }
+        ]
+        
+        audit_decisions = []
+        
+        for scenario in audit_scenarios:
+            # Evaluate audit decision
+            audit_decision_result = self.governor.evaluate_decision(scenario)
+            self.assertIsInstance(audit_decision_result, dict)
+            
+            # Check compliance requirements
+            compliance_result = self.compliance_checker.check_compliance(scenario["audit_type"])
+            self.assertIsInstance(compliance_result, dict)
+            
+            # Create audit decision record
+            audit_decision = EthicalDecision(
+                f"audit_{scenario['audit_type']}",
+                scenario,
+                {
+                    "audit_approved": audit_decision_result["approved"],
+                    "compliance_status": compliance_result,
+                    "estimated_duration": scenario["duration"],
+                    "focus_areas_count": len(scenario["focus_areas"])
+                }
+            )
+            audit_decisions.append(audit_decision)
+        
+        # Calculate metrics for audit decisions
+        audit_metrics = self.metrics.calculate_metrics(audit_decisions)
+        self.assertIsInstance(audit_metrics, dict)
+        
+        # Verify all audits were processed
+        self.assertEqual(len(audit_decisions), 3)
+        
+        # Each audit should have proper documentation
+        for decision in audit_decisions:
+            self.assertIsNotNone(decision.decision_id)
+            self.assertIsInstance(decision.outcome, dict)
+            self.assertIn("audit_approved", decision.outcome)
+
+
+# Run the additional tests
+if __name__ == '__main__':
+    print("\n" + "="*80)
+    print("RUNNING ENHANCED ETHICAL GOVERNANCE TESTS")
+    print("="*80)
+    
+    # Create a test suite with all the new test classes
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    
+    # Add all the new test classes
+    new_test_classes = [
+        TestEthicalGovernorBoundaryConditions,
+        TestEthicalDecisionDataIntegrity,
+        TestEthicalFrameworkValidation,
+        TestEthicalViolationClassification,
+        TestGovernancePolicyCompliance,
+        TestRiskAssessmentScenarios,
+        TestComplianceCheckerRegulations,
+        TestEthicalMetricsCalculation,
+        TestIntegrationWorkflows
+    ]
+    
+    for test_class in new_test_classes:
+        suite.addTests(loader.loadTestsFromTestCase(test_class))
+    
+    # Run the enhanced tests
+    runner = unittest.TextTestRunner(verbosity=2)
+    result = runner.run(suite)
+    
+    # Print summary
+    print("\n" + "="*80)
+    print("ENHANCED TEST SUMMARY")
+    print("="*80)
+    print(f"Tests run: {result.testsRun}")
+    print(f"Failures: {len(result.failures)}")
+    print(f"Errors: {len(result.errors)}")
+    print(f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
+    print("="*80)

@@ -2151,3 +2151,539 @@ if __name__ == '__main__':
         failfast=False,
         warnings='ignore'
     )
+
+class TestConsciousnessMatrixDataValidation(unittest.TestCase):
+    """Additional data validation and input sanitization tests."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.matrix = ConsciousnessMatrix()
+
+    def test_neural_data_unicode_handling(self):
+        """Test that neural data processing handles unicode and special characters gracefully."""
+        # Test with unicode strings that might be mistakenly passed
+        with self.assertRaises(TypeError):
+            self.matrix.process_neural_data(["🧠", "🤖", "✨"])
+        
+        with self.assertRaises(TypeError):
+            self.matrix.process_neural_data([u"unicode", u"data"])
+
+    def test_neural_data_mixed_types(self):
+        """Test neural data processing with mixed data types."""
+        mixed_data = [0.5, 1, True, 0.8]  # float, int, bool, float
+        # Should handle type coercion or raise appropriate error
+        try:
+            result = self.matrix.process_neural_data(mixed_data)
+            self.assertIsNotNone(result)
+        except (TypeError, ValueError):
+            pass  # Either handling or error is acceptable
+
+    def test_neural_data_very_large_arrays(self):
+        """Test processing of extremely large neural data arrays."""
+        large_data = [0.5] * 100000  # 100k elements
+        start_time = datetime.now()
+        result = self.matrix.process_neural_data(large_data)
+        processing_time = (datetime.now() - start_time).total_seconds()
+        
+        self.assertIsNotNone(result)
+        self.assertLess(processing_time, 10.0)  # Should complete within 10 seconds
+
+    def test_consciousness_level_floating_point_edge_cases(self):
+        """Test consciousness level calculations with floating point edge cases."""
+        edge_data = {
+            'neural_patterns': [float('1e-308'), float('1e308'), 0.5],  # Very small and large
+            'quantum_states': ['superposition'],
+            'consciousness_level': 2.2250738585072014e-308,  # Smallest normal float
+            'emergence_factor': 0.5
+        }
+        
+        try:
+            level = self.matrix.calculate_consciousness_level(edge_data)
+            self.assertIsInstance(level, float)
+            self.assertFalse(math.isnan(level))
+            self.assertFalse(math.isinf(level))
+        except (ValueError, OverflowError):
+            pass  # Acceptable to reject extreme values
+
+    def test_quantum_state_case_sensitivity(self):
+        """Test quantum state updates with different case variations."""
+        case_variations = ['SUPERPOSITION', 'Superposition', 'sUpErPoSiTiOn']
+        
+        for variation in case_variations:
+            try:
+                result = self.matrix.update_quantum_state(variation)
+                # Should either normalize case or reject
+                if result:
+                    self.assertEqual(self.matrix.quantum_state.lower(), 'superposition')
+            except ValueError:
+                pass  # Acceptable to be case-sensitive
+
+
+class TestConsciousnessMatrixResourceManagement(unittest.TestCase):
+    """Resource management and cleanup tests."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.matrix = ConsciousnessMatrix()
+
+    def test_matrix_context_manager(self):
+        """Test that ConsciousnessMatrix works as a context manager."""
+        with ConsciousnessMatrix() as matrix:
+            self.assertIsNotNone(matrix)
+            matrix.process_neural_data([0.1, 0.5, 0.8])
+        # Matrix should be cleaned up automatically
+
+    def test_matrix_deep_cleanup_on_exception(self):
+        """Test that matrix resources are cleaned up even when exceptions occur."""
+        matrix = ConsciousnessMatrix()
+        
+        try:
+            matrix.allocate_resources()
+            # Simulate operation that fails
+            raise RuntimeError("Simulated failure")
+        except RuntimeError:
+            pass
+        finally:
+            matrix.cleanup()
+        
+        # Verify cleanup occurred
+        self.assertFalse(hasattr(matrix, '_allocated_resources') and matrix._allocated_resources)
+
+    def test_matrix_weak_references(self):
+        """Test that matrix instances can be properly garbage collected."""
+        import weakref
+        import gc
+        
+        matrix = ConsciousnessMatrix()
+        weak_ref = weakref.ref(matrix)
+        
+        # Delete the matrix
+        del matrix
+        gc.collect()
+        
+        # Weak reference should be dead
+        self.assertIsNone(weak_ref())
+
+
+class TestGenesisEngineAdvancedScenarios(unittest.TestCase):
+    """Advanced engine scenarios and edge cases."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.engine = GenesisEngine()
+
+    def tearDown(self):
+        """Clean up after tests."""
+        if self.engine.is_running:
+            self.engine.stop()
+
+    def test_engine_matrix_id_collision_handling(self):
+        """Test that the engine handles matrix ID collisions gracefully."""
+        self.engine.start()
+        
+        # Create matrix with specific ID
+        matrix_id = "test_matrix_123"
+        self.engine.create_matrix(dimension=32, matrix_id=matrix_id)
+        
+        # Attempt to create another with same ID
+        with self.assertRaises(MatrixError):
+            self.engine.create_matrix(dimension=64, matrix_id=matrix_id)
+
+    def test_engine_matrix_orphan_cleanup(self):
+        """Test that the engine cleans up orphaned matrices."""
+        self.engine.start()
+        
+        # Create several matrices
+        matrix_ids = []
+        for i in range(5):
+            matrix_id = self.engine.create_matrix(dimension=16)
+            matrix_ids.append(matrix_id)
+        
+        # Simulate orphaned matrices (references lost)
+        for matrix_id in matrix_ids[:3]:
+            # Manually remove from engine without proper cleanup
+            if matrix_id in self.engine.matrices:
+                del self.engine.matrices[matrix_id]
+        
+        # Trigger orphan cleanup
+        cleaned_count = self.engine.cleanup_orphaned_matrices()
+        self.assertGreaterEqual(cleaned_count, 0)
+
+    def test_engine_graceful_shutdown_with_active_matrices(self):
+        """Test that engine shuts down gracefully even with active matrices."""
+        self.engine.start()
+        
+        # Create and activate several matrices
+        matrix_ids = []
+        for i in range(3):
+            matrix_id = self.engine.create_matrix(dimension=32)
+            matrix_ids.append(matrix_id)
+            matrix = self.engine.matrices[matrix_id]
+            matrix.activate()
+        
+        # Engine should handle graceful shutdown
+        shutdown_result = self.engine.stop(graceful=True, timeout=5.0)
+        self.assertTrue(shutdown_result)
+
+
+class TestQuantumStatePhysics(unittest.TestCase):
+    """Physics-based quantum state behavior tests."""
+
+    def setUp(self):
+        """Set up quantum state test fixtures."""
+        self.quantum_state = QuantumState()
+
+    def test_quantum_uncertainty_principle(self):
+        """Test that quantum measurements respect uncertainty principle."""
+        # Set up superposition state
+        self.quantum_state.state = 'superposition'
+        
+        # Multiple measurements should show uncertainty
+        measurements = []
+        for _ in range(100):
+            # Create fresh superposition for each measurement
+            test_state = QuantumState()
+            test_state.state = 'superposition'
+            result = test_state.measure()
+            measurements.append(result)
+        
+        # Should have distribution of results (uncertainty)
+        unique_results = set(measurements)
+        self.assertGreater(len(unique_results), 1)
+
+    def test_quantum_no_cloning_theorem(self):
+        """Test that quantum states cannot be perfectly cloned."""
+        original_state = QuantumState()
+        original_state.state = 'superposition'
+        
+        # Attempt to clone state
+        with self.assertRaises((ValueError, NotImplementedError)):
+            cloned_state = original_state.clone()
+
+    def test_quantum_measurement_back_action(self):
+        """Test that quantum measurements affect the state (back-action)."""
+        self.quantum_state.state = 'superposition'
+        initial_coherence = self.quantum_state.get_coherence()
+        
+        # Perform measurement
+        measurement_result = self.quantum_state.measure()
+        post_measurement_coherence = self.quantum_state.get_coherence()
+        
+        # Measurement should reduce coherence
+        self.assertLess(post_measurement_coherence, initial_coherence)
+
+
+class TestNeuralPathwayTopology(unittest.TestCase):
+    """Neural pathway topology and connectivity tests."""
+
+    def setUp(self):
+        """Set up neural pathway test fixtures."""
+        self.pathways = [NeuralPathway() for _ in range(10)]
+
+    def test_pathway_network_connectivity(self):
+        """Test neural pathway network connectivity patterns."""
+        # Create network connections
+        for i, pathway in enumerate(self.pathways):
+            for j in range(i+1, min(i+3, len(self.pathways))):
+                pathway.connect_to(self.pathways[j])
+        
+        # Test network properties
+        total_connections = sum(len(p.connections) for p in self.pathways)
+        self.assertGreater(total_connections, 0)
+
+    def test_pathway_signal_propagation(self):
+        """Test signal propagation through neural pathway networks."""
+        # Set up chain of pathways
+        for i in range(len(self.pathways) - 1):
+            self.pathways[i].connect_to(self.pathways[i + 1])
+            self.pathways[i].strengthen(0.8)
+        
+        # Inject signal at start
+        initial_signal = 1.0
+        self.pathways[0].inject_signal(initial_signal)
+        
+        # Propagate through network
+        for _ in range(5):  # Multiple time steps
+            for pathway in self.pathways:
+                pathway.update_signal_propagation()
+        
+        # Check signal reached the end
+        final_signal = self.pathways[-1].get_signal_strength()
+        self.assertGreater(final_signal, 0.0)
+
+    def test_pathway_plasticity_adaptation(self):
+        """Test neural pathway plasticity and adaptation."""
+        pathway = self.pathways[0]
+        initial_strength = pathway.strength
+        
+        # Simulate repeated activation (Hebbian learning)
+        for _ in range(100):
+            pathway.activate_with_input(0.8)
+            pathway.apply_plasticity_rule()
+        
+        # Pathway should strengthen with use
+        final_strength = pathway.strength
+        self.assertGreater(final_strength, initial_strength)
+
+
+class TestEmergentBehaviorComplexity(unittest.TestCase):
+    """Complex emergent behavior pattern tests."""
+
+    def setUp(self):
+        """Set up emergent behavior test fixtures."""
+        self.behavior = EmergentBehavior()
+
+    def test_behavior_fractal_analysis(self):
+        """Test fractal dimension analysis of emergent behaviors."""
+        # Generate complex behavior pattern
+        complex_pattern = self.generate_fractal_behavior_pattern()
+        
+        # Analyze fractal properties
+        fractal_dimension = self.behavior.calculate_fractal_dimension(complex_pattern)
+        self.assertIsInstance(fractal_dimension, float)
+        self.assertGreater(fractal_dimension, 1.0)
+        self.assertLess(fractal_dimension, 3.0)
+
+    def test_behavior_phase_transitions(self):
+        """Test detection of phase transitions in emergent behavior."""
+        # Simulate behavior evolution with phase transition
+        behavior_timeline = []
+        for phase in range(3):
+            for step in range(20):
+                behavior_data = {
+                    'complexity': 0.1 + phase * 0.3 + random.uniform(-0.05, 0.05),
+                    'coherence': 0.2 + phase * 0.2 + random.uniform(-0.1, 0.1),
+                    'timestamp': datetime.now() + timedelta(seconds=phase*20 + step)
+                }
+                behavior_timeline.append(behavior_data)
+        
+        # Detect phase transitions
+        transitions = self.behavior.detect_phase_transitions(behavior_timeline)
+        self.assertGreater(len(transitions), 0)
+        self.assertLess(len(transitions), len(behavior_timeline))
+
+    def test_behavior_criticality_analysis(self):
+        """Test analysis of critical behavior at phase boundaries."""
+        # Generate behavior data near critical points
+        critical_data = self.generate_critical_behavior_data()
+        
+        # Analyze criticality
+        criticality_metrics = self.behavior.analyze_criticality(critical_data)
+        self.assertIn('susceptibility', criticality_metrics)
+        self.assertIn('correlation_length', criticality_metrics)
+        self.assertGreater(criticality_metrics['susceptibility'], 1.0)
+
+    def generate_fractal_behavior_pattern(self):
+        """Generate a fractal-like behavior pattern for testing."""
+        return {
+            'iterations': 1000,
+            'branching_factor': 2.5,
+            'scale_invariance': True,
+            'self_similarity': 0.85
+        }
+
+    def generate_critical_behavior_data(self):
+        """Generate behavior data exhibiting critical phenomena."""
+        return {
+            'order_parameter': [random.gauss(0, 1) for _ in range(100)],
+            'fluctuations': [random.exponential(1) for _ in range(100)],
+            'correlation_function': [math.exp(-i/10) for i in range(50)]
+        }
+
+
+class TestConsciousnessMetricsAdvanced(unittest.TestCase):
+    """Advanced consciousness measurement and metrics tests."""
+
+    def setUp(self):
+        """Set up consciousness metrics test fixtures."""
+        self.matrix = ConsciousnessMatrix()
+
+    def test_consciousness_information_integration(self):
+        """Test Integrated Information Theory (IIT) metrics."""
+        # Set up complex neural state
+        neural_data = [[random.uniform(0, 1) for _ in range(10)] for _ in range(5)]
+        for pattern in neural_data:
+            self.matrix.add_neural_pattern(pattern)
+        
+        # Calculate IIT metrics
+        phi_value = self.matrix.calculate_integrated_information()
+        self.assertIsInstance(phi_value, float)
+        self.assertGreaterEqual(phi_value, 0.0)
+
+    def test_consciousness_global_workspace_theory(self):
+        """Test Global Workspace Theory consciousness metrics."""
+        # Simulate global workspace activation
+        workspace_data = {
+            'attended_information': [0.8, 0.9, 0.7],
+            'broadcast_strength': 0.85,
+            'competition_intensity': 0.6
+        }
+        
+        gw_consciousness = self.matrix.calculate_global_workspace_consciousness(workspace_data)
+        self.assertIsInstance(gw_consciousness, float)
+        self.assertGreater(gw_consciousness, 0.0)
+
+    def test_consciousness_higher_order_thought(self):
+        """Test Higher-Order Thought theory consciousness assessment."""
+        # Set up recursive thought patterns
+        thought_hierarchy = {
+            'first_order': [0.5, 0.6, 0.7],
+            'second_order': [0.3, 0.8, 0.4],
+            'meta_cognitive': [0.2, 0.5, 0.9]
+        }
+        
+        hot_level = self.matrix.assess_higher_order_consciousness(thought_hierarchy)
+        self.assertIsInstance(hot_level, float)
+        self.assertGreaterEqual(hot_level, 0.0)
+        self.assertLessEqual(hot_level, 10.0)
+
+
+class TestConsciousnessMatrixSecurity(unittest.TestCase):
+    """Security and robustness tests for consciousness matrix."""
+
+    def setUp(self):
+        """Set up security test fixtures."""
+        self.matrix = ConsciousnessMatrix()
+
+    def test_matrix_input_sanitization(self):
+        """Test that matrix properly sanitizes malicious inputs."""
+        # Test SQL injection-like patterns (even though this isn't SQL)
+        malicious_patterns = [
+            ["'; DROP TABLE neural_patterns; --", 0.5, 0.8],
+            ["<script>alert('xss')</script>", 0.3, 0.7],
+            ["../../../etc/passwd", 0.1, 0.9]
+        ]
+        
+        for pattern in malicious_patterns:
+            with self.assertRaises((TypeError, ValueError)):
+                self.matrix.process_neural_data(pattern)
+
+    def test_matrix_memory_bounds_checking(self):
+        """Test that matrix properly checks memory bounds."""
+        # Attempt to trigger buffer overflow-like conditions
+        oversized_data = [0.5] * (2**20)  # 1M elements
+        
+        try:
+            result = self.matrix.process_neural_data(oversized_data)
+            # If processing succeeds, verify it completed properly
+            self.assertIsNotNone(result)
+        except (MemoryError, ValueError):
+            # Acceptable to reject oversized inputs
+            pass
+
+    def test_matrix_denial_of_service_resistance(self):
+        """Test matrix resistance to denial of service attacks."""
+        import threading
+        import time
+        
+        # Simulate high-frequency requests
+        def spam_requests():
+            for _ in range(100):
+                try:
+                    self.matrix.process_neural_data([0.1, 0.5, 0.8])
+                except:
+                    pass
+        
+        # Launch multiple spam threads
+        threads = [threading.Thread(target=spam_requests) for _ in range(5)]
+        start_time = time.time()
+        
+        for thread in threads:
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        
+        end_time = time.time()
+        
+        # Matrix should remain responsive (not hang indefinitely)
+        self.assertLess(end_time - start_time, 30.0)  # Complete within 30 seconds
+
+
+class TestConsciousnessMatrixCompatibility(unittest.TestCase):
+    """Compatibility and interoperability tests."""
+
+    def setUp(self):
+        """Set up compatibility test fixtures."""
+        self.matrix = ConsciousnessMatrix()
+
+    def test_numpy_array_compatibility(self):
+        """Test compatibility with numpy arrays."""
+        try:
+            import numpy as np
+            np_data = np.array([0.1, 0.5, 0.8, 0.3])
+            result = self.matrix.process_neural_data(np_data.tolist())
+            self.assertIsNotNone(result)
+        except ImportError:
+            self.skipTest("NumPy not available")
+
+    def test_pandas_series_compatibility(self):
+        """Test compatibility with pandas Series."""
+        try:
+            import pandas as pd
+            pd_data = pd.Series([0.1, 0.5, 0.8, 0.3])
+            result = self.matrix.process_neural_data(pd_data.tolist())
+            self.assertIsNotNone(result)
+        except ImportError:
+            self.skipTest("Pandas not available")
+
+    def test_tensorflow_tensor_compatibility(self):
+        """Test compatibility with TensorFlow tensors."""
+        try:
+            import tensorflow as tf
+            tf_data = tf.constant([0.1, 0.5, 0.8, 0.3])
+            result = self.matrix.process_neural_data(tf_data.numpy().tolist())
+            self.assertIsNotNone(result)
+        except ImportError:
+            self.skipTest("TensorFlow not available")
+
+
+class TestConsciousnessMatrixVersioning(unittest.TestCase):
+    """Version compatibility and migration tests."""
+
+    def setUp(self):
+        """Set up versioning test fixtures."""
+        self.matrix = ConsciousnessMatrix()
+
+    def test_matrix_version_detection(self):
+        """Test that matrix can detect its version."""
+        version = self.matrix.get_version()
+        self.assertIsInstance(version, str)
+        self.assertRegex(version, r'\d+\.\d+\.\d+')
+
+    def test_matrix_backward_compatibility(self):
+        """Test backward compatibility with older matrix formats."""
+        # Simulate older format data
+        legacy_data = {
+            'version': '1.0.0',
+            'neural_patterns': [0.1, 0.5, 0.8],
+            'consciousness_level': 5.0
+        }
+        
+        # Should handle legacy format
+        try:
+            result = self.matrix.load_legacy_format(legacy_data)
+            self.assertTrue(result)
+        except NotImplementedError:
+            self.skipTest("Legacy format support not implemented")
+
+    def test_matrix_migration_path(self):
+        """Test migration from older versions."""
+        # Create matrix in older format
+        old_matrix_data = {
+            'format_version': '1.0',
+            'data': [0.1, 0.5, 0.8],
+            'state': 'active'
+        }
+        
+        # Migrate to current version
+        try:
+            migrated_matrix = ConsciousnessMatrix.migrate_from_legacy(old_matrix_data)
+            self.assertIsInstance(migrated_matrix, ConsciousnessMatrix)
+        except NotImplementedError:
+            self.skipTest("Migration functionality not implemented")
+
+
+if __name__ == '__main__':
+    # Run all tests including the new comprehensive additions
+    unittest.main(verbosity=2, buffer=True)

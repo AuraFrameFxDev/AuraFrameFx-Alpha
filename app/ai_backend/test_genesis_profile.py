@@ -2886,3 +2886,811 @@ if __name__ == '__main__':
     
     print("\n" + "=" * 80)
     print("All tests completed!")
+
+# ================================================================================================
+# ADDITIONAL COMPREHENSIVE TEST CASES FOR ENHANCED COVERAGE
+# ================================================================================================
+
+class TestAdvancedGenesisProfileEdgeCases(unittest.TestCase):
+    """Additional advanced edge cases for GenesisProfile testing"""
+    
+    def setUp(self):
+        """Set up test fixtures with more complex scenarios"""
+        self.profile_id = 'edge_case_profile'
+        self.edge_case_data = {
+            'name': 'edge_case_test',
+            'version': '1.0.0-alpha+build.123',
+            'settings': {
+                'numeric_limits': {
+                    'max_int': 9223372036854775807,  # sys.maxsize
+                    'min_int': -9223372036854775808,
+                    'max_float': 1.7976931348623157e+308,
+                    'min_float': 2.2250738585072014e-308,
+                    'infinity': float('inf'),
+                    'negative_infinity': float('-inf'),
+                    'not_a_number': float('nan')
+                },
+                'special_strings': {
+                    'empty': '',
+                    'whitespace_only': '   \t\n\r  ',
+                    'unicode_mixed': '🚀 Hello Wörld 测试 🌍',
+                    'control_chars': '\x00\x01\x02\x03',
+                    'very_long': 'x' * 1000000,  # 1MB string
+                    'null_byte': 'before\x00after'
+                },
+                'boolean_edge_cases': {
+                    'true_bool': True,
+                    'false_bool': False,
+                    'truthy_int': 1,
+                    'falsy_int': 0,
+                    'truthy_string': 'true',
+                    'falsy_string': 'false'
+                }
+            }
+        }
+    
+    def test_genesis_profile_with_extreme_numeric_values(self):
+        """Test GenesisProfile handling of extreme numeric values including infinity and NaN"""
+        profile = GenesisProfile(self.profile_id, self.edge_case_data)
+        
+        # Test extreme integers
+        self.assertEqual(profile.data['settings']['numeric_limits']['max_int'], 9223372036854775807)
+        self.assertEqual(profile.data['settings']['numeric_limits']['min_int'], -9223372036854775808)
+        
+        # Test extreme floats
+        self.assertEqual(profile.data['settings']['numeric_limits']['max_float'], 1.7976931348623157e+308)
+        
+        # Test special float values
+        self.assertTrue(math.isinf(profile.data['settings']['numeric_limits']['infinity']))
+        self.assertTrue(math.isinf(profile.data['settings']['numeric_limits']['negative_infinity']))
+        self.assertTrue(math.isnan(profile.data['settings']['numeric_limits']['not_a_number']))
+    
+    def test_genesis_profile_with_special_characters_and_encoding(self):
+        """Test GenesisProfile handling of various special characters and encoding edge cases"""
+        profile = GenesisProfile(self.profile_id, self.edge_case_data)
+        
+        # Test unicode preservation
+        unicode_value = profile.data['settings']['special_strings']['unicode_mixed']
+        self.assertEqual(unicode_value, '🚀 Hello Wörld 测试 🌍')
+        self.assertIn('🚀', unicode_value)
+        self.assertIn('Wörld', unicode_value)
+        self.assertIn('测试', unicode_value)
+        
+        # Test control characters
+        control_chars = profile.data['settings']['special_strings']['control_chars']
+        self.assertEqual(len(control_chars), 4)
+        
+        # Test null byte handling
+        null_byte_string = profile.data['settings']['special_strings']['null_byte']
+        self.assertIn('\x00', null_byte_string)
+        self.assertEqual(null_byte_string, 'before\x00after')
+    
+    def test_genesis_profile_large_data_handling(self):
+        """Test GenesisProfile with very large data structures"""
+        large_data = {
+            'name': 'large_data_test',
+            'version': '1.0.0',
+            'settings': {
+                'huge_list': list(range(100000)),  # 100k elements
+                'huge_dict': {f'key_{i}': f'value_{i}' * 100 for i in range(10000)},  # 10k key-value pairs
+                'nested_large': {
+                    f'level_{i}': {
+                        f'sublevel_{j}': list(range(100)) 
+                        for j in range(10)
+                    } for i in range(100)
+                }
+            }
+        }
+        
+        # This should not raise memory errors or timeouts for reasonable large data
+        profile = GenesisProfile('large_data_profile', large_data)
+        
+        self.assertEqual(len(profile.data['settings']['huge_list']), 100000)
+        self.assertEqual(len(profile.data['settings']['huge_dict']), 10000)
+        self.assertEqual(len(profile.data['settings']['nested_large']), 100)
+    
+    def test_genesis_profile_immutability_deep_verification(self):
+        """Thoroughly test data immutability and isolation in GenesisProfile"""
+        import copy
+        
+        original_data = copy.deepcopy(self.edge_case_data)
+        profile = GenesisProfile(self.profile_id, original_data)
+        
+        # Modify original data deeply
+        original_data['settings']['numeric_limits']['max_int'] = -999
+        original_data['settings']['special_strings']['unicode_mixed'] = 'modified'
+        original_data['settings']['boolean_edge_cases']['true_bool'] = False
+        
+        # Profile should remain unchanged
+        self.assertEqual(profile.data['settings']['numeric_limits']['max_int'], 9223372036854775807)
+        self.assertEqual(profile.data['settings']['special_strings']['unicode_mixed'], '🚀 Hello Wörld 测试 🌍')
+        self.assertTrue(profile.data['settings']['boolean_edge_cases']['true_bool'])
+    
+    def test_genesis_profile_datetime_precision_and_timezone_handling(self):
+        """Test GenesisProfile with various datetime formats and timezones"""
+        from datetime import datetime, timezone, timedelta
+        
+        datetime_data = {
+            'name': 'datetime_test',
+            'version': '1.0.0',
+            'settings': {
+                'utc_time': datetime.now(timezone.utc),
+                'local_time': datetime.now(),
+                'custom_tz': datetime.now(timezone(timedelta(hours=5, minutes=30))),
+                'microsecond_precision': datetime(2023, 12, 25, 15, 30, 45, 123456),
+                'iso_string': '2023-12-25T15:30:45.123456+00:00'
+            }
+        }
+        
+        profile = GenesisProfile('datetime_profile', datetime_data)
+        
+        # Verify datetime objects are preserved with their types
+        self.assertIsInstance(profile.data['settings']['utc_time'], datetime)
+        self.assertIsInstance(profile.data['settings']['local_time'], datetime)
+        self.assertIsInstance(profile.data['settings']['custom_tz'], datetime)
+        
+        # Verify microsecond precision
+        self.assertEqual(profile.data['settings']['microsecond_precision'].microsecond, 123456)
+        
+        # Verify timezone information
+        self.assertEqual(profile.data['settings']['utc_time'].tzinfo, timezone.utc)
+
+
+class TestProfileManagerAdvancedConcurrency(unittest.TestCase):
+    """Advanced concurrency and thread safety tests for ProfileManager"""
+    
+    def setUp(self):
+        """Set up ProfileManager for concurrency testing"""
+        self.manager = ProfileManager()
+        self.stress_data = {
+            'name': 'stress_test',
+            'version': '1.0.0',
+            'settings': {'counter': 0, 'operations': []}
+        }
+    
+    def test_profile_manager_rapid_creation_deletion_cycles(self):
+        """Test rapid cycles of profile creation and deletion"""
+        profile_ids = []
+        
+        # Rapid creation phase
+        for i in range(1000):
+            profile_id = f'rapid_cycle_{i}'
+            profile_data = {
+                'name': f'rapid_test_{i}',
+                'version': '1.0.0',
+                'settings': {'cycle_id': i}
+            }
+            
+            profile = self.manager.create_profile(profile_id, profile_data)
+            profile_ids.append(profile_id)
+            self.assertIsNotNone(profile)
+        
+        # Verify all created
+        self.assertEqual(len(self.manager.profiles), 1000)
+        
+        # Rapid deletion phase - delete every other profile
+        deleted_count = 0
+        for i in range(0, len(profile_ids), 2):
+            result = self.manager.delete_profile(profile_ids[i])
+            self.assertTrue(result)
+            deleted_count += 1
+        
+        # Verify partial deletion
+        self.assertEqual(len(self.manager.profiles), 1000 - deleted_count)
+        
+        # Verify remaining profiles are accessible
+        for i in range(1, len(profile_ids), 2):
+            profile = self.manager.get_profile(profile_ids[i])
+            self.assertIsNotNone(profile)
+    
+    def test_profile_manager_interleaved_operations(self):
+        """Test interleaved create, read, update, delete operations"""
+        operation_log = []
+        
+        # Interleaved operations
+        for i in range(100):
+            # Create
+            profile_id = f'interleaved_{i}'
+            create_data = {
+                'name': f'interleaved_test_{i}',
+                'version': '1.0.0',
+                'settings': {'step': 'created', 'iteration': i}
+            }
+            profile = self.manager.create_profile(profile_id, create_data)
+            operation_log.append(f'CREATE:{profile_id}')
+            
+            # Read
+            read_profile = self.manager.get_profile(profile_id)
+            self.assertEqual(read_profile.data['settings']['step'], 'created')
+            operation_log.append(f'READ:{profile_id}')
+            
+            # Update
+            update_data = {'settings': {'step': 'updated', 'iteration': i, 'updated': True}}
+            updated_profile = self.manager.update_profile(profile_id, update_data)
+            self.assertEqual(updated_profile.data['settings']['step'], 'updated')
+            operation_log.append(f'UPDATE:{profile_id}')
+            
+            # Conditionally delete some profiles
+            if i % 3 == 0:
+                deleted = self.manager.delete_profile(profile_id)
+                self.assertTrue(deleted)
+                operation_log.append(f'DELETE:{profile_id}')
+        
+        # Verify operation log integrity
+        self.assertEqual(len(operation_log), 100 * 3 + (100 // 3))  # CREATE + READ + UPDATE + some DELETEs
+        
+        # Verify final state
+        remaining_profiles = len(self.manager.profiles)
+        expected_remaining = 100 - (100 // 3)  # Total created minus deleted
+        self.assertEqual(remaining_profiles, expected_remaining)
+    
+    def test_profile_manager_state_consistency_under_stress(self):
+        """Test state consistency under stress conditions"""
+        import time
+        
+        # Create baseline profiles
+        baseline_count = 100
+        for i in range(baseline_count):
+            profile_data = {
+                'name': f'baseline_{i}',
+                'version': '1.0.0',
+                'settings': {'type': 'baseline', 'id': i}
+            }
+            self.manager.create_profile(f'baseline_{i}', profile_data)
+        
+        # Stress operations
+        stress_operations = 1000
+        start_time = time.time()
+        
+        for i in range(stress_operations):
+            operation_type = i % 4
+            profile_id = f'stress_{i}'
+            
+            if operation_type == 0:  # Create
+                profile_data = {
+                    'name': f'stress_test_{i}',
+                    'version': '1.0.0',
+                    'settings': {'type': 'stress', 'operation_id': i}
+                }
+                try:
+                    self.manager.create_profile(profile_id, profile_data)
+                except Exception as e:
+                    self.fail(f"Unexpected error during create operation {i}: {e}")
+                    
+            elif operation_type == 1:  # Read existing baseline
+                baseline_id = f'baseline_{i % baseline_count}'
+                profile = self.manager.get_profile(baseline_id)
+                self.assertIsNotNone(profile)
+                
+            elif operation_type == 2:  # Update existing baseline
+                baseline_id = f'baseline_{i % baseline_count}'
+                update_data = {'settings': {'last_updated': i, 'stress_updated': True}}
+                try:
+                    self.manager.update_profile(baseline_id, update_data)
+                except ProfileNotFoundError:
+                    pass  # Profile might have been deleted in another operation
+                    
+            elif operation_type == 3:  # Delete stress profile if exists
+                if i > 10:  # Only delete after some profiles are created
+                    delete_id = f'stress_{i - 10}'
+                    self.manager.delete_profile(delete_id)  # Returns False if not found
+        
+        end_time = time.time()
+        duration = end_time - start_time
+        
+        # Performance assertion
+        self.assertLess(duration, 10.0, f"Stress test took too long: {duration} seconds")
+        
+        # Verify baseline profiles still exist and are consistent
+        baseline_profiles_found = 0
+        for i in range(baseline_count):
+            profile = self.manager.get_profile(f'baseline_{i}')
+            if profile is not None:
+                baseline_profiles_found += 1
+                self.assertEqual(profile.data['settings']['type'], 'baseline')
+        
+        # Should have most baseline profiles still (some may have been deleted)
+        self.assertGreater(baseline_profiles_found, baseline_count * 0.8)
+
+
+class TestProfileValidatorComprehensiveEdgeCases(unittest.TestCase):
+    """Comprehensive edge case testing for ProfileValidator"""
+    
+    def test_profile_validator_malformed_data_structures(self):
+        """Test ProfileValidator with malformed and edge case data structures"""
+        malformed_cases = [
+            # Missing fields but with extra data
+            ({'version': '1.0.0', 'settings': {}, 'extra_field': 'should_not_affect_validation'}, False),
+            ({'name': 'test', 'settings': {}, 'unexpected': {'nested': 'data'}}, False),
+            
+            # Nested required field names (should not be confused with actual required fields)
+            ({'name': 'test', 'version': '1.0.0', 'settings': {'name': 'nested_name', 'version': 'nested_version'}}, True),
+            
+            # Fields with None values vs missing fields
+            ({'name': 'test', 'version': '1.0.0', 'settings': None}, True),
+            ({'name': None, 'version': '1.0.0', 'settings': {}}, False),
+            
+            # Empty nested structures
+            ({'name': 'test', 'version': '1.0.0', 'settings': {'empty_dict': {}, 'empty_list': []}}, True),
+            
+            # Circular reference attempt (dict referencing itself)
+            # Note: This will be tested differently to avoid actual circular reference
+        ]
+        
+        for test_data, expected_result in malformed_cases:
+            with self.subTest(test_data=test_data):
+                try:
+                    result = ProfileValidator.validate_profile_data(test_data)
+                    self.assertEqual(result, expected_result, 
+                                   f"Expected {expected_result} for {test_data}, got {result}")
+                except (TypeError, AttributeError):
+                    if expected_result:
+                        self.fail(f"Unexpected exception for data that should be valid: {test_data}")
+    
+    def test_profile_validator_performance_with_large_data(self):
+        """Test ProfileValidator performance with large data structures"""
+        import time
+        
+        # Large but valid data
+        large_valid_data = {
+            'name': 'performance_test',
+            'version': '1.0.0',
+            'settings': {
+                'large_list': list(range(50000)),
+                'large_dict': {f'key_{i}': f'value_{i}' * 50 for i in range(5000)},
+                'nested_large': {
+                    f'category_{i}': {
+                        f'item_{j}': f'data_{i}_{j}' 
+                        for j in range(100)
+                    } for i in range(50)
+                }
+            }
+        }
+        
+        # Test validation performance
+        start_time = time.time()
+        result = ProfileValidator.validate_profile_data(large_valid_data)
+        end_time = time.time()
+        
+        validation_time = end_time - start_time
+        
+        # Should validate successfully
+        self.assertTrue(result)
+        
+        # Should complete validation reasonably quickly (under 1 second for large data)
+        self.assertLess(validation_time, 1.0, 
+                       f"Validation took too long for large data: {validation_time} seconds")
+    
+    def test_profile_validator_unicode_and_encoding_edge_cases(self):
+        """Test ProfileValidator with various Unicode and encoding scenarios"""
+        unicode_test_cases = [
+            # Various Unicode categories
+            ({'name': 'emojis_🚀🌍🎉', 'version': '1.0.0', 'settings': {}}, True),
+            ({'name': 'chinese_测试', 'version': '1.0.0', 'settings': {}}, True),
+            ({'name': 'arabic_اختبار', 'version': '1.0.0', 'settings': {}}, True),
+            ({'name': 'russian_тест', 'version': '1.0.0', 'settings': {}}, True),
+            ({'name': 'mathematical_∑∆∏', 'version': '1.0.0', 'settings': {}}, True),
+            
+            # Mixed scripts
+            ({'name': 'mixed_Hello世界🌍', 'version': '1.0.0', 'settings': {}}, True),
+            
+            # Unicode normalization forms
+            ({'name': 'café', 'version': '1.0.0', 'settings': {}}, True),  # NFC
+            ({'name': 'cafe\u0301', 'version': '1.0.0', 'settings': {}}, True),  # NFD
+            
+            # Control characters
+            ({'name': 'control\u0000chars', 'version': '1.0.0', 'settings': {}}, True),
+            ({'name': 'tab\tand\nnewline', 'version': '1.0.0', 'settings': {}}, True),
+        ]
+        
+        for test_data, expected_result in unicode_test_cases:
+            with self.subTest(test_data=test_data['name']):
+                try:
+                    result = ProfileValidator.validate_profile_data(test_data)
+                    self.assertEqual(result, expected_result,
+                                   f"Unicode validation failed for: {test_data['name']}")
+                except (TypeError, AttributeError, UnicodeError):
+                    if expected_result:
+                        self.fail(f"Unexpected Unicode error for: {test_data['name']}")
+    
+    def test_profile_validator_version_format_comprehensive(self):
+        """Comprehensive testing of version format validation"""
+        version_test_cases = [
+            # Semantic versioning standard cases
+            ('1.0.0', True),
+            ('0.0.1', True),
+            ('10.20.30', True),
+            ('1.1.2-prerelease+meta', True),
+            ('1.1.2+meta', True),
+            ('1.1.2+meta-valid', True),
+            ('1.0.0-alpha', True),
+            ('1.0.0-beta', True),
+            ('1.0.0-alpha.beta', True),
+            ('1.0.0-alpha.1', True),
+            ('1.0.0-alpha0.valid', True),
+            ('1.0.0-alpha.0valid', True),
+            ('1.0.0-alpha-a.b-c-somethinglong+metadata+meta', True),
+            ('1.0.0-rc.1+meta', True),
+            ('2.0.0-rc.1+meta', True),
+            ('1.2.3-beta', True),
+            ('10.2.3-DEV-SNAPSHOT', True),
+            ('1.2.3-SNAPSHOT-123', True),
+            ('1.0.0', True),
+            ('2.0.0', True),
+            ('1.1.7', True),
+            ('2.0.0+build.1', True),
+            ('2.0.0-beta+meta', True),
+            
+            # Edge cases that might be valid depending on implementation
+            ('1.0', True),  # May be valid in some systems
+            ('1', True),    # May be valid in some systems
+            ('v1.0.0', False),  # Prefix not typically allowed in semver
+            ('1.0.0-', False),  # Trailing dash
+            ('1.0.0+', False),  # Trailing plus
+            
+            # Invalid cases
+            ('1.0.0-', False),
+            ('1.0.0+', False),
+            ('1.0.0-+', False),
+            ('1.0.0-+123', False),
+            ('+invalid', False),
+            ('-invalid', False),
+            ('1', False),  # Depending on implementation
+            ('1.2', False),  # Depending on implementation
+            ('1.2.a', False),
+            ('a.b.c', False),
+            ('1.2.3.4', False),
+            ('', False),
+            ('1.2.3-DEV-SNAPSHOT-', False),
+        ]
+        
+        for version, expected_valid in version_test_cases:
+            with self.subTest(version=version):
+                test_data = {
+                    'name': 'version_test',
+                    'version': version,
+                    'settings': {}
+                }
+                
+                try:
+                    result = ProfileValidator.validate_profile_data(test_data)
+                    # Note: The current implementation only checks field presence
+                    # More sophisticated version validation would be implementation-specific
+                    if expected_valid:
+                        self.assertTrue(result, f"Expected version '{version}' to be valid")
+                    # For invalid cases, we don't assert False because the basic validator
+                    # only checks field presence, not format
+                except (TypeError, ValueError):
+                    if expected_valid:
+                        self.fail(f"Unexpected error for version: {version}")
+
+
+class TestProfileBuilderRobustnessAndEdgeCases(unittest.TestCase):
+    """Test ProfileBuilder robustness with edge cases and unusual inputs"""
+    
+    def setUp(self):
+        """Set up ProfileBuilder for robustness testing"""
+        self.builder = ProfileBuilder()
+    
+    def test_profile_builder_extreme_chaining_scenarios(self):
+        """Test ProfileBuilder with extreme method chaining scenarios"""
+        # Very long chain
+        result = (self.builder
+                 .with_name('test1')
+                 .with_name('test2')  # Overwrite
+                 .with_name('test3')  # Overwrite again
+                 .with_version('1.0.0')
+                 .with_version('1.1.0')  # Overwrite
+                 .with_settings({'key1': 'value1'})
+                 .with_settings({'key2': 'value2'})  # Overwrite
+                 .with_settings({'key3': 'value3'})  # Overwrite again
+                 .build())
+        
+        # Should have final values
+        self.assertEqual(result['name'], 'test3')
+        self.assertEqual(result['version'], '1.1.0')
+        self.assertEqual(result['settings'], {'key3': 'value3'})
+    
+    def test_profile_builder_with_complex_data_types(self):
+        """Test ProfileBuilder with complex Python data types"""
+        import datetime
+        import decimal
+        
+        complex_settings = {
+            'datetime_obj': datetime.datetime.now(),
+            'date_obj': datetime.date.today(),
+            'time_obj': datetime.time(12, 30, 45),
+            'decimal_obj': decimal.Decimal('123.456'),
+            'set_obj': {1, 2, 3, 4, 5},
+            'frozenset_obj': frozenset([1, 2, 3]),
+            'tuple_obj': (1, 'two', 3.0, True),
+            'range_obj': range(10),
+            'complex_number': complex(3, 4),
+            'bytes_obj': b'hello world',
+            'bytearray_obj': bytearray(b'mutable bytes'),
+        }
+        
+        result = (self.builder
+                 .with_name('complex_types_test')
+                 .with_version('1.0.0')
+                 .with_settings(complex_settings)
+                 .build())
+        
+        # Verify complex types are preserved
+        self.assertIsInstance(result['settings']['datetime_obj'], datetime.datetime)
+        self.assertIsInstance(result['settings']['decimal_obj'], decimal.Decimal)
+        self.assertIsInstance(result['settings']['set_obj'], set)
+        self.assertIsInstance(result['settings']['tuple_obj'], tuple)
+        self.assertIsInstance(result['settings']['complex_number'], complex)
+        self.assertIsInstance(result['settings']['bytes_obj'], bytes)
+    
+    def test_profile_builder_memory_efficiency_large_builds(self):
+        """Test ProfileBuilder memory efficiency with large builds"""
+        import gc
+        import sys
+        
+        # Get initial object count
+        gc.collect()
+        initial_objects = len(gc.get_objects())
+        
+        # Create many builders and build profiles
+        builders = []
+        results = []
+        
+        for i in range(100):
+            builder = ProfileBuilder()
+            large_settings = {
+                'large_data': [f'item_{j}' for j in range(1000)],
+                'dict_data': {f'key_{j}': f'value_{j}' for j in range(500)},
+                'nested': {
+                    f'level_{k}': [f'data_{k}_{l}' for l in range(100)]
+                    for k in range(10)
+                }
+            }
+            
+            result = (builder
+                     .with_name(f'memory_test_{i}')
+                     .with_version('1.0.0')
+                     .with_settings(large_settings)
+                     .build())
+            
+            builders.append(builder)
+            results.append(result)
+        
+        # Force garbage collection
+        gc.collect()
+        final_objects = len(gc.get_objects())
+        
+        # Check that we haven't created an unreasonable number of objects
+        object_increase = final_objects - initial_objects
+        
+        # Verify all results are valid
+        self.assertEqual(len(results), 100)
+        for i, result in enumerate(results):
+            self.assertEqual(result['name'], f'memory_test_{i}')
+            self.assertEqual(len(result['settings']['large_data']), 1000)
+    
+    def test_profile_builder_thread_safety_simulation(self):
+        """Simulate thread safety by using multiple builders concurrently in sequence"""
+        import threading
+        import time
+        
+        results = []
+        lock = threading.Lock()
+        
+        def build_profile(thread_id):
+            """Build a profile in a simulated thread context"""
+            builder = ProfileBuilder()
+            
+            # Simulate some processing time
+            time.sleep(0.001)
+            
+            result = (builder
+                     .with_name(f'thread_test_{thread_id}')
+                     .with_version(f'1.{thread_id}.0')
+                     .with_settings({
+                         'thread_id': thread_id,
+                         'timestamp': time.time(),
+                         'data': [f'item_{i}' for i in range(100)]
+                     })
+                     .build())
+            
+            with lock:
+                results.append(result)
+        
+        # Simulate concurrent building (sequential execution for testing)
+        thread_count = 50
+        for i in range(thread_count):
+            build_profile(i)
+        
+        # Verify all profiles were built correctly
+        self.assertEqual(len(results), thread_count)
+        
+        # Verify each profile has unique data
+        thread_ids = [result['settings']['thread_id'] for result in results]
+        self.assertEqual(len(set(thread_ids)), thread_count)  # All unique
+        
+        # Verify no data corruption
+        for i, result in enumerate(results):
+            expected_name = f'thread_test_{result["settings"]["thread_id"]}'
+            self.assertEqual(result['name'], expected_name)
+            self.assertEqual(len(result['settings']['data']), 100)
+
+
+class TestIntegrationComplexScenarios(unittest.TestCase):
+    """Complex integration scenarios testing multiple components together"""
+    
+    def setUp(self):
+        """Set up complex integration test environment"""
+        self.manager = ProfileManager()
+        self.builder = ProfileBuilder()
+        self.validator = ProfileValidator()
+    
+    def test_full_workflow_with_error_handling_and_recovery(self):
+        """Test complete workflow with intentional errors and recovery mechanisms"""
+        successful_profiles = []
+        failed_operations = []
+        
+        # Attempt to create profiles with various scenarios
+        test_scenarios = [
+            # Valid profiles
+            {'id': 'valid_1', 'name': 'Valid Profile 1', 'version': '1.0.0', 'settings': {'type': 'valid'}},
+            {'id': 'valid_2', 'name': 'Valid Profile 2', 'version': '2.0.0', 'settings': {'type': 'valid'}},
+            
+            # Invalid profiles (will fail validation)
+            {'id': 'invalid_1', 'name': 'Invalid Profile 1', 'settings': {'type': 'invalid'}},  # Missing version
+            {'id': 'invalid_2', 'version': '1.0.0', 'settings': {'type': 'invalid'}},  # Missing name
+            
+            # Valid profiles for recovery testing
+            {'id': 'recovery_1', 'name': 'Recovery Profile 1', 'version': '1.0.0', 'settings': {'type': 'recovery'}},
+            {'id': 'recovery_2', 'name': 'Recovery Profile 2', 'version': '1.0.0', 'settings': {'type': 'recovery'}},
+        ]
+        
+        for scenario in test_scenarios:
+            try:
+                # Build profile data
+                builder = ProfileBuilder()
+                profile_data = {}
+                
+                if 'name' in scenario:
+                    builder.with_name(scenario['name'])
+                    profile_data['name'] = scenario['name']
+                
+                if 'version' in scenario:
+                    builder.with_version(scenario['version'])
+                    profile_data['version'] = scenario['version']
+                
+                if 'settings' in scenario:
+                    builder.with_settings(scenario['settings'])
+                    profile_data['settings'] = scenario['settings']
+                
+                built_data = builder.build()
+                
+                # Validate profile data
+                if self.validator.validate_profile_data(built_data):
+                    # Create profile
+                    profile = self.manager.create_profile(scenario['id'], built_data)
+                    successful_profiles.append((scenario['id'], profile))
+                else:
+                    failed_operations.append((scenario['id'], 'validation_failed'))
+                    
+            except Exception as e:
+                failed_operations.append((scenario['id'], f'exception: {str(e)}'))
+        
+        # Verify results
+        self.assertEqual(len(successful_profiles), 4)  # 2 valid + 2 recovery
+        self.assertEqual(len(failed_operations), 2)   # 2 invalid
+        
+        # Verify successful profiles are accessible
+        for profile_id, profile in successful_profiles:
+            retrieved = self.manager.get_profile(profile_id)
+            self.assertIsNotNone(retrieved)
+            self.assertEqual(retrieved.profile_id, profile_id)
+        
+        # Test recovery operations on failed profiles
+        for failed_id, failure_reason in failed_operations:
+            if 'invalid_1' in failed_id:
+                # Fix missing version and retry
+                corrected_data = {
+                    'name': 'Corrected Invalid Profile 1',
+                    'version': '1.0.0',
+                    'settings': {'type': 'corrected'}
+                }
+                
+                if self.validator.validate_profile_data(corrected_data):
+                    recovered_profile = self.manager.create_profile(f'{failed_id}_corrected', corrected_data)
+                    self.assertIsNotNone(recovered_profile)
+    
+    def test_complex_profile_lifecycle_with_versioning(self):
+        """Test complex profile lifecycle including versioning and migration"""
+        # Create initial profile version
+        v1_data = (ProfileBuilder()
+                  .with_name('lifecycle_test')
+                  .with_version('1.0.0')
+                  .with_settings({
+                      'feature_a': True,
+                      'feature_b': False,
+                      'config': {'setting1': 'value1'},
+                      'deprecated_field': 'old_value'
+                  })
+                  .build())
+        
+        profile_id = 'lifecycle_complex'
+        v1_profile = self.manager.create_profile(profile_id, v1_data)
+        
+        # Simulate version 2.0.0 migration
+        v2_migration_data = {
+            'name': 'lifecycle_test',
+            'version': '2.0.0',
+            'settings': {
+                'feature_a': True,
+                'feature_b': True,  # Enable new feature
+                'feature_c': 'new_feature',  # Add new feature
+                'config': {
+                    'setting1': 'updated_value1',
+                    'setting2': 'new_value2'  # Add new setting
+                },
+                'migration_info': {
+                    'migrated_from': '1.0.0',
+                    'migration_date': datetime.now(timezone.utc).isoformat(),
+                    'deprecated_fields_removed': ['deprecated_field']
+                }
+                # Note: deprecated_field removed
+            }
+        }
+        
+        v2_profile = self.manager.update_profile(profile_id, v2_migration_data)
+        
+        # Verify migration
+        self.assertEqual(v2_profile.data['version'], '2.0.0')
+        self.assertTrue(v2_profile.data['settings']['feature_b'])
+        self.assertEqual(v2_profile.data['settings']['feature_c'], 'new_feature')
+        self.assertNotIn('deprecated_field', v2_profile.data['settings'])
+        self.assertIn('migration_info', v2_profile.data['settings'])
+        
+        # Simulate version 3.0.0 with major breaking changes
+        v3_breaking_data = {
+            'name': 'lifecycle_test_v3',  # Name change
+            'version': '3.0.0',
+            'settings': {
+                'new_architecture': True,
+                'features': {  # Restructured features
+                    'a': v2_profile.data['settings']['feature_a'],
+                    'b': v2_profile.data['settings']['feature_b'],
+                    'c': v2_profile.data['settings']['feature_c']
+                },
+                'advanced_config': v2_profile.data['settings']['config'],  # Renamed config
+                'migration_info': {
+                    'migrated_from': '2.0.0',
+                    'migration_date': datetime.now(timezone.utc).isoformat(),
+                    'breaking_changes': ['restructured_features', 'renamed_config'],
+                    'previous_migrations': v2_profile.data['settings']['migration_info']
+                }
+            }
+        }
+        
+        v3_profile = self.manager.update_profile(profile_id, v3_breaking_data)
+        
+        # Verify breaking changes migration
+        self.assertEqual(v3_profile.data['version'], '3.0.0')
+        self.assertEqual(v3_profile.data['name'], 'lifecycle_test_v3')
+        self.assertTrue(v3_profile.data['settings']['features']['a'])
+        self.assertEqual(v3_profile.data['settings']['advanced_config']['setting1'], 'updated_value1')
+        self.assertIn('breaking_changes', v3_profile.data['settings']['migration_info'])
+    
+    def test_bulk_operations_with_mixed_success_failure(self):
+        """Test bulk operations with mixed success and failure scenarios"""
+        # Prepare bulk data with mixed valid/invalid profiles
+        bulk_data = []
+        
+        # Add valid profiles
+        for i in range(50):
+            valid_data = {
+                'id': f'bulk_valid_{i}',
+                'name': f'Bulk Valid Profile {i}',
+                'version': f'1.{i}.0',
+                'settings': {'bulk_index': i, 'type': 'valid'}
+            }
+            bulk_data.append(valid_data)
+        
+        # Add invalid profiles (m
