@@ -9,7 +9,7 @@ import org.junit.Test
 import org.mockito.kotlin.*
 import java.util.concurrent.ConcurrentHashMap
 
-class DummyAgent(private val name: String, private val response: String, private val confidence: Float = 1.0f) : Agent {
+class DummyAgent(private val name: String, private val response: String?, private val confidence: Float = 1.0f) : Agent {
     override fun getName() = name
     override fun getType() = null
     override suspend fun processRequest(request: AiRequest) = AgentResponse(response, confidence)
@@ -342,7 +342,7 @@ class GenesisAgentTest {
         val response = genesisAgent.processRequest(request)
 
         assertNotNull("Response should not be null", response)
-        assertTrue("Response should have content", response.content.isNotEmpty())
+        assertTrue("Response should have content", response.content?.isNotEmpty() == true)
         assertTrue("Confidence should be positive", response.confidence >= 0.0f)
     }
 
@@ -417,7 +417,6 @@ class GenesisAgentTest {
         assertTrue("Should handle concurrent access", responses.isNotEmpty())
         assertEquals("response", responses["ConcurrentAgent"]?.content)
     }
-}
 
     // Additional comprehensive tests for better coverage
 
@@ -628,7 +627,7 @@ class GenesisAgentTest {
         val response = genesisAgent.processRequest(request)
 
         assertNotNull(response)
-        assertTrue(response.content.isNotEmpty())
+        assertTrue(response.content?.isNotEmpty() == true)
         assertTrue(response.confidence >= 0.0f)
     }
 
@@ -643,7 +642,7 @@ class GenesisAgentTest {
         val response = genesisAgent.processRequest(request)
 
         assertNotNull(response)
-        assertTrue(response.content.isNotEmpty())
+        assertTrue(response.content?.isNotEmpty() == true)
         assertTrue(response.confidence >= 0.0f)
     }
 
@@ -660,7 +659,7 @@ class GenesisAgentTest {
         val response = genesisAgent.processRequest(request)
 
         assertNotNull(response)
-        assertTrue(response.content.isNotEmpty())
+        assertTrue(response.content?.isNotEmpty() == true)
         assertTrue(response.confidence >= 0.0f)
     }
 
@@ -691,7 +690,7 @@ class GenesisAgentTest {
         val response = genesisAgent.processRequest(request)
 
         assertNotNull(response)
-        assertTrue("Should handle partial service failures", response.content.isNotEmpty())
+        assertTrue("Should handle partial service failures", response.content?.isNotEmpty() == true)
         assertTrue(response.confidence >= 0.0f)
     }
 
@@ -884,7 +883,6 @@ class GenesisAgentTest {
             assertTrue("System handled memory limitation", true)
         }
     }
-}
 
     // Additional comprehensive tests for edge cases and boundary conditions
 
@@ -1054,7 +1052,7 @@ class GenesisAgentTest {
         val response = genesisAgent.processRequest(request)
         
         assertNotNull(response)
-        assertTrue(response.content.isNotEmpty())
+        assertTrue(response.content?.isNotEmpty() == true)
         assertTrue(response.confidence >= 0.0f)
     }
 
@@ -1219,9 +1217,30 @@ class GenesisAgentTest {
         assertEquals(100, consensus.size)
         consensus.values.forEach { response ->
             assertTrue("Confidence should be valid", response.confidence >= 0.0f && response.confidence <= 1.0f)
-            assertTrue("Content should not be empty", response.content.isNotEmpty())
+            assertTrue("Content should not be empty", response.content?.isNotEmpty() == true)
         }
     }
 
     @Test
-    fun testParticipateWithAgents_rapidSuccessiveCalls
+    fun testParticipateWithAgents_rapidSuccessiveCalls() = runBlocking {
+        val agent = DummyAgent("RapidAgent", "rapid response")
+        
+        val results = mutableListOf<Map<String, AgentResponse>>()
+        
+        repeat(100) { i ->
+            val response = genesisAgent.participateWithAgents(
+                emptyMap(),
+                listOf(agent),
+                "rapid call $i",
+                GenesisAgent.ConversationMode.TURN_ORDER
+            )
+            results.add(response)
+        }
+        
+        assertEquals(100, results.size)
+        results.forEach { result ->
+            assertEquals(1, result.size)
+            assertEquals("rapid response", result["RapidAgent"]?.content)
+        }
+    }
+}

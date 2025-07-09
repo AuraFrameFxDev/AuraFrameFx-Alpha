@@ -6,6 +6,7 @@ from datetime import datetime
 import asyncio
 import sys
 import os
+import math
 
 # Add the app directory to the Python path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -379,7 +380,6 @@ class TestFitnessFunction(unittest.TestCase):
         genome = [1.0, 2.0, 3.0]
         
         def constraint_func(g):
-            # Constraint: sum should be less than 5
             """
             Check if the sum of elements in the input iterable is less than 5.
             
@@ -687,10 +687,10 @@ class TestEvolutionaryConduit(unittest.TestCase):
             Calculate the fitness score of a genome by summing its elements.
             
             Parameters:
-            	genome (iterable): An iterable of numeric values representing the genome.
+                genome (iterable): An iterable of numeric values representing the genome.
             
             Returns:
-		The sum of the genome's elements as the fitness score.
+                The sum of the genome's elements as the fitness score.
             """
             return sum(genome)
         
@@ -790,10 +790,10 @@ class TestEvolutionaryConduit(unittest.TestCase):
             Calculate the fitness of a genome by summing its elements.
             
             Parameters:
-		genome (Iterable[float | int]): The genome to evaluate.
+                genome (Iterable[float | int]): The genome to evaluate.
             
             Returns:
-		float | int: The total sum of the genome's elements, used as the fitness value.
+                float | int: The total sum of the genome's elements, used as the fitness value.
             """
             return sum(genome)
         
@@ -1336,10 +1336,6 @@ class TestAsyncEvolution(unittest.TestCase):
         # Verify parallel execution was attempted
         mock_executor.assert_called_once()
 
-
-if __name__ == '__main__':
-    # Run all tests
-    unittest.main(verbosity=2)
 
 class TestEvolutionaryParametersExtended(unittest.TestCase):
     """Extended test suite for EvolutionaryParameters edge cases and additional scenarios."""
@@ -2407,5 +2403,8 @@ class TestRobustnessAndEdgeCases(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    # Run all tests
+    unittest.main(verbosity=2)
+    
     # Ensure all tests run with high verbosity
     unittest.main(verbosity=3, buffer=True)
