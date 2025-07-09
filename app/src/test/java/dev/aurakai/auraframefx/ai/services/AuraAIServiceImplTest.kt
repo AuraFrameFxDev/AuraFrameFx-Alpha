@@ -453,18 +453,6 @@ class AuraAIServiceImplTest {
         }
     }
 
-    // Helper methods
-    private fun mockHttpResponse(statusCode: Int, body: String): HttpResponse {
-        val mockResponse = mock<HttpResponse>()
-        whenever(mockResponse.statusCode).thenReturn(statusCode)
-        whenever(mockResponse.body).thenReturn(body)
-        return mockResponse
-    }
-}
-
-// Exception and data types
-class ConfigurationException(message: String) : Exception(message)
-data class HealthCheckResult(val isHealthy: Boolean, val message: String)
     @Nested
     @DisplayName("Enhanced Initialization Tests")
     inner class EnhancedInitializationTests {
@@ -578,8 +566,6 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         @Test
         @DisplayName("Should handle 404 not found")
         fun shouldHandle404NotFound() = runTest {
-            val mockHttpResponse = mockHttpResponse(404, "Not Found")
-                    fun shouldHandle404NotFound() = runTest {
             val mockHttpResponse = mockHttpResponse(404, "Not Found")
             whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
             assertThrows<IOException> {
@@ -1288,4 +1274,16 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             assertEquals("Success", result)
         }
     }
+
+    // Helper methods
+    private fun mockHttpResponse(statusCode: Int, body: String): HttpResponse {
+        val mockResponse = mock<HttpResponse>()
+        whenever(mockResponse.statusCode).thenReturn(statusCode)
+        whenever(mockResponse.body).thenReturn(body)
+        return mockResponse
+    }
 }
+
+// Exception and data types
+class ConfigurationException(message: String) : Exception(message)
+data class HealthCheckResult(val isHealthy: Boolean, val message: String)
