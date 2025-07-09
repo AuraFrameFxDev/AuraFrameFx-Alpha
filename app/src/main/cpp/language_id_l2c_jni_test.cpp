@@ -1,8 +1,12 @@
 #include <gtest/gtest.h>
 #include <jni.h>
+#include <cstring>
 #include <string>
 #include <vector>
 #include <memory>
+#include <thread>
+#include <atomic>
+#include <chrono>
 
 // Mock JNI environment for testing
 class MockJNIEnv {
@@ -24,7 +28,7 @@ public:
     }
     
     jsize GetStringUTFLength(jstring str) {
-        return strlen(reinterpret_cast<const char*>(str));
+        return static_cast<jsize>(strlen(reinterpret_cast<const char*>(str)));
     }
 };
 
@@ -128,7 +132,7 @@ TEST_F(LanguageIdL2cJniTest, EdgeCases) {
 // Test long text handling
 TEST_F(LanguageIdL2cJniTest, LongTextHandling) {
     // Test very long text
-    std::string longText = "";
+    std::string longText;
     for (int i = 0; i < 1000; i++) {
         longText += "This is a very long English text that should be detected correctly. ";
     }
@@ -179,7 +183,7 @@ TEST_F(LanguageIdL2cJniTest, JNIStringConversion) {
     
     // Test string length
     jsize length = mock_env->GetStringUTFLength(jstr);
-    EXPECT_EQ(length, strlen(testString));
+    EXPECT_EQ(length, static_cast<jsize>(strlen(testString)));
     
     // Test string release
     mock_env->ReleaseStringUTFChars(jstr, retrievedString);
