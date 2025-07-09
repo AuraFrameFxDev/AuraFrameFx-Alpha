@@ -43,10 +43,10 @@ class GenesisAPI:
     
     async def startup(self):
         """
-        Asynchronously initializes the Genesis Layer backend and updates the running state.
+        Asynchronously starts the Genesis Layer backend and updates the running state.
         
         Returns:
-            bool: True if initialization succeeds; False if initialization fails or an exception occurs.
+            bool: True if the Genesis Layer is successfully initialized; False if initialization fails or an exception occurs.
         """
         try:
             logger.info("🚀 Genesis API starting up...")
@@ -65,9 +65,9 @@ class GenesisAPI:
     
     async def shutdown(self):
         """
-        Asynchronously shuts down the Genesis Layer and updates the API state to not running.
+        Asynchronously shuts down the Genesis Layer and marks the API as not running.
         
-        After shutdown, the `is_running` attribute is set to False. Any errors encountered during the shutdown process are logged.
+        After shutdown, the `is_running` attribute is set to False. Errors during shutdown are logged but not raised.
         """
         try:
             logger.info("🌙 Genesis API shutting down...")
@@ -83,7 +83,7 @@ genesis_api = GenesisAPI()
 # Helper function to run async functions in Flask routes
 def run_async(coro):
     """
-    Run an asynchronous coroutine in a new event loop and return its result synchronously.
+    Run an asynchronous coroutine synchronously in a new event loop and return its result.
     
     Intended for use in synchronous Flask route handlers to enable integration with asynchronous backend operations.
     
@@ -103,12 +103,12 @@ def run_async(coro):
 @app.route('/health', methods=['GET'])
 def health_check():
     """
-    Return a JSON response with the Genesis API health status, current server timestamp, and uptime.
+    Return the Genesis API health status, current server timestamp, and uptime as a JSON response.
     
-    The response contains:
+    The response includes:
     - "status": "healthy" if the Genesis Layer is running, otherwise "unhealthy".
-    - "timestamp": The current server time in ISO 8601 format.
-    - "uptime": The duration since the Genesis Layer started, or "0:00:00" if not running.
+    - "timestamp": Current server time in ISO 8601 format.
+    - "uptime": Duration since the Genesis Layer started, or "0:00:00" if not running.
     """
     return jsonify({
         "status": "healthy" if genesis_api.is_running else "unhealthy",
@@ -119,12 +119,12 @@ def health_check():
 @app.route('/genesis/chat', methods=['POST'])
 def chat_with_genesis():
     """
-    Handles chat requests by forwarding user messages, user ID, and optional context to the Genesis backend and returning the backend's response as JSON.
+    Processes a chat request by forwarding the user's message, user ID, and optional context to the Genesis backend and returning the backend's response as JSON.
     
-    Expects a JSON payload with required fields `message` and `user_id`, and an optional `context` object. Returns HTTP 400 if the request is not JSON or required fields are missing, and HTTP 500 for internal errors.
+    Expects a JSON payload with required fields `message` (the user's message) and `user_id` (the user's identifier), and an optional `context` object. Returns HTTP 400 if the request is not JSON or required fields are missing, and HTTP 500 for internal server errors.
     
     Returns:
-        JSON response from the Genesis backend, or an error message with the appropriate HTTP status code.
+        JSON response from the Genesis backend on success, or an error message with the appropriate HTTP status code on failure.
     """
     try:
         # Validate request
@@ -165,10 +165,10 @@ def chat_with_genesis():
 @app.route('/genesis/status', methods=['GET'])
 def get_status():
     """
-    Retrieve the current operational status of the Genesis Layer.
+    Retrieve the Genesis Layer's current operational status as a JSON response.
     
     Returns:
-        A JSON response with the Genesis Layer's status information on success, or an error message with HTTP 500 status code if retrieval fails.
+        JSON containing the Genesis Layer's status information on success, or an error message with HTTP 500 if retrieval fails.
     """
     try:
         status = run_async(get_genesis_status())
@@ -182,14 +182,15 @@ def get_consciousness_state():
     """
     Retrieve the Genesis system's current consciousness state and related metrics as a JSON response.
     
-    The response includes:
-    - `state`: Current consciousness state.
-    - `awareness_level`: System's awareness level (float).
-    - `active_patterns`: List of active consciousness patterns.
-    - `evolution_stage`: Current evolution stage.
-    - `ethical_compliance`: Ethical compliance score (float).
+    Returns:
+        JSON containing the following fields:
+            - state (str): Current consciousness state.
+            - awareness_level (float): System's awareness level.
+            - active_patterns (list): List of active consciousness patterns.
+            - evolution_stage (str): Current evolution stage.
+            - ethical_compliance (float): Ethical compliance score.
     
-    Returns an error message with HTTP 500 status if retrieval fails.
+    If retrieval fails, returns a JSON error message with HTTP 500 status.
     """
     try:
         status = run_async(get_genesis_status())
@@ -208,9 +209,11 @@ def get_consciousness_state():
 @app.route('/genesis/profile', methods=['GET'])
 def get_genesis_profile():
     """
-    Returns the Genesis system's identity, personality traits, capabilities, values, and evolution stage as a JSON response.
+    Retrieve the Genesis system's profile information, including identity, personality, capabilities, values, and evolution stage, as a JSON response.
     
-    If retrieval fails, returns a JSON error message with HTTP 500 status.
+    Returns:
+        JSON object containing the Genesis profile data on success.
+        On failure, returns a JSON error message with HTTP 500 status.
     """
     try:
         profile_data = {
@@ -228,9 +231,9 @@ def get_genesis_profile():
 @app.route('/genesis/evolve', methods=['POST'])
 def trigger_evolution():
     """
-    Trigger an evolution event in the Genesis backend with a specified trigger type and reason.
+    Triggers an evolution event in the Genesis backend using the specified trigger type and reason.
     
-    Accepts a JSON payload containing `trigger_type` and `reason`, constructs an evolution trigger request, and processes it asynchronously. Returns a JSON response with the trigger status and backend response. Responds with HTTP 400 if the request is not JSON, and HTTP 500 on internal errors.
+    Accepts a JSON payload with `trigger_type` and `reason`, constructs an evolution trigger request, and processes it asynchronously. Returns a JSON response with the trigger status and backend response on success. Responds with HTTP 400 if the request is not JSON, and HTTP 500 if an internal error occurs.
     """
     try:
         if not request.is_json:
@@ -263,9 +266,9 @@ def trigger_evolution():
 @app.route('/genesis/ethics/evaluate', methods=['POST'])
 def evaluate_ethics():
     """
-    Processes a POST request to evaluate the ethical implications of a specified action using the Genesis ethical governor.
+    Handles POST requests to evaluate the ethical implications of a specified action via the Genesis ethical governor.
     
-    Accepts a JSON payload with a required `action` field and an optional `context`. Returns the ethical evaluation result as JSON. Responds with HTTP 400 for missing or invalid fields, and HTTP 500 if the evaluation fails.
+    Expects a JSON payload with a required `action` field and an optional `context`. Returns the ethical evaluation result as JSON. Responds with HTTP 400 for missing or invalid fields, and HTTP 500 if the evaluation process fails.
     """
     try:
         if not request.is_json:
@@ -295,10 +298,10 @@ def evaluate_ethics():
 @app.route('/genesis/reset', methods=['POST'])
 def reset_session():
     """
-    Resets the Genesis backend session by shutting down and reinitializing the Genesis Layer.
+    Reset the Genesis backend session by shutting down and reinitializing the Genesis Layer.
     
     Returns:
-        Response: JSON with reset status, message, and timestamp on success. Returns HTTP 500 with an error message if the reset operation fails.
+        Response: A JSON response with reset status, message, and timestamp on success. Returns HTTP 500 with an error message if the reset operation fails.
     """
     try:
         # Shutdown and restart Genesis
@@ -337,10 +340,10 @@ def not_found(error):
 @app.errorhandler(500)
 def internal_error(error):
     """
-    Return a generic JSON response with error details for HTTP 500 Internal Server Error.
+    Return a JSON response indicating an internal server error (HTTP 500).
     
     Returns:
-        tuple: A JSON object containing an error message and the HTTP 500 status code.
+        tuple: JSON object with "error" and "message" fields, and HTTP 500 status code.
     """
     return jsonify({
         "error": "Internal server error",
@@ -351,7 +354,9 @@ def internal_error(error):
 @app.before_first_request
 def initialize_app():
     """
-    Initializes the Genesis Layer asynchronously before the first client request is processed.
+    Initializes the Genesis backend asynchronously before handling the first client request.
+    
+    This function ensures the Genesis Layer is started and ready to process API requests when the Flask application receives its first request.
     """
     run_async(genesis_api.startup())
 

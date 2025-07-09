@@ -20,7 +20,7 @@ class MockAuraAIService : Agent {
  */
 override fun getName(): String? = "MockAura"
     /**
- * Returns the agent type for this mock AI service.
+ * Returns the fixed agent type `AgentType.AURA` for this mock AI service.
  *
  * @return The `AgentType.AURA` enum value.
  */
@@ -59,14 +59,16 @@ override fun getName(): String? = "MockKai"
     /**
  * Returns the agent type for this mock Kai AI service.
  *
- * @return Always returns AgentType.KAI.
+ * Always returns AgentType.KAI.
+ *
+ * @return The agent type, AgentType.KAI.
  */
 override fun getType(): AgentType = AgentType.KAI /**
-     * Returns a mock AgentResponse that echoes the input query and context with a fixed confidence score of 1.0.
+     * Returns a mock AgentResponse echoing the input query and context with a fixed confidence score of 1.0.
      *
      * @param request The AI request containing the query to echo.
      * @param context The context string to include in the response.
-     * @return An AgentResponse containing the echoed query and context.
+     * @return An AgentResponse with the echoed query and context.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         return AgentResponse(
@@ -86,15 +88,15 @@ override fun getType(): AgentType = AgentType.KAI /**
 
 class MockCascadeAIService : Agent {
     /**
- * Returns the name identifier for this mock Cascade AI service.
+ * Returns the fixed name identifier for this mock Cascade AI service.
  *
  * @return The string "MockCascade".
  */
 override fun getName(): String? = "MockCascade"
     /**
- * Returns the agent type associated with this mock AI service.
+ * Returns the fixed agent type for this mock AI service.
  *
- * @return The CASCADE agent type.
+ * @return The `AgentType.CASCADE` value.
  */
 override fun getType(): AgentType = AgentType.CASCADE /**
      * Returns a mock AgentResponse for CascadeAI, echoing the provided query and context.
