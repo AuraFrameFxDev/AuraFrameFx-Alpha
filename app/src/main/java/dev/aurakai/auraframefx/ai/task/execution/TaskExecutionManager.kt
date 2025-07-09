@@ -57,7 +57,7 @@ class TaskExecutionManager @Inject constructor(
     /**
      * Schedules a new background task for asynchronous execution by the most appropriate AI agent.
      *
-     * Validates the scheduling request, creates a pending `TaskExecution` with the provided parameters, determines the optimal agent based on task type or explicit agent preference, and enqueues the task for processing. The task can be scheduled for immediate or delayed execution.
+     * Validates the scheduling request, creates a pending `TaskExecution` with the provided parameters, determines the optimal agent based on task type or explicit agent preference, and enqueues the task for processing.
      *
      * @param type The category or identifier of the task.
      * @param data The input data required for the task.
@@ -117,9 +117,9 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Retrieves the current execution status of a task by its ID, or `null` if the task does not exist.
+     * Retrieves the current execution status of a task by its ID.
      *
-     * Checks active, completed, and queued tasks to determine the most up-to-date status.
+     * Searches active, completed, and queued tasks to find and return the task's status, or returns `null` if the task does not exist.
      *
      * @param taskId The unique identifier of the task.
      * @return The current execution status, or `null` if the task is not found.
@@ -138,7 +138,7 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Returns the result of a completed task for the given task ID, or null if the task is not found or not yet completed.
+     * Returns the result of a completed task by its unique identifier, or null if the task is not found or not yet completed.
      *
      * @param taskId The unique identifier of the task.
      * @return The completed task result, or null if unavailable.
@@ -148,9 +148,9 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Attempts to cancel a task by its ID if it is pending or currently running.
+     * Cancels a task by its ID if it is pending in the queue or currently running.
      *
-     * Removes the task from the queue if it is still pending, or marks it as cancelled if it is actively executing. Returns `true` if cancellation was initiated; returns `false` if the task does not exist or has already completed.
+     * Removes the task from the queue if it is pending, or marks it as cancelled if it is active. Returns `true` if cancellation was initiated, or `false` if the task does not exist or has already completed.
      *
      * @param taskId The unique identifier of the task to cancel.
      * @return `true` if the task was cancelled; `false` otherwise.
@@ -220,7 +220,7 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Launches a coroutine that continuously processes queued tasks while processing is enabled.
+     * Launches a background coroutine that continuously processes queued tasks while processing is enabled.
      *
      * The processor iterates with a short delay between cycles to reduce resource usage, and applies a longer delay after encountering errors to provide backoff.
      */
@@ -245,7 +245,7 @@ class TaskExecutionManager @Inject constructor(
     /**
      * Processes the next eligible task from the queue if concurrency limits permit.
      *
-     * Retrieves and evaluates the highest-priority task; if its scheduled time has arrived, dispatches it for execution. Otherwise, re-queues the task for future processing.
+     * Polls the highest-priority task and checks if its scheduled time has arrived. If not, the task is re-queued. If eligible, the task is dispatched for asynchronous execution.
      */
     private suspend fun processNextTask() {
         // Check if we can process more tasks
@@ -268,9 +268,9 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Executes a task asynchronously using its designated AI agent and records the outcome.
+     * Executes a task asynchronously using its assigned AI agent and records the outcome.
      *
-     * Updates the task's status to running, delegates execution to the assigned agent, and upon completion or failure, stores the result and updates execution statistics. Removes the task from active executions after processing.
+     * Delegates the task to the appropriate agent based on its configuration. Upon completion or failure, updates the task's result, execution statistics, and removes it from the set of active executions.
      *
      * @param execution The task to execute.
      */
@@ -414,9 +414,9 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Selects the most appropriate agent type for a task based on explicit agent preference or task type keywords.
+     * Selects the appropriate agent type for a task based on explicit agent preference or task type keywords.
      *
-     * If the task specifies a valid agent preference, that agent is chosen. Otherwise, the agent is determined by matching keywords in the task type, defaulting to Genesis if no keywords match.
+     * If the task specifies a valid agent preference, that agent is chosen. Otherwise, the agent is determined by matching keywords in the task type, defaulting to Genesis if no match is found.
      *
      * @param execution The task execution containing agent preference and type information.
      * @return The agent type selected to process the task.
@@ -444,7 +444,7 @@ class TaskExecutionManager @Inject constructor(
         }
     }
     /**
-     * Returns the number of tasks currently being executed.
+     * Returns the number of tasks currently being executed concurrently.
      *
      * @return The count of active task executions.
      */
@@ -472,7 +472,7 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Updates the queue status state flow with the latest queue size, number of active executions, concurrency limit, and processing status.
+     * Updates the queue status state flow with the latest queue size, number of active executions, concurrency limit, and processing flag.
      */
     private fun updateQueueStatus() {
         _queueStatus.value = QueueStatus(
