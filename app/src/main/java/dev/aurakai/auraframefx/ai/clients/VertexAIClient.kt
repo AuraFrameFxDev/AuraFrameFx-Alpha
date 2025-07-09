@@ -9,16 +9,16 @@ interface VertexAIClient {
  * Generates content based on the given prompt.
  *
  * @param prompt The input text used to guide content generation.
- * @return The generated content as a string, or null if generation is unsuccessful.
+ * @return The generated content as a string, or null if generation fails.
  */
     suspend fun generateContent(prompt: String): String?
 
     /**
-     * Generates text from the provided prompt with configurable output length and creativity.
+     * Generates text from a prompt with configurable maximum token length and temperature to control randomness.
      *
-     * @param prompt The input prompt to guide text generation.
-     * @param maxTokens Maximum number of tokens to generate in the output.
-     * @param temperature Degree of randomness in the generated text; higher values yield more diverse results.
+     * @param prompt The input prompt for text generation.
+     * @param maxTokens The maximum number of tokens to generate.
+     * @param temperature The value that controls randomness in the generated text; higher values yield more diverse output.
      * @return The generated text.
      */
     suspend fun generateText(
@@ -28,12 +28,12 @@ interface VertexAIClient {
     ): String
 
     /**
- * Generates source code based on a specification, target programming language, and coding style.
+ * Generates source code based on a specification, programming language, and coding style.
  *
- * @param specification Description of the functionality or requirements for the code to be generated.
- * @param language The programming language in which the code should be written.
+ * @param specification Description of the required functionality or features for the generated code.
+ * @param language The target programming language for code generation.
  * @param style The coding style or conventions to follow.
- * @return The generated source code, or null if generation is unsuccessful.
+ * @return The generated source code, or null if generation fails.
  */
     suspend fun generateCode(specification: String, language: String, style: String): String?
 
@@ -45,9 +45,7 @@ interface VertexAIClient {
     suspend fun validateConnection(): Boolean
 
     /**
- * Prepares creative AI models in Vertex AI for content generation.
- *
- * This function sets up and configures the required models to enable creative generation features.
+ * Prepares and configures creative AI models in Vertex AI to enable content generation features.
  */
     suspend fun initializeCreativeModels()
 

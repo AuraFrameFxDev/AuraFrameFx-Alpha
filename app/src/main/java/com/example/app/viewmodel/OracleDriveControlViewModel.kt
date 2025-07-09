@@ -38,9 +38,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
 
     /**
-     * Simulates unbinding from the Oracle Drive service for UI testing in beta mode.
+     * Simulates unbinding from the Oracle Drive service in beta mode.
      *
-     * Updates the service connection state and status message to reflect a disconnected state, without performing any real unbinding.
+     * Updates the service connection state and status message with placeholder values; no actual unbinding occurs.
      */
     fun unbindService() {
         // Beta stub: No actual unbinding
@@ -51,7 +51,7 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Updates the status, detailed status, and diagnostics log with static messages indicating Oracle Drive features are disabled in beta mode.
      *
-     * Intended for UI testing; does not perform any real status or diagnostics retrieval.
+     * This method does not perform any real status or diagnostics retrieval.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -63,7 +63,7 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates toggling a module by updating the diagnostics log with a placeholder message.
      *
-     * No actual module state is changed; this method is intended for UI testing in beta mode only.
+     * Intended for UI testing in beta mode; does not change any actual module state.
      *
      * @param packageName The package name of the module to simulate toggling.
      * @param enable If `true`, simulates enabling the module; if `false`, simulates disabling it.

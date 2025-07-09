@@ -50,11 +50,11 @@ data class VertexAIConfig(
     val enableFunctionCalling: Boolean = true
 ) {
     /**
-     * Validates the configuration fields and collects error messages for any missing or invalid values.
+     * Checks the configuration for missing or invalid values and returns a list of error messages.
      *
-     * Ensures required string fields are not blank and numeric parameters are within acceptable ranges.
+     * Validates that required string fields are not blank and that numeric parameters are within acceptable ranges.
      *
-     * @return A list of error messages for invalid fields, or an empty list if all validations pass.
+     * @return A list of error messages for any invalid fields, or an empty list if the configuration is valid.
      */
     fun validate(): List<String> {
         val errors = mutableListOf<String>()
@@ -89,9 +89,9 @@ data class VertexAIConfig(
     }
 
     /**
-     * Builds the complete URL for the content generation endpoint of the configured Vertex AI model.
+     * Builds the complete API endpoint URL for content generation using the configured Vertex AI model.
      *
-     * @return The full API endpoint URL for generating content with the specified model.
+     * @return The full URL for the model's content generation endpoint.
      */
     fun getModelEndpoint(): String {
         return "${getFullEndpoint()}/publishers/google/models/$modelName:generateContent"
