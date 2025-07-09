@@ -33,9 +33,9 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
 
         /**
-         * Handles the event when the AuraDrive service is disconnected.
+         * Called when the AuraDrive service is disconnected, clearing the service reference and updating the connection state to false.
          *
-         * Clears the reference to the remote service and updates the connection state to indicate disconnection.
+         * @param name The component name of the disconnected service.
          */
         override fun onServiceDisconnected(name: ComponentName?) {
             auraDriveService = null
@@ -44,9 +44,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Initiates a connection to the remote AuraDrive service using an explicit intent.
+     * Initiates binding to the remote AuraDrive service using an explicit intent.
      *
-     * Sets the connection state to disconnected if a security exception occurs during binding.
+     * Sets the connection state to disconnected if a SecurityException occurs during the binding attempt.
      */
     fun bindService() {
         val intent = Intent().apply {

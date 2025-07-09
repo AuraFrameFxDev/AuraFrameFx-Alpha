@@ -11,11 +11,12 @@ extern "C" {
 #endif
 
 /**
- * @brief Initializes the language identifier using a specified model path.
+ * @brief Simulates initialization of the language identifier with a given model path.
  *
- * This function sets up the language identification module with the given model path, using a simple pattern-based approach that does not rely on external models. If the model path is valid, it returns the version string "1.2.0"; if the model path is null, it returns an empty string.
+ * Returns the version string "1.2.0" if the model path is valid, or an empty string if the model path is null.
+ * No actual model loading or resource allocation is performed.
  *
- * @return jstring Version string ("1.2.0") if initialized with a valid model path, or an empty string if the model path is null.
+ * @return jstring Version string ("1.2.0") on success, or an empty string if initialization fails.
  */
 JNIEXPORT jstring
 
@@ -40,12 +41,12 @@ Java_com_example_app_language_LanguageIdentifier_nativeInitialize(
 }
 
 /**
- * @brief Identifies the language of the input text using heuristic pattern matching.
+ * @brief Identifies the language of the input text using heuristic pattern matching and character analysis.
  *
- * Analyzes the input string for language-specific words and character patterns to return an ISO 639-1 language code: "es" (Spanish), "fr" (French), "de" (German), "it" (Italian), "pt" (Portuguese), or defaults to "en" (English). If the text contains a high proportion of accented (non-ASCII) characters without a clear language match, returns "mul" for multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
+ * Examines the input string for language-specific words and patterns to detect Spanish ("es"), French ("fr"), German ("de"), Italian ("it"), or Portuguese ("pt"). Defaults to English ("en") if no match is found. If the text contains a high proportion of accented (non-ASCII) characters without a clear language match, returns "mul" for multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
  *
- * @param text The input text to analyze.
- * @return jstring ISO 639-1 language code ("es", "fr", "de", "it", "pt", "en", "mul", or "und").
+ * @param text Input text to analyze.
+ * @return jstring ISO 639-1 language code: "es", "fr", "de", "it", "pt", "en", "mul", or "und".
  */
 JNIEXPORT jstring
 

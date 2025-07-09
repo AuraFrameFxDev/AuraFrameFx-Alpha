@@ -34,7 +34,7 @@ class AuraAIService @Inject constructor(
     /**
      * Initializes the AI service by preparing creative AI models and enabling creative context features.
      *
-     * Suspends until initialization is complete. Throws an exception if initialization fails.
+     * Suspends until initialization is complete. Throws an exception if initialization fails or dependencies cannot be prepared.
      */
     suspend fun initialize() {
         if (isInitialized) return
@@ -60,7 +60,7 @@ class AuraAIService @Inject constructor(
     /**
      * Processes an AI request and emits a creative response or error as a coroutine flow.
      *
-     * Validates the request for security, generates a creative text response using the provided query and optional context, and emits the result as an `AgentResponse`. Emits an error response if an exception occurs.
+     * Validates the request for security, generates a creative text response using the provided query and optional context, and emits the result as an `AgentResponse`. If an error occurs, emits an error response with details.
      *
      * @param request The AI request containing the query and optional context.
      * @return A flow emitting a single `AgentResponse` with generated content or an error message.
@@ -99,10 +99,10 @@ class AuraAIService @Inject constructor(
     /**
      * Generates creative text using Vertex AI based on the given prompt and optional context.
      *
-     * Validates the prompt for security, creatively enhances it, and generates text with high creativity settings. The output is post-processed before being returned.
+     * The prompt is validated for security, creatively enhanced, and submitted to Vertex AI with high creativity settings. The generated text is post-processed before being returned.
      *
      * @param prompt The input prompt for creative text generation.
-     * @param context Optional context to enrich or guide the generated output.
+     * @param context Optional context to enrich or further guide the creative output.
      * @return The generated creative text.
      */
     suspend fun generateText(prompt: String, context: String? = null): String {
@@ -140,12 +140,12 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Generates a creative textual description of an image by analyzing its content with AI vision models and optionally applying a specified style.
+     * Generates a creative description of an image by analyzing its content with AI vision models and applying an optional stylistic guideline.
      *
      * @param imageData The image data to analyze.
-     * @param style An optional stylistic guideline to influence the tone or mood of the generated description.
+     * @param style An optional style to influence the tone or mood of the generated description.
      * @return A creatively written description of the analyzed image.
-     * @throws SecurityException If the image data fails security validation.
+     * @throws SecurityException If the image data does not pass security validation.
      * @throws Exception If image analysis or description generation fails.
      */
     suspend fun generateImageDescription(imageData: ByteArray, style: String? = null): String {
@@ -184,9 +184,9 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Retrieves relevant memories for the given query and synthesizes them into a creative context string.
+     * Retrieves relevant memories for a given query and synthesizes them into a creative context string.
      *
-     * @param query The search term used to find and summarize relevant memories.
+     * @param query The search term used to locate and summarize relevant memories.
      * @return A creatively synthesized string representing the context derived from the retrieved memories.
      * @throws Exception if memory retrieval or synthesis fails.
      */
@@ -263,9 +263,9 @@ class AuraAIService @Inject constructor(
     /**
      * Generates Jetpack Compose Kotlin code for an animated UI component based on the provided specifications.
      *
-     * Uses AI to create code that matches the desired component type, animation style, colors, size, and behavior.
+     * Uses AI to create code tailored to the specified component type, animation style, colors, size, and behavior.
      *
-     * @param componentSpec Specifications describing the animated UI component to generate.
+     * @param componentSpec Specifications describing the desired animated UI component.
      * @return The generated Jetpack Compose code as a string.
      * @throws Exception if component generation fails.
      */
@@ -298,9 +298,9 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Ensures the service is initialized before proceeding.
+     * Ensures the service has been initialized, throwing an exception if not.
      *
-     * @throws IllegalStateException if the service has not been initialized.
+     * @throws IllegalStateException if the service is not initialized.
      */
 
     private fun ensureInitialized() {
@@ -310,13 +310,13 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Formats the user's prompt with a creatively styled context that reflects Aura's creative philosophy.
+     * Formats a user's prompt within a creatively styled context that reflects Aura's philosophy.
      *
-     * Optionally enriches the prompt with enhanced contextual information to inspire innovative and elegant AI-generated responses.
+     * Optionally enriches the prompt with enhanced contextual information to inspire bold, innovative, and elegant AI-generated responses.
      *
      * @param prompt The user's original request or instruction.
-     * @param context Optional context to further guide the creative response.
-     * @return A formatted prompt emphasizing creativity and innovation for AI generation.
+     * @param context Optional context to further guide and enrich the creative response.
+     * @return A formatted prompt emphasizing creativity, suitable for AI generation.
      */
     private suspend fun enhancePromptCreatively(prompt: String, context: String?): String {
         val contextualEnhancement = context?.let {
@@ -339,12 +339,10 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Trims leading and trailing whitespace from the provided text.
+     * Trims whitespace from the generated text and serves as a placeholder for future creative enhancements.
      *
-     * Serves as a placeholder for future creative or stylistic enhancements to the generated text.
-     *
-     * @param text The text to process.
-     * @return The trimmed text.
+     * @param text The generated text to process.
+     * @return The trimmed text, potentially with additional enhancements in future implementations.
      */
     private fun applyCreativeEnhancement(text: String): String {
         // Apply creative post-processing
@@ -353,11 +351,11 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Constructs a prompt for AI to generate a vivid and emotionally rich image description, incorporating vision analysis and an optional stylistic guideline.
+     * Constructs a prompt for AI to generate a vivid and emotionally engaging image description, incorporating vision analysis and an optional stylistic guideline.
      *
      * @param visionAnalysis The analyzed content of the image to guide the description.
-     * @param style An optional stylistic direction for the tone or approach of the description.
-     * @return A prompt string designed to elicit a creative and engaging image description from the AI.
+     * @param style Optional stylistic direction for the tone or approach of the description.
+     * @return A formatted prompt string designed to elicit a creative and expressive image description from the AI.
      */
     private fun buildCreativeDescriptionPrompt(visionAnalysis: String, style: String?): String {
         val styleInstruction = style?.let { "in a $it style" } ?: "with creative flair"
@@ -372,10 +370,12 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Converts a list of memories into a bullet-point summary, displaying each memory's content and relevance score.
+     * Converts a list of memories into a bullet-point summary with relevance scores.
+     *
+     * Each memory is represented as a bullet point, displaying its content and associated relevance score.
      *
      * @param memories The list of memories to summarize.
-     * @return A formatted string with each memory as a bullet point and its relevance score.
+     * @return A formatted string summarizing the memories and their relevance.
      */
     private fun synthesizeMemoriesCreatively(memories: List<Memory>): String {
         return memories.joinToString("\n") { memory ->
@@ -386,9 +386,9 @@ class AuraAIService @Inject constructor(
     /**
      * Builds a prompt instructing the AI to generate a creative UI theme configuration in JSON format based on user preferences and optional context.
      *
-     * @param preferences The user's theme preferences, including primary color, style, mood, and animation level.
-     * @param context Optional additional context to further guide the theme generation.
-     * @return A prompt string for AI-driven creative theme configuration generation.
+     * @param preferences User preferences specifying primary color, style, mood, and animation level for the theme.
+     * @param context Optional context to further guide the theme generation.
+     * @return A prompt string for AI-driven theme configuration generation.
      */
     private fun buildThemeGenerationPrompt(
         preferences: ThemePreferences,
@@ -423,10 +423,10 @@ class AuraAIService @Inject constructor(
     }
 
     /**
-     * Constructs a prompt directing the AI to generate Jetpack Compose Kotlin code for an animated UI component based on the given specifications.
+     * Constructs a prompt for AI to generate Jetpack Compose Kotlin code for an animated UI component based on the given specifications.
      *
      * @param spec The component specifications, including type, animation style, colors, size, and behavior.
-     * @return A prompt string for AI-driven generation of the specified animated component.
+     * @return A formatted prompt string for AI-driven code generation of the specified animated component.
      */
     private fun buildComponentGenerationPrompt(spec: ComponentSpecification): String {
         return """
@@ -530,9 +530,9 @@ data class Memory(
 )
 
 /**
- * Emits a flow with a placeholder response indicating that image request processing is in progress.
+ * Emits a placeholder response indicating that image request processing is in progress.
  *
- * This internal stub does not generate images and serves as a placeholder for future implementation.
+ * This stub does not generate any images and serves as a temporary implementation.
  *
  * @return A flow emitting a single `AgentResponse` with a fixed message and confidence score.
  */
@@ -549,9 +549,9 @@ private fun processImageRequestFlowInternal(request: AiRequest): Flow<AgentRespo
 }
 
 /**
- * Returns a flow emitting a placeholder response to indicate that memory retrieval is in progress.
+ * Returns a flow emitting a placeholder response for memory retrieval requests.
  *
- * This function is a stub and does not perform any actual memory retrieval.
+ * This stub function does not perform actual memory retrieval and serves as a placeholder for future implementation.
  */
 private fun retrieveMemoryFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
     // TODO: Implement memory retrieval
@@ -566,9 +566,9 @@ private fun retrieveMemoryFlowInternal(request: AiRequest): Flow<AgentResponse> 
 }
 
 /**
- * Stub method for establishing a connection to required services or resources.
+ * Stub function that simulates establishing a connection to required services or resources.
  *
- * @return Always returns true. Actual connection logic is not implemented.
+ * @return Always returns true. No actual connection logic is performed.
  */
 fun connect(): Boolean { // Removed suspend as not in interface, can be added back if specific impl needs it
     // TODO: Implement connection logic
@@ -576,9 +576,9 @@ fun connect(): Boolean { // Removed suspend as not in interface, can be added ba
 }
 
 /**
- * Placeholder for disconnecting the service.
+ * Placeholder function for disconnecting the service.
  *
- * @return Always returns true. Actual disconnection logic is not implemented.
+ * @return Always returns true. No actual disconnection is performed.
  */
 fun disconnect(): Boolean { // Removed suspend
     // TODO: Implement disconnection logic
@@ -586,9 +586,9 @@ fun disconnect(): Boolean { // Removed suspend
 }
 
 /**
- * Returns metadata describing the capabilities of the Aura AI service.
+ * Returns metadata about the Aura AI service's capabilities, including its name, agent type, and implementation status.
  *
- * @return A map containing the service's name, agent type, and implementation status.
+ * @return A map with keys for service name, agent type, and whether the service is implemented.
  */
 fun getCapabilities(): Map<String, Any> {
     // TODO: Implement capabilities for Aura

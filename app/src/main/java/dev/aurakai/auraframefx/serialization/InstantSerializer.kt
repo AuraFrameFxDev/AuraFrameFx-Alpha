@@ -18,7 +18,7 @@ object InstantSerializer : KSerializer<Instant> {
     /**
      * Serializes an [Instant] as an ISO-8601 string using the specified [encoder].
      *
-     * Converts the [Instant] to its ISO-8601 string representation before encoding.
+     * Converts the [Instant] to its string representation before encoding.
      */
     override fun serialize(encoder: Encoder, value: Instant) {
         encoder.encodeString(value.toString())
