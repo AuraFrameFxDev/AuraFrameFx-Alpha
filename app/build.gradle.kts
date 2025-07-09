@@ -37,19 +37,15 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_24
-        targetCompatibility = JavaVersion.VERSION_24
-    }
-
-    kotlinOptions {
-        @Suppress("DEPRECATION")
-        jvmTarget = "24"
-        @Suppress("DEPRECATION")
-        freeCompilerArgs = listOf(
-            "-opt-in=kotlin.RequiresOptIn",
-            "-Xjvm-default=all"
-        )
+    kotlin {
+        jvmToolchain(17)
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+            freeCompilerArgs.addAll(
+                "-opt-in=kotlin.RequiresOptIn",
+                "-Xjvm-default=all"
+            )
+        }
     }
 
     buildFeatures {
@@ -122,7 +118,9 @@ dependencies {
 
     // Animation
     implementation(libs.androidxComposeAnimation)
-    debugImplementation(libs.composeUiTooling)
+    debugImplementation(platform(libs.composeBom))
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-tooling-preview")
 
     // Lifecycle
     implementation(libs.lifecycleViewmodelCompose)
@@ -198,4 +196,3 @@ dependencies {
     debugImplementation(libs.composeUiTooling)
     debugImplementation(libs.composeUiTestManifest)
 }
-

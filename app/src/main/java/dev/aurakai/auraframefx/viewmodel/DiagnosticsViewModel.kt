@@ -101,9 +101,15 @@ class DiagnosticsViewModel @Inject constructor(
     }
 
     /**
-     * Asynchronously retrieves and updates the current day's logs in the observable state.
+<<<<<<< HEAD
+     * Asynchronously refreshes the current day's logs and updates the observable log state.
      *
-     * Shows a loading message during retrieval, displays the logs if available, or a placeholder if none are found. Updates the state with an error message if log retrieval fails.
+     * If no logs are available, sets a placeholder message. In case of an error, updates the log state with an error message.
+=======
+     * Asynchronously refreshes the observable state with the current day's logs.
+     *
+     * Sets a loading message while retrieving logs, then updates the state with today's logs if available, a placeholder if none are found, or an error message if retrieval fails.
+>>>>>>> pr458merge
      */
     fun refreshLogs() {
         viewModelScope.launch {
@@ -134,10 +140,14 @@ class DiagnosticsViewModel @Inject constructor(
     }
 
     /**
-     * Retrieves all available log entries up to the specified maximum number of lines.
+<<<<<<< HEAD
+     * Retrieves logs for all dates with pagination support.
+=======
+     * Retrieves up to the specified number of log entries from the application's log storage.
      *
      * @param maxLines The maximum number of log lines to retrieve. Defaults to 500.
      * @return A list of log entries, or a single-item list with an error message if retrieval fails.
+>>>>>>> pr458merge
      */
     fun getAllLogs(maxLines: Int = 500): List<String> {
         return try {
@@ -149,12 +159,16 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
-     * Retrieves log entries containing the specified severity level.
+<<<<<<< HEAD
+     * Filters logs by severity level.
+=======
+     * Returns up to 1000 log entries that contain the specified severity level.
      *
-     * Filters up to 1000 log entries and returns those that include the given level (case-insensitive) in square brackets (e.g., "[ERROR]"). If an error occurs during filtering, returns a single-item list with an error message.
+     * Filters log entries for those including the given level (case-insensitive, enclosed in square brackets, e.g., "[ERROR]").
      *
      * @param level The severity level to filter for (e.g., "ERROR", "INFO").
      * @return A list of log entries matching the specified level, or a single-item list with an error message if filtering fails.
+>>>>>>> pr458merge
      */
     fun getLogsByLevel(level: String): List<String> {
         return try {
@@ -169,9 +183,13 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
-     * Asynchronously clears all application logs and updates the observable logs state with the result.
+<<<<<<< HEAD
+     * Clears all logs with confirmation.
+=======
+     * Asynchronously clears all application logs and updates the observable logs state to reflect the result.
      *
-     * Sets the logs state to a success or error message based on the outcome, enabling the UI to display feedback to the user.
+     * Updates the logs state with a success or error message, allowing the UI to display the outcome to the user.
+>>>>>>> pr458merge
      */
     fun clearLogs() {
         viewModelScope.launch {
@@ -187,9 +205,13 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
-     * Asynchronously checks cloud connectivity and appends the result to the current logs.
+<<<<<<< HEAD
+     * Triggers a manual cloud reachability check.
+=======
+     * Initiates an asynchronous check of cloud connectivity and appends the result or an error message to the current logs.
      *
-     * Updates the observable log state with either "Cloud reachability: CONNECTED", "Cloud reachability: DISCONNECTED", or an error message if the check fails.
+     * Updates the observable log state with either "Cloud reachability: CONNECTED", "Cloud reachability: DISCONNECTED", or an error message if the connectivity check fails.
+>>>>>>> pr458merge
      */
     fun checkCloudReachability() {
         viewModelScope.launch {
@@ -211,9 +233,13 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
+<<<<<<< HEAD
+     * Loads and displays detailed configuration from offline data manager.
+=======
      * Retrieves and returns a string representation of critical offline configuration data.
      *
-     * @return A string describing the critical offline data, or an error message if retrieval fails.
+     * @return A formatted string containing the critical offline data, or an error message if retrieval fails.
+>>>>>>> pr458merge
      */
     fun loadDetailedConfig(): String {
         return try {

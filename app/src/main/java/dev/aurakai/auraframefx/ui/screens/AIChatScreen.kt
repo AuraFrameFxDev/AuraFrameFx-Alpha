@@ -30,9 +30,15 @@ data class ChatMessage(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays an AI chat interface with a scrollable conversation and persistent message input.
+<<<<<<< HEAD
+ * Composable that renders an AI chat interface with persistent message history and input.
  *
- * Presents a chat screen where users can send messages and receive simulated AI responses. The conversation history and input text are preserved across recompositions and configuration changes. Messages are visually distinguished by sender.
+ * Shows a scrollable list of chat messages and an input field for composing new messages. User messages and simulated AI responses are visually distinguished and aligned accordingly. Input text and chat history are preserved across configuration changes.
+=======
+ * Renders an AI chat interface with a scrollable conversation history and a persistent input field.
+ *
+ * Allows users to send messages and receive simulated AI responses. The conversation state and input text are preserved across recompositions and configuration changes, ensuring a seamless chat experience.
+>>>>>>> pr458merge
  */
 @Composable
 fun AiChatScreen() {
@@ -121,11 +127,19 @@ fun AiChatScreen() {
 }
 
 /**
- * Renders a chat message bubble with alignment, color, and shape determined by the sender.
+<<<<<<< HEAD
+ * Renders a chat message bubble with visual styling that distinguishes user and AI messages.
  *
- * User messages appear right-aligned with primary container styling, while AI messages are left-aligned with surface variant styling.
+ * The bubble's alignment, color, and shape adapt based on whether the message is sent by the user or the AI.
  *
  * @param message The chat message to render.
+=======
+ * Displays a single chat message bubble with styling and alignment based on the sender.
+ *
+ * User messages are right-aligned with primary container colors and an outgoing bubble shape, while AI messages are left-aligned with surface variant colors and an incoming bubble shape.
+ *
+ * @param message The chat message to display.
+>>>>>>> pr458merge
  */
 @Composable
 fun ChatMessageItem(message: ChatMessage) {
@@ -164,7 +178,11 @@ fun ChatMessageItem(message: ChatMessage) {
 }
 
 /**
- * Renders the AI chat screen within the custom AuraFrameFXTheme for design-time preview.
+<<<<<<< HEAD
+ * Provides a preview of the AI chat screen within the custom theme for design-time visualization.
+=======
+ * Displays a design-time preview of the AI chat screen using the custom AuraFrameFXTheme.
+>>>>>>> pr458merge
  */
 @Preview(showBackground = true)
 @Composable

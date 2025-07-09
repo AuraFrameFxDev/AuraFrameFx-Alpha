@@ -93,18 +93,30 @@ URL_FORMATS = [
 # Test helpers
 def create_mock_response(status_code=200, json_data=None, headers=None, text=None):
     """
-    Create a mock HTTP response object for testing purposes.
-    
-    Simulates an HTTP response with configurable status code, headers, text content, and JSON data. The returned mock object provides `.status_code`, `.headers`, `.text`, a `.json()` method (which returns the provided JSON data or raises a `ValueError` if none is set), and a `.raise_for_status()` method (which raises an exception for status codes 400 or higher).
+<<<<<<< HEAD
+    Return a mock HTTP response object with customizable status code, headers, text, and JSON data for testing purposes.
     
     Parameters:
         status_code (int, optional): HTTP status code to simulate. Defaults to 200.
+        json_data (any, optional): Data to be returned by the mock's `json()` method. If not provided, calling `json()` raises a ValueError.
+=======
+    Create a mock HTTP response object for testing purposes.
+
+    Simulates an HTTP response with configurable status code, headers, text content, and JSON data. The returned mock object provides `.status_code`, `.headers`, `.text`, a `.json()` method (which returns the provided JSON data or raises a `ValueError` if none is set), and a `.raise_for_status()` method (which raises an exception for status codes 400 or higher).
+
+    Parameters:
+        status_code (int, optional): HTTP status code to simulate. Defaults to 200.
         json_data (any, optional): Data returned by the `.json()` method. If not provided, `.json()` raises a `ValueError`.
+>>>>>>> pr458merge
         headers (dict, optional): Headers to include in the mock response. Defaults to an empty dictionary.
         text (str, optional): Text content of the response. Defaults to an empty string.
     
     Returns:
+<<<<<<< HEAD
+        Mock: A unittest.mock.Mock object simulating an HTTP response, including `status_code`, `headers`, `text`, `json()`, and `raise_for_status()` behaviors.
+=======
         Mock: A mock object simulating an HTTP response.
+>>>>>>> pr458merge
     """
     from unittest.mock import Mock
     
@@ -127,13 +139,23 @@ def create_mock_response(status_code=200, json_data=None, headers=None, text=Non
 
 def create_test_connector(config_overrides=None):
     """
-    Instantiate and return a GenesisConnector configured for testing, applying any provided configuration overrides.
+<<<<<<< HEAD
+    Instantiate a GenesisConnector for testing with optional configuration overrides.
     
     Parameters:
-        config_overrides (dict, optional): Configuration values to override the default test settings.
+        config_overrides (dict, optional): Dictionary of configuration values to override the defaults.
     
     Returns:
+        GenesisConnector: An instance initialized with the merged configuration.
+=======
+    Instantiate and return a GenesisConnector configured for testing, applying any provided configuration overrides.
+
+    Parameters:
+        config_overrides (dict, optional): Configuration values to override the default test settings.
+
+    Returns:
         GenesisConnector: A test instance initialized with the merged configuration.
+>>>>>>> pr458merge
     """
     config = TEST_CONFIG.copy()
     if config_overrides:

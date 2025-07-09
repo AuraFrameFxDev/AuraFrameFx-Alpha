@@ -60,6 +60,13 @@ import kotlinx.coroutines.launch
  * @param viewModel The ViewModel that supplies service state and handles control actions for the Oracle Drive service.
  */
 /**
+<<<<<<< HEAD
+ * Displays the Oracle Drive control screen, providing UI controls and status information for managing the Oracle Drive service.
+ *
+ * The screen shows connection status, service status, detailed status, diagnostics log, and allows enabling or disabling modules by package name. It manages service binding and unbinding based on lifecycle events and provides error feedback to the user.
+ *
+ * @param viewModel The ViewModel that supplies state and handles actions for the Oracle Drive control UI.
+=======
  * Displays the Oracle Drive control screen with UI controls and status information for managing the Oracle Drive service.
  *
  * This composable shows the service connection status, current and detailed status, diagnostics log, and provides controls to enable or disable modules by package name. It manages service binding and unbinding according to the composable lifecycle and displays error feedback for user actions.
@@ -97,14 +104,34 @@ import kotlinx.coroutines.launch
 /**
  * Displays a UI screen for controlling and monitoring the Oracle Drive service.
  *
- * Shows service connection status, current and detailed status, diagnostics logs, and provides controls to enable or disable modules by package name. Handles service binding and unbinding based on the composable lifecycle, and provides loading and error feedback for user actions.
+ * Shows connection status, current and detailed status, diagnostics logs, and provides controls to enable or disable modules by package name. Handles service binding and unbinding based on lifecycle, and displays error feedback for user actions.
+ */
+/**
+ * Displays a UI screen for controlling and monitoring the Oracle Drive service.
+ *
+ * Shows service connection status, current and detailed status, diagnostics log, and provides controls to enable or disable modules by package name. Handles service binding and unbinding according to the composable lifecycle, and provides user feedback for loading and error states.
+ */
+/**
+ * Displays a UI screen for controlling and monitoring the Oracle Drive service.
+ *
+ * Shows service connection status, current and detailed status, diagnostics log, and provides controls to enable or disable modules by package name. Manages service binding and unbinding according to the composable lifecycle, and provides user feedback for loading and error states.
  *
  * @param viewModel Supplies service state and handles control actions for the Oracle Drive service.
  */
 /**
  * Displays a UI screen for controlling and monitoring the Oracle Drive service.
  *
- * Shows service connection status, current and detailed status, diagnostics log, and provides controls to enable or disable modules by package name. Handles service binding and unbinding based on the composable lifecycle, and provides user feedback for loading and error states.
+ * Shows service connection status, current and detailed status, and diagnostics logs. Provides controls to enable or disable modules by package name, with user feedback for loading and error states. Handles service binding and unbinding according to the composable lifecycle.
+ *
+ * @param viewModel Supplies service state and handles control actions for the Oracle Drive service.
+ */
+/**
+ * Displays a UI screen for controlling and monitoring the Oracle Drive service.
+ *
+ * Shows service connection status, current and detailed status, diagnostics log, and provides controls to enable or disable modules by package name. Manages service binding and unbinding according to the composable lifecycle, and provides user feedback for loading and error states.
+ *
+ * @param viewModel Supplies the service state and handles control actions for the Oracle Drive service.
+>>>>>>> pr458merge
  */
 @Composable
 fun OracleDriveControlScreen(

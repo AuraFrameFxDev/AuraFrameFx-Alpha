@@ -29,24 +29,44 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     /**
- * Returns the agent's name, "Kai".
+<<<<<<< HEAD
+ * Retrieves the name of the agent.
  *
- * @return The string "Kai".
+ * @return The agent name, "Kai".
  */
 override fun getName(): String? = "Kai"
     /**
- * Returns the agent type, which is `AgentType.KAI`.
+ * Returns the agent type as `AgentType.KAI`.
  *
  * @return The type of this agent.
+=======
+ * Returns the fixed name of the agent, "Kai".
+ *
+ * @return The agent's name.
+ */
+override fun getName(): String? = "Kai"
+    /**
+ * Retrieves the type of this agent.
+ *
+ * @return `AgentType.KAI`, indicating this agent's type.
+>>>>>>> pr458merge
  */
 override fun getType(): AgentType = AgentType.KAI
 
     /**
+<<<<<<< HEAD
+         * Returns a map indicating the supported capabilities of the Kai agent.
+         *
+         * The map contains capability names as keys ("security", "analysis", "memory", "service_implemented") with values set to true.
+         *
+         * @return A map of capability names to their support status.
+=======
          * Returns a map of the Kai agent's supported capabilities.
          *
-         * The map includes "security", "analysis", "memory", and "service_implemented" as keys, each mapped to true to indicate support.
+         * The map contains the keys "security", "analysis", "memory", and "service_implemented", each mapped to true.
          *
-         * @return A map where each key is a capability name and the value is true if supported.
+         * @return A map indicating which capabilities are supported by the agent.
+>>>>>>> pr458merge
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
@@ -57,11 +77,18 @@ override fun getType(): AgentType = AgentType.KAI
         )
 
     /**
-     * Processes an AI request with the given context and returns a response referencing both.
+<<<<<<< HEAD
+     * Handles an AI request using the provided context and returns a fixed response referencing both.
      *
      * @param request The AI request to process.
-     * @param context Contextual information to include in the response.
-     * @return An AgentResponse containing a message that references the request query and context, with a confidence score of 1.0.
+     * @param context Contextual information to accompany the request.
+=======
+     * Processes an AI request using the provided context and returns a stubbed response referencing both.
+     *
+     * @param request The AI request to process.
+     * @param context The context information to include in the response.
+>>>>>>> pr458merge
+     * @return An AgentResponse containing a message referencing the request query and context, with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         auraFxLogger.i(

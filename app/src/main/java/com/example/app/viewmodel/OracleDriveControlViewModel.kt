@@ -27,9 +27,15 @@ class OracleDriveControlViewModel : ViewModel() {
     val diagnosticsLog: StateFlow<String> = _diagnosticsLog.asStateFlow()
     
     /**
+<<<<<<< HEAD
+     * Simulates a service bind operation for Oracle Drive in beta mode.
+     *
+     * Updates internal state to reflect that service binding is disabled; does not perform any real service connection.
+=======
      * Simulates binding to the Oracle Drive service in beta mode.
      *
      * Updates internal state to indicate that service binding is disabled. No actual service connection is performed.
+>>>>>>> pr458merge
      */
     fun bindService() {
         // Beta stub: No actual binding
@@ -38,9 +44,15 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
+<<<<<<< HEAD
      * Simulates unbinding from the Oracle Drive service in beta mode.
      *
-     * Sets the internal connection state to disconnected and updates the status message. No actual service interaction is performed.
+     * Sets the service connection state to disconnected and updates the status message, but does not perform any real unbinding operation.
+=======
+     * Simulates unbinding from the Oracle Drive service for beta UI testing.
+     *
+     * Updates the connection state and status message to reflect a disconnected state. No real unbinding or backend operations are performed.
+>>>>>>> pr458merge
      */
     fun unbindService() {
         // Beta stub: No actual unbinding
@@ -49,9 +61,15 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Simulates a status refresh for the Oracle Drive service using static placeholder messages.
+<<<<<<< HEAD
+     * Sets the status, detailed status, and diagnostics log to static messages indicating Oracle Drive features are disabled in beta mode.
      *
-     * Updates the status, detailed status, and diagnostics log with predefined beta-mode values for UI testing. No real status or diagnostics information is retrieved.
+     * No actual status or diagnostics retrieval is performed.
+=======
+     * Updates the status, detailed status, and diagnostics log with static placeholder messages for beta UI testing.
+     *
+     * No real status or diagnostics data is retrieved; all updates are mock values intended solely for UI testing in beta mode.
+>>>>>>> pr458merge
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -61,12 +79,21 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Simulates toggling a module by updating the diagnostics log with a message indicating the intended action.
+<<<<<<< HEAD
+     * Simulates enabling or disabling a module by updating the diagnostics log with a placeholder message.
      *
-     * This method does not alter any real module state and only provides placeholder feedback for UI testing in beta mode.
+     * This method does not affect any real module state and is intended solely for UI testing in beta mode.
      *
-     * @param packageName The name of the module to simulate enabling or disabling.
+     * @param packageName The name of the module package to simulate toggling.
      * @param enable If `true`, simulates enabling the module; if `false`, simulates disabling it.
+=======
+     * Simulates toggling a module by updating the diagnostics log with a placeholder message.
+     *
+     * This method does not perform any real module toggling and is intended only for UI testing in beta mode.
+     *
+     * @param packageName Name of the module to simulate toggling.
+     * @param enable Whether to simulate enabling (`true`) or disabling (`false`) the module.
+>>>>>>> pr458merge
      */
     fun toggleModule(packageName: String, enable: Boolean) {
         // Beta stub: Just log the action without actually doing anything

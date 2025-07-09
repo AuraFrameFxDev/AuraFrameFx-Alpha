@@ -21,7 +21,11 @@ object LoggingModule {
     /**
      * Provides a singleton instance of `AuraFxLogger` for application-wide logging.
      *
+<<<<<<< HEAD
+     * @param context The application context used by the logger implementation.
+=======
      * @param context The application context used by the logger.
+>>>>>>> pr458merge
      * @param kaiService The KaiAIService dependency required by the logger.
      * @return A singleton implementation of `AuraFxLogger`.
      */

@@ -23,6 +23,11 @@ import dev.aurakai.auraframefx.ui.theme.*
  * and hexagonal UI elements inspired by futuristic cyberpunk interfaces.
  */
 /**
+<<<<<<< HEAD
+ * Displays the main home screen UI for the AuraFrameFX app with a cyberpunk theme.
+ *
+ * Renders layered animated backgrounds, a stylized title header, a navigation menu, action buttons, and a system status panel. Menu and button selections trigger navigation to other screens via the provided navigation controller.
+=======
  * Displays the AuraFrameFX home screen with a cyberpunk-themed floating UI, interactive navigation menu, action buttons, and system status panel.
  *
  * The screen features layered digital landscape and hexagonal grid backgrounds, a floating header, a vertical menu for navigation, action buttons for quick access to key screens, and a status panel showing system information. User interactions update the selected menu item and trigger navigation to other screens via the provided navigation controller.
@@ -48,14 +53,34 @@ import dev.aurakai.auraframefx.ui.theme.*
  * The screen features a layered digital landscape and hexagonal grid background, a floating header, a vertical navigation menu, action buttons, and a system status panel. User interactions update the selected menu item and trigger navigation to other screens via the provided navigation controller.
  */
 /**
+ * Displays the AuraFrameFX home screen with a cyberpunk-themed floating user interface.
+ *
+ * Renders layered digital landscape and hexagonal grid backgrounds, a floating header, a vertical navigation menu, action buttons, and a system status panel. User interactions update the selected menu item and trigger navigation to other screens via the provided navigation controller.
+ */
+/**
  * Displays the main home screen of the AuraFrameFX app with a cyberpunk-themed floating user interface.
  *
- * The screen features layered digital landscape and animated hexagonal grid backgrounds, a floating header window, a vertical navigation menu, action buttons for navigation, and a system status panel. User interactions update the selected menu item and trigger navigation to other screens via the provided navigation controller.
+ * The screen features a layered digital landscape and animated hexagon grid backgrounds, a floating header, a vertical navigation menu, action buttons, and a system status panel. User interactions update the selected menu item and trigger navigation to other screens via the provided navigation controller.
+ *
+ * @param navController Used to navigate to other screens based on user actions.
  */
 /**
  * Displays the AuraFrameFX home screen with a cyberpunk-themed floating user interface.
  *
- * Renders layered digital landscape and animated hexagonal grid backgrounds, a floating header, a vertical navigation menu, action buttons, and a system status panel. Handles user interaction to update the selected menu item and navigates to different screens using the provided navigation controller.
+ * Renders layered digital landscape and animated hexagon grid backgrounds, a floating header, a vertical navigation menu, action buttons, and a system status panel. User interactions update the selected menu item and trigger navigation to other screens via the provided navigation controller.
+ *
+ * @param navController Used to navigate between screens within the app.
+ */
+/**
+ * Displays the main cyberpunk-themed home screen with layered digital backgrounds, interactive navigation menu, action buttons, and system status panel.
+ *
+ * Presents a floating user interface with animated backgrounds, a vertical navigation menu for switching between app sections, quick-access action buttons, and a real-time status display. Navigation to other screens is handled via the provided navigation controller.
+ */
+/**
+ * Displays the main cyberpunk-themed home screen with layered digital backgrounds, interactive navigation menu, action buttons, and system status panel.
+ *
+ * Presents a floating user interface with animated backgrounds, a vertical navigation menu, and action buttons for navigation to key app sections. The screen also shows system status information and responds to user interactions by updating the selected menu item and navigating to other screens via the provided navigation controller.
+>>>>>>> pr458merge
  */
 @Composable
 fun HomeScreen(navController: NavController) {

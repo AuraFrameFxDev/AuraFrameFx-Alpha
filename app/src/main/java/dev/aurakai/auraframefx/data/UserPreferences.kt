@@ -42,23 +42,39 @@ class UserPreferences(context: Context) {
     private val prefs = mutableMapOf<String, String>()
 
     /**
-     * Returns the value associated with the specified key from user preferences, or the provided default if the key is not present.
+<<<<<<< HEAD
+     * Retrieves the value associated with the given preference key, or returns the specified default if the key is not found.
      *
-     * @param key The preference key to retrieve.
-     * @param defaultValue The value to return if the key does not exist.
-     * @return The stored value for the key, or the default value if absent.
+     * @param key The key identifying the preference to retrieve.
+     * @param defaultValue The value to return if the key is not present in the preferences.
+     * @return The stored value for the key, or the default value if the key does not exist.
+=======
+     * Returns the value associated with the given key from user preferences, or the provided default if the key is absent.
+     *
+     * @param key The preference key to look up.
+     * @param defaultValue The value to return if the key is not present in preferences.
+     * @return The stored value for the key, or the default value if not found.
+>>>>>>> pr458merge
      */
     fun getPreference(key: String, defaultValue: String): String {
         return prefs[key] ?: defaultValue
     }
 
     /**
-     * Sets or updates the value for a given key in the in-memory user preferences.
+<<<<<<< HEAD
+     * Sets or updates the string value for the specified key in the in-memory preferences.
      *
-     * If the key already exists, its value is overwritten.
+     * Any existing value for the key will be overwritten.
      *
      * @param key The preference key.
-     * @param value The value to store for the key.
+=======
+     * Stores or updates a user preference value in memory for the given key.
+     *
+     * Overwrites the existing value if the key is already present.
+     *
+     * @param key The preference key to set.
+>>>>>>> pr458merge
+     * @param value The value to associate with the key.
      */
     fun setPreference(key: String, value: String) {
         prefs[key] = value
