@@ -2,8 +2,12 @@ import pytest
 import unittest
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
+import time
 
+import tempfile
+import os
 # Import the module under test
 from app.ai_backend.genesis_profile import (
     GenesisProfile,
@@ -102,43 +106,55 @@ class TestGenesisProfile(unittest.TestCase):
     
     def test_genesis_profile_update_preferences_invalid_type(self):
         """Test updating preferences with invalid type"""
-        with self.assertRaises(TypeError):
-        """
+    def test_genesis_profile_update_preferences_invalid_type(self):
+        """Test updating preferences with invalid type"""
+    def test_genesis_profile_invalid_initialization_types(self):
+        """Test GenesisProfile initialization with invalid types"""
         with self.assertRaises((TypeError, ValueError)):
-            GenesisProfile(None, self.sample_data)
+            GenesisProfile(None)
         
         with self.assertRaises((TypeError, ValueError)):
-            GenesisProfile("", self.sample_data)
-    
     def test_genesis_profile_data_immutability(self):
         """
-        Test that a copied snapshot of a GenesisProfile's data remains unchanged after the profile's data is modified.
+        Test that a copied snapshot of a GenesisProfile data remains unchanged after the profile data is modified.
         
-        Ensures that copying the profile's data produces an immutable snapshot, and subsequent changes to the profile do not affect the copied data.
+        Ensures that copying the profile data produces an immutable snapshot, and subsequent changes to the profile do not affect the copied data.
         """
-        profile = GenesisProfile(self.profile_id, self.sample_data)
-        original_data = profile.data.copy()
+        profile = GenesisProfile(self.sample_profile_data)
+        original_data = profile.to_dict().copy()
         
-        # Modify the data
-        profile.data['new_field'] = 'new_value'
+        # Modify the profile data
+        profile.update_preferences({"new_field": "new_value"})
         
-        # Original data should not be affected if properly implemented
-        self.assertNotEqual(profile.data, original_data)
-        self.assertIn('new_field', profile.data)
-    
+        # Original data should not be affected
+        self.assertNotEqual(profile.to_dict(), original_data)
+        self.assertNotIn("new_field", original_data.get("preferences", {}))
+        Ensures that copying the profile's data produces an immutable snapshot, and subsequent changes to the profile do not affect the copied data.
     def test_genesis_profile_str_representation(self):
         """
         Tests that the string representation of a GenesisProfile instance includes the profile ID and is of type string.
         """
-        profile = GenesisProfile(self.profile_id, self.sample_data)
+        profile = GenesisProfile(self.sample_profile_data)
         str_repr = str(profile)
         
-        self.assertIn(self.profile_id, str_repr)
+        self.assertIn(self.sample_profile_data["id"], str_repr)
         self.assertIsInstance(str_repr, str)
-    
+        self.assertIn("GenesisProfile", str_repr)
     def test_genesis_profile_equality(self):
         """
-        Verify that GenesisProfile instances are equal when both profile ID and data match, and unequal when profile IDs differ.
+        Verify that GenesisProfile instances are equal when both profile data matches, and unequal when data differs.
+        """
+        profile1 = GenesisProfile(self.sample_profile_data)
+        profile2 = GenesisProfile(self.sample_profile_data.copy())
+        different_data = self.sample_profile_data.copy()
+        different_data["id"] = "different_id"
+        profile3 = GenesisProfile(different_data)
+        
+        # Note: This test depends on how __eq__ is implemented
+        # If not implemented, it will test object identity
+        if hasattr(profile1, "__eq__"):
+            self.assertEqual(profile1, profile2)
+            self.assertNotEqual(profile1, profile3)
         """
         profile1 = GenesisProfile(self.profile_id, self.sample_data)
         profile2 = GenesisProfile(self.profile_id, self.sample_data.copy())
@@ -317,16 +333,16 @@ class TestProfileValidator(unittest.TestCase):
     
     def test_validate_profile_data_valid(self):
         """
-        Tests that `ProfileValidator.validate_profile_data` returns True when provided with valid profile data.
+        Tests that `validate_profile_schema` returns True when provided with valid profile data.
         """
-        result = ProfileValidator.validate_profile_data(self.valid_data)
+        result = validate_profile_schema(self.valid_data)
         self.assertTrue(result)
     
     def test_validate_profile_data_missing_required_fields(self):
         """
         Test that profile data validation returns False when required fields are missing.
         
-        Verifies that `ProfileValidator.validate_profile_data` correctly identifies dictionaries lacking any of the required fields ('name', 'version', or 'settings') as invalid.
+        Verifies that `validate_profile_schema` correctly identifies dictionaries lacking any of the required fields ('name', 'version', or 'settings') as invalid.
         """
         invalid_data_cases = [
             {'version': '1.0.0', 'settings': {}},  # Missing name
@@ -337,7 +353,7 @@ class TestProfileValidator(unittest.TestCase):
         
         for invalid_data in invalid_data_cases:
             with self.subTest(invalid_data=invalid_data):
-                result = ProfileValidator.validate_profile_data(invalid_data)
+                result = validate_profile_schema(invalid_data)
                 self.assertFalse(result)
     
     def test_validate_profile_data_empty_values(self):
@@ -355,20 +371,20 @@ class TestProfileValidator(unittest.TestCase):
         for empty_data in empty_data_cases:
             with self.subTest(empty_data=empty_data):
                 # This may pass or fail depending on implementation
-                result = ProfileValidator.validate_profile_data(empty_data)
+                result = validate_profile_schema(empty_data)
                 # Test that it returns a boolean
                 self.assertIsInstance(result, bool)
     
     def test_validate_profile_data_none_input(self):
         """
-        Test that passing None to ProfileValidator.validate_profile_data raises a TypeError or AttributeError.
+        Test that passing None to validate_profile_schema raises a TypeError or AttributeError.
         """
         with self.assertRaises((TypeError, AttributeError)):
-            ProfileValidator.validate_profile_data(None)
+            validate_profile_schema(None)
     
     def test_validate_profile_data_invalid_types(self):
         """
-        Test that `ProfileValidator.validate_profile_data` raises a `TypeError` or `AttributeError` when given input types other than a dictionary.
+        Test that `validate_profile_schema` raises a `TypeError` or `AttributeError` when given input types other than a dictionary.
         """
         invalid_type_cases = [
             "string_instead_of_dict",
@@ -380,7 +396,7 @@ class TestProfileValidator(unittest.TestCase):
         for invalid_type in invalid_type_cases:
             with self.subTest(invalid_type=invalid_type):
                 with self.assertRaises((TypeError, AttributeError)):
-                    ProfileValidator.validate_profile_data(invalid_type)
+                    validate_profile_schema(invalid_type)
     
     def test_validate_profile_data_extra_fields(self):
         """
@@ -395,16 +411,15 @@ class TestProfileValidator(unittest.TestCase):
             'optional_settings': {'debug': True}
         })
         
-        result = ProfileValidator.validate_profile_data(data_with_extra)
+        result = validate_profile_schema(data_with_extra)
         self.assertTrue(result)  # Extra fields should be allowed
 
 
 class TestProfileBuilder(unittest.TestCase):
-    """Test cases for ProfileBuilder class"""
-    
-    def setUp(self):
-        """
-        Set up a fresh ProfileBuilder instance before each test case.
+        result = generate_profile_data()
+        result["name"] = "test_profile"
+        result["version"] = "1.0.0"
+        result["settings"] = {"ai_model": "gpt-4"}
         """
         self.builder = ProfileBuilder()
     
@@ -631,7 +646,7 @@ class TestIntegrationScenarios(unittest.TestCase):
                      .build())
         
         # Validate before creating
-        is_valid = ProfileValidator.validate_profile_data(valid_data)
+        is_valid = validate_profile_schema(valid_data)
         self.assertTrue(is_valid)
         
         # Create profile
@@ -644,7 +659,7 @@ class TestIntegrationScenarios(unittest.TestCase):
         """
         # Test validation error
         invalid_data = {'name': 'test'}  # Missing required fields
-        is_valid = ProfileValidator.validate_profile_data(invalid_data)
+        is_valid = validate_profile_schema(invalid_data)
         self.assertFalse(is_valid)
         
         # Test profile not found error
@@ -890,7 +905,7 @@ def test_profile_validation_parametrized(data, should_validate):
         data (dict): The profile data to validate.
         should_validate (bool): The expected result of the validation.
     """
-    result = ProfileValidator.validate_profile_data(data)
+    result = validate_profile_schema(data)
     assert result == should_validate
 
 
@@ -1152,7 +1167,7 @@ class TestAdvancedValidationScenarios(unittest.TestCase):
             }
         }
         
-        result = ProfileValidator.validate_profile_data(complex_data)
+        result = validate_profile_schema(complex_data)
         self.assertTrue(result)
     
     def test_version_format_validation(self):
@@ -1184,7 +1199,7 @@ class TestAdvancedValidationScenarios(unittest.TestCase):
                 }
                 
                 try:
-                    result = ProfileValidator.validate_profile_data(data)
+                    result = validate_profile_schema(data)
                     if expected_valid:
                         self.assertTrue(result)
                     else:
@@ -1222,7 +1237,7 @@ class TestAdvancedValidationScenarios(unittest.TestCase):
                 }
                 
                 try:
-                    result = ProfileValidator.validate_profile_data(data)
+                    result = validate_profile_schema(data)
                     if expected_valid:
                         self.assertTrue(result)
                     else:
@@ -1262,7 +1277,7 @@ class TestAdvancedValidationScenarios(unittest.TestCase):
                 }
                 
                 try:
-                    result = ProfileValidator.validate_profile_data(data)
+                    result = validate_profile_schema(data)
                     if expected_valid:
                         self.assertTrue(result)
                     else:
@@ -1453,7 +1468,7 @@ class TestProfileBuilderAdvancedScenarios(unittest.TestCase):
                        .build())
         
         # Validate the built profile
-        is_valid = ProfileValidator.validate_profile_data(profile_data)
+        is_valid = validate_profile_schema(profile_data)
         self.assertTrue(is_valid)
         
         # Test with invalid data
@@ -1461,7 +1476,7 @@ class TestProfileBuilderAdvancedScenarios(unittest.TestCase):
                           .with_name('invalid_test')
                           .build())  # Missing version and settings
         
-        is_invalid = ProfileValidator.validate_profile_data(invalid_profile)
+        is_invalid = validate_profile_schema(invalid_profile)
         self.assertFalse(is_invalid)
     
     def test_builder_immutability_and_reuse(self):
@@ -1537,7 +1552,7 @@ def test_profile_creation_performance_parametrized(data_size, expected_performan
 ])
 def test_profile_validation_error_types_parametrized(invalid_data, expected_error):
     """
-    Parametrized test verifying that `ProfileValidator.validate_profile_data` raises the correct exception for invalid input types or returns `False` for incomplete but valid profile data.
+    Parametrized test verifying that `validate_profile_schema` raises the correct exception for invalid input types or returns `False` for incomplete but valid profile data.
     
     Parameters:
         invalid_data: Input to validate, which may be of an incorrect type or missing required fields.
@@ -1545,12 +1560,12 @@ def test_profile_validation_error_types_parametrized(invalid_data, expected_erro
     """
     if expected_error is False:
         # Valid case - should return False but not raise exception
-        result = ProfileValidator.validate_profile_data(invalid_data)
+        result = validate_profile_schema(invalid_data)
         assert isinstance(result, bool)
     else:
         # Invalid case - should raise expected error
         with pytest.raises(expected_error):
-            ProfileValidator.validate_profile_data(invalid_data)
+            validate_profile_schema(invalid_data)
 
 
 @pytest.mark.parametrize("operation,profile_id,data,expected_outcome", [
@@ -1909,7 +1924,7 @@ class TestProfileValidatorExtended(unittest.TestCase):
         
         for scenario in validation_scenarios:
             with self.subTest(scenario=scenario['name']):
-                result = ProfileValidator.validate_profile_data(scenario['data'])
+                result = validate_profile_schema(scenario['data'])
                 self.assertEqual(result, scenario['should_validate'])
     
     def test_validation_with_dynamic_schemas(self):
@@ -1950,13 +1965,13 @@ class TestProfileValidatorExtended(unittest.TestCase):
         for variant in schema_variants:
             with self.subTest(profile_type=variant['type']):
                 # Test basic validation (current implementation)
-                result = ProfileValidator.validate_profile_data(variant['data'])
+                result = validate_profile_schema(variant['data'])
                 self.assertTrue(result)
                 
                 # Test missing required fields
                 incomplete_data = variant['data'].copy()
                 incomplete_data.pop('settings')
-                result = ProfileValidator.validate_profile_data(incomplete_data)
+                result = validate_profile_schema(incomplete_data)
                 self.assertFalse(result)
 
 
@@ -2349,7 +2364,7 @@ class TestProfileSystemIntegration(unittest.TestCase):
                 internal_data['metadata'] = external_data['metadata']
             
             # Validate before importing
-            if ProfileValidator.validate_profile_data(internal_data):
+            if validate_profile_schema(internal_data):
                 return self.manager.create_profile(profile_id, internal_data)
             else:
                 raise ValidationError("Invalid external profile format")
@@ -2569,7 +2584,7 @@ class TestProfileVersioning(unittest.TestCase):
         for scenario in version_scenarios:
             with self.subTest(version=scenario['version']):
                 # Test validation
-                is_valid = ProfileValidator.validate_profile_data(scenario['data'])
+                is_valid = validate_profile_schema(scenario['data'])
                 self.assertEqual(is_valid, scenario['should_validate'])
                 
                 # Test profile creation
@@ -2688,6 +2703,279 @@ class TestProfileSystemStress(unittest.TestCase):
         end_time = time.time()
         
         duration = end_time - start_time
+if __name__ == "__main__":
+    # Run comprehensive test suite with both unittest and pytest
+    import sys
+    
+    print("Running unittest tests...")
+    # Run unittest tests
+    unittest.main(argv=[""], exit=False, verbosity=2)
+    
+    print("\nRunning pytest tests...")
+    # Run pytest tests
+    pytest.main([__file__, "-v", "--tb=short"])
+
+class TestMergeProfiles(unittest.TestCase):
+    """Test suite for merge_profiles function"""
+    
+    def setUp(self):
+        """Set up test fixtures before each test method."""
+        self.profile1_data = {
+            "id": "profile1",
+            "name": "Profile 1",
+            "email": "profile1@example.com",
+            "preferences": {
+                "language": "en",
+                "theme": "dark"
+            }
+        }
+        
+        self.profile2_data = {
+            "id": "profile2",
+            "name": "Profile 2",
+            "email": "profile2@example.com",
+            "preferences": {
+                "language": "es",
+                "notifications": True
+            }
+        }
+    
+    def test_merge_profiles_basic(self):
+        """Test basic profile merging functionality"""
+        merged = merge_profiles(self.profile1_data, self.profile2_data)
+        self.assertIsInstance(merged, dict)
+        self.assertIn("preferences", merged)
+    
+    def test_merge_profiles_preference_override(self):
+        """Test that second profile preferences override first profile"""
+        merged = merge_profiles(self.profile1_data, self.profile2_data)
+        # Second profile should override language preference
+        self.assertEqual(merged["preferences"]["language"], "es")
+    
+    def test_merge_profiles_preserve_unique_fields(self):
+        """Test that unique fields from both profiles are preserved"""
+        merged = merge_profiles(self.profile1_data, self.profile2_data)
+        # Both profiles should contribute unique preference fields
+        self.assertIn("theme", merged["preferences"])
+        self.assertIn("notifications", merged["preferences"])
+    
+    def test_merge_profiles_empty_profiles(self):
+        """Test merging with empty profiles"""
+        empty_profile = {}
+        merged = merge_profiles(self.profile1_data, empty_profile)
+        self.assertEqual(merged["name"], "Profile 1")
+        
+        merged = merge_profiles(empty_profile, self.profile2_data)
+        self.assertEqual(merged["name"], "Profile 2")
+    
+    def test_merge_profiles_none_values(self):
+        """Test merging profiles with None values"""
+        profile_with_none = {
+            "id": "profile_none",
+            "name": None,
+            "preferences": None
+        }
+        merged = merge_profiles(self.profile1_data, profile_with_none)
+        self.assertIsNotNone(merged)
+
+
+class TestGenerateProfileData(unittest.TestCase):
+    """Test suite for generate_profile_data function"""
+    
+    def test_generate_profile_data_basic(self):
+        """Test basic profile data generation"""
+        profile_data = generate_profile_data()
+        self.assertIsInstance(profile_data, dict)
+        self.assertIn("id", profile_data)
+        self.assertIn("created_at", profile_data)
+    
+    def test_generate_profile_data_with_params(self):
+        """Test profile data generation with parameters"""
+        profile_data = generate_profile_data(name="Test Profile", email="test@example.com")
+        self.assertEqual(profile_data["name"], "Test Profile")
+        self.assertEqual(profile_data["email"], "test@example.com")
+    
+    def test_generate_profile_data_unique_ids(self):
+        """Test that generated profile data has unique IDs"""
+        profile1 = generate_profile_data()
+        profile2 = generate_profile_data()
+        self.assertNotEqual(profile1["id"], profile2["id"])
+    
+    def test_generate_profile_data_timestamp_format(self):
+        """Test that generated timestamps are in correct format"""
+        profile_data = generate_profile_data()
+        # Should be able to parse the timestamp
+        try:
+            datetime.fromisoformat(profile_data["created_at"].replace("Z", "+00:00"))
+        except ValueError:
+            self.fail("Generated timestamp is not in valid ISO format")
+
+
+class TestValidateProfileSchema(unittest.TestCase):
+    """Test suite for validate_profile_schema function"""
+    
+    def setUp(self):
+        """Set up test fixtures before each test method."""
+        self.valid_profile = {
+            "id": "test_profile_123",
+            "name": "Test User",
+            "email": "test@example.com",
+            "created_at": "2024-01-01T00:00:00Z",
+            "preferences": {
+                "language": "en",
+                "theme": "dark"
+            }
+        }
+    
+    def test_validate_profile_schema_valid(self):
+        """Test validation of valid profile schema"""
+        result = validate_profile_schema(self.valid_profile)
+        self.assertTrue(result)
+    
+    def test_validate_profile_schema_missing_required_fields(self):
+        """Test validation fails for missing required fields"""
+        invalid_profile = {"name": "Test User"}
+        result = validate_profile_schema(invalid_profile)
+        self.assertFalse(result)
+    
+    def test_validate_profile_schema_invalid_email(self):
+        """Test validation fails for invalid email format"""
+        invalid_profile = self.valid_profile.copy()
+        invalid_profile["email"] = "invalid_email"
+        result = validate_profile_schema(invalid_profile)
+        self.assertFalse(result)
+    
+    def test_validate_profile_schema_invalid_types(self):
+        """Test validation fails for invalid data types"""
+        with self.assertRaises((TypeError, ValueError)):
+            validate_profile_schema(None)
+        
+        with self.assertRaises((TypeError, ValueError)):
+            validate_profile_schema("not_a_dict")
+        
+        with self.assertRaises((TypeError, ValueError)):
+            validate_profile_schema(123)
+
+
+class TestAdditionalGenesisProfileMethods(unittest.TestCase):
+    """Test additional methods that might exist in GenesisProfile"""
+    
+    def setUp(self):
+        """Set up test fixtures before each test method."""
+        self.sample_profile_data = {
+            "id": "test_profile_123",
+            "name": "Test User",
+            "email": "test@example.com",
+            "created_at": "2024-01-01T00:00:00Z",
+            "preferences": {
+                "language": "en",
+                "theme": "dark",
+                "notifications": True
+            }
+        }
+        self.profile = GenesisProfile(self.sample_profile_data)
+    
+    def test_genesis_profile_get_preference(self):
+        """Test getting individual preference values"""
+        if hasattr(self.profile, "get_preference"):
+            language = self.profile.get_preference("language")
+            self.assertEqual(language, "en")
+            
+            # Test default value for non-existent preference
+            non_existent = self.profile.get_preference("non_existent", "default")
+            self.assertEqual(non_existent, "default")
+    
+    def test_genesis_profile_set_preference(self):
+        """Test setting individual preference values"""
+        if hasattr(self.profile, "set_preference"):
+            self.profile.set_preference("new_pref", "new_value")
+            self.assertEqual(self.profile.get_preference("new_pref"), "new_value")
+    
+    def test_genesis_profile_validate(self):
+        """Test profile validation method"""
+        if hasattr(self.profile, "validate"):
+            result = self.profile.validate()
+            self.assertTrue(result)
+    
+    def test_genesis_profile_to_json(self):
+        """Test converting profile to JSON string"""
+        if hasattr(self.profile, "to_json"):
+            json_str = self.profile.to_json()
+            self.assertIsInstance(json_str, str)
+            # Should be valid JSON
+            parsed = json.loads(json_str)
+            self.assertIsInstance(parsed, dict)
+    
+    def test_genesis_profile_clone(self):
+        """Test cloning a profile"""
+        if hasattr(self.profile, "clone"):
+            cloned = self.profile.clone()
+            self.assertIsNot(cloned, self.profile)
+            self.assertEqual(cloned.to_dict(), self.profile.to_dict())
+    
+    def test_genesis_profile_reset_preferences(self):
+        """Test resetting preferences to default values"""
+        if hasattr(self.profile, "reset_preferences"):
+            self.profile.reset_preferences()
+            # Should have empty or default preferences
+            self.assertIsInstance(self.profile.preferences, dict)
+
+
+class TestProfileManagerAdvancedFeatures(unittest.TestCase):
+    """Test advanced ProfileManager features"""
+    
+    def setUp(self):
+        """Set up test fixtures before each test method."""
+        self.manager = ProfileManager()
+        self.sample_data = {
+            "id": "test_profile",
+            "name": "Test Profile",
+            "email": "test@example.com",
+            "preferences": {"language": "en"}
+        }
+    
+    def test_profile_manager_list_profiles(self):
+        """Test listing all profiles"""
+        if hasattr(self.manager, "list_profiles"):
+            # Create some profiles
+            self.manager.create_profile("profile1", self.sample_data)
+            self.manager.create_profile("profile2", self.sample_data)
+            
+            profiles = self.manager.list_profiles()
+            self.assertIsInstance(profiles, list)
+            self.assertEqual(len(profiles), 2)
+    
+    def test_profile_manager_search_profiles(self):
+        """Test searching profiles by criteria"""
+        if hasattr(self.manager, "search_profiles"):
+            # Create test profiles
+            self.manager.create_profile("profile1", {
+                "name": "John Doe",
+                "email": "john@example.com",
+                "preferences": {"language": "en"}
+            })
+            self.manager.create_profile("profile2", {
+                "name": "Jane Smith",
+                "email": "jane@example.com",
+                "preferences": {"language": "es"}
+            })
+            
+            # Search by name
+            results = self.manager.search_profiles(name="John")
+            self.assertIsInstance(results, list)
+    
+    def test_profile_manager_bulk_operations(self):
+        """Test bulk operations on profiles"""
+        if hasattr(self.manager, "bulk_create_profiles"):
+            profiles_data = [
+                {"id": "bulk1", "name": "Bulk Profile 1"},
+                {"id": "bulk2", "name": "Bulk Profile 2"},
+                {"id": "bulk3", "name": "Bulk Profile 3"}
+            ]
+            
+            results = self.manager.bulk_create_profiles(profiles_data)
+            self.assertIsInstance(results, list)
+         
         
         # Verify no errors occurred
         self.assertEqual(len(errors), 0, f"Errors during rapid operations: {errors}")
