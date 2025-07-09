@@ -93,18 +93,16 @@ URL_FORMATS = [
 # Test helpers
 def create_mock_response(status_code=200, json_data=None, headers=None, text=None):
     """
-    Create a mock HTTP response object for testing purposes.
-    
-    Simulates an HTTP response with configurable status code, headers, text content, and JSON data. The returned mock object provides `.status_code`, `.headers`, `.text`, a `.json()` method (which returns the provided JSON data or raises a `ValueError` if none is set), and a `.raise_for_status()` method (which raises an exception for status codes 400 or higher).
+    Create a mock HTTP response object for testing with customizable status code, headers, text, and JSON data.
     
     Parameters:
-        status_code (int, optional): HTTP status code to simulate. Defaults to 200.
-        json_data (any, optional): Data returned by the `.json()` method. If not provided, `.json()` raises a `ValueError`.
+        status_code (int, optional): The HTTP status code to simulate. Defaults to 200.
+        json_data (optional): The value returned by the mock's `json()` method. If not provided, calling `json()` raises a ValueError.
         headers (dict, optional): Headers to include in the mock response. Defaults to an empty dictionary.
-        text (str, optional): Text content of the response. Defaults to an empty string.
+        text (str, optional): The response text content. Defaults to an empty string.
     
     Returns:
-        Mock: A mock object simulating an HTTP response.
+        Mock: A mock object simulating an HTTP response, including `status_code`, `headers`, `text`, a `json()` method, and a `raise_for_status()` method that raises an exception for error status codes.
     """
     from unittest.mock import Mock
     
@@ -127,10 +125,10 @@ def create_mock_response(status_code=200, json_data=None, headers=None, text=Non
 
 def create_test_connector(config_overrides=None):
     """
-    Instantiate and return a GenesisConnector configured for testing, applying any provided configuration overrides.
+    Create and return a GenesisConnector instance for testing, using default test configuration merged with any provided overrides.
     
     Parameters:
-        config_overrides (dict, optional): Configuration values to override the default test settings.
+        config_overrides (dict, optional): Configuration values to override the defaults for the test connector.
     
     Returns:
         GenesisConnector: A test instance initialized with the merged configuration.

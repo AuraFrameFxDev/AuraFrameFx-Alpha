@@ -18,6 +18,7 @@ Relay a request to the Android Device Layer (ADL)
 
 ```java
 // Import classes:
+
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
@@ -26,29 +27,29 @@ import org.openapitools.client.models.*;
 import org.openapitools.client.api.AdlApi;
 
 public class Example {
-  public static void main(String[] args) {
-    ApiClient defaultClient = Configuration.getDefaultApiClient();
-    defaultClient.setBasePath("https://api.auraframefx.com/v1");
-    
-    // Configure API key authorization: ApiKeyAuth
-    ApiKeyAuth ApiKeyAuth = (ApiKeyAuth) defaultClient.getAuthentication("ApiKeyAuth");
-    ApiKeyAuth.setApiKey("YOUR API KEY");
-    // Uncomment the following line to set a prefix for the API key, e.g. "Token" (defaults to null)
-    //ApiKeyAuth.setApiKeyPrefix("Token");
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        defaultClient.setBasePath("https://api.auraframefx.com/v1");
 
-    AdlApi apiInstance = new AdlApi(defaultClient);
-    ADLRelayRequest adLRelayRequest = new ADLRelayRequest(); // ADLRelayRequest | 
-    try {
-      ADLRelayResponse result = apiInstance.adlRelayPost(adLRelayRequest);
-      System.out.println(result);
-    } catch (ApiException e) {
-      System.err.println("Exception when calling AdlApi#adlRelayPost");
-      System.err.println("Status code: " + e.getCode());
-      System.err.println("Reason: " + e.getResponseBody());
-      System.err.println("Response headers: " + e.getResponseHeaders());
-      e.printStackTrace();
+        // Configure API key authorization: ApiKeyAuth
+        ApiKeyAuth ApiKeyAuth = (ApiKeyAuth) defaultClient.getAuthentication("ApiKeyAuth");
+        ApiKeyAuth.setApiKey("YOUR API KEY");
+        // Uncomment the following line to set a prefix for the API key, e.g. "Token" (defaults to null)
+        //ApiKeyAuth.setApiKeyPrefix("Token");
+
+        AdlApi apiInstance = new AdlApi(defaultClient);
+        ADLRelayRequest adLRelayRequest = new ADLRelayRequest(); // ADLRelayRequest | 
+        try {
+            ADLRelayResponse result = apiInstance.adlRelayPost(adLRelayRequest);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling AdlApi#adlRelayPost");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+        }
     }
-  }
 }
 ```
 

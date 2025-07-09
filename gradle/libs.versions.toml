@@ -55,8 +55,6 @@ toolchainsFoojayResolver = "1.0.0"
 
 [libraries]
 # Hilt (Core & Testing)
-animation = { module = "androidx.compose.animation:animation" }
-foundation = { module = "androidx.compose.foundation:foundation" }
 generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hiltCompiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" } # KSP
@@ -74,7 +72,7 @@ androidxMaterial3 = { group = "androidx.compose.material3", name = "material3" }
 androidxComposeAnimation = { group = "androidx.compose.animation", name = "animation" }
 composeUiTestJunit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 composeUiTooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-composeUiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version = "1.8.3" }
+composeUiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 
 # AndroidX
 androidxCoreKtx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -99,10 +97,10 @@ androidxSecurityCrypto = { module = "androidx.security:security-crypto", version
 
 # Firebase
 firebaseBom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBomVersion" }
-firebaseAnalyticsKtx = { group = "com.google.firebase", name = "firebase-analytics-ktx", version = "22.5.0" }
-firebaseCrashlyticsKtx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx", version = "19.4.4" }
-firebasePerfKtx = { group = "com.google.firebase", name = "firebase-perf-ktx", version = "21.0.5" }
-firebaseMessagingKtx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version = "24.1.2" }
+firebaseAnalyticsKtx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
+firebaseCrashlyticsKtx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+firebasePerfKtx = { group = "com.google.firebase", name = "firebase-perf-ktx" }
+firebaseMessagingKtx = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
 firebaseConfigKtx = { module = "com.google.firebase:firebase-config-ktx", version.ref = "firebaseConfigKtx" }
 firebaseStorageKtx = { module = "com.google.firebase:firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 
@@ -115,7 +113,6 @@ kotlinxSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serializati
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
 # Network
-material3 = { module = "androidx.compose.material3:material3" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 converterGson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 retrofitKotlinxSerializationConverter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofitKotlinxSerializationConverter" }
@@ -137,10 +134,6 @@ androidxTestExtJunit = { module = "androidx.test.ext:junit", version.ref = "andr
 espressoCore = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
 mockkAndroid = { module = "io.mockk:mockk-android", version.ref = "mockk" }
 mockkAgent = { module = "io.mockk:mockk-agent-jvm", version.ref = "mockk" }
-ui = { module = "androidx.compose.ui:ui" }
-uiTestJunit4 = { module = "androidx.compose.ui:ui-test-junit4" }
-uiTooling = { module = "androidx.compose.ui:ui-tooling" }
-uiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

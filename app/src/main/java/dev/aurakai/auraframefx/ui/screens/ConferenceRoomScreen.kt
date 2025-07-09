@@ -17,11 +17,16 @@ import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonPurple
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
 
+/**
+ * Displays the main conference room UI, including agent selection, recording and transcription controls, chat interface, and message input.
+ *
+ * This composable manages local state for the selected agent, recording, and transcription status. It provides interactive controls for switching agents, starting/stopping recording and transcription, and a placeholder chat interface with a message input area.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays the conference room UI with agent selection, recording and transcription controls, chat area, and message input.
+ * Displays the main conference room UI, including agent selection, recording and transcription controls, chat area, and message input.
  *
- * Users can select an agent, toggle recording and transcription states, and view a placeholder chat area. Message input and settings actions are present but not yet implemented.
+ * This composable manages local UI state for the selected agent, recording, and transcription toggles. It provides interactive controls for selecting an agent, starting/stopping recording and transcription, and a chat interface with a message input field. Several actions are placeholders for future implementation.
  */
 @Composable
 fun ConferenceRoomScreen() {
@@ -145,13 +150,13 @@ fun ConferenceRoomScreen() {
 }
 
 /**
- * Renders a selectable button representing an agent, highlighting when selected.
+ * Renders a button representing an agent, visually indicating selection state.
  *
- * The button displays the agent's name and visually indicates selection state. When pressed, it invokes the provided callback.
+ * The button updates its background and text color based on whether it is selected, and triggers the provided callback when pressed.
  *
- * @param agent The name of the agent to display.
- * @param isSelected True if this agent is currently selected; affects button styling.
- * @param onClick Called when the button is clicked.
+ * @param agent The display name of the agent.
+ * @param isSelected True if this agent is currently selected.
+ * @param onClick Invoked when the button is clicked.
  */
 @Composable
 fun AgentButton(
@@ -180,12 +185,10 @@ fun AgentButton(
 }
 
 /**
- * Displays a toggle button for recording in the conference room UI.
+ * Renders a toggle button for recording, displaying a stop icon with red tint when active and a circle icon with purple tint when inactive.
  *
- * Shows a red stop icon when recording is active and a purple circle icon when inactive. The icon's content description updates for accessibility to indicate the current recording action.
- *
- * @param isRecording True if recording is active; false otherwise.
- * @param onClick Called when the button is pressed.
+ * @param isRecording Indicates whether recording is currently active.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun RecordingButton(
@@ -210,12 +213,12 @@ fun RecordingButton(
 }
 
 /**
- * Renders a toggle button for starting or stopping transcription in the conference room UI.
+ * Renders a toggle button for controlling transcription state, updating its icon and color based on whether transcription is active.
  *
- * Displays a red stop icon when transcription is active, or a neon blue phone icon when inactive. The icon's content description changes to reflect the current transcription state for accessibility.
+ * Shows a stop icon with a red tint when transcription is active, and a phone icon with a blue tint otherwise. Invokes the provided callback when pressed.
  *
- * @param isTranscribing Whether transcription is currently active.
- * @param onClick Called when the button is pressed.
+ * @param isTranscribing Indicates if transcription is currently active.
+ * @param onClick Callback invoked when the button is pressed.
  */
 @Composable
 fun TranscribeButton(
@@ -240,9 +243,7 @@ fun TranscribeButton(
 }
 
 /**
- * Displays a design-time preview of the ConferenceRoomScreen composable within a MaterialTheme.
- *
- * Intended for use in Android Studio's Compose preview to visualize the conference room UI layout and styling.
+ * Displays a preview of the ConferenceRoomScreen composable within a MaterialTheme for design-time inspection.
  */
 @Composable
 @Preview(showBackground = true)

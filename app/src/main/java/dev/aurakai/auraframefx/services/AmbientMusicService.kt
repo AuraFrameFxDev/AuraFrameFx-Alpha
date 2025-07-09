@@ -8,7 +8,13 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class AmbientMusicService @Inject constructor() : Service() {
-    // TODO: If this service has dependencies to be injected, add them to the constructor.
+    /**
+     * Called when a client attempts to bind to the service.
+     *
+     * Always returns null, indicating that binding is not supported for this service.
+     *
+     * @return null, preventing clients from binding.
+     */
 
     override fun onBind(_intent: Intent?): IBinder? { // intent -> _intent
         // TODO: Implement binding if needed, otherwise this service cannot be bound.
@@ -16,23 +22,40 @@ class AmbientMusicService @Inject constructor() : Service() {
         return null
     }
 
+    /**
+     * Handles a request to start the service and specifies that it should not be restarted if terminated by the system.
+     *
+     * @return `START_NOT_STICKY` to indicate the service will not be recreated automatically after being killed.
+     */
     override fun onStartCommand(_intent: Intent?, _flags: Int, _startId: Int): Int {
         // TODO: Implement service logic for starting the service.
         // TODO: Utilize parameters (_intent, _flags, _startId) or remove if not needed by actual implementation.
         return START_NOT_STICKY
     }
 
+    /**
+     * Called by the system when the service is first created to perform one-time initialization.
+     */
     override fun onCreate() {
         super.onCreate()
         // TODO: Initialization code for the service.
     }
 
+    /**
+     * Handles cleanup operations when the service is destroyed.
+     *
+     * Called before the service is terminated to allow for resource release or other shutdown tasks.
+     */
     override fun onDestroy() {
         super.onDestroy()
         // TODO: Cleanup code for the service.
     }
 
-    // Example methods that might be relevant for a music service
+    /**
+     * Pauses music playback.
+     *
+     * This method is a placeholder and does not perform any action.
+     */
     fun pause() {
         // TODO: Implement pause logic. Reported as unused. Implement or remove.
     }

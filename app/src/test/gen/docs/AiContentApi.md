@@ -21,6 +21,7 @@ Generate a description for the provided image URL
 
 ```java
 // Import classes:
+
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
@@ -28,23 +29,23 @@ import org.openapitools.client.models.*;
 import org.openapitools.client.api.AiContentApi;
 
 public class Example {
-  public static void main(String[] args) {
-    ApiClient defaultClient = Configuration.getDefaultApiClient();
-    defaultClient.setBasePath("https://api.auraframefx.com/v1");
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        defaultClient.setBasePath("https://api.auraframefx.com/v1");
 
-    AiContentApi apiInstance = new AiContentApi(defaultClient);
-    GenerateImageDescriptionRequest generateImageDescriptionRequest = new GenerateImageDescriptionRequest(); // GenerateImageDescriptionRequest | 
-    try {
-      GenerateImageDescriptionResponse result = apiInstance.aiGenerateImageDescriptionPost(generateImageDescriptionRequest);
-      System.out.println(result);
-    } catch (ApiException e) {
-      System.err.println("Exception when calling AiContentApi#aiGenerateImageDescriptionPost");
-      System.err.println("Status code: " + e.getCode());
-      System.err.println("Reason: " + e.getResponseBody());
-      System.err.println("Response headers: " + e.getResponseHeaders());
-      e.printStackTrace();
+        AiContentApi apiInstance = new AiContentApi(defaultClient);
+        GenerateImageDescriptionRequest generateImageDescriptionRequest = new GenerateImageDescriptionRequest(); // GenerateImageDescriptionRequest | 
+        try {
+            GenerateImageDescriptionResponse result = apiInstance.aiGenerateImageDescriptionPost(generateImageDescriptionRequest);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling AiContentApi#aiGenerateImageDescriptionPost");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+        }
     }
-  }
 }
 ```
 
@@ -87,6 +88,7 @@ Generate text content
 
 ```java
 // Import classes:
+
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
@@ -95,27 +97,27 @@ import org.openapitools.client.models.*;
 import org.openapitools.client.api.AiContentApi;
 
 public class Example {
-  public static void main(String[] args) {
-    ApiClient defaultClient = Configuration.getDefaultApiClient();
-    defaultClient.setBasePath("https://api.auraframefx.com/v1");
-    
-    // Configure OAuth2 access token for authorization: OAuth2AuthCode
-    OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
-    OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        defaultClient.setBasePath("https://api.auraframefx.com/v1");
 
-    AiContentApi apiInstance = new AiContentApi(defaultClient);
-    GenerateTextRequest generateTextRequest = new GenerateTextRequest(); // GenerateTextRequest | 
-    try {
-      GenerateTextResponse result = apiInstance.generateTextPost(generateTextRequest);
-      System.out.println(result);
-    } catch (ApiException e) {
-      System.err.println("Exception when calling AiContentApi#generateTextPost");
-      System.err.println("Status code: " + e.getCode());
-      System.err.println("Reason: " + e.getResponseBody());
-      System.err.println("Response headers: " + e.getResponseHeaders());
-      e.printStackTrace();
+        // Configure OAuth2 access token for authorization: OAuth2AuthCode
+        OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
+        OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+
+        AiContentApi apiInstance = new AiContentApi(defaultClient);
+        GenerateTextRequest generateTextRequest = new GenerateTextRequest(); // GenerateTextRequest | 
+        try {
+            GenerateTextResponse result = apiInstance.generateTextPost(generateTextRequest);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling AiContentApi#generateTextPost");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+        }
     }
-  }
 }
 ```
 

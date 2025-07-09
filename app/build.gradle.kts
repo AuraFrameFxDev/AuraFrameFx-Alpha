@@ -67,6 +67,7 @@ android {
             version = "3.22.1"
         }
     }
+
 }
 
 // OpenAPI Generator: Generate Kotlin client
@@ -85,7 +86,6 @@ openApiGenerate {
         )
     )
 }
-
 
 // Ensure KSP and compilation tasks depend on the code generation
 tasks.named("preBuild") {
@@ -145,7 +145,7 @@ dependencies {
     implementation(libs.androidxSecurityCrypto)
 
     // Google AI
-    implementation(libs.generativeai)
+    implementation(libs.lifecycleCommonJava8)
 
     // Firebase
     implementation(platform(libs.firebaseBom))

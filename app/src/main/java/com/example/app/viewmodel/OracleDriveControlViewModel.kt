@@ -38,9 +38,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
 
     /**
-     * Simulates unbinding from the Oracle Drive service for beta UI testing.
+     * Simulates unbinding from the Oracle Drive service in beta mode.
      *
-     * Updates the connection state and status message to reflect a disconnected state. No real unbinding or backend operations are performed.
+     * Updates the service connection state and status message to reflect a disconnected state, without performing any real unbinding.
      */
     fun unbindService() {
         // Beta stub: No actual unbinding
@@ -49,9 +49,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
 
     /**
-     * Updates the status, detailed status, and diagnostics log with static placeholder messages for beta UI testing.
+     * Updates the status, detailed status, and diagnostics log with static messages indicating Oracle Drive features are disabled in beta mode.
      *
-     * No real status or diagnostics data is retrieved; all updates are mock values intended solely for UI testing in beta mode.
+     * This method does not perform any real status or diagnostics retrieval.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -63,10 +63,10 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates toggling a module by updating the diagnostics log with a placeholder message.
      *
-     * This method does not perform any real module toggling and is intended only for UI testing in beta mode.
+     * This method does not modify any actual module state and is intended only for UI testing in beta mode.
      *
-     * @param packageName Name of the module to simulate toggling.
-     * @param enable Whether to simulate enabling (`true`) or disabling (`false`) the module.
+     * @param packageName The module package name to simulate toggling.
+     * @param enable If `true`, simulates enabling the module; if `false`, simulates disabling it.
      */
     fun toggleModule(packageName: String, enable: Boolean) {
         // Beta stub: Just log the action without actually doing anything

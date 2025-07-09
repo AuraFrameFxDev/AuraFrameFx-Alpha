@@ -18,6 +18,7 @@ Create a new AI conference room
 
 ```java
 // Import classes:
+
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
@@ -26,27 +27,27 @@ import org.openapitools.client.models.*;
 import org.openapitools.client.api.ConferenceRoomApi;
 
 public class Example {
-  public static void main(String[] args) {
-    ApiClient defaultClient = Configuration.getDefaultApiClient();
-    defaultClient.setBasePath("https://api.auraframefx.com/v1");
-    
-    // Configure OAuth2 access token for authorization: OAuth2AuthCode
-    OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
-    OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        defaultClient.setBasePath("https://api.auraframefx.com/v1");
 
-    ConferenceRoomApi apiInstance = new ConferenceRoomApi(defaultClient);
-    ConferenceRoomCreateRequest conferenceRoomCreateRequest = new ConferenceRoomCreateRequest(); // ConferenceRoomCreateRequest | 
-    try {
-      ConferenceRoom result = apiInstance.conferenceCreatePost(conferenceRoomCreateRequest);
-      System.out.println(result);
-    } catch (ApiException e) {
-      System.err.println("Exception when calling ConferenceRoomApi#conferenceCreatePost");
-      System.err.println("Status code: " + e.getCode());
-      System.err.println("Reason: " + e.getResponseBody());
-      System.err.println("Response headers: " + e.getResponseHeaders());
-      e.printStackTrace();
+        // Configure OAuth2 access token for authorization: OAuth2AuthCode
+        OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
+        OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+
+        ConferenceRoomApi apiInstance = new ConferenceRoomApi(defaultClient);
+        ConferenceRoomCreateRequest conferenceRoomCreateRequest = new ConferenceRoomCreateRequest(); // ConferenceRoomCreateRequest | 
+        try {
+            ConferenceRoom result = apiInstance.conferenceCreatePost(conferenceRoomCreateRequest);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling ConferenceRoomApi#conferenceCreatePost");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+        }
     }
-  }
 }
 ```
 

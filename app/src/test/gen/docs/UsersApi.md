@@ -19,6 +19,7 @@ Get current user information
 
 ```java
 // Import classes:
+
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
@@ -27,26 +28,26 @@ import org.openapitools.client.models.*;
 import org.openapitools.client.api.UsersApi;
 
 public class Example {
-  public static void main(String[] args) {
-    ApiClient defaultClient = Configuration.getDefaultApiClient();
-    defaultClient.setBasePath("https://api.auraframefx.com/v1");
-    
-    // Configure OAuth2 access token for authorization: OAuth2AuthCode
-    OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
-    OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        defaultClient.setBasePath("https://api.auraframefx.com/v1");
 
-    UsersApi apiInstance = new UsersApi(defaultClient);
-    try {
-      User result = apiInstance.userGet();
-      System.out.println(result);
-    } catch (ApiException e) {
-      System.err.println("Exception when calling UsersApi#userGet");
-      System.err.println("Status code: " + e.getCode());
-      System.err.println("Reason: " + e.getResponseBody());
-      System.err.println("Response headers: " + e.getResponseHeaders());
-      e.printStackTrace();
+        // Configure OAuth2 access token for authorization: OAuth2AuthCode
+        OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
+        OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+
+        UsersApi apiInstance = new UsersApi(defaultClient);
+        try {
+            User result = apiInstance.userGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UsersApi#userGet");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+        }
     }
-  }
 }
 ```
 
@@ -86,6 +87,7 @@ Update user preferences
 
 ```java
 // Import classes:
+
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
@@ -94,26 +96,26 @@ import org.openapitools.client.models.*;
 import org.openapitools.client.api.UsersApi;
 
 public class Example {
-  public static void main(String[] args) {
-    ApiClient defaultClient = Configuration.getDefaultApiClient();
-    defaultClient.setBasePath("https://api.auraframefx.com/v1");
-    
-    // Configure OAuth2 access token for authorization: OAuth2AuthCode
-    OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
-    OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        defaultClient.setBasePath("https://api.auraframefx.com/v1");
 
-    UsersApi apiInstance = new UsersApi(defaultClient);
-    UserPreferencesUpdate userPreferencesUpdate = new UserPreferencesUpdate(); // UserPreferencesUpdate | 
-    try {
-      apiInstance.userPreferencesPut(userPreferencesUpdate);
-    } catch (ApiException e) {
-      System.err.println("Exception when calling UsersApi#userPreferencesPut");
-      System.err.println("Status code: " + e.getCode());
-      System.err.println("Reason: " + e.getResponseBody());
-      System.err.println("Response headers: " + e.getResponseHeaders());
-      e.printStackTrace();
+        // Configure OAuth2 access token for authorization: OAuth2AuthCode
+        OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
+        OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+
+        UsersApi apiInstance = new UsersApi(defaultClient);
+        UserPreferencesUpdate userPreferencesUpdate = new UserPreferencesUpdate(); // UserPreferencesUpdate | 
+        try {
+            apiInstance.userPreferencesPut(userPreferencesUpdate);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UsersApi#userPreferencesPut");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+        }
     }
-  }
 }
 ```
 

@@ -75,13 +75,15 @@ openApiGenerate {
     generatorName.set("kotlin")
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
     outputDir.set("$buildDir/generated/source/openapi")
-    
-    configOptions.set(mapOf(
-        "library" to "jvm-retrofit2",
-        "useCoroutines" to "true",
-        "serializationLibrary" to "kotlinx_serialization",
-        "dateLibrary" to "kotlinx-datetime"
-    ))
+
+    configOptions.set(
+        mapOf(
+            "library" to "jvm-retrofit2",
+            "useCoroutines" to "true",
+            "serializationLibrary" to "kotlinx_serialization",
+            "dateLibrary" to "kotlinx-datetime"
+        )
+    )
 }
 ```
 
@@ -99,13 +101,15 @@ openApiGenerate {
 tasks.register<GenerateTask>("generateTypeScriptClient") {
     generatorName.set("typescript-fetch")
     outputDir.set("$buildDir/generated/typescript")
-    
-    configOptions.set(mapOf(
-        "npmName" to "@auraframefx/api-client",
-        "supportsES6" to "true",
-        "withInterfaces" to "true",
-        "typescriptThreePlus" to "true"
-    ))
+
+    configOptions.set(
+        mapOf(
+            "npmName" to "@auraframefx/api-client",
+            "supportsES6" to "true",
+            "withInterfaces" to "true",
+            "typescriptThreePlus" to "true"
+        )
+    )
 }
 ```
 
@@ -123,13 +127,15 @@ tasks.register<GenerateTask>("generateTypeScriptClient") {
 tasks.register<GenerateTask>("generateJavaClient") {
     generatorName.set("java")
     outputDir.set("$buildDir/generated/java")
-    
-    configOptions.set(mapOf(
-        "library" to "retrofit2",
-        "serializationLibrary" to "gson",
-        "dateLibrary" to "java8",
-        "java8" to "true"
-    ))
+
+    configOptions.set(
+        mapOf(
+            "library" to "retrofit2",
+            "serializationLibrary" to "gson",
+            "dateLibrary" to "java8",
+            "java8" to "true"
+        )
+    )
 }
 ```
 
@@ -185,7 +191,7 @@ src/main/java/dev/aurakai/auraframefx/java/
 @Module
 @InstallIn(SingletonComponent::class)
 object ApiModule {
-    
+
     @Provides
     @Singleton
     fun provideApiClient(): ApiClient {
@@ -193,7 +199,7 @@ object ApiModule {
             setBasePath("https://api.auraframefx.com/v1")
         }
     }
-    
+
     @Provides
     fun provideUsersApi(client: ApiClient): UsersApi {
         return client.createService(UsersApi::class.java)
@@ -208,7 +214,7 @@ class UserRepository @Inject constructor(
     suspend fun getCurrentUser(): User {
         return usersApi.userGet()
     }
-    
+
     suspend fun updatePreferences(preferences: UserPreferencesUpdate) {
         usersApi.userPreferencesPut(preferences)
     }
@@ -219,7 +225,7 @@ class UserRepository @Inject constructor(
 class UserViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
-    
+
     fun loadUser() {
         viewModelScope.launch {
             try {
@@ -264,8 +270,12 @@ async function loadUserProfile() {
 ```java
 // Configure the client
 ApiClient client = new ApiClient();
-client.setBasePath("https://api.auraframefx.com/v1");
-client.setAccessToken("your-access-token");
+client.
+
+setBasePath("https://api.auraframefx.com/v1");
+client.
+
+setAccessToken("your-access-token");
 
 UsersApi usersApi = new UsersApi(client);
 AiAgentsApi agentsApi = new AiAgentsApi(client);
@@ -273,11 +283,11 @@ AiAgentsApi agentsApi = new AiAgentsApi(client);
 // Use in your service
 @Service
 public class AuraFrameFxService {
-    
+
     public User getUserById(String userId) throws ApiException {
         return usersApi.userGet();
     }
-    
+
     public AgentMessage processAgentRequest(AgentType agent, AgentProcessRequest request) throws ApiException {
         return agentsApi.agentAgentTypeProcessRequestPost(agent, request);
     }
