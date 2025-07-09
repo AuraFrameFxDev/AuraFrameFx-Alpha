@@ -36,7 +36,7 @@ class OracleDriveServiceConnector(private val context: Context) {
         /**
          * Handles disconnection from the AuraDrive service.
          *
-         * Clears the reference to the remote service and sets the connection state to disconnected.
+         * Clears the remote service reference and updates the connection state to disconnected.
          */
         override fun onServiceDisconnected(name: ComponentName?) {
             auraDriveService = null

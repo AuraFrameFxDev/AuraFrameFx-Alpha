@@ -16,8 +16,8 @@ extern "C" {
  * Sets up the language identification system with built-in heuristics based on the provided model path.
  * Returns the version string "1.2.0" if initialization succeeds, or an empty string if the model path is null.
  *
- * @param modelPath Java string specifying the path to the language model.
- * @return jstring Version string "1.2.0" on success, or an empty string if modelPath is null.
+ * @param modelPath Java string representing the path to the language model.
+ * @return jstring Version string "1.2.0" on success, or an empty string if the model path is null.
  */
 JNIEXPORT jstring
 
@@ -44,7 +44,7 @@ Java_com_example_app_language_LanguageIdentifier_nativeInitialize(
 /**
  * @brief Identifies the language of the input text using heuristic word and character analysis.
  *
- * Examines the text for language-specific words, articles, and the proportion of accented (non-ASCII) characters to determine if it is written in English, Spanish, French, German, Italian, or Portuguese. Returns "mul" if the text contains a high proportion of accented characters without a clear language match, or "und" if the input is null or cannot be processed.
+ * Examines the input text for language-specific words, articles, and the proportion of accented (non-ASCII) characters to determine if it is written in English, Spanish, French, German, Italian, or Portuguese. If the text contains a high proportion of accented characters without a clear language match, returns "mul" for multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
  *
  * @param text The text to analyze for language identification.
  * @return jstring The detected language code: "en" (English), "es" (Spanish), "fr" (French), "de" (German), "it" (Italian), "pt" (Portuguese), "mul" (multiple/unknown accented languages), or "und" (undetermined).
@@ -129,7 +129,7 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
 /**
  * @brief Releases resources associated with a language identifier instance.
  *
- * If the provided handle is non-zero, logs that cleanup has occurred. No explicit resource deallocation is performed beyond logging.
+ * Logs resource cleanup if the provided handle is non-zero. No explicit deallocation is performed.
  *
  * @param handle Identifier of the language identifier instance to release.
  */

@@ -27,9 +27,9 @@ class OracleDriveControlViewModel : ViewModel() {
     val diagnosticsLog: StateFlow<String> = _diagnosticsLog.asStateFlow()
     
     /**
-     * Simulates binding to the Oracle Drive service in beta mode.
+     * Simulates a service bind operation for Oracle Drive in beta mode.
      *
-     * Updates internal state to indicate that service binding is disabled. No actual service connection is performed.
+     * Updates internal state to indicate that service binding is disabled, without performing any real connection.
      */
     fun bindService() {
         // Beta stub: No actual binding
@@ -49,9 +49,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Simulates a status refresh by setting status, detailed status, and diagnostics log to static placeholder messages.
+     * Updates status, detailed status, and diagnostics log with static placeholder messages for UI testing in beta mode.
      *
-     * All updates are for UI testing in beta mode; no actual status or diagnostics data is retrieved.
+     * No actual status or diagnostics data is retrieved; all updates are simulated.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status

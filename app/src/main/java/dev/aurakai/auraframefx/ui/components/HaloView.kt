@@ -88,7 +88,7 @@ import kotlin.math.*
 /**
  * Displays an interactive rotating halo UI for managing agents and delegating tasks.
  *
- * Renders a circular arrangement of agent nodes around a central "GENESIS" node, supporting drag-and-drop and tap-based task assignment. Features animated rotation, pulsing effects for active agents, real-time status indicators, a task input overlay, a scrollable task history panel, and control buttons for rotation and history management.
+ * Renders a circular arrangement of agent nodes around a central "GENESIS" node, supporting animated rotation, drag-and-drop task assignment, pulsing visual effects for active agents, real-time status indicators, a scrollable task history panel, and control buttons for rotation and history management. Integrates gesture handling and asynchronous task simulation.
  *
  * @param viewModel Provides agent data and task processing logic. Defaults to a local instance.
  */

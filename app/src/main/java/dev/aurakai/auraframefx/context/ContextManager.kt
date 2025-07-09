@@ -92,10 +92,10 @@ class ContextManager @Inject constructor(
     /**
      * Enriches a user interaction with relevant context, recommends an AI agent, and assigns a priority score.
      *
-     * Searches stored memories for information related to the interaction content, selects the most suitable AI agent, and calculates a priority value. Returns an `EnhancedInteractionData` object containing the original content, enriched context, agent recommendation, and priority score.
+     * Searches stored memories for information related to the interaction content, determines the most suitable AI agent, and calculates a priority value. Returns an `EnhancedInteractionData` object containing the original content, enriched context, agent recommendation, and priority score.
      *
      * @param interaction The user interaction data to enhance.
-     * @return An `EnhancedInteractionData` object with enriched context, agent suggestion, and priority score.
+     * @return An `EnhancedInteractionData` object containing the enriched context, agent suggestion, and priority score.
      */
     suspend fun enhanceInteraction(interaction: InteractionData): EnhancedInteractionData {
         logger.debug("ContextManager", "Enhancing interaction")
@@ -114,7 +114,7 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Records a user interaction and its agent response in the conversation history.
+     * Records a user interaction and its corresponding agent response in the conversation history.
      *
      * Also extracts and stores high-confidence memories from the interaction for future retrieval and learning.
      */
@@ -159,7 +159,7 @@ class ContextManager @Inject constructor(
     /**
      * Records an insight from a request and response for future learning, and periodically triggers asynchronous learning processing.
      *
-     * Creates an `Insight` with the provided request, response, complexity descriptor, and extracted pattern features, then adds it to the insight store. Triggers asynchronous learning processing every 10 recorded insights.
+     * Creates an `Insight` containing the request, response, complexity descriptor, and extracted pattern features, then adds it to the insight store. Initiates learning processing every 10 recorded insights.
      *
      * @param request The original request string to analyze.
      * @param response The system's response to the request.
@@ -213,7 +213,7 @@ class ContextManager @Inject constructor(
     /**
      * Sets the system-wide mood and updates all active contexts with the new mood value.
      *
-     * @param newMood The new mood to apply across the system and propagate to each active context.
+     * @param newMood The mood to apply globally and to each active context.
      */
     fun updateMood(newMood: String) {
         logger.info("ContextManager", "Updating system mood to: $newMood")
@@ -291,7 +291,7 @@ class ContextManager @Inject constructor(
      *
      * Returns "aura" for creative or artistic topics, "kai" for security-related topics, and "genesis" for complex analysis or as the default agent.
      *
-     * @param interaction The interaction data to analyze for agent selection.
+     * @param interaction The interaction data to analyze.
      * @return The recommended AI agent name.
      */
     private fun suggestOptimalAgent(interaction: InteractionData): String {
@@ -304,7 +304,7 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Returns a priority score for the given interaction based on its type.
+     * Calculates a priority score for an interaction based on its type.
      *
      * Security interactions are assigned the highest score, followed by analysis, creative, and text types; all other types receive the lowest score.
      *
@@ -322,7 +322,7 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Stores a conversation entry as a memory if its confidence score exceeds 0.8.
+     * Creates and stores a memory from a conversation entry if its confidence score exceeds 0.8.
      *
      * The memory includes the user input, agent response, agent type, and relevant tags for future retrieval.
      *
@@ -344,11 +344,11 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Generates a list of simple feature descriptors from the request and response strings for learning purposes.
+     * Generates simple feature descriptors from the request and response strings for learning purposes.
      *
-     * The features include the length of the request, the length of the response, and whether the request contains a question mark.
+     * The extracted features include the length of the request, the length of the response, and whether the request contains a question mark.
      *
-     * @return A list of strings describing extracted features from the input request and response.
+     * @return A list of strings describing the extracted features.
      */
     private fun extractPatterns(request: String, response: String): List<String> {
         // Extract patterns for learning - simplified implementation
@@ -362,7 +362,7 @@ class ContextManager @Inject constructor(
     /**
      * Asynchronously processes accumulated insights to update internal learning models.
      *
-     * This is currently a placeholder for future implementation of adaptive learning and pattern analysis using recorded insights.
+     * This function is a placeholder for future implementation of adaptive learning and pattern analysis using recorded insights.
      */
     private suspend fun processInsightsForLearning() {
         logger.info("ContextManager", "Processing insights for learning")
