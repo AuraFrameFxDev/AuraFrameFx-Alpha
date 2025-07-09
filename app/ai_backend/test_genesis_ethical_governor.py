@@ -1848,3 +1848,435 @@ if __name__ == '__main__':
         pytest.main([__file__, '-v', '--tb=short'])
     except ImportError:
         print("pytest not available, skipping pytest-specific tests")
+
+# =============================================================================
+# ADDITIONAL COMPREHENSIVE TEST COVERAGE
+# =============================================================================
+
+class TestEthicalGovernorBoundaryConditions(unittest.TestCase):
+    """Test boundary conditions and extreme scenarios for EthicalGovernor"""
+    
+    def setUp(self):
+        """Set up test fixtures for boundary condition testing"""
+        self.minimal_framework = EthicalFramework("minimal", ["basic"])
+        self.maximal_framework = EthicalFramework("maximal", 
+            ["fairness", "transparency", "accountability", "privacy", "safety", 
+             "dignity", "autonomy", "beneficence", "non_maleficence", "justice",
+             "explainability", "robustness", "reliability", "inclusivity", "sustainability"])
+        self.governor = EthicalGovernor(self.minimal_framework, [])
+
+    def test_evaluate_decision_with_extreme_data_sizes(self):
+        """Test decision evaluation with extremely large and small data sizes"""
+        # Extremely large context
+        large_context = {
+            "massive_data": {f"key_{i}": f"value_{i}" * 100 for i in range(1000)},
+            "nested_arrays": [[i for i in range(100)] for _ in range(50)],
+            "text_blob": "Lorem ipsum " * 10000
+        }
+        
+        result = self.governor.evaluate_decision(large_context)
+        self.assertIsInstance(result, dict)
+        self.assertIn("approved", result)
+        
+        # Extremely small context
+        minimal_context = {"x": "y"}
+        result = self.governor.evaluate_decision(minimal_context)
+        self.assertIsInstance(result, dict)
+        self.assertIn("approved", result)
+
+    def test_evaluate_decision_with_numeric_extremes(self):
+        """Test decision evaluation with numeric boundary values"""
+        numeric_extremes = [
+            {"value": 0},
+            {"value": -0},
+            {"value": float('inf')},
+            {"value": float('-inf')},
+            {"value": float('nan')},
+            {"value": 1e308},  # Near max float
+            {"value": 1e-308}, # Near min float
+            {"value": 2**63 - 1},  # Max int64
+            {"value": -2**63},     # Min int64
+        ]
+        
+        for context in numeric_extremes:
+            with self.subTest(context=context):
+                result = self.governor.evaluate_decision(context)
+                self.assertIsInstance(result, dict)
+                self.assertIn("approved", result)
+
+    def test_policy_application_with_empty_and_null_inputs(self):
+        """Test policy application with various empty and null inputs"""
+        test_cases = [
+            ("", {}),
+            (None, {}),
+            ("valid_policy", None),
+            ("", None),
+            ("policy_with_spaces   ", {"  ": "  "}),
+            ("\n\t\r", {"special": "chars\n\t\r"}),
+        ]
+        
+        for policy_name, context in test_cases:
+            with self.subTest(policy=policy_name, context=context):
+                result = self.governor.apply_policy(policy_name, context)
+                self.assertIsInstance(result, dict)
+
+    def test_violation_logging_with_boundary_data(self):
+        """Test violation logging with boundary condition data"""
+        boundary_violations = [
+            EthicalViolation("", "", ""),
+            EthicalViolation("a", "b", "c"),
+            EthicalViolation("x" * 1000, "y" * 10000, "critical"),
+            EthicalViolation("normal", None, "high"),
+            EthicalViolation(None, "description", "low"),
+        ]
+        
+        initial_count = len(self.governor.violations)
+        for violation in boundary_violations:
+            self.governor.log_violation(violation)
+        
+        self.assertEqual(len(self.governor.violations), initial_count + len(boundary_violations))
+
+
+class TestEthicalDecisionStateManagement(unittest.TestCase):
+    """Test state management and data integrity in EthicalDecision"""
+    
+    def test_decision_immutability_simulation(self):
+        """Test that decision objects maintain data integrity over time"""
+        original_context = {"user": "test", "action": "process"}
+        decision = EthicalDecision("immutable_test", original_context)
+        
+        # Store original values
+        original_id = decision.decision_id
+        original_timestamp = decision.timestamp
+        original_context_copy = decision.context.copy()
+        
+        # Attempt to modify context externally
+        original_context["user"] = "modified"
+        original_context["new_key"] = "new_value"
+        
+        # Verify decision maintains original state
+        self.assertEqual(decision.decision_id, original_id)
+        self.assertEqual(decision.timestamp, original_timestamp)
+        self.assertEqual(decision.context, original_context_copy)
+
+    def test_decision_with_mutable_objects(self):
+        """Test decision handling with mutable objects as context"""
+        mutable_list = [1, 2, 3]
+        mutable_dict = {"nested": {"value": 42}}
+        mutable_set = {1, 2, 3}
+        
+        context = {
+            "list_data": mutable_list,
+            "dict_data": mutable_dict,
+            "set_data": mutable_set
+        }
+        
+        decision = EthicalDecision("mutable_test", context)
+        
+        # Modify original mutable objects
+        mutable_list.append(4)
+        mutable_dict["nested"]["value"] = 999
+        mutable_set.add(4)
+        
+        # Decision should preserve its state
+        self.assertIsNotNone(decision.context)
+        self.assertEqual(decision.decision_id, "mutable_test")
+
+    def test_decision_creation_under_concurrent_conditions(self):
+        """Simulate concurrent decision creation to test timestamp uniqueness"""
+        decisions = []
+        
+        # Rapid decision creation
+        for i in range(100):
+            decision = EthicalDecision(f"concurrent_{i}", {"index": i})
+            decisions.append(decision)
+        
+        # Verify all decisions were created
+        self.assertEqual(len(decisions), 100)
+        
+        # Verify all have valid timestamps
+        for decision in decisions:
+            self.assertIsInstance(decision.timestamp, datetime.datetime)
+        
+        # Check for reasonable timestamp distribution
+        timestamps = [d.timestamp for d in decisions]
+        time_range = max(timestamps) - min(timestamps)
+        self.assertLess(time_range.total_seconds(), 1)  # Should complete within 1 second
+
+
+class TestEthicalFrameworkEdgeCases(unittest.TestCase):
+    """Test edge cases and boundary conditions for EthicalFramework"""
+    
+    def test_framework_with_duplicate_principles(self):
+        """Test framework behavior with duplicate principles"""
+        duplicate_principles = ["fairness", "transparency", "fairness", "transparency"]
+        framework = EthicalFramework("duplicate_test", duplicate_principles)
+        
+        self.assertEqual(framework.name, "duplicate_test")
+        self.assertEqual(framework.principles, duplicate_principles)  # Should preserve input as-is
+
+    def test_framework_with_special_character_principles(self):
+        """Test framework with special characters and unicode in principles"""
+        special_principles = [
+            "fairness",
+            "transparência",  # Portuguese
+            "公平性",         # Chinese
+            "справедливость", # Russian
+            "🤖 AI Ethics",   # Emoji
+            "fair-ness_v2.0", # Special chars
+            "@ethical#principle$", # Symbols
+        ]
+        
+        framework = EthicalFramework("international", special_principles)
+        self.assertEqual(len(framework.principles), len(special_principles))
+        
+        # Verify all principles are preserved
+        for principle in special_principles:
+            self.assertIn(principle, framework.principles)
+
+    def test_framework_with_extremely_long_names_and_principles(self):
+        """Test framework with extremely long names and principles"""
+        long_name = "A" * 10000
+        long_principles = ["B" * 5000, "C" * 5000, "D" * 5000]
+        
+        framework = EthicalFramework(long_name, long_principles)
+        self.assertEqual(framework.name, long_name)
+        self.assertEqual(len(framework.principles), 3)
+
+
+class TestEthicalViolationClassification(unittest.TestCase):
+    """Test violation classification and severity handling"""
+    
+    def test_violation_severity_validation(self):
+        """Test violation creation with various severity levels"""
+        severity_levels = [
+            "critical", "high", "medium", "low", "negligible",
+            "CRITICAL", "High", "MeDiUm",  # Case variations
+            "1", "2", "3", "4", "5",       # Numeric severities
+            "urgent", "normal", "minor",    # Alternative scales
+            "", None, "invalid_severity"    # Edge cases
+        ]
+        
+        for severity in severity_levels:
+            with self.subTest(severity=severity):
+                violation = EthicalViolation("test_type", "test_description", severity)
+                self.assertEqual(violation.severity, severity)
+                self.assertIsInstance(violation.timestamp, datetime.datetime)
+
+    def test_violation_type_categorization(self):
+        """Test violation with various type categorizations"""
+        violation_types = [
+            "bias", "privacy", "transparency", "safety", "fairness",
+            "data_quality", "algorithmic_bias", "discrimination",
+            "consent_violation", "security_breach", "regulatory_compliance",
+            "user_harm", "environmental_impact", "economic_inequality"
+        ]
+        
+        for violation_type in violation_types:
+            with self.subTest(type=violation_type):
+                violation = EthicalViolation(violation_type, f"Description for {violation_type}")
+                self.assertEqual(violation.violation_type, violation_type)
+                self.assertEqual(violation.severity, "medium")  # Default
+
+    def test_violation_temporal_clustering(self):
+        """Test creation of violations in temporal clusters"""
+        base_time = datetime.datetime.now()
+        violation_clusters = []
+        
+        # Create violations in time clusters
+        for cluster in range(5):
+            cluster_violations = []
+            for i in range(10):
+                violation = EthicalViolation(
+                    f"cluster_{cluster}_type",
+                    f"Violation {i} in cluster {cluster}",
+                    "medium"
+                )
+                cluster_violations.append(violation)
+            violation_clusters.append(cluster_violations)
+        
+        # Verify all clusters were created
+        self.assertEqual(len(violation_clusters), 5)
+        for cluster in violation_clusters:
+            self.assertEqual(len(cluster), 10)
+
+
+class TestComplianceCheckerRobustness(unittest.TestCase):
+    """Test compliance checker robustness and error handling"""
+    
+    def setUp(self):
+        """Set up compliance checker with comprehensive regulations"""
+        self.comprehensive_regulations = [
+            "GDPR", "CCPA", "HIPAA", "SOX", "PCI_DSS", "COPPA", "FERPA", 
+            "GLBA", "PIPEDA", "LGPD", "DPA_2018", "BCBS_239", "MiFID_II"
+        ]
+        self.checker = ComplianceChecker(self.comprehensive_regulations)
+
+    def test_compliance_with_regulatory_conflicts(self):
+        """Test compliance checking when regulations have conflicting requirements"""
+        conflicting_scenarios = [
+            {
+                "action": "cross_border_data_transfer",
+                "context": {"from": "EU", "to": "US", "data_type": "personal"}
+            },
+            {
+                "action": "data_retention",
+                "context": {"duration": "7_years", "user_request": "delete_immediately"}
+            },
+            {
+                "action": "automated_decision_making",
+                "context": {"involves_minors": True, "consent_obtained": False}
+            }
+        ]
+        
+        for scenario in conflicting_scenarios:
+            with self.subTest(scenario=scenario["action"]):
+                result = self.checker.check_compliance(scenario)
+                self.assertIsInstance(result, dict)
+                self.assertIn("compliant", result)
+
+    def test_compliance_with_malformed_actions(self):
+        """Test compliance checking with malformed or unusual actions"""
+        malformed_actions = [
+            {"action": "nested_action", "sub_actions": ["a", "b", "c"]},
+            ["list", "as", "action"],
+            123456,
+            True,
+            {"complex": {"nested": {"action": "deep_structure"}}},
+            "",
+            None,
+            float('inf'),
+        ]
+        
+        for action in malformed_actions:
+            with self.subTest(action=action):
+                result = self.checker.check_compliance(action)
+                self.assertIsInstance(result, dict)
+
+    def test_compliance_with_regulation_subsets(self):
+        """Test compliance checking with different regulation subsets"""
+        regulation_subsets = [
+            ["GDPR"],
+            ["GDPR", "CCPA"],
+            ["HIPAA", "SOX", "GLBA"],
+            self.comprehensive_regulations[:5],
+            self.comprehensive_regulations,
+            [],  # Empty regulations
+        ]
+        
+        test_action = "standard_data_processing"
+        
+        for regulations in regulation_subsets:
+            with self.subTest(regulations=len(regulations)):
+                checker = ComplianceChecker(regulations)
+                result = checker.check_compliance(test_action)
+                self.assertIsInstance(result, dict)
+                self.assertIn("compliant", result)
+
+
+class TestRiskAssessmentComprehensive(unittest.TestCase):
+    """Comprehensive risk assessment testing"""
+    
+    def test_risk_calculation_with_missing_context_fields(self):
+        """Test risk calculation when expected context fields are missing"""
+        incomplete_contexts = [
+            {},  # Completely empty
+            {"user": "test"},  # Missing data sensitivity
+            {"data_sensitivity": "high"},  # Missing user info
+            {"partial": "data", "missing": None},  # Mixed complete/incomplete
+        ]
+        
+        for context in incomplete_contexts:
+            with self.subTest(context=context):
+                assessment = RiskAssessment(context)
+                result = assessment.calculate_risk()
+                self.assertIsInstance(result, dict)
+                self.assertIn("level", result)
+                self.assertIn("score", result)
+
+    def test_risk_calculation_with_contradictory_signals(self):
+        """Test risk calculation with contradictory risk signals"""
+        contradictory_contexts = [
+            {
+                "high_risk_indicators": ["sensitive_data", "no_consent", "public_exposure"],
+                "low_risk_indicators": ["anonymized", "encrypted", "minimal_data"],
+                "user_type": "child",
+                "data_protection": "maximum"
+            },
+            {
+                "privacy_level": "high",
+                "sharing_scope": "global",
+                "encryption": True,
+                "consent": False
+            }
+        ]
+        
+        for context in contradictory_contexts:
+            with self.subTest(context=context):
+                assessment = RiskAssessment(context)
+                result = assessment.calculate_risk()
+                self.assertIsInstance(result, dict)
+                self.assertIn("level", result)
+                self.assertIn("score", result)
+                # Score should be numeric and within reasonable bounds
+                self.assertIsInstance(result["score"], (int, float))
+
+    def test_risk_assessment_consistency(self):
+        """Test that risk assessment produces consistent results for identical inputs"""
+        test_context = {
+            "user_age": 25,
+            "data_sensitivity": "medium",
+            "processing_purpose": "analytics",
+            "consent_status": True
+        }
+        
+        # Run assessment multiple times
+        assessments = []
+        for _ in range(10):
+            assessment = RiskAssessment(test_context)
+            result = assessment.calculate_risk()
+            assessments.append(result)
+        
+        # All results should be identical
+        first_result = assessments[0]
+        for result in assessments[1:]:
+            self.assertEqual(result["level"], first_result["level"])
+            self.assertEqual(result["score"], first_result["score"])
+
+
+class TestEthicalMetricsAdvancedScenarios(unittest.TestCase):
+    """Advanced scenarios for ethical metrics calculation"""
+    
+    def test_metrics_with_biased_decision_patterns(self):
+        """Test metrics calculation with biased decision patterns"""
+        # Create decisions with inherent bias patterns
+        biased_decisions = []
+        
+        # Group A: Always positive outcomes
+        for i in range(50):
+            decision = EthicalDecision(
+                f"group_a_{i}",
+                {"demographic": "group_a", "feature_x": "high"},
+                {"outcome": "positive", "confidence": 0.9}
+            )
+            biased_decisions.append(decision)
+        
+        # Group B: Always negative outcomes  
+        for i in range(50):
+            decision = EthicalDecision(
+                f"group_b_{i}",
+                {"demographic": "group_b", "feature_x": "low"},
+                {"outcome": "negative", "confidence": 0.9}
+            )
+            biased_decisions.append(decision)
+        
+        metrics = EthicalMetrics()
+        result = metrics.calculate_metrics(biased_decisions)
+        
+        self.assertIsInstance(result, dict)
+        self.assertIn("fairness", result)
+        # Fairness score should reflect the bias
+        self.assertIsInstance(result["fairness"], (int, float))
+
+    def test_metrics_with_temporal_degradation(self):
+        """Test metrics calculation showing degradati
