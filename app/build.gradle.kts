@@ -102,7 +102,7 @@ dependencies {
     kspTest(libs.daggerHiltAndroidCompiler)
 
     // Time and Date
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+    implementation(libs.kotlinxDatetime)
 
     // AndroidX & Compose
     implementation(libs.androidxCoreKtx)
@@ -119,8 +119,8 @@ dependencies {
     // Animation
     implementation(libs.androidxComposeAnimation)
     debugImplementation(platform(libs.composeBom))
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-tooling-preview")
+    debugImplementation(libs.uiTooling)
+    debugImplementation(libs.uiToolingPreview)
 
     // Lifecycle
     implementation(libs.lifecycleViewmodelCompose)
@@ -137,10 +137,10 @@ dependencies {
     ksp(libs.androidxRoomCompiler)
 
     // Security
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation(libs.androidxSecurityCrypto)
 
     // Google AI
-    implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
+    implementation(libs.generativeai)
 
     // Firebase
     implementation(platform(libs.firebaseBom))
