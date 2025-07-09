@@ -271,7 +271,7 @@ class AuraAgent @Inject constructor(
      * @return A map with keys: "animation_code" (Kotlin code for the animation), "timing_curves" (timing curve details), "interaction_states" (possible animation states), and "performance_optimization" (optimization strategies).
      */
     private suspend fun handleAnimationDesign(request: AiRequest): Map<String, Any> {
-        val animationType = request.context["type"] ?: "transition"
+        val animationType = request.context?.get("type") ?: "transition"
         val duration = 300 // Default duration
 
         logger.info("AuraAgent", "Designing mesmerizing $animationType animation")

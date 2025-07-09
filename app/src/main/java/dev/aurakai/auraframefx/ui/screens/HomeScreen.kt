@@ -112,10 +112,15 @@ fun HomeScreen(navController: NavController) {
                 cornerStyle = CornerStyle.SHARP
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
+                    // TODO: Add R.string.menu_dashboard and R.string.menu_analytics to strings.xml
+                    val menuDashboardText = "Dashboard (TODO)"
+                    val menuAnalyticsText = "Analytics (TODO)"
+                    val menuConferenceRoomText = stringResource(R.string.menu_conference_room)
+
                     val menuItems = listOf(
-                        stringResource(R.string.menu_dashboard) to null,
-                        stringResource(R.string.menu_analytics) to null,
-                        stringResource(R.string.menu_conference_room) to NavDestination.AiChat.route
+                        menuDashboardText to null,
+                        menuAnalyticsText to null,
+                        menuConferenceRoomText to NavDestination.AiChat.route
                     )
 
                     menuItems.forEach { (menuItem, destination) ->
@@ -148,7 +153,7 @@ fun HomeScreen(navController: NavController) {
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // Warning message like in image reference 4
-                    if (selectedMenuItem != stringResource(R.string.menu_conference_room)) {
+                    if (selectedMenuItem != menuConferenceRoomText) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()

@@ -5,6 +5,7 @@ import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import java.lang.System // Added import
 
@@ -14,7 +15,7 @@ data class ContextChain(
     val rootContext: String,
     val currentContext: String,
     val contextHistory: List<ContextNode> = emptyList(),
-    @Contextual val relatedMemories: List<CanonicalMemoryItem> = emptyList(), // Changed MemoryItem to CanonicalMemoryItem
+    @Contextual val relatedMemories: List<MemoryItem> = emptyList(), // Reverted to MemoryItem
     val metadata: Map<String, String> = emptyMap(),
     val priority: Float = 0.5f,
     val relevanceScore: Float = 0.0f,

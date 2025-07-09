@@ -25,9 +25,22 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConferenceRoomScreen() {
-    var selectedAgent by remember { mutableStateOf("Aura") }
+    var selectedAgent by remember { mutableStateOf("Aura") } // Default to a non-resource string initially
     var isRecording by remember { mutableStateOf(false) }
     var isTranscribing by remember { mutableStateOf(false) }
+
+    val agentAuraName = stringResource(R.string.agent_aura)
+    val agentKaiName = stringResource(R.string.agent_kai)
+    val agentCascadeName = stringResource(R.string.agent_cascade)
+
+    // Initialize selectedAgent with a resource string if not already set,
+    // or if the default "Aura" should map to the resource string.
+    LaunchedEffect(key1 = agentAuraName) {
+        if (selectedAgent == "Aura") { // Default literal matches default resource intent
+            selectedAgent = agentAuraName
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -67,19 +80,19 @@ fun ConferenceRoomScreen() {
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             AgentButton(
-                agent = stringResource(R.string.agent_aura),
-                isSelected = selectedAgent == stringResource(R.string.agent_aura),
-                onClick = { selectedAgent = stringResource(R.string.agent_aura) }
+                agent = agentAuraName,
+                isSelected = selectedAgent == agentAuraName,
+                onClick = { selectedAgent = agentAuraName }
             )
             AgentButton(
-                agent = stringResource(R.string.agent_kai),
-                isSelected = selectedAgent == stringResource(R.string.agent_kai),
-                onClick = { selectedAgent = stringResource(R.string.agent_kai) }
+                agent = agentKaiName,
+                isSelected = selectedAgent == agentKaiName,
+                onClick = { selectedAgent = agentKaiName }
             )
             AgentButton(
-                agent = stringResource(R.string.agent_cascade),
-                isSelected = selectedAgent == stringResource(R.string.agent_cascade),
-                onClick = { selectedAgent = stringResource(R.string.agent_cascade) }
+                agent = agentCascadeName,
+                isSelected = selectedAgent == agentCascadeName,
+                onClick = { selectedAgent = agentCascadeName }
             )
         }
 
@@ -190,7 +203,7 @@ fun RecordingButton(
     isRecording: Boolean,
     onClick: () -> Unit,
 ) {
-    val icon = if (isRecording) Icons.Default.Stop else Icons.Default.FiberManualRecord
+    val icon = if (isRecording) Icons.Filled.Stop else Icons.Filled.FiberManualRecord
     val color = if (isRecording) Color.Red else NeonPurple
 
     IconButton(
@@ -220,7 +233,7 @@ fun TranscribeButton(
     isTranscribing: Boolean,
     onClick: () -> Unit,
 ) {
-    val icon = if (isTranscribing) Icons.Default.Stop else Icons.Default.Phone
+    val icon = if (isTranscribing) Icons.Filled.Stop else Icons.Filled.Phone
     val color = if (isTranscribing) Color.Red else NeonBlue
 
     IconButton(
