@@ -21,7 +21,7 @@ class AuraAIServiceImpl @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : AuraAIService {
     /**
-     * Returns a placeholder string for any analytics query.
+     * Returns a fixed placeholder string for any analytics query.
      *
      * This implementation ignores the input and always returns "Analytics response placeholder".
      *
@@ -32,21 +32,21 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub for file download functionality; always returns null.
+     * Placeholder for file download functionality; always returns null.
      *
      * @param _fileId The identifier of the file to download.
-     * @return Null, indicating file download is not implemented.
+     * @return Always null, as file download is not implemented.
      */
     override suspend fun downloadFile(_fileId: String): File? {
         return null
     }
 
     /**
-     * Placeholder for image generation that always returns null.
+     * Stub implementation for image generation that always returns null.
      *
-     * This method does not generate images and serves as a stub implementation.
+     * This method does not generate images and is intended as a placeholder.
      *
-     * @return Always returns null.
+     * @return Always null.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         return null
@@ -55,7 +55,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Returns a fixed placeholder string for any text generation request.
      *
-     * This method does not perform actual text generation and always returns "Generated text placeholder" regardless of the input.
+     * This method does not perform actual text generation and always returns "Generated text placeholder" regardless of input.
      *
      * @return The string "Generated text placeholder".
      */
@@ -75,9 +75,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Retrieves the memory value for the given key.
+     * Retrieves the memory value associated with the specified key.
      *
-     * This stub implementation always returns null, indicating memory retrieval is not supported.
+     * This stub implementation always returns null, indicating that memory retrieval is not supported.
      *
      * @return Always null.
      */
@@ -86,9 +86,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for saving a value in memory associated with a key.
+     * Placeholder method for saving a value in memory associated with a key.
      *
-     * This implementation does nothing and does not persist any data.
+     * This implementation does not store or persist any data.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.

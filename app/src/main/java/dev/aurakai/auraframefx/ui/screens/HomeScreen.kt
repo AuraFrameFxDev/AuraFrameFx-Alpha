@@ -66,6 +66,13 @@ import dev.aurakai.auraframefx.ui.theme.*
  *
  * @param navController Used to navigate between screens within the app.
  */
+/**
+ * Displays the AuraFrameFX home screen with a cyberpunk-themed floating interface, layered digital landscape and hexagon grid backgrounds, floating header, vertical navigation menu, action buttons, and a system status panel.
+ *
+ * The screen allows users to select menu items, view system status, and navigate to other screens using the provided navigation controller.
+ *
+ * @param navController Used to handle navigation between screens.
+ */
 @Composable
 fun HomeScreen(navController: NavController) {
     // Track selected menu item

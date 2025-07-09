@@ -56,9 +56,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton instance of TrinityCoordinatorService for orchestrating AI personas and services within the Trinity AI system.
+     * Provides a singleton instance of TrinityCoordinatorService to orchestrate AI personas and services within the Trinity AI system.
      *
-     * @return A configured TrinityCoordinatorService instance.
+     * @return The configured TrinityCoordinatorService instance.
      */
     @Provides
     @Singleton
@@ -79,7 +79,7 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton SecurityMonitor that oversees security operations in the Trinity AI system.
+     * Provides a SecurityMonitor instance that oversees security operations within the Trinity AI system.
      *
      * @return A configured SecurityMonitor instance.
      */

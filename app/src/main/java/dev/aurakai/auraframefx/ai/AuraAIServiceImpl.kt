@@ -21,12 +21,12 @@ class AuraAIServiceImpl @Inject constructor(
 ) : AuraAIService {
 
     /**
-     * Returns a static placeholder response for the provided analytics query.
+     * Returns a placeholder response for the given analytics query.
      *
      * This method does not perform any analytics processing and always returns a fixed string.
      *
      * @param _query The analytics query string.
-     * @return A placeholder analytics response.
+     * @return A static placeholder analytics response.
      */
     override fun analyticsQuery(_query: String): String {
         // TODO: Implement analytics query; Reported as unused
@@ -35,9 +35,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for downloading a file by its identifier.
+     * Placeholder for downloading a file by its identifier.
      *
-     * Always returns null, as file download functionality is not implemented.
+     * This method does not perform any file download and always returns null.
      *
      * @param _fileId The identifier of the file to download.
      * @return Always null.
@@ -49,12 +49,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder for image generation; always returns null.
+     * Simulates image generation by logging the prompt and returning null.
      *
-     * Logs the provided prompt but does not generate or return any image data.
+     * This method does not perform any actual image generation and always returns null.
      *
      * @param _prompt The prompt describing the desired image.
-     * @return Always null, as image generation is not implemented.
+     * @return Always null.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         // TODO: Implement image generation; Reported as unused
@@ -63,11 +63,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Simulates text generation by returning a fixed placeholder string for the given prompt.
+     * Returns a fixed placeholder string simulating generated text for the given prompt.
      *
-     * @param prompt The input text to guide the simulated text generation.
-     * @param options Optional parameters for text generation (currently ignored).
-     * @return A placeholder string representing generated text for the prompt.
+     * @param prompt The input text for which to simulate text generation.
+     * @param options Optional parameters for text generation (ignored in this implementation).
+     * @return A static placeholder string representing generated text.
      */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         // TODO: Implement text generation; Reported as unused
@@ -76,12 +76,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a fixed placeholder AI response string for the given prompt.
+     * Returns a static placeholder AI response string for the given prompt.
      *
-     * This method does not perform any real AI processing. The `options` parameter is ignored.
+     * This method does not perform any actual AI processing and always returns a fixed response. The `options` parameter is ignored.
      *
      * @param prompt The input text for which an AI response is requested.
-     * @return A static placeholder AI response string.
+     * @return A placeholder AI response string.
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         // TODO: Implement AI response retrieval; Reported as unused
@@ -90,12 +90,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a placeholder memory value string for the specified key.
+     * Returns a placeholder string representing the memory value for the given key.
      *
-     * This stub does not access any real memory storage and always returns a fixed string indicating a placeholder value for the provided key.
+     * This method does not access any real memory storage and always returns a fixed placeholder value.
      *
      * @param _memoryKey The key for which to retrieve the memory value.
-     * @return A placeholder string representing the memory value for the given key.
+     * @return A placeholder string indicating the memory value for the specified key.
      */
     override fun getMemory(_memoryKey: String): String? {
         // TODO: Implement memory retrieval; Reported as unused
@@ -104,9 +104,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for saving a value to memory under the specified key.
+     * Placeholder method for saving a value to memory under the given key.
      *
-     * This implementation does not persist any data and serves only as a placeholder.
+     * This implementation does not store any data and is intended as a stub.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.
@@ -117,10 +117,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Indicates whether the service is connected.
+     * Returns true to indicate the service is connected.
      *
-     * Always returns true as a placeholder; no actual connectivity check is performed.
-     * @return true
+     * This is a placeholder implementation and does not perform any real connectivity check.
+     * @return Always returns true.
      */
     override fun isConnected(): Boolean {
         // TODO: Implement actual connection check; Reported to always return true
@@ -129,9 +129,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Publishes a message to a PubSub topic.
+     * Simulates publishing a message to a PubSub topic.
      *
-     * This stub implementation logs the topic and message but does not actually publish to any PubSub system.
+     * This placeholder method logs the topic and message but does not perform any actual publishing.
      */
     override fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing; Reported as unused

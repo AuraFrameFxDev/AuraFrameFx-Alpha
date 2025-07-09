@@ -19,9 +19,9 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
 
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays the conference room UI with agent selection, recording and transcription controls, chat area, and message input.
+ * Composes the main conference room interface with agent selection, recording and transcription controls, chat area, and message input.
  *
- * Provides interactive controls for selecting an agent and toggling recording or transcription states. Includes placeholders for chat messages and message input; chat functionality and settings actions are not yet implemented.
+ * Provides interactive UI elements for choosing an agent, toggling recording and transcription states, and placeholders for chat and message input. Chat functionality, message sending, and settings actions are not yet implemented.
  */
 @Composable
 fun ConferenceRoomScreen() {
@@ -145,13 +145,13 @@ fun ConferenceRoomScreen() {
 }
 
 /**
- * Renders a selectable button representing an agent, visually indicating selection state.
+ * Displays a button for selecting an agent, visually highlighting the selected state.
  *
- * Highlights the button when selected and invokes the provided callback when pressed.
+ * The button's appearance changes based on whether it is selected, and clicking it triggers the provided callback.
  *
- * @param agent The label displayed on the button for the agent.
- * @param isSelected True if this agent is currently selected; affects button styling.
- * @param onClick Called when the button is clicked.
+ * @param agent The name or label of the agent shown on the button.
+ * @param isSelected Whether this agent is currently selected, affecting the button's style.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun AgentButton(
@@ -180,12 +180,12 @@ fun AgentButton(
 }
 
 /**
- * Displays a button for toggling the recording state in the conference room UI.
+ * Renders a button that toggles the recording state in the conference room interface.
  *
- * Shows a red stop icon when recording is active and a purple circle icon when inactive. The icon's content description updates for accessibility to indicate the current action.
+ * Displays a red stop icon when recording is active and a purple circle icon when inactive. The icon's content description changes for accessibility to reflect the current recording action.
  *
- * @param isRecording Whether recording is currently active.
- * @param onClick Called when the button is pressed.
+ * @param isRecording Indicates whether recording is currently active.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun RecordingButton(
@@ -210,12 +210,12 @@ fun RecordingButton(
 }
 
 /**
- * Displays a button for toggling transcription in the conference room UI.
+ * Renders a button to start or stop transcription in the conference room interface.
  *
- * Shows a red stop icon when transcription is active, or a NeonBlue phone icon when inactive. The icon's content description updates for accessibility to reflect the current transcription state.
+ * Displays a red stop icon when transcription is active, or a neon blue phone icon when inactive. The icon's content description updates for accessibility to indicate the current transcription state.
  *
- * @param isTranscribing Indicates whether transcription is currently active.
- * @param onClick Called when the button is pressed.
+ * @param isTranscribing True if transcription is currently active; false otherwise.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun TranscribeButton(
@@ -240,9 +240,9 @@ fun TranscribeButton(
 }
 
 /**
- * Displays a design-time preview of the ConferenceRoomScreen composable within a MaterialTheme.
+ * Provides a Compose preview of the ConferenceRoomScreen within a MaterialTheme for design-time visualization.
  *
- * Intended for use in Android Studio's Compose preview to visualize the conference room UI layout and styling.
+ * Intended for use in IDEs to preview the conference room UI layout and appearance.
  */
 @Composable
 @Preview(showBackground = true)
