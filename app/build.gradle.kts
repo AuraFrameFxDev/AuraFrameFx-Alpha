@@ -38,13 +38,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_24
-        targetCompatibility = JavaVersion.VERSION_24
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
         @Suppress("DEPRECATION")
-        jvmTarget = "24"
+        jvmTarget = "17"
         @Suppress("DEPRECATION")
         freeCompilerArgs = listOf(
             "-opt-in=kotlin.RequiresOptIn",
@@ -141,8 +141,8 @@ dependencies {
     // Security
     implementation(libs.androidxSecurityCrypto)
 
-    // Google AI
-
+    // Google AI / Generative AI
+    implementation(libs.guava)
 
     // Firebase
     implementation(platform(libs.firebaseBom))
