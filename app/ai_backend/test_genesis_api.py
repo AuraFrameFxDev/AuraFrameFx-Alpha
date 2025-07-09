@@ -25,10 +25,10 @@ class TestGenesisAPIClient:
     @pytest.fixture
     def mock_config(self):
         """
-        Provides a mock configuration dictionary with API key, base URL, timeout, and max retries for testing GenesisAPIClient initialization.
-
+        Return a mock configuration dictionary for initializing GenesisAPIClient in tests.
+        
         Returns:
-            dict: A dictionary containing mock configuration values for API key, base URL, timeout, and max retries.
+            dict: Mock values for API key, base URL, timeout, and max retries.
         """
         return {
             'api_key': 'test-api-key-123',
@@ -40,14 +40,17 @@ class TestGenesisAPIClient:
     @pytest.fixture
     def client(self, mock_config):
         """
-        Pytest fixture that returns a GenesisAPIClient instance initialized with the provided mock configuration.
+        Pytest fixture that provides a GenesisAPIClient instance initialized with the given mock configuration.
         """
         return GenesisAPIClient(**mock_config)
 
     @pytest.fixture
     def sample_messages(self):
         """
-        Return a list of sample ChatMessage objects representing a typical conversation for testing purposes.
+        Provides a list of sample ChatMessage objects simulating a typical conversation for use in tests.
+        
+        Returns:
+            List[ChatMessage]: Sample conversation messages with system, user, and assistant roles.
         """
         return [
             ChatMessage(role="system", content="You are a helpful assistant."),
@@ -58,10 +61,10 @@ class TestGenesisAPIClient:
     @pytest.fixture
     def sample_model_config(self):
         """
-        Return a ModelConfig instance with typical preset parameters for testing purposes.
-
+        Return a ModelConfig instance with standard parameters for use in tests.
+        
         Returns:
-            ModelConfig: A model configuration populated with standard test values.
+            ModelConfig: A model configuration populated with typical test values.
         """
         return ModelConfig(
             name="genesis-gpt-4",
@@ -74,9 +77,9 @@ class TestGenesisAPIClient:
 
     def test_client_initialization_with_valid_config(self, mock_config):
         """
-        Test that GenesisAPIClient initializes with the expected attributes when provided a valid configuration.
-
-        Asserts that the client's API key, base URL, timeout, and max retries match the configuration values.
+        Verify that GenesisAPIClient initializes with correct attributes when given a valid configuration.
+        
+        Asserts that the client's API key, base URL, timeout, and max retries match the provided configuration.
         """
         client = GenesisAPIClient(**mock_config)
         assert client.api_key == mock_config['api_key']
@@ -103,7 +106,7 @@ class TestGenesisAPIClient:
 
     def test_client_initialization_invalid_timeout(self):
         """
-        Test that initializing GenesisAPIClient with a non-positive timeout raises a ValueError.
+        Test that initializing GenesisAPIClient with a zero or negative timeout raises a ValueError.
         """
         with pytest.raises(ValueError, match="Timeout must be positive"):
             GenesisAPIClient(api_key='test-key', timeout=-1)
@@ -113,7 +116,7 @@ class TestGenesisAPIClient:
 
     def test_client_initialization_invalid_max_retries(self):
         """
-        Test that initializing GenesisAPIClient with a negative max_retries value raises a ValueError.
+        Test that initializing GenesisAPIClient with a negative max_retries raises a ValueError.
         """
         with pytest.raises(ValueError, match="Max retries must be non-negative"):
             GenesisAPIClient(api_key='test-key', max_retries=-1)
@@ -121,7 +124,7 @@ class TestGenesisAPIClient:
     @pytest.mark.asyncio
     async def test_chat_completion_success(self, client, sample_messages, sample_model_config):
         """
-        Verifies that a successful chat completion request returns a ChatCompletion object with the correct attributes.
+        Test that a successful chat completion request returns a ChatCompletion object with expected attributes.
         """
         mock_response = {
             'id': 'chat-123',
@@ -162,8 +165,8 @@ class TestGenesisAPIClient:
     @pytest.mark.asyncio
     async def test_chat_completion_with_streaming(self, client, sample_messages, sample_model_config):
         """
-        Tests that chat completion with streaming enabled yields the expected sequence of streamed response chunks.
-
+        Test that chat completion with streaming enabled yields the expected sequence of streamed response chunks.
+        
         Simulates a streaming API response and verifies that the client receives chat completion chunks in order, with correct content and finish reason.
         """
         mock_chunks = [
@@ -175,7 +178,10 @@ class TestGenesisAPIClient:
 
         async def mock_stream():
             """
-            Asynchronously yields encoded JSON representations of mock data chunks to simulate a streaming API response.
+            Asynchronously yields encoded JSON data chunks to simulate a streaming API response.
+            
+            Yields:
+                bytes: Each yielded value is a JSON-encoded mock data chunk as bytes.
             """
             for chunk in mock_chunks:
                 yield json.dumps(chunk).encode()
@@ -200,7 +206,7 @@ class TestGenesisAPIClient:
     @pytest.mark.asyncio
     async def test_chat_completion_authentication_error(self, client, sample_messages, sample_model_config):
         """
-        Test that an authentication error during chat completion raises an AuthenticationError with the correct message.
+        Verify that an authentication error (HTTP 401) during chat completion raises an AuthenticationError with the expected message.
         """
         with patch('aiohttp.ClientSession.post') as mock_post:
             mock_post.return_value.__aenter__.return_value.status = 401
@@ -217,9 +223,9 @@ class TestGenesisAPIClient:
     @pytest.mark.asyncio
     async def test_chat_completion_rate_limit_error(self, client, sample_messages, sample_model_config):
         """
-        Test that a RateLimitError is raised with the correct retry_after value when a 429 status is returned during chat completion.
-
-        Verifies that the client correctly interprets the 'Retry-After' header and raises a RateLimitError with the expected retry_after value.
+        Test that a RateLimitError is raised with the correct retry_after value when the API returns a 429 status during chat completion.
+        
+        Ensures the client interprets the 'Retry-After' header and raises a RateLimitError with the expected retry_after value.
         """
         with patch('aiohttp.ClientSession.post') as mock_post:
             mock_post.return_value.__aenter__.return_value.status = 429
@@ -240,8 +246,8 @@ class TestGenesisAPIClient:
     async def test_chat_completion_validation_error(self, client, sample_model_config):
         """
         Test that a chat completion request with an invalid message role raises a ValidationError.
-
-        Simulates a 400 API response for an invalid message role and asserts that the client raises a ValidationError with the expected error message.
+        
+        Simulates a 400 Bad Request response from the API when an invalid message role is provided and asserts that a ValidationError is raised with the expected error message.
         """
         invalid_messages = [
             ChatMessage(role="invalid_role", content="This should fail")
@@ -262,18 +268,18 @@ class TestGenesisAPIClient:
     @pytest.mark.asyncio
     async def test_chat_completion_server_error_with_retry(self, client, sample_messages, sample_model_config):
         """
-        Test that chat completion retries on server errors and succeeds after retry attempts.
-
+        Test that the chat completion method retries on server errors and succeeds after retry attempts.
+        
         Simulates two consecutive server errors followed by a successful response, verifying that the retry mechanism is triggered and the final chat completion result is correct.
         """
         call_count = 0
 
         async def mock_post_with_failure(*args, **kwargs):
             """
-            Simulates an asynchronous HTTP POST request that returns a 500 error response on the first two calls and a successful 200 response with a chat completion payload on the third call.
-
+            Simulates an asynchronous HTTP POST request that returns a 500 error response for the first two calls and a successful 200 response with a chat completion payload on the third call.
+            
             Returns:
-                Mock: A mock response object with status and JSON payload based on the current call count.
+                Mock: A mock response object with a status code and JSON payload reflecting the simulated server behavior.
             """
             nonlocal call_count
             call_count += 1
@@ -310,7 +316,7 @@ class TestGenesisAPIClient:
     @pytest.mark.asyncio
     async def test_chat_completion_max_retries_exceeded(self, client, sample_messages, sample_model_config):
         """
-        Test that the client raises a GenesisAPIError when the maximum number of retries is exceeded due to repeated server errors during chat completion.
+        Test that exceeding the maximum number of retries for server errors during chat completion raises a GenesisAPIError.
         """
         with patch('aiohttp.ClientSession.post') as mock_post:
             mock_post.return_value.__aenter__.return_value.status = 500
@@ -329,7 +335,7 @@ class TestGenesisAPIClient:
     async def test_chat_completion_network_timeout(self, client, sample_messages, sample_model_config):
         """
         Test that a network timeout during chat completion raises a GenesisAPIError with a timeout message.
-
+        
         Simulates a timeout in the chat completion API call and verifies that the client raises a GenesisAPIError containing a timeout-related message.
         """
         with patch('aiohttp.ClientSession.post', side_effect=asyncio.TimeoutError()):
@@ -342,7 +348,7 @@ class TestGenesisAPIClient:
     @pytest.mark.asyncio
     async def test_chat_completion_connection_error(self, client, sample_messages, sample_model_config):
         """
-        Test that a connection error during chat completion raises a GenesisAPIError with an appropriate message.
+        Test that a connection error during chat completion raises a GenesisAPIError with a connection error message.
         """
         import aiohttp
 
@@ -355,14 +361,14 @@ class TestGenesisAPIClient:
 
     def test_validate_messages_empty_list(self, client):
         """
-        Test that validating an empty message list raises a ValidationError.
+        Test that validating an empty message list with the client raises a ValidationError.
         """
         with pytest.raises(ValidationError, match="Messages cannot be empty"):
             client._validate_messages([])
 
     def test_validate_messages_invalid_role(self, client):
         """
-        Verify that providing a message with an invalid role to _validate_messages raises a ValidationError.
+        Test that _validate_messages raises a ValidationError when a message has an invalid role.
         """
         invalid_messages = [
             ChatMessage(role="invalid", content="Test content")
@@ -384,7 +390,7 @@ class TestGenesisAPIClient:
 
     def test_validate_messages_content_too_long(self, client):
         """
-        Test that validating messages with excessively long content raises a ValidationError.
+        Test that validating a message with content exceeding the maximum allowed length raises a ValidationError.
         """
         long_content = "x" * 100000  # Assuming max length is less than this
         invalid_messages = [
@@ -396,7 +402,7 @@ class TestGenesisAPIClient:
 
     def test_validate_model_config_invalid_temperature(self, client, sample_model_config):
         """
-        Test that model configuration validation raises a ValidationError when temperature is set below 0 or above 2.
+        Verify that model configuration validation raises a ValidationError when the temperature parameter is set outside the valid range [0, 2].
         """
         sample_model_config.temperature = -0.5  # Invalid negative temperature
 
@@ -410,7 +416,7 @@ class TestGenesisAPIClient:
 
     def test_validate_model_config_invalid_max_tokens(self, client, sample_model_config):
         """
-        Verify that _validate_model_config raises a ValidationError when max_tokens is zero or negative in the model configuration.
+        Test that _validate_model_config raises ValidationError when max_tokens is zero or negative.
         """
         sample_model_config.max_tokens = 0  # Invalid zero tokens
 
@@ -424,7 +430,7 @@ class TestGenesisAPIClient:
 
     def test_validate_model_config_invalid_top_p(self, client, sample_model_config):
         """
-        Verify that a ValidationError is raised when the model config's top_p parameter is set outside the range [0, 1].
+        Test that a ValidationError is raised if the model config's top_p parameter is set below 0 or above 1.
         """
         sample_model_config.top_p = -0.1  # Invalid negative top_p
 
@@ -439,8 +445,8 @@ class TestGenesisAPIClient:
     @pytest.mark.asyncio
     async def test_list_models_success(self, client):
         """
-        Test that the client retrieves and parses a list of available models from the API.
-
+        Test that the client successfully retrieves and parses a list of available models from the API.
+        
         Asserts that the returned list contains the expected model IDs and the correct number of models.
         """
         mock_response = {
@@ -464,7 +470,7 @@ class TestGenesisAPIClient:
     @pytest.mark.asyncio
     async def test_get_model_success(self, client):
         """
-        Test that retrieving a model by ID returns a model object with the expected attributes.
+        Verifies that retrieving a model by ID using the client returns a model object with the correct attributes.
         """
         mock_response = {
             'id': 'genesis-gpt-4',
@@ -486,7 +492,7 @@ class TestGenesisAPIClient:
     @pytest.mark.asyncio
     async def test_get_model_not_found(self, client):
         """
-        Test that retrieving a model with a non-existent ID raises a GenesisAPIError with the expected error message.
+        Test that attempting to retrieve a model with a non-existent ID raises a GenesisAPIError with the message "Model not found".
         """
         with patch('aiohttp.ClientSession.get') as mock_get:
             mock_get.return_value.__aenter__.return_value.status = 404
@@ -499,7 +505,7 @@ class TestGenesisAPIClient:
 
     def test_build_headers(self, client):
         """
-        Test that the client's _build_headers method includes the required HTTP headers for authorization and content type.
+        Verify that the client's _build_headers method returns HTTP headers containing Authorization, Content-Type, and User-Agent fields.
         """
         headers = client._build_headers()
 
@@ -510,7 +516,7 @@ class TestGenesisAPIClient:
 
     def test_build_headers_with_custom_headers(self, client):
         """
-        Verify that custom headers are correctly merged with default headers when building request headers.
+        Test that custom headers are merged with default headers when building request headers.
         """
         custom_headers = {'X-Custom-Header': 'custom-value'}
         headers = client._build_headers(custom_headers)
@@ -525,7 +531,7 @@ class TestDataModels:
 
     def test_chat_message_creation(self):
         """
-        Test creation of a ChatMessage instance with specified role and content, verifying that the optional name attribute defaults to None.
+        Test that a ChatMessage instance is created with the correct role and content, and that the name attribute defaults to None.
         """
         message = ChatMessage(role="user", content="Hello, world!")
         assert message.role == "user"
@@ -554,7 +560,7 @@ class TestDataModels:
 
     def test_model_config_defaults(self):
         """
-        Test that ModelConfig assigns default values to optional parameters when only the name is provided.
+        Verify that ModelConfig sets default values for optional parameters when only the name is specified.
         """
         config = ModelConfig(name="test-model")
         assert config.name == "test-model"
@@ -577,7 +583,7 @@ class TestDataModels:
 
     def test_chat_completion_creation(self):
         """
-        Test that a ChatCompletion object is created with the correct attribute values.
+        Test creation of a ChatCompletion object with specified attributes and verify their values.
         """
         completion = ChatCompletion(
             id="chat-123",
@@ -597,7 +603,7 @@ class TestExceptionClasses:
 
     def test_genesis_api_error(self):
         """
-        Test that GenesisAPIError is instantiated correctly with the provided message and status code.
+        Test that a GenesisAPIError instance is created with the correct message and status code.
         """
         error = GenesisAPIError("Test error message", status_code=500)
         assert str(error) == "Test error message"
@@ -605,7 +611,7 @@ class TestExceptionClasses:
 
     def test_authentication_error(self):
         """
-        Test instantiation of AuthenticationError and verify it inherits from GenesisAPIError.
+        Test that AuthenticationError is instantiated correctly and inherits from GenesisAPIError.
         """
         error = AuthenticationError("Invalid API key")
         assert str(error) == "Invalid API key"
@@ -645,9 +651,7 @@ class TestUtilityFunctions:
 
     def test_calculate_token_usage(self):
         """
-        Test that the `calculate_token_usage` utility correctly computes token usage for a list of chat messages.
-
-        Asserts that the returned value is a dictionary containing the 'estimated_tokens' key.
+        Test that `calculate_token_usage` returns a dictionary with an 'estimated_tokens' key for a list of chat messages.
         """
         from app.ai_backend.genesis_api import calculate_token_usage
 
@@ -668,11 +672,11 @@ class TestUtilityFunctions:
     ])
     def test_estimate_tokens(self, content, expected_tokens):
         """
-        Test that the token estimation function returns the expected token count for the given input.
-
+        Verify that the token estimation utility returns the expected token count for a given input string.
+        
         Parameters:
             content (str): The input text to estimate tokens for.
-            expected_tokens (int): The expected token count to compare against.
+            expected_tokens (int): The expected number of tokens for the input.
         """
         from app.ai_backend.genesis_api import estimate_tokens
 
