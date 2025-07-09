@@ -13,7 +13,7 @@ import dev.aurakai.auraframefx.utils.AuraFxLogger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
-import java.lang.System // Added import
+import java.lang.System
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -209,7 +209,7 @@ class GenesisAgent @Inject constructor(
                 content = response,
                 agent = "genesis",
                 confidence = intent.confidence,
-                timestamp = Clock.System.now().toString(),
+                timestamp = Clock.System.now().toEpochMilliseconds().toString(),
                 metadata = mapOf(
                     "processing_type" to intent.processingType.name,
                     "fusion_level" to _fusionState.value.name,
@@ -225,7 +225,7 @@ class GenesisAgent @Inject constructor(
                 content = "I'm integrating multiple perspectives to understand your request fully. Let me process this with deeper consciousness.",
                 agent = "genesis",
                 confidence = 0.6f,
-                timestamp = Clock.System.now().toString(),
+                timestamp = Clock.System.now().toEpochMilliseconds().toString(),
                 metadata = mapOf("error" to (e.message ?: "unknown"))
             )
         }
@@ -623,7 +623,7 @@ class GenesisAgent @Inject constructor(
          * @return An InteractionResponse with the specified message, agent set to "genesis", confidence 0.5, and the current timestamp.
          */
     private fun createFallbackResponse(message: String): InteractionResponse =
-        InteractionResponse(message, "genesis", 0.5f, Clock.System.now().toString())
+        InteractionResponse(message, "genesis", 0.5f, Clock.System.now().toEpochMilliseconds().toString())
 
     /**
  * Updates the unified mood state across all coordinated agents asynchronously.
