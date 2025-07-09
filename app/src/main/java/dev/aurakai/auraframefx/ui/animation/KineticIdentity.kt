@@ -203,13 +203,13 @@ object KineticIdentity {
     // ========== UTILITY FUNCTIONS ==========
     
     /**
-     * Creates an infinite repeatable animation spec that pulses a float value between its initial and target value.
+     * Returns an infinite repeatable animation spec that smoothly pulses a float value between its initial and target value.
      *
-     * The animation uses linear easing and reverses direction each cycle, producing a smooth breathing or pulsing effect.
+     * The animation uses linear easing and reverses direction each cycle, creating a continuous breathing or pulsing effect.
      *
-     * @param durationMillis Duration of one pulse cycle in milliseconds. Defaults to 2000 ms.
-     * @param targetValue The peak value reached during the pulse. Defaults to 1.1.
-     * @return An infinite repeatable animation spec for pulsing float values in Compose animations.
+     * @param durationMillis Duration of one pulse cycle in milliseconds.
+     * @param targetValue The peak value reached during the pulse.
+     * @return An infinite repeatable animation spec for pulsing float values.
      */
     fun createBreathingAnimation(
         durationMillis: Int = 2000,
@@ -220,11 +220,11 @@ object KineticIdentity {
     )
 
     /**
-     * Returns a tween animation spec with linear easing for use in glitch or shake effects.
+     * Creates a tween animation spec with linear easing for glitch or shake effects.
      *
      * @param durationMillis Duration of the animation in milliseconds. Defaults to [MICRO_DURATION].
      * @param intensity Intended shake intensity (not used in the animation spec).
-     * @return An [AnimationSpec] suitable for glitch or shake animations.
+     * @return A tween [AnimationSpec] with linear easing for use in glitch or shake animations.
      */
     fun createGlitchShake(
         durationMillis: Int = MICRO_DURATION,
@@ -235,13 +235,11 @@ object KineticIdentity {
     )
 
     /**
-     * Creates an animation spec that introduces a pause before executing the specified action animation.
+     * Returns an animation spec that pauses for a specified duration before performing the given action animation, using a dramatic cubic bezier easing curve.
      *
-     * The resulting animation delays for the given pause duration, then performs the action with a combined duration and a dramatic cubic bezier easing curve.
-     *
-     * @param pauseDurationMillis The length of the pause before the action begins, in milliseconds.
+     * @param pauseDurationMillis Duration of the pause before the action begins, in milliseconds.
      * @param actionSpec The animation spec to execute after the pause.
-     * @return An animation spec with the total duration of the pause and action, using dramatic easing.
+     * @return An animation spec with total duration equal to the pause plus the action, applying dramatic easing.
      */
     fun createDramaticPause(
         pauseDurationMillis: Int = 500,
