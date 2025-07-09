@@ -151,9 +151,9 @@ class GenesisBridgeServer:
         
     def start(self):
         """
-        Starts the Genesis bridge server, enabling asynchronous processing of JSON requests from standard input.
+        Starts the Genesis bridge server, signaling readiness to the Android client, launching a background thread for asynchronous request processing, and continuously reading and enqueuing JSON requests from standard input.
         
-        Signals readiness to the Android client, launches a background thread for request handling, and continuously reads and enqueues incoming JSON requests. Handles invalid JSON input gracefully and supports shutdown on keyboard interruption.
+        Handles invalid JSON input by sending error responses and supports graceful shutdown on keyboard interruption.
         """
         self.running = True
         print("Genesis Ready", flush=True)  # Signal to Android that we're ready
@@ -180,9 +180,9 @@ class GenesisBridgeServer:
     
     def _process_requests(self):
         """
-        Continuously processes requests from the queue in a background thread and sends responses.
+        Processes queued requests in a background thread and sends responses, ensuring continuous server operation.
         
-        Each request is handled by the appropriate method, with errors caught and reported to maintain server responsiveness.
+        Requests are dequeued and routed to the appropriate handler. Errors are caught and reported to maintain responsiveness.
         """
         while self.running:
             try:
@@ -199,7 +199,7 @@ class GenesisBridgeServer:
     
     def _handle_request(self, request):
         """
-        Routes an incoming JSON request to the appropriate handler based on its type and returns the handler's response.
+        Routes a JSON request to the appropriate handler based on its type and returns the handler's response.
         
         Parameters:
             request (dict): The JSON-decoded request containing a "requestType" field and optional additional fields.
