@@ -13,6 +13,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity // Added import
+import androidx.compose.ui.unit.Density // Added import
 import androidx.compose.ui.unit.dp
 import dev.aurakai.auraframefx.ui.debug.model.Connection
 import dev.aurakai.auraframefx.ui.debug.model.ConnectionType
@@ -75,6 +77,7 @@ fun InteractiveGraph(
 
         // Convert GraphOffset to ComposeOffset for rendering
         fun GraphOffset.toCompose() = ComposeOffset(x.toFloat(), y.toFloat())
+
 
         Canvas(
             modifier = Modifier
@@ -456,4 +459,8 @@ private fun ComposeOffset.rotate(
     val rotatedY = translatedX * sin + translatedY * cos
 
     return Offset(rotatedX + pivot.x + pivotOffset.x, rotatedY + pivot.y + pivotOffset.y)
+
 }
+
+// Convert GraphOffset to ComposeOffset for rendering
+private fun GraphOffset.toCompose(): ComposeOffset = ComposeOffset(this.x, this.y)
