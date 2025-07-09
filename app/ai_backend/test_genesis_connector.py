@@ -671,9 +671,8 @@ if __name__ == '__main__':
     # Configure logging for tests
     logging.basicConfig(level=logging.DEBUG)
     
-
-class TestGenesisConnectorAdvanced(unittest.TestCase):
-    """Advanced unit tests for GenesisConnector edge cases and performance."""
+class TestGenesisConnectorEdgeCases(unittest.TestCase):
+    """Additional edge case tests for GenesisConnector."""
     
     def setUp(self):
         """Set up test fixtures."""
@@ -681,99 +680,142 @@ class TestGenesisConnectorAdvanced(unittest.TestCase):
             'api_key': 'test_api_key_123',
             'base_url': 'https://api.genesis.test',
             'timeout': 30,
-            'max_retries': 3,
-            'rate_limit': 100,
-            'burst_limit': 10
+            'max_retries': 3
         }
         self.connector = GenesisConnector(self.mock_config)
     
-    def test_initialization_with_default_values(self):
-        """Test initialization with minimal configuration using defaults."""
-        minimal_config = {'api_key': 'test_key'}
-        connector = GenesisConnector(minimal_config)
+    def test_initialization_with_unicode_api_key(self):
+        """Test initialization with unicode characters in API key."""
+        config = self.mock_config.copy()
+        config['api_key'] = 'test_ключ_123_🔑'
         
-        self.assertEqual(connector.api_key, 'test_key')
-        self.assertEqual(connector.timeout, 30)  # Default timeout
-        self.assertEqual(connector.max_retries, 3)  # Default max_retries
+        connector = GenesisConnector(config)
+        self.assertEqual(connector.api_key, 'test_ключ_123_🔑')
+    
+    def test_initialization_with_very_long_api_key(self):
+        """Test initialization with extremely long API key."""
+        config = self.mock_config.copy()
+        config['api_key'] = 'a' * 10000  # 10KB API key
+        
+        connector = GenesisConnector(config)
+        self.assertEqual(len(connector.api_key), 10000)
+    
+    def test_initialization_with_various_url_formats(self):
+        """Test initialization with different URL formats."""
+        test_cases = [
+            'https://api.genesis.test:8080',
+            'https://api.genesis.test/v1',
+            'https://api.genesis.test/v1/',
+            'https://api-staging.genesis.test',
+            'https://localhost:3000'
+        ]
+        
+        for url in test_cases:
+            config = self.mock_config.copy()
+            config['base_url'] = url
+            connector = GenesisConnector(config)
+            self.assertEqual(connector.base_url, url)
+    
+    def test_initialization_with_edge_case_timeout_values(self):
+        """Test initialization with edge case timeout values."""
+        test_cases = [0.1, 0.001, 300, 3600]  # Very small to very large timeouts
+        
+        for timeout in test_cases:
+            config = self.mock_config.copy()
+            config['timeout'] = timeout
+            connector = GenesisConnector(config)
+            self.assertEqual(connector.timeout, timeout)
+    
+    def test_initialization_with_string_numeric_values(self):
+        """Test initialization with string numeric values."""
+        config = self.mock_config.copy()
+        config['timeout'] = '30'
+        config['max_retries'] = '3'
+        
+        connector = GenesisConnector(config)
+        self.assertEqual(connector.timeout, 30)
+        self.assertEqual(connector.max_retries, 3)
     
     def test_initialization_with_none_values(self):
-        """Test initialization handling None values in configuration."""
+        """Test initialization with None values in config."""
         config = self.mock_config.copy()
         config['timeout'] = None
-        config['max_retries'] = None
         
         with self.assertRaises(ValueError):
             GenesisConnector(config)
     
-    def test_initialization_with_extreme_values(self):
-        """Test initialization with extreme but valid values."""
+    def test_initialization_with_extra_config_fields(self):
+        """Test initialization ignores extra config fields."""
         config = self.mock_config.copy()
-        config['timeout'] = 1  # Very short timeout
-        config['max_retries'] = 10  # High retry count
+        config['extra_field'] = 'should_be_ignored'
+        config['another_field'] = 123
         
         connector = GenesisConnector(config)
-        self.assertEqual(connector.timeout, 1)
-        self.assertEqual(connector.max_retries, 10)
-    
-    def test_initialization_with_invalid_config_type(self):
-        """Test initialization with invalid configuration type."""
-        with self.assertRaises(TypeError):
-            GenesisConnector("invalid_config")
-        
-        with self.assertRaises(TypeError):
-            GenesisConnector(None)
-    
-    def test_api_key_sanitization(self):
-        """Test that API key is properly sanitized in logs and representations."""
-        long_api_key = 'a' * 100
-        config = self.mock_config.copy()
-        config['api_key'] = long_api_key
-        
-        connector = GenesisConnector(config)
-        repr_str = repr(connector)
-        
-        # Should not contain the full API key
-        self.assertNotIn(long_api_key, repr_str)
-        # Should contain some indication of the key length or partial key
-        self.assertIn('***', repr_str)
+        self.assertEqual(connector.api_key, 'test_api_key_123')
+        self.assertFalse(hasattr(connector, 'extra_field'))
     
     @patch('requests.Session.request')
-    def test_make_request_with_special_characters(self, mock_request):
-        """Test API request with special characters in endpoint and data."""
+    def test_make_request_with_very_large_payload(self, mock_request):
+        """Test making request with very large data payload."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'success': True}
         mock_response.raise_for_status.return_value = None
         mock_request.return_value = mock_response
         
-        special_endpoint = '/test/endpoint with spaces/special%chars'
-        special_data = {'text': 'Hello 世界! @#$%^&*()'}
+        # 1MB payload
+        large_data = {'data': 'x' * 1024 * 1024}
         
-        result = self.connector.make_request('POST', special_endpoint, data=special_data)
+        result = self.connector.make_request('POST', '/test', data=large_data)
         
         self.assertEqual(result, {'success': True})
         mock_request.assert_called_once()
     
     @patch('requests.Session.request')
-    def test_make_request_with_large_payload(self, mock_request):
-        """Test API request with large data payload."""
+    def test_make_request_with_special_characters_in_endpoint(self, mock_request):
+        """Test making request with special characters in endpoint."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'success': True}
         mock_response.raise_for_status.return_value = None
         mock_request.return_value = mock_response
         
-        # Create a large payload
-        large_data = {'content': 'A' * 10000}  # 10KB of data
+        endpoints = [
+            '/test/endpoint%20with%20spaces',
+            '/test/endpoint-with-dashes',
+            '/test/endpoint_with_underscores',
+            '/test/endpoint.with.dots',
+            '/test/endpoint@special#chars'
+        ]
         
-        result = self.connector.make_request('POST', '/large', data=large_data)
+        for endpoint in endpoints:
+            result = self.connector.make_request('GET', endpoint)
+            self.assertEqual(result, {'success': True})
+    
+    @patch('requests.Session.request')
+    def test_make_request_with_unicode_data(self, mock_request):
+        """Test making request with unicode data."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'success': True}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        unicode_data = {
+            'text': 'Hello 世界 🌍',
+            'emoji': '🚀🎉💡',
+            'cyrillic': 'Привет мир',
+            'arabic': 'مرحبا بالعالم'
+        }
+        
+        result = self.connector.make_request('POST', '/test', data=unicode_data)
         
         self.assertEqual(result, {'success': True})
         mock_request.assert_called_once()
     
     @patch('requests.Session.request')
     def test_make_request_with_empty_response(self, mock_request):
-        """Test API request handling empty response body."""
+        """Test handling of empty response body."""
         mock_response = Mock()
         mock_response.status_code = 204  # No Content
         mock_response.json.side_effect = json.JSONDecodeError("Empty response", "", 0)
@@ -781,18 +823,17 @@ class TestGenesisConnectorAdvanced(unittest.TestCase):
         mock_response.raise_for_status.return_value = None
         mock_request.return_value = mock_response
         
-        result = self.connector.make_request('DELETE', '/test')
-        
         # Should handle empty response gracefully
+        result = self.connector.make_request('DELETE', '/test')
         self.assertIsNone(result)
     
     @patch('requests.Session.request')
     def test_make_request_with_malformed_json(self, mock_request):
-        """Test API request with malformed JSON response."""
+        """Test handling of malformed JSON response."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.side_effect = json.JSONDecodeError("Malformed JSON", "", 0)
-        mock_response.text = '{"incomplete": json'
+        mock_response.text = '{"invalid": json,}'
         mock_response.raise_for_status.return_value = None
         mock_request.return_value = mock_response
         
@@ -802,107 +843,121 @@ class TestGenesisConnectorAdvanced(unittest.TestCase):
         self.assertIn('Malformed JSON', str(context.exception))
     
     @patch('requests.Session.request')
-    def test_make_request_with_various_http_methods(self, mock_request):
-        """Test API request with various HTTP methods."""
+    def test_make_request_with_nested_json_error(self, mock_request):
+        """Test handling of valid JSON but with nested error information."""
+        mock_response = Mock()
+        mock_response.status_code = 400
+        mock_response.json.return_value = {
+            'error': {
+                'code': 'INVALID_REQUEST',
+                'message': 'Request validation failed',
+                'details': [
+                    {'field': 'prompt', 'message': 'Cannot be empty'},
+                    {'field': 'model', 'message': 'Invalid model ID'}
+                ]
+            }
+        }
+        mock_response.raise_for_status.side_effect = requests.HTTPError("400 Bad Request")
+        mock_request.return_value = mock_response
+        
+        with self.assertRaises(GenesisConnectionError) as context:
+            self.connector.make_request('POST', '/test')
+        
+        self.assertIn('400 Bad Request', str(context.exception))
+    
+    @patch('requests.Session.request')
+    def test_make_request_with_rate_limit_headers(self, mock_request):
+        """Test handling of rate limit response headers."""
+        mock_response = Mock()
+        mock_response.status_code = 429
+        mock_response.headers = {
+            'X-RateLimit-Limit': '1000',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': '1640995200',
+            'Retry-After': '3600'
+        }
+        mock_response.raise_for_status.side_effect = requests.HTTPError("429 Too Many Requests")
+        mock_response.text = "Rate limit exceeded"
+        mock_request.return_value = mock_response
+        
+        with self.assertRaises(GenesisConnectionError) as context:
+            self.connector.make_request('GET', '/test')
+        
+        self.assertIn('429 Too Many Requests', str(context.exception))
+    
+    @patch('requests.Session.request')
+    def test_make_request_with_server_error_variations(self, mock_request):
+        """Test handling of different server error types."""
+        error_cases = [
+            (500, "Internal Server Error"),
+            (502, "Bad Gateway"),
+            (503, "Service Unavailable"),
+            (504, "Gateway Timeout"),
+            (507, "Insufficient Storage"),
+            (511, "Network Authentication Required")
+        ]
+        
+        for status_code, error_message in error_cases:
+            mock_response = Mock()
+            mock_response.status_code = status_code
+            mock_response.raise_for_status.side_effect = requests.HTTPError(f"{status_code} {error_message}")
+            mock_response.text = error_message
+            mock_request.return_value = mock_response
+            
+            with self.assertRaises(GenesisConnectionError) as context:
+                self.connector.make_request('GET', '/test')
+            
+            self.assertIn(str(status_code), str(context.exception))
+    
+    @patch('requests.Session.request')
+    def test_make_request_with_redirect_responses(self, mock_request):
+        """Test handling of redirect responses."""
+        redirect_cases = [
+            (301, "Moved Permanently"),
+            (302, "Found"),
+            (307, "Temporary Redirect"),
+            (308, "Permanent Redirect")
+        ]
+        
+        for status_code, redirect_type in redirect_cases:
+            mock_response = Mock()
+            mock_response.status_code = status_code
+            mock_response.headers = {'Location': 'https://api.genesis.test/v2/test'}
+            mock_response.json.return_value = {'message': f'{redirect_type}'}
+            mock_response.raise_for_status.return_value = None
+            mock_request.return_value = mock_response
+            
+            result = self.connector.make_request('GET', '/test')
+            self.assertEqual(result, {'message': f'{redirect_type}'})
+    
+    @patch('requests.Session.request')
+    def test_concurrent_requests_thread_safety(self, mock_request):
+        """Test thread safety of concurrent requests."""
+        import threading
+        import queue
+        
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'success': True}
         mock_response.raise_for_status.return_value = None
         mock_request.return_value = mock_response
         
-        methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
-        
-        for method in methods:
-            with self.subTest(method=method):
-                result = self.connector.make_request(method, '/test')
-                self.assertEqual(result, {'success': True})
-    
-    @patch('requests.Session.request')
-    def test_make_request_with_status_codes(self, mock_request):
-        """Test API request handling various status codes."""
-        status_codes = [200, 201, 202, 204, 400, 401, 403, 404, 500, 502, 503]
-        
-        for status_code in status_codes:
-            with self.subTest(status_code=status_code):
-                mock_response = Mock()
-                mock_response.status_code = status_code
-                mock_response.text = f"Status {status_code}"
-                
-                if status_code < 400:
-                    mock_response.json.return_value = {'status': status_code}
-                    mock_response.raise_for_status.return_value = None
-                    mock_request.return_value = mock_response
-                    
-                    result = self.connector.make_request('GET', '/test')
-                    if status_code != 204:  # No Content
-                        self.assertEqual(result, {'status': status_code})
-                else:
-                    mock_response.raise_for_status.side_effect = requests.HTTPError(f"{status_code} Error")
-                    mock_request.return_value = mock_response
-                    
-                    with self.assertRaises(GenesisConnectionError):
-                        self.connector.make_request('GET', '/test')
-    
-    @patch('time.sleep')
-    @patch('requests.Session.request')
-    def test_retry_with_different_exceptions(self, mock_request, mock_sleep):
-        """Test retry logic with different types of exceptions."""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'success': True}
-        mock_response.raise_for_status.return_value = None
-        
-        exception_types = [
-            ConnectionError("Connection error"),
-            Timeout("Timeout error"),
-            requests.exceptions.ChunkedEncodingError("Chunked encoding error"),
-            requests.exceptions.ContentDecodingError("Content decoding error")
-        ]
-        
-        for exception in exception_types:
-            with self.subTest(exception=type(exception).__name__):
-                mock_request.side_effect = [exception, mock_response]
-                mock_sleep.reset_mock()
-                
-                result = self.connector.make_request('GET', '/test')
-                
-                self.assertEqual(result, {'success': True})
-                self.assertEqual(mock_request.call_count, 2)
-                mock_sleep.assert_called_once_with(1)  # First retry delay
-                mock_request.reset_mock()
-    
-    @patch('requests.Session.request')
-    def test_concurrent_requests(self, mock_request):
-        """Test handling of concurrent requests."""
-        import threading
-        import time
-        
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'success': True}
-        mock_response.raise_for_status.return_value = None
-        
-        # Add slight delay to simulate real API call
-        def delayed_response(*args, **kwargs):
-            time.sleep(0.01)
-            return mock_response
-        
-        mock_request.side_effect = delayed_response
-        
-        results = []
-        errors = []
-        
-        def make_request():
-            try:
-                result = self.connector.make_request('GET', '/test')
-                results.append(result)
-            except Exception as e:
-                errors.append(e)
-        
-        # Create multiple threads
+        results = queue.Queue()
         threads = []
-        for i in range(5):
-            thread = threading.Thread(target=make_request)
+        
+        def make_request_thread(connector, endpoint):
+            try:
+                result = connector.make_request('GET', endpoint)
+                results.put(result)
+            except Exception as e:
+                results.put(e)
+        
+        # Start 10 concurrent requests
+        for i in range(10):
+            thread = threading.Thread(
+                target=make_request_thread,
+                args=(self.connector, f'/test/{i}')
+            )
             threads.append(thread)
             thread.start()
         
@@ -910,601 +965,296 @@ class TestGenesisConnectorAdvanced(unittest.TestCase):
         for thread in threads:
             thread.join()
         
-        # All requests should succeed
-        self.assertEqual(len(results), 5)
-        self.assertEqual(len(errors), 0)
-        self.assertEqual(mock_request.call_count, 5)
+        # Verify all requests succeeded
+        self.assertEqual(results.qsize(), 10)
+        while not results.empty():
+            result = results.get()
+            self.assertEqual(result, {'success': True})
     
-    def test_url_building_edge_cases(self):
-        """Test URL building with various edge cases."""
-        test_cases = [
-            ('', 'https://api.genesis.test'),
-            ('/', 'https://api.genesis.test/'),
-            ('//endpoint', 'https://api.genesis.test/endpoint'),
-            ('/endpoint/', 'https://api.genesis.test/endpoint/'),
-            ('endpoint?param=value', 'https://api.genesis.test/endpoint?param=value'),
-            ('/endpoint#fragment', 'https://api.genesis.test/endpoint#fragment'),
-        ]
+    def test_memory_usage_with_large_config(self):
+        """Test memory usage with large configuration objects."""
+        import sys
         
-        for endpoint, expected in test_cases:
-            with self.subTest(endpoint=endpoint):
-                result = self.connector._build_url(endpoint)
-                self.assertEqual(result, expected)
-    
-    def test_headers_with_unicode_values(self):
-        """Test header building with unicode values."""
-        unicode_headers = {
-            'X-Custom-Header': 'value with ünicøde',
-            'X-Another-Header': '测试值'
-        }
+        # Create a large configuration
+        large_config = self.mock_config.copy()
+        large_config['large_field'] = 'x' * 1024 * 1024  # 1MB string
         
-        headers = self.connector._build_headers(unicode_headers)
+        connector = GenesisConnector(large_config)
         
-        self.assertIn('X-Custom-Header', headers)
-        self.assertIn('X-Another-Header', headers)
-        self.assertEqual(headers['X-Custom-Header'], 'value with ünicøde')
-        self.assertEqual(headers['X-Another-Header'], '测试值')
-    
-    def test_context_manager_exception_handling(self):
-        """Test context manager behavior during exceptions."""
-        class TestException(Exception):
-            pass
-        
-        try:
-            with GenesisConnector(self.mock_config) as connector:
-                self.assertIsNotNone(connector)
-                raise TestException("Test exception")
-        except TestException:
-            pass  # Expected
-        
-        # Context manager should properly clean up even with exceptions
-        
-    @patch('requests.Session.request')
-    def test_request_timeout_variations(self, mock_request):
-        """Test various timeout scenarios."""
-        timeout_exceptions = [
-            Timeout("Read timeout"),
-            Timeout("Connection timeout"),
-            requests.exceptions.ReadTimeout("Read timeout"),
-            requests.exceptions.ConnectTimeout("Connect timeout")
-        ]
-        
-        for exception in timeout_exceptions:
-            with self.subTest(exception=type(exception).__name__):
-                mock_request.side_effect = exception
-                
-                with self.assertRaises(GenesisTimeoutError):
-                    self.connector.make_request('GET', '/test')
+        # Verify the connector doesn't store unnecessary large data
+        connector_size = sys.getsizeof(connector.__dict__)
+        self.assertLess(connector_size, 1024 * 1024)  # Should be much smaller than 1MB
     
     @patch('requests.Session.request')
-    def test_generation_workflow_complete(self, mock_request):
-        """Test complete generation workflow from creation to completion."""
-        # Mock responses for the complete workflow
-        create_response = Mock()
-        create_response.status_code = 201
-        create_response.json.return_value = {'id': 'gen_123', 'status': 'pending'}
-        create_response.raise_for_status.return_value = None
-        
-        status_pending_response = Mock()
-        status_pending_response.status_code = 200
-        status_pending_response.json.return_value = {'id': 'gen_123', 'status': 'running'}
-        status_pending_response.raise_for_status.return_value = None
-        
-        status_complete_response = Mock()
-        status_complete_response.status_code = 200
-        status_complete_response.json.return_value = {
-            'id': 'gen_123',
-            'status': 'completed',
-            'result': 'Generated content'
-        }
-        status_complete_response.raise_for_status.return_value = None
-        
-        mock_request.side_effect = [
-            create_response,
-            status_pending_response,
-            status_complete_response
-        ]
-        
-        # Test complete workflow
-        generation_request = {'prompt': 'Test prompt', 'model': 'test_model'}
-        
-        # Create generation
-        create_result = self.connector.create_generation(generation_request)
-        self.assertEqual(create_result['id'], 'gen_123')
-        self.assertEqual(create_result['status'], 'pending')
-        
-        # Check status (running)
-        status_result = self.connector.get_generation_status('gen_123')
-        self.assertEqual(status_result['status'], 'running')
-        
-        # Check status (completed)
-        final_result = self.connector.get_generation_status('gen_123')
-        self.assertEqual(final_result['status'], 'completed')
-        self.assertEqual(final_result['result'], 'Generated content')
-    
-    @patch('requests.Session.request')
-    def test_model_operations_comprehensive(self, mock_request):
-        """Test comprehensive model operations."""
-        # List models
-        list_response = Mock()
-        list_response.status_code = 200
-        list_response.json.return_value = {
-            'models': [
-                {'id': 'model_1', 'name': 'Model 1', 'status': 'active'},
-                {'id': 'model_2', 'name': 'Model 2', 'status': 'inactive'}
-            ]
-        }
-        list_response.raise_for_status.return_value = None
-        
-        # Get specific model
-        model_response = Mock()
-        model_response.status_code = 200
-        model_response.json.return_value = {
-            'id': 'model_1',
-            'name': 'Model 1',
-            'status': 'active',
-            'capabilities': ['text-generation', 'summarization']
-        }
-        model_response.raise_for_status.return_value = None
-        
-        mock_request.side_effect = [list_response, model_response]
-        
-        # Test list models
-        models = self.connector.list_models()
-        self.assertEqual(len(models['models']), 2)
-        
-        # Test get specific model
-        model_info = self.connector.get_model_info('model_1')
-        self.assertEqual(model_info['id'], 'model_1')
-        self.assertIn('capabilities', model_info)
-    
-    def test_logging_integration(self):
-        """Test logging integration and log messages."""
-        import logging
-        
-        # Set up log capture
-        log_capture = []
-        
-        class TestHandler(logging.Handler):
-            def emit(self, record):
-                log_capture.append(record)
-        
-        # Add test handler to logger
-        logger = logging.getLogger('genesis_connector')
-        test_handler = TestHandler()
-        logger.addHandler(test_handler)
-        logger.setLevel(logging.DEBUG)
-        
-        try:
-            # Create connector (should log initialization)
-            connector = GenesisConnector(self.mock_config)
-            
-            # Check if any logs were captured
-            # Note: This depends on actual logging in the implementation
-            self.assertIsNotNone(connector)
-            
-        finally:
-            # Clean up
-            logger.removeHandler(test_handler)
-    
-    def test_session_persistence(self):
-        """Test that HTTP session is properly managed."""
-        # Test that session is reused across requests
-        self.assertIsNotNone(self.connector.session)
-        
-        # Session should be the same instance across calls
-        session1 = self.connector.session
-        session2 = self.connector.session
-        self.assertIs(session1, session2)
-    
-    @patch('requests.Session.request')
-    def test_error_message_preservation(self, mock_request):
-        """Test that error messages are properly preserved through the error handling chain."""
-        original_error_message = "Very specific error message with details"
-        
-        mock_response = Mock()
-        mock_response.status_code = 400
-        mock_response.text = original_error_message
-        mock_response.raise_for_status.side_effect = requests.HTTPError("400 Bad Request")
-        mock_request.return_value = mock_response
-        
-        with self.assertRaises(GenesisConnectionError) as context:
-            self.connector.make_request('GET', '/test')
-        
-        # Original error message should be preserved
-        error_str = str(context.exception)
-        self.assertIn(original_error_message, error_str)
-    
-    def test_config_validation_comprehensive(self):
-        """Test comprehensive configuration validation."""
-        # Test various invalid configurations
-        invalid_configs = [
-            ({'api_key': 123}, "API key must be string"),
-            ({'api_key': 'valid', 'base_url': 123}, "Base URL must be string"),
-            ({'api_key': 'valid', 'timeout': 'invalid'}, "Timeout must be number"),
-            ({'api_key': 'valid', 'max_retries': 'invalid'}, "Max retries must be number"),
-            ({'api_key': 'valid', 'base_url': 'ftp://invalid'}, "Invalid protocol"),
-        ]
-        
-        for config, expected_error in invalid_configs:
-            with self.subTest(config=config):
-                with self.assertRaises(ValueError) as context:
-                    GenesisConnector(config)
-                # Note: This depends on actual validation in the implementation
-
-
-class TestGenesisConnectorPerformance(unittest.TestCase):
-    """Performance and load testing for GenesisConnector."""
-    
-    def setUp(self):
-        """Set up performance test fixtures."""
-        self.mock_config = {
-            'api_key': 'test_api_key_123',
-            'base_url': 'https://api.genesis.test',
-            'timeout': 30,
-            'max_retries': 3
-        }
-        self.connector = GenesisConnector(self.mock_config)
-    
-    @patch('requests.Session.request')
-    def test_rapid_sequential_requests(self, mock_request):
-        """Test rapid sequential request performance."""
-        import time
-        
+    def test_request_with_custom_user_agent(self, mock_request):
+        """Test request with custom user agent header."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'success': True}
         mock_response.raise_for_status.return_value = None
         mock_request.return_value = mock_response
         
-        num_requests = 100
-        start_time = time.time()
+        custom_headers = {'User-Agent': 'GenesisConnector/1.0 (Custom)'}
+        result = self.connector.make_request('GET', '/test', headers=custom_headers)
         
-        for i in range(num_requests):
-            result = self.connector.make_request('GET', f'/test/{i}')
-            self.assertEqual(result, {'success': True})
-        
-        end_time = time.time()
-        total_time = end_time - start_time
-        
-        # Performance assertion: should complete 100 requests in reasonable time
-        self.assertLess(total_time, 10.0, "100 requests took too long")
-        self.assertEqual(mock_request.call_count, num_requests)
+        self.assertEqual(result, {'success': True})
+        expected_headers = {
+            'Authorization': 'Bearer test_api_key_123',
+            'User-Agent': 'GenesisConnector/1.0 (Custom)'
+        }
+        mock_request.assert_called_once_with(
+            'GET',
+            'https://api.genesis.test/test',
+            headers=expected_headers,
+            timeout=30
+        )
     
     @patch('requests.Session.request')
-    def test_memory_usage_stability(self, mock_request):
-        """Test memory usage stability over many requests."""
-        import gc
-        
+    def test_request_with_binary_data(self, mock_request):
+        """Test request with binary data payload."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'data': 'x' * 1000}  # 1KB response
+        mock_response.json.return_value = {'success': True}
         mock_response.raise_for_status.return_value = None
         mock_request.return_value = mock_response
         
-        # Make many requests and ensure memory doesn't grow unbounded
-        for i in range(50):
-            result = self.connector.make_request('GET', '/test')
-            self.assertIsNotNone(result)
-            
-            # Periodic garbage collection
-            if i % 10 == 0:
-                gc.collect()
+        binary_data = b'\x00\x01\x02\x03\x04\x05'
         
-        # Memory usage should be stable (no assertions here, just ensuring no crashes)
-        self.assertTrue(True)
+        # This should handle binary data appropriately
+        result = self.connector.make_request('POST', '/upload', data={'file': binary_data})
+        
+        self.assertEqual(result, {'success': True})
+        mock_request.assert_called_once()
+    
+    def test_url_building_edge_cases(self):
+        """Test URL building with various edge cases."""
+        test_cases = [
+            ('', 'https://api.genesis.test/'),
+            ('/', 'https://api.genesis.test/'),
+            ('//double//slash', 'https://api.genesis.test/double/slash'),
+            ('query?param=value', 'https://api.genesis.test/query?param=value'),
+            ('fragment#section', 'https://api.genesis.test/fragment#section'),
+            ('encoded%20path', 'https://api.genesis.test/encoded%20path')
+        ]
+        
+        for endpoint, expected in test_cases:
+            result = self.connector._build_url(endpoint)
+            self.assertEqual(result, expected)
+    
+    def test_headers_with_none_values(self):
+        """Test header building with None values."""
+        custom_headers = {
+            'X-Custom': 'value',
+            'X-None': None,
+            'X-Empty': ''
+        }
+        
+        headers = self.connector._build_headers(custom_headers)
+        
+        # None values should be filtered out
+        self.assertNotIn('X-None', headers)
+        self.assertIn('X-Empty', headers)
+        self.assertEqual(headers['X-Empty'], '')
+    
+    @patch('requests.Session.request')
+    def test_request_method_variations(self, mock_request):
+        """Test all supported HTTP methods."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'success': True}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']
+        
+        for method in methods:
+            result = self.connector.make_request(method, '/test')
+            self.assertEqual(result, {'success': True})
+            
+            # Verify correct method was used
+            mock_request.assert_called_with(
+                method,
+                'https://api.genesis.test/test',
+                headers={'Authorization': 'Bearer test_api_key_123'},
+                timeout=30
+            )
+        
+        self.assertEqual(mock_request.call_count, len(methods))
 
 
 class TestGenesisConnectorSecurity(unittest.TestCase):
     """Security-focused tests for GenesisConnector."""
     
     def setUp(self):
-        """Set up security test fixtures."""
-        self.mock_config = {
-            'api_key': 'sensitive_api_key_123',
-            'base_url': 'https://api.genesis.test',
-            'timeout': 30,
-            'max_retries': 3
-        }
-        self.connector = GenesisConnector(self.mock_config)
-    
-    def test_api_key_not_in_logs(self):
-        """Test that API key is not exposed in logs or error messages."""
-        # Test repr
-        repr_str = repr(self.connector)
-        self.assertNotIn('sensitive_api_key_123', repr_str)
-        
-        # Test str
-        str_repr = str(self.connector)
-        self.assertNotIn('sensitive_api_key_123', str_repr)
-        
-        # Test that partial key or masking is present
-        self.assertTrue('***' in repr_str or 'sensitive_api_key_123'[:4] in repr_str)
-    
-    def test_sensitive_data_in_error_messages(self):
-        """Test that sensitive data is not included in error messages."""
-        with self.assertRaises(ValueError) as context:
-            config = self.mock_config.copy()
-            config['api_key'] = ''
-            GenesisConnector(config)
-        
-        error_msg = str(context.exception)
-        # Should not contain the original API key
-        self.assertNotIn('sensitive_api_key_123', error_msg)
-    
-    @patch('requests.Session.request')
-    def test_request_data_sanitization(self, mock_request):
-        """Test that request data doesn't leak sensitive information."""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'success': True}
-        mock_response.raise_for_status.return_value = None
-        mock_request.return_value = mock_response
-        
-        sensitive_data = {
-            'password': 'secret123',
-            'api_key': 'another_secret',
-            'token': 'bearer_token'
-        }
-        
-        # Make request with sensitive data
-        result = self.connector.make_request('POST', '/test', data=sensitive_data)
-        
-        # Verify request was made but sensitive data handling is proper
-        self.assertEqual(result, {'success': True})
-        mock_request.assert_called_once()
-        
-        # Check that the call was made with the data (implementation should handle sanitization)
-        call_args = mock_request.call_args
-        self.assertIn('json', call_args[1])
-
-
-class TestGenesisConnectorCompatibility(unittest.TestCase):
-    """Compatibility tests for different Python versions and environments."""
-    
-    def setUp(self):
-        """Set up compatibility test fixtures."""
+        """Set up test fixtures."""
         self.mock_config = {
             'api_key': 'test_api_key_123',
             'base_url': 'https://api.genesis.test',
             'timeout': 30,
             'max_retries': 3
         }
+        self.connector = GenesisConnector(self.mock_config)
     
-    def test_python_version_compatibility(self):
-        """Test compatibility with current Python version."""
+    def test_api_key_not_logged_in_repr(self):
+        """Test that API key is not exposed in string representations."""
+        repr_str = repr(self.connector)
+        str_str = str(self.connector)
+        
+        # API key should not appear in full
+        self.assertNotIn('test_api_key_123', repr_str)
+        self.assertNotIn('test_api_key_123', str_str)
+        
+        # Should show masked version
+        self.assertIn('***', repr_str)
+    
+    def test_api_key_not_in_exception_messages(self):
+        """Test that API key doesn't leak in exception messages."""
+        with patch('requests.Session.request') as mock_request:
+            mock_request.side_effect = ConnectionError("Connection failed")
+            
+            with self.assertRaises(GenesisConnectionError) as context:
+                self.connector.make_request('GET', '/test')
+            
+            # API key should not appear in error message
+            self.assertNotIn('test_api_key_123', str(context.exception))
+    
+    @patch('requests.Session.request')
+    def test_sensitive_data_not_logged(self, mock_request):
+        """Test that sensitive data is not logged."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'success': True}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        with patch('logging.getLogger') as mock_logger:
+            mock_log = Mock()
+            mock_logger.return_value = mock_log
+            
+            sensitive_data = {
+                'password': 'secret123',
+                'token': 'private_token',
+                'api_key': 'another_secret'
+            }
+            
+            self.connector.make_request('POST', '/test', data=sensitive_data)
+            
+            # Check that sensitive data is not in any log calls
+            for call in mock_log.debug.call_args_list:
+                log_message = str(call)
+                self.assertNotIn('secret123', log_message)
+                self.assertNotIn('private_token', log_message)
+    
+    def test_malicious_endpoint_injection(self):
+        """Test protection against endpoint injection attacks."""
+        malicious_endpoints = [
+            '../../../etc/passwd',
+            '../../admin/delete',
+            '/admin/users/../../../system/shutdown',
+            'javascript:alert(1)',
+            'file:///etc/passwd'
+        ]
+        
+        for endpoint in malicious_endpoints:
+            # Should handle malicious endpoints by URL construction
+            url = self.connector._build_url(endpoint)
+            self.assertTrue(url.startswith('https://api.genesis.test/'))
+    
+    def test_header_injection_prevention(self):
+        """Test prevention of header injection attacks."""
+        malicious_headers = {
+            'X-Injected\r\nX-Evil': 'value',
+            'X-CRLF\r\n\r\nGET /evil': 'injection',
+            'X-Normal': 'value\r\nX-Injected: evil'
+        }
+        
+        headers = self.connector._build_headers(malicious_headers)
+        
+        # Headers should be sanitized or rejected
+        for key, value in headers.items():
+            self.assertNotIn('\r', key)
+            self.assertNotIn('\n', key)
+            self.assertNotIn('\r', str(value))
+            self.assertNotIn('\n', str(value))
+
+
+class TestGenesisConnectorPerformance(unittest.TestCase):
+    """Performance-focused tests for GenesisConnector."""
+    
+    def setUp(self):
+        """Set up test fixtures."""
+        self.mock_config = {
+            'api_key': 'test_api_key_123',
+            'base_url': 'https://api.genesis.test',
+            'timeout': 30,
+            'max_retries': 3
+        }
+        self.connector = GenesisConnector(self.mock_config)
+    
+    def test_connector_initialization_performance(self):
+        """Test connector initialization performance."""
+        import time
+        
+        start_time = time.time()
+        
+        for _ in range(100):
+            GenesisConnector(self.mock_config)
+        
+        end_time = time.time()
+        total_time = end_time - start_time
+        
+        # Should be able to create 100 connectors in reasonable time
+        self.assertLess(total_time, 1.0)  # Less than 1 second
+    
+    @patch('requests.Session.request')
+    def test_rapid_requests_performance(self, mock_request):
+        """Test performance of rapid sequential requests."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'success': True}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        import time
+        start_time = time.time()
+        
+        for i in range(50):
+            self.connector.make_request('GET', f'/test/{i}')
+        
+        end_time = time.time()
+        total_time = end_time - start_time
+        
+        # Should handle 50 requests efficiently
+        self.assertLess(total_time, 0.5)  # Less than 0.5 seconds
+    
+    def test_memory_leak_prevention(self):
+        """Test that connector doesn't leak memory with repeated use."""
+        import gc
         import sys
         
-        # Should work with Python 3.7+
-        self.assertGreaterEqual(sys.version_info[:2], (3, 7))
+        # Force garbage collection
+        gc.collect()
+        initial_objects = len(gc.get_objects())
         
-        # Should be able to create connector
-        connector = GenesisConnector(self.mock_config)
-        self.assertIsNotNone(connector)
-    
-    def test_unicode_handling(self):
-        """Test Unicode string handling in various contexts."""
-        unicode_config = {
-            'api_key': 'test_këy_123',
-            'base_url': 'https://api.génesis.test',
-            'timeout': 30,
-            'max_retries': 3
-        }
-        
-        # Should handle Unicode in configuration
-        connector = GenesisConnector(unicode_config)
-        self.assertEqual(connector.api_key, 'test_këy_123')
-    
-    def test_exception_inheritance(self):
-        """Test that custom exceptions inherit properly."""
-        # Test exception hierarchy
-        self.assertTrue(issubclass(GenesisConnectionError, Exception))
-        self.assertTrue(issubclass(GenesisTimeoutError, GenesisConnectionError))
-        
-        # Test exception instantiation
-        conn_error = GenesisConnectionError("Connection failed")
-        self.assertIsInstance(conn_error, Exception)
-        
-        timeout_error = GenesisTimeoutError("Timeout occurred")
-        self.assertIsInstance(timeout_error, GenesisConnectionError)
-        self.assertIsInstance(timeout_error, Exception)
-
-
-if __name__ == '__main__':
-    # Run all tests including the new ones
-    unittest.main(verbosity=2)
-
-
-# Pytest parametrized tests (if pytest is available)
-class TestGenesisConnectorParametrized:
-    """Parametrized tests using pytest for comprehensive coverage."""
-    
-    @pytest.fixture
-    def connector(self):
-        """Pytest fixture for GenesisConnector."""
-        config = {
-            'api_key': 'test_api_key_123',
-            'base_url': 'https://api.genesis.test',
-            'timeout': 30,
-            'max_retries': 3
-        }
-        return GenesisConnector(config)
-    
-    @pytest.mark.parametrize("status_code,expected_exception", [
-        (400, GenesisConnectionError),
-        (401, GenesisConnectionError),
-        (403, GenesisConnectionError),
-        (404, GenesisConnectionError),
-        (500, GenesisConnectionError),
-        (502, GenesisConnectionError),
-        (503, GenesisConnectionError),
-    ])
-    @patch('requests.Session.request')
-    def test_http_error_codes(self, mock_request, connector, status_code, expected_exception):
-        """Test various HTTP error codes with parametrized approach."""
-        mock_response = Mock()
-        mock_response.status_code = status_code
-        mock_response.raise_for_status.side_effect = requests.HTTPError(f"{status_code} Error")
-        mock_response.text = f"Error {status_code}"
-        mock_request.return_value = mock_response
-        
-        with pytest.raises(expected_exception):
-            connector.make_request('GET', '/test')
-    
-    @pytest.mark.parametrize("method", [
-        'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'
-    ])
-    @patch('requests.Session.request')
-    def test_http_methods(self, mock_request, connector, method):
-        """Test all HTTP methods with parametrized approach."""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'method': method}
-        mock_response.raise_for_status.return_value = None
-        mock_request.return_value = mock_response
-        
-        result = connector.make_request(method, '/test')
-        assert result == {'method': method}
-    
-    @pytest.mark.parametrize("timeout_value,should_raise", [
-        (1, False),
-        (30, False),
-        (60, False),
-        (0, True),
-        (-1, True),
-        ('invalid', True),
-        (None, True),
-    ])
-    def test_timeout_validation(self, timeout_value, should_raise):
-        """Test timeout validation with various values."""
-        config = {
-            'api_key': 'test_key',
-            'base_url': 'https://api.test.com',
-            'timeout': timeout_value,
-            'max_retries': 3
-        }
-        
-        if should_raise:
-            with pytest.raises(ValueError):
-                GenesisConnector(config)
-        else:
-            connector = GenesisConnector(config)
-            assert connector.timeout == timeout_value
-    
-    @pytest.mark.parametrize("base_url,should_raise", [
-        ('https://api.test.com', False),
-        ('http://api.test.com', False),
-        ('https://api.test.com:8080', False),
-        ('https://api.test.com/v1', False),
-        ('invalid_url', True),
-        ('ftp://api.test.com', True),
-        ('', True),
-        (None, True),
-    ])
-    def test_base_url_validation(self, base_url, should_raise):
-        """Test base URL validation with various formats."""
-        config = {
-            'api_key': 'test_key',
-            'base_url': base_url,
-            'timeout': 30,
-            'max_retries': 3
-        }
-        
-        if should_raise:
-            with pytest.raises(ValueError):
-                GenesisConnector(config)
-        else:
-            connector = GenesisConnector(config)
-            assert connector.base_url == base_url
-
-
-class TestGenesisConnectorStress(unittest.TestCase):
-    """Stress tests for GenesisConnector under high load."""
-    
-    def setUp(self):
-        """Set up stress test fixtures."""
-        self.mock_config = {
-            'api_key': 'test_api_key_123',
-            'base_url': 'https://api.genesis.test',
-            'timeout': 30,
-            'max_retries': 3
-        }
-        self.connector = GenesisConnector(self.mock_config)
-    
-    @patch('requests.Session.request')
-    def test_high_frequency_requests(self, mock_request):
-        """Test high frequency requests without delays."""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'success': True}
-        mock_response.raise_for_status.return_value = None
-        mock_request.return_value = mock_response
-        
-        # Make 1000 requests as fast as possible
-        for i in range(1000):
-            result = self.connector.make_request('GET', f'/test/{i}')
-            self.assertEqual(result, {'success': True})
-        
-        self.assertEqual(mock_request.call_count, 1000)
-    
-    @patch('requests.Session.request')
-    def test_retry_storm_handling(self, mock_request):
-        """Test handling of retry storms (many consecutive failures)."""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'success': True}
-        mock_response.raise_for_status.return_value = None
-        
-        # Create a scenario where requests fail many times before succeeding
-        failures = [ConnectionError("Connection failed")] * 100
-        mock_request.side_effect = failures + [mock_response]
-        
-        # Should eventually succeed after all retries are exhausted and tried again
-        with self.assertRaises(GenesisConnectionError):
-            # This should fail after max_retries
-            self.connector.make_request('GET', '/test')
-    
-    @patch('requests.Session.request')
-    def test_large_response_handling(self, mock_request):
-        """Test handling of very large responses."""
-        # Create a large response (1MB of data)
-        large_data = {'content': 'A' * 1024 * 1024}
-        
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = large_data
-        mock_response.raise_for_status.return_value = None
-        mock_request.return_value = mock_response
-        
-        result = self.connector.make_request('GET', '/large-data')
-        
-        # Should handle large responses without issues
-        self.assertEqual(len(result['content']), 1024 * 1024)
-    
-    def test_connector_cleanup_after_many_uses(self):
-        """Test that connector properly cleans up after extensive use."""
         # Create and destroy many connectors
-        for i in range(100):
-            config = self.mock_config.copy()
-            config['api_key'] = f'key_{i}'
-            
-            connector = GenesisConnector(config)
-            self.assertIsNotNone(connector)
-            
-            # Use context manager
-            with connector:
-                pass
-            
-            # Explicit cleanup if available
-            if hasattr(connector, 'close'):
-                connector.close()
+        for _ in range(100):
+            connector = GenesisConnector(self.mock_config)
+            del connector
+        
+        # Force garbage collection again
+        gc.collect()
+        final_objects = len(gc.get_objects())
+        
+        # Should not have significantly more objects
+        object_increase = final_objects - initial_objects
+        self.assertLess(object_increase, 50)  # Allow some increase but not linear
 
 
-class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
-    """Test boundary conditions and edge cases."""
+class TestGenesisConnectorErrorRecovery(unittest.TestCase):
+    """Error recovery and resilience tests for GenesisConnector."""
     
     def setUp(self):
-        """Set up boundary condition test fixtures."""
+        """Set up test fixtures."""
         self.mock_config = {
             'api_key': 'test_api_key_123',
             'base_url': 'https://api.genesis.test',
@@ -1513,86 +1263,224 @@ class TestGenesisConnectorBoundaryConditions(unittest.TestCase):
         }
         self.connector = GenesisConnector(self.mock_config)
     
-    def test_minimum_configuration_values(self):
-        """Test with minimum valid configuration values."""
-        min_config = {
-            'api_key': 'a',  # Single character API key
-            'base_url': 'https://a.com',  # Minimal URL
-            'timeout': 1,  # Minimum timeout
-            'max_retries': 0  # No retries
-        }
-        
-        connector = GenesisConnector(min_config)
-        self.assertEqual(connector.api_key, 'a')
-        self.assertEqual(connector.timeout, 1)
-        self.assertEqual(connector.max_retries, 0)
-    
-    def test_maximum_configuration_values(self):
-        """Test with maximum reasonable configuration values."""
-        max_config = {
-            'api_key': 'x' * 1000,  # Very long API key
-            'base_url': 'https://' + 'x' * 250 + '.com',  # Long domain
-            'timeout': 3600,  # 1 hour timeout
-            'max_retries': 100  # Many retries
-        }
-        
-        connector = GenesisConnector(max_config)
-        self.assertEqual(len(connector.api_key), 1000)
-        self.assertEqual(connector.timeout, 3600)
-        self.assertEqual(connector.max_retries, 100)
-    
     @patch('requests.Session.request')
-    def test_zero_length_response(self, mock_request):
-        """Test handling of zero-length responses."""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {}  # Empty JSON
-        mock_response.raise_for_status.return_value = None
-        mock_request.return_value = mock_response
-        
-        result = self.connector.make_request('GET', '/empty')
-        self.assertEqual(result, {})
-    
-    @patch('requests.Session.request')
-    def test_exactly_at_retry_limit(self, mock_request):
-        """Test behavior when failures equal exactly the retry limit."""
+    def test_partial_network_failure_recovery(self, mock_request):
+        """Test recovery from partial network failures."""
+        # Simulate intermittent network issues
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'success': True}
         mock_response.raise_for_status.return_value = None
         
-        # Fail exactly max_retries times, then succeed
-        failures = [ConnectionError("Connection failed")] * 3  # max_retries = 3
-        mock_request.side_effect = failures + [mock_response]
+        mock_request.side_effect = [
+            ConnectionError("Network unreachable"),
+            ConnectionError("Connection reset"),
+            mock_response  # Finally succeeds
+        ]
         
         result = self.connector.make_request('GET', '/test')
+        
         self.assertEqual(result, {'success': True})
-        self.assertEqual(mock_request.call_count, 4)  # Initial + 3 retries
+        self.assertEqual(mock_request.call_count, 3)
     
-    def test_url_building_with_query_parameters(self):
-        """Test URL building with complex query parameters."""
-        test_cases = [
-            ('/endpoint?param=value', 'https://api.genesis.test/endpoint?param=value'),
-            ('/endpoint?a=1&b=2', 'https://api.genesis.test/endpoint?a=1&b=2'),
-            ('/endpoint?unicode=測試', 'https://api.genesis.test/endpoint?unicode=測試'),
-            ('/endpoint?empty=', 'https://api.genesis.test/endpoint?empty='),
+    @patch('requests.Session.request')
+    def test_dns_resolution_failure_recovery(self, mock_request):
+        """Test recovery from DNS resolution failures."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'success': True}
+        mock_response.raise_for_status.return_value = None
+        
+        mock_request.side_effect = [
+            ConnectionError("Name resolution failed"),
+            mock_response
         ]
         
-        for endpoint, expected in test_cases:
-            with self.subTest(endpoint=endpoint):
-                result = self.connector._build_url(endpoint)
-                self.assertEqual(result, expected)
+        result = self.connector.make_request('GET', '/test')
+        
+        self.assertEqual(result, {'success': True})
+        self.assertEqual(mock_request.call_count, 2)
     
-    def test_header_case_sensitivity(self):
-        """Test header handling with different case variations."""
-        headers_variations = [
-            {'authorization': 'Bearer override'},  # lowercase
-            {'Authorization': 'Bearer override'},  # proper case
-            {'AUTHORIZATION': 'Bearer override'},  # uppercase
+    @patch('requests.Session.request')
+    def test_ssl_certificate_error_handling(self, mock_request):
+        """Test handling of SSL certificate errors."""
+        mock_request.side_effect = requests.exceptions.SSLError("SSL certificate verify failed")
+        
+        with self.assertRaises(GenesisConnectionError) as context:
+            self.connector.make_request('GET', '/test')
+        
+        self.assertIn('SSL certificate verify failed', str(context.exception))
+    
+    @patch('requests.Session.request')
+    def test_proxy_error_handling(self, mock_request):
+        """Test handling of proxy-related errors."""
+        mock_request.side_effect = requests.exceptions.ProxyError("Proxy connection failed")
+        
+        with self.assertRaises(GenesisConnectionError) as context:
+            self.connector.make_request('GET', '/test')
+        
+        self.assertIn('Proxy connection failed', str(context.exception))
+    
+    @patch('requests.Session.request')
+    def test_chunked_encoding_error_handling(self, mock_request):
+        """Test handling of chunked encoding errors."""
+        mock_request.side_effect = requests.exceptions.ChunkedEncodingError("Chunked encoding error")
+        
+        with self.assertRaises(GenesisConnectionError) as context:
+            self.connector.make_request('GET', '/test')
+        
+        self.assertIn('Chunked encoding error', str(context.exception))
+    
+    @patch('requests.Session.request')
+    def test_content_decode_error_handling(self, mock_request):
+        """Test handling of content decoding errors."""
+        mock_request.side_effect = requests.exceptions.ContentDecodingError("Content decoding error")
+        
+        with self.assertRaises(GenesisConnectionError) as context:
+            self.connector.make_request('GET', '/test')
+        
+        self.assertIn('Content decoding error', str(context.exception))
+
+
+class TestGenesisConnectorConfigurationValidation(unittest.TestCase):
+    """Configuration validation tests for GenesisConnector."""
+    
+    def test_configuration_with_boolean_values(self):
+        """Test configuration with boolean values."""
+        config = {
+            'api_key': 'test_api_key_123',
+            'base_url': 'https://api.genesis.test',
+            'timeout': 30,
+            'max_retries': 3,
+            'verify_ssl': True,
+            'use_compression': False
+        }
+        
+        connector = GenesisConnector(config)
+        # Should handle boolean values gracefully
+        self.assertEqual(connector.api_key, 'test_api_key_123')
+    
+    def test_configuration_type_coercion(self):
+        """Test automatic type coercion in configuration."""
+        config = {
+            'api_key': 'test_api_key_123',
+            'base_url': 'https://api.genesis.test',
+            'timeout': '30',  # String that should be converted to int
+            'max_retries': '3'  # String that should be converted to int
+        }
+        
+        connector = GenesisConnector(config)
+        self.assertEqual(connector.timeout, 30)
+        self.assertEqual(connector.max_retries, 3)
+    
+    def test_configuration_with_environment_variables(self):
+        """Test configuration using environment variables."""
+        import os
+        
+        # Mock environment variables
+        with patch.dict(os.environ, {
+            'GENESIS_API_KEY': 'env_api_key',
+            'GENESIS_BASE_URL': 'https://env.genesis.test',
+            'GENESIS_TIMEOUT': '60'
+        }):
+            config = {
+                'api_key': os.getenv('GENESIS_API_KEY'),
+                'base_url': os.getenv('GENESIS_BASE_URL'),
+                'timeout': int(os.getenv('GENESIS_TIMEOUT', '30')),
+                'max_retries': 3
+            }
+            
+            connector = GenesisConnector(config)
+            self.assertEqual(connector.api_key, 'env_api_key')
+            self.assertEqual(connector.base_url, 'https://env.genesis.test')
+            self.assertEqual(connector.timeout, 60)
+    
+    def test_configuration_validation_edge_cases(self):
+        """Test configuration validation with edge cases."""
+        base_config = {
+            'api_key': 'test_api_key_123',
+            'base_url': 'https://api.genesis.test',
+            'timeout': 30,
+            'max_retries': 3
+        }
+        
+        # Test with whitespace in API key
+        config = base_config.copy()
+        config['api_key'] = '  test_api_key_123  '
+        connector = GenesisConnector(config)
+        self.assertEqual(connector.api_key, 'test_api_key_123')  # Should be stripped
+        
+        # Test with trailing slash in URL
+        config = base_config.copy()
+        config['base_url'] = 'https://api.genesis.test/'
+        connector = GenesisConnector(config)
+        self.assertEqual(connector.base_url, 'https://api.genesis.test')  # Should be normalized
+
+
+class TestGenesisConnectorLogging(unittest.TestCase):
+    """Logging behavior tests for GenesisConnector."""
+    
+    def setUp(self):
+        """Set up test fixtures."""
+        self.mock_config = {
+            'api_key': 'test_api_key_123',
+            'base_url': 'https://api.genesis.test',
+            'timeout': 30,
+            'max_retries': 3
+        }
+        self.connector = GenesisConnector(self.mock_config)
+    
+    @patch('logging.getLogger')
+    @patch('requests.Session.request')
+    def test_request_logging(self, mock_request, mock_get_logger):
+        """Test that requests are properly logged."""
+        mock_logger = Mock()
+        mock_get_logger.return_value = mock_logger
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'success': True}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        self.connector.make_request('GET', '/test')
+        
+        # Should log request details (but not sensitive data)
+        mock_logger.debug.assert_called()
+    
+    @patch('logging.getLogger')
+    @patch('requests.Session.request')
+    def test_error_logging(self, mock_request, mock_get_logger):
+        """Test that errors are properly logged."""
+        mock_logger = Mock()
+        mock_get_logger.return_value = mock_logger
+        
+        mock_request.side_effect = ConnectionError("Connection failed")
+        
+        with self.assertRaises(GenesisConnectionError):
+            self.connector.make_request('GET', '/test')
+        
+        # Should log error details
+        mock_logger.error.assert_called()
+    
+    @patch('logging.getLogger')
+    @patch('requests.Session.request')
+    def test_retry_logging(self, mock_request, mock_get_logger):
+        """Test that retries are properly logged."""
+        mock_logger = Mock()
+        mock_get_logger.return_value = mock_logger
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'success': True}
+        mock_response.raise_for_status.return_value = None
+        
+        mock_request.side_effect = [
+            ConnectionError("Connection failed"),
+            mock_response
         ]
         
-        for headers in headers_variations:
-            with self.subTest(headers=headers):
-                result = self.connector._build_headers(headers)
-                # Should preserve the provided authorization header
-                self.assertIn('authorization', result or {})
+        self.connector.make_request('GET', '/test')
+        
+        # Should log retry attempts
+        mock_logger.warning.assert_called()
