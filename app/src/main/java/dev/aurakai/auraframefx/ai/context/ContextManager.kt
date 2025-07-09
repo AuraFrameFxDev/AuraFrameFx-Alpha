@@ -28,7 +28,7 @@ class ContextManager @Inject constructor(
     /**
      * Creates and registers a new context chain with an initial context node and optional string metadata.
      *
-     * Initializes a context chain using the specified root context, initial content, and agent. The chain begins with a single context node containing the initial content and metadata, and is added to the set of active context chains.
+     * Initializes a context chain using the specified root context, initial content, and agent. The chain starts with a single context node containing the initial content and metadata, and is added to the set of active context chains.
      *
      * @param rootContext The identifier for the root context of the chain.
      * @param initialContext The content of the initial context node.
@@ -65,7 +65,7 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Updates an existing context chain by appending a new context node with the specified content, agent, and metadata.
+     * Appends a new context node to an existing context chain with the specified content, agent, and metadata.
      *
      * @param chainId The unique identifier of the context chain to update.
      * @param newContext The context string to add to the chain.
@@ -103,21 +103,21 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Returns the context chain for the given chain ID, or null if no such chain exists.
+     * Retrieves the context chain associated with the specified chain ID.
      *
      * @param chainId The unique identifier of the context chain.
-     * @return The matching ContextChain, or null if not found.
+     * @return The corresponding ContextChain if found, or null otherwise.
      */
     fun getContextChain(chainId: String): ContextChain? {
         return _activeContexts.value[chainId]
     }
 
     /**
-     * Retrieves the most relevant context chain and related chains based on the specified query criteria.
+     * Retrieves the most relevant context chain and related chains matching the given query criteria.
      *
-     * Filters active context chains by agent (if provided), sorts them by most recent update, and applies relevance and length constraints. If no matching chains are found, returns a new chain initialized with the query string.
+     * Filters active context chains by agent (if specified), sorts by most recent update, and applies relevance and length constraints. If no matching chains are found, returns a new chain initialized with the query string.
      *
-     * @param query The criteria for filtering, sorting, and limiting context chains.
+     * @param query Criteria for filtering, sorting, and limiting context chains.
      * @return A [ContextChainResult] containing the selected chain, related chains, and the original query.
      */
 
@@ -147,9 +147,9 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Recalculates and updates statistics for all active context chains.
+     * Updates the context statistics to reflect the current state of all active context chains.
      *
-     * Updates the total number of chains, the count of chains updated within a recent configurable time window, the length of the longest chain, and the timestamp of the last update.
+     * Recalculates the total number of chains, the number of recently updated chains within a configurable time window, the length of the longest chain, and sets the timestamp of the last update.
      */
     private fun updateStats() {
         val chains = _activeContexts.value.values

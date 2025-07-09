@@ -34,6 +34,11 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
      *
      * The effect features an 8.dp elevation shadow and a 1.dp border with 60% opacity, both using neon blue coloring and rounded corners for a cyberpunk aesthetic.
      */
+    /**
+     * Applies a neon blue edge glow effect to the component.
+     *
+     * Adds a shadow with 8.dp elevation and rounded corners, along with a 1.dp border using a semi-transparent neon blue color for a cyberpunk-inspired appearance.
+     */
     fun Modifier.cyberEdgeGlow() = this
     .shadow(
         elevation = 8.dp,
@@ -48,9 +53,9 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
     )
 
 /**
-     * Applies a neon purple digital glitch effect to the modifier.
+     * Applies a neon purple digital glitch effect to a UI component.
      *
-     * Adds a 4.dp elevation shadow and a 2.dp wide border with 80% opacity, both using neon purple and rounded corners, to create a cyberpunk-inspired visual style.
+     * Adds a 4.dp elevation shadow and a 2.dp border with 80% opacity, both using neon purple and rounded corners, to create a cyberpunk-inspired visual style.
      */
 fun Modifier.digitalGlitchEffect() = this
     .shadow(

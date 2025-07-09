@@ -11,6 +11,8 @@ class AppInitializerInitializer : Initializer<Unit> {
      * Performs application-specific initialization logic during app startup.
      *
      * Called on the main thread when the application launches.
+     *
+     * @param context The application context provided at startup.
      */
     override fun create(context: Context) {
         // TODO: Implement initialization logic here.

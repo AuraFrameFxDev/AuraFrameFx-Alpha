@@ -23,22 +23,29 @@ import androidx.compose.ui.graphics.Color // Added import for Color
  *
  * Once implemented, this function will apply a glowing edge effect to the UI element, evoking a cyber aesthetic.
  */
+/**
+ * Placeholder for applying a cyber-themed edge glow effect to the modifier.
+ *
+ * Currently returns the original modifier without any visual changes.
+ */
 fun Modifier.cyberEdgeGlow(): Modifier = this
 
 /**
- * Returns this modifier unchanged. Intended as a placeholder for a customizable cyber edge glow effect using the specified primary and secondary colors.
+ * Placeholder for a customizable cyber edge glow effect using the specified primary and secondary colors.
  *
- * @param primaryColor The main color for the edge glow effect.
- * @param secondaryColor The secondary color to blend with the primary color.
- * @return The original modifier without any visual effect applied.
+ * Currently returns the original modifier unchanged without applying any visual effect.
+ *
+ * @param primaryColor The main color intended for the edge glow.
+ * @param secondaryColor The secondary color intended to blend with the primary color.
+ * @return The original modifier without modification.
  */
 fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier = this
 
 /**
- * Intended to apply a digital pixelation effect to this modifier when enabled.
+ * Placeholder for a digital pixelation effect on this modifier.
  *
- * @param visible If true, the pixelation effect should be applied; if false, no effect is shown.
- * @return The original modifier, as this function is currently a placeholder and does not apply any effect.
+ * @param visible If true, the pixelation effect would be shown when implemented.
+ * @return The original modifier, as no effect is currently applied.
  */
 fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this
 

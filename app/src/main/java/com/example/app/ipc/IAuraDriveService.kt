@@ -14,9 +14,9 @@ interface IAuraDriveService : IInterface {
     fun getOracleDriveStatus(): String
 
     /**
- * Toggles the enabled or disabled state of the LSPosed module.
+ * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module state was successfully changed, or `false` if the operation failed.
+ * @return `true` if the module was successfully enabled or disabled; `false` if the operation failed.
  */
     fun toggleLSPosedModule(): Boolean
 
@@ -28,16 +28,16 @@ interface IAuraDriveService : IInterface {
     fun getDetailedInternalStatus(): String
 
     /**
- * Retrieves the internal diagnostics log entries for the Aura Drive service.
+ * Retrieves a list of internal diagnostic log entries for the Aura Drive service.
  *
- * @return A list of log entry strings containing diagnostic information for debugging or monitoring the service.
+ * @return A list of strings, each representing a diagnostic log entry for debugging or monitoring purposes.
  */
     fun getInternalDiagnosticsLog(): List<String>
 
     companion object {
         object Stub {
             /**
-             * Returns an `IAuraDriveService` implementation backed by the provided `IBinder`, or `null` if the binder is `null`.
+             * Retrieves an `IAuraDriveService` implementation backed by the provided `IBinder`, or `null` if the binder is `null`.
              *
              * Use this method to obtain a service interface for IPC binding scenarios.
              *
@@ -49,35 +49,35 @@ interface IAuraDriveService : IInterface {
                 return if (service != null) {
                     object : IAuraDriveService {
                         /**
- * Returns the IBinder instance associated with this interface implementation.
+ * Retrieves the underlying IBinder instance for this interface implementation.
  *
- * @return The backing IBinder instance.
+ * @return The associated IBinder instance.
  */
                         override fun asBinder(): IBinder = service
 
                         /**
- * Returns a summary string describing the current operational status of the Oracle Drive.
+ * Retrieves a summary string describing the current operational status of the Oracle Drive.
  *
- * @return A status summary, or "Unknown" if the status is unavailable or not implemented.
+ * @return The status summary, or "Unknown" if the status is unavailable or not implemented.
  */
                         override fun getOracleDriveStatus(): String = "Unknown"
 
                         /**
- * Toggles the enabled state of the LSPosed module.
+ * Toggles the enabled or disabled state of the LSPosed module.
  *
- * @return `true` if the module's enabled state was successfully toggled, or `false` if the operation failed or is not implemented.
+ * @return `true` if the module state was successfully changed, or `false` if the operation failed or is not supported.
  */
                         override fun toggleLSPosedModule(): Boolean = false
 
                         /**
- * Returns a detailed internal status report of the Aura Drive service.
+ * Retrieves a comprehensive internal status report of the Aura Drive service.
  *
- * @return A string containing diagnostic information about the current internal state of the service.
+ * @return A string containing detailed diagnostic information about the service's current internal state.
  */
                         override fun getDetailedInternalStatus(): String = "Not implemented"
 
                         /**
- * Returns a list of internal diagnostics log entries.
+ * Retrieves a list of internal diagnostics log entries.
  *
  * In this stub implementation, always returns an empty list.
  *

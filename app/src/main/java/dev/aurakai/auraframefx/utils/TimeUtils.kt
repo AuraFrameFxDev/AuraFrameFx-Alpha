@@ -11,17 +11,17 @@ object TimeUtils {
     val systemClock: Clock = Clock.systemUTC()
 
     /**
-     * Returns the current instant using the system UTC clock.
-     *
-     * @return The current point in time as an [Instant].
-     */
+ * Returns the current time as an [Instant] using the system UTC clock.
+ *
+ * @return The current instant in UTC.
+ */
     fun now(): Instant = Instant.now(systemClock)
 
     /**
-     * Returns the current time in milliseconds since the Unix epoch.
-     *
-     * @return The current timestamp in milliseconds.
-     */
+ * Returns the current time in milliseconds since the Unix epoch.
+ *
+ * @return The number of milliseconds elapsed since January 1, 1970 UTC.
+ */
     fun currentTimestamp(): Long = System.currentTimeMillis()
 
     /**

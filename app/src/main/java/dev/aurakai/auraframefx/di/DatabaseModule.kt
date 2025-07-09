@@ -17,11 +17,11 @@ import javax.inject.Singleton
 object DatabaseModule {
 
     /**
-     * Provides a singleton instance of the Room `AppDatabase` for the application.
+     * Provides a singleton instance of the Room AppDatabase for the application.
      *
-     * Builds the database named "aura_frame_fx_database" using the application context, with destructive migration as a fallback if no migration is specified.
+     * Builds the "aura_frame_fx_database" using the application context, with destructive migration as a fallback if no migration is specified.
      *
-     * @return The singleton `AppDatabase` instance.
+     * @return The singleton AppDatabase instance.
      */
     @Provides
     @Singleton
@@ -38,10 +38,10 @@ object DatabaseModule {
     }
 
     /**
-     * Provides the AgentMemoryDao for accessing agent memory data from the specified AppDatabase.
+     * Returns the AgentMemoryDao for accessing agent memory data from the provided AppDatabase.
      *
-     * @param database The Room database instance from which to retrieve the DAO.
-     * @return The AgentMemoryDao used for agent memory operations.
+     * @param database The AppDatabase instance to retrieve the DAO from.
+     * @return The AgentMemoryDao for agent memory operations.
      */
     @Provides
     fun provideAgentMemoryDao(database: AppDatabase): AgentMemoryDao {

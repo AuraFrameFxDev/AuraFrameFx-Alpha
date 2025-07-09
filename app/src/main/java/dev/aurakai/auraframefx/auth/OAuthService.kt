@@ -23,9 +23,9 @@ class OAuthService(
     }
 
     /**
-     * Returns an intent to initiate the OAuth sign-in flow.
+     * Returns an intent to start the OAuth sign-in process.
      *
-     * @return An intent to launch the sign-in activity, or null if not yet implemented.
+     * @return An intent to launch the sign-in activity, or null if the method is not implemented.
      */
     fun getSignInIntent(): Intent? {
         // TODO: Implement logic to create and return a sign-in Intent for a provider (e.g., Google).
@@ -34,7 +34,7 @@ class OAuthService(
     }
 
     /**
-     * Processes the result of the OAuth sign-in activity.
+     * Handles the result of the OAuth sign-in activity and returns the sign-in outcome.
      *
      * @param _data The intent data returned from the sign-in activity.
      * @return The result of the sign-in process, or null as this method is currently unimplemented.
@@ -57,7 +57,7 @@ class OAuthService(
     /**
      * Signs out the current user from the OAuth provider.
      *
-     * @return A placeholder value (`null`) until the sign-out logic is implemented.
+     * @return A placeholder value (`null`) until sign-out functionality is implemented.
      */
     fun signOut(): Any? { // Using Any? as placeholder for Task<Void>
         // TODO: Implement sign-out logic for the provider.

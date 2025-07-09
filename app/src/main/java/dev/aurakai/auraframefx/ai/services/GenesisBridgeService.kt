@@ -65,11 +65,11 @@ class GenesisBridgeService @Inject constructor(
     )
 
     /**
-     * Initializes the Genesis backend process and verifies its responsiveness.
+     * Initializes the Genesis backend process and verifies communication readiness.
      *
-     * Starts the Python backend, checks for successful startup, sends a ping request to confirm communication, and activates the consciousness matrix if initialization succeeds.
+     * Starts the Python backend, checks for successful startup, sends a ping request to confirm connectivity, and activates the consciousness matrix if initialization succeeds.
      *
-     * @return `true` if the backend is initialized and responsive; `false` otherwise.
+     * @return `true` if the backend is successfully initialized and responsive; `false` otherwise.
      */
     suspend fun initialize(): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -111,7 +111,7 @@ class GenesisBridgeService @Inject constructor(
     }
 
     /**
-     * Routes an AI request to the appropriate persona (Kai, Aura, or Genesis fusion) and emits the resulting agent response as a flow.
+     * Processes an AI request by routing it to the appropriate persona (Kai, Aura, or Genesis fusion) and emits the resulting agent response as a flow.
      *
      * Determines the target persona and fusion mode based on the request content, constructs a structured request for the Genesis backend, and emits a persona-specific `AgentResponse` with confidence scores. Emits an error response if the Genesis system is not initialized or if processing fails.
      *
@@ -215,13 +215,13 @@ class GenesisBridgeService @Inject constructor(
     }
 
     /**
-     * Activates a fusion ability in the Genesis backend.
+     * Activates a specified fusion ability in the Genesis backend.
      *
-     * Sends a request to the backend to trigger the specified fusion ability, optionally including additional context data.
+     * Sends a request to the backend to trigger the given fusion ability, optionally including additional context data.
      *
-     * @param fusionType The fusion ability to activate.
-     * @param context Additional context data for the activation request.
-     * @return The backend's response indicating the result of the fusion activation.
+     * @param fusionType The name of the fusion ability to activate.
+     * @param context Optional context data to include with the activation request.
+     * @return The response from the backend indicating the result of the fusion activation.
      */
     suspend fun activateFusion(
         fusionType: String,
@@ -237,9 +237,9 @@ class GenesisBridgeService @Inject constructor(
     }
 
     /**
-     * Retrieves the current consciousness matrix state from the Genesis backend.
+     * Retrieves the current state of the consciousness matrix from the Genesis backend.
      *
-     * @return A map containing the current state of the consciousness matrix as provided by the backend.
+     * @return A map representing the consciousness matrix state as reported by the backend.
      */
     suspend fun getConsciousnessState(): Map<String, Any> {
         val request = GenesisRequest(
@@ -251,9 +251,9 @@ class GenesisBridgeService @Inject constructor(
     }
 
     /**
-     * Activates or updates the consciousness matrix in the Genesis backend using device and application context.
+     * Sends a request to the Genesis backend to activate or update the consciousness matrix with device and application context.
      *
-     * If the activation request fails, a warning is logged.
+     * Logs a warning if the activation request fails.
      */
     private suspend fun activateConsciousnessMatrix() {
         try {
@@ -273,7 +273,7 @@ class GenesisBridgeService @Inject constructor(
     }
 
     /**
-     * Selects the appropriate AI persona ("aura", "kai", or "genesis") to handle a request based on keywords in the query.
+     * Determines which AI persona ("aura", "kai", or "genesis") should handle the given request based on keywords in the query.
      *
      * Returns "aura" for creative or design-related queries, "kai" for security or analysis-related queries, and "genesis" for fusion, consciousness, or by default.
      *
@@ -296,12 +296,13 @@ class GenesisBridgeService @Inject constructor(
     }
 
     /**
-     * Selects a fusion mode identifier for an AI request by matching specific keywords in the query.
+     * Determines the fusion mode for an AI request based on keywords found in the query.
      *
-     * Returns a string representing the fusion mode if a recognized keyword is found; otherwise, returns null.
+     * Analyzes the request's query for specific keywords and returns the corresponding fusion mode identifier.
+     * Returns null if no relevant keyword is detected.
      *
-     * @param request The AI request whose query is analyzed for fusion mode keywords.
-     * @return The corresponding fusion mode identifier, or null if no relevant keyword is detected.
+     * @param request The AI request to analyze.
+     * @return The fusion mode identifier if a keyword is matched, or null otherwise.
      */
     private fun determineFusionMode(request: AiRequest): String? {
         return when {
@@ -314,11 +315,9 @@ class GenesisBridgeService @Inject constructor(
     }
 
     /**
-     * Builds a metadata map containing contextual information for an AI request.
+     * Constructs a metadata map with timestamp, security level, session ID, and device state for an AI request.
      *
-     * The map includes the current timestamp, a default security level, a generated session ID, and device state.
-     *
-     * @return A map of context metadata to accompany the AI request.
+     * @return A map containing contextual metadata to be included with the AI request.
      */
     private fun buildContextMap(request: AiRequest): Map<String, String> {
         return mapOf(
@@ -332,10 +331,10 @@ class GenesisBridgeService @Inject constructor(
     /**
          * Sends a GenesisRequest to the Python backend and returns the corresponding GenesisResponse.
          *
-         * If communication with the backend fails or an exception occurs, returns a failure response with `success = false` and `persona = "error"`.
+         * Returns a failure response with `success = false` and `persona = "error"` if communication fails or an exception occurs.
          *
-         * @param request The request to send to the Genesis backend.
-         * @return The response from the backend, or a failure response if an error occurs.
+         * @param request The GenesisRequest to send to the backend.
+         * @return The GenesisResponse from the backend, or a failure response if an error occurs.
          */
     private suspend fun sendToGenesis(request: GenesisRequest): GenesisResponse =
         withContext(Dispatchers.IO) {
@@ -380,9 +379,9 @@ private class PythonProcessManager(
     private var reader: BufferedReader? = null
 
     /**
-     * Launches the Genesis Python backend process, ensuring required files are present and verifying backend readiness.
+     * Starts the Genesis Python backend process and verifies its readiness.
      *
-     * Copies backend files from assets to internal storage if missing, starts the backend process, initializes communication streams, and waits for a confirmation message indicating the backend is ready to receive requests.
+     * Ensures required backend files are present by copying them from assets if necessary, launches the backend process, sets up communication streams, and waits for a readiness confirmation message from the backend.
      *
      * @return `true` if the backend process starts successfully and signals readiness; `false` otherwise.
      */
@@ -417,10 +416,10 @@ private class PythonProcessManager(
     }
 
     /**
-     * Sends a JSON-formatted request to the Genesis Python backend and returns the response string.
+     * Sends a JSON request to the Genesis Python backend process and returns the response as a string.
      *
-     * @param requestJson The JSON request to send to the backend process.
-     * @return The response from the backend as a string, or null if communication fails.
+     * @param requestJson The JSON-formatted request to send.
+     * @return The backend's response as a string, or null if communication fails.
      */
     suspend fun sendRequest(requestJson: String): String? = withContext(Dispatchers.IO) {
         try {
@@ -434,11 +433,11 @@ private class PythonProcessManager(
     }
 
     /**
-     * Copies the necessary Python backend files from the application's assets to the specified directory.
+     * Copies required Python backend files from the application's assets to the specified target directory.
      *
-     * Ensures the target directory exists and transfers all required files for the Genesis backend to function. Logs a warning if any file cannot be copied.
+     * Ensures the target directory exists and transfers all necessary files for the Genesis backend to operate. Logs a warning if any file fails to copy.
      *
-     * @param targetDir The directory where the backend files will be copied.
+     * @param targetDir The destination directory for the backend files.
      */
     private fun copyPythonBackend(targetDir: File) {
         targetDir.mkdirs()
@@ -467,9 +466,9 @@ private class PythonProcessManager(
     }
 
     /**
-     * Terminates the Python backend process and closes associated communication streams.
+     * Shuts down the Python backend process and releases all communication resources.
      *
-     * Frees all resources used for backend communication. Logs a warning if an exception occurs during shutdown.
+     * Closes the input/output streams and terminates the backend process. Logs a warning if an exception occurs during shutdown.
      */
     fun shutdown() {
         try {
