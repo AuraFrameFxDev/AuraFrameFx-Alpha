@@ -45,9 +45,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Sets up text-to-speech and speech recognition engines for audio processing and AI interaction.
+     * Initializes the text-to-speech and speech recognition engines required for audio processing and AI interaction.
      *
-     * Prepares the NeuralWhisper service for use by initializing required audio components. Additional setup steps may be added as needed.
+     * Prepares the NeuralWhisper service for use by setting up core audio components. Additional initialization steps may be added in the future.
      */
     fun initialize() {
         Log.d(TAG, "Initializing NeuralWhisper...")
@@ -57,7 +57,7 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initializes the Text-to-Speech (TTS) engine and updates the initialization status.
+     * Initializes the Text-to-Speech (TTS) engine and updates the initialization status flag.
      *
      * Creates a `TextToSpeech` instance and sets the initialization flag based on the result.
      * Language, voice, pitch, and rate configuration are not yet implemented.
@@ -105,7 +105,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Converts audio input to text using speech-to-text processing.
      *
-     * Updates the conversation state to indicate listening and processing stages. Returns a placeholder transcription if speech-to-text is initialized; otherwise, returns null.
+     * Updates the conversation state to reflect listening and processing stages. Returns a placeholder transcription if speech-to-text is initialized; otherwise, returns null.
      *
      * @param audioInput The audio data or trigger for speech recognition.
      * @return The transcribed text, or null if speech-to-text is not initialized.
@@ -130,7 +130,7 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initiates speech synthesis for the given text using the specified locale.
+     * Initiates speech synthesis for the provided text using the specified locale.
      *
      * Updates the conversation state to "Speaking." Returns `false` if the text-to-speech engine is not initialized; otherwise, returns `true` as a placeholder.
      *
@@ -161,7 +161,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Processes a transcribed voice command and returns a placeholder response.
      *
-     * Updates the conversation state to indicate the command is being understood. Currently serves as a stub for future natural language understanding and command-to-action mapping.
+     * Updates the conversation state to indicate the command is being understood. Currently acts as a stub for future natural language understanding and command-to-action mapping.
      *
      * @param command The transcribed voice command to process.
      * @return A placeholder string representing the result of command processing.
@@ -180,11 +180,11 @@ class NeuralWhisper @Inject constructor(
 
 
     /**
-     * Updates the conversation state to indicate that context is being shared with the Kai agent.
+     * Updates the conversation state to reflect sharing context information with the Kai agent.
      *
-     * Logs the sharing action. Does not perform actual communication with the Kai agent.
+     * Logs the sharing action. No actual communication with the Kai agent is performed.
      *
-     * @param contextText The context information to share with the Kai agent.
+     * @param contextText The context information intended for the Kai agent.
      */
     fun shareContextWithKai(contextText: String) {
         _conversationStateFlow.value = ConversationState.Processing("Sharing with Kai: $contextText")
@@ -215,7 +215,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Stops the current audio recording session and returns a status message.
      *
-     * Updates the conversation state to "Processing" during the stop operation.
+     * Updates the conversation state to "Processing" while stopping the recording.
      *
      * @return A message indicating whether the recording was stopped successfully or describing the failure.
      */
