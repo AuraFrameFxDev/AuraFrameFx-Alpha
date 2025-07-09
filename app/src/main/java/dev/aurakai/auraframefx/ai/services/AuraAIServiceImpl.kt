@@ -23,7 +23,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Returns a fixed placeholder string for any analytics query.
      *
-     * This method does not perform analytics processing and always returns "Analytics response placeholder".
+     * This method does not perform any analytics processing and always returns "Analytics response placeholder".
      *
      * @return The placeholder analytics response string.
      */
@@ -32,10 +32,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null to indicate that file download is not supported in this implementation.
+     * Always returns null, indicating that file download is not supported by this service.
      *
      * @param _fileId The identifier of the file to download.
-     * @return Always null.
+     * @return Null, as file download functionality is not implemented.
      */
     override suspend fun downloadFile(_fileId: String): File? {
         return null
@@ -44,7 +44,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Returns null to indicate that image generation is not supported.
      *
-     * This method serves as a placeholder and does not perform any image generation.
+     * This method is a placeholder and does not generate any images.
      *
      * @return Always null.
      */
@@ -55,7 +55,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Returns a fixed placeholder string for any text generation request.
      *
-     * This method does not perform actual text generation and always returns "Generated text placeholder" regardless of the input.
+     * This method does not perform actual text generation and always returns "Generated text placeholder" regardless of the input prompt or options.
      *
      * @param prompt The input prompt for text generation.
      * @param options Optional parameters for text generation.
@@ -66,9 +66,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a fixed placeholder string for any AI response request.
+     * Returns a fixed placeholder string as the AI response.
      *
-     * Always returns "AI response placeholder" regardless of the input prompt or options.
+     * Always returns "AI response placeholder" regardless of the provided prompt or options.
      *
      * @return The placeholder string "AI response placeholder".
      */
@@ -79,7 +79,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Retrieves the memory value for the specified key.
      *
-     * This stub implementation always returns null, indicating that memory retrieval is not supported.
+     * This implementation always returns null, indicating that memory retrieval is not supported.
      *
      * @return Always null.
      */
@@ -88,9 +88,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder method for saving a value in memory associated with a key.
+     * Placeholder for saving a value in memory associated with a key.
      *
-     * This implementation does nothing and does not persist any data.
+     * This implementation does not persist any data and serves as a stub.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.

@@ -165,6 +165,14 @@ fun AgentButton(
     }
 }
 
+/**
+ * A button that toggles the recording state.
+ *
+ * Displays a stop icon with a red tint when recording is active, or a circle icon with a purple tint when inactive.
+ *
+ * @param isRecording Whether recording is currently active.
+ * @param onClick Callback invoked when the button is pressed.
+ */
 @Composable
 fun RecordingButton(
     isRecording: Boolean,
@@ -188,12 +196,12 @@ fun RecordingButton(
 }
 
 /**
- * Displays a button for starting or stopping transcription.
+ * Renders a button that toggles the transcription state.
  *
- * The button icon and color indicate the current transcription state. When transcription is active, a stop icon in red is shown; otherwise, a phone icon in NeonBlue is displayed.
+ * The button displays a red stop icon when transcription is active, or a NeonBlue phone icon when inactive.
  *
- * @param isTranscribing Whether transcription is currently active.
- * @param onClick Called when the button is pressed.
+ * @param isTranscribing True if transcription is currently active.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun TranscribeButton(

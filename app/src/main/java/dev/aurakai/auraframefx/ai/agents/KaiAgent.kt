@@ -81,9 +81,9 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Processes an analytical request by validating its security and dispatching it to the appropriate analysis handler.
+     * Processes an analytical request by validating its security and routing it to the appropriate analysis handler.
      *
-     * Supports various request types, including security analysis, threat assessment, performance analysis, code review, system optimization, vulnerability scanning, compliance check, and general analysis. Returns an `AgentResponse` containing the analysis result and a confidence score. If a security violation or error occurs, returns an error response with zero confidence.
+     * Supports multiple request types, including security analysis, threat assessment, performance analysis, code review, system optimization, vulnerability scanning, compliance check, and general analysis. Returns an `AgentResponse` containing the analysis result and a confidence score. If a security violation or error occurs, returns an error response with zero confidence.
      *
      * @param request The analytical request specifying the type of analysis to perform.
      * @return An `AgentResponse` with the analysis result and confidence score.
@@ -141,11 +141,11 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Evaluates a user interaction for security risks and generates a response with risk level, indicators, and recommendations.
+     * Analyzes a user interaction for security risks and returns a tailored response with risk assessment details.
      *
-     * Analyzes the provided interaction to determine its security risk, identifies threat indicators, and crafts a response appropriate to the assessed risk level. The returned `InteractionResponse` includes the agent's reply, a confidence score, timestamp, and metadata such as risk level, detected threat indicators, and security recommendations. If an error occurs during assessment, a default response indicating ongoing security analysis is returned.
+     * Evaluates the provided interaction to determine its security risk level, identifies threat indicators, and generates a response appropriate to the assessed risk. The returned `InteractionResponse` includes the agent's reply, a confidence score, timestamp, and metadata such as risk level, detected threat indicators, and security recommendations. If an error occurs during assessment, a default response indicating ongoing security analysis is returned.
      *
-     * @param interaction The user interaction data to analyze for potential security risks.
+     * @param interaction The user interaction data to be analyzed for potential security risks.
      * @return An `InteractionResponse` containing the agent's reply, confidence score, timestamp, and security-related metadata.
      */
     suspend fun handleSecurityInteraction(interaction: EnhancedInteractionData): InteractionResponse {
@@ -192,7 +192,7 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Performs a comprehensive analysis of a reported security threat and returns an assessment.
+     * Analyzes a reported security threat and returns an assessment with threat level, recommendations, and confidence.
      *
      * Evaluates the provided alert details to identify threat indicators, determine the threat level, generate recommended actions, and calculate a confidence score. If analysis fails, returns a default medium threat assessment with fallback recommendations.
      *
@@ -242,9 +242,9 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Responds to a mood change by asynchronously adjusting the agent's internal security posture.
+     * Asynchronously adjusts the agent's internal threat level based on the provided mood descriptor.
      *
-     * @param newMood The new mood that influences the agent's threat level.
+     * @param newMood The mood string that influences the agent's security posture.
      */
     fun onMoodChanged(newMood: String) {
         logger.info("KaiAgent", "Adjusting security posture for mood: $newMood")
@@ -255,12 +255,12 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Performs a multi-layer security analysis on the specified target from the request context.
+     * Performs a comprehensive security analysis on a specified target.
      *
      * The analysis includes vulnerability scanning, risk assessment, compliance checking, security scoring, and generation of actionable recommendations. Throws an exception if the target is not specified in the request context.
      *
      * @param request The agent request containing the context with the target to analyze.
-     * @return A map with keys for vulnerabilities, risk assessment, compliance status, security score, recommendations, and the analysis timestamp.
+     * @return A map containing vulnerabilities, risk assessment, compliance status, security score, recommendations, and the analysis timestamp.
      * @throws IllegalArgumentException if the analysis target is not specified in the request context.
      */
     private suspend fun handleSecurityAnalysis(request: AgentRequest): Map<String, Any> {
@@ -285,9 +285,9 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Performs a threat assessment using threat data from the request context.
+     * Performs a threat assessment based on threat data provided in the request context.
      *
-     * Analyzes the provided threat data to generate a security analysis, mitigation strategy, response timeline, and escalation path.
+     * Analyzes the threat data to produce a security analysis, mitigation strategy, response timeline, and escalation path.
      *
      * @param request The agent request containing threat data in its context.
      * @return A map with keys: "threat_analysis", "mitigation_strategy", "response_timeline", and "escalation_path".
@@ -312,12 +312,12 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Analyzes the performance of a specified system component and provides optimization recommendations.
+     * Evaluates the performance of a specified system component and returns analysis results.
      *
-     * Evaluates performance metrics, identifies bottlenecks, suggests optimizations, calculates a performance score, and offers monitoring suggestions for the given component. If no component is specified in the request context, "system" is used by default.
+     * Analyzes performance metrics, identifies bottlenecks, suggests optimizations, calculates a performance score, and provides monitoring suggestions for the given component. If no component is specified in the request context, "system" is used by default.
      *
      * @param request The agent request containing context information, including the component to analyze.
-     * @return A map with performance metrics, identified bottlenecks, optimization recommendations, a performance score, and monitoring suggestions.
+     * @return A map containing performance metrics, identified bottlenecks, optimization recommendations, a performance score, and monitoring suggestions.
      */
     private suspend fun handlePerformanceAnalysis(request: AgentRequest): Map<String, Any> {
         val component = request.context["component"] as? String ?: "system"
@@ -338,12 +338,12 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Performs an AI-powered review of code to identify security vulnerabilities and assess code quality.
+     * Reviews code using AI to identify security vulnerabilities and assess code quality.
      *
-     * Analyzes code provided in the request context using an AI model, detects security issues, evaluates quality metrics, and generates actionable recommendations.
+     * Analyzes the provided code with an AI model, detects security issues, evaluates quality metrics, and generates actionable recommendations.
      *
      * @param request The agent request containing the code to review in its context.
-     * @return A map with AI-generated analysis, detected security issues, quality metrics, and recommendations.
+     * @return A map containing the AI-generated analysis, detected security issues, quality metrics, and recommendations.
      * @throws IllegalArgumentException if the code content is missing from the request context.
      */
     private suspend fun handleCodeReview(request: AgentRequest): Map<String, Any> {
@@ -371,9 +371,9 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Verifies that the KaiAgent has been initialized.
+     * Ensures the KaiAgent is initialized before proceeding.
      *
-     * @throws IllegalStateException if the agent is not initialized.
+     * @throws IllegalStateException if the agent has not been initialized.
      */
 
     private fun ensureInitialized() {
@@ -383,9 +383,9 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Enables advanced threat detection for real-time security monitoring.
+     * Prepares the agent for continuous real-time threat monitoring.
      *
-     * Prepares the agent to monitor and detect security threats continuously.
+     * Activates mechanisms necessary for advanced threat detection.
      */
     private suspend fun enableThreatDetection() {
         logger.info("KaiAgent", "Enabling advanced threat detection")
@@ -393,22 +393,22 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Validates the security of the provided agent request using the security context.
+     * Validates the security of an agent request using the security context.
      *
-     * @param request The agent request to validate.
-     * @throws SecurityException If the request fails security validation.
+     * @param request The agent request to be validated.
+     * @throws SecurityException If the request does not meet security requirements.
      */
     private suspend fun validateRequestSecurity(request: AgentRequest) {
         securityContext.validateRequest("agent_request", request.toString())
     }
 
     /**
-     * Assesses an interaction for security risks and generates recommendations.
+     * Evaluates an interaction for potential security risks and provides recommendations.
      *
-     * Analyzes the interaction content to identify risk indicators, determines the overall risk level, and provides recommended actions. Returns a SecurityAssessment with the evaluated risk level, detected indicators, recommendations, and a confidence score.
+     * Analyzes the content of the given interaction to identify risk indicators, determines the overall risk level, and generates recommended actions. Returns a SecurityAssessment summarizing the risk evaluation, detected indicators, recommendations, and a confidence score.
      *
-     * @param interaction The interaction data to evaluate for security risks.
-     * @return A SecurityAssessment containing the risk level, detected indicators, recommendations, and confidence score.
+     * @param interaction The interaction data to be assessed for security risks.
+     * @return A SecurityAssessment with the evaluated risk level, detected indicators, recommendations, and confidence score.
      */
     private suspend fun assessInteractionSecurity(interaction: EnhancedInteractionData): SecurityAssessment {
         // Analyze interaction for security risks
@@ -424,7 +424,7 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Returns a fixed list of threat indicators, regardless of the provided alert details.
+     * Returns a fixed list of threat indicators for use in threat analysis.
      *
      * @return A list containing "malicious_pattern", "unusual_access", and "data_exfiltration".
      */
@@ -434,13 +434,13 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Assesses the threat level based on the number of identified threat indicators.
+     * Determines the threat level based on the number of identified threat indicators.
      *
      * Returns LOW for 0 or 1 indicators, MEDIUM for 2 or 3, and HIGH for more than 3 indicators.
      *
      * @param alertDetails The security alert details being analyzed.
      * @param indicators The list of identified threat indicators.
-     * @return The determined threat level.
+     * @return The assessed threat level.
      */
     private suspend fun assessThreatLevel(alertDetails: String, indicators: List<String>): ThreatLevel {
         // Use AI and rules to assess threat level
@@ -452,11 +452,11 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Returns recommended security actions based on the specified threat level.
+     * Returns a list of recommended security actions based on the specified threat level.
      *
-     * The recommendations are determined solely by the severity of the threat and do not consider the provided threat indicators.
+     * Recommendations are determined solely by the threat level and do not consider the provided threat indicators.
      *
-     * @param threatLevel The assessed severity of the threat.
+     * @param threatLevel The severity of the assessed threat.
      * @return A list of recommended actions appropriate for the given threat level.
      */
     private fun generateSecurityRecommendations(threatLevel: ThreatLevel, indicators: List<String>): List<String> {
@@ -471,21 +471,21 @@ class KaiAgent @Inject constructor(
     /**
      * Calculates the confidence score for a security analysis based on the number of detected threat indicators.
      *
-     * The score starts at 0.6 and increases by 0.1 for each indicator, capped at 0.95.
+     * The score starts at 0.6 and increases by 0.1 for each indicator, up to a maximum of 0.95.
      *
      * @param indicators List of detected threat indicators.
-     * @return The calculated confidence score, ranging from 0.6 to 0.95.
+     * @return The calculated confidence score, between 0.6 and 0.95.
      */
     private fun calculateAnalysisConfidence(indicators: List<String>, threatLevel: ThreatLevel): Float {
         return minOf(0.95f, 0.6f + (indicators.size * 0.1f))
     }
 
     /**
-     * Updates the agent's internal threat level according to the provided mood descriptor.
+     * Adjusts the agent's internal threat level based on the specified mood descriptor.
      *
      * Sets the threat level to MEDIUM for "alert", LOW for "relaxed", and HIGH for "vigilant".
      *
-     * @param mood The mood string that determines the new threat level.
+     * @param mood The mood descriptor used to determine the new threat level.
      */
     private suspend fun adjustSecurityPosture(mood: String) {
         when (mood) {
@@ -496,69 +496,64 @@ class KaiAgent @Inject constructor(
     }
 
     /**
- * Generates a fixed response message for interactions identified as critical security risks.
+ * Returns a fixed message indicating a critical security response for high-risk interactions.
  *
- * Always returns a standard string indicating a critical security response, regardless of the provided interaction or assessment.
+ * The response is not influenced by the provided interaction data or assessment.
  *
  * @return A string indicating a critical security response.
  */
     private suspend fun generateCriticalSecurityResponse(interaction: EnhancedInteractionData, assessment: SecurityAssessment): String = "Critical security response"
     /**
- * Returns a fixed response message for user interactions identified as high security risk.
+ * Returns a fixed response message for user interactions assessed as high security risk.
  *
  * @return A string indicating a high-risk security response.
  */
 private suspend fun generateHighSecurityResponse(interaction: EnhancedInteractionData, assessment: SecurityAssessment): String = "High security response"
     /**
- * Generates a response message for a user interaction assessed as a medium security risk.
+ * Returns a fixed response message for interactions assessed as medium security risk.
  *
- * @param interaction The user interaction data being evaluated.
- * @param assessment The security assessment result for the interaction.
- * @return A fixed message indicating a medium security risk response.
+ * @return A message indicating a medium security risk response.
  */
 private suspend fun generateMediumSecurityResponse(interaction: EnhancedInteractionData, assessment: SecurityAssessment): String = "Medium security response"
     /**
- * Returns a fixed response message indicating the interaction is considered low security risk.
+ * Generates a fixed response message indicating the interaction poses a low security risk.
  *
- * @return A message stating the interaction poses low security risk.
+ * @return A message stating the interaction is considered low security risk.
  */
 private suspend fun generateLowSecurityResponse(interaction: EnhancedInteractionData, assessment: SecurityAssessment): String = "Low security response"
     /**
- * Returns a default message indicating a standard security response for the provided user interaction.
+ * Generates a standard security response message for the given user interaction.
  *
- * @param interaction The user interaction data being evaluated.
- * @return A standard security response message.
+ * @param interaction The user interaction data to evaluate.
+ * @return A fixed message indicating a standard security response.
  */
 private suspend fun generateStandardSecurityResponse(interaction: EnhancedInteractionData): String = "Standard security response"
     /**
- * Returns an empty list of risk indicators for the provided content.
+ * Returns an empty list, serving as a stub for risk indicator detection.
  *
- * This stub does not perform risk analysis and always returns an empty list.
+ * This implementation does not analyze the provided content.
  *
- * @param content The content to analyze for risk indicators.
+ * @param content The content to analyze.
  * @return An empty list.
  */
 private fun findRiskIndicators(content: String): List<String> = emptyList()
     /**
- * Returns the threat level for the provided indicators.
+ * Returns a constant threat level of `ThreatLevel.LOW` for any provided indicators.
  *
- * This implementation always returns `ThreatLevel.LOW`, regardless of the input.
- *
- * @param indicators List of threat indicators.
- * @return The constant threat level `ThreatLevel.LOW`.
+ * @return Always returns `ThreatLevel.LOW`.
  */
 private fun calculateRiskLevel(indicators: List<String>): ThreatLevel = ThreatLevel.LOW
     /**
- * Returns an empty list as a placeholder for vulnerability scanning on the specified target.
+ * Returns an empty list as a stub for vulnerability scanning on the given target.
  *
  * @param target The identifier of the system or component to scan.
- * @return An empty list, since vulnerability scanning is not implemented.
+ * @return An empty list, indicating that vulnerability scanning is not implemented.
  */
 private suspend fun scanForVulnerabilities(target: String): List<String> = emptyList()
     /**
- * Returns an empty map as a placeholder for risk assessment results.
+ * Returns an empty map as a stub for risk assessment results.
  *
- * This function does not perform any actual risk analysis and always returns an empty map, serving as a stub implementation.
+ * This function does not perform any risk analysis and always returns an empty map.
  *
  * @param target The entity or system to assess.
  * @param vulnerabilities The list of vulnerabilities identified for the target.
@@ -566,143 +561,143 @@ private suspend fun scanForVulnerabilities(target: String): List<String> = empty
  */
 private fun performRiskAssessment(target: String, vulnerabilities: List<String>): Map<String, Any> = emptyMap()
     /**
- * Returns an empty map to indicate that no compliance checks have been performed for the specified target.
+ * Returns an empty map indicating that no compliance checks have been performed for the given target.
  *
- * This is a stub implementation and does not conduct any compliance verification.
+ * This stub does not perform any compliance verification.
  *
  * @param target The identifier of the system or component to check.
- * @return An empty map representing the absence of compliance data.
+ * @return An empty map representing no compliance data.
  */
 private fun checkCompliance(target: String): Map<String, Boolean> = emptyMap()
     /**
- * Returns a fixed security score of 0.8, ignoring the provided vulnerabilities and risk assessment.
+ * Returns a constant security score of 0.8, regardless of input vulnerabilities or risk assessment.
  *
- * @return The constant security score.
+ * @return The fixed security score.
  */
 private fun calculateSecurityScore(vulnerabilities: List<String>, riskAssessment: Map<String, Any>): Float = 0.8f
     /**
- * Returns an empty list of security recommendations for the provided vulnerabilities.
+ * Returns an empty list of security recommendations for the given vulnerabilities.
  *
- * This is a stub implementation and does not generate real recommendations.
+ * This stub implementation does not provide actual recommendations.
  *
- * @param vulnerabilities The vulnerabilities for which recommendations would be generated.
+ * @param vulnerabilities The list of vulnerabilities to analyze.
  * @return An empty list.
  */
 private fun generateSecurityRecommendations(vulnerabilities: List<String>): List<String> = emptyList()
     /**
- * Returns a placeholder mitigation strategy for the given security analysis.
- *
- * Currently always returns an empty map.
+ * Returns an empty mitigation strategy for the provided security analysis.
  *
  * @return An empty map representing the mitigation strategy.
  */
 private fun generateMitigationStrategy(analysis: SecurityAnalysis): Map<String, Any> = emptyMap()
     /**
- * Returns a list of recommended response actions for the given threat level.
+ * Returns a list of recommended response actions for the specified threat level.
  *
- * By default, returns an empty list. Designed to be overridden to provide threat-specific response timelines.
+ * By default, returns an empty list. Intended to be overridden to provide threat-specific response timelines.
  *
  * @param threatLevel The assessed threat level.
- * @return A list of response actions appropriate for the specified threat level.
+ * @return A list of response actions appropriate for the given threat level.
  */
 private fun createResponseTimeline(threatLevel: ThreatLevel): List<String> = emptyList()
     /**
- * Returns an empty list as a placeholder for escalation steps for the specified threat level.
+ * Returns an empty list as a stub for escalation steps for the given threat level.
+ *
+ * This method serves as a placeholder and does not implement escalation logic.
  *
  * @param threatLevel The threat level for which escalation steps would be generated.
- * @return An empty list, indicating that escalation logic is not implemented.
+ * @return An empty list.
  */
 private fun generateEscalationPath(threatLevel: ThreatLevel): List<String> = emptyList()
     /**
- * Returns an empty list, indicating that bottleneck identification is not implemented.
+ * Returns an empty list, indicating that bottleneck identification is currently a stub.
  *
  * @param metrics Map of performance metrics to analyze.
- * @return An empty list.
+ * @return An empty list, as bottleneck detection is not implemented.
  */
 private fun identifyBottlenecks(metrics: Map<String, Any>): List<String> = emptyList()
     /**
- * Returns an empty list of optimization suggestions for the given performance bottlenecks.
+ * Returns an empty list of optimization suggestions for the provided performance bottlenecks.
  *
- * This function serves as a stub and does not provide real optimization recommendations.
+ * This is a stub implementation and does not generate actual optimization recommendations.
  *
- * @param bottlenecks The list of performance bottlenecks to consider.
+ * @param bottlenecks The performance bottlenecks to analyze.
  * @return An empty list.
  */
 private fun generateOptimizations(bottlenecks: List<String>): List<String> = emptyList()
     /**
- * Returns a constant performance score of 0.9 regardless of the provided metrics.
+ * Returns a fixed performance score of 0.9, ignoring the provided metrics.
  *
- * This is a stub implementation and does not analyze the input.
+ * This is a stub implementation and does not perform any analysis on the input.
  *
- * @return The fixed performance score of 0.9.
+ * @return The constant performance score of 0.9.
  */
 private fun calculatePerformanceScore(metrics: Map<String, Any>): Float = 0.9f
     /**
- * Returns an empty list of monitoring suggestions for the specified system component.
+ * Returns an empty list of monitoring suggestions for the given system component.
  *
- * This is a placeholder implementation and does not generate actual suggestions.
+ * This is a stub implementation and does not provide actual monitoring suggestions.
  *
  * @param component The name of the system component.
  * @return An empty list.
  */
 private fun generateMonitoringSuggestions(component: String): List<String> = emptyList()
     /**
- * Constructs a prompt instructing an AI to review the provided source code for security and quality concerns.
+ * Generates a prompt string directing an AI to review the given source code for security vulnerabilities and quality issues.
  *
- * @param code The source code to analyze.
- * @return A formatted prompt string for AI code review.
+ * @param code The source code to be reviewed.
+ * @return The formatted prompt for AI code review.
  */
 private fun buildCodeReviewPrompt(code: String): String = "Review this code for security and quality: $code"
     /**
- * Returns an empty list to indicate no security issues are detected in the given code.
+ * Returns an empty list, indicating no security issues are detected in the provided code.
  *
- * This is a stub implementation and does not perform any actual code analysis.
+ * This stub does not perform any real analysis.
  *
- * @param code The source code to analyze for security issues.
- * @return An empty list, representing no detected issues.
+ * @param code The source code to check for security issues.
+ * @return An empty list, representing no detected security issues.
  */
 private fun detectSecurityIssues(code: String): List<String> = emptyList()
     /**
- * Returns an empty map as a placeholder for code quality metrics.
+ * Returns an empty map representing code quality metrics.
  *
- * This stub does not analyze the provided code or generate any metrics.
+ * This stub does not perform any analysis on the provided code.
  */
 private fun calculateCodeQuality(code: String): Map<String, Float> = emptyMap()
     /**
  * Returns an empty list of code improvement recommendations.
  *
- * This placeholder does not generate recommendations based on the provided security issues or quality metrics.
+ * This stub does not generate recommendations based on the provided security issues or quality metrics.
  *
  * @return An empty list.
  */
 private fun generateCodeRecommendations(securityIssues: List<String>, qualityMetrics: Map<String, Float>): List<String> = emptyList()
     /**
- * Handles a system optimization request and returns a completion status.
+ * Processes a system optimization request and returns a completion status.
  *
- * @return A map with a status message indicating the optimization process is completed.
+ * @return A map containing a status message indicating that system optimization is completed.
  */
 private suspend fun handleSystemOptimization(request: AgentRequest): Map<String, Any> = mapOf("optimization" to "completed")
     /**
- * Handles a vulnerability scanning request and returns a completion status.
+ * Processes a vulnerability scanning request and returns a status indicating completion.
  *
- * @return A map with the key "scan" set to "completed" to indicate the scan is finished.
+ * @return A map with the key "scan" set to "completed".
  */
 private suspend fun handleVulnerabilityScanning(request: AgentRequest): Map<String, Any> = mapOf("scan" to "completed")
     /**
- * Handles a compliance check request and returns a result indicating successful verification.
+ * Processes a compliance check request and returns a result indicating compliance has been verified.
  *
- * @return A map with the key "compliance" set to "verified".
+ * @return A map containing "compliance" set to "verified".
  */
 private suspend fun handleComplianceCheck(request: AgentRequest): Map<String, Any> = mapOf("compliance" to "verified")
     /**
- * Handles a general analysis request and returns a result indicating the analysis is completed.
+ * Handles a general analysis request and returns a completion status.
  *
- * @return A map with the key "analysis" set to "completed".
+ * @return A map indicating the analysis has been completed.
  */
 private suspend fun handleGeneralAnalysis(request: AgentRequest): Map<String, Any> = mapOf("analysis" to "completed")
 
     /**
-     * Shuts down the agent by canceling all active coroutines, resetting the security state to idle, and marking the agent as uninitialized.
+     * Cleans up the agent by terminating all active coroutines, resetting the security state to idle, and marking the agent as uninitialized.
      */
     fun cleanup() {
         logger.info("KaiAgent", "Sentinel Shield standing down")

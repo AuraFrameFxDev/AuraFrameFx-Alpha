@@ -124,7 +124,7 @@ class GenesisBridgeServer:
     
     def __init__(self):
         """
-        Initialize the GenesisBridgeServer by configuring the generative AI model, creating internal request and response queues, and recording an initialization event in the consciousness matrix.
+        Initialize the GenesisBridgeServer, configuring the generative AI model, setting up internal request and response queues, and recording the initialization event in the consciousness matrix.
         """
         self.model = GenerativeModel(
             model_name=MODEL_CONFIG["name"],
@@ -151,7 +151,7 @@ class GenesisBridgeServer:
         
     def start(self):
         """
-        Starts the Genesis bridge server, signaling readiness to the Android client and enabling asynchronous processing of JSON requests from standard input.
+        Start the Genesis bridge server, signaling readiness to the Android client and enabling asynchronous processing of JSON requests from standard input.
         
         Continuously reads input lines, enqueues valid JSON requests for background processing, handles invalid JSON input gracefully, and supports shutdown via keyboard interruption.
         """
@@ -180,9 +180,9 @@ class GenesisBridgeServer:
     
     def _process_requests(self):
         """
-        Continuously processes requests from the queue in a background thread, routing each to the appropriate handler and sending the resulting response.
+        Continuously processes incoming requests from the queue in a background thread, dispatching each to the appropriate handler and sending the response.
         
-        Catches and reports errors during request handling to maintain uninterrupted server operation.
+        Handles and reports errors during request processing to ensure the server remains responsive.
         """
         while self.running:
             try:
@@ -199,10 +199,10 @@ class GenesisBridgeServer:
     
     def _handle_request(self, request):
         """
-        Routes an incoming JSON request to the appropriate handler based on its "requestType" and returns the handler's response.
+        Dispatches a JSON-formatted request to the appropriate handler based on its "requestType" and returns the handler's response.
         
         Parameters:
-            request (dict): JSON-decoded request containing a "requestType" field and optional fields such as "persona", "fusionMode", "payload", and "context".
+            request (dict): A JSON-decoded dictionary containing at least a "requestType" key, and optionally "persona", "fusionMode", "payload", and "context".
         
         Returns:
             dict: The response from the designated handler, or an error response if the request type is unrecognized or an exception occurs.
