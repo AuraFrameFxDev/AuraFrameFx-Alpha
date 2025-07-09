@@ -69,24 +69,25 @@ android {
 }
 
 // OpenAPI Generator: Generate Kotlin client
-tasks.register<GenerateTask>("generateKotlinClient") {
+openApiGenerate {
     generatorName.set("kotlin")
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
-    outputDir.set("${layout.buildDirectory.get().asFile}/generated/kotlin")
+    outputDir.set("${layout.buildDirectory.get().asFile}/generated/source/openapi")
     apiPackage.set("dev.aurakai.auraframefx.api.client.apis")
     modelPackage.set("dev.aurakai.auraframefx.api.client.models")
     invokerPackage.set("dev.aurakai.auraframefx.api.client.infrastructure")
     configOptions.set(
         mapOf(
             "dateLibrary" to "kotlinx-datetime",
-            "serializationLibrary" to "kotlinx_serialization"
+            "serializationLibrary" to "kotlinx_serialization",
+            "library" to "jvm-retrofit2"
         )
     )
 }
 
 // Ensure KSP and compilation tasks depend on the code generation
 tasks.named("preBuild") {
-    dependsOn("generateKotlinClient")
+    dependsOn("openApiGenerate")
 }
 
 dependencies {
