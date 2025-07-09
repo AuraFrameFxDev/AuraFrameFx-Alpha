@@ -59,34 +59,16 @@ import androidx.navigation.NavHostController
 /**
  * Displays the main home screen with centered app title, subtitle, beta status, and navigation buttons.
  *
- * Shows the app's name, a subtitle, and a beta status message. Provides buttons for navigating to the AI Chat screen and a placeholder for Settings.
- */
-/**
- * Displays the main home screen with app title, status messages, and navigation buttons.
- *
- * Presents the app name, a subtitle, and a beta status message, along with buttons to navigate to the AI chat screen or access settings.
+ * Shows the app's name, a subtitle, and a beta status message, along with buttons for navigating to the AI Chat screen and a placeholder for settings.
  *
  * @param navController Used to handle navigation actions from the home screen.
  */
 /**
  * Displays the main home screen with centered app title, subtitle, beta status, and navigation buttons.
  *
- * Shows the app's name, a subtitle, and a beta status message, along with buttons for navigating to the AI Chat screen and a placeholder for Settings.
+ * Shows the app's name, a subtitle, and a beta status message. Provides a button to navigate to the AI Chat screen and a placeholder button for Settings.
  *
  * @param navController Used to handle navigation actions from the home screen.
- */
-/**
- * Displays the main home screen with the app title, subtitle, beta status message, and navigation buttons.
- *
- * The screen centers its content and provides buttons to navigate to the AI Chat screen or access settings.
- *
- * @param navController Used to handle navigation actions from the home screen.
- */
-/**
- * Displays the main home screen with centered app title, subtitle, beta status, and navigation buttons.
- *
- * Shows the app name ("AuraFrameFX Alpha"), a subtitle ("Trinity AI System"), and a beta status message.
- * Provides buttons to navigate to the AI Chat screen and a placeholder for future settings navigation.
  */
 @Composable
 fun HomeScreen(navController: NavHostController) {
@@ -129,7 +111,7 @@ fun HomeScreen(navController: NavHostController) {
 /**
  * Displays the AI chat interface screen with a centered headline and status message.
  *
- * Presents a large headline and a status message, both centered on the screen using MaterialTheme typography styles.
+ * Shows a large headline and a status message, both centered within the screen and styled using MaterialTheme typography.
  */
 @Composable
 fun BetaAiChatScreen() {

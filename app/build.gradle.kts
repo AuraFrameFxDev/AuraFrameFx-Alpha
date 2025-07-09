@@ -38,13 +38,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_24
+        targetCompatibility = JavaVersion.VERSION_24
     }
 
     kotlinOptions {
         @Suppress("DEPRECATION")
-        jvmTarget = "17"
+        jvmTarget = "24"
         @Suppress("DEPRECATION")
         freeCompilerArgs = listOf(
             "-opt-in=kotlin.RequiresOptIn",
@@ -106,7 +106,7 @@ dependencies {
     kspTest(libs.daggerHiltAndroidCompiler)
 
     // Time and Date
-    implementation(libs.kotlinxDatetime)
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
 
     // AndroidX & Compose
     implementation(libs.androidxCoreKtx)
@@ -139,10 +139,10 @@ dependencies {
     ksp(libs.androidxRoomCompiler)
 
     // Security
-    implementation(libs.androidxSecurityCrypto)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
-    // Google AI / Generative AI
-    implementation(libs.guava)
+    // Google AI
+    implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
 
     // Firebase
     implementation(platform(libs.firebaseBom))

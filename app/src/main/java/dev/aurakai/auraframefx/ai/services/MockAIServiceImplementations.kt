@@ -14,22 +14,24 @@ import kotlinx.coroutines.flow.flowOf
 
 class MockAuraAIService : Agent {
     /**
- * Returns the fixed name "MockAura" identifying this mock Aura AI service.
+ * Returns the fixed name identifying this mock AI service.
  *
  * @return The string "MockAura".
  */
 override fun getName(): String? = "MockAura"
     /**
- * Returns the fixed agent type for this mock AI service.
+ * Returns the constant agent type for this mock AI service.
  *
- * @return The agent type `AgentType.AURA`.
+ * @return `AgentType.AURA`
  */
 override fun getType(): AgentType = AgentType.AURA /**
-     * Generates a mock AgentResponse echoing the input query and context with a fixed confidence score of 1.0.
+     * Generates a mock AgentResponse echoing the input query and context for testing.
      *
-     * @param request The AI request whose query will be included in the response.
-     * @param context The context string to be echoed in the response.
-     * @return An AgentResponse containing the echoed query and context.
+     * The response content includes the provided query and context, with a fixed confidence score of 1.0.
+     *
+     * @param request The AI request whose query is echoed in the response.
+     * @param context The context string to include in the response content.
+     * @return An AgentResponse containing the echoed query and context with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         return AgentResponse(
@@ -49,21 +51,21 @@ override fun getType(): AgentType = AgentType.AURA /**
 
 class MockKaiAIService : Agent {
     /**
- * Returns the fixed name identifier for the mock Kai AI service.
+ * Gets the fixed name identifier for the mock Kai AI service.
  *
  * @return The string "MockKai".
  */
 override fun getName(): String? = "MockKai"
     /**
- * Returns the agent type for this mock Kai AI service.
+ * Returns the constant agent type for the mock Kai AI service.
  *
- * @return The constant `AgentType.KAI`.
+ * @return `AgentType.KAI`
  */
 override fun getType(): AgentType = AgentType.KAI /**
-     * Generates a mock AgentResponse for KaiAI by echoing the input query and context with a fixed confidence score of 1.0.
+     * Returns a mock AgentResponse for KaiAI, echoing the input query and context with a fixed confidence score of 1.0.
      *
-     * @param request The AI request whose query will be echoed in the response.
-     * @param context The context string to include in the response.
+     * @param request The AI request whose query is echoed in the response.
+     * @param context The context string included in the response content.
      * @return An AgentResponse containing the echoed query and context with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
@@ -84,21 +86,21 @@ override fun getType(): AgentType = AgentType.KAI /**
 
 class MockCascadeAIService : Agent {
     /**
- * Returns the fixed name identifier "MockCascade" for this mock AI service.
+ * Gets the fixed name identifier for the mock Cascade AI service.
  *
  * @return The string "MockCascade".
  */
 override fun getName(): String? = "MockCascade"
     /**
- * Returns the fixed agent type `AgentType.CASCADE` for this mock service.
+ * Gets the fixed agent type for this mock service.
  *
- * @return The constant agent type for the mock Cascade AI service.
+ * @return The constant value AgentType.CASCADE.
  */
 override fun getType(): AgentType = AgentType.CASCADE /**
-     * Generates a mock AgentResponse for CascadeAI, echoing the input query and context with a fixed confidence score of 1.0.
+     * Returns a mock AgentResponse for CascadeAI that echoes the input query and context with a fixed confidence score of 1.0.
      *
-     * @param request The AI request whose query is echoed in the response.
-     * @param context The context string to include in the response.
+     * @param request The AI request whose query is included in the response content.
+     * @param context The context string to be echoed in the response content.
      * @return An AgentResponse containing the echoed query and context with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context

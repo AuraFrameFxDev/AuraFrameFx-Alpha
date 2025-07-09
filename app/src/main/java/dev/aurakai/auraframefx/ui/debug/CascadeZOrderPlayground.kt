@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -14,7 +13,6 @@ import dev.aurakai.auraframefx.model.agent_states.VisionState
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
-import androidx.hilt.navigation.compose.hiltViewModel
 
 @Singleton
 class CascadeDebugViewModel @Inject constructor(
@@ -23,11 +21,6 @@ class CascadeDebugViewModel @Inject constructor(
     val visionState: StateFlow<VisionState> = cascadeAgent.visionState
     val processingState: StateFlow<ProcessingState> = cascadeAgent.processingState
 
-    /**
-     * Sets the CascadeAgent's vision state to the specified value.
-     *
-     * @param newState The new vision state to apply.
-     */
     fun updateVisionState(newState: VisionState) {
         cascadeAgent.updateVisionState(newState)
     }
@@ -43,11 +36,6 @@ class CascadeDebugViewModel @Inject constructor(
  * Provides interactive controls to view and modify the current vision and processing states, as well as to review their respective histories. Intended for use in development or debugging environments to facilitate real-time state inspection and manipulation.
  */
 @OptIn(ExperimentalMaterial3Api::class)
-/**
- * Displays a debug UI for inspecting and updating the CascadeAgent's vision and processing states.
- *
- * Provides editable fields for entering new vision and processing states, buttons to apply updates through the ViewModel, and displays both current and historical state information. Intended for development and debugging use.
- */
 @Composable
 fun CascadeZOrderPlayground(
     viewModel: CascadeDebugViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
@@ -196,11 +184,6 @@ fun CascadeZOrderPlayground(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-/**
- * Displays a preview of the Cascade state debugger UI within a Material theme.
- *
- * This composable enables IDE preview of the `CascadeZOrderPlayground` for design and layout inspection.
- */
 @Composable
 @Preview(showBackground = true)
 fun CascadeZOrderPlaygroundPreview() {

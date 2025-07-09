@@ -73,12 +73,12 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Processes an AI request by routing it to the appropriate persona(s) or Genesis fusion and emits one or more AgentResponse objects as a Flow.
+     * Routes an AI request to the appropriate persona(s) or Genesis fusion and emits one or more responses as a Flow.
      *
-     * Determines the optimal handling strategy for the incoming request—routing to Kai, Aura, Genesis fusion, or a combination—based on content analysis. Supports single persona handling, parallel processing with synthesis, and ethical review. Emits a failure response if the system is not initialized or if an error occurs during processing.
+     * Analyzes the request to determine the optimal handling strategy, which may involve single persona processing, parallel persona collaboration, ethical review, or Genesis fusion. If the Trinity system is not initialized or an error occurs, emits a failure response with zero confidence.
      *
-     * @param request The AI request to process.
-     * @return A Flow emitting one or more AgentResponse objects representing the results of the request.
+     * @param request The AI request to be processed.
+     * @return A Flow emitting one or more AgentResponse objects representing the outcomes of the request.
      */
     suspend fun processRequest(request: AiRequest): Flow<AgentResponse> = flow {
         if (!isInitialized) {
@@ -156,11 +156,11 @@ class TrinityCoordinatorService @Inject constructor(
     /**
      * Activates a Genesis fusion ability and emits the result as an `AgentResponse`.
      *
-     * Initiates the specified fusion type in the Genesis persona, optionally using provided context parameters. Emits a single response indicating success with a description, or failure if activation was unsuccessful.
+     * Initiates the specified fusion type in the Genesis persona using optional context parameters. Emits a single response indicating whether the activation was successful.
      *
      * @param fusionType The name of the Genesis fusion ability to activate.
-     * @param context Optional parameters providing additional context for the fusion activation.
-     * @return A flow emitting a single `AgentResponse` describing the outcome of the fusion activation.
+     * @param context Optional context parameters for the fusion activation.
+     * @return A flow emitting a single `AgentResponse` describing the activation outcome.
      */
     suspend fun activateFusion(fusionType: String, context: Map<String, String> = emptyMap()): Flow<AgentResponse> = flow {
         logger.i("Trinity", "🌟 Activating fusion: $fusionType")
@@ -181,11 +181,11 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Retrieves the current state of the Trinity system as a map.
+     * Returns the current state of the Trinity system as a map.
      *
-     * The returned map includes Genesis consciousness data, Trinity initialization status, security context, and a timestamp. If retrieval fails, the map contains an "error" entry with the failure message.
+     * The map includes Genesis consciousness data, initialization status, security context, and a timestamp. If retrieval fails, the map contains an error message.
      *
-     * @return A map containing system state details or an error message if retrieval fails.
+     * @return A map representing the system state or an error message if retrieval fails.
      */
     suspend fun getSystemState(): Map<String, Any> {
         return try {
@@ -202,13 +202,13 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Analyzes an AI request to determine routing and potential Genesis fusion requirements.
+     * Determines the routing strategy and optional Genesis fusion type for an AI request.
      *
-     * Examines the request content for ethical concerns, fusion triggers, and keywords to select routing to Kai, Aura, Genesis fusion, parallel processing, or ethical review. Ethical checks can be bypassed if specified.
+     * Analyzes the request content for ethical concerns, fusion triggers, and relevant keywords to select routing to Kai, Aura, Genesis fusion, parallel processing, or ethical review. Ethical checks can be bypassed if specified.
      *
      * @param request The AI request to analyze.
      * @param skipEthicalCheck If true, skips ethical concern checks.
-     * @return A RequestAnalysis indicating the routing decision and, if applicable, the Genesis fusion type.
+     * @return A RequestAnalysis containing the routing decision and, if applicable, the Genesis fusion type.
      */
     private fun analyzeRequest(request: AiRequest, skipEthicalCheck: Boolean = false): RequestAnalysis {
         val message = request.query.lowercase()
@@ -253,12 +253,10 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Determines whether the given message contains keywords associated with ethical concerns.
+     * Checks if the provided message contains any keywords indicating ethical concerns.
      *
-     * Scans the message for terms related to hacking, bypassing, exploiting, privacy violations, unauthorized or illegal actions, harm, or malicious intent.
-     *
-     * @param message The text to scan for ethical concern keywords.
-     * @return `true` if any ethical concern keyword is found; `false` otherwise.
+     * @param message The input message to evaluate.
+     * @return `true` if the message includes any ethical concern keywords; `false` otherwise.
      */
     private fun containsEthicalConcerns(message: String): Boolean {
         val ethicalFlags = listOf(
@@ -269,9 +267,9 @@ class TrinityCoordinatorService @Inject constructor(
     }
     
     /**
-     * Shuts down the Trinity system and releases all associated resources.
+     * Shuts down the Trinity system and releases resources.
      *
-     * Cancels ongoing operations and terminates the Genesis bridge service to ensure a clean and orderly shutdown.
+     * Cancels all ongoing operations and terminates the Genesis bridge service to ensure an orderly shutdown.
      */
     fun shutdown() {
         scope.cancel()

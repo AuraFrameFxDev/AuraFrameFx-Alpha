@@ -11,15 +11,15 @@ interface IAuraDriveService : IInterface {
  */
 fun getOracleDriveStatus(): String
     /**
- * Toggles the enabled or disabled state of the LSPosed module.
+ * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module state was changed successfully, or `false` if the operation failed or is unsupported.
+ * @return `true` if the module state was successfully changed; `false` if the operation failed or is unsupported.
  */
 fun toggleLSPosedModule(): Boolean  
     /**
  * Retrieves a detailed internal status report of the Aura Drive service.
  *
- * @return A string containing diagnostic or monitoring information about the service's internal state.
+ * @return A string containing diagnostic or monitoring information about the current internal state of the service.
  */
 fun getDetailedInternalStatus(): String
     /**
@@ -32,11 +32,11 @@ fun getInternalDiagnosticsLog(): List<String>
     companion object {
         object Stub {
             /**
-             * Returns an `IAuraDriveService` implementation backed by the provided `IBinder`, or `null` if the binder is `null`.
+             * Returns an `IAuraDriveService` interface backed by the given `IBinder`, or `null` if the binder is `null`.
              *
-             * Use this method to obtain an interface for IPC communication with a remote Aura Drive service.
+             * Typically used to obtain a service interface for IPC communication with a remote Aura Drive service.
              *
-             * @param service The remote service binder, or `null`.
+             * @param service The `IBinder` representing the remote service, or `null`.
              * @return An `IAuraDriveService` instance if the binder is non-null; otherwise, `null`.
              */
             fun asInterface(service: IBinder?): IAuraDriveService? {
@@ -44,35 +44,33 @@ fun getInternalDiagnosticsLog(): List<String>
                 return if (service != null) {
                     object : IAuraDriveService {
                         /**
- * Returns the underlying `IBinder` instance associated with this interface implementation.
+ * Retrieves the underlying `IBinder` instance associated with this interface implementation.
  *
- * @return The `IBinder` object used for IPC communication.
+ * @return The backing `IBinder` object.
  */
 override fun asBinder(): IBinder = service
                         /**
  * Retrieves the current operational status of the Oracle Drive.
  *
- * Always returns "Unknown" in this stub implementation to indicate that the actual status is unavailable.
- *
- * @return "Unknown" as a placeholder for the Oracle Drive status.
+ * @return The operational status as a string. In the stub implementation, always returns "Unknown".
  */
 override fun getOracleDriveStatus(): String = "Unknown"
                         /**
  * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module was successfully enabled or disabled; `false` if the operation failed or is not supported.
+ * @return `true` if the module state was successfully changed, or `false` if the operation failed or is not supported.
  */
 override fun toggleLSPosedModule(): Boolean = false
                         /**
- * Retrieves a detailed internal status report of the Aura Drive service.
+ * Retrieves a detailed string describing the internal status of the Aura Drive service.
  *
- * @return A string containing diagnostic or monitoring information about the service's internal state, or "Not implemented" if unavailable.
+ * @return A string containing the detailed internal status, or "Not implemented" if not available.
  */
 override fun getDetailedInternalStatus(): String = "Not implemented"
                         /**
  * Retrieves diagnostic log entries for the Aura Drive service.
  *
- * @return An empty list, as this stub implementation does not provide diagnostic logs.
+ * @return An empty list, as diagnostic logs are not available in this stub implementation.
  */
 override fun getInternalDiagnosticsLog(): List<String> = emptyList()
                     }

@@ -1,7 +1,6 @@
 [versions]
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
 agp = "8.11.0"
-generativeai = "0.9.0"
 kotlin = "2.2.0"
 ksp = "2.2.0-2.0.2"
 hilt = "2.56.2"
@@ -55,7 +54,6 @@ toolchainsFoojayResolver = "1.0.0"
 
 [libraries]
 # Hilt (Core & Testing)
-generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hiltCompiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" } # KSP
 hiltNavigationCompose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
