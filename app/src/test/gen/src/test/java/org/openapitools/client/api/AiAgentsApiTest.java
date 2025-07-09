@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -46,7 +46,7 @@ public class AiAgentsApiTest {
         // Setup valid AgentProcessRequest
         validAgentProcessRequest = new AgentProcessRequest();
         // Note: Setting basic properties - actual implementation depends on model structure
-        
+
         // Setup expected AgentMessage response
         expectedAgentMessage = new AgentMessage();
         // Note: Setting basic properties - actual implementation depends on model structure
@@ -61,10 +61,10 @@ public class AiAgentsApiTest {
         void shouldProcessRequestWithValidChatAgentType() throws ApiException {
             // Given
             AgentType agentType = AgentType.CHAT;
-            
+
             // When
             AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
-            
+
             // Then
             assertNotNull(response, "Response should not be null");
             // Additional assertions based on expected behavior
@@ -75,10 +75,10 @@ public class AiAgentsApiTest {
         void shouldProcessRequestWithValidCodeAgentType() throws ApiException {
             // Given
             AgentType agentType = AgentType.CODE;
-            
+
             // When
             AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
-            
+
             // Then
             assertNotNull(response, "Response should not be null");
         }
@@ -88,10 +88,10 @@ public class AiAgentsApiTest {
         void shouldProcessRequestWithValidAnalysisAgentType() throws ApiException {
             // Given
             AgentType agentType = AgentType.ANALYSIS;
-            
+
             // When
             AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
-            
+
             // Then
             assertNotNull(response, "Response should not be null");
         }
@@ -102,7 +102,7 @@ public class AiAgentsApiTest {
         void shouldHandleAllValidAgentTypes(AgentType agentType) throws ApiException {
             // When
             AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
-            
+
             // Then
             assertNotNull(response, "Response should not be null for agent type: " + agentType);
         }
@@ -113,10 +113,10 @@ public class AiAgentsApiTest {
             // Given
             AgentType agentType = AgentType.CHAT;
             AgentProcessRequest minimalRequest = new AgentProcessRequest();
-            
+
             // When
             AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, minimalRequest);
-            
+
             // Then
             assertNotNull(response, "Response should not be null for minimal request");
         }
@@ -133,7 +133,7 @@ public class AiAgentsApiTest {
             AgentType agentType = AgentType.CHAT;
             AgentProcessRequest emptyRequest = new AgentProcessRequest();
             // Set empty content if the model supports it
-            
+
             // When & Then
             assertDoesNotThrow(() -> {
                 AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, emptyRequest);
@@ -148,7 +148,7 @@ public class AiAgentsApiTest {
             AgentType agentType = AgentType.CHAT;
             AgentProcessRequest longContentRequest = new AgentProcessRequest();
             // Set long content if the model supports it
-            
+
             // When & Then
             assertDoesNotThrow(() -> {
                 AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, longContentRequest);
@@ -163,7 +163,7 @@ public class AiAgentsApiTest {
             AgentType agentType = AgentType.CHAT;
             AgentProcessRequest specialCharRequest = new AgentProcessRequest();
             // Set special character content if the model supports it
-            
+
             // When & Then
             assertDoesNotThrow(() -> {
                 AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, specialCharRequest);
@@ -178,7 +178,7 @@ public class AiAgentsApiTest {
             AgentType agentType = AgentType.CHAT;
             AgentProcessRequest unicodeRequest = new AgentProcessRequest();
             // Set unicode content if the model supports it
-            
+
             // When & Then
             assertDoesNotThrow(() -> {
                 AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, unicodeRequest);
@@ -196,7 +196,7 @@ public class AiAgentsApiTest {
         void shouldThrowApiExceptionWhenAgentTypeIsNull() {
             // Given
             AgentType agentType = null;
-            
+
             // When & Then
             assertThrows(ApiException.class, () -> {
                 api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
@@ -209,7 +209,7 @@ public class AiAgentsApiTest {
             // Given
             AgentType agentType = AgentType.CHAT;
             AgentProcessRequest request = null;
-            
+
             // When & Then
             assertThrows(ApiException.class, () -> {
                 api.agentAgentTypeProcessRequestPost(agentType, request);
@@ -232,7 +232,7 @@ public class AiAgentsApiTest {
             AgentType agentType = AgentType.CHAT;
             // This test would typically use mocking to simulate server errors
             // For now, we'll test that the method signature is correct
-            
+
             // When & Then
             assertDoesNotThrow(() -> {
                 // The actual implementation would depend on how the API client handles server errors
@@ -245,7 +245,7 @@ public class AiAgentsApiTest {
         void shouldHandleNetworkTimeoutScenarios() {
             // Given
             AgentType agentType = AgentType.CODE;
-            
+
             // When & Then
             assertDoesNotThrow(() -> {
                 // This would typically involve mocking network conditions
@@ -264,7 +264,7 @@ public class AiAgentsApiTest {
         void shouldValidateAgentTypeParameter() {
             // Given
             AgentType validAgentType = AgentType.CHAT;
-            
+
             // When & Then
             assertDoesNotThrow(() -> {
                 AgentMessage response = api.agentAgentTypeProcessRequestPost(validAgentType, validAgentProcessRequest);
@@ -278,7 +278,7 @@ public class AiAgentsApiTest {
             // Given
             AgentType agentType = AgentType.ANALYSIS;
             AgentProcessRequest validRequest = new AgentProcessRequest();
-            
+
             // When & Then
             assertDoesNotThrow(() -> {
                 AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validRequest);
@@ -306,7 +306,7 @@ public class AiAgentsApiTest {
         void shouldCreateApiInstanceSuccessfully() {
             // When
             AiAgentsApi newApi = new AiAgentsApi();
-            
+
             // Then
             assertNotNull(newApi, "API instance should not be null");
         }
@@ -317,7 +317,7 @@ public class AiAgentsApiTest {
             // When
             AiAgentsApi api1 = new AiAgentsApi();
             AiAgentsApi api2 = new AiAgentsApi();
-            
+
             // Then
             assertNotNull(api1, "First API instance should not be null");
             assertNotNull(api2, "Second API instance should not be null");
@@ -329,7 +329,7 @@ public class AiAgentsApiTest {
         void shouldMaintainApiInstanceState() {
             // Given
             AiAgentsApi apiInstance = new AiAgentsApi();
-            
+
             // When & Then
             assertNotNull(apiInstance, "API instance should maintain its state");
             // Additional state validation would depend on the actual API implementation
@@ -345,10 +345,10 @@ public class AiAgentsApiTest {
         void shouldHaveCorrectMethodSignature() throws ApiException {
             // Given
             AgentType agentType = AgentType.CHAT;
-            
+
             // When
             AgentMessage result = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
-            
+
             // Then
             assertNotNull(result, "Return type should be AgentMessage");
             assertTrue(result instanceof AgentMessage, "Return value should be instance of AgentMessage");
@@ -360,7 +360,7 @@ public class AiAgentsApiTest {
             // Given
             AgentType agentType = AgentType.CODE;
             AgentProcessRequest request = new AgentProcessRequest();
-            
+
             // When & Then
             assertDoesNotThrow(() -> {
                 api.agentAgentTypeProcessRequestPost(agentType, request);
@@ -386,7 +386,7 @@ public class AiAgentsApiTest {
             // Given
             AgentType agentType = AgentType.CHAT;
             int numberOfCalls = 10;
-            
+
             // When & Then
             assertDoesNotThrow(() -> {
                 for (int i = 0; i < numberOfCalls; i++) {
@@ -404,7 +404,7 @@ public class AiAgentsApiTest {
             int numberOfThreads = 5;
             Thread[] threads = new Thread[numberOfThreads];
             boolean[] results = new boolean[numberOfThreads];
-            
+
             // When
             for (int i = 0; i < numberOfThreads; i++) {
                 final int threadIndex = i;
@@ -418,12 +418,12 @@ public class AiAgentsApiTest {
                 });
                 threads[i].start();
             }
-            
+
             // Wait for all threads to complete
             for (Thread thread : threads) {
                 thread.join();
             }
-            
+
             // Then
             for (int i = 0; i < numberOfThreads; i++) {
                 assertTrue(results[i], "Thread " + i + " should have completed successfully");

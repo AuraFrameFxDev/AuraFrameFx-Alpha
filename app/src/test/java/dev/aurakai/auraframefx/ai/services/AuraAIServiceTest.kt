@@ -8,8 +8,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
-import org.junit.jupiter.params.provider.MethodSource
-import kotlinx.coroutines.runBlocking
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeoutException
@@ -96,7 +94,10 @@ class AuraAIServiceTest {
                 mapOf("apiKey" to "test-key"), // missing baseUrl and timeout
                 mapOf("baseUrl" to "https://api.test.com"), // missing apiKey and timeout
                 mapOf("timeout" to "30000"), // missing apiKey and baseUrl
-                mapOf("apiKey" to "test-key", "baseUrl" to "https://api.test.com") // missing timeout
+                mapOf(
+                    "apiKey" to "test-key",
+                    "baseUrl" to "https://api.test.com"
+                ) // missing timeout
             )
 
             incompleteConfigs.forEach { config ->
@@ -194,21 +195,22 @@ class AuraAIServiceTest {
             "This is a very long query that contains many words and should test the token counting functionality properly, 200"
         )
         @DisplayName("Should handle queries of different lengths")
-        fun `should handle queries of different lengths`(query: String, expectedTokens: Int) = runTest {
-            // Given
-            val response = AIResponse(
-                content = "Test response",
-                confidence = 0.8,
-                tokensUsed = expectedTokens
-            )
-            coEvery { mockApiClient.sendQuery(any()) } returns response
+        fun `should handle queries of different lengths`(query: String, expectedTokens: Int) =
+            runTest {
+                // Given
+                val response = AIResponse(
+                    content = "Test response",
+                    confidence = 0.8,
+                    tokensUsed = expectedTokens
+                )
+                coEvery { mockApiClient.sendQuery(any()) } returns response
 
-            // When
-            val result = auraAIService.processQuery(query)
+                // When
+                val result = auraAIService.processQuery(query)
 
-            // Then
-            assertEquals(expectedTokens, result.tokensUsed)
-        }
+                // Then
+                assertEquals(expectedTokens, result.tokensUsed)
+            }
 
         @Test
         @DisplayName("Should handle network timeout gracefully")
@@ -330,12 +332,22 @@ class AuraAIServiceTest {
             val sessionId = "test-session-123"
             val firstQuery = "Hello"
             val secondQuery = "What did I just say?"
-            
+
             val firstResponse = AIResponse("Hello there!", 0.9, 5)
             val secondResponse = AIResponse("You said 'Hello'", 0.95, 8)
-            
-            coEvery { mockApiClient.sendQueryWithContext(firstQuery, emptyList()) } returns firstResponse
-            coEvery { mockApiClient.sendQueryWithContext(secondQuery, any()) } returns secondResponse
+
+            coEvery {
+                mockApiClient.sendQueryWithContext(
+                    firstQuery,
+                    emptyList()
+                )
+            } returns firstResponse
+            coEvery {
+                mockApiClient.sendQueryWithContext(
+                    secondQuery,
+                    any()
+                )
+            } returns secondResponse
 
             // When
             val result1 = auraAIService.processQueryWithContext(firstQuery, sessionId)
@@ -368,11 +380,16 @@ class AuraAIServiceTest {
             val session1 = "session-1"
             val session2 = "session-2"
             val query = "Test query"
-            
+
             val response1 = AIResponse("Response 1", 0.8, 10)
             val response2 = AIResponse("Response 2", 0.9, 12)
-            
-            coEvery { mockApiClient.sendQueryWithContext(query, emptyList()) } returns response1 andThen response2
+
+            coEvery {
+                mockApiClient.sendQueryWithContext(
+                    query,
+                    emptyList()
+                )
+            } returns response1 andThen response2
 
             // When
             val result1 = auraAIService.processQueryWithContext(query, session1)
@@ -557,7 +574,7 @@ class AuraAIServiceTest {
                 "baseUrl" to "invalid-url",
                 "timeout" to "30000"
             )
-            
+
             every { mockConfigService.getConfig("ai") } returns originalConfig
             every { mockConfigService.updateConfig("ai", failingConfig) } returns false
             auraAIService.initialize()
@@ -580,9 +597,10 @@ class AuraAIServiceTest {
         @DisplayName("Should report correct service status")
         fun `should report correct service status`() {
             // Given
-            val config = mapOf("apiKey" to "test", "baseUrl" to "https://test.com", "timeout" to "30000")
+            val config =
+                mapOf("apiKey" to "test", "baseUrl" to "https://test.com", "timeout" to "30000")
             every { mockConfigService.getConfig("ai") } returns config
-            
+
             // When
             auraAIService.initialize()
             val status = auraAIService.getServiceStatus()
@@ -624,7 +642,8 @@ class AuraAIServiceTest {
         @DisplayName("Should shutdown gracefully")
         fun `should shutdown gracefully`() = runTest {
             // Given
-            val config = mapOf("apiKey" to "test", "baseUrl" to "https://test.com", "timeout" to "30000")
+            val config =
+                mapOf("apiKey" to "test", "baseUrl" to "https://test.com", "timeout" to "30000")
             every { mockConfigService.getConfig("ai") } returns config
             auraAIService.initialize()
 
@@ -640,7 +659,8 @@ class AuraAIServiceTest {
         @DisplayName("Should handle repeated shutdown calls gracefully")
         fun `should handle repeated shutdown calls gracefully`() = runTest {
             // Given
-            val config = mapOf("apiKey" to "test", "baseUrl" to "https://test.com", "timeout" to "30000")
+            val config =
+                mapOf("apiKey" to "test", "baseUrl" to "https://test.com", "timeout" to "30000")
             every { mockConfigService.getConfig("ai") } returns config
             auraAIService.initialize()
 
@@ -702,11 +722,11 @@ class AuraAIServiceTest {
             // Given
             val query = "Test query"
             val expectedResponse = AIResponse("Success after retry", 0.8, 15)
-            
-            coEvery { mockApiClient.sendQuery(any()) } throws 
-                IOException("Network error") andThen 
-                IOException("Network error") andThen 
-                expectedResponse
+
+            coEvery { mockApiClient.sendQuery(any()) } throws
+                    IOException("Network error") andThen
+                    IOException("Network error") andThen
+                    expectedResponse
 
             // When
             val result = auraAIService.processQuery(query)
@@ -783,7 +803,7 @@ class AuraAIServiceTest {
             // Given
             val queries = (1..10).map { "Query $it" }
             val responses = queries.map { AIResponse("Response for $it", 0.8, 10) }
-            
+
             queries.zip(responses).forEach { (query, response) ->
                 coEvery { mockApiClient.sendQuery(query) } returns response
             }
@@ -806,7 +826,7 @@ class AuraAIServiceTest {
             // Given
             val sessionId = "large-context-session"
             val largeContext = (1..1000).map { "Context item $it" }.joinToString(" ")
-            
+
             // When
             auraAIService.storeContext(sessionId, largeContext)
             val retrievedContext = auraAIService.getContext(sessionId)
@@ -819,10 +839,11 @@ class AuraAIServiceTest {
         @DisplayName("Should implement proper timeout handling")
         fun `should implement proper timeout handling`() = runTest {
             // Given
-            val config = mapOf("apiKey" to "test-key", "baseUrl" to "https://test.com", "timeout" to "1000")
+            val config =
+                mapOf("apiKey" to "test-key", "baseUrl" to "https://test.com", "timeout" to "1000")
             every { mockConfigService.getConfig("ai") } returns config
             auraAIService.initialize()
-            
+
             coEvery { mockApiClient.sendQuery(any()) } throws TimeoutException("Request timeout")
 
             // When & Then
@@ -838,7 +859,7 @@ class AuraAIServiceTest {
             val numberOfRequests = 100
             val queries = (1..numberOfRequests).map { "Rapid query $it" }
             val response = AIResponse("Rate limited response", 0.8, 5)
-            
+
             queries.forEach { query ->
                 coEvery { mockApiClient.sendQuery(query) } returns response
             }
@@ -1038,7 +1059,7 @@ class AuraAIServiceTest {
             auraAIService.initialize()
 
             val boundaryTokenCounts = listOf(0, 1, 4095, 4096, 4097, Int.MAX_VALUE)
-            
+
             boundaryTokenCounts.forEach { tokenCount ->
                 // Given
                 val query = "Boundary test query"
@@ -1070,7 +1091,7 @@ class AuraAIServiceTest {
             auraAIService.initialize()
 
             val boundaryConfidences = listOf(-0.1, 0.0, 0.5, 1.0, 1.1)
-            
+
             boundaryConfidences.forEach { confidence ->
                 // Given
                 val query = "Confidence test query"
@@ -1206,7 +1227,13 @@ class AuraAIServiceTest {
             Arguments.of(mapOf("apiKey" to "test-key", "baseUrl" to "https://test.com"), false),
             Arguments.of(mapOf("apiKey" to "test-key", "timeout" to "30000"), false),
             Arguments.of(mapOf("baseUrl" to "https://test.com", "timeout" to "30000"), false),
-            Arguments.of(mapOf("apiKey" to "test-key", "baseUrl" to "https://test.com", "timeout" to "30000"), true)
+            Arguments.of(
+                mapOf(
+                    "apiKey" to "test-key",
+                    "baseUrl" to "https://test.com",
+                    "timeout" to "30000"
+                ), true
+            )
         )
 
         @JvmStatic
@@ -1236,7 +1263,9 @@ data class ServiceStatus(
 )
 
 // Exception classes for testing
-data class ServiceException(override val message: String, override val cause: Throwable? = null) : Exception(message, cause)
+data class ServiceException(override val message: String, override val cause: Throwable? = null) :
+    Exception(message, cause)
+
 data class DataCorruptionException(override val message: String) : Exception(message)
 data class JsonParseException(override val message: String) : Exception(message)
 data class ApiRateLimitException(override val message: String) : Exception(message)
@@ -1250,10 +1279,12 @@ interface ApiClient {
     suspend fun sendQueryWithContext(query: String, context: List<String>): AIResponse
     suspend fun healthCheck(): Boolean
 }
+
 interface ConfigService {
     fun getConfig(key: String): Map<String, String>?
     fun updateConfig(key: String, config: Map<String, String>): Boolean
 }
+
 interface Logger {
     fun info(message: String)
     fun debug(message: String)
@@ -1274,17 +1305,17 @@ class AuraAIService(
     fun initialize(): Boolean {
         val config = configService.getConfig("ai") ?: return false
         val requiredKeys = listOf("apiKey", "baseUrl", "timeout")
-        
+
         if (!requiredKeys.all { config.containsKey(it) }) return false
-        
+
         val apiKey = config["apiKey"]?.trim() ?: return false
         val baseUrl = config["baseUrl"]?.trim() ?: return false
         val timeout = config["timeout"]?.toIntOrNull() ?: return false
-        
+
         if (apiKey.length < 8) return false
         if (!baseUrl.matches(Regex("^https?://[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}.*"))) return false
         if (timeout <= 0 || timeout > 120000) return false
-        
+
         initialized = true
         return true
     }
@@ -1294,7 +1325,7 @@ class AuraAIService(
     suspend fun processQuery(query: String?): AIResponse {
         if (!initialized) throw IllegalStateException("Service not initialized")
         if (query.isNullOrBlank()) throw IllegalArgumentException("Query cannot be null or blank")
-        
+
         return try {
             val response = apiClient.sendQuery(query)
             if (response.confidence < 0.0 || response.confidence > 1.0) {
@@ -1323,9 +1354,9 @@ class AuraAIService(
     fun storeContext(sessionId: String?, context: String?) {
         validateSessionId(sessionId)
         if (context.isNullOrBlank()) throw IllegalArgumentException("Context cannot be null or blank")
-        
+
         contextStorage.getOrPut(sessionId!!) { mutableListOf() }.add(context)
-        
+
         // Limit context size to prevent memory issues
         val sessionContext = contextStorage[sessionId]!!
         if (sessionContext.size > 1000) {
@@ -1346,7 +1377,7 @@ class AuraAIService(
     fun updateConfiguration(config: Map<String, String>): Boolean {
         val requiredKeys = listOf("apiKey", "baseUrl", "timeout")
         if (config.keys.any { it !in requiredKeys }) return false
-        
+
         return configService.updateConfig("ai", config).also { success ->
             if (success) {
                 logger.info("Configuration updated successfully")
@@ -1395,7 +1426,8 @@ class AuraAIService(
         }
         if (sessionId.contains('\n') || sessionId.contains('\r') || sessionId.contains('\u0000') ||
             sessionId.contains('<') || sessionId.contains('>') || sessionId.contains(';') ||
-            sessionId.contains('\'') || sessionId.contains('"') || sessionId.startsWith("../")) {
+            sessionId.contains('\'') || sessionId.contains('"') || sessionId.startsWith("../")
+        ) {
             throw IllegalArgumentException("Invalid session ID format")
         }
     }

@@ -18,11 +18,6 @@ import dev.aurakai.auraframefx.ui.animation.digitalPixelEffect
 import dev.aurakai.auraframefx.ui.components.*
 import dev.aurakai.auraframefx.ui.navigation.NavDestination
 import dev.aurakai.auraframefx.ui.theme.*
-import dev.aurakai.auraframefx.ui.theme.CyberpunkTextColor
-import dev.aurakai.auraframefx.ui.theme.CyberpunkTextStyle
-import dev.aurakai.auraframefx.ui.theme.NeonBlue
-import dev.aurakai.auraframefx.ui.theme.NeonCyan
-import dev.aurakai.auraframefx.ui.theme.NeonPink
 
 /**
  * Safely gets a string resource with a fallback value.
@@ -69,7 +64,7 @@ conferenceRoomText to NavDestination.AiChat.route
 fun HomeScreen(navController: NavController) {
     // Track selected menu item
     var selectedMenuItem by remember { mutableStateOf("") }
-    
+
     // Define menu items with their navigation destinations
     val menuItems = listOf(
         "Dashboard" to null,
@@ -137,7 +132,10 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .cyberEdgeGlow(),
-                title = getStringResourceSafe(R.string.virtual_monitorization, "Virtual Monitorization"),
+                title = getStringResourceSafe(
+                    R.string.virtual_monitorization,
+                    "Virtual Monitorization"
+                ),
                 cornerStyle = CornerStyle.SHARP
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {

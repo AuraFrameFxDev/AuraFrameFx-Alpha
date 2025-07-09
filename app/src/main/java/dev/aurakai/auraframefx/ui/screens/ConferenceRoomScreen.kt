@@ -159,7 +159,7 @@ fun AgentButton(
             contentColor = contentColor
         ),
         modifier = modifier // Apply the passed modifier
-            .padding(horizontal = 8.dp) 
+            .padding(horizontal = 8.dp)
     ) {
         Text(
             text = agent,

@@ -19,17 +19,17 @@ class CascadeAIService @Inject constructor(
     private val state = mutableMapOf<String, Any>()
 
     /**
- * Returns the name of the agent.
- *
- * @return The string "Cascade".
- */
+     * Returns the name of the agent.
+     *
+     * @return The string "Cascade".
+     */
     override fun getName(): String? = "Cascade"
 
     /**
- * Returns the agent type as `AgentType.CASCADE`, identifying this agent as a Cascade type.
- *
- * @return The agent type for this service.
- */
+     * Returns the agent type as `AgentType.CASCADE`, identifying this agent as a Cascade type.
+     *
+     * @return The agent type for this service.
+     */
     override fun getType(): AgentType = AgentType.CASCADE
 
     /**

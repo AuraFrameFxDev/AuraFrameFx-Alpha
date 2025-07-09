@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -23,7 +23,7 @@ import java.io.IOException;
 
 /**
  * Encodes request bodies using gzip.
- *
+ * <p>
  * Taken from https://github.com/square/okhttp/issues/350
  */
 class GzipRequestInterceptor implements Interceptor {
@@ -35,9 +35,9 @@ class GzipRequestInterceptor implements Interceptor {
         }
 
         Request compressedRequest = originalRequest.newBuilder()
-                                                   .header("Content-Encoding", "gzip")
-                                                   .method(originalRequest.method(), forceContentLength(gzip(originalRequest.body())))
-                                                   .build();
+                .header("Content-Encoding", "gzip")
+                .method(originalRequest.method(), forceContentLength(gzip(originalRequest.body())))
+                .build();
         return chain.proceed(compressedRequest);
     }
 

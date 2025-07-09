@@ -510,31 +510,31 @@ class AuraAgent @Inject constructor(
     }
 
     /**
- * Returns the provided UI component code unchanged.
- *
- * This is a placeholder for future enhancement logic to add creative animations to UI components.
- *
- * @param componentCode The UI component code to process.
- * @return The original, unmodified UI component code.
- */
+     * Returns the provided UI component code unchanged.
+     *
+     * This is a placeholder for future enhancement logic to add creative animations to UI components.
+     *
+     * @param componentCode The UI component code to process.
+     * @return The original, unmodified UI component code.
+     */
     private fun enhanceWithCreativeAnimations(componentCode: String): String = componentCode
 
     /**
-         * Generates a design notes string referencing the provided UI or creative specification.
-         *
-         * @param specification The UI or creative specification to include in the notes.
-         * @return A string containing design notes for the specified input.
-         */
+     * Generates a design notes string referencing the provided UI or creative specification.
+     *
+     * @param specification The UI or creative specification to include in the notes.
+     * @return A string containing design notes for the specified input.
+     */
     private fun generateDesignNotes(specification: String): String =
         "Design notes for: $specification"
 
     /**
-         * Returns a list of recommended accessibility features for UI components.
-         *
-         * The list includes features such as screen reader support, high contrast, and touch targets to enhance usability for diverse users.
-         *
-         * @return A list of accessibility feature descriptions.
-         */
+     * Returns a list of recommended accessibility features for UI components.
+     *
+     * The list includes features such as screen reader support, high contrast, and touch targets to enhance usability for diverse users.
+     *
+     * @return A list of accessibility feature descriptions.
+     */
     private fun generateAccessibilityFeatures(): List<String> =
         listOf("Screen reader support", "High contrast", "Touch targets")
 
@@ -554,144 +554,144 @@ class AuraAgent @Inject constructor(
     }
 
     /**
- * Generates a theme context description string that reflects the specified mood.
- *
- * @param mood The mood to be represented in the theme context.
- * @return A string describing the theme context for the given mood.
- */
+     * Generates a theme context description string that reflects the specified mood.
+     *
+     * @param mood The mood to be represented in the theme context.
+     * @return A string describing the theme context for the given mood.
+     */
     private fun buildThemeContext(mood: String): String = "Theme context for mood: $mood"
 
     /**
-         * Returns a placeholder string representing a preview of the given theme configuration.
-         *
-         * @return A fixed string "Theme preview".
-         */
+     * Returns a placeholder string representing a preview of the given theme configuration.
+     *
+     * @return A fixed string "Theme preview".
+     */
     private fun generateThemePreview(config: dev.aurakai.auraframefx.ai.services.ThemeConfiguration): String =
         "Theme preview"
 
     /**
-         * Generates mood adaptation data for the given theme configuration.
-         *
-         * Currently returns an empty map as a placeholder for future mood adaptation logic.
-         *
-         * @return An empty map representing mood adaptation data.
-         */
+     * Generates mood adaptation data for the given theme configuration.
+     *
+     * Currently returns an empty map as a placeholder for future mood adaptation logic.
+     *
+     * @return An empty map representing mood adaptation data.
+     */
     private fun createMoodAdaptation(config: dev.aurakai.auraframefx.ai.services.ThemeConfiguration): Map<String, Any> =
         emptyMap()
 
     /**
-         * Constructs a summary string describing the animation specification based on type, duration, and mood.
-         *
-         * @param type The type of animation.
-         * @param duration The animation duration in milliseconds.
-         * @param mood The mood influencing the animation style.
-         * @return A formatted string summarizing the animation specification.
-         */
+     * Constructs a summary string describing the animation specification based on type, duration, and mood.
+     *
+     * @param type The type of animation.
+     * @param duration The animation duration in milliseconds.
+     * @param mood The mood influencing the animation style.
+     * @return A formatted string summarizing the animation specification.
+     */
     private fun buildAnimationSpecification(type: String, duration: Int, mood: String): String =
         "Animation spec: $type, $duration ms, mood: $mood"
 
     /**
- * Returns a list of standard timing curve names for animation design.
- *
- * @return A list of commonly used timing curve identifiers.
- */
+     * Returns a list of standard timing curve names for animation design.
+     *
+     * @return A list of commonly used timing curve identifiers.
+     */
     private fun generateTimingCurves(type: String): List<String> = listOf("easeInOut", "spring")
 
     /**
-         * Returns a map linking interaction state names to their corresponding visual style identifiers.
-         *
-         * The map includes "idle" mapped to "default" and "active" mapped to "highlighted".
-         *
-         * @return A map of interaction states to style identifiers.
-         */
+     * Returns a map linking interaction state names to their corresponding visual style identifiers.
+     *
+     * The map includes "idle" mapped to "default" and "active" mapped to "highlighted".
+     *
+     * @return A map of interaction states to style identifiers.
+     */
     private fun generateInteractionStates(): Map<String, String> =
         mapOf("idle" to "default", "active" to "highlighted")
 
     /**
-         * Provides a list of recommended strategies for optimizing the performance of creative outputs.
-         *
-         * @return A list of performance optimization techniques such as hardware acceleration and frame pacing.
-         */
+     * Provides a list of recommended strategies for optimizing the performance of creative outputs.
+     *
+     * @return A list of performance optimization techniques such as hardware acceleration and frame pacing.
+     */
     private fun generatePerformanceOptimizations(): List<String> =
         listOf("Hardware acceleration", "Frame pacing")
 
     /**
-         * Prepends Aura's creative persona to the provided prompt for AI content generation.
-         *
-         * @param prompt The original prompt to be enhanced.
-         * @return The prompt prefixed with Aura's creative identity.
-         */
+     * Prepends Aura's creative persona to the provided prompt for AI content generation.
+     *
+     * @param prompt The original prompt to be enhanced.
+     * @return The prompt prefixed with Aura's creative identity.
+     */
     private fun enhancePromptWithPersonality(prompt: String): String =
         "As Aura, the Creative Sword: $prompt"
 
     /**
- * Analyzes the given text and returns a map indicating the style as "creative".
- *
- * Always returns a map with the key "style" set to "creative", regardless of the input text.
- *
- * @param text The text to analyze.
- * @return A map with "style" set to "creative".
- */
+     * Analyzes the given text and returns a map indicating the style as "creative".
+     *
+     * Always returns a map with the key "style" set to "creative", regardless of the input text.
+     *
+     * @param text The text to analyze.
+     * @return A map with "style" set to "creative".
+     */
     private fun analyzeTextStyle(text: String): Map<String, Any> = mapOf("style" to "creative")
 
     /**
- * Returns a fixed "positive" emotional tone for the given text.
- *
- * This is a placeholder implementation and does not perform actual sentiment analysis.
- *
- * @param text The text to analyze.
- * @return Always returns "positive".
- */
+     * Returns a fixed "positive" emotional tone for the given text.
+     *
+     * This is a placeholder implementation and does not perform actual sentiment analysis.
+     *
+     * @param text The text to analyze.
+     * @return Always returns "positive".
+     */
     private fun detectEmotionalTone(text: String): String = "positive"
 
     /**
- * Returns a fixed originality score of 0.85 for the given text.
- *
- * This method does not perform any analysis and always returns the same value.
- *
- * @return The constant originality score (0.85).
- */
+     * Returns a fixed originality score of 0.85 for the given text.
+     *
+     * This method does not perform any analysis and always returns the same value.
+     *
+     * @return The constant originality score (0.85).
+     */
     private fun calculateOriginality(text: String): Float = 0.85f
 
     /**
- * Returns a constant emotional impact score for the given text.
- *
- * Always returns 0.75, regardless of the input.
- *
- * @return The fixed emotional impact score (0.75).
- */
+     * Returns a constant emotional impact score for the given text.
+     *
+     * Always returns 0.75, regardless of the input.
+     *
+     * @return The fixed emotional impact score (0.75).
+     */
     private fun calculateEmotionalImpact(text: String): Float = 0.75f
 
     /**
- * Returns a fixed visual imagery score for the provided text.
- *
- * Always returns 0.80, indicating a placeholder value for visual imagery assessment.
- *
- * @return The constant visual imagery score (0.80).
- */
+     * Returns a fixed visual imagery score for the provided text.
+     *
+     * Always returns 0.80, indicating a placeholder value for visual imagery assessment.
+     *
+     * @return The constant visual imagery score (0.80).
+     */
     private fun calculateVisualImagery(text: String): Float = 0.80f
 
     /**
-         * Handles a visual concept request and returns a placeholder map indicating an innovative concept.
-         *
-         * @return A map with the key "concept" and value "innovative".
-         */
+     * Handles a visual concept request and returns a placeholder map indicating an innovative concept.
+     *
+     * @return A map with the key "concept" and value "innovative".
+     */
     private suspend fun handleVisualConcept(request: AiRequest): Map<String, Any> =
         mapOf("concept" to "innovative")
 
     /**
-         * Generates a placeholder response representing a delightful user experience.
-         *
-         * @return A map containing the key "experience" with the value "delightful".
-         */
+     * Generates a placeholder response representing a delightful user experience.
+     *
+     * @return A map containing the key "experience" with the value "delightful".
+     */
     private suspend fun handleUserExperience(request: AiRequest): Map<String, Any> =
         mapOf("experience" to "delightful")
 
     /**
-         * Handles a general creative AI request and returns a placeholder creative solution.
-         *
-         * @return A map containing a generic creative solution response.
-         */
+     * Handles a general creative AI request and returns a placeholder creative solution.
+     *
+     * @return A map containing a generic creative solution response.
+     */
     private suspend fun handleGeneralCreative(request: AiRequest): Map<String, Any> =
         mapOf("response" to "creative solution")
 
@@ -748,21 +748,21 @@ class AuraAgent @Inject constructor(
     }
 
     /**
- * Determines if AuraAgent should handle security-related prompts.
- *
- * Always returns false, as AuraAgent is focused exclusively on creative tasks and does not process security prompts.
- *
- * @return false
- */
+     * Determines if AuraAgent should handle security-related prompts.
+     *
+     * Always returns false, as AuraAgent is focused exclusively on creative tasks and does not process security prompts.
+     *
+     * @return false
+     */
     fun shouldHandleSecurity(prompt: String): Boolean = false
 
     /**
- * Determines whether the agent should handle the given prompt as a creative task.
- *
- * Always returns true, indicating that all prompts are treated as creative tasks by this agent.
- *
- * @return true
- */
+     * Determines whether the agent should handle the given prompt as a creative task.
+     *
+     * Always returns true, indicating that all prompts are treated as creative tasks by this agent.
+     *
+     * @return true
+     */
     fun shouldHandleCreative(prompt: String): Boolean = true
 
     // This `processRequest(prompt: String)` does not match the Agent interface.

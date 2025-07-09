@@ -5,14 +5,12 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset // Keep ComposeOffset as the default Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -20,12 +18,26 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.aurakai.auraframefx.ui.debug.model.GraphNode
 import dev.aurakai.auraframefx.ui.debug.model.Connection
-import dev.aurakai.auraframefx.ui.debug.model.ConnectionType // Added import
-import dev.aurakai.auraframefx.ui.debug.model.NodeType
-import dev.aurakai.auraframefx.ui.debug.model.Offset as GraphOffset // Keep GraphOffset for model
+import dev.aurakai.auraframefx.ui.debug.model.ConnectionType
+import dev.aurakai.auraframefx.ui.debug.model.GraphNode
+import kotlin.Boolean
+import kotlin.Float
+import kotlin.String
+import kotlin.Unit
+import kotlin.apply
+import kotlin.collections.List
+import kotlin.collections.find
+import kotlin.collections.forEach
+import kotlin.collections.plus
+import kotlin.floatArrayOf
+import kotlin.let
 import kotlin.math.*
+import kotlin.plus
+import kotlin.sequences.plus
+import kotlin.unaryMinus
+import kotlin.with
+import dev.aurakai.auraframefx.ui.debug.model.Offset as GraphOffset
 
 /**
  * Displays an interactive, zoomable, and pannable graph visualization with selectable nodes.
@@ -68,14 +80,14 @@ fun InteractiveGraph(
     ) {
         val canvasWidth = constraints.maxWidth.toFloat()
         val canvasHeight = constraints.maxHeight.toFloat()
-        
+
         // Calculate content bounds for centering
         val contentWidth = 1000f * scale
         val contentHeight = 800f * scale
-        
+
         val offsetX = (canvasWidth - contentWidth) / 2 + translation.x
         val offsetY = (canvasHeight - contentHeight) / 2 + translation.y
-        
+
         // Convert GraphOffset to Offset for rendering
         fun GraphOffset.toCompose() = Offset(x.toFloat(), y.toFloat())
 
@@ -96,7 +108,7 @@ fun InteractiveGraph(
         ) {
             // Draw grid
             drawGrid(scale, translation, gridColor)
-            
+
             // Draw connections first (behind nodes)
             nodes.forEach { node ->
                 node.connections.forEach { connection ->
@@ -104,15 +116,18 @@ fun InteractiveGraph(
                     targetNode?.let { drawConnection(node, it, connection) }
                 }
             }
-            
+
             // Draw nodes
             nodes.forEach { node ->
                 val isSelected = node.id == selectedNodeId
                 val nodeScale = if (isSelected) pulse else 1f
                 val currentOffset = Offset(offsetX, offsetY) + node.position.toCompose() * scale
-                
+
                 withTransform({
-                    translate(left = currentOffset.x - node.position.toCompose().x * scale * nodeScale, top = currentOffset.y - node.position.toCompose().y * scale * nodeScale)
+                    translate(
+                        left = currentOffset.x - node.position.toCompose().x * scale * nodeScale,
+                        top = currentOffset.y - node.position.toCompose().y * scale * nodeScale
+                    )
                     scale(scale * nodeScale, scale * nodeScale, pivot = node.position.toCompose())
                 }) {
                     drawNode(node, isSelected, nodeTextColor, this)
@@ -259,13 +274,13 @@ private fun DrawScope.drawConnection(
     val distance = sqrt(direction.x.pow(2) + direction.y.pow(2)) // Use Float.pow
     if (distance == 0f) return // Avoid division by zero if nodes are at the same position
     val directionNormalized = direction / distance
-    
+
     val fromRadius = from.type.defaultSize.toPx(this) * 0.6f
     val toRadius = to.type.defaultSize.toPx(this) * 0.6f
-    
+
     val start = fromCenter + directionNormalized * fromRadius
     val end = toCenter - directionNormalized * toRadius
-    
+
     // Draw connection line
     val strokeWidth = 2.dp.toPx(this)
     val color = when (connection.type) {
@@ -273,9 +288,9 @@ private fun DrawScope.drawConnection(
         ConnectionType.BIDIRECTIONAL -> Color.Green.copy(alpha = 0.7f)
         ConnectionType.DASHED -> Color.Yellow.copy(alpha = 0.7f)
         // It's good practice to have an else branch for when, even if you expect all cases to be covered
-        else -> Color.Gray 
+        else -> Color.Gray
     }
-    
+
     if (connection.type == ConnectionType.DASHED) {
         // Draw dashed line
         val dashLength = 10.dp.toPx(this)
@@ -301,7 +316,7 @@ private fun DrawScope.drawConnection(
             strokeWidth = strokeWidth
         )
     }
-    
+
     // Draw arrow head
     if (connection.type == ConnectionType.DIRECT || connection.type == ConnectionType.BIDIRECTIONAL) {
         val arrowSize = 10.dp.toPx(this)

@@ -280,13 +280,13 @@ object KineticIdentity {
  */
 
 /**
-     * Creates a tween animation spec that introduces a delay before starting the original animation.
-     *
-     * The resulting animation spec has a total duration equal to the specified delay plus the estimated duration of the original animation. For spring-based specs, the duration is estimated as 1000 ms; for other types, a standard duration is used.
-     *
-     * @param delayMillis The delay in milliseconds before the animation starts.
-     * @return A tween animation spec with the combined delay and animation duration.
-     */
+ * Creates a tween animation spec that introduces a delay before starting the original animation.
+ *
+ * The resulting animation spec has a total duration equal to the specified delay plus the estimated duration of the original animation. For spring-based specs, the duration is estimated as 1000 ms; for other types, a standard duration is used.
+ *
+ * @param delayMillis The delay in milliseconds before the animation starts.
+ * @return A tween animation spec with the combined delay and animation duration.
+ */
 fun <T> AnimationSpec<T>.afterDelay(delayMillis: Int): AnimationSpec<T> =
     tween(
         durationMillis = delayMillis + when (this) {
@@ -297,11 +297,11 @@ fun <T> AnimationSpec<T>.afterDelay(delayMillis: Int): AnimationSpec<T> =
     )
 
 /**
-     * Returns an infinite repeatable animation spec based on this animation spec.
-     *
-     * @param repeatMode The repeat mode, either [RepeatMode.Restart] or [RepeatMode.Reverse]. Defaults to [RepeatMode.Restart].
-     * @return An [InfiniteRepeatableSpec] that repeats this animation indefinitely.
-     */
+ * Returns an infinite repeatable animation spec based on this animation spec.
+ *
+ * @param repeatMode The repeat mode, either [RepeatMode.Restart] or [RepeatMode.Reverse]. Defaults to [RepeatMode.Restart].
+ * @return An [InfiniteRepeatableSpec] that repeats this animation indefinitely.
+ */
 fun <T> AnimationSpec<T>.infinite(repeatMode: RepeatMode = RepeatMode.Restart): InfiniteRepeatableSpec<T> =
     infiniteRepeatable(this as DurationBasedAnimationSpec<T>, repeatMode)
 

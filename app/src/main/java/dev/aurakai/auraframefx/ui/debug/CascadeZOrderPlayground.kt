@@ -1,11 +1,8 @@
 package dev.aurakai.auraframefx.ui.debug
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -14,22 +11,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import dev.aurakai.auraframefx.R
 import dev.aurakai.auraframefx.ai.agents.CascadeAgent
 import dev.aurakai.auraframefx.model.agent_states.ProcessingState
 import dev.aurakai.auraframefx.model.agent_states.VisionState
 import dev.aurakai.auraframefx.ui.debug.component.InteractiveGraph
 import dev.aurakai.auraframefx.ui.debug.model.*
-import dev.aurakai.auraframefx.ui.theme.LocalSpacing
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -79,7 +69,7 @@ fun CascadeZOrderPlayground(
     var selectedNodeId by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    
+
     // Simulate loading
     LaunchedEffect(Unit) {
         coroutineScope.launch {
@@ -87,67 +77,67 @@ fun CascadeZOrderPlayground(
             isLoading = false
         }
     }
-    
+
     // Sample graph nodes - in a real app, these would be derived from your actual agent state
     val nodes = remember {
         try {
             mutableStateListOf(
-            GraphNode(
-                id = "vision",
-                name = "Vision",
-                type = NodeType.VISION,
-                position = GraphOffset(200f, 200f),
-                state = "Active",
-                connections = listOf(
-                    Connection(
-                        targetId = "processing",
-                        type = ConnectionType.DIRECT,
-                        label = "sends to"
+                GraphNode(
+                    id = "vision",
+                    name = "Vision",
+                    type = NodeType.VISION,
+                    position = GraphOffset(200f, 200f),
+                    state = "Active",
+                    connections = listOf(
+                        Connection(
+                            targetId = "processing",
+                            type = ConnectionType.DIRECT,
+                            label = "sends to"
+                        )
+                    )
+                ),
+                GraphNode(
+                    id = "processing",
+                    name = "Processing",
+                    type = NodeType.PROCESSING,
+                    position = GraphOffset(500f, 200f),
+                    state = "Idle",
+                    connections = listOf(
+                        Connection(
+                            targetId = "agent",
+                            type = ConnectionType.DIRECT,
+                            label = "updates"
+                        )
+                    )
+                ),
+                GraphNode(
+                    id = "agent",
+                    name = "Agent",
+                    type = NodeType.AGENT,
+                    position = GraphOffset(800f, 200f),
+                    state = "Ready",
+                    connections = listOf(
+                        Connection(
+                            targetId = "datastore",
+                            type = ConnectionType.BIDIRECTIONAL,
+                            label = "reads/writes"
+                        )
+                    )
+                ),
+                GraphNode(
+                    id = "datastore",
+                    name = "Data Store",
+                    type = NodeType.DATA,
+                    position = GraphOffset(500f, 400f),
+                    state = "Connected",
+                    connections = listOf(
+                        Connection(
+                            targetId = "vision",
+                            type = ConnectionType.DIRECT,
+                            label = "feeds"
+                        )
                     )
                 )
-            ),
-            GraphNode(
-                id = "processing",
-                name = "Processing",
-                type = NodeType.PROCESSING,
-                position = GraphOffset(500f, 200f),
-                state = "Idle",
-                connections = listOf(
-                    Connection(
-                        targetId = "agent",
-                        type = ConnectionType.DIRECT,
-                        label = "updates"
-                    )
-                )
-            ),
-            GraphNode(
-                id = "agent",
-                name = "Agent",
-                type = NodeType.AGENT,
-                position = GraphOffset(800f, 200f),
-                state = "Ready",
-                connections = listOf(
-                    Connection(
-                        targetId = "datastore",
-                        type = ConnectionType.BIDIRECTIONAL,
-                        label = "reads/writes"
-                    )
-                )
-            ),
-            GraphNode(
-                id = "datastore",
-                name = "Data Store",
-                type = NodeType.DATA,
-                position = GraphOffset(500f, 400f),
-                state = "Connected",
-                connections = listOf(
-                    Connection(
-                        targetId = "vision",
-                        type = ConnectionType.DIRECT,
-                        label = "feeds"
-                    )
-                )
-            )
             )
         } catch (e: Exception) {
             errorMessage = "Failed to load nodes: ${e.localizedMessage}"
@@ -178,7 +168,7 @@ fun CascadeZOrderPlayground(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         "Agent State Visualizer",
                         maxLines = 1,
@@ -200,7 +190,7 @@ fun CascadeZOrderPlayground(
                             )
                         }
                     }
-                    IconButton(onClick = { 
+                    IconButton(onClick = {
                         isLoading = true
                         coroutineScope.launch {
                             delay(500) // Simulate refresh
@@ -232,7 +222,7 @@ fun CascadeZOrderPlayground(
                     CircularProgressIndicator()
                 }
             }
-            
+
             // Show error message if any
             errorMessage?.let { message ->
                 Snackbar(
@@ -255,7 +245,7 @@ fun CascadeZOrderPlayground(
                     targetValue = if (isLoading) 0.5f else 1f,
                     label = "graphAlpha"
                 )
-                
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -282,7 +272,7 @@ fun CascadeZOrderPlayground(
                     targetValue = if (isLoading) 0.5f else 1f,
                     label = "detailsAlpha"
                 )
-                
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -327,7 +317,10 @@ private fun NodeDetails(node: GraphNode) {
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(40.dp)
-                    .background(node.type.color.copy(alpha = 0.2f), shape = RoundedCornerShape(20.dp))
+                    .background(
+                        node.type.color.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(20.dp)
+                    )
             ) {
                 // Using a simple text as icon for now
                 Text(
@@ -345,12 +338,12 @@ private fun NodeDetails(node: GraphNode) {
                 overflow = TextOverflow.Ellipsis
             )
         }
-        
+
         Divider(
             modifier = Modifier.padding(vertical = 8.dp),
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
-        
+
         // State information
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
             Text(
@@ -364,7 +357,7 @@ private fun NodeDetails(node: GraphNode) {
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
-        
+
         // Last updated
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
             Text(
@@ -379,7 +372,7 @@ private fun NodeDetails(node: GraphNode) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        
+
         // Connections section
         if (node.connections.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -389,7 +382,7 @@ private fun NodeDetails(node: GraphNode) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
-            
+
             node.connections.forEach { connection ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -459,7 +452,7 @@ private fun NodeDetailsPreview() {
             Connection("agent-1", ConnectionType.DIRECT, "Output")
         )
     )
-    
+
     MaterialTheme {
         Surface {
             NodeDetails(node = sampleNode)

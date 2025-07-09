@@ -21,15 +21,15 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
  *
- * @param sender 
+ *
+ * @param sender
  * @param message The content of the message
  * @param timestamp ISO 8601 timestamp of the message
  */
 
 
-data class AgentMessage (
+data class AgentMessage(
 
     @Json(name = "sender")
     val sender: AgentType,

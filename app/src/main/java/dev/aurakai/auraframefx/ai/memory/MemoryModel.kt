@@ -4,12 +4,12 @@ import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Contextual // Added import
-import java.lang.System
 
 @Serializable
-data class CanonicalMemoryItem( // Renamed from MemoryItem
+data class CanonicalMemoryItem(
+    // Renamed from MemoryItem
     val id: String = "mem_${System.currentTimeMillis()}",
     val content: String,
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),

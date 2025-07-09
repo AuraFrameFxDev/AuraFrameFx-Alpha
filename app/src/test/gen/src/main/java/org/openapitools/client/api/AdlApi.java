@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -76,28 +76,28 @@ public class AdlApi {
 
     /**
      * Build call for adlRelayPost
-     * @param adLRelayRequest  (required)
-     * @param _callback Callback for upload/download progress
+     *
+     * @param adLRelayRequest (required)
+     * @param _callback       Callback for upload/download progress
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
-     * @http.response.details
-     <table summary="Response Details" border="1">
-        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> ADL relay successful </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
-        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
-        <tr><td> 500 </td><td> Internal server error </td><td>  -  </td></tr>
-     </table>
+     * @http.response.details <table summary="Response Details" border="1">
+     * <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+     * <tr><td> 200 </td><td> ADL relay successful </td><td>  -  </td></tr>
+     * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
+     * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     * <tr><td> 500 </td><td> Internal server error </td><td>  -  </td></tr>
+     * </table>
      */
     public okhttp3.Call adlRelayPostCall(ADLRelayRequest adLRelayRequest, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
-        String[] localBasePaths = new String[] {  };
+        String[] localBasePaths = new String[]{};
 
         // Determine Base Path to Use
-        if (localCustomBaseUrl != null){
+        if (localCustomBaseUrl != null) {
             basePath = localCustomBaseUrl;
-        } else if ( localBasePaths.length > 0 ) {
+        } else if (localBasePaths.length > 0) {
             basePath = localBasePaths[localHostIndex];
         } else {
             basePath = null;
@@ -115,7 +115,7 @@ public class AdlApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
-            "application/json"
+                "application/json"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -123,14 +123,14 @@ public class AdlApi {
         }
 
         final String[] localVarContentTypes = {
-            "application/json"
+                "application/json"
         };
         final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
         if (localVarContentType != null) {
             localVarHeaderParams.put("Content-Type", localVarContentType);
         }
 
-        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        String[] localVarAuthNames = new String[]{"ApiKeyAuth"};
         return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
     }
 
@@ -147,18 +147,17 @@ public class AdlApi {
 
     /**
      * Relay a request to the Android Device Layer (ADL)
-     * 
-     * @param adLRelayRequest  (required)
+     *
+     * @param adLRelayRequest (required)
      * @return ADLRelayResponse
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
-     * @http.response.details
-     <table summary="Response Details" border="1">
-        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> ADL relay successful </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
-        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
-        <tr><td> 500 </td><td> Internal server error </td><td>  -  </td></tr>
-     </table>
+     * @http.response.details <table summary="Response Details" border="1">
+     * <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+     * <tr><td> 200 </td><td> ADL relay successful </td><td>  -  </td></tr>
+     * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
+     * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     * <tr><td> 500 </td><td> Internal server error </td><td>  -  </td></tr>
+     * </table>
      */
     public ADLRelayResponse adlRelayPost(ADLRelayRequest adLRelayRequest) throws ApiException {
         ApiResponse<ADLRelayResponse> localVarResp = adlRelayPostWithHttpInfo(adLRelayRequest);
@@ -167,45 +166,45 @@ public class AdlApi {
 
     /**
      * Relay a request to the Android Device Layer (ADL)
-     * 
-     * @param adLRelayRequest  (required)
+     *
+     * @param adLRelayRequest (required)
      * @return ApiResponse&lt;ADLRelayResponse&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
-     * @http.response.details
-     <table summary="Response Details" border="1">
-        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> ADL relay successful </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
-        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
-        <tr><td> 500 </td><td> Internal server error </td><td>  -  </td></tr>
-     </table>
+     * @http.response.details <table summary="Response Details" border="1">
+     * <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+     * <tr><td> 200 </td><td> ADL relay successful </td><td>  -  </td></tr>
+     * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
+     * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     * <tr><td> 500 </td><td> Internal server error </td><td>  -  </td></tr>
+     * </table>
      */
     public ApiResponse<ADLRelayResponse> adlRelayPostWithHttpInfo(ADLRelayRequest adLRelayRequest) throws ApiException {
         okhttp3.Call localVarCall = adlRelayPostValidateBeforeCall(adLRelayRequest, null);
-        Type localVarReturnType = new TypeToken<ADLRelayResponse>(){}.getType();
+        Type localVarReturnType = new TypeToken<ADLRelayResponse>() {
+        }.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
     /**
      * Relay a request to the Android Device Layer (ADL) (asynchronously)
-     * 
-     * @param adLRelayRequest  (required)
-     * @param _callback The callback to be executed when the API call finishes
+     *
+     * @param adLRelayRequest (required)
+     * @param _callback       The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
-     * @http.response.details
-     <table summary="Response Details" border="1">
-        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> ADL relay successful </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
-        <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
-        <tr><td> 500 </td><td> Internal server error </td><td>  -  </td></tr>
-     </table>
+     * @http.response.details <table summary="Response Details" border="1">
+     * <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+     * <tr><td> 200 </td><td> ADL relay successful </td><td>  -  </td></tr>
+     * <tr><td> 400 </td><td> Invalid request format or parameters </td><td>  -  </td></tr>
+     * <tr><td> 401 </td><td> Authentication credentials were missing or incorrect </td><td>  -  </td></tr>
+     * <tr><td> 500 </td><td> Internal server error </td><td>  -  </td></tr>
+     * </table>
      */
     public okhttp3.Call adlRelayPostAsync(ADLRelayRequest adLRelayRequest, final ApiCallback<ADLRelayResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adlRelayPostValidateBeforeCall(adLRelayRequest, _callback);
-        Type localVarReturnType = new TypeToken<ADLRelayResponse>(){}.getType();
+        Type localVarReturnType = new TypeToken<ADLRelayResponse>() {
+        }.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

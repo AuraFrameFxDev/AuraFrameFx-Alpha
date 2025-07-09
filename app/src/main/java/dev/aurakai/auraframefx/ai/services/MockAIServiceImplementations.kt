@@ -14,17 +14,17 @@ import kotlinx.coroutines.flow.flowOf
 
 class MockAuraAIService : Agent {
     /**
- * Returns the fixed name identifying this mock AI service.
- *
- * @return The string "MockAura".
- */
+     * Returns the fixed name identifying this mock AI service.
+     *
+     * @return The string "MockAura".
+     */
     override fun getName(): String? = "MockAura"
 
     /**
- * Returns the agent type associated with this mock AI service.
- *
- * @return The `AgentType.AURA` enum value.
- */
+     * Returns the agent type associated with this mock AI service.
+     *
+     * @return The `AgentType.AURA` enum value.
+     */
     override fun getType(): AgentType = AgentType.AURA
 
     /**
@@ -63,17 +63,17 @@ class MockAuraAIService : Agent {
 
 class MockKaiAIService : Agent {
     /**
- * Returns the fixed name identifier for the mock Kai AI service.
- *
- * @return The string "MockKai".
- */
+     * Returns the fixed name identifier for the mock Kai AI service.
+     *
+     * @return The string "MockKai".
+     */
     override fun getName(): String? = "MockKai"
 
     /**
- * Returns the agent type associated with the mock Kai AI service.
- *
- * @return The `AgentType.KAI` enum value.
- */
+     * Returns the agent type associated with the mock Kai AI service.
+     *
+     * @return The `AgentType.KAI` enum value.
+     */
     override fun getType(): AgentType = AgentType.KAI
 
     /**
@@ -112,17 +112,17 @@ class MockKaiAIService : Agent {
 
 class MockCascadeAIService : Agent {
     /**
- * Returns the fixed name identifier for the mock Cascade AI service.
- *
- * @return The string "MockCascade".
- */
+     * Returns the fixed name identifier for the mock Cascade AI service.
+     *
+     * @return The string "MockCascade".
+     */
     override fun getName(): String? = "MockCascade"
 
     /**
- * Returns the agent type associated with the mock Cascade AI service.
- *
- * @return The `AgentType.CASCADE` enum value.
- */
+     * Returns the agent type associated with the mock Cascade AI service.
+     *
+     * @return The `AgentType.CASCADE` enum value.
+     */
     override fun getType(): AgentType = AgentType.CASCADE
 
     /**

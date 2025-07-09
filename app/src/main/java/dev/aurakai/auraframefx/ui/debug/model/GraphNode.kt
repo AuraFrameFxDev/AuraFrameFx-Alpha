@@ -1,19 +1,17 @@
 package dev.aurakai.auraframefx.ui.debug.model
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import dev.aurakai.auraframefx.model.agent_states.ProcessingState
-import dev.aurakai.auraframefx.model.agent_states.VisionState
-import java.util.*
-import kotlin.math.sqrt
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Storage
+import java.util.*
+import kotlin.math.sqrt
 
 @Immutable
 data class GraphNode(
@@ -50,29 +48,32 @@ data class GraphNode(
 @Immutable
 data class Offset(val x: Float, val y: Float) {
     /**
- * Returns a new Offset representing the sum of this offset and another.
- *
- * Adds the x and y components of the two offsets.
- *
- * @param other The offset to add.
- * @return The resulting offset after addition.
- */
-operator fun plus(other: Offset): Offset = Offset(x + other.x, y + other.y)
+     * Returns a new Offset representing the sum of this offset and another.
+     *
+     * Adds the x and y components of the two offsets.
+     *
+     * @param other The offset to add.
+     * @return The resulting offset after addition.
+     */
+    operator fun plus(other: Offset): Offset = Offset(x + other.x, y + other.y)
+
     /**
- * Returns the vector difference between this offset and another offset.
- *
- * @return A new Offset representing the result of subtracting the given offset from this offset.
- */
-operator fun minus(other: Offset): Offset = Offset(x - other.x, y - other.y)
+     * Returns the vector difference between this offset and another offset.
+     *
+     * @return A new Offset representing the result of subtracting the given offset from this offset.
+     */
+    operator fun minus(other: Offset): Offset = Offset(x - other.x, y - other.y)
+
     /**
- * Returns a new Offset scaled by the given factor.
- *
- * Multiplies both the x and y coordinates by the specified scalar value.
- *
- * @param factor The scalar value to multiply the coordinates by.
- * @return A new Offset with scaled coordinates.
- */
-operator fun times(factor: Float): Offset = Offset(x * factor, y * factor)
+     * Returns a new Offset scaled by the given factor.
+     *
+     * Multiplies both the x and y coordinates by the specified scalar value.
+     *
+     * @param factor The scalar value to multiply the coordinates by.
+     * @return A new Offset with scaled coordinates.
+     */
+    operator fun times(factor: Float): Offset = Offset(x * factor, y * factor)
+
     /**
      * Calculates the Euclidean distance between this offset and another offset.
      *

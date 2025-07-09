@@ -145,24 +145,24 @@ class AuraFxLogger @Inject constructor(
         loggerScope.launch { writeLogEntry("WARN", tag, message, throwable) }
 
     /**
-         * Logs an error-level message asynchronously with the given tag and optional throwable.
-         *
-         * The log entry is written to both Android Logcat and the current day's log file.
-         *
-         * @param tag Identifies the source of the log message.
-         * @param message The error message to log.
-         * @param throwable Optional exception whose stack trace will be included in the log entry.
-         */
+     * Logs an error-level message asynchronously with the given tag and optional throwable.
+     *
+     * The log entry is written to both Android Logcat and the current day's log file.
+     *
+     * @param tag Identifies the source of the log message.
+     * @param message The error message to log.
+     * @param throwable Optional exception whose stack trace will be included in the log entry.
+     */
     fun e(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("ERROR", tag, message, throwable) }
 
     /**
-         * Logs a verbose-level message asynchronously to both Android Logcat and the current day's log file.
-         *
-         * @param tag Identifier for the source of the log message.
-         * @param message The message to be logged.
-         * @param throwable Optional exception whose stack trace will be included in the log entry.
-         */
+     * Logs a verbose-level message asynchronously to both Android Logcat and the current day's log file.
+     *
+     * @param tag Identifier for the source of the log message.
+     * @param message The message to be logged.
+     * @param throwable Optional exception whose stack trace will be included in the log entry.
+     */
     fun v(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("VERBOSE", tag, message, throwable) }
 

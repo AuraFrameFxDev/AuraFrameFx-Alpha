@@ -5,7 +5,6 @@ import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import java.lang.System // Added import
 
 @Serializable
 data class AIError(
@@ -31,7 +30,7 @@ data class RecoveryAction(
     val metadata: Map<String, String> = emptyMap(),
 )
 
-@Serializable 
+@Serializable
 enum class ErrorType {
     PROCESSING_ERROR,
     MEMORY_ERROR,
@@ -42,7 +41,7 @@ enum class ErrorType {
     USER_ERROR
 }
 
-@Serializable 
+@Serializable
 enum class RecoveryStatus {
     PENDING,
     IN_PROGRESS,
@@ -51,7 +50,7 @@ enum class RecoveryStatus {
     SKIPPED
 }
 
-@Serializable 
+@Serializable
 enum class RecoveryActionType {
     RETRY,
     FALLBACK,
@@ -61,7 +60,7 @@ enum class RecoveryActionType {
     ESCALATE
 }
 
-@Serializable 
+@Serializable
 enum class RecoveryResult {
     SUCCESS,
     FAILURE,
