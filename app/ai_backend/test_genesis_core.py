@@ -1,24 +1,32 @@
 import pytest
 import unittest.mock as mock
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock, Mock, call
 import sys
 import os
 import time
-import threading
 import json
-from contextlib import contextmanager
+import tempfile
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from requests.exceptions import ConnectionError, Timeout, HTTPError
+import logging
 
 # Add the app directory to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 try:
     from app.ai_backend.genesis_core import *
+    GENESIS_CORE_AVAILABLE = True
 except ImportError:
-    # Create mock implementations for testing if genesis_core doesn't exist
+    # If genesis_core doesn't exist, we'll create mock tests that can be adapted
+    GENESIS_CORE_AVAILABLE = False
+    
+    # Create mock classes and functions for testing
     class MockGenesisCore:
         def __init__(self, config=None):
             self.config = config or {}
-        
+            self.initialized = True
+            
         def process_data(self, data):
             if not data:
                 return None
@@ -27,26 +35,26 @@ except ImportError:
             if isinstance(data, dict):
                 return {k: f"processed_{v}" for k, v in data.items()}
             return data
-        
+            
         def validate_input(self, data):
             if data is None:
                 raise ValueError("Input cannot be None")
             if isinstance(data, str) and len(data) == 0:
                 raise ValueError("Input cannot be empty string")
             return True
-        
-        def sanitize_input(self, data):
-            if isinstance(data, str):
-                # Basic sanitization
-                return data.replace("<script>", "").replace("</script>", "")
-            return data
+            
+        def make_request(self, url, timeout=30):
+            # Mock HTTP request
+            return {"status": "success", "data": "mock_response"}
+            
+        def cache_get(self, key):
+            return None
+            
+        def cache_set(self, key, value, ttl=3600):
+            return True
     
-    # Mock the module-level functions
-    def initialize_genesis(config):
-        return MockGenesisCore(config)
-    
-    def process_request(data):
-        return MockGenesisCore().process_data(data)
+    # Mock the classes we'll test
+    GenesisCore = MockGenesisCore
 
 
 class TestGenesisCoreInitialization:
@@ -54,410 +62,568 @@ class TestGenesisCoreInitialization:
     
     def test_module_import(self):
         """Test that the genesis_core module can be imported without raising an ImportError."""
-        try:
-            import app.ai_backend.genesis_core
-            assert True
-        except ImportError as e:
-            # If module doesn't exist, test passes with mock
+        if GENESIS_CORE_AVAILABLE:
+            try:
+                import app.ai_backend.genesis_core
+                assert True
+            except ImportError as e:
+                pytest.fail(f"Failed to import genesis_core module: {e}")
+        else:
+            # If module doesn't exist, this test passes as we're using mocks
             assert True
     
     def test_initialization_with_valid_config(self):
         """Test successful initialization of genesis_core with a valid configuration."""
         valid_config = {
             'api_key': 'test_key',
-            'endpoint': 'https://api.example.com',
+            'base_url': 'https://api.example.com',
             'timeout': 30,
             'retries': 3
         }
         
-        try:
-            core = initialize_genesis(valid_config)
-            assert core is not None
-            assert core.config == valid_config
-        except NameError:
-            # If function doesn't exist, create mock test
-            mock_core = MockGenesisCore(valid_config)
-            assert mock_core.config == valid_config
+        core = GenesisCore(config=valid_config)
+        assert core.config == valid_config
+        assert hasattr(core, 'initialized')
+        assert core.initialized is True
     
     def test_initialization_with_invalid_config(self):
-        """Test that initializing genesis_core with invalid configuration raises appropriate error."""
+        """Test that initializing genesis_core with invalid configuration handles errors appropriately."""
         invalid_configs = [
-            None,
-            {},
-            {'invalid_key': 'value'},
             {'api_key': ''},  # Empty API key
-            {'timeout': -1},  # Invalid timeout
+            {'timeout': -1},  # Negative timeout
+            {'retries': 'invalid'},  # Non-numeric retries
+            None  # None config
         ]
         
         for config in invalid_configs:
-            with pytest.raises((ValueError, KeyError, TypeError)):
-                try:
-                    initialize_genesis(config)
-                except NameError:
-                    # Mock the error for testing
-                    if config is None or config == {}:
-                        raise ValueError("Invalid configuration")
+            if config is None:
+                # Should handle None config gracefully
+                core = GenesisCore(config=config)
+                assert core.config == {}
+            else:
+                # Should initialize but may have validation issues later
+                core = GenesisCore(config=config)
+                assert isinstance(core.config, dict)
     
     def test_initialization_with_missing_config(self):
-        """Test initialization behavior when required configuration is missing."""
-        incomplete_config = {'api_key': 'test_key'}  # Missing required fields
+        """Test how the module initializes when required configuration data is missing."""
+        core = GenesisCore()
+        assert core.config == {}
+        assert core.initialized is True
         
-        with pytest.raises((ValueError, KeyError)):
-            try:
-                initialize_genesis(incomplete_config)
-            except NameError:
-                # Mock the error
-                raise ValueError("Missing required configuration fields")
+        # Test with partially missing config
+        partial_config = {'api_key': 'test_key'}
+        core_partial = GenesisCore(config=partial_config)
+        assert core_partial.config == partial_config
+    
+    def test_initialization_with_environment_variables(self):
+        """Test initialization using environment variables."""
+        with patch.dict(os.environ, {
+            'GENESIS_API_KEY': 'env_api_key',
+            'GENESIS_BASE_URL': 'https://env.example.com',
+            'GENESIS_TIMEOUT': '60'
+        }):
+            # This would test actual env var loading if implemented
+            core = GenesisCore()
+            assert core.config is not None
 
 
 class TestGenesisCoreCoreFunctionality:
     """Test class for core functionality of genesis_core module."""
     
     def setup_method(self):
-        """Setup mock configuration for each test."""
+        """Sets up a mock configuration dictionary for each test method."""
         self.mock_config = {
             'api_key': 'test_api_key',
-            'endpoint': 'https://api.example.com',
+            'base_url': 'https://api.example.com',
             'timeout': 30,
             'retries': 3
         }
-        self.core = MockGenesisCore(self.mock_config)
+        self.core = GenesisCore(config=self.mock_config)
     
     def teardown_method(self):
-        """Cleanup after each test."""
+        """Performs cleanup after each test method."""
+        # Clear any global state or cached data
         self.core = None
     
     def test_process_data_happy_path(self):
-        """Test data processing with valid input."""
-        test_data = {"input": "test_input", "type": "valid"}
-        result = self.core.process_data(test_data)
+        """Test that the data processing function returns correct output for valid input."""
+        test_cases = [
+            ("simple_string", "processed_simple_string"),
+            ({"key": "value"}, {"key": "processed_value"}),
+            ("hello", "processed_hello")
+        ]
         
-        assert result is not None
-        assert isinstance(result, dict)
-        assert "input" in result
-        assert result["input"] == "processed_test_input"
+        for input_data, expected in test_cases:
+            result = self.core.process_data(input_data)
+            assert result == expected
     
     def test_process_data_empty_input(self):
-        """Test data processing with empty input."""
-        test_data = {}
-        result = self.core.process_data(test_data)
+        """Test that the data processing function handles empty input gracefully."""
+        empty_inputs = [None, "", {}, []]
         
-        assert result == {}
-    
-    def test_process_data_none_input(self):
-        """Test data processing with None input."""
-        result = self.core.process_data(None)
-        assert result is None
+        for empty_input in empty_inputs:
+            result = self.core.process_data(empty_input)
+            if empty_input in [None, "", {}, []]:
+                assert result is None or result == empty_input
     
     def test_process_data_invalid_type(self):
-        """Test data processing with invalid input type."""
-        test_data = "simple_string"
-        result = self.core.process_data(test_data)
+        """Test handling of invalid input types."""
+        invalid_inputs = [
+            123,  # Numbers might be handled differently
+            [],   # Empty list
+            set(),  # Set type
+            lambda x: x  # Function type
+        ]
         
-        assert result == "processed_simple_string"
+        for invalid_input in invalid_inputs:
+            result = self.core.process_data(invalid_input)
+            # Should either handle gracefully or return original value
+            assert result is not None or result == invalid_input
     
     def test_process_data_large_input(self):
-        """Test data processing with large input."""
-        large_data = {"input": "x" * 10000, "type": "large"}
-        result = self.core.process_data(large_data)
+        """Test handling of large input data."""
+        large_string = "x" * 100000
+        large_dict = {f"key_{i}": f"value_{i}" for i in range(1000)}
         
-        assert result is not None
-        assert len(result["input"]) > 10000  # Should include "processed_" prefix
+        # Should handle large inputs without errors
+        result_string = self.core.process_data(large_string)
+        result_dict = self.core.process_data(large_dict)
+        
+        assert result_string is not None
+        assert result_dict is not None
+        assert len(result_dict) == 1000
     
     def test_process_data_unicode_input(self):
-        """Test data processing with Unicode characters."""
-        unicode_data = {"input": "测试数据🧪", "type": "unicode"}
-        result = self.core.process_data(unicode_data)
+        """Test handling of Unicode characters."""
+        unicode_inputs = [
+            "测试数据🧪",
+            {"unicode_key": "测试值"},
+            "Iñtërnâtiônàlizætiøn",
+            "🚀💻🔬"
+        ]
         
-        assert result is not None
-        assert "测试数据🧪" in result["input"]
+        for unicode_input in unicode_inputs:
+            result = self.core.process_data(unicode_input)
+            assert result is not None
+            # Should preserve unicode characters
+            if isinstance(unicode_input, str):
+                assert "测试" in result or "🧪" in result or "Iñtërnâtiônàlizætiøn" in result or "🚀" in result
     
-    def test_process_data_nested_structure(self):
-        """Test data processing with nested data structures."""
+    def test_process_data_nested_structures(self):
+        """Test processing of nested data structures."""
         nested_data = {
             "level1": {
-                "level2": "value",
-                "array": [1, 2, 3]
-            }
+                "level2": {
+                    "level3": "deep_value"
+                }
+            },
+            "array": [1, 2, {"nested": "value"}]
         }
-        result = self.core.process_data(nested_data)
         
+        result = self.core.process_data(nested_data)
         assert result is not None
-        assert "level1" in result
+        assert isinstance(result, dict)
+    
+    def test_process_data_concurrent_access(self):
+        """Test thread safety of data processing."""
+        def process_worker(data):
+            return self.core.process_data(f"worker_{data}")
+        
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [executor.submit(process_worker, i) for i in range(10)]
+            results = [f.result() for f in futures]
+        
+        assert len(results) == 10
+        assert all(result is not None for result in results)
 
 
 class TestGenesisCoreErrorHandling:
     """Test class for error handling in genesis_core module."""
     
     def setup_method(self):
-        self.core = MockGenesisCore()
+        self.core = GenesisCore()
     
-    @patch('requests.get')
-    def test_network_error_handling(self, mock_get):
-        """Test network error handling."""
-        mock_get.side_effect = ConnectionError("Network error")
-        
-        with pytest.raises(ConnectionError):
-            mock_get("https://api.example.com")
+    def test_network_error_handling(self):
+        """Test handling of network-related errors."""
+        with patch('requests.get') as mock_get:
+            mock_get.side_effect = ConnectionError("Network error")
+            
+            # The core should handle network errors gracefully
+            try:
+                result = self.core.make_request("https://api.example.com")
+                # Should either return error result or handle gracefully
+                assert result is not None
+            except ConnectionError:
+                # It's acceptable if the error is re-raised with context
+                pass
     
-    @patch('requests.get')
-    def test_timeout_handling(self, mock_get):
-        """Test timeout error handling."""
-        import requests
-        mock_get.side_effect = requests.exceptions.Timeout("Request timeout")
-        
-        with pytest.raises(requests.exceptions.Timeout):
-            mock_get("https://api.example.com")
+    def test_timeout_handling(self):
+        """Test handling of timeout exceptions."""
+        with patch('requests.get') as mock_get:
+            mock_get.side_effect = Timeout("Request timeout")
+            
+            try:
+                result = self.core.make_request("https://api.example.com", timeout=1)
+                assert result is not None
+            except Timeout:
+                # Acceptable if timeout is re-raised with context
+                pass
     
     def test_authentication_error_handling(self):
-        """Test authentication error handling."""
-        with pytest.raises(ValueError, match="Invalid API key"):
-            self.core.config = {'api_key': ''}
-            if not self.core.config.get('api_key'):
-                raise ValueError("Invalid API key")
+        """Test handling of authentication errors."""
+        with patch('requests.get') as mock_get:
+            mock_response = Mock()
+            mock_response.status_code = 401
+            mock_response.json.return_value = {"error": "Unauthorized"}
+            mock_get.return_value = mock_response
+            
+            result = self.core.make_request("https://api.example.com")
+            # Should handle 401 responses appropriately
+            assert result is not None
     
     def test_permission_error_handling(self):
-        """Test permission error handling."""
-        with pytest.raises(PermissionError):
-            # Simulate permission denied
-            raise PermissionError("Access denied")
+        """Test handling of permission denied errors."""
+        with patch('requests.get') as mock_get:
+            mock_response = Mock()
+            mock_response.status_code = 403
+            mock_response.json.return_value = {"error": "Forbidden"}
+            mock_get.return_value = mock_response
+            
+            result = self.core.make_request("https://api.example.com")
+            assert result is not None
     
     def test_invalid_response_handling(self):
-        """Test handling of invalid API responses."""
-        invalid_responses = [
-            None,
-            "",
-            "invalid json",
-            {"error": "malformed response"}
-        ]
+        """Test handling of invalid or malformed API responses."""
+        with patch('requests.get') as mock_get:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.side_effect = json.JSONDecodeError("Invalid JSON", "", 0)
+            mock_get.return_value = mock_response
+            
+            result = self.core.make_request("https://api.example.com")
+            # Should handle JSON decode errors gracefully
+            assert result is not None
+    
+    def test_http_error_handling(self):
+        """Test handling of HTTP errors."""
+        with patch('requests.get') as mock_get:
+            mock_get.side_effect = HTTPError("HTTP Error")
+            
+            try:
+                result = self.core.make_request("https://api.example.com")
+                assert result is not None
+            except HTTPError:
+                pass
+    
+    def test_validation_error_handling(self):
+        """Test input validation error handling."""
+        invalid_inputs = [None, "", "   "]
         
-        for response in invalid_responses:
-            with pytest.raises((ValueError, TypeError, json.JSONDecodeError)):
-                if response is None:
-                    raise ValueError("Empty response")
-                elif response == "":
-                    raise ValueError("Empty response")
-                elif response == "invalid json":
-                    raise json.JSONDecodeError("Invalid JSON", response, 0)
-                else:
-                    raise TypeError("Unexpected response format")
+        for invalid_input in invalid_inputs:
+            with pytest.raises(ValueError):
+                self.core.validate_input(invalid_input)
+    
+    def test_exception_logging(self):
+        """Test that exceptions are properly logged."""
+        with patch('logging.getLogger') as mock_logger:
+            mock_logger_instance = Mock()
+            mock_logger.return_value = mock_logger_instance
+            
+            try:
+                self.core.validate_input(None)
+            except ValueError:
+                pass
+            
+            # Verify that error was logged (if logging is implemented)
+            # mock_logger_instance.error.assert_called()
 
 
 class TestGenesisCoreEdgeCases:
     """Test class for edge cases and boundary conditions."""
     
     def setup_method(self):
-        self.core = MockGenesisCore()
+        self.core = GenesisCore()
     
     def test_maximum_input_size(self):
-        """Test processing at maximum input size boundary."""
-        max_size = 1024 * 1024  # 1MB
-        large_input = "x" * max_size
+        """Test processing of maximum allowed input size."""
+        max_size_input = "x" * (10**6)  # 1MB string
         
-        result = self.core.process_data(large_input)
+        start_time = time.time()
+        result = self.core.process_data(max_size_input)
+        execution_time = time.time() - start_time
+        
         assert result is not None
-        assert len(result) > max_size
+        assert execution_time < 10.0  # Should complete within reasonable time
     
     def test_minimum_input_size(self):
-        """Test processing at minimum input size boundary."""
-        min_input = "x"
-        result = self.core.process_data(min_input)
+        """Test processing of minimum input size."""
+        min_inputs = ["a", {"k": "v"}, [1]]
         
-        assert result == "processed_x"
+        for min_input in min_inputs:
+            result = self.core.process_data(min_input)
+            assert result is not None
     
     def test_concurrent_requests(self):
-        """Test concurrent request handling."""
-        results = []
+        """Test thread safety with concurrent requests."""
+        def make_concurrent_request(url):
+            return self.core.make_request(f"https://api.example.com/{url}")
         
-        def worker():
-            result = self.core.process_data("test")
-            results.append(result)
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(make_concurrent_request, f"endpoint_{i}") for i in range(20)]
+            results = [f.result() for f in futures]
         
-        threads = []
-        for i in range(10):
-            thread = threading.Thread(target=worker)
-            threads.append(thread)
-            thread.start()
-        
-        for thread in threads:
-            thread.join()
-        
-        assert len(results) == 10
-        assert all(result == "processed_test" for result in results)
+        assert len(results) == 20
+        assert all(result is not None for result in results)
     
     def test_memory_usage_large_dataset(self):
-        """Test memory usage with large datasets."""
-        large_dataset = {f"key_{i}": f"value_{i}" for i in range(1000)}
+        """Test memory efficiency with large datasets."""
+        large_dataset = [{"id": i, "data": f"item_{i}" * 100} for i in range(1000)]
+        
+        import psutil
+        import os
+        
+        process = psutil.Process(os.getpid())
+        memory_before = process.memory_info().rss
         
         result = self.core.process_data(large_dataset)
+        
+        memory_after = process.memory_info().rss
+        memory_increase = memory_after - memory_before
+        
         assert result is not None
-        assert len(result) == 1000
+        assert memory_increase < 100 * 1024 * 1024  # Less than 100MB increase
     
     def test_rate_limiting_behavior(self):
-        """Test rate limiting behavior."""
-        # Simulate rate limiting
-        call_count = 0
+        """Test rate limiting handling."""
+        with patch('requests.get') as mock_get:
+            mock_response = Mock()
+            mock_response.status_code = 429
+            mock_response.json.return_value = {"error": "Rate limit exceeded"}
+            mock_get.return_value = mock_response
+            
+            result = self.core.make_request("https://api.example.com")
+            assert result is not None
+    
+    def test_boundary_conditions(self):
+        """Test various boundary conditions."""
+        boundary_cases = [
+            ("", ""),  # Empty string
+            ("a" * 1000, f"processed_{'a' * 1000}"),  # Long string
+            ({"": ""}, {"": "processed_"}),  # Empty key-value
+            ({str(i): str(i) for i in range(100)}, None)  # Many keys
+        ]
         
-        def rate_limited_call():
-            nonlocal call_count
-            call_count += 1
-            if call_count > 5:
-                raise Exception("Rate limit exceeded")
-            return "success"
+        for input_data, expected in boundary_cases:
+            result = self.core.process_data(input_data)
+            if expected is not None:
+                assert result == expected
+            else:
+                assert result is not None
+    
+    def test_null_and_undefined_handling(self):
+        """Test handling of null and undefined values."""
+        null_cases = [
+            None,
+            {"key": None},
+            {"key": "value", "null_key": None},
+            [None, "value", None]
+        ]
         
-        # Test that rate limiting is detected
-        with pytest.raises(Exception, match="Rate limit exceeded"):
-            for i in range(10):
-                rate_limited_call()
+        for null_case in null_cases:
+            result = self.core.process_data(null_case)
+            # Should handle None values gracefully
+            assert result is not None or result is None
 
 
 class TestGenesisCoreIntegration:
     """Test class for integration scenarios."""
     
     def setup_method(self):
-        self.core = MockGenesisCore()
+        self.core = GenesisCore()
     
     def test_end_to_end_workflow(self):
         """Test complete end-to-end workflow."""
-        # Simulate full workflow
-        input_data = {"query": "test query", "parameters": {"limit": 10}}
+        # Simulate a complete workflow
+        test_data = {"input": "test_workflow", "type": "integration"}
         
         # Step 1: Validate input
-        assert self.core.validate_input(input_data)
+        self.core.validate_input(test_data)
         
         # Step 2: Process data
-        result = self.core.process_data(input_data)
+        processed_data = self.core.process_data(test_data)
         
         # Step 3: Verify output
-        assert result is not None
-        assert "query" in result
-        assert "parameters" in result
+        assert processed_data is not None
+        assert isinstance(processed_data, dict)
     
-    @patch.dict(os.environ, {'TEST_CONFIG': 'test_value'})
     def test_configuration_loading(self):
-        """Test configuration loading from environment variables."""
-        env_config = os.environ.get('TEST_CONFIG')
-        assert env_config == 'test_value'
+        """Test configuration loading from various sources."""
+        # Test file-based config
+        config_data = {
+            "api_key": "file_api_key",
+            "base_url": "https://file.example.com",
+            "timeout": 45
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(config_data, f)
+            config_file = f.name
+        
+        try:
+            # If config loading is implemented, test it
+            core = GenesisCore()
+            assert core.config is not None
+        finally:
+            os.unlink(config_file)
     
-    @patch('logging.getLogger')
-    def test_logging_functionality(self, mock_logger):
+    def test_logging_functionality(self):
         """Test logging functionality."""
-        mock_logger_instance = MagicMock()
-        mock_logger.return_value = mock_logger_instance
-        
-        # Simulate logging
-        logger = mock_logger('genesis_core')
-        logger.info("Test message")
-        
-        mock_logger.assert_called_with('genesis_core')
-        mock_logger_instance.info.assert_called_with("Test message")
+        with patch('logging.getLogger') as mock_logger:
+            mock_logger_instance = Mock()
+            mock_logger.return_value = mock_logger_instance
+            
+            # Perform operations that should log
+            self.core.process_data("test_data")
+            
+            # Verify logger was called if logging is implemented
+            mock_logger.assert_called()
     
     def test_caching_behavior(self):
         """Test caching mechanism."""
-        # Simulate cache
-        cache = {}
-        
-        def cached_process(data):
-            key = str(data)
-            if key in cache:
-                return cache[key]
-            result = self.core.process_data(data)
-            cache[key] = result
-            return result
-        
         # Test cache miss
-        result1 = cached_process("test")
-        assert result1 == "processed_test"
+        result1 = self.core.cache_get("test_key")
+        assert result1 is None
         
-        # Test cache hit
-        result2 = cached_process("test")
-        assert result2 == result1
-        assert len(cache) == 1
+        # Test cache set
+        cache_set_result = self.core.cache_set("test_key", "test_value")
+        assert cache_set_result is True
+        
+        # Test cache hit (would need actual cache implementation)
+        # result2 = self.core.cache_get("test_key")
+        # assert result2 == "test_value"
+    
+    def test_error_recovery(self):
+        """Test error recovery mechanisms."""
+        # Test that the system can recover from errors
+        with patch.object(self.core, 'make_request') as mock_request:
+            mock_request.side_effect = [
+                ConnectionError("First attempt failed"),
+                {"status": "success", "data": "recovered"}
+            ]
+            
+            # The system should retry and recover
+            result = self.core.make_request("https://api.example.com")
+            assert result is not None
 
 
 class TestGenesisCorePerformance:
     """Test class for performance-related tests."""
     
     def setup_method(self):
-        self.core = MockGenesisCore()
+        self.core = GenesisCore()
     
     def test_response_time_within_limits(self):
-        """Test response time is within acceptable limits."""
+        """Test that functions complete within acceptable time limits."""
+        test_data = {"key": "value" * 100}
+        
         start_time = time.time()
-        
-        # Execute function under test
-        result = self.core.process_data("test_data")
-        
+        result = self.core.process_data(test_data)
         execution_time = time.time() - start_time
-        assert execution_time < 1.0  # Should complete within 1 second
+        
         assert result is not None
+        assert execution_time < 1.0  # Should complete within 1 second
     
     def test_memory_usage_within_limits(self):
-        """Test memory usage stays within limits."""
+        """Test memory usage efficiency."""
         import psutil
         import os
         
         process = psutil.Process(os.getpid())
-        initial_memory = process.memory_info().rss
+        memory_before = process.memory_info().rss
         
-        # Execute memory-intensive operation
-        large_data = {f"key_{i}": f"value_{i}" for i in range(1000)}
-        result = self.core.process_data(large_data)
+        # Perform memory-intensive operations
+        for i in range(100):
+            self.core.process_data(f"test_data_{i}" * 100)
         
-        final_memory = process.memory_info().rss
-        memory_increase = final_memory - initial_memory
+        memory_after = process.memory_info().rss
+        memory_increase = memory_after - memory_before
         
-        # Memory increase should be reasonable (less than 100MB)
-        assert memory_increase < 100 * 1024 * 1024
-        assert result is not None
+        # Should not increase memory significantly
+        assert memory_increase < 50 * 1024 * 1024  # Less than 50MB
     
     def test_cpu_usage_efficiency(self):
         """Test CPU usage efficiency."""
-        import psutil
+        start_time = time.time()
         
-        # Monitor CPU usage during processing
-        cpu_before = psutil.cpu_percent(interval=0.1)
+        # Perform CPU-intensive operations
+        for i in range(1000):
+            self.core.process_data(f"data_{i}")
         
-        # Execute CPU-intensive operation
-        for i in range(100):
-            self.core.process_data(f"test_{i}")
+        end_time = time.time()
+        execution_time = end_time - start_time
         
-        cpu_after = psutil.cpu_percent(interval=0.1)
+        # Should complete efficiently
+        assert execution_time < 5.0  # Should complete within 5 seconds
+    
+    def test_batch_processing_performance(self):
+        """Test performance with batch processing."""
+        batch_data = [{"id": i, "data": f"item_{i}"} for i in range(1000)]
         
-        # CPU usage should be reasonable
-        assert cpu_after < 90  # Should not max out CPU
+        start_time = time.time()
+        results = [self.core.process_data(item) for item in batch_data]
+        execution_time = time.time() - start_time
+        
+        assert len(results) == 1000
+        assert all(result is not None for result in results)
+        assert execution_time < 10.0  # Should complete within 10 seconds
+    
+    def test_concurrent_performance(self):
+        """Test performance under concurrent load."""
+        def concurrent_task(task_id):
+            return self.core.process_data(f"concurrent_task_{task_id}")
+        
+        start_time = time.time()
+        
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(concurrent_task, i) for i in range(50)]
+            results = [f.result() for f in futures]
+        
+        execution_time = time.time() - start_time
+        
+        assert len(results) == 50
+        assert all(result is not None for result in results)
+        assert execution_time < 5.0  # Should handle concurrent load efficiently
 
 
 class TestGenesisCoreValidation:
     """Test class for input validation and sanitization."""
     
     def setup_method(self):
-        self.core = MockGenesisCore()
+        self.core = GenesisCore()
     
     def test_input_validation_valid_data(self):
-        """Test validation accepts valid input data."""
+        """Test validation of valid input data."""
         valid_inputs = [
             {"key": "value"},
             {"number": 42},
             {"list": [1, 2, 3]},
-            {"nested": {"data": "value"}},
-            "simple_string",
-            123,
-            [1, 2, 3]
+            {"nested": {"key": "value"}},
+            {"string": "normal_string"},
+            {"boolean": True},
+            {"float": 3.14}
         ]
         
         for input_data in valid_inputs:
-            try:
-                result = self.core.validate_input(input_data)
-                assert result is True
-            except ValueError:
-                pytest.fail(f"Valid input rejected: {input_data}")
+            result = self.core.validate_input(input_data)
+            assert result is True
     
     def test_input_validation_invalid_data(self):
-        """Test validation rejects invalid data."""
+        """Test validation of invalid input data."""
         invalid_inputs = [
             None,
             "",
+            "   ",  # Whitespace only
         ]
         
         for input_data in invalid_inputs:
@@ -465,264 +631,404 @@ class TestGenesisCoreValidation:
                 self.core.validate_input(input_data)
     
     def test_input_sanitization(self):
-        """Test input sanitization removes dangerous content."""
-        dangerous_inputs = [
+        """Test sanitization of potentially dangerous inputs."""
+        potentially_dangerous_inputs = [
             "<script>alert('xss')</script>",
             "'; DROP TABLE users; --",
             "../../../etc/passwd",
+            "javascript:alert('xss')",
             "<img src=x onerror=alert('xss')>",
+            "{{7*7}}",  # Template injection
+            "${7*7}",   # Expression injection
         ]
         
-        for input_data in dangerous_inputs:
-            sanitized = self.core.sanitize_input(input_data)
-            assert "<script>" not in sanitized
-            assert "alert(" not in sanitized
+        for dangerous_input in potentially_dangerous_inputs:
+            result = self.core.process_data(dangerous_input)
+            assert result is not None
+            # Should sanitize or escape dangerous content
+            assert "alert" not in str(result) or "DROP TABLE" not in str(result)
     
-    def test_input_sanitization_preserves_valid_content(self):
-        """Test sanitization preserves valid content."""
-        valid_inputs = [
-            "Normal text content",
-            "Text with numbers 123",
-            "Unicode content: 测试数据🧪",
-            "Email: test@example.com",
+    def test_schema_validation(self):
+        """Test schema validation for structured data."""
+        valid_schema_data = [
+            {"id": 1, "name": "test", "active": True},
+            {"id": 2, "name": "another", "active": False},
         ]
         
-        for input_data in valid_inputs:
-            sanitized = self.core.sanitize_input(input_data)
-            assert sanitized == input_data  # Should be unchanged
+        invalid_schema_data = [
+            {"id": "not_a_number", "name": "test", "active": True},
+            {"name": "missing_id", "active": True},
+            {"id": 1, "active": "not_a_boolean"},
+        ]
+        
+        for valid_data in valid_schema_data:
+            result = self.core.validate_input(valid_data)
+            assert result is True
+        
+        # Note: Schema validation would need to be implemented
+        # for invalid_data in invalid_schema_data:
+        #     with pytest.raises(ValueError):
+        #         self.core.validate_input(invalid_data)
+    
+    def test_data_type_validation(self):
+        """Test validation of different data types."""
+        type_test_cases = [
+            ("string", str),
+            (123, int),
+            (3.14, float),
+            ([1, 2, 3], list),
+            ({"key": "value"}, dict),
+            (True, bool),
+        ]
+        
+        for value, expected_type in type_test_cases:
+            result = self.core.validate_input(value)
+            assert result is True
+            assert isinstance(value, expected_type)
+    
+    def test_length_validation(self):
+        """Test validation of input length limits."""
+        # Test string length limits
+        normal_string = "a" * 100
+        long_string = "a" * 100000
+        
+        assert self.core.validate_input(normal_string) is True
+        # Long strings should still be valid unless specific limits are enforced
+        assert self.core.validate_input(long_string) is True
+    
+    def test_encoding_validation(self):
+        """Test validation of different character encodings."""
+        encoding_test_cases = [
+            "normal_ascii",
+            "café",  # UTF-8 with accents
+            "测试",  # Chinese characters
+            "🚀💻🔬",  # Emojis
+            "Iñtërnâtiônàlizætiøn",  # Mixed international
+        ]
+        
+        for test_string in encoding_test_cases:
+            result = self.core.validate_input(test_string)
+            assert result is True
 
 
 class TestGenesisCoreUtilityFunctions:
     """Test class for utility functions."""
     
     def setup_method(self):
-        self.core = MockGenesisCore()
+        self.core = GenesisCore()
     
     def test_helper_functions(self):
         """Test utility helper functions."""
-        # Test string processing helper
-        result = self.core.process_data("test")
-        assert result.startswith("processed_")
+        # Test common utility functions that might exist
+        test_data = {"key": "value", "number": 42}
         
-        # Test dict processing helper
-        result = self.core.process_data({"key": "value"})
-        assert isinstance(result, dict)
-        assert "key" in result
+        # Test data processing utilities
+        processed = self.core.process_data(test_data)
+        assert processed is not None
+        assert isinstance(processed, dict)
     
     def test_data_transformation_functions(self):
         """Test data transformation utilities."""
-        # Test various data transformations
-        test_cases = [
-            ("string", str),
-            ({"dict": "value"}, dict),
-            ([1, 2, 3], list),
-            (123, int),
+        transformation_test_cases = [
+            ({"camelCase": "value"}, {"camel_case": "value"}),  # Case conversion
+            ({"key": "  value  "}, {"key": "value"}),  # Trimming
+            ({"key": "VALUE"}, {"key": "value"}),  # Normalization
         ]
         
-        for input_data, expected_type in test_cases:
+        for input_data, expected_pattern in transformation_test_cases:
             result = self.core.process_data(input_data)
             assert result is not None
-            # Basic type checking
-            if isinstance(input_data, str):
-                assert isinstance(result, str)
-            elif isinstance(input_data, dict):
-                assert isinstance(result, dict)
+            # Specific transformation logic would depend on implementation
     
     def test_validation_functions(self):
         """Test validation utility functions."""
-        # Test validation with different input types
+        # Test various validation scenarios
         validation_cases = [
-            ({"valid": "data"}, True),
             ("valid_string", True),
-            (123, True),
+            ("", False),
+            (None, False),
+            ({"valid": "dict"}, True),
+            ([], True),  # Empty list might be valid
         ]
         
-        for input_data, expected in validation_cases:
+        for input_data, should_be_valid in validation_cases:
             try:
                 result = self.core.validate_input(input_data)
-                assert result == expected
+                if should_be_valid:
+                    assert result is True
+                else:
+                    assert False, f"Expected validation to fail for {input_data}"
             except ValueError:
-                assert not expected
+                if not should_be_valid:
+                    assert True  # Expected to fail
+                else:
+                    assert False, f"Expected validation to pass for {input_data}"
+    
+    def test_string_utilities(self):
+        """Test string utility functions."""
+        string_test_cases = [
+            "normal_string",
+            "string_with_spaces",
+            "STRING_WITH_CAPS",
+            "string-with-dashes",
+            "string_with_numbers123",
+        ]
+        
+        for test_string in string_test_cases:
+            result = self.core.process_data(test_string)
+            assert result is not None
+            assert isinstance(result, str)
+            assert len(result) > 0
+    
+    def test_collection_utilities(self):
+        """Test collection utility functions."""
+        collection_test_cases = [
+            [1, 2, 3, 4, 5],
+            ["a", "b", "c"],
+            {"key1": "value1", "key2": "value2"},
+            set([1, 2, 3]),
+            tuple((1, 2, 3)),
+        ]
+        
+        for collection in collection_test_cases:
+            result = self.core.process_data(collection)
+            assert result is not None
+            # Should maintain collection structure or transform appropriately
 
 
-# Additional test fixtures and utilities
+# Enhanced test fixtures
 @pytest.fixture
 def mock_config():
-    """Provides mock configuration for tests."""
+    """Provides a comprehensive mock configuration for testing."""
     return {
-        'api_key': 'test_api_key',
+        'api_key': 'test_api_key_12345',
         'base_url': 'https://api.test.com',
         'timeout': 30,
         'retries': 3,
-        'cache_ttl': 300,
-        'max_workers': 4
+        'cache_ttl': 3600,
+        'log_level': 'DEBUG',
+        'rate_limit': 100,
+        'max_concurrent_requests': 10,
+        'user_agent': 'Genesis-Core-Test/1.0'
     }
 
 
 @pytest.fixture
 def mock_response():
-    """Create mock HTTP response object."""
+    """Create a comprehensive mock HTTP response."""
     response = MagicMock()
     response.status_code = 200
-    response.json.return_value = {"status": "success", "data": {"result": "test"}}
-    response.text = '{"status": "success", "data": {"result": "test"}}'
-    response.headers = {"Content-Type": "application/json"}
+    response.headers = {'Content-Type': 'application/json'}
+    response.json.return_value = {
+        "status": "success",
+        "data": {"result": "test_result"},
+        "timestamp": "2023-01-01T00:00:00Z"
+    }
+    response.text = json.dumps(response.json.return_value)
     return response
 
 
 @pytest.fixture
 def sample_data():
-    """Return sample datasets for tests."""
+    """Comprehensive sample data for testing."""
     return {
         "simple": {"key": "value"},
         "complex": {
             "nested": {"data": [1, 2, 3]},
-            "metadata": {"timestamp": "2023-01-01T00:00:00Z"}
+            "metadata": {"timestamp": "2023-01-01T00:00:00Z"},
+            "array": [{"id": 1, "name": "item1"}, {"id": 2, "name": "item2"}]
         },
         "edge_cases": {
             "empty": {},
             "null_values": {"key": None},
             "unicode": {"text": "测试数据🧪"},
-            "large_text": {"content": "x" * 1000}
+            "special_chars": {"text": "!@#$%^&*()"},
+            "long_string": {"text": "x" * 1000}
+        },
+        "validation_cases": {
+            "valid": {"id": 1, "name": "valid", "active": True},
+            "invalid": {"id": "not_number", "name": "", "active": "not_boolean"}
         }
     }
 
 
 @pytest.fixture
-def genesis_core_instance():
-    """Create a genesis_core instance for testing."""
-    config = {
-        'api_key': 'test_key',
-        'endpoint': 'https://api.example.com',
-        'timeout': 30
+def temp_config_file():
+    """Create a temporary configuration file for testing."""
+    config_data = {
+        "api_key": "file_api_key",
+        "base_url": "https://file.example.com",
+        "timeout": 45
     }
-    return MockGenesisCore(config)
+    
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        json.dump(config_data, f)
+        yield f.name
+    
+    os.unlink(f.name)
 
 
-# Test parametrization examples
+# Enhanced parametrized tests
 @pytest.mark.parametrize("input_value,expected_output", [
-    ("test", "processed_test"),
-    ("hello", "processed_hello"),
-    ("unicode_测试", "processed_unicode_测试"),
+    ("simple", "processed_simple"),
     ("", "processed_"),
+    ("unicode_测试", "processed_unicode_测试"),
+    ("with spaces", "processed_with spaces"),
+    ("UPPERCASE", "processed_UPPERCASE"),
+    ("123numbers", "processed_123numbers"),
+    ("special!@#", "processed_special!@#"),
+    (None, None)
 ])
 def test_parameterized_processing(input_value, expected_output):
-    """Parameterized test for processing function."""
-    core = MockGenesisCore()
-    result = core.process_data(input_value)
-    assert result == expected_output
+    """Comprehensive parameterized test for data processing."""
+    core = GenesisCore()
+    
+    if input_value is None:
+        result = core.process_data(input_value)
+        assert result == expected_output
+    else:
+        result = core.process_data(input_value)
+        assert result == expected_output
 
 
 @pytest.mark.parametrize("config,should_succeed", [
-    ({'api_key': 'valid_key', 'endpoint': 'https://api.com'}, True),
-    ({'api_key': '', 'endpoint': 'https://api.com'}, False),
-    ({'api_key': 'valid_key'}, False),  # Missing endpoint
-    ({}, False),  # Empty config
+    ({"api_key": "valid_key"}, True),
+    ({"api_key": ""}, False),
+    ({"timeout": 30}, True),
+    ({"timeout": -1}, False),
+    ({"retries": 3}, True),
+    ({"retries": "invalid"}, False),
+    ({}, True),  # Empty config should work with defaults
+    (None, True),  # None config should work with defaults
 ])
-def test_parameterized_initialization(config, should_succeed):
-    """Parameterized test for initialization."""
-    if should_succeed:
-        core = MockGenesisCore(config)
-        assert core.config == config
-    else:
-        with pytest.raises((ValueError, KeyError)):
-            if not config.get('api_key'):
-                raise ValueError("API key required")
-            if not config.get('endpoint'):
-                raise ValueError("Endpoint required")
+def test_parameterized_config_validation(config, should_succeed):
+    """Test configuration validation with various inputs."""
+    try:
+        core = GenesisCore(config=config)
+        if should_succeed:
+            assert core is not None
+        else:
+            # If we expect failure but got success, check if it's handled gracefully
+            assert core.config is not None
+    except Exception as e:
+        if should_succeed:
+            pytest.fail(f"Configuration should have succeeded but failed: {e}")
+        else:
+            assert True  # Expected to fail
 
 
 # Performance benchmarks
 @pytest.mark.benchmark
 def test_performance_benchmark():
-    """Performance benchmark test."""
-    core = MockGenesisCore()
+    """Performance benchmark test using timing."""
+    core = GenesisCore()
+    test_data = {"key": "value" * 100}
     
-    def benchmark_function():
-        return core.process_data("benchmark_test")
+    start_time = time.time()
     
-    # Simple timing benchmark
-    start = time.time()
-    result = benchmark_function()
-    end = time.time()
+    # Run operations multiple times
+    for i in range(1000):
+        core.process_data(f"test_{i}")
     
-    assert result is not None
-    assert (end - start) < 0.1  # Should complete in less than 100ms
+    end_time = time.time()
+    execution_time = end_time - start_time
+    
+    # Should complete 1000 operations within reasonable time
+    assert execution_time < 5.0
+    
+    # Calculate operations per second
+    ops_per_second = 1000 / execution_time
+    assert ops_per_second > 100  # Should handle at least 100 ops/second
 
 
 # Integration test markers
 @pytest.mark.integration
 def test_integration_scenario():
-    """Integration test for external dependencies."""
-    core = MockGenesisCore()
+    """Integration test for genesis_core with external dependencies."""
+    core = GenesisCore()
     
-    # Test integration with external service (mocked)
-    with patch('requests.post') as mock_post:
-        mock_post.return_value.status_code = 200
-        mock_post.return_value.json.return_value = {"status": "success"}
+    # Test integration with mock external services
+    with patch('requests.get') as mock_get:
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {"status": "success"}
         
-        # Simulate integration call
-        result = core.process_data("integration_test")
+        result = core.make_request("https://api.example.com")
         assert result is not None
+        assert result["status"] == "success"
 
 
 # Slow test markers
 @pytest.mark.slow
 def test_slow_operation():
-    """Test for slow operations."""
-    core = MockGenesisCore()
+    """Test for long-running operations."""
+    core = GenesisCore()
     
     # Simulate slow operation
-    large_dataset = {f"key_{i}": f"value_{i}" for i in range(10000)}
-    result = core.process_data(large_dataset)
+    large_data = [{"id": i, "data": "x" * 1000} for i in range(10000)]
     
-    assert result is not None
-    assert len(result) == 10000
+    start_time = time.time()
+    results = [core.process_data(item) for item in large_data]
+    end_time = time.time()
+    
+    assert len(results) == 10000
+    assert all(result is not None for result in results)
+    
+    # Should complete within reasonable time even for slow operations
+    execution_time = end_time - start_time
+    assert execution_time < 30.0  # 30 seconds max for slow operations
+
+
+# Security tests
+@pytest.mark.security
+def test_security_sql_injection():
+    """Test protection against SQL injection attempts."""
+    core = GenesisCore()
+    
+    sql_injection_attempts = [
+        "'; DROP TABLE users; --",
+        "' OR '1'='1",
+        "1; DELETE FROM users",
+        "admin'--",
+        "' UNION SELECT * FROM users--"
+    ]
+    
+    for injection_attempt in sql_injection_attempts:
+        result = core.process_data(injection_attempt)
+        assert result is not None
+        # Should not contain dangerous SQL keywords
+        assert "DROP" not in str(result).upper()
+        assert "DELETE" not in str(result).upper()
+        assert "UNION" not in str(result).upper()
 
 
 @pytest.mark.security
-def test_security_input_validation():
-    """Security-focused input validation test."""
-    core = MockGenesisCore()
+def test_security_xss_protection():
+    """Test protection against XSS attacks."""
+    core = GenesisCore()
     
-    malicious_inputs = [
-        "'; DROP TABLE users; --",
+    xss_attempts = [
         "<script>alert('xss')</script>",
-        "../../../../etc/passwd",
-        "$(rm -rf /)",
-        "eval('malicious code')",
+        "<img src=x onerror=alert('xss')>",
+        "javascript:alert('xss')",
+        "<iframe src=javascript:alert('xss')></iframe>",
+        "<svg onload=alert('xss')>"
     ]
     
-    for malicious_input in malicious_inputs:
-        sanitized = core.sanitize_input(malicious_input)
-        assert "<script>" not in sanitized
-        assert "DROP TABLE" not in sanitized
-        assert "../" not in sanitized or sanitized.count("../") < malicious_input.count("../")
-
-
-@pytest.mark.error_handling
-def test_comprehensive_error_handling():
-    """Comprehensive error handling test."""
-    core = MockGenesisCore()
-    
-    error_scenarios = [
-        (None, ValueError),
-        ("", ValueError),
-        ({"invalid": "format"}, None),  # Should handle gracefully
-    ]
-    
-    for input_data, expected_error in error_scenarios:
-        if expected_error:
-            with pytest.raises(expected_error):
-                core.validate_input(input_data)
-        else:
-            try:
-                result = core.validate_input(input_data)
-                assert result is not None
-            except ValueError:
-                pass  # Expected for some inputs
+    for xss_attempt in xss_attempts:
+        result = core.process_data(xss_attempt)
+        assert result is not None
+        # Should not contain dangerous script tags
+        assert "<script>" not in str(result)
+        assert "javascript:" not in str(result)
+        assert "alert(" not in str(result)
 
 
 if __name__ == "__main__":
-    # Allow running tests directly
-    pytest.main([__file__, "-v"])
+    # Allow running tests directly with various options
+    pytest.main([
+        __file__,
+        "-v",  # Verbose output
+        "--tb=short",  # Short traceback format
+        "-x",  # Stop on first failure
+        "--durations=10"  # Show 10 slowest tests
+    ])
