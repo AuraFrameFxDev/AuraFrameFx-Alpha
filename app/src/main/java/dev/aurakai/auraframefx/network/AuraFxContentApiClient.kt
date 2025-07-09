@@ -17,19 +17,18 @@ class AuraFxContentApiClient @Inject constructor(
     private val aiContentApi: AIContentApi,
 ) {
     /**
-     * Generates text using the provided prompt and optional parameters.
+     * Asynchronously generates AI-powered text based on the provided prompt.
      *
-     * @param prompt The input text prompt for content generation.
-     * @param maxTokens Optional maximum number of tokens to generate; defaults to 500 if not specified.
-     * @param temperature Optional value controlling output randomness; defaults to 0.7 if not specified.
-     * @return The API response containing the generated text and finish reason.
-
+     * @param prompt The prompt to guide text generation.
+     * @param maxTokens The maximum number of tokens for the generated text. Defaults to 500 if not specified.
+     * @param temperature Controls the randomness of the output. Defaults to 0.7 if not specified.
+     * @return The API response containing the generated text.
      */
     suspend fun generateText(
         prompt: String,
         maxTokens: Int? = null,
         temperature: Float? = null,
-    ) = withContext(Dispatchers.IO) {
+    ): Any = withContext(Dispatchers.IO) { // Temporary: Use Any instead of missing ResponseType
 
         aiContentApi.aiGenerateTextPost(
             GenerateTextRequest(
@@ -41,23 +40,23 @@ class AuraFxContentApiClient @Inject constructor(
     }
 
     /**
-     * Generates an image description using the provided image URL and optional context.
-     *
-     * @param imageUrl The URL of the image to be described.
-     * @param context Optional additional context to guide the description.
-     * @return The API response containing the generated image description.
-
-     */
+         * Generates an AI-powered description for an image at the given URL, optionally incorporating additional context.
+         *
+         * @param imageUrl The URL of the image to describe.
+         * @param context Optional context to guide or refine the generated description.
+         * @return The API response containing the generated image description.
+         */
     suspend fun generateImageDescription(
         imageUrl: String,
         context: String? = null,
-    ): GenerateImageDescriptionResponse = withContext(Dispatchers.IO) {
+    ): Any =
+        withContext(Dispatchers.IO) { // Temporary: Use Any instead of missing GenerateImageDescriptionResponse
 
-        aiContentApi.aiGenerateImageDescriptionPost(
-            GenerateImageDescriptionRequest(
-                imageUrl = imageUrl,
-                context = context
+            aiContentApi.aiGenerateImageDescriptionPost(
+                GenerateImageDescriptionRequest(
+                    imageUrl = imageUrl,
+                    context = context
+                )
             )
-        )
-    }
+        }
 }

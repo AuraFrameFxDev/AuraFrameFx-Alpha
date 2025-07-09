@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.model.ThreatLevel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -47,6 +48,27 @@ class SecurityContext @Inject constructor(
 
     private val _securityState = MutableStateFlow(SecurityState())
     val securityState: StateFlow<SecurityState> = _securityState.asStateFlow()
+
+    /**
+     * Placeholder for content validation logic.
+     *
+     * In its current form, this method accepts all content without performing any checks. Intended to be extended to detect policy violations or security threats in production environments.
+     */
+    fun validateContent(content: String) {
+        // TODO: Implement real validation logic
+        // For now, always allow
+    }
+
+    /**
+     * Validates image data for security compliance.
+     *
+     * Currently a stub that logs the image data size and allows all input. Intended for future implementation of image validation logic.
+     */
+    fun validateImageData(imageData: ByteArray) {
+        // TODO: Implement real image validation logic
+        // For now, always allow
+        Log.d(TAG, "Validating image data of size: ${imageData.size} bytes")
+    }
 
     private val _threatDetectionActive = MutableStateFlow(false)
     val threatDetectionActive: StateFlow<Boolean> = _threatDetectionActive.asStateFlow()
@@ -243,7 +265,13 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Share a secure context with another agent
+     * Creates a secure context to be shared with the specified agent.
+     *
+     * Generates a unique secure identifier and packages the provided context string (as a byte array) into a `SharedSecureContext` object, setting the originating agent as KAI and the target agent as specified. The shared context includes a creation timestamp and an expiry time set to one hour from creation. Note: The content is not encrypted in this implementation.
+     *
+     * @param agentType The agent with whom the secure context will be shared.
+     * @param context The context data to share.
+     * @return A `SharedSecureContext` containing the packaged context and metadata.
      */
     fun shareSecureContextWith(agentType: AgentType, context: String): SharedSecureContext {
         val secureId = generateSecureId()
@@ -260,7 +288,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Verify the integrity of the application
+     * Checks the application's integrity by retrieving its signing certificate, computing its SHA-256 hash, and returning verification details.
+     *
+     * @return An [ApplicationIntegrity] object containing the verification result, app version, signature hash, install and update times, and an error message if verification fails.
      */
     fun verifyApplicationIntegrity(): ApplicationIntegrity {
         try {
@@ -315,8 +345,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Detect potential security threats
-     * For the beta, this returns simulated threats
+     * Simulates security threat detection by randomly generating a list of `SecurityThreat` objects.
+     *
+     * Used for testing and demonstration purposes, this method mimics threat detection by occasionally returning simulated threats. The returned list may be empty or contain one or more threats.
+     *
+     * @return A list of simulated security threats, which may be empty.
      */
     private fun detectThreats(): List<SecurityThreat> {
         // In a real implementation, this would perform actual threat analysis
@@ -340,10 +373,15 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Calculate overall threat level based on detected threats
+     * Determines the overall threat level based on the highest severity among the provided security threats.
+     *
+     * Returns `ThreatLevel.LOW` if the list of threats is empty.
+     *
+     * @param threats The list of detected security threats to evaluate.
+     * @return The highest threat level present among the threats, or `ThreatLevel.LOW` if none are present.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
-        if (threats.isEmpty()) return ThreatLevel.SAFE
+        if (threats.isEmpty()) return ThreatLevel.LOW
 
         val hasCritical = threats.any { it.severity == ThreatSeverity.CRITICAL }
         val hasHigh = threats.any { it.severity == ThreatSeverity.HIGH }
@@ -352,13 +390,15 @@ class SecurityContext @Inject constructor(
         return when {
             hasCritical -> ThreatLevel.CRITICAL
             hasHigh -> ThreatLevel.HIGH
-            hasMedium -> ThreatLevel.MODERATE
+            hasMedium -> ThreatLevel.MEDIUM
             else -> ThreatLevel.LOW
         }
     }
 
     /**
-     * Generate a secure ID for context sharing
+     * Generates a random 16-byte hexadecimal string to serve as a secure identifier.
+     *
+     * @return A 32-character hexadecimal string representing a securely generated ID.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -367,7 +407,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Log a security event
+     * Asynchronously records a security event for auditing and monitoring.
+     *
+     * Serializes the provided event and writes it to the debug log. In production environments, events should be securely persisted rather than logged.
+     *
+     * @param event The security event to record.
      */
     fun logSecurityEvent(event: SecurityEvent) {
         scope.launch {
@@ -378,6 +422,38 @@ class SecurityContext @Inject constructor(
             // In a real implementation, this would store events securely
         }
     }
+
+    /**
+     * Records a security validation event for the specified request type and data.
+     *
+     * Logs a validation event for auditing purposes without performing any actual validation of the request.
+     *
+     * @param requestType The type of request being recorded.
+     * @param requestData The data associated with the request.
+     */
+    fun validateRequest(requestType: String, requestData: String) {
+        // Log the security validation event
+        logSecurityEvent(
+            SecurityEvent(
+                type = SecurityEventType.VALIDATION,
+                details = "Request validation: $requestType",
+                severity = EventSeverity.INFO
+            )
+        )
+
+        // For now, we'll just log the validation - can be extended with actual validation logic
+        Log.d(TAG, "Validating request of type: $requestType")
+    }
+
+    /**
+     * Logs a security-related exception.
+     *
+     * Serves as a placeholder for future exception handling such as user notifications or additional security measures.
+     */
+    private fun handleSecurityException(e: Exception) {
+        Log.e(TAG, "Security exception occurred", e)
+        // In a real implementation, take appropriate actions like alerting the user, logging, etc.
+    }
 }
 
 /**
@@ -386,7 +462,7 @@ class SecurityContext @Inject constructor(
 @Serializable
 data class SecurityState(
     val detectedThreats: List<SecurityThreat> = emptyList(),
-    val threatLevel: ThreatLevel = ThreatLevel.UNKNOWN,
+    val threatLevel: ThreatLevel = ThreatLevel.LOW,
     val lastScanTime: Long = 0,
     val errorState: Boolean = false,
     val errorMessage: String? = null,
@@ -423,18 +499,6 @@ enum class ThreatSeverity {
     MEDIUM,
     HIGH,
     CRITICAL
-}
-
-/**
- * Overall threat levels for the system
- */
-enum class ThreatLevel {
-    SAFE,
-    LOW,
-    MODERATE,
-    HIGH,
-    CRITICAL,
-    UNKNOWN
 }
 
 /**
@@ -516,7 +580,8 @@ enum class SecurityEventType {
     THREAT_DETECTED,
     ENCRYPTION_EVENT,
     AUTHENTICATION_EVENT,
-    INTEGRITY_CHECK
+    INTEGRITY_CHECK,
+    VALIDATION
 }
 
 /**

@@ -12,18 +12,17 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      JAVA_HOME: /usr/lib/jvm/temurin-24-jdk-amd64
-      ANDROID_SDK_ROOT: /opt/android-sdk
+      ANDROID_SDK_ROOT: /opt/android-sdk # JAVA_HOME was already removed
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 24  # Changed name
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '24' # Changed to JDK 24
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3

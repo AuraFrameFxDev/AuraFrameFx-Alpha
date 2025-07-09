@@ -1,0 +1,34 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    id "org.jetbrains.kotlin.jvm" version "2.2.0"
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    implementation libs.kotlinStdlib
+    implementation libs.kotlinxCoroutinesCore
+    implementation libs.javaxInject
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+sourceSets {
+    main {
+        kotlin {
+            srcDirs = ["app/src/main/java"]
+        }
+    }
+}
+
+task compileKotlinOnly(type: KotlinCompile) {
+    source = fileTree(dir: "app/src/main/java", include: "**/*.kt")
+    classpath = configurations.compileClasspath
+    destinationDirectory = file("build/classes")
+}

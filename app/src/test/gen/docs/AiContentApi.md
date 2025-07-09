@@ -17,6 +17,7 @@ Generate image description using AI
 Generate a description for the provided image URL
 
 ### Example
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;

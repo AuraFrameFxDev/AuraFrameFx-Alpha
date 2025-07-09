@@ -1,5 +1,6 @@
 package dev.aurakai.auraframefx.xposed.hooks
 
+import android.util.Log
 import dev.aurakai.auraframefx.system.overlay.model.NotchBarConfig
 
 class NotchBarHooker(
@@ -7,6 +8,7 @@ class NotchBarHooker(
     private val config: NotchBarConfig
 ) {
     fun applyNotchBarHooks() {
-        // TODO: Implement Xposed hooks for the Notch Bar
+        Log.d("XposedHook", "NotchBarHooker: applyNotchBarHooks called. Config: $config")
+        // Actual Xposed hook implementation would go here.
     }
 }

@@ -3,14 +3,13 @@ package dev.aurakai.auraframefx.ai.error
 import dev.aurakai.auraframefx.ai.context.ContextManager
 import dev.aurakai.auraframefx.ai.pipeline.AIPipelineConfig
 import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import dev.aurakai.auraframefx.model.AgentType // Explicit import
-import dev.aurakai.auraframefx.serialization.InstantSerializer // Import for serializer
-import kotlinx.serialization.Serializable // Import for @Serializable
+import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,6 +24,16 @@ class ErrorHandler @Inject constructor(
     private val _errorStats = MutableStateFlow(ErrorStats())
     val errorStats: StateFlow<ErrorStats> = _errorStats
 
+    /**
+     * Handles an error by categorizing it, recording its details, updating error statistics, and triggering recovery actions.
+     *
+     * All metadata values are converted to strings before being stored in the error record.
+     *
+     * @param agent The agent associated with the error event.
+     * @param context Description of where or how the error occurred.
+     * @param metadata Additional information about the error; all values are stringified.
+     * @return The AIError instance representing the recorded error.
+     */
     fun handleError(
         error: Throwable,
         agent: AgentType,
@@ -39,7 +48,7 @@ class ErrorHandler @Inject constructor(
             type = errorType,
             message = errorMessage,
             context = context,
-            metadata = metadata
+            metadata = metadata.mapValues { it.value.toString() }
         )
 
         _errors.update { current ->

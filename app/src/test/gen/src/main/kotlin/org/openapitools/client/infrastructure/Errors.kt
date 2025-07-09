@@ -1,4 +1,5 @@
 @file:Suppress("unused")
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 package org.openapitools.client.infrastructure
 
 import java.lang.RuntimeException

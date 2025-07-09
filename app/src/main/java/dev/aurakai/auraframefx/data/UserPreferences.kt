@@ -41,51 +41,42 @@ class UserPreferences(context: Context) {
     // Minimal working implementation for placeholder
     private val prefs = mutableMapOf<String, String>()
 
+    /**
+     * Returns the value for the specified key from in-memory preferences, or the provided default if the key does not exist.
+     *
+     * @param key The preference key to retrieve.
+     * @param defaultValue The value to return if the key is not found.
+     * @return The stored value for the key, or the default value if the key is absent.
+     */
     fun getPreference(key: String, defaultValue: String): String {
         return prefs[key] ?: defaultValue
     }
 
+    /**
+     * Sets or updates the value for the specified key in the in-memory preferences.
+     *
+     * If the key already exists, its value is overwritten.
+     *
+     * @param key The preference key.
+     * @param value The value to associate with the key.
+     */
     fun setPreference(key: String, value: String) {
         prefs[key] = value
     }
 
-    // Properties and methods based on error report (unused declarations)
+    // Properties based on error report (unused declarations)
 
     // TODO: Reported as unused. Implement storage and retrieval if needed.
     var apiKey: String? = null
 
-    // TODO: Reported as unused. Implement if needed.
-    fun setApiKey(_key: String?) {
-        this.apiKey = _key
-        // TODO: Persist API key
-    }
-
     // TODO: Reported as unused. Implement storage and retrieval if needed.
     var userId: String? = null
-
-    // TODO: Reported as unused. Implement if needed.
-    fun setUserId(_id: String?) {
-        this.userId = _id
-        // TODO: Persist User ID
-    }
 
     // TODO: Reported as unused. Implement storage and retrieval if needed.
     var userName: String? = null
 
-    // TODO: Reported as unused. Implement if needed.
-    fun setUserName(_name: String?) {
-        this.userName = _name
-        // TODO: Persist User Name
-    }
-
     // TODO: Reported as unused. Implement storage and retrieval if needed.
     var userEmail: String? = null
-
-    // TODO: Reported as unused. Implement if needed.
-    fun setUserEmail(_email: String?) {
-        this.userEmail = _email
-        // TODO: Persist User Email
-    }
 
     /**
      * Retrieves user data. The original error report mentioned a "NonExistentClass"

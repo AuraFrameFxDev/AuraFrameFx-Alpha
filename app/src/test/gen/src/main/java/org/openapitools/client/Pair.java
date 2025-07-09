@@ -23,6 +23,7 @@ public class Pair {
         setValue(value);
     }
 
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
     private void setName(String name) {
         if (!isValidString(name)) {
             return;

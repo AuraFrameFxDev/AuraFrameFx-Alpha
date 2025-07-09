@@ -3,12 +3,13 @@ package dev.aurakai.auraframefx.ai.task
 import dev.aurakai.auraframefx.ai.error.ErrorHandler
 import dev.aurakai.auraframefx.ai.pipeline.AIPipelineConfig
 import dev.aurakai.auraframefx.model.AgentType
+import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
+import java.lang.System // Added import
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -119,6 +120,11 @@ class TaskScheduler @Inject constructor(
         return true
     }
 
+    /**
+     * Marks the given task as in progress, assigns required agents, and updates internal active and task maps.
+     *
+     * This method transitions the task to the active state and ensures its status is reflected in the scheduler's state.
+     */
     private fun executeTask(task: Task) {
         val updatedTask = task.copy(
             status = TaskStatus.IN_PROGRESS,
@@ -131,6 +137,14 @@ class TaskScheduler @Inject constructor(
         }
     }
 
+    /**
+     * Updates the status of a task and manages its transition between active, completed, and failed states.
+     *
+     * Moves the task to the completed or failed collection as appropriate, updates the internal task map and statistics, and triggers processing of pending tasks.
+     *
+     * @param taskId The unique identifier of the task to update.
+     * @param status The new status to assign to the task.
+     */
     fun updateTaskStatus(taskId: String, status: TaskStatus) {
         val task = _tasks.value[taskId] ?: return
         val updatedTask = task.copy(status = status)
@@ -161,18 +175,42 @@ class TaskScheduler @Inject constructor(
         processQueue()
     }
 
+    /**
+     * Calculates the weighted priority score for the given task using its priority value and the configured priority weight.
+     *
+     * @return The weighted priority score.
+     */
     private fun calculatePriorityScore(task: Task): Float {
         return task.priority.value * config.priorityWeight
     }
 
+    /**
+     * Calculates the weighted urgency score for the given task.
+     *
+     * Multiplies the task's urgency value by the configured urgency weight to determine its scheduling priority.
+     *
+     * @return The weighted urgency score.
+     */
     private fun calculateUrgencyScore(task: Task): Float {
         return task.urgency.value * config.urgencyWeight
     }
 
+    /**
+     * Calculates the weighted importance score for the given task.
+     *
+     * Multiplies the task's importance value by the configured importance weight to determine its contribution to scheduling priority.
+     *
+     * @return The weighted importance score.
+     */
     private fun calculateImportanceScore(task: Task): Float {
         return task.importance.value * config.importanceWeight
     }
 
+    /**
+     * Updates the task statistics to reflect the current state after a task is created or its status changes.
+     *
+     * Increments the total task count, updates counts for active, completed, and pending tasks, refreshes per-status counts, and sets the last updated timestamp.
+     */
     private fun updateStats(task: Task) {
         _taskStats.update { current ->
             current.copy(
@@ -188,12 +226,12 @@ class TaskScheduler @Inject constructor(
     }
 }
 
-@kotlinx.serialization.Serializable // Added annotation
+@kotlinx.serialization.Serializable
 data class TaskStats(
     val totalTasks: Int = 0,
     val activeTasks: Int = 0,
     val completedTasks: Int = 0,
     val pendingTasks: Int = 0,
     val taskCounts: Map<TaskStatus, Int> = emptyMap(),
-    @kotlinx.serialization.Serializable(with = dev.aurakai.auraframefx.serialization.InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
+    @kotlinx.serialization.Serializable(with = InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
 )

@@ -5,7 +5,12 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class SystemMonitorService : Service() {
@@ -35,9 +40,14 @@ class SystemMonitorService : Service() {
         return START_STICKY
     }
 
+    /**
+     * Continuously monitors system metrics such as CPU, memory, battery, and network status while the service is active.
+     *
+     * Intended to run in a background coroutine, gathering and processing system information at regular intervals.
+     */
     private suspend fun monitorSystem() {
         // Loop indefinitely (or until service is stopped) to perform monitoring
-        while (isActive) {
+        while (serviceScope.isActive) {
             // TODO: Implement CPU usage monitoring
             // Log.d(TAG, "Current CPU Usage: ...")
 

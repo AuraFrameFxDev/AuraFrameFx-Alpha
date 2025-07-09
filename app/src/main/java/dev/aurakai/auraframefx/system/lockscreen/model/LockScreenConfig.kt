@@ -22,16 +22,6 @@ data class BackgroundConfig(
     val image: ImageResource?
 )
 
-@Serializable
-enum class LockScreenElementType {
-    CLOCK,
-    DATE,
-    NOTIFICATIONS
-}
+// Use LockScreenElementType from dev.aurakai.auraframefx.system.lockscreen.model.LockScreenElementType
 
-@Serializable
-enum class LockScreenAnimation {
-    FADE_IN,
-    GLOW,
-    SCANLINE
-}
+// Use LockScreenAnimation from dev.aurakai.auraframefx.system.lockscreen.model.LockScreenAnimation

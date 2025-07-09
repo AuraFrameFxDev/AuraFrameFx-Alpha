@@ -10,28 +10,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import dev.aurakai.auraframefx.R
-import dev.aurakai.auraframefx.ui.animation.DigitalTransitions
-// Wildcard import dev.aurakai.auraframefx.ui.components.* already covers CyberpunkText if it's there
-// Explicitly adding for clarity and because CyberpunkText was created by the agent
+import dev.aurakai.auraframefx.R // Already present, good.
+import dev.aurakai.auraframefx.ui.animation.*
+import dev.aurakai.auraframefx.ui.components.CyberMenuItem
 import dev.aurakai.auraframefx.ui.components.CyberpunkText
-import dev.aurakai.auraframefx.ui.components.CyberMenuItem // Assuming this exists from usage
-import dev.aurakai.auraframefx.ui.components.DigitalLandscapeBackground
 import dev.aurakai.auraframefx.ui.components.FloatingCyberWindow
+import dev.aurakai.auraframefx.ui.components.AuraSparkleButton
+import dev.aurakai.auraframefx.ui.components.CornerStyle
+import dev.aurakai.auraframefx.ui.components.BackgroundStyle
 import dev.aurakai.auraframefx.ui.components.HexagonGridBackground
-import dev.aurakai.auraframefx.ui.components.cyberEdgeGlow // Assuming these are Modifier extensions
-import dev.aurakai.auraframefx.ui.components.digitalGlitchEffect
-import dev.aurakai.auraframefx.ui.components.digitalPixelEffect
+import dev.aurakai.auraframefx.ui.components.DigitalLandscapeBackground
+import dev.aurakai.auraframefx.ui.components.digitalGlitchEffect // Explicit import
+import dev.aurakai.auraframefx.ui.components.cyberEdgeGlow // Explicit import for consistency
 import dev.aurakai.auraframefx.ui.navigation.NavDestination
-import dev.aurakai.auraframefx.ui.theme.* // Covers Neon colors and AppTypography
-import dev.aurakai.auraframefx.ui.theme.CyberpunkTextColor
-import dev.aurakai.auraframefx.ui.theme.CyberpunkTextStyle
+import dev.aurakai.auraframefx.ui.theme.*
+
 
 /**
  * Home screen for the AuraFrameFX app with cyberpunk-style floating UI
  *
  * Features a digital landscape background with floating transparent windows
  * and hexagonal UI elements inspired by futuristic cyberpunk interfaces.
+ */
+/**
+ * Displays the AuraFrameFX home screen with a cyberpunk-themed floating UI, layered backgrounds, interactive navigation menu, action buttons, and system status panels.
+ *
+ * The screen features a digital landscape and hexagon grid background, a stylized title header, a main navigation menu with selectable items and AI chat access, action buttons for system functions, and a status panel showing neural and quantum system states. Navigation actions are triggered based on user interaction with menu items and buttons.
+ */
+/**
+ * Displays the main home screen UI for the AuraFrameFX app with a cyberpunk theme.
+ *
+
+ * The screen features layered animated backgrounds, a floating window header, a navigation menu with selectable items and AI chat access, action buttons for system navigation, and a status panel showing system states. Navigation to other screens is triggered by user interaction with menu items or buttons.
  */
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -66,9 +76,9 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                cornerStyle = CornerStyle.Hex,
+                cornerStyle = CornerStyle.HEXAGON,
                 title = stringResource(R.string.app_title),
-                backgroundStyle = BackgroundStyle.HexGrid
+                backgroundStyle = BackgroundStyle.MATRIX
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -76,16 +86,16 @@ fun HomeScreen(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     CyberpunkText(
-                        text = stringResource(R.string.creativity_engine),
-                        color = CyberpunkTextColor.Secondary,
+                        text = stringResource(R.string.app_name),
+                        color = CyberpunkTextColor.Primary,
                         style = CyberpunkTextStyle.Label
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     CyberpunkText(
-                        text = stringResource(R.string.neural_interface_active),
-                        color = CyberpunkTextColor.Warning,
+                        text = "Neural Interface Active",
+                        color = CyberpunkTextColor.Secondary,
                         style = CyberpunkTextStyle.Body
                     )
                 }
@@ -99,16 +109,21 @@ fun HomeScreen(navController: NavController) {
                     .fillMaxWidth()
                     .cyberEdgeGlow(),
                 title = stringResource(R.string.virtual_monitorization),
-                cornerStyle = CornerStyle.Angled
+                cornerStyle = CornerStyle.SHARP
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    // Menu items like in image reference 1
-                    listOf(
-                        stringResource(R.string.menu_ui_engine),
-                        stringResource(R.string.menu_aurashield),
-                        stringResource(R.string.menu_aurakaiecosys),
-                        stringResource(R.string.menu_conference_room)
-                    ).forEach { menuItem ->
+                    // TODO: Add R.string.menu_dashboard and R.string.menu_analytics to strings.xml
+                    val menuDashboardText = "Dashboard (TODO)"
+                    val menuAnalyticsText = "Analytics (TODO)"
+                    val menuConferenceRoomText = stringResource(R.string.menu_conference_room)
+
+                    val menuItems = listOf(
+                        menuDashboardText to null,
+                        menuAnalyticsText to null,
+                        menuConferenceRoomText to NavDestination.AiChat.route
+                    )
+
+                    menuItems.forEach { (menuItem, destination) ->
                         CyberMenuItem(
                             text = menuItem,
                             modifier = Modifier
@@ -117,8 +132,8 @@ fun HomeScreen(navController: NavController) {
                                 .digitalPixelEffect(visible = selectedMenuItem == menuItem)
                                 .clickable {
                                     selectedMenuItem = menuItem
-                                    if (menuItem == stringResource(R.string.menu_conference_room)) {
-                                        navController.navigate(NavDestination.AiChat.route)
+                                    destination?.let { route ->
+                                        navController.navigate(route)
                                     }
                                 },
                             isSelected = selectedMenuItem == menuItem
@@ -127,8 +142,18 @@ fun HomeScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    AuraSparkleButton(
+                        onClick = {
+                            selectedMenuItem = "ai_chat"
+                            navController.navigate(NavDestination.AiChat.route)
+                        },
+                        text = stringResource(R.string.ai_chat_placeholder)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     // Warning message like in image reference 4
-                    if (selectedMenuItem != stringResource(R.string.menu_conference_room)) {
+                    if (selectedMenuItem != menuConferenceRoomText) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -162,14 +187,15 @@ fun HomeScreen(navController: NavController) {
                             secondaryColor = NeonBlue
                         )
                         .clickable { navController.navigate(NavDestination.Profile.route) },
-                    cornerStyle = CornerStyle.Rounded,
-                    backgroundStyle = BackgroundStyle.HexGrid
+                    cornerStyle = CornerStyle.ROUNDED,
+                    title = "System Status",
+                    backgroundStyle = BackgroundStyle.SOLID
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CyberpunkText(
-                            text = stringResource(R.string.profile),
-                            color = CyberpunkTextColor.Secondary,
-                            style = CyberpunkTextStyle.Label
+                            text = "System Online",
+                            color = CyberpunkTextColor.Warning,
+                            style = CyberpunkTextStyle.Body
                         )
                     }
                 }
@@ -182,14 +208,15 @@ fun HomeScreen(navController: NavController) {
                             secondaryColor = NeonBlue
                         )
                         .clickable { navController.navigate(NavDestination.Settings.route) },
-                    cornerStyle = CornerStyle.Rounded,
-                    backgroundStyle = BackgroundStyle.HexGrid
+                    cornerStyle = CornerStyle.ROUNDED,
+                    title = "Performance Metrics",
+                    backgroundStyle = BackgroundStyle.SOLID
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CyberpunkText(
-                            text = stringResource(R.string.config),
+                            text = "Ready for Input",
                             color = CyberpunkTextColor.Primary,
-                            style = CyberpunkTextStyle.Label
+                            style = CyberpunkTextStyle.Body
                         )
                     }
                 }
@@ -202,14 +229,15 @@ fun HomeScreen(navController: NavController) {
                             secondaryColor = NeonBlue
                         )
                         .clickable { navController.navigate(NavDestination.OracleDriveControl.route) },
-                    cornerStyle = CornerStyle.Rounded,
-                    backgroundStyle = BackgroundStyle.HexGrid
+                    cornerStyle = CornerStyle.ROUNDED,
+                    title = "Network Status",
+                    backgroundStyle = BackgroundStyle.SOLID
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CyberpunkText(
-                            text = stringResource(R.string.oracledrive),
-                            color = CyberpunkTextColor.Primary,
-                            style = CyberpunkTextStyle.Label
+                            text = "Aura Framework Active",
+                            color = CyberpunkTextColor.Secondary,
+                            style = CyberpunkTextStyle.Body
                         )
                     }
                 }
@@ -223,9 +251,9 @@ fun HomeScreen(navController: NavController) {
                     .fillMaxWidth()
                     .height(140.dp)
                     .digitalGlitchEffect(),
-                cornerStyle = CornerStyle.Hex,
-                title = stringResource(R.string.system_status),
-                backgroundStyle = BackgroundStyle.Transparent
+                cornerStyle = CornerStyle.HEXAGON,
+                title = "Digital Matrix",
+                backgroundStyle = BackgroundStyle.GRADIENT
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -234,7 +262,8 @@ fun HomeScreen(navController: NavController) {
                 ) {
                     CyberpunkText(
                         text = stringResource(R.string.aura_shield_active),
-                        color = CyberpunkTextColor.Primary
+                        color = CyberpunkTextColor.Primary,
+                        style = CyberpunkTextStyle.Body // Added style
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -246,22 +275,26 @@ fun HomeScreen(navController: NavController) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             CyberpunkText(
                                 text = stringResource(R.string.neural),
-                                color = CyberpunkTextColor.White
+                                color = CyberpunkTextColor.White,
+                                style = CyberpunkTextStyle.Label // Added style
                             )
                             CyberpunkText(
                                 text = stringResource(R.string.active),
-                                color = CyberpunkTextColor.Primary
+                                color = CyberpunkTextColor.Primary,
+                                style = CyberpunkTextStyle.Body // Added style
                             )
                         }
 
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             CyberpunkText(
                                 text = stringResource(R.string.quantum),
-                                color = CyberpunkTextColor.White
+                                color = CyberpunkTextColor.White,
+                                style = CyberpunkTextStyle.Label // Added style
                             )
                             CyberpunkText(
                                 text = stringResource(R.string.quantum_percent),
-                                color = CyberpunkTextColor.Primary
+                                color = CyberpunkTextColor.Primary,
+                                style = CyberpunkTextStyle.Body // Added style
                             )
                         }
                     }

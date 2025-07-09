@@ -96,6 +96,7 @@ open class ApiClient(val baseUrl: String, val client: OkHttpClient = defaultClie
                             }
                         }
                     }.build()
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
             mediaType == FormUrlEncMediaType -> {
                 FormBody.Builder().apply {
                     // content's type *must* be Map<String, PartConfig<*>>

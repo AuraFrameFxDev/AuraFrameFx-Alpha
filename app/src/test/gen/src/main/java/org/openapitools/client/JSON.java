@@ -21,6 +21,7 @@ import com.google.gson.internal.bind.util.ISO8601Utils;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.google.gson.JsonElement;
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 import io.gsonfire.GsonFireBuilder;
 import io.gsonfire.TypeSelector;
 
@@ -295,23 +296,6 @@ public class JSON {
             }
         }
     }
-
-    public static void setOffsetDateTimeFormat(DateTimeFormatter dateFormat) {
-        offsetDateTimeTypeAdapter.setFormat(dateFormat);
-    }
-
-    public static void setLocalDateFormat(DateTimeFormatter dateFormat) {
-        localDateTypeAdapter.setFormat(dateFormat);
-    }
-
-    /**
-     * Gson TypeAdapter for java.sql.Date type
-     * If the dateFormat is null, a simple "yyyy-MM-dd" format will be used
-     * (more efficient than SimpleDateFormat).
-     */
-    public static class SqlDateTypeAdapter extends TypeAdapter<java.sql.Date> {
-
-        private DateFormat dateFormat;
 
         public SqlDateTypeAdapter() {}
 

@@ -1,27 +1,50 @@
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn // Added import
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Stop // Explicit import
+import androidx.compose.material.icons.filled.FiberManualRecord // Explicit import
+import androidx.compose.material.icons.filled.Phone // Explicit import
+// Settings and Send are also used, ensure they are covered or add explicit if errors persist
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.aurakai.auraframefx.R // Added import
+import dev.aurakai.auraframefx.R
 import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonPurple
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
 
+/**
+ * Displays the main conference room UI, allowing users to select an agent, control recording and transcription, view chat messages, and send new messages.
+ *
+ * This composable manages local state for agent selection, recording, and transcription. Interactive elements for settings, chat, and message input are present but not yet implemented.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConferenceRoomScreen() {
-    var selectedAgent by remember { mutableStateOf("Aura") }
+    var selectedAgent by remember { mutableStateOf("Aura") } // Default to a non-resource string initially
     var isRecording by remember { mutableStateOf(false) }
     var isTranscribing by remember { mutableStateOf(false) }
+
+    val agentAuraName = stringResource(R.string.agent_aura)
+    val agentKaiName = stringResource(R.string.agent_kai)
+    val agentCascadeName = stringResource(R.string.agent_cascade)
+
+    // Initialize selectedAgent with a resource string if not already set,
+    // or if the default "Aura" should map to the resource string.
+    LaunchedEffect(key1 = agentAuraName) {
+        if (selectedAgent == "Aura") { // Default literal matches default resource intent
+            selectedAgent = agentAuraName
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -46,7 +69,7 @@ fun ConferenceRoomScreen() {
                 onClick = { /* TODO: Open settings */ }
             ) {
                 Icon(
-                    Icons.Default.Settings,
+                    Icons.Filled.Settings,
                     contentDescription = stringResource(R.string.settings_action),
                     tint = NeonPurple
                 )
@@ -61,19 +84,19 @@ fun ConferenceRoomScreen() {
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             AgentButton(
-                agent = stringResource(R.string.agent_aura),
-                isSelected = selectedAgent == stringResource(R.string.agent_aura),
-                onClick = { selectedAgent = stringResource(R.string.agent_aura) }
+                agent = agentAuraName,
+                isSelected = selectedAgent == agentAuraName,
+                onClick = { selectedAgent = agentAuraName }
             )
             AgentButton(
-                agent = stringResource(R.string.agent_kai),
-                isSelected = selectedAgent == stringResource(R.string.agent_kai),
-                onClick = { selectedAgent = stringResource(R.string.agent_kai) }
+                agent = agentKaiName,
+                isSelected = selectedAgent == agentKaiName,
+                onClick = { selectedAgent = agentKaiName }
             )
             AgentButton(
-                agent = stringResource(R.string.agent_cascade),
-                isSelected = selectedAgent == stringResource(R.string.agent_cascade),
-                onClick = { selectedAgent = stringResource(R.string.agent_cascade) }
+                agent = agentCascadeName,
+                isSelected = selectedAgent == agentCascadeName,
+                onClick = { selectedAgent = agentCascadeName }
             )
         }
 
@@ -115,7 +138,7 @@ fun ConferenceRoomScreen() {
             TextField(
                 value = "",
                 onValueChange = { /* TODO: Handle input */ },
-                placeholder = { Text(stringResource(R.string.type_your_message)) },
+                placeholder = { Text("Type your message...") },
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp),
@@ -129,7 +152,7 @@ fun ConferenceRoomScreen() {
                 onClick = { /* TODO: Send message */ }
             ) {
                 Icon(
-                    Icons.Default.Send,
+                    Icons.Filled.Send,
                     contentDescription = "Send",
                     tint = NeonBlue
                 )
@@ -138,6 +161,15 @@ fun ConferenceRoomScreen() {
     }
 }
 
+/**
+ * Displays a selectable button for an agent with visual indication of selection state.
+ *
+ * The button's background and text color change based on whether it is selected.
+ *
+ * @param agent The name of the agent to display on the button.
+ * @param isSelected Whether this agent is currently selected.
+ * @param onClick Called when the button is pressed.
+ */
 @Composable
 fun AgentButton(
     agent: String,
@@ -154,7 +186,7 @@ fun AgentButton(
             contentColor = contentColor
         ),
         modifier = Modifier
-            .weight(1f)
+            .weight(1f) // Re-typed to ensure no hidden characters
             .padding(horizontal = 8.dp)
     ) {
         Text(
@@ -164,12 +196,18 @@ fun AgentButton(
     }
 }
 
+/**
+ * Renders a button that toggles the recording state, displaying a stop icon when recording or a record icon otherwise.
+ *
+ * @param isRecording Indicates whether recording is currently active.
+ * @param onClick Invoked when the button is pressed to toggle the recording state.
+ */
 @Composable
 fun RecordingButton(
     isRecording: Boolean,
     onClick: () -> Unit,
 ) {
-    val icon = if (isRecording) Icons.Default.Stop else Icons.Default.FiberManualRecord
+    val icon = if (isRecording) Icons.Filled.Stop else Icons.Filled.FiberManualRecord
     val color = if (isRecording) Color.Red else NeonPurple
 
     IconButton(
@@ -186,12 +224,20 @@ fun RecordingButton(
     }
 }
 
+/**
+ * Displays a button that toggles the transcription state.
+ *
+ * The button icon and color indicate whether transcription is active. Pressing the button triggers the provided click handler.
+ *
+ * @param isTranscribing Whether transcription is currently active.
+ * @param onClick Called when the button is pressed.
+ */
 @Composable
 fun TranscribeButton(
     isTranscribing: Boolean,
     onClick: () -> Unit,
 ) {
-    val icon = if (isTranscribing) Icons.Default.Stop else Icons.Default.VoiceChat
+    val icon = if (isTranscribing) Icons.Filled.Stop else Icons.Filled.Phone
     val color = if (isTranscribing) Color.Red else NeonBlue
 
     IconButton(
@@ -208,6 +254,9 @@ fun TranscribeButton(
     }
 }
 
+/**
+ * Displays a design-time preview of the ConferenceRoomScreen composable within a MaterialTheme.
+ */
 @Composable
 @Preview(showBackground = true)
 fun ConferenceRoomScreenPreview() {

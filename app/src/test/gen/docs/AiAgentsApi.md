@@ -14,6 +14,7 @@ All URIs are relative to *https://api.auraframefx.com/v1*
 Send a request to an AI agent
 
 ### Example
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;

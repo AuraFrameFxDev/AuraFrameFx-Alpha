@@ -4,9 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AiRequest(
-    val query: String, // Changed from prompt
-    val type: String? = null, // Added
-    val context: String? = null, // Added
-    val maxTokens: Int = 256,
-    val temperature: Float = 0.7f
+    val query: String,
+    val type: String? = null, // Added type back, made nullable
+    val context: Map<String, String>? = null,
+    val data: Map<String, String>? = null,
+    val agentType: AgentType? = null
 )

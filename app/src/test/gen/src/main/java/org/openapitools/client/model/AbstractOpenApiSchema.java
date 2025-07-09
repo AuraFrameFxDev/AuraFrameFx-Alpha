@@ -14,6 +14,7 @@
 package org.openapitools.client.model;
 
 import org.openapitools.client.ApiException;
+>>>>>>> origin/coderabbitai/docstrings/78f34ad
 import java.util.Objects;
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -140,7 +141,6 @@ public abstract class AbstractOpenApiSchema {
             return Boolean.FALSE;
         }
     }
-
 
 
 }

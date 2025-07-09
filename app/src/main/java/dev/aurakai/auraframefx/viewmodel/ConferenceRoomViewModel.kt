@@ -74,10 +74,10 @@ class ConferenceRoomViewModel @Inject constructor(
                     }
 
                     is ConversationState.Error -> {
-                        Log.e(TAG, "NeuralWhisper error: ${state.message}")
+                        Log.e(TAG, "NeuralWhisper error: ${state.errorMessage}")
                         _messages.update { current ->
                             current + AgentMessage(
-                                content = "Error: ${state.message}",
+                                content = "Error: ${state.errorMessage}",
                                 sender = AgentType.NEURAL_WHISPER, // Or a system error agent
                                 timestamp = System.currentTimeMillis(),
                                 confidence = 0.0f
@@ -101,24 +101,21 @@ class ConferenceRoomViewModel @Inject constructor(
             AgentType.AURA -> auraService.processRequestFlow(
                 AiRequest(
                     query = message,
-                    type = "text",
-                    context = context
+                    context = mapOf("requestType" to "text", "userProvidedContext" to context)
                 )
             )
 
             AgentType.KAI -> kaiService.processRequestFlow(
                 AiRequest(
                     query = message,
-                    type = "text",
-                    context = context
+                    context = mapOf("requestType" to "text", "userProvidedContext" to context)
                 )
             )
 
             AgentType.CASCADE -> cascadeService.processRequestFlow(
                 AiRequest(
                     query = message,
-                    type = "context",
-                    context = context
+                    context = mapOf("requestType" to "context_query", "userProvidedContext" to context)
                 )
             )
 

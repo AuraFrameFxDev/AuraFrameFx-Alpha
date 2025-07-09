@@ -1,19 +1,42 @@
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
-import dev.aurakai.auraframefx.ui.theme.*
+import androidx.compose.ui.unit.dp
+import dev.aurakai.auraframefx.ui.theme.AppDimensions
+import dev.aurakai.auraframefx.ui.theme.AppStrings
+import dev.aurakai.auraframefx.ui.theme.AuraFrameFXTheme
+import dev.aurakai.auraframefx.ui.theme.ChatBubbleIncomingShape
+import dev.aurakai.auraframefx.ui.theme.ChatBubbleOutgoingShape
+import dev.aurakai.auraframefx.ui.theme.FloatingActionButtonShape
+import dev.aurakai.auraframefx.ui.theme.InputFieldShape
 
 /**
  * Data class representing a chat message
@@ -29,9 +52,9 @@ data class ChatMessage(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays an AI chat interface with message history and input field.
+ * Displays an AI chat interface with persistent message history and input field.
  *
- * Presents a scrollable list of chat messages and allows the user to send new messages. User messages and simulated AI responses are displayed with distinct styling and alignment. The input field persists its content across configuration changes, and messages are retained during recomposition.
+ * Renders a scrollable conversation view where user and AI messages are visually distinguished by alignment and style. Input and chat history are preserved across configuration changes. Sending a message appends it to the conversation and generates a simulated AI response.
  */
 @Composable
 fun AiChatScreen() {
@@ -82,9 +105,9 @@ fun AiChatScreen() {
                 modifier = Modifier.weight(1f),
                 placeholder = { Text(AppStrings.AI_CHAT_PLACEHOLDER) },
                 shape = InputFieldShape,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outline
                 )
             )
 
@@ -120,15 +143,15 @@ fun AiChatScreen() {
 }
 
 /**
- * Displays a single chat message bubble with styling based on sender.
+ * Displays a single chat message bubble with visual styling based on the sender.
  *
- * Aligns, colors, and shapes the message bubble differently depending on whether the message is from the user or the AI.
+ * The bubble's alignment, background color, text color, and shape are adjusted to differentiate between user and AI messages.
  *
  * @param message The chat message to display.
  */
 @Composable
 fun ChatMessageItem(message: ChatMessage) {
-    val alignment = if (message.isFromUser) Alignment.End else Alignment.Start
+    val alignment = if (message.isFromUser) Alignment.CenterEnd else Alignment.CenterStart
     val background = if (message.isFromUser)
         MaterialTheme.colorScheme.primaryContainer
     else
@@ -163,7 +186,7 @@ fun ChatMessageItem(message: ChatMessage) {
 }
 
 /**
- * Displays a design-time preview of the AI chat screen using the custom theme.
+ * Displays a design-time preview of the AI chat screen composable using the app's custom theme.
  */
 @Preview(showBackground = true)
 @Composable

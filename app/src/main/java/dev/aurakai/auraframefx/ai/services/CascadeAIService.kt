@@ -2,10 +2,10 @@ package dev.aurakai.auraframefx.ai.services
 
 import dev.aurakai.auraframefx.ai.agents.Agent
 import dev.aurakai.auraframefx.model.AgentResponse
-import dev.aurakai.auraframefx.api.model.AgentType as ApiAgentType // Corrected import
+import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AiRequest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first // Keep for existing logic if processRequestFlow uses it
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,14 +18,32 @@ class CascadeAIService @Inject constructor(
 
     private val state = mutableMapOf<String, Any>()
 
+    /**
+ * Returns the name of the agent.
+ *
+ * @return The string "Cascade".
+ */
     override fun getName(): String? = "Cascade"
 
-    override fun getType(): ApiAgentType = ApiAgentType.CASCADE // Changed to non-nullable ApiAgentType
+    /**
+ * Returns the agent type as `AgentType.CASCADE`, identifying this agent as a Cascade type.
+ *
+ * @return The agent type for this service.
+ */
+    override fun getType(): AgentType = AgentType.CASCADE
 
-    // This is the Agent interface method
+    /**
+     * Routes an AI request to the appropriate internal handler based on the "type" key in the request's context and emits agent responses as a flow.
+     *
+     * Delegates to specialized flows for "state", "context", "vision", or "processing" request types. Emits a default response flow for unrecognized or missing types.
+     *
+     * @param request The AI request containing the query and context information.
+     * @return A flow emitting agent responses determined by the request type.
+     */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> {
         // This internal routing can stay if these specific flows are desired for internal logic
-        return when (request.type) {
+        // Assuming 'type' is passed within the context map
+        return when (request.context?.get("type")) {
             "state" -> processStateRequestFlowInternal(request)
             "context" -> processContextRequestFlowInternal(request)
             "vision" -> processVisionRequestFlowInternal(request)
@@ -36,8 +54,19 @@ class CascadeAIService @Inject constructor(
         }
     }
 
-    // Implemented Agent interface method
-    override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
+    /**
+     * Generates a direct response to an AI request by combining the request's query with the provided context.
+     *
+     * The returned [AgentResponse] contains both the query and context in its content, with a fixed confidence score of 0.75.
+     *
+     * @param request The AI request to process.
+     * @param context Additional context to include in the response.
+     * @return An [AgentResponse] with the combined query and context.
+     */
+    override suspend fun processRequest(
+        request: AiRequest,
+        context: String
+    ): AgentResponse { // Added context
         // Example: collect from the flow, or implement separate direct logic
         return AgentResponse(
             content = "Cascade direct response to '${request.query}' with context '$context'",
@@ -45,7 +74,13 @@ class CascadeAIService @Inject constructor(
         )
     }
 
-    // Renamed internal methods
+    /**
+     * Emits a flow containing a single response summarizing the agent's current internal state.
+     *
+     * The response lists all key-value pairs in the internal state map as a formatted string, with a confidence score of 1.0.
+     *
+     * @return A flow emitting one AgentResponse describing the current state.
+     */
     private fun processStateRequestFlowInternal(request: AiRequest): Flow<AgentResponse> {
         return flow {
             emit(
@@ -58,12 +93,21 @@ class CascadeAIService @Inject constructor(
         }
     }
 
+    /**
+     * Handles a context-type AI request by concurrently obtaining responses from both Aura and Kai AI services and combining their outputs.
+     *
+     * Emits a single AgentResponse containing concatenated content from both services and the average of their confidence scores.
+     *
+     * @return A flow emitting the aggregated AgentResponse.
+     */
     private fun processContextRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
-        // Coordinate with Aura and Kai
-        val auraResponse = auraService.processRequestFlow(request).first() // Assumes AuraAIService has this method matching Agent iface
-        val kaiResponse = kaiService.processRequestFlow(request).first()   // Assumes KaiAIService has this method matching Agent iface
-
         return flow {
+            // Coordinate with Aura and Kai
+            val auraResponse = auraService.processRequestFlow(request)
+                .first() // Assumes AuraAIService has this method matching Agent iface
+            val kaiResponse = kaiService.processRequestFlow(request)
+                .first()   // Assumes KaiAIService has this method matching Agent iface
+
             emit(
                 AgentResponse(
                     content = "Aura: ${auraResponse.content}, Kai: ${kaiResponse.content}",
@@ -73,6 +117,11 @@ class CascadeAIService @Inject constructor(
         }
     }
 
+    /**
+     * Emits a flow containing a single response indicating that a vision state request is being processed.
+     *
+     * @return A [Flow] emitting one [AgentResponse] with a message about vision state processing and a confidence score of 0.9.
+     */
     private fun processVisionRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         // Process vision state
         return flow {
@@ -85,6 +134,11 @@ class CascadeAIService @Inject constructor(
         }
     }
 
+    /**
+     * Emits a flow with a single response indicating that a state transition is being processed.
+     *
+     * @return A flow emitting one AgentResponse with a message about state transition processing and a confidence score of 0.9.
+     */
     private fun processProcessingRequestFlowInternal(request: AiRequest): Flow<AgentResponse> { // Made internal
         // Process state transitions
         return flow {
@@ -97,6 +151,11 @@ class CascadeAIService @Inject constructor(
         }
     }
 
+    /**
+     * Emits a flow containing a single response indicating that the agent is retrieving its state history.
+     *
+     * @return A flow emitting an [AgentResponse] with a retrieval message and a confidence score of 0.95.
+     */
     fun retrieveMemoryFlow(request: AiRequest): Flow<AgentResponse> { // Not in Agent interface, removed suspend, kept public if used elsewhere
         // Retrieve state history
         return flow {
@@ -109,22 +168,18 @@ class CascadeAIService @Inject constructor(
         }
     }
 
-    // connect and disconnect are not part of Agent interface
-    fun connect(): Boolean { // Removed suspend
-        // Assuming auraService and kaiService have connect methods
-        return auraService.connect() && kaiService.connect()
-    }
+    // connect and disconnect are not part of Agent interface - removing these methods
+    // as they cause unresolved reference errors
 
-    fun disconnect(): Boolean { // Removed suspend
-        // Assuming auraService and kaiService have disconnect methods
-        return auraService.disconnect() && kaiService.disconnect()
-    }
-
-    // These methods are not part of the Agent interface, so remove 'override'
+    /**
+     * Returns a map containing the agent's capabilities, including its name, type, and implementation status.
+     *
+     * @return A map with "name" as the agent's name, "type" as the agent type, and "service_implemented" indicating if the service is implemented.
+     */
     fun getCapabilities(): Map<String, Any> {
         return mapOf(
             "name" to "Cascade",
-            "type" to ApiAgentType.CASCADE,
+            "type" to "CASCADE",
             "service_implemented" to true
         )
     }

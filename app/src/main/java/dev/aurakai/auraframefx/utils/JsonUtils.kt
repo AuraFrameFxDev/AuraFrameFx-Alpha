@@ -1,28 +1,26 @@
 package dev.aurakai.auraframefx.utils
 
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 object JsonUtils {
-    private val json = Json {
+    internal val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
         prettyPrint = true
     }
 
-    inline fun <reified T> toJson(obj: T): String? {
+    fun <T> toJson(obj: T, serializer: kotlinx.serialization.KSerializer<T>): String? {
         return try {
-            json.encodeToString(obj)
+            Json.encodeToString(serializer, obj)
         } catch (e: Exception) {
             // Log the exception
             null
         }
     }
 
-    inline fun <reified T> fromJson(jsonString: String): T? {
+    fun <T> fromJson(jsonString: String, serializer: kotlinx.serialization.KSerializer<T>): T? {
         return try {
-            json.decodeFromString<T>(jsonString)
+            Json.decodeFromString(serializer, jsonString)
         } catch (e: Exception) {
             // Log the exception
             null

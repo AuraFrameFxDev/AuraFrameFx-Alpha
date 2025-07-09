@@ -1,56 +1,76 @@
 package com.example.app.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.app.ipc.OracleDriveServiceConnector
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class OracleDriveControlViewModel @Inject constructor(
-    private val oracleDriveServiceConnector: OracleDriveServiceConnector,
-) : ViewModel() {
-    private val _status = MutableStateFlow<String?>(null)
-    val status: StateFlow<String?> = _status.asStateFlow()
+/**
+ * ViewModel for Oracle Drive Control Screen
+ *
+ * Note: This is a stub implementation for beta. All methods are no-ops
+ * and return placeholder data to prevent crashes during UI testing.
+ */
+class OracleDriveControlViewModel : ViewModel() {
 
-    private val _detailedStatus = MutableStateFlow<String?>(null)
-    val detailedStatus: StateFlow<String?> = _detailedStatus.asStateFlow()
+    // State properties expected by the UI
+    private val _isServiceConnected = MutableStateFlow(false)
+    val isServiceConnected: StateFlow<Boolean> = _isServiceConnected.asStateFlow()
 
-    private val _diagnosticsLog = MutableStateFlow<String?>(null)
-    val diagnosticsLog: StateFlow<String?> = _diagnosticsLog.asStateFlow()
+    private val _status = MutableStateFlow("Service not connected (Beta Mode)")
+    val status: StateFlow<String> = _status.asStateFlow()
 
-    val isServiceConnected: StateFlow<Boolean> =
-        oracleDriveServiceConnector.isServiceConnected
+    private val _detailedStatus = MutableStateFlow("Oracle Drive is disabled in beta version")
+    val detailedStatus: StateFlow<String> = _detailedStatus.asStateFlow()
 
+    private val _diagnosticsLog = MutableStateFlow("Beta mode: No diagnostics available")
+    val diagnosticsLog: StateFlow<String> = _diagnosticsLog.asStateFlow()
+
+    /**
+     * Simulates binding to the Oracle Drive service in beta mode.
+     *
+     * Updates internal state to reflect that service binding is disabled. No real service connection occurs.
+     */
     fun bindService() {
-        oracleDriveServiceConnector.bindService()
+        // Beta stub: No actual binding
+        _isServiceConnected.value = false
+        _status.value = "Service binding disabled in beta"
     }
 
+    /**
+     * Simulates unbinding from the Oracle Drive service in beta mode.
+     *
+     * Updates internal state to indicate the service is disconnected, but does not perform any real unbinding operation.
+     */
     fun unbindService() {
-        oracleDriveServiceConnector.unbindService()
+        // Beta stub: No actual unbinding
+        _isServiceConnected.value = false
+        _status.value = "Service unbound (beta mode)"
     }
 
+    /**
+     * Sets status, detailed status, and diagnostics log to static messages indicating Oracle Drive is disabled in beta mode.
+     *
+     * This method is a stub for UI testing and does not perform any actual status or diagnostics retrieval.
+     */
     fun refreshStatus() {
-        viewModelScope.launch {
-            _status.value = oracleDriveServiceConnector.getStatusFromOracleDrive()
-            _detailedStatus.value = oracleDriveServiceConnector.getDetailedInternalStatus()
-            _diagnosticsLog.value = oracleDriveServiceConnector.getInternalDiagnosticsLog()
-        }
+        // Beta stub: Update with fake status
+        _status.value = "Beta Mode - Oracle Drive Status Simulation"
+        _detailedStatus.value = "All Oracle Drive features are disabled in beta for safety"
+        _diagnosticsLog.value = "Beta Log: No real diagnostics in this version"
     }
 
+    /**
+     * Updates the diagnostics log with a placeholder message simulating the enabling or disabling of a module.
+     *
+     * This method does not change any actual module state and is intended solely for UI testing in beta mode.
+     *
+     * @param packageName The name of the module package to simulate toggling.
+     * @param enable If `true`, simulates enabling the module; if `false`, simulates disabling it.
+     */
     fun toggleModule(packageName: String, enable: Boolean) {
-        viewModelScope.launch {
-            oracleDriveServiceConnector.toggleModuleOnOracleDrive(packageName, enable)
-            refreshStatus()
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        unbindService()
+        // Beta stub: Just log the action without actually doing anything
+        val action = if (enable) "enable" else "disable"
+        _diagnosticsLog.value = "Beta Mode: Would $action module '$packageName' (no-op)"
     }
 }
