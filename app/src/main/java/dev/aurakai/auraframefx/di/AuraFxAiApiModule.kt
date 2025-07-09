@@ -36,9 +36,9 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton Json serializer configured for resilient API data handling.
+     * Supplies a singleton Json serializer configured for robust handling of API data.
      *
-     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values to ensure robust serialization and deserialization of API responses.
+     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values, ensuring resilient serialization and deserialization of API responses.
      *
      * @return A configured Json instance for processing API data.
      */
@@ -52,10 +52,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Supplies a singleton AIContentApi instance configured for communication with the AuraFrameFx AI API.
+     * Supplies a singleton `AIContentApi` configured to interact with the AuraFrameFx AI API.
      *
-     * @param okHttpClient The OkHttpClient used for network requests to the API.
-     * @return An AIContentApi instance set up with the AuraFrameFx API base URL and the provided HTTP client.
+     * @param okHttpClient The HTTP client used for API network communication.
+     * @return An `AIContentApi` instance initialized with the AuraFrameFx API base URL and the specified HTTP client.
      */
     @Provides
     @Singleton
