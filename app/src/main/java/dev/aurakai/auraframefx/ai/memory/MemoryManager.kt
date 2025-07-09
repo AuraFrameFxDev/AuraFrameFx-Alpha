@@ -15,7 +15,8 @@ import kotlin.time.Duration.Companion.seconds
 class MemoryManager @Inject constructor(
     private val config: AIPipelineConfig,
 ) {
-    private val memoryStore = ConcurrentHashMap<String, CanonicalMemoryItem>() // Changed MemoryItem to CanonicalMemoryItem
+    private val memoryStore =
+        ConcurrentHashMap<String, CanonicalMemoryItem>() // Changed MemoryItem to CanonicalMemoryItem
     private val _recentAccess = MutableStateFlow(mutableSetOf<String>())
     val recentAccess: StateFlow<Set<String>> = _recentAccess
 

@@ -19,24 +19,24 @@ jobs:
       matrix:
         java: [ 17, 21 ]
     steps:
-<<<<<<< HEAD
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'temurin'
-          cache: maven
-      - name: Build with Maven
-        run: mvn -B package --no-transfer-progress --file pom.xml
-=======
-    - uses: actions/checkout@v4
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: ${{ matrix.java }}
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package --no-transfer-progress --file pom.xml
->>>>>>> origin/coderabbitai/docstrings/78f34ad
+  <<<<<<< HEAD
+  - uses: actions/checkout@v4
+- name: Set up JDK
+  uses: actions/setup-java@v4
+  with:
+    java-version: ${{ matrix.java }}
+    distribution: 'temurin'
+    cache: maven
+- name: Build with Maven
+  run: mvn -B package --no-transfer-progress --file pom.xml
+  =======
+- uses: actions/checkout@v4
+- name: Set up JDK
+  uses: actions/setup-java@v4
+  with:
+    java-version: ${{ matrix.java }}
+    distribution: 'temurin'
+    cache: maven
+- name: Build with Maven
+  run: mvn -B package --no-transfer-progress --file pom.xml
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad

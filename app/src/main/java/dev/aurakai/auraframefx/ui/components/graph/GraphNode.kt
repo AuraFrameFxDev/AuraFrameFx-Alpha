@@ -126,5 +126,3 @@ enum class ConnectionType {
     BIDIRECTIONAL,
     DASHED
 }
-
-// Extension properties for Dp have been removed as androidx.compose.ui.unit.dp is now imported.

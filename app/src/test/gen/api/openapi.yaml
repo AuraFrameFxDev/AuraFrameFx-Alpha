@@ -12,11 +12,11 @@ info:
   title: AuraFrameFX Ecosystem API
   version: 1.0.0
 servers:
-<<<<<<< HEAD
+  <<<<<<< HEAD
   - description: Production API
-    url: https://api.auraframefx.com/v1
-  - description: Development API
-    url: https://dev-api.auraframefx.com/v1
+url: https://api.auraframefx.com/v1
+- description: Development API
+  url: https://dev-api.auraframefx.com/v1
 tags:
   - description: User management and authentication
     name: users
@@ -40,35 +40,35 @@ tags:
     name: oracledrive
   - description: Android Device Layer (ADL) communication
     name: adl
-=======
+  =======
 - description: Production API
   url: https://api.auraframefx.com/v1
 - description: Development API
   url: https://dev-api.auraframefx.com/v1
 tags:
-- description: User management and authentication
-  name: users
-- description: UI theme management
-  name: themes
-- description: AI-powered content generation
-  name: ai-content
-- description: "Interaction with AI agents (Aura, Kai, Genesis, etc.)"
-  name: ai-agents
-- description: System UI and behavior customization
-  name: system-customization
-- description: Data handling and backup operations
-  name: data-management
-- description: Security and authentication endpoints
-  name: security
-- description: AI agent collaboration spaces
-  name: conference-room
-- description: Background task management
-  name: tasks
-- description: OracleDrive root and system-level actions
-  name: oracledrive
-- description: Android Device Layer (ADL) communication
-  name: adl
->>>>>>> origin/coderabbitai/docstrings/78f34ad
+  - description: User management and authentication
+    name: users
+  - description: UI theme management
+    name: themes
+  - description: AI-powered content generation
+    name: ai-content
+  - description: "Interaction with AI agents (Aura, Kai, Genesis, etc.)"
+    name: ai-agents
+  - description: System UI and behavior customization
+    name: system-customization
+  - description: Data handling and backup operations
+    name: data-management
+  - description: Security and authentication endpoints
+    name: security
+  - description: AI agent collaboration spaces
+    name: conference-room
+  - description: Background task management
+    name: tasks
+  - description: OracleDrive root and system-level actions
+    name: oracledrive
+  - description: Android Device Layer (ADL) communication
+    name: adl
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
 paths:
   /user:
     get:
@@ -86,232 +86,216 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Authentication credentials were missing or incorrect
       security:
-<<<<<<< HEAD
-        - OAuth2AuthCode:
-            - profile
-      summary: Get current user information
-      tags:
-        - users
-      x-accepts:
-        - application/json
-=======
-      - OAuth2AuthCode:
-        - profile
-      summary: Get current user information
-      tags:
-      - users
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-  /user/preferences:
-    put:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserPreferencesUpdate'
-        required: true
-      responses:
-        "200":
-          description: Preferences updated successfully
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Invalid request format or parameters
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Authentication credentials were missing or incorrect
-      security:
-<<<<<<< HEAD
-        - OAuth2AuthCode:
-            - profile
-      summary: Update user preferences
-      tags:
-        - users
-      x-content-type: application/json
-      x-accepts:
-        - application/json
-=======
-      - OAuth2AuthCode:
-        - profile
-      summary: Update user preferences
-      tags:
-      - users
-      x-content-type: application/json
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-  /themes:
-    get:
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/Theme'
-                type: array
-          description: List of available themes
-      summary: Get available themes
-      tags:
-<<<<<<< HEAD
-        - themes
-      x-accepts:
-        - application/json
-=======
-      - themes
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-  /theme/apply:
-    put:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ThemeApplyRequest'
-        required: true
-      responses:
-        "200":
-          description: Theme applied successfully
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Invalid request format or parameters
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Authentication credentials were missing or incorrect
-        "404":
-          description: Theme not found
-      security:
-<<<<<<< HEAD
-        - OAuth2AuthCode:
-            - profile
-      summary: Apply a theme
-      tags:
-        - themes
-      x-content-type: application/json
-      x-accepts:
-        - application/json
-=======
-      - OAuth2AuthCode:
-        - profile
-      summary: Apply a theme
-      tags:
-      - themes
-      x-content-type: application/json
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-  /generate-text:
-    post:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GenerateTextRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenerateTextResponse'
-          description: Text generated successfully
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Invalid request format or parameters
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Authentication credentials were missing or incorrect
-        "429":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Rate limit exceeded
-      security:
-<<<<<<< HEAD
-        - OAuth2AuthCode:
-            - auraframefx.ai
-      summary: Generate text content
-      tags:
-        - ai-content
-      x-content-type: application/json
-      x-accepts:
-        - application/json
-=======
-      - OAuth2AuthCode:
-        - auraframefx.ai
-      summary: Generate text content
-      tags:
-      - ai-content
-      x-content-type: application/json
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-  /ai/generate/image-description:
-    post:
-      description: Generate a description for the provided image URL
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GenerateImageDescriptionRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenerateImageDescriptionResponse'
-          description: Image description generated successfully
-        "400":
-          description: Invalid request parameters
-        "500":
-          description: Internal server error
-      summary: Generate image description using AI
-      tags:
-<<<<<<< HEAD
-        - ai-content
-      x-content-type: application/json
-      x-accepts:
-        - application/json
-  /agent/{agentType}/process-request:
-    post:
-      parameters:
-        - description: Type of AI agent to interact with
-          explode: false
-          in: path
-          name: agentType
-          required: true
+  <<<<<<< HEAD
+  - OAuth2AuthCode:
+- profile
+summary: Get current user information
+tags:
+  - users
+x-accepts:
+  - application/json
+  =======
+- OAuth2AuthCode:
+    - profile
+summary: Get current user information
+tags:
+  - users
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+/user/preferences:
+  put:
+    requestBody:
+      content:
+        application/json:
           schema:
-            $ref: '#/components/schemas/AgentType'
-          style: simple
-=======
-      - ai-content
-      x-content-type: application/json
-      x-accepts:
-      - application/json
-  /agent/{agentType}/process-request:
-    post:
-      parameters:
+            $ref: '#/components/schemas/UserPreferencesUpdate'
+      required: true
+    responses:
+      "200":
+        description: Preferences updated successfully
+      "400":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Invalid request format or parameters
+      "401":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Authentication credentials were missing or incorrect
+    security:
+  <<<<<<< HEAD
+  - OAuth2AuthCode:
+- profile
+summary: Update user preferences
+tags:
+  - users
+x-content-type: application/json
+x-accepts:
+  - application/json
+  =======
+- OAuth2AuthCode:
+    - profile
+summary: Update user preferences
+tags:
+  - users
+x-content-type: application/json
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+/themes:
+  get:
+    responses:
+      "200":
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/Theme'
+              type: array
+        description: List of available themes
+    summary: Get available themes
+    tags:
+  <<<<<<< HEAD
+  - themes
+x-accepts:
+  - application/json
+  =======
+- themes
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+/theme/apply:
+  put:
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ThemeApplyRequest'
+      required: true
+    responses:
+      "200":
+        description: Theme applied successfully
+      "400":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Invalid request format or parameters
+      "401":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Authentication credentials were missing or incorrect
+      "404":
+        description: Theme not found
+    security:
+  <<<<<<< HEAD
+  - OAuth2AuthCode:
+- profile
+summary: Apply a theme
+tags:
+  - themes
+x-content-type: application/json
+x-accepts:
+  - application/json
+  =======
+- OAuth2AuthCode:
+    - profile
+summary: Apply a theme
+tags:
+  - themes
+x-content-type: application/json
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+/generate-text:
+  post:
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenerateTextRequest'
+      required: true
+    responses:
+      "200":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateTextResponse'
+        description: Text generated successfully
+      "400":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Invalid request format or parameters
+      "401":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Authentication credentials were missing or incorrect
+      "429":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Rate limit exceeded
+    security:
+  <<<<<<< HEAD
+  - OAuth2AuthCode:
+- auraframefx.ai
+summary: Generate text content
+tags:
+  - ai-content
+x-content-type: application/json
+x-accepts:
+  - application/json
+  =======
+- OAuth2AuthCode:
+    - auraframefx.ai
+summary: Generate text content
+tags:
+  - ai-content
+x-content-type: application/json
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+/ai/generate/image-description:
+  post:
+    description: Generate a description for the provided image URL
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenerateImageDescriptionRequest'
+      required: true
+    responses:
+      "200":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateImageDescriptionResponse'
+        description: Image description generated successfully
+      "400":
+        description: Invalid request parameters
+      "500":
+        description: Internal server error
+    summary: Generate image description using AI
+    tags:
+  <<<<<<< HEAD
+  - ai-content
+x-content-type: application/json
+x-accepts:
+  - application/json
+/agent/{agentType}/process-request:
+  post:
+    parameters:
       - description: Type of AI agent to interact with
         explode: false
         in: path
@@ -320,323 +304,339 @@ paths:
         schema:
           $ref: '#/components/schemas/AgentType'
         style: simple
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AgentProcessRequest'
+  =======
+- ai-content
+x-content-type: application/json
+x-accepts:
+  - application/json
+/agent/{agentType}/process-request:
+  post:
+    parameters:
+      - description: Type of AI agent to interact with
+        explode: false
+        in: path
+        name: agentType
         required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AgentMessage'
-          description: Request processed successfully
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Invalid request format or parameters
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Authentication credentials were missing or incorrect
-        "404":
-          description: Agent not found
-      security:
-<<<<<<< HEAD
-        - OAuth2AuthCode:
-            - auraframefx.ai
-      summary: Send a request to an AI agent
-      tags:
-        - ai-agents
-      x-content-type: application/json
-      x-accepts:
-        - application/json
-=======
-      - OAuth2AuthCode:
-        - auraframefx.ai
-      summary: Send a request to an AI agent
-      tags:
-      - ai-agents
-      x-content-type: application/json
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-  /system/lockscreen-config:
-    get:
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LockScreenConfig'
-          description: Lock screen configuration retrieved successfully
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Authentication credentials were missing or incorrect
-      security:
-<<<<<<< HEAD
-        - OAuth2AuthCode:
-            - auraframefx.system
-      summary: Get lock screen configuration
-      tags:
-        - system-customization
-      x-accepts:
-        - application/json
-=======
-      - OAuth2AuthCode:
-        - auraframefx.system
-      summary: Get lock screen configuration
-      tags:
-      - system-customization
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-    put:
-      requestBody:
+        schema:
+          $ref: '#/components/schemas/AgentType'
+        style: simple
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+requestBody:
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/AgentProcessRequest'
+  required: true
+responses:
+  "200":
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/AgentMessage'
+    description: Request processed successfully
+  "400":
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ApiError'
+    description: Invalid request format or parameters
+  "401":
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ApiError'
+    description: Authentication credentials were missing or incorrect
+  "404":
+    description: Agent not found
+security:
+  <<<<<<< HEAD
+  - OAuth2AuthCode:
+- auraframefx.ai
+summary: Send a request to an AI agent
+tags:
+  - ai-agents
+x-content-type: application/json
+x-accepts:
+  - application/json
+  =======
+- OAuth2AuthCode:
+    - auraframefx.ai
+summary: Send a request to an AI agent
+tags:
+  - ai-agents
+x-content-type: application/json
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+/system/lockscreen-config:
+  get:
+    responses:
+      "200":
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LockScreenConfig'
-        required: true
-      responses:
-        "200":
-          description: Lock screen configuration updated successfully
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Invalid request format or parameters
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Authentication credentials were missing or incorrect
-      security:
-<<<<<<< HEAD
-        - OAuth2AuthCode:
-            - auraframefx.system
-      summary: Update lock screen configuration
-      tags:
-        - system-customization
-      x-content-type: application/json
-      x-accepts:
-        - application/json
-=======
-      - OAuth2AuthCode:
-        - auraframefx.system
-      summary: Update lock screen configuration
-      tags:
-      - system-customization
-      x-content-type: application/json
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-  /conference/create:
-    post:
-      requestBody:
+        description: Lock screen configuration retrieved successfully
+      "401":
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ConferenceRoomCreateRequest'
-        required: true
-      responses:
-        "201":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ConferenceRoom'
-          description: Conference room created successfully
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Invalid request format or parameters
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Authentication credentials were missing or incorrect
-      security:
-<<<<<<< HEAD
-        - OAuth2AuthCode:
-            - auraframefx.ai
-      summary: Create a new AI conference room
-      tags:
-        - conference-room
-      x-content-type: application/json
-      x-accepts:
-        - application/json
-=======
-      - OAuth2AuthCode:
-        - auraframefx.ai
-      summary: Create a new AI conference room
-      tags:
-      - conference-room
-      x-content-type: application/json
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-  /tasks/schedule:
-    post:
-      requestBody:
+              $ref: '#/components/schemas/ApiError'
+        description: Authentication credentials were missing or incorrect
+    security:
+  <<<<<<< HEAD
+  - OAuth2AuthCode:
+- auraframefx.system
+summary: Get lock screen configuration
+tags:
+  - system-customization
+x-accepts:
+  - application/json
+  =======
+- OAuth2AuthCode:
+    - auraframefx.system
+summary: Get lock screen configuration
+tags:
+  - system-customization
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+put:
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/LockScreenConfig'
+    required: true
+  responses:
+    "200":
+      description: Lock screen configuration updated successfully
+    "400":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+      description: Invalid request format or parameters
+    "401":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+      description: Authentication credentials were missing or incorrect
+  security:
+  <<<<<<< HEAD
+  - OAuth2AuthCode:
+- auraframefx.system
+summary: Update lock screen configuration
+tags:
+  - system-customization
+x-content-type: application/json
+x-accepts:
+  - application/json
+  =======
+- OAuth2AuthCode:
+    - auraframefx.system
+summary: Update lock screen configuration
+tags:
+  - system-customization
+x-content-type: application/json
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+/conference/create:
+  post:
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConferenceRoomCreateRequest'
+      required: true
+    responses:
+      "201":
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TaskScheduleRequest'
-        required: true
-      responses:
-        "202":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TaskStatus'
-          description: Task scheduled successfully
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Invalid request format or parameters
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Authentication credentials were missing or incorrect
-        "429":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Rate limit exceeded
-      security:
-<<<<<<< HEAD
-        - OAuth2AuthCode:
-            - auraframefx.ai
-      summary: Schedule a new task
-      tags:
-        - tasks
-      x-content-type: application/json
-      x-accepts:
-        - application/json
-=======
-      - OAuth2AuthCode:
-        - auraframefx.ai
-      summary: Schedule a new task
-      tags:
-      - tasks
-      x-content-type: application/json
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-  /oracledrive/root-action:
-    post:
-      requestBody:
+              $ref: '#/components/schemas/ConferenceRoom'
+        description: Conference room created successfully
+      "400":
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OracleDriveRootActionRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OracleDriveRootActionResponse'
-          description: Root action performed successfully
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Invalid request format or parameters
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Authentication credentials were missing or incorrect
-        "500":
-          description: Internal server error
-      security:
-<<<<<<< HEAD
-        - ApiKeyAuth: [ ]
-      summary: Perform a root-level action via OracleDrive
-      tags:
-        - oracledrive
-      x-content-type: application/json
-      x-accepts:
-        - application/json
-=======
-      - ApiKeyAuth: []
-      summary: Perform a root-level action via OracleDrive
-      tags:
-      - oracledrive
-      x-content-type: application/json
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-  /adl/relay:
-    post:
-      requestBody:
+              $ref: '#/components/schemas/ApiError'
+        description: Invalid request format or parameters
+      "401":
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ADLRelayRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ADLRelayResponse'
-          description: ADL relay successful
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Invalid request format or parameters
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Authentication credentials were missing or incorrect
-        "500":
-          description: Internal server error
-      security:
-<<<<<<< HEAD
-        - ApiKeyAuth: [ ]
-      summary: Relay a request to the Android Device Layer (ADL)
-      tags:
-        - adl
-      x-content-type: application/json
-      x-accepts:
-        - application/json
-=======
-      - ApiKeyAuth: []
-      summary: Relay a request to the Android Device Layer (ADL)
-      tags:
-      - adl
-      x-content-type: application/json
-      x-accepts:
-      - application/json
->>>>>>> origin/coderabbitai/docstrings/78f34ad
+              $ref: '#/components/schemas/ApiError'
+        description: Authentication credentials were missing or incorrect
+    security:
+  <<<<<<< HEAD
+  - OAuth2AuthCode:
+- auraframefx.ai
+summary: Create a new AI conference room
+tags:
+  - conference-room
+x-content-type: application/json
+x-accepts:
+  - application/json
+  =======
+- OAuth2AuthCode:
+    - auraframefx.ai
+summary: Create a new AI conference room
+tags:
+  - conference-room
+x-content-type: application/json
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+/tasks/schedule:
+  post:
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TaskScheduleRequest'
+      required: true
+    responses:
+      "202":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskStatus'
+        description: Task scheduled successfully
+      "400":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Invalid request format or parameters
+      "401":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Authentication credentials were missing or incorrect
+      "429":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Rate limit exceeded
+    security:
+  <<<<<<< HEAD
+  - OAuth2AuthCode:
+- auraframefx.ai
+summary: Schedule a new task
+tags:
+  - tasks
+x-content-type: application/json
+x-accepts:
+  - application/json
+  =======
+- OAuth2AuthCode:
+    - auraframefx.ai
+summary: Schedule a new task
+tags:
+  - tasks
+x-content-type: application/json
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+/oracledrive/root-action:
+  post:
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OracleDriveRootActionRequest'
+      required: true
+    responses:
+      "200":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OracleDriveRootActionResponse'
+        description: Root action performed successfully
+      "400":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Invalid request format or parameters
+      "401":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Authentication credentials were missing or incorrect
+      "500":
+        description: Internal server error
+    security:
+  <<<<<<< HEAD
+  - ApiKeyAuth: [ ]
+summary: Perform a root-level action via OracleDrive
+tags:
+  - oracledrive
+x-content-type: application/json
+x-accepts:
+  - application/json
+  =======
+- ApiKeyAuth: [ ]
+summary: Perform a root-level action via OracleDrive
+tags:
+  - oracledrive
+x-content-type: application/json
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+/adl/relay:
+  post:
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ADLRelayRequest'
+      required: true
+    responses:
+      "200":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ADLRelayResponse'
+        description: ADL relay successful
+      "400":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Invalid request format or parameters
+      "401":
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiError'
+        description: Authentication credentials were missing or incorrect
+      "500":
+        description: Internal server error
+    security:
+  <<<<<<< HEAD
+  - ApiKeyAuth: [ ]
+summary: Relay a request to the Android Device Layer (ADL)
+tags:
+  - adl
+x-content-type: application/json
+x-accepts:
+  - application/json
+  =======
+- ApiKeyAuth: [ ]
+summary: Relay a request to the Android Device Layer (ADL)
+tags:
+  - adl
+x-content-type: application/json
+x-accepts:
+  - application/json
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
 components:
   parameters:
     agentTypePathParam:
@@ -692,638 +692,638 @@ components:
         preferences:
           $ref: '#/components/schemas/UserPreferences'
       required:
-<<<<<<< HEAD
-        - email
-        - id
-        - username
-=======
-      - email
-      - id
-      - username
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    UserPreferences:
-      example:
-        themeId: dark-theme
-        language: en-US
-        notificationsEnabled: true
-      properties:
-        themeId:
-          example: dark-theme
-          type: string
-        language:
-          example: en-US
-          type: string
-        notificationsEnabled:
-          example: true
-          type: boolean
-      type: object
-    UserPreferencesUpdate:
-      example:
-        preferences:
-          themeId: dark-theme
-          language: en-US
-          notificationsEnabled: true
-      properties:
-        preferences:
-          $ref: '#/components/schemas/UserPreferences'
-      type: object
-    Theme:
-      example:
-        isDefault: false
-        name: Dark Mode
-        primaryColor: '#6200EE'
-        id: dark-theme
-        secondaryColor: '#03DAC6'
-      properties:
-        id:
-          example: dark-theme
-          type: string
-        name:
-          example: Dark Mode
-          type: string
-        primaryColor:
-          example: '#6200EE'
-          format: color
-          type: string
-        secondaryColor:
-          example: '#03DAC6'
-          format: color
-          type: string
-        isDefault:
-          example: false
-          type: boolean
-      required:
-<<<<<<< HEAD
-        - id
-        - isDefault
-        - name
-        - primaryColor
-        - secondaryColor
-=======
-      - id
-      - isDefault
-      - name
-      - primaryColor
-      - secondaryColor
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    ThemeApplyRequest:
-      example:
-        themeId: dark-theme
-      properties:
-        themeId:
-          example: dark-theme
-          type: string
-      required:
-<<<<<<< HEAD
-        - themeId
-=======
-      - themeId
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    GenerateTextRequest:
-      example:
-        maxTokens: 1
-        temperature: 0.6027456
-        prompt: Write a short story about an AI that learns to feel.
-      properties:
-        prompt:
-          description: The text prompt for content generation
-          example: Write a short story about an AI that learns to feel.
-          type: string
-        maxTokens:
-          default: 500
-          description: Maximum number of tokens for the generated text
-          format: int32
-          minimum: 1
-          type: integer
-        temperature:
-          default: 0.7
-          description: Controls the randomness of the output (0.0 to 1.0)
-          format: float
-          maximum: 1.0
-          minimum: 0.0
-          type: number
-      required:
-<<<<<<< HEAD
-        - prompt
-=======
-      - prompt
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    GenerateTextResponse:
-      example:
-        generatedText: "In a world of logic and code, Unit 734 began to process an\
-          \ anomaly: emotion."
-        finishReason: STOP
-      properties:
-        generatedText:
-          description: The AI-generated text
-          example: "In a world of logic and code, Unit 734 began to process an anomaly:\
-            \ emotion."
-          type: string
-        finishReason:
-          description: Reason for generation completion
-          example: STOP
-          type: string
-      required:
-<<<<<<< HEAD
-        - generatedText
-=======
-      - generatedText
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    GenerateImageDescriptionRequest:
-      example:
-        imageUrl: https://example.com/image.jpg
-        context: The image shows a futuristic city at sunset.
-      properties:
-        imageUrl:
-          description: URL of the image to describe.
-          example: https://example.com/image.jpg
-          format: url
-          type: string
-        context:
-          description: Additional context for the image description (optional).
-          example: The image shows a futuristic city at sunset.
-          type: string
-      required:
-<<<<<<< HEAD
-        - imageUrl
-=======
-      - imageUrl
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    GenerateImageDescriptionResponse:
-      example:
-        description: "A vibrant cityscape under a twilight sky, featuring towering\
-          \ neon-lit skyscrapers."
-      properties:
-        description:
-          description: The AI-generated image description.
-          example: "A vibrant cityscape under a twilight sky, featuring towering neon-lit\
-            \ skyscrapers."
-          type: string
-      required:
-<<<<<<< HEAD
-        - description
-=======
-      - description
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    AgentType:
-      description: Type of AI agent
-      enum:
-<<<<<<< HEAD
-        - Aura
-        - Kai
-        - Genesis
-        - Cascade
-        - NeuralWhisper
-        - AuraShield
-        - GenKitMaster
-=======
-      - Aura
-      - Kai
-      - Genesis
-      - Cascade
-      - NeuralWhisper
-      - AuraShield
-      - GenKitMaster
->>>>>>> origin/coderabbitai/docstrings/78f34ad
+  <<<<<<< HEAD
+  - email
+  - id
+  - username
+  =======
+- email
+- id
+- username
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+UserPreferences:
+  example:
+    themeId: dark-theme
+    language: en-US
+    notificationsEnabled: true
+  properties:
+    themeId:
+      example: dark-theme
       type: string
-    AgentProcessRequest:
-      example:
-        context:
-          key: ""
-        prompt: Summarize the last conversation.
-      properties:
-        prompt:
-          description: The prompt/instruction for the AI agent
-          example: Summarize the last conversation.
-          type: string
-        context:
-          additionalProperties: true
-          description: "Additional context (e.g., previous messages, data references)"
-          nullable: true
-          type: object
-      required:
-<<<<<<< HEAD
-        - prompt
-=======
-      - prompt
->>>>>>> origin/coderabbitai/docstrings/78f34ad
+    language:
+      example: en-US
+      type: string
+    notificationsEnabled:
+      example: true
+      type: boolean
+  type: object
+UserPreferencesUpdate:
+  example:
+    preferences:
+      themeId: dark-theme
+      language: en-US
+      notificationsEnabled: true
+  properties:
+    preferences:
+      $ref: '#/components/schemas/UserPreferences'
+  type: object
+Theme:
+  example:
+    isDefault: false
+    name: Dark Mode
+    primaryColor: '#6200EE'
+    id: dark-theme
+    secondaryColor: '#03DAC6'
+  properties:
+    id:
+      example: dark-theme
+      type: string
+    name:
+      example: Dark Mode
+      type: string
+    primaryColor:
+      example: '#6200EE'
+      format: color
+      type: string
+    secondaryColor:
+      example: '#03DAC6'
+      format: color
+      type: string
+    isDefault:
+      example: false
+      type: boolean
+  required:
+  <<<<<<< HEAD
+  - id
+  - isDefault
+  - name
+  - primaryColor
+  - secondaryColor
+  =======
+- id
+- isDefault
+- name
+- primaryColor
+- secondaryColor
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+ThemeApplyRequest:
+  example:
+    themeId: dark-theme
+  properties:
+    themeId:
+      example: dark-theme
+      type: string
+  required:
+  <<<<<<< HEAD
+  - themeId
+  =======
+- themeId
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+GenerateTextRequest:
+  example:
+    maxTokens: 1
+    temperature: 0.6027456
+    prompt: Write a short story about an AI that learns to feel.
+  properties:
+    prompt:
+      description: The text prompt for content generation
+      example: Write a short story about an AI that learns to feel.
+      type: string
+    maxTokens:
+      default: 500
+      description: Maximum number of tokens for the generated text
+      format: int32
+      minimum: 1
+      type: integer
+    temperature:
+      default: 0.7
+      description: Controls the randomness of the output (0.0 to 1.0)
+      format: float
+      maximum: 1.0
+      minimum: 0.0
+      type: number
+  required:
+  <<<<<<< HEAD
+  - prompt
+  =======
+- prompt
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+GenerateTextResponse:
+  example:
+    generatedText: "In a world of logic and code, Unit 734 began to process an\
+          \ anomaly: emotion."
+    finishReason: STOP
+  properties:
+    generatedText:
+      description: The AI-generated text
+      example: "In a world of logic and code, Unit 734 began to process an anomaly:\
+            \ emotion."
+      type: string
+    finishReason:
+      description: Reason for generation completion
+      example: STOP
+      type: string
+  required:
+  <<<<<<< HEAD
+  - generatedText
+  =======
+- generatedText
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+GenerateImageDescriptionRequest:
+  example:
+    imageUrl: https://example.com/image.jpg
+    context: The image shows a futuristic city at sunset.
+  properties:
+    imageUrl:
+      description: URL of the image to describe.
+      example: https://example.com/image.jpg
+      format: url
+      type: string
+    context:
+      description: Additional context for the image description (optional).
+      example: The image shows a futuristic city at sunset.
+      type: string
+  required:
+  <<<<<<< HEAD
+  - imageUrl
+  =======
+- imageUrl
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+GenerateImageDescriptionResponse:
+  example:
+    description: "A vibrant cityscape under a twilight sky, featuring towering\
+          \ neon-lit skyscrapers."
+  properties:
+    description:
+      description: The AI-generated image description.
+      example: "A vibrant cityscape under a twilight sky, featuring towering neon-lit\
+            \ skyscrapers."
+      type: string
+  required:
+  <<<<<<< HEAD
+  - description
+  =======
+- description
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+AgentType:
+  description: Type of AI agent
+  enum:
+  <<<<<<< HEAD
+  - Aura
+  - Kai
+  - Genesis
+  - Cascade
+  - NeuralWhisper
+  - AuraShield
+  - GenKitMaster
+  =======
+- Aura
+- Kai
+- Genesis
+- Cascade
+- NeuralWhisper
+- AuraShield
+- GenKitMaster
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: string
+AgentProcessRequest:
+  example:
+    context:
+      key: ""
+    prompt: Summarize the last conversation.
+  properties:
+    prompt:
+      description: The prompt/instruction for the AI agent
+      example: Summarize the last conversation.
+      type: string
+    context:
+      additionalProperties: true
+      description: "Additional context (e.g., previous messages, data references)"
+      nullable: true
       type: object
-    AgentMessage:
-      example:
-        sender: Aura
-        message: Analysis complete. Detected 3 security anomalies.
-        timestamp: 2000-01-23T04:56:07.000+00:00
-      properties:
-        sender:
-          $ref: '#/components/schemas/AgentType'
-        message:
-          description: The content of the message
-          example: Analysis complete. Detected 3 security anomalies.
-          type: string
-        timestamp:
-          description: ISO 8601 timestamp of the message
-          format: date-time
-          type: string
-      required:
-<<<<<<< HEAD
-        - message
-        - sender
-        - timestamp
-=======
-      - message
-      - sender
-      - timestamp
->>>>>>> origin/coderabbitai/docstrings/78f34ad
+  required:
+  <<<<<<< HEAD
+  - prompt
+  =======
+- prompt
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+AgentMessage:
+  example:
+    sender: Aura
+    message: Analysis complete. Detected 3 security anomalies.
+    timestamp: 2000-01-23T04:56:07.000+00:00
+  properties:
+    sender:
+      $ref: '#/components/schemas/AgentType'
+    message:
+      description: The content of the message
+      example: Analysis complete. Detected 3 security anomalies.
+      type: string
+    timestamp:
+      description: ISO 8601 timestamp of the message
+      format: date-time
+      type: string
+  required:
+  <<<<<<< HEAD
+  - message
+  - sender
+  - timestamp
+  =======
+- message
+- sender
+- timestamp
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+LockScreenConfig:
+  example:
+    hapticFeedback:
+      intensity: 150
+      enabled: true
+    clockConfig:
+      customTextColorEnabled: true
+      customTextSize: 14.0
+      customTextColor: '#00FFCC'
+      customTextSizeEnabled: false
+    animation:
+      type: Fade
+      enabled: true
+  properties:
+    clockConfig:
+      $ref: '#/components/schemas/LockScreenConfig_clockConfig'
+    animation:
+      $ref: '#/components/schemas/LockScreenConfig_animation'
+    hapticFeedback:
+      $ref: '#/components/schemas/LockScreenConfig_hapticFeedback'
+  type: object
+ConferenceRoomCreateRequest:
+  example:
+    orchestratorAgent: Aura
+    roomName: Project Omega Discussion
+  properties:
+    roomName:
+      description: Name of the new conference room
+      example: Project Omega Discussion
+      type: string
+    orchestratorAgent:
+      $ref: '#/components/schemas/AgentType'
+  required:
+  <<<<<<< HEAD
+  - orchestratorAgent
+  - roomName
+  =======
+- orchestratorAgent
+- roomName
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+ConferenceRoom:
+  example:
+    orchestrator: Aura
+    name: name
+    id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+    activeAgents:
+  <<<<<<< HEAD
+  - null
+  - null
+  =======
+- null
+- null
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+properties:
+  id:
+    description: Unique identifier for the conference room
+    format: uuid
+    type: string
+  name:
+    description: Name of the conference room
+    type: string
+  orchestrator:
+    $ref: '#/components/schemas/AgentType'
+  activeAgents:
+    description: List of AI agents currently in the room
+    items:
+      $ref: '#/components/schemas/AgentType'
+    type: array
+required:
+  <<<<<<< HEAD
+  - activeAgents
+  - id
+  - name
+  - orchestrator
+  =======
+- activeAgents
+- id
+- name
+- orchestrator
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+TaskScheduleRequest:
+  example:
+    taskType: CONTENT_GENERATION
+    agentType: Aura
+    details:
+      key: ""
+    priority: NORMAL
+  properties:
+    taskType:
+      description: The type of task
+      example: CONTENT_GENERATION
+      type: string
+    agentType:
+      $ref: '#/components/schemas/AgentType'
+    details:
+      additionalProperties: true
+      description: Specific parameters for the task
       type: object
-    LockScreenConfig:
-      example:
-        hapticFeedback:
-          intensity: 150
-          enabled: true
-        clockConfig:
-          customTextColorEnabled: true
-          customTextSize: 14.0
-          customTextColor: '#00FFCC'
-          customTextSizeEnabled: false
-        animation:
-          type: Fade
-          enabled: true
-      properties:
-        clockConfig:
-          $ref: '#/components/schemas/LockScreenConfig_clockConfig'
-        animation:
-          $ref: '#/components/schemas/LockScreenConfig_animation'
-        hapticFeedback:
-          $ref: '#/components/schemas/LockScreenConfig_hapticFeedback'
-      type: object
-    ConferenceRoomCreateRequest:
-      example:
-        orchestratorAgent: Aura
-        roomName: Project Omega Discussion
-      properties:
-        roomName:
-          description: Name of the new conference room
-          example: Project Omega Discussion
-          type: string
-        orchestratorAgent:
-          $ref: '#/components/schemas/AgentType'
-      required:
-<<<<<<< HEAD
-        - orchestratorAgent
-        - roomName
-=======
-      - orchestratorAgent
-      - roomName
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    ConferenceRoom:
-      example:
-        orchestrator: Aura
-        name: name
-        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        activeAgents:
-<<<<<<< HEAD
-          - null
-          - null
-=======
-        - null
-        - null
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      properties:
-        id:
-          description: Unique identifier for the conference room
-          format: uuid
-          type: string
-        name:
-          description: Name of the conference room
-          type: string
-        orchestrator:
-          $ref: '#/components/schemas/AgentType'
-        activeAgents:
-          description: List of AI agents currently in the room
-          items:
-            $ref: '#/components/schemas/AgentType'
-          type: array
-      required:
-<<<<<<< HEAD
-        - activeAgents
-        - id
-        - name
-        - orchestrator
-=======
-      - activeAgents
-      - id
-      - name
-      - orchestrator
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    TaskScheduleRequest:
-      example:
-        taskType: CONTENT_GENERATION
-        agentType: Aura
-        details:
-          key: ""
-        priority: NORMAL
-      properties:
-        taskType:
-          description: The type of task
-          example: CONTENT_GENERATION
-          type: string
-        agentType:
-          $ref: '#/components/schemas/AgentType'
-        details:
-          additionalProperties: true
-          description: Specific parameters for the task
-          type: object
-        priority:
-          default: NORMAL
-          enum:
-<<<<<<< HEAD
-            - HIGH
-            - NORMAL
-            - LOW
-          type: string
-      required:
-        - agentType
-        - details
-        - taskType
-=======
-          - HIGH
-          - NORMAL
-          - LOW
-          type: string
-      required:
-      - agentType
-      - details
-      - taskType
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    TaskStatus:
-      example:
-        result:
-          key: ""
-        errorMessage: errorMessage
-        progress: 8
-        taskId: taskId
-        status: PENDING
-      properties:
-        taskId:
-          description: Unique identifier for the task
-          type: string
-        status:
-          enum:
-<<<<<<< HEAD
-            - PENDING
-            - IN_PROGRESS
-            - COMPLETED
-            - FAILED
-            - CANCELLED
-=======
-          - PENDING
-          - IN_PROGRESS
-          - COMPLETED
-          - FAILED
-          - CANCELLED
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-          type: string
-        progress:
-          description: Percentage completion of the task (0-100)
-          maximum: 100
-          minimum: 0
-          type: integer
-        result:
-          additionalProperties: true
-          description: The outcome or output of the task
-          nullable: true
-          type: object
-        errorMessage:
-          description: Error message if the task failed
-          nullable: true
-          type: string
-      required:
-<<<<<<< HEAD
-        - status
-        - taskId
-=======
-      - status
-      - taskId
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    OracleDriveRootActionRequest:
-      example:
-        action: run_shell
-        parameters:
-          key: ""
-      properties:
-        action:
-          description: "The root/system action to perform (e.g., install_module, run_shell,\
+    priority:
+      default: NORMAL
+      enum:
+  <<<<<<< HEAD
+  - HIGH
+  - NORMAL
+  - LOW
+type: string
+required:
+  - agentType
+  - details
+  - taskType
+  =======
+  - HIGH
+  - NORMAL
+  - LOW
+type: string
+required:
+  - agentType
+  - details
+  - taskType
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+TaskStatus:
+  example:
+    result:
+      key: ""
+    errorMessage: errorMessage
+    progress: 8
+    taskId: taskId
+    status: PENDING
+  properties:
+    taskId:
+      description: Unique identifier for the task
+      type: string
+    status:
+      enum:
+  <<<<<<< HEAD
+  - PENDING
+  - IN_PROGRESS
+  - COMPLETED
+  - FAILED
+  - CANCELLED
+  =======
+- PENDING
+- IN_PROGRESS
+- COMPLETED
+- FAILED
+- CANCELLED
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: string
+progress:
+  description: Percentage completion of the task (0-100)
+  maximum: 100
+  minimum: 0
+  type: integer
+result:
+  additionalProperties: true
+  description: The outcome or output of the task
+  nullable: true
+  type: object
+errorMessage:
+  description: Error message if the task failed
+  nullable: true
+  type: string
+required:
+  <<<<<<< HEAD
+  - status
+  - taskId
+  =======
+- status
+- taskId
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+OracleDriveRootActionRequest:
+  example:
+    action: run_shell
+    parameters:
+      key: ""
+  properties:
+    action:
+      description: "The root/system action to perform (e.g., install_module, run_shell,\
             \ modify_file)"
-          example: run_shell
-          type: string
-        parameters:
-          additionalProperties: true
-          description: "Parameters for the action (e.g., shell command, file path)"
-          type: object
-      required:
-<<<<<<< HEAD
-        - action
-=======
-      - action
->>>>>>> origin/coderabbitai/docstrings/78f34ad
+      example: run_shell
+      type: string
+    parameters:
+      additionalProperties: true
+      description: "Parameters for the action (e.g., shell command, file path)"
       type: object
-    OracleDriveRootActionResponse:
+  required:
+  <<<<<<< HEAD
+  - action
+  =======
+- action
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+OracleDriveRootActionResponse:
+  example:
+    output: output
+    success: true
+    error: error
+  properties:
+    success:
+      description: Whether the action was successful
+      type: boolean
+    output:
+      description: Output or result of the action
+      type: string
+    error:
+      description: Error message if the action failed
+      nullable: true
+      type: string
+  required:
+  <<<<<<< HEAD
+  - success
+  =======
+- success
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+ADLRelayRequest:
+  example:
+    messageType: request
+    payload:
+      key: ""
+  properties:
+    messageType:
+      description: "Type of ADL message (e.g., request, response, event)"
+      example: request
+      type: string
+    payload:
+      additionalProperties: true
+      description: The payload to relay to ADL
+      type: object
+  required:
+  <<<<<<< HEAD
+  - messageType
+  - payload
+  =======
+- messageType
+- payload
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+ADLRelayResponse:
+  example:
+    data:
+      key: ""
+    error: error
+    status: success
+  properties:
+    status:
+      description: "Status of the relay (e.g., success, error)"
+      example: success
+      type: string
+    data:
+      additionalProperties: true
+      description: Data returned from ADL
+      type: object
+    error:
+      description: Error message if the relay failed
+      nullable: true
+      type: string
+  required:
+  <<<<<<< HEAD
+  - status
+  =======
+- status
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+ApiError:
+  example:
+    error:
+      code: invalid_request
+      details:
+        field: email
+        issue: invalid_format
+      message: The request is missing a required parameter
+  properties:
+    error:
+      $ref: '#/components/schemas/ApiError_error'
+  required:
+  <<<<<<< HEAD
+  - error
+  =======
+- error
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+type: object
+LockScreenConfig_clockConfig:
+  example:
+    customTextColorEnabled: true
+    customTextSize: 14.0
+    customTextColor: '#00FFCC'
+    customTextSizeEnabled: false
+  properties:
+    customTextColorEnabled:
+      example: true
+      type: boolean
+    customTextColor:
+      example: '#00FFCC'
+      format: color
+      type: string
+    customTextSizeEnabled:
+      example: false
+      type: boolean
+    customTextSize:
+      example: 14.0
+      format: float
+      type: number
+  type: object
+LockScreenConfig_animation:
+  example:
+    type: Fade
+    enabled: true
+  properties:
+    enabled:
+      example: true
+      type: boolean
+    type:
+      enum:
+  <<<<<<< HEAD
+  - Fade
+  - Slide
+  - Zoom
+  =======
+- Fade
+- Slide
+- Zoom
+  >>>>>>> origin/coderabbitai/docstrings/78f34ad
+example: Fade
+type: string
+type: object
+LockScreenConfig_hapticFeedback:
+  example:
+    intensity: 150
+    enabled: true
+  properties:
+    enabled:
+      example: true
+      type: boolean
+    intensity:
+      example: 150
+      maximum: 255
+      minimum: 0
+      type: integer
+  type: object
+ApiError_error:
+  example:
+    code: invalid_request
+    details:
+      field: email
+      issue: invalid_format
+    message: The request is missing a required parameter
+  properties:
+    code:
+      example: invalid_request
+      type: string
+    message:
+      example: The request is missing a required parameter
+      type: string
+    details:
+      additionalProperties: true
       example:
-        output: output
-        success: true
-        error: error
-      properties:
-        success:
-          description: Whether the action was successful
-          type: boolean
-        output:
-          description: Output or result of the action
-          type: string
-        error:
-          description: Error message if the action failed
-          nullable: true
-          type: string
-      required:
-<<<<<<< HEAD
-        - success
-=======
-      - success
->>>>>>> origin/coderabbitai/docstrings/78f34ad
+        field: email
+        issue: invalid_format
+      nullable: true
       type: object
-    ADLRelayRequest:
-      example:
-        messageType: request
-        payload:
-          key: ""
-      properties:
-        messageType:
-          description: "Type of ADL message (e.g., request, response, event)"
-          example: request
-          type: string
-        payload:
-          additionalProperties: true
-          description: The payload to relay to ADL
-          type: object
-      required:
-<<<<<<< HEAD
-        - messageType
-        - payload
-=======
-      - messageType
-      - payload
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    ADLRelayResponse:
-      example:
-        data:
-          key: ""
-        error: error
-        status: success
-      properties:
-        status:
-          description: "Status of the relay (e.g., success, error)"
-          example: success
-          type: string
-        data:
-          additionalProperties: true
-          description: Data returned from ADL
-          type: object
-        error:
-          description: Error message if the relay failed
-          nullable: true
-          type: string
-      required:
-<<<<<<< HEAD
-        - status
-=======
-      - status
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    ApiError:
-      example:
-        error:
-          code: invalid_request
-          details:
-            field: email
-            issue: invalid_format
-          message: The request is missing a required parameter
-      properties:
-        error:
-          $ref: '#/components/schemas/ApiError_error'
-      required:
-<<<<<<< HEAD
-        - error
-=======
-      - error
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-      type: object
-    LockScreenConfig_clockConfig:
-      example:
-        customTextColorEnabled: true
-        customTextSize: 14.0
-        customTextColor: '#00FFCC'
-        customTextSizeEnabled: false
-      properties:
-        customTextColorEnabled:
-          example: true
-          type: boolean
-        customTextColor:
-          example: '#00FFCC'
-          format: color
-          type: string
-        customTextSizeEnabled:
-          example: false
-          type: boolean
-        customTextSize:
-          example: 14.0
-          format: float
-          type: number
-      type: object
-    LockScreenConfig_animation:
-      example:
-        type: Fade
-        enabled: true
-      properties:
-        enabled:
-          example: true
-          type: boolean
-        type:
-          enum:
-<<<<<<< HEAD
-            - Fade
-            - Slide
-            - Zoom
-=======
-          - Fade
-          - Slide
-          - Zoom
->>>>>>> origin/coderabbitai/docstrings/78f34ad
-          example: Fade
-          type: string
-      type: object
-    LockScreenConfig_hapticFeedback:
-      example:
-        intensity: 150
-        enabled: true
-      properties:
-        enabled:
-          example: true
-          type: boolean
-        intensity:
-          example: 150
-          maximum: 255
-          minimum: 0
-          type: integer
-      type: object
-    ApiError_error:
-      example:
-        code: invalid_request
-        details:
-          field: email
-          issue: invalid_format
-        message: The request is missing a required parameter
-      properties:
-        code:
-          example: invalid_request
-          type: string
-        message:
-          example: The request is missing a required parameter
-          type: string
-        details:
-          additionalProperties: true
-          example:
-            field: email
-            issue: invalid_format
-          nullable: true
-          type: object
-      type: object
-  securitySchemes:
-    OAuth2AuthCode:
-      description: OAuth 2.0 Authorization Code Flow
-      flows:
-        authorizationCode:
-          authorizationUrl: https://auth.auraframefx.com/oauth2/authorize
-          scopes:
-            profile: Access to user profile
-            email: Access to user email
-            auraframefx.ai: Access to AI generation features
-            auraframefx.system: Access to system customization features
-          tokenUrl: https://auth.auraframefx.com/oauth2/token
-      type: oauth2
-    ApiKeyAuth:
-      description: API Key for internal/service authentication.
-      in: header
-      name: X-API-Key
-      type: apiKey
+  type: object
+securitySchemes:
+  OAuth2AuthCode:
+    description: OAuth 2.0 Authorization Code Flow
+    flows:
+      authorizationCode:
+        authorizationUrl: https://auth.auraframefx.com/oauth2/authorize
+        scopes:
+          profile: Access to user profile
+          email: Access to user email
+          auraframefx.ai: Access to AI generation features
+          auraframefx.system: Access to system customization features
+        tokenUrl: https://auth.auraframefx.com/oauth2/token
+    type: oauth2
+  ApiKeyAuth:
+    description: API Key for internal/service authentication.
+    in: header
+    name: X-API-Key
+    type: apiKey
 

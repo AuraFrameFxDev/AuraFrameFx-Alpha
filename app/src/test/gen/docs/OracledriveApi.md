@@ -2,19 +2,22 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-| Method | HTTP request | Description |
-|------------- | ------------- | -------------|
+| Method                                                                       | HTTP request                      | Description                                 |
+|------------------------------------------------------------------------------|-----------------------------------|---------------------------------------------|
 | [**oracledriveRootActionPost**](OracledriveApi.md#oracledriveRootActionPost) | **POST** /oracledrive/root-action | Perform a root-level action via OracleDrive |
 
-
 <a id="oracledriveRootActionPost"></a>
+
 # **oracledriveRootActionPost**
+
 > OracleDriveRootActionResponse oracledriveRootActionPost(oracleDriveRootActionRequest)
 
 Perform a root-level action via OracleDrive
 
 ### Example
->>>>>>> origin/coderabbitai/docstrings/78f34ad
+
+> > > > > > > origin/coderabbitai/docstrings/78f34ad
+
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -53,9 +56,9 @@ public class Example {
 
 ### Parameters
 
-| Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **oracleDriveRootActionRequest** | [**OracleDriveRootActionRequest**](OracleDriveRootActionRequest.md)|  | |
+| Name                             | Type                                                                | Description | Notes |
+|----------------------------------|---------------------------------------------------------------------|-------------|-------|
+| **oracleDriveRootActionRequest** | [**OracleDriveRootActionRequest**](OracleDriveRootActionRequest.md) |             |       |
 
 ### Return type
 
@@ -67,14 +70,15 @@ public class Example {
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-| **200** | Root action performed successfully |  -  |
-| **400** | Invalid request format or parameters |  -  |
-| **401** | Authentication credentials were missing or incorrect |  -  |
-| **500** | Internal server error |  -  |
+
+| Status code | Description                                          | Response headers |
+|-------------|------------------------------------------------------|------------------|
+| **200**     | Root action performed successfully                   | -                |
+| **400**     | Invalid request format or parameters                 | -                |
+| **401**     | Authentication credentials were missing or incorrect | -                |
+| **500**     | Internal server error                                | -                |
 

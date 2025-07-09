@@ -1,12 +1,11 @@
 package dev.aurakai.auraframefx.ai.task.execution
 
+// Removed import kotlinx.datetime.Clock.System as System is now java.lang.System
 import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.serialization.InstantSerializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-// Removed import kotlinx.datetime.Clock.System as System is now java.lang.System
-import java.lang.System // Added import for java.lang.System
 
 @Serializable
 data class TaskExecution(

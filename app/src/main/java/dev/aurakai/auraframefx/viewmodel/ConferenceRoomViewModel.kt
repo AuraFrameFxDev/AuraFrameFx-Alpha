@@ -115,7 +115,10 @@ class ConferenceRoomViewModel @Inject constructor(
             AgentType.CASCADE -> cascadeService.processRequestFlow(
                 AiRequest(
                     query = message,
-                    context = mapOf("requestType" to "context_query", "userProvidedContext" to context)
+                    context = mapOf(
+                        "requestType" to "context_query",
+                        "userProvidedContext" to context
+                    )
                 )
             )
 

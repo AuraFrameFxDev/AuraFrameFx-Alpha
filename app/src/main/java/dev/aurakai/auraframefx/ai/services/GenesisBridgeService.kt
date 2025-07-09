@@ -142,7 +142,8 @@ class GenesisBridgeService @Inject constructor(
                 fusionMode = fusionMode,
                 payload = mapOf(
                     "message" to request.query,
-                    "type" to (request.context?.get("type") ?: "unknown"), // Get type from context map
+                    "type" to (request.context?.get("type")
+                        ?: "unknown"), // Get type from context map
                     "priority" to "normal"
                 ),
                 context = buildContextMap(request)
@@ -324,13 +325,13 @@ class GenesisBridgeService @Inject constructor(
     }
 
     /**
-         * Sends a GenesisRequest to the Python backend and returns the corresponding GenesisResponse.
-         *
-         * If communication fails or an exception occurs, returns a failure response with `success = false` and `persona = "error"`.
-         *
-         * @param request The request to send to the Genesis backend.
-         * @return The response from the Genesis backend, or a failure response if an error occurs.
-         */
+     * Sends a GenesisRequest to the Python backend and returns the corresponding GenesisResponse.
+     *
+     * If communication fails or an exception occurs, returns a failure response with `success = false` and `persona = "error"`.
+     *
+     * @param request The request to send to the Genesis backend.
+     * @return The response from the Genesis backend, or a failure response if an error occurs.
+     */
     private suspend fun sendToGenesis(request: GenesisRequest): GenesisResponse =
         withContext(Dispatchers.IO) {
             try {

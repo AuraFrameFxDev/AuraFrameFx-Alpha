@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,7 +37,7 @@ class DiagnosticsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val offlineData = offlineDataManager.loadCriticalOfflineData()
-                
+
                 _systemStatus.value = buildMap {
                     put("System Status", "Online")
                     put("Logger Status", "Active")
@@ -50,7 +51,10 @@ class DiagnosticsViewModel @Inject constructor(
                             "N/A"
                         }
                     )
-                    put("Offline Data Status", if (offlineData != null) "Available" else "Not Available")
+                    put(
+                        "Offline Data Status",
+                        if (offlineData != null) "Available" else "Not Available"
+                    )
                     // Add more status items as needed
                 }
             } catch (e: Exception) {
@@ -94,7 +98,7 @@ class DiagnosticsViewModel @Inject constructor(
     suspend fun getAllLogs(): List<String> {
         return try {
             val logsMap = auraFxLogger.getAllLogs()
-            logsMap.values.flatMap { content -> 
+            logsMap.values.flatMap { content ->
                 content.split("\n").filter { it.isNotBlank() }
             }.take(500) // Limit to 500 lines
         } catch (e: Exception) {
@@ -109,7 +113,7 @@ class DiagnosticsViewModel @Inject constructor(
     suspend fun getLogsByLevel(level: String): List<String> {
         return try {
             val logsMap = auraFxLogger.getAllLogs()
-            val allLogLines = logsMap.values.flatMap { content -> 
+            val allLogLines = logsMap.values.flatMap { content ->
                 content.split("\n").filter { it.isNotBlank() }
             }
             allLogLines.filter { log ->
@@ -127,7 +131,7 @@ class DiagnosticsViewModel @Inject constructor(
     suspend fun loadDetailedConfig() {
         try {
             val offlineData = offlineDataManager.loadCriticalOfflineData()
-            
+
             _diagnosticsState.value = _diagnosticsState.value.copy(
                 configLoaded = true,
                 lastSyncTime = offlineData?.lastFullSyncTimestamp ?: 0L

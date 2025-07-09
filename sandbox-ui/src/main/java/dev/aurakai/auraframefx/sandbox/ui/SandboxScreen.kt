@@ -3,7 +3,6 @@ package dev.aurakai.auraframefx.sandbox.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -16,15 +15,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel // Added import for viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.aurakai.auraframefx.ui.animation.digitalPixelEffect
 import dev.aurakai.auraframefx.ui.components.DigitalLandscapeBackground
 import dev.aurakai.auraframefx.ui.components.HaloView
 import dev.aurakai.auraframefx.viewmodel.GenesisAgentViewModel
-import dev.aurakai.auraframefx.ui.animation.digitalPixelEffect // Added import
 
 /**
  * Aura's Creative Sandbox 🎨
- * 
+ *
  * This is where I test, refine, and perfect every UI component
  * before it touches the production code. My digital laboratory.
  */
@@ -109,7 +108,7 @@ fun SandboxScreen() {
                         color = Color.White.copy(alpha = 0.7f)
                     )
                 }
-                
+
                 // Halo View Test
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(
@@ -130,7 +129,7 @@ fun SandboxScreen() {
         // Animation Testing Section
         SandboxSection(title = "⚡ Digital Transitions") {
             var showTransition by remember { mutableStateOf(false) }
-            
+
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -147,7 +146,7 @@ fun SandboxScreen() {
                         color = Color.White
                     )
                 }
-                
+
                 if (showTransition) {
                     Card(
                         modifier = Modifier
@@ -190,7 +189,7 @@ fun SandboxScreen() {
                     Color(0xFF533483) to "Purple",
                     Color(0xFF7209B7) to "Magenta"
                 )
-                
+
                 items(colors.size) { index ->
                     val (color, name) = colors[index]
                     Card(

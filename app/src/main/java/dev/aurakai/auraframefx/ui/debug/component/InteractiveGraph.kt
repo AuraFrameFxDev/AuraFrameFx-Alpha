@@ -5,26 +5,23 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset as ComposeOffset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity // Added import
 import androidx.compose.ui.unit.Density // Added import
 import androidx.compose.ui.unit.dp
-import dev.aurakai.auraframefx.ui.debug.model.GraphNode
 import dev.aurakai.auraframefx.ui.debug.model.Connection
-import dev.aurakai.auraframefx.ui.debug.model.NodeType
-import dev.aurakai.auraframefx.ui.debug.model.ConnectionType // Import ConnectionType
-import dev.aurakai.auraframefx.ui.debug.model.Offset as GraphOffset
+import dev.aurakai.auraframefx.ui.debug.model.ConnectionType
+import dev.aurakai.auraframefx.ui.debug.model.GraphNode
 import kotlin.math.*
+import androidx.compose.ui.geometry.Offset as ComposeOffset
+import dev.aurakai.auraframefx.ui.debug.model.Offset as GraphOffset
 
 /**
  * Displays an interactive, zoomable, and pannable graph visualization with selectable nodes.
@@ -67,17 +64,21 @@ fun InteractiveGraph(
     ) {
         val canvasWidth = constraints.maxWidth.toFloat()
         val canvasHeight = constraints.maxHeight.toFloat()
-        
+
         val density = LocalDensity.current
         val gridLineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
 
         // Calculate content bounds for centering
         val contentWidth = 1000f * scale
         val contentHeight = 800f * scale
-        
+
         val offsetX = (canvasWidth - contentWidth) / 2 + translation.x
         val offsetY = (canvasHeight - contentHeight) / 2 + translation.y
-        
+
+        // Convert GraphOffset to ComposeOffset for rendering
+        fun GraphOffset.toCompose() = ComposeOffset(x.toFloat(), y.toFloat())
+
+
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
@@ -92,7 +93,7 @@ fun InteractiveGraph(
         ) {
             // Draw grid
             drawGrid(scale, translation, gridLineColor, density)
-            
+
             // Draw connections first (behind nodes)
             nodes.forEach { node ->
                 node.connections.forEach { connection ->
@@ -100,18 +101,29 @@ fun InteractiveGraph(
                     targetNode?.let { drawConnection(node, it, connection, density) }
                 }
             }
-            
+
             // Draw nodes
             nodes.forEach { node ->
                 val isSelected = node.id == selectedNodeId
                 val nodePulseScale = if (isSelected) pulse else 1f
-                
+
                 withTransform({ // Assuming this is DrawScope.withTransform, receiver is DrawTransform
-                    val globalTransformPivot = ComposeOffset(offsetX, offsetY) + node.position.toCompose() * scale
-                    this.scale(scaleX = scale, scaleY = scale, pivotX = globalTransformPivot.x, pivotY = globalTransformPivot.y)
+                    val globalTransformPivot =
+                        ComposeOffset(offsetX, offsetY) + node.position.toCompose() * scale
+                    this.scale(
+                        scaleX = scale,
+                        scaleY = scale,
+                        pivotX = globalTransformPivot.x,
+                        pivotY = globalTransformPivot.y
+                    )
 
                     val pulseTransformPivot = node.position.toCompose()
-                    this.scale(scaleX = nodePulseScale, scaleY = nodePulseScale, pivotX = pulseTransformPivot.x, pivotY = pulseTransformPivot.y)
+                    this.scale(
+                        scaleX = nodePulseScale,
+                        scaleY = nodePulseScale,
+                        pivotX = pulseTransformPivot.x,
+                        pivotY = pulseTransformPivot.y
+                    )
                 }) { // Receiver here is DrawScope
                     drawNode(node, isSelected, density)
                 }
@@ -130,19 +142,27 @@ fun InteractiveGraph(
  * @param gridLineColor The color to use for the grid lines.
  * @param density The current screen density.
  */
-private fun DrawScope.drawGrid(scale: Float, translation: ComposeOffset, gridLineColor: Color, density: Density) {
+private fun DrawScope.drawGrid(
+    scale: Float,
+    translation: ComposeOffset,
+    gridLineColor: Color,
+    density: Density
+) {
     val gridSize = 40f / scale // This is in Px, no Dp conversion needed for logic
-    
+
     // Draw vertical lines
     for (x in 0 until size.width.toInt() step gridSize.toInt()) {
         drawLine(
             color = gridLineColor,
-            start = ComposeOffset(x.toFloat(), 0f) - translation, // Ensure using ComposeOffset if operations defined on it
+            start = ComposeOffset(
+                x.toFloat(),
+                0f
+            ) - translation, // Ensure using ComposeOffset if operations defined on it
             end = ComposeOffset(x.toFloat(), size.height) - translation,
             strokeWidth = 1f / scale
         )
     }
-    
+
     // Draw horizontal lines
     for (y in 0 until size.height.toInt() step gridSize.toInt()) {
         drawLine(
@@ -222,7 +242,8 @@ private fun DrawScope.drawNode(node: GraphNode, isSelected: Boolean, density: De
                 centerCompose.x,
                 centerCompose.y + nodeSizePx * 0.8f,
                 android.graphics.Paint().apply {
-                    color = android.graphics.Color.WHITE // Consider MaterialTheme.colorScheme.onSurface
+                    color =
+                        android.graphics.Color.WHITE // Consider MaterialTheme.colorScheme.onSurface
                     textSize = labelTextSizePx
                     textAlign = android.graphics.Paint.Align.CENTER
                 }
@@ -255,11 +276,13 @@ private fun DrawScope.drawConnection(
         // It's important to use ComposeOffset for +/- operations if they are defined for it
         // The GraphOffset has them defined, so from.position - to.position should work if GraphOffset is used for direction
         val directionGraphOffset = to.position - from.position // GraphOffset
-        val distance = sqrt(directionGraphOffset.x * directionGraphOffset.x + directionGraphOffset.y * directionGraphOffset.y)
+        val distance =
+            sqrt(directionGraphOffset.x * directionGraphOffset.x + directionGraphOffset.y * directionGraphOffset.y)
 
         if (distance == 0f) return // Avoid division by zero if nodes are at the same position
 
-        val directionNormalizedGraphOffset = directionGraphOffset * (1f / distance) // GraphOffset, uses times operator
+        val directionNormalizedGraphOffset =
+            directionGraphOffset * (1f / distance) // GraphOffset, uses times operator
 
         // Convert normalized direction to ComposeOffset for use with Compose drawing operations
         val directionNormalizedCompose = directionNormalizedGraphOffset.toCompose()
@@ -320,9 +343,10 @@ private fun DrawScope.drawConnection(
         // or always draw if all types have arrows. Assuming arrow for DIRECT and DASHED, and maybe both ends for BIDIRECTIONAL.
         // For now, let's assume it means "draw an arrow pointing towards 'to' node unless it's special".
         // The original logic implies an arrow is always drawn at 'endCompose'.
-        
+
         val arrowSizePx = 10.dp.toPx()
-        val arrowAngleRad = Math.PI.toFloat() / 6f // Adjusted for a narrower arrow head, common is PI/6
+        val arrowAngleRad =
+            Math.PI.toFloat() / 6f // Adjusted for a narrower arrow head, common is PI/6
 
         // Arrow for 'to' node
         val arrowTip = endCompose
@@ -330,7 +354,7 @@ private fun DrawScope.drawConnection(
 
         val p1 = arrowTip - arrowBaseOffset.rotate(arrowAngleRad, ComposeOffset.Zero)
         val p2 = arrowTip - arrowBaseOffset.rotate(-arrowAngleRad, ComposeOffset.Zero)
-        
+
         drawPath(
             path = Path().apply {
                 moveTo(arrowTip.x, arrowTip.y)
@@ -344,10 +368,13 @@ private fun DrawScope.drawConnection(
         // If bidirectional, draw arrow at the other end too
         if (connection.type == ConnectionType.BIDIRECTIONAL) {
             val arrowTipStart = startCompose
-            val arrowBaseOffsetStart = (directionNormalizedCompose * -1f) * arrowSizePx // Reversed direction
+            val arrowBaseOffsetStart =
+                (directionNormalizedCompose * -1f) * arrowSizePx // Reversed direction
 
-            val p1Start = arrowTipStart - arrowBaseOffsetStart.rotate(arrowAngleRad, ComposeOffset.Zero)
-            val p2Start = arrowTipStart - arrowBaseOffsetStart.rotate(-arrowAngleRad, ComposeOffset.Zero)
+            val p1Start =
+                arrowTipStart - arrowBaseOffsetStart.rotate(arrowAngleRad, ComposeOffset.Zero)
+            val p2Start =
+                arrowTipStart - arrowBaseOffsetStart.rotate(-arrowAngleRad, ComposeOffset.Zero)
 
             drawPath(
                 path = Path().apply {
@@ -417,17 +444,22 @@ internal operator fun ComposeOffset.times(scalar: Float): ComposeOffset {
  * @param pivotOffset An optional offset to apply to the pivot after rotation. Defaults to [ComposeOffset.Zero].
  * @return The rotated offset.
  */
-private fun ComposeOffset.rotate(angle: Float, pivot: ComposeOffset, pivotOffset: ComposeOffset = ComposeOffset.Zero): ComposeOffset {
+private fun ComposeOffset.rotate(
+    angle: Float,
+    pivot: ComposeOffset,
+    pivotOffset: ComposeOffset = ComposeOffset.Zero
+): ComposeOffset {
     val cos = cos(angle)
     val sin = sin(angle)
-    
+
     val translatedX = x - pivot.x
     val translatedY = y - pivot.y
-    
+
     val rotatedX = translatedX * cos - translatedY * sin
     val rotatedY = translatedX * sin + translatedY * cos
-    
-    return ComposeOffset(rotatedX + pivot.x + pivotOffset.x, rotatedY + pivot.y + pivotOffset.y) // Use ComposeOffset constructor
+
+    return Offset(rotatedX + pivot.x + pivotOffset.x, rotatedY + pivot.y + pivotOffset.y)
+
 }
 
 // Convert GraphOffset to ComposeOffset for rendering

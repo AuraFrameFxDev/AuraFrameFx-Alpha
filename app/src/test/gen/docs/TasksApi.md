@@ -2,19 +2,22 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-| Method | HTTP request | Description |
-|------------- | ------------- | -------------|
+| Method                                                 | HTTP request             | Description         |
+|--------------------------------------------------------|--------------------------|---------------------|
 | [**tasksSchedulePost**](TasksApi.md#tasksSchedulePost) | **POST** /tasks/schedule | Schedule a new task |
 
-
 <a id="tasksSchedulePost"></a>
+
 # **tasksSchedulePost**
+
 > TaskStatus tasksSchedulePost(taskScheduleRequest)
 
 Schedule a new task
 
 ### Example
->>>>>>> origin/coderabbitai/docstrings/78f34ad
+
+> > > > > > > origin/coderabbitai/docstrings/78f34ad
+
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -51,9 +54,9 @@ public class Example {
 
 ### Parameters
 
-| Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **taskScheduleRequest** | [**TaskScheduleRequest**](TaskScheduleRequest.md)|  | |
+| Name                    | Type                                              | Description | Notes |
+|-------------------------|---------------------------------------------------|-------------|-------|
+| **taskScheduleRequest** | [**TaskScheduleRequest**](TaskScheduleRequest.md) |             |       |
 
 ### Return type
 
@@ -65,14 +68,15 @@ public class Example {
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-| **202** | Task scheduled successfully |  -  |
-| **400** | Invalid request format or parameters |  -  |
-| **401** | Authentication credentials were missing or incorrect |  -  |
-| **429** | Rate limit exceeded |  -  |
+
+| Status code | Description                                          | Response headers |
+|-------------|------------------------------------------------------|------------------|
+| **202**     | Task scheduled successfully                          | -                |
+| **400**     | Invalid request format or parameters                 | -                |
+| **401**     | Authentication credentials were missing or incorrect | -                |
+| **429**     | Rate limit exceeded                                  | -                |
 

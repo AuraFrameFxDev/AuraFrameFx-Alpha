@@ -1,12 +1,12 @@
 package dev.aurakai.auraframefx.ui.navigation
 
-import androidx.compose.material.icons.Icons
 // Explicitly import all used icons to be safe, supplementing wildcard if it was there before or was insufficient.
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Message // Explicit import
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Folder // Explicit import
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class NavDestination(val route: String, val title: String, val icon: ImageVector?) {

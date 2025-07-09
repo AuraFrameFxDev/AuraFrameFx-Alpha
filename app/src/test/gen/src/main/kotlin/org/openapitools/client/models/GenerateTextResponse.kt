@@ -20,14 +20,14 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
+ *
  *
  * @param generatedText The AI-generated text
  * @param finishReason Reason for generation completion
  */
 
 
-data class GenerateTextResponse (
+data class GenerateTextResponse(
 
     /* The AI-generated text */
     @Json(name = "generatedText")

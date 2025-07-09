@@ -1,11 +1,10 @@
 package dev.aurakai.auraframefx.initializers
 
-import android.content.Context
-import androidx.startup.Initializer
-
 // Assuming this is meant to be an Initializer for the App Startup library.
 // Replace 'Unit' with the actual type this initializer provides if different.
-import android.util.Log // Added import for Log
+import android.content.Context
+import android.util.Log
+import androidx.startup.Initializer
 
 class AppInitializerInitializer : Initializer<Unit> {
 

@@ -95,22 +95,22 @@ interface AuraAIService {
     }
 
     /**
- * Retrieves the stored memory value associated with the given key.
- *
- * @param memoryKey The key identifying the memory entry to retrieve.
- * @return The stored value as a string, or null if the key does not exist.
- */
-fun getMemory(memoryKey: String): String?
+     * Retrieves the stored memory value associated with the given key.
+     *
+     * @param memoryKey The key identifying the memory entry to retrieve.
+     * @return The stored value as a string, or null if the key does not exist.
+     */
+    fun getMemory(memoryKey: String): String?
 
     /**
- * Saves a value in memory under the specified key.
- *
- * Implementations should allow retrieval of the stored value using the same key.
- *
- * @param key The identifier for the memory entry.
- * @param value The value to store.
- */
-fun saveMemory(key: String, value: Any)
+     * Saves a value in memory under the specified key.
+     *
+     * Implementations should allow retrieval of the stored value using the same key.
+     *
+     * @param key The identifier for the memory entry.
+     * @param value The value to store.
+     */
+    fun saveMemory(key: String, value: Any)
 
     /**
      * Indicates whether the AI service is currently connected.
