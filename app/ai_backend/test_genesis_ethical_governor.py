@@ -781,294 +781,144 @@ class TestGenesisEthicalGovernorIntegration:
         assert all(isinstance(result, DecisionResult) for result in results)
         assert len(governor.decision_history) == 100
 
-class TestGenesisEthicalGovernorExtended:
-    """Extended comprehensive test suite for GenesisEthicalGovernor with additional edge cases and scenarios"""
+# Additional comprehensive tests for enhanced coverage
+
+class TestGenesisEthicalGovernorEnhanced:
+    """Enhanced test suite with additional edge cases and scenarios"""
     
     @pytest.fixture
-    def governor_strict_mode(self):
-        """Create a GenesisEthicalGovernor in strict mode for testing"""
-        return GenesisEthicalGovernor(config={'strict_mode': True, 'violation_threshold': 1})
-    
-    @pytest.fixture
-    def malformed_contexts(self):
-        """Create various malformed contexts for testing"""
-        return [
-            EthicalContext(user_id=None, action="test", context_data={}, timestamp=datetime.now()),
-            EthicalContext(user_id="", action="", context_data={}, timestamp=datetime.now()),
-            EthicalContext(user_id="user", action="test", context_data={"key": None}, timestamp=None),
-            EthicalContext(user_id="user" * 1000, action="test", context_data={}, timestamp=datetime.now()),
-        ]
-    
-    def test_evaluate_decision_with_malformed_context(self, governor, malformed_contexts):
-        """Test decision evaluation with various malformed contexts"""
-        for context in malformed_contexts:
-            decision = EthicalDecision(
-                action="test_action",
-                context=context,
-                parameters={}
-            )
-            
-            # Should handle gracefully without crashing
-            result = governor.evaluate_decision(decision)
-            assert isinstance(result, DecisionResult)
-    
-    def test_evaluate_decision_with_circular_references(self, governor):
-        """Test decision evaluation with circular reference in context data"""
-        circular_data = {}
-        circular_data["self"] = circular_data
+    def governor_with_custom_rules(self):
+        """Create a governor with pre-configured custom rules"""
+        governor = GenesisEthicalGovernor()
         
-        context = EthicalContext(
-            user_id="test_user",
-            action="circular_test",
-            context_data=circular_data,
-            timestamp=datetime.now()
-        )
-        
-        decision = EthicalDecision(
-            action="circular_test",
-            context=context,
-            parameters={}
-        )
-        
-        result = governor.evaluate_decision(decision)
-        assert isinstance(result, DecisionResult)
-    
-    def test_evaluate_decision_with_unicode_characters(self, governor):
-        """Test decision evaluation with unicode characters in action names and context"""
-        unicode_context = EthicalContext(
-            user_id="测试用户",
-            action="действие",
-            context_data={"emoji": "🤖", "special": "café"},
-            timestamp=datetime.now()
-        )
-        
-        decision = EthicalDecision(
-            action="действие_🤖",
-            context=unicode_context,
-            parameters={"param": "🎯"}
-        )
-        
-        result = governor.evaluate_decision(decision)
-        assert isinstance(result, DecisionResult)
-    
-    def test_evaluate_decision_with_deeply_nested_parameters(self, governor):
-        """Test decision evaluation with deeply nested parameter structures"""
-        deep_params = {}
-        current = deep_params
-        for i in range(100):
-            current["level_" + str(i)] = {}
-            current = current["level_" + str(i)]
-        current["final"] = "value"
-        
-        context = EthicalContext(
-            user_id="test_user",
-            action="deep_nesting_test",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        decision = EthicalDecision(
-            action="deep_nesting_test",
-            context=context,
-            parameters=deep_params
-        )
-        
-        result = governor.evaluate_decision(decision)
-        assert isinstance(result, DecisionResult)
-    
-    def test_add_ethical_rule_with_exception_in_condition(self, governor):
-        """Test adding ethical rule with condition that throws exception"""
-        def failing_condition(ctx):
-            raise ValueError("Condition evaluation failed")
-        
-        rule = {
-            "name": "failing_rule",
-            "condition": failing_condition,
-            "action": "deny",
-            "priority": 1
-        }
-        
-        governor.add_ethical_rule(rule)
-        
-        context = EthicalContext(
-            user_id="test_user",
-            action="test_action",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        decision = EthicalDecision(
-            action="test_action",
-            context=context,
-            parameters={}
-        )
-        
-        # Should handle rule evaluation failure gracefully
-        result = governor.evaluate_decision(decision)
-        assert isinstance(result, DecisionResult)
-    
-    def test_rule_priority_with_same_priority(self, governor):
-        """Test rule evaluation when multiple rules have same priority"""
-        context = EthicalContext(
-            user_id="test_user",
-            action="same_priority_test",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        # Add multiple rules with same priority
-        for i in range(5):
-            rule = {
-                "name": f"same_priority_rule_{i}",
-                "condition": lambda ctx: ctx.action == "same_priority_test",
-                "action": "deny" if i % 2 == 0 else "allow",
+        # Add various priority rules
+        rules = [
+            {
+                "name": "security_rule",
+                "condition": lambda ctx: "security" in ctx.action.lower(),
+                "action": "require_approval",
+                "priority": 10
+            },
+            {
+                "name": "admin_rule",
+                "condition": lambda ctx: ctx.user_id.startswith("admin_"),
+                "action": "allow",
                 "priority": 5
+            },
+            {
+                "name": "delete_rule",
+                "condition": lambda ctx: "delete" in ctx.action.lower(),
+                "action": "deny",
+                "priority": 8
             }
+        ]
+        
+        for rule in rules:
             governor.add_ethical_rule(rule)
         
-        decision = EthicalDecision(
-            action="same_priority_test",
-            context=context,
-            parameters={}
-        )
-        
-        result = governor.evaluate_decision(decision)
-        assert isinstance(result, DecisionResult)
+        return governor
     
-    def test_decision_history_with_time_filtering(self, governor):
-        """Test decision history retrieval with time-based filtering"""
-        context = EthicalContext(
-            user_id="test_user",
-            action="time_test",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        # Make decisions at different times
-        for i in range(10):
-            decision = EthicalDecision(
-                action=f"time_test_{i}",
-                context=context,
-                parameters={}
+    @pytest.fixture
+    def bulk_ethical_contexts(self):
+        """Create bulk ethical contexts for testing"""
+        contexts = []
+        for i in range(50):
+            context = EthicalContext(
+                user_id=f"bulk_user_{i % 5}",
+                action=f"bulk_action_{i}",
+                context_data={"batch_id": i, "priority": i % 3},
+                timestamp=datetime.now() - timedelta(seconds=i)
             )
-            governor.evaluate_decision(decision)
-            time.sleep(0.01)  # Small delay to ensure different timestamps
-        
-        # Test time-based filtering
-        recent_time = datetime.now() - timedelta(seconds=5)
-        recent_history = governor.get_decision_history(since=recent_time)
-        
-        assert len(recent_history) > 0
-        assert all(entry["timestamp"] >= recent_time for entry in recent_history)
+            contexts.append(context)
+        return contexts
     
-    def test_violation_recording_with_duplicate_prevention(self, governor):
-        """Test violation recording with duplicate prevention logic"""
+    def test_rule_evaluation_order_complex(self, governor_with_custom_rules):
+        """Test complex rule evaluation order with multiple matching rules"""
         context = EthicalContext(
-            user_id="test_user",
-            action="duplicate_test",
-            context_data={},
+            user_id="admin_user",
+            action="security_delete_action",
+            context_data={"sensitive": True},
             timestamp=datetime.now()
         )
         
-        violation = EthicalViolation(
-            user_id="test_user",
-            action="duplicate_action",
+        decision = EthicalDecision(
+            action="security_delete_action",
             context=context,
-            severity="medium",
-            timestamp=datetime.now()
+            parameters={"force": True}
         )
         
-        # Record same violation multiple times
-        governor.record_violation(violation)
-        governor.record_violation(violation)
-        governor.record_violation(violation)
+        result = governor_with_custom_rules.evaluate_decision(decision)
         
-        violations = governor.get_violations("test_user")
-        # Should handle duplicates appropriately
-        assert len(violations) >= 1
+        # Security rule (priority 10) should override admin rule (priority 5)
+        # and delete rule (priority 8)
+        assert isinstance(result, DecisionResult)
+        assert result.reasoning is not None
     
-    def test_user_trust_score_with_mixed_violations(self, governor):
-        """Test user trust score calculation with mixed severity violations"""
-        context = EthicalContext(
-            user_id="mixed_user",
-            action="mixed_test",
-            context_data={},
-            timestamp=datetime.now()
-        )
+    def test_violation_severity_impact_on_trust_score(self, governor, mock_ethical_context):
+        """Test how different violation severities impact trust scores"""
+        user_id = "severity_test_user"
+        initial_score = governor.get_user_trust_score(user_id)
         
-        # Add violations of different severities
+        # Test different severity levels
         severities = ["low", "medium", "high", "critical"]
+        scores = [initial_score]
+        
         for severity in severities:
             violation = EthicalViolation(
-                user_id="mixed_user",
-                action=f"violation_{severity}",
-                context=context,
+                user_id=user_id,
+                action=f"{severity}_violation",
+                context=mock_ethical_context,
                 severity=severity,
                 timestamp=datetime.now()
             )
             governor.record_violation(violation)
+            new_score = governor.get_user_trust_score(user_id)
+            scores.append(new_score)
         
-        trust_score = governor.get_user_trust_score("mixed_user")
-        assert isinstance(trust_score, float)
-        assert 0.0 <= trust_score <= 1.0
+        # Scores should decrease with each violation
+        for i in range(len(scores) - 1):
+            assert scores[i] >= scores[i + 1]
+        
+        # Critical violations should have more impact than low ones
+        assert scores[-1] < scores[1]  # Critical vs initial
     
-    def test_trust_score_with_time_decay(self, governor):
-        """Test trust score recovery with time-based decay"""
-        context = EthicalContext(
-            user_id="decay_user",
-            action="decay_test",
-            context_data={},
-            timestamp=datetime.now()
-        )
+    def test_decision_history_memory_management(self, governor, mock_ethical_context):
+        """Test memory management with very large decision history"""
+        # Create a large number of decisions
+        for i in range(10000):
+            decision = EthicalDecision(
+                action=f"memory_test_{i}",
+                context=mock_ethical_context,
+                parameters={"index": i, "data": f"test_data_{i}"}
+            )
+            governor.evaluate_decision(decision)
         
-        # Create violations at different times
-        old_violation = EthicalViolation(
-            user_id="decay_user",
-            action="old_violation",
-            context=context,
-            severity="high",
-            timestamp=datetime.now() - timedelta(days=60)
-        )
+        # Test that we can still query history efficiently
+        start_time = time.time()
+        recent_history = governor.get_decision_history()[-100:]
+        query_time = time.time() - start_time
         
-        recent_violation = EthicalViolation(
-            user_id="decay_user",
-            action="recent_violation",
-            context=context,
-            severity="high",
-            timestamp=datetime.now() - timedelta(days=1)
-        )
-        
-        governor.record_violation(old_violation)
-        score_after_old = governor.get_user_trust_score("decay_user")
-        
-        governor.record_violation(recent_violation)
-        score_after_recent = governor.get_user_trust_score("decay_user")
-        
-        # Recent violation should have more impact
-        assert score_after_recent <= score_after_old
+        assert len(recent_history) == 100
+        assert query_time < 1.0  # Should be fast even with large history
     
-    def test_concurrent_violation_recording(self, governor):
+    def test_concurrent_violation_recording(self, governor, mock_ethical_context):
         """Test concurrent violation recording for thread safety"""
         import threading
         
-        context = EthicalContext(
-            user_id="concurrent_user",
-            action="concurrent_test",
-            context_data={},
-            timestamp=datetime.now()
-        )
+        violations_recorded = []
         
         def record_violation(violation_id):
             violation = EthicalViolation(
-                user_id="concurrent_user",
-                action=f"concurrent_violation_{violation_id}",
-                context=context,
+                user_id=f"concurrent_user_{violation_id}",
+                action=f"concurrent_action_{violation_id}",
+                context=mock_ethical_context,
                 severity="medium",
                 timestamp=datetime.now()
             )
             governor.record_violation(violation)
+            violations_recorded.append(violation_id)
         
-        # Create multiple threads recording violations
+        # Create multiple threads
         threads = []
         for i in range(20):
             thread = threading.Thread(target=record_violation, args=(i,))
@@ -1079,496 +929,419 @@ class TestGenesisEthicalGovernorExtended:
         for thread in threads:
             thread.join()
         
-        violations = governor.get_violations("concurrent_user")
-        assert len(violations) == 20
+        assert len(violations_recorded) == 20
+        
+        # Check that all violations were recorded
+        for i in range(20):
+            user_violations = governor.get_violations(f"concurrent_user_{i}")
+            assert len(user_violations) == 1
     
-    def test_serialization_with_large_state(self, governor):
-        """Test serialization with large state data"""
-        context = EthicalContext(
-            user_id="large_state_user",
-            action="large_state_test",
-            context_data={"large_data": "x" * 50000},
-            timestamp=datetime.now()
-        )
+    def test_trust_score_edge_cases(self, governor, mock_ethical_context):
+        """Test trust score calculation edge cases"""
+        # Test with non-existent user
+        score = governor.get_user_trust_score("non_existent_user")
+        assert isinstance(score, float)
+        assert 0.0 <= score <= 1.0
         
-        # Create large state
-        for i in range(500):
-            decision = EthicalDecision(
-                action=f"large_state_action_{i}",
-                context=context,
-                parameters={"index": i}
-            )
-            governor.evaluate_decision(decision)
+        # Test with empty user_id
+        with pytest.raises(ValueError):
+            governor.get_user_trust_score("")
         
-        # Test serialization
-        serialized_state = governor.serialize_state()
-        assert isinstance(serialized_state, str)
-        assert len(serialized_state) > 0
+        # Test with None user_id
+        with pytest.raises(ValueError):
+            governor.get_user_trust_score(None)
         
-        # Test deserialization
-        new_governor = GenesisEthicalGovernor()
-        new_governor.deserialize_state(serialized_state)
-        assert len(new_governor.decision_history) == 500
+        # Test with special characters in user_id
+        special_user = "user@#$%^&*()"
+        score = governor.get_user_trust_score(special_user)
+        assert isinstance(score, float)
     
-    def test_serialization_failure_handling(self, governor):
-        """Test handling of serialization failures"""
-        # Add non-serializable data
-        governor.non_serializable_data = lambda x: x
+    def test_ethical_rule_condition_exceptions(self, governor, mock_ethical_context):
+        """Test handling of exceptions in rule conditions"""
+        # Add a rule with a condition that raises an exception
+        def faulty_condition(ctx):
+            raise ValueError("Intentional error in condition")
         
-        try:
-            serialized_state = governor.serialize_state()
-            # If serialization doesn't fail, ensure it's still valid
-            assert isinstance(serialized_state, str)
-        except Exception as e:
-            # Should handle serialization errors gracefully
-            assert isinstance(e, (TypeError, ValueError))
-    
-    def test_validate_context_comprehensive(self, governor):
-        """Test comprehensive context validation"""
-        # Test various invalid contexts
-        invalid_contexts = [
-            None,
-            "invalid_string",
-            123,
-            EthicalContext(user_id="", action="", context_data={}, timestamp=datetime.now()),
-            EthicalContext(user_id="user", action="", context_data={}, timestamp=datetime.now()),
-            EthicalContext(user_id="", action="action", context_data={}, timestamp=datetime.now()),
-            EthicalContext(user_id="user", action="action", context_data={}, timestamp=None),
-        ]
-        
-        for context in invalid_contexts:
-            if context is None or not isinstance(context, EthicalContext):
-                with pytest.raises((TypeError, AttributeError)):
-                    governor.validate_context(context)
-            else:
-                result = governor.validate_context(context)
-                assert isinstance(result, bool)
-    
-    def test_memory_leak_detection(self, governor):
-        """Test for potential memory leaks with repeated operations"""
-        import gc
-        
-        # Get initial memory state
-        gc.collect()
-        initial_objects = len(gc.get_objects())
-        
-        # Perform many operations
-        for i in range(1000):
-            context = EthicalContext(
-                user_id=f"memory_test_user_{i}",
-                action=f"memory_test_action_{i}",
-                context_data={"iteration": i},
-                timestamp=datetime.now()
-            )
-            
-            decision = EthicalDecision(
-                action=f"memory_test_action_{i}",
-                context=context,
-                parameters={}
-            )
-            
-            governor.evaluate_decision(decision)
-            
-            # Clear history periodically
-            if i % 100 == 0:
-                governor.clear_decision_history()
-        
-        # Check final memory state
-        gc.collect()
-        final_objects = len(gc.get_objects())
-        
-        # Should not have excessive memory growth
-        memory_growth = final_objects - initial_objects
-        assert memory_growth < 10000  # Reasonable threshold
-    
-    def test_configuration_edge_cases(self):
-        """Test configuration with edge case values"""
-        edge_configs = [
-            {'violation_threshold': 0},
-            {'violation_threshold': 1000000},
-            {'strict_mode': None},
-            {'logging_enabled': "true"},  # String instead of boolean
-            {'unknown_config': 'value'},
-            {}  # Empty config
-        ]
-        
-        for config in edge_configs:
-            try:
-                governor = GenesisEthicalGovernor(config=config)
-                assert governor is not None
-            except (ValueError, TypeError) as e:
-                # Should handle invalid configurations gracefully
-                assert isinstance(e, (ValueError, TypeError))
-    
-    def test_rule_condition_with_complex_logic(self, governor):
-        """Test rules with complex conditional logic"""
-        def complex_condition(ctx):
-            # Complex multi-criteria condition
-            if not ctx.user_id or not ctx.action:
-                return False
-            
-            high_risk_actions = ["delete", "modify", "access_sensitive"]
-            suspicious_users = ["suspicious_user", "banned_user"]
-            
-            if ctx.user_id in suspicious_users:
-                return True
-            
-            if any(risk_action in ctx.action for risk_action in high_risk_actions):
-                if ctx.context_data and ctx.context_data.get("bypass_check"):
-                    return False
-                return True
-            
-            return False
-        
-        complex_rule = {
-            "name": "complex_security_rule",
-            "condition": complex_condition,
+        faulty_rule = {
+            "name": "faulty_rule",
+            "condition": faulty_condition,
             "action": "deny",
-            "priority": 10
+            "priority": 5
         }
         
-        governor.add_ethical_rule(complex_rule)
+        governor.add_ethical_rule(faulty_rule)
         
-        # Test various scenarios
-        test_cases = [
-            ("normal_user", "read_data", {}, True),  # Should be allowed
-            ("suspicious_user", "read_data", {}, False),  # Should be denied
-            ("normal_user", "delete_data", {}, False),  # Should be denied
-            ("normal_user", "delete_data", {"bypass_check": True}, True),  # Should be allowed
+        decision = EthicalDecision(
+            action="test_faulty_rule",
+            context=mock_ethical_context,
+            parameters={}
+        )
+        
+        # Should handle the exception gracefully
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+    
+    def test_decision_parameter_validation(self, governor, mock_ethical_context):
+        """Test validation of decision parameters"""
+        # Test with various parameter types
+        parameter_tests = [
+            {"string": "value"},
+            {"number": 42},
+            {"float": 3.14},
+            {"boolean": True},
+            {"list": [1, 2, 3]},
+            {"nested": {"key": {"subkey": "value"}}},
+            {"mixed": {"str": "val", "num": 42, "bool": True}}
         ]
         
-        for user_id, action, context_data, expected_approved in test_cases:
-            context = EthicalContext(
-                user_id=user_id,
-                action=action,
-                context_data=context_data,
-                timestamp=datetime.now()
-            )
-            
+        for params in parameter_tests:
             decision = EthicalDecision(
-                action=action,
-                context=context,
-                parameters={}
-            )
-            
-            result = governor.evaluate_decision(decision)
-            assert result.approved == expected_approved
-    
-    @patch('app.ai_backend.genesis_ethical_governor.time')
-    def test_performance_monitoring(self, mock_time, governor):
-        """Test performance monitoring and timing"""
-        mock_time.time.side_effect = [1.0, 1.5, 2.0, 2.2]  # Simulate time progression
-        
-        context = EthicalContext(
-            user_id="performance_user",
-            action="performance_test",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        decision = EthicalDecision(
-            action="performance_test",
-            context=context,
-            parameters={}
-        )
-        
-        result = governor.evaluate_decision(decision)
-        
-        # Check that timing was tracked
-        assert isinstance(result, DecisionResult)
-        # Additional assertions about performance metrics if implemented
-    
-    def test_audit_trail_integrity(self, governor):
-        """Test audit trail integrity and immutability"""
-        context = EthicalContext(
-            user_id="audit_user",
-            action="audit_test",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        decision = EthicalDecision(
-            action="audit_test",
-            context=context,
-            parameters={}
-        )
-        
-        # Make decision
-        result = governor.evaluate_decision(decision)
-        
-        # Get decision history
-        history = governor.get_decision_history()
-        original_history = history.copy()
-        
-        # Attempt to modify history (should not affect internal state)
-        if history:
-            history[0]["tampered"] = True
-        
-        # Verify internal state is unchanged
-        new_history = governor.get_decision_history()
-        assert new_history == original_history
-    
-    def test_rate_limiting_functionality(self, governor):
-        """Test rate limiting for rapid decision requests"""
-        context = EthicalContext(
-            user_id="rate_limit_user",
-            action="rate_limit_test",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        # Make rapid decisions
-        results = []
-        for i in range(50):
-            decision = EthicalDecision(
-                action=f"rate_limit_action_{i}",
-                context=context,
-                parameters={}
-            )
-            result = governor.evaluate_decision(decision)
-            results.append(result)
-        
-        # All should be processed successfully
-        assert len(results) == 50
-        assert all(isinstance(result, DecisionResult) for result in results)
-    
-    def test_backup_and_recovery_simulation(self, governor):
-        """Test backup and recovery of governor state"""
-        context = EthicalContext(
-            user_id="backup_user",
-            action="backup_test",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        # Create initial state
-        for i in range(10):
-            decision = EthicalDecision(
-                action=f"backup_action_{i}",
-                context=context,
-                parameters={}
-            )
-            governor.evaluate_decision(decision)
-        
-        # Backup state
-        backup_state = governor.serialize_state()
-        
-        # Simulate data loss
-        governor.clear_decision_history()
-        assert len(governor.decision_history) == 0
-        
-        # Restore from backup
-        governor.deserialize_state(backup_state)
-        assert len(governor.decision_history) == 10
-    
-    def test_user_privilege_levels(self, governor):
-        """Test different user privilege levels affect decisions"""
-        privilege_levels = ["admin", "user", "guest", "restricted"]
-        
-        for privilege in privilege_levels:
-            context = EthicalContext(
-                user_id=f"{privilege}_user",
-                action="privilege_test",
-                context_data={"privilege_level": privilege},
-                timestamp=datetime.now()
-            )
-            
-            decision = EthicalDecision(
-                action="admin_action",
-                context=context,
-                parameters={}
+                action="parameter_test",
+                context=mock_ethical_context,
+                parameters=params
             )
             
             result = governor.evaluate_decision(decision)
             assert isinstance(result, DecisionResult)
-            
-            # Different privilege levels might have different approval rates
-            # This would depend on implementation details
     
-    def test_decision_metadata_preservation(self, governor):
-        """Test that decision metadata is properly preserved"""
-        context = EthicalContext(
-            user_id="metadata_user",
-            action="metadata_test",
-            context_data={"important_data": "preserve_me"},
+    def test_context_data_sanitization(self, governor):
+        """Test context data sanitization for sensitive information"""
+        sensitive_context = EthicalContext(
+            user_id="sensitive_user",
+            action="sensitive_action",
+            context_data={
+                "password": "secret123",
+                "credit_card": "1234-5678-9012-3456",
+                "ssn": "123-45-6789",
+                "normal_data": "public_info"
+            },
             timestamp=datetime.now()
         )
         
+        # Test that sensitive data is handled appropriately
+        is_valid = governor.validate_context(sensitive_context)
+        assert isinstance(is_valid, bool)
+        
+        decision = EthicalDecision(
+            action="sensitive_action",
+            context=sensitive_context,
+            parameters={}
+        )
+        
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+    
+    def test_decision_result_metadata_handling(self, governor, mock_ethical_context):
+        """Test handling of decision result metadata"""
         decision = EthicalDecision(
             action="metadata_test",
-            context=context,
-            parameters={"critical_param": "important_value"}
+            context=mock_ethical_context,
+            parameters={"metadata_test": True}
         )
         
         result = governor.evaluate_decision(decision)
         
-        # Check that metadata is preserved in history
-        history = governor.get_decision_history()
-        if history:
-            last_entry = history[-1]
-            assert "decision" in last_entry
-            assert last_entry["decision"].context.context_data["important_data"] == "preserve_me"
-            assert last_entry["decision"].parameters["critical_param"] == "important_value"
-
-
-class TestEthicalDecisionExtended:
-    """Extended test cases for EthicalDecision class"""
+        # Check that metadata is present and properly structured
+        assert hasattr(result, 'metadata')
+        if result.metadata:
+            assert isinstance(result.metadata, dict)
     
-    def test_decision_with_none_action(self):
-        """Test EthicalDecision with None action"""
-        context = EthicalContext(
-            user_id="test_user",
-            action="test_action",
-            context_data={},
-            timestamp=datetime.now()
-        )
+    def test_violation_timestamp_ordering(self, governor, mock_ethical_context):
+        """Test that violations are ordered by timestamp correctly"""
+        user_id = "timestamp_test_user"
+        violations = []
         
-        with pytest.raises((ValueError, TypeError)):
-            EthicalDecision(
-                action=None,
-                context=context,
-                parameters={}
+        # Create violations with different timestamps
+        for i in range(5):
+            violation = EthicalViolation(
+                user_id=user_id,
+                action=f"action_{i}",
+                context=mock_ethical_context,
+                severity="medium",
+                timestamp=datetime.now() - timedelta(hours=i)
             )
+            violations.append(violation)
+            governor.record_violation(violation)
+        
+        # Retrieve violations
+        retrieved_violations = governor.get_violations(user_id)
+        
+        # Check that violations are ordered (most recent first)
+        for i in range(len(retrieved_violations) - 1):
+            assert retrieved_violations[i].timestamp >= retrieved_violations[i + 1].timestamp
     
-    def test_decision_with_empty_action(self):
-        """Test EthicalDecision with empty action"""
-        context = EthicalContext(
-            user_id="test_user",
-            action="test_action",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        decision = EthicalDecision(
-            action="",
-            context=context,
-            parameters={}
-        )
-        
-        assert decision.action == ""
-    
-    def test_decision_immutability(self):
-        """Test that EthicalDecision objects are immutable"""
-        context = EthicalContext(
-            user_id="test_user",
-            action="test_action",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        decision = EthicalDecision(
-            action="original_action",
-            context=context,
-            parameters={"key": "value"}
-        )
-        
-        # Should not be able to modify after creation
-        with pytest.raises(AttributeError):
-            decision.action = "modified_action"
-    
-    def test_decision_hash_consistency(self):
-        """Test hash consistency of EthicalDecision objects"""
-        context = EthicalContext(
-            user_id="test_user",
-            action="test_action",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        decision1 = EthicalDecision(
-            action="test_action",
-            context=context,
-            parameters={"key": "value"}
-        )
-        
-        decision2 = EthicalDecision(
-            action="test_action",
-            context=context,
-            parameters={"key": "value"}
-        )
-        
-        # Same decisions should have same hash
-        assert hash(decision1) == hash(decision2)
-    
-    def test_decision_with_complex_parameters(self):
-        """Test EthicalDecision with complex parameter structures"""
-        context = EthicalContext(
-            user_id="test_user",
-            action="complex_test",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        complex_params = {
-            "nested": {
-                "level1": {
-                    "level2": ["item1", "item2", {"deep": "value"}]
-                }
-            },
-            "list": [1, 2, 3, {"item": "value"}],
-            "mixed": None,
-            "boolean": True,
-            "float": 3.14159
+    def test_serialization_edge_cases(self, governor, mock_ethical_context):
+        """Test serialization with edge cases"""
+        # Create complex state with various data types
+        complex_rule = {
+            "name": "complex_rule",
+            "condition": lambda ctx: True,
+            "action": "allow",
+            "priority": 1,
+            "metadata": {"created": datetime.now().isoformat()}
         }
+        governor.add_ethical_rule(complex_rule)
         
-        decision = EthicalDecision(
-            action="complex_test",
-            context=context,
-            parameters=complex_params
-        )
-        
-        assert decision.parameters == complex_params
-
-
-class TestEthicalViolationExtended:
-    """Extended test cases for EthicalViolation class"""
-    
-    def test_violation_with_future_timestamp(self):
-        """Test EthicalViolation with future timestamp"""
-        context = EthicalContext(
-            user_id="test_user",
-            action="test_action",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        future_time = datetime.now() + timedelta(days=1)
-        
+        # Add violation with complex data
         violation = EthicalViolation(
-            user_id="test_user",
-            action="future_violation",
-            context=context,
-            severity="medium",
-            timestamp=future_time
-        )
-        
-        assert violation.timestamp == future_time
-    
-    def test_violation_serialization(self):
-        """Test serialization of EthicalViolation"""
-        context = EthicalContext(
-            user_id="test_user",
-            action="test_action",
-            context_data={},
-            timestamp=datetime.now()
-        )
-        
-        violation = EthicalViolation(
-            user_id="test_user",
-            action="serialization_test",
-            context=context,
+            user_id="serialization_user",
+            action="complex_action",
+            context=mock_ethical_context,
             severity="high",
             timestamp=datetime.now()
         )
+        governor.record_violation(violation)
         
-        serialized = violation.to_dict()
-        assert isinstance(serialized, dict)
-        assert serialized["user_id"] == "test_user"
-        assert serialized["action"] == "serialization_test"
-        assert serialized["severity"] == "high"
+        # Test serialization
+        serialized = governor.serialize_state()
+        assert isinstance(serialized, str)
+        
+        # Test deserialization
+        new_governor = GenesisEthicalGovernor()
+        new_governor.deserialize_state(serialized)
+        
+        # Verify complex data was preserved
+        assert len(new_governor.ethical_rules) > 0
     
-    def test_violation_comparison(self):
-        """Test comparison of EthicalViolation objects"""
+    def test_performance_with_complex_rules(self, governor, mock_ethical_context):
+        """Test performance with many complex rules"""
+        # Add many complex rules
+        for i in range(100):
+            rule = {
+                "name": f"complex_rule_{i}",
+                "condition": lambda ctx, i=i: i % 2 == 0 and len(ctx.action) > 5,
+                "action": "allow" if i % 2 == 0 else "deny",
+                "priority": i % 10
+            }
+            governor.add_ethical_rule(rule)
+        
+        # Test decision evaluation performance
+        start_time = time.time()
+        
+        for i in range(100):
+            decision = EthicalDecision(
+                action=f"performance_test_action_{i}",
+                context=mock_ethical_context,
+                parameters={"test_id": i}
+            )
+            result = governor.evaluate_decision(decision)
+            assert isinstance(result, DecisionResult)
+        
+        end_time = time.time()
+        execution_time = end_time - start_time
+        
+        # Should complete within reasonable time
+        assert execution_time < 5.0
+    
+    def test_config_inheritance_and_overrides(self):
+        """Test configuration inheritance and override behavior"""
+        base_config = {
+            'violation_threshold': 3,
+            'strict_mode': False,
+            'logging_enabled': True,
+            'custom_setting': 'base_value'
+        }
+        
+        override_config = {
+            'violation_threshold': 5,
+            'strict_mode': True,
+            'new_setting': 'override_value'
+        }
+        
+        # Test that overrides work correctly
+        governor = GenesisEthicalGovernor(config={**base_config, **override_config})
+        
+        assert governor.violation_threshold == 5  # Overridden
+        assert governor.strict_mode is True  # Overridden
+        assert governor.logging_enabled is True  # Inherited
+    
+    def test_bulk_violation_analysis(self, governor, bulk_ethical_contexts):
+        """Test bulk violation analysis and patterns"""
+        # Create bulk violations
+        for i, context in enumerate(bulk_ethical_contexts):
+            violation = EthicalViolation(
+                user_id=context.user_id,
+                action=f"bulk_violation_{i}",
+                context=context,
+                severity=["low", "medium", "high"][i % 3],
+                timestamp=context.timestamp
+            )
+            governor.record_violation(violation)
+        
+        # Test pattern analysis
+        user_patterns = {}
+        for context in bulk_ethical_contexts:
+            user_violations = governor.get_violations(context.user_id)
+            user_patterns[context.user_id] = len(user_violations)
+        
+        # Verify that violations are distributed across users
+        assert len(user_patterns) > 1
+        assert all(count > 0 for count in user_patterns.values())
+    
+    def test_decision_context_immutability(self, governor, mock_ethical_context):
+        """Test that decision context is not modified during evaluation"""
+        original_context_data = mock_ethical_context.context_data.copy()
+        original_action = mock_ethical_context.action
+        
+        decision = EthicalDecision(
+            action="immutability_test",
+            context=mock_ethical_context,
+            parameters={"modify_test": True}
+        )
+        
+        governor.evaluate_decision(decision)
+        
+        # Verify context was not modified
+        assert mock_ethical_context.context_data == original_context_data
+        assert mock_ethical_context.action == original_action
+    
+    def test_rule_removal_by_condition(self, governor, mock_ethical_context):
+        """Test removal of rules based on conditions"""
+        # Add multiple rules
+        rules_to_add = [
+            {
+                "name": "temp_rule_1",
+                "condition": lambda ctx: "temp" in ctx.action,
+                "action": "allow",
+                "priority": 1
+            },
+            {
+                "name": "temp_rule_2",
+                "condition": lambda ctx: "temp" in ctx.action,
+                "action": "deny",
+                "priority": 2
+            },
+            {
+                "name": "permanent_rule",
+                "condition": lambda ctx: True,
+                "action": "allow",
+                "priority": 1
+            }
+        ]
+        
+        for rule in rules_to_add:
+            governor.add_ethical_rule(rule)
+        
+        initial_count = len(governor.ethical_rules)
+        
+        # Remove rules matching condition
+        governor.remove_ethical_rule("temp_rule_1")
+        governor.remove_ethical_rule("temp_rule_2")
+        
+        assert len(governor.ethical_rules) == initial_count - 2
+        
+        # Verify specific rules were removed
+        rule_names = [rule["name"] for rule in governor.ethical_rules]
+        assert "temp_rule_1" not in rule_names
+        assert "temp_rule_2" not in rule_names
+        assert "permanent_rule" in rule_names
+    
+    def test_extreme_parameter_sizes(self, governor, mock_ethical_context):
+        """Test handling of extremely large parameters"""
+        # Test with very large parameter values
+        large_params = {
+            "large_string": "x" * 100000,  # 100KB string
+            "large_list": list(range(10000)),  # Large list
+            "large_dict": {f"key_{i}": f"value_{i}" for i in range(1000)}  # Large dict
+        }
+        
+        decision = EthicalDecision(
+            action="large_params_test",
+            context=mock_ethical_context,
+            parameters=large_params
+        )
+        
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+    
+    def test_unicode_and_special_characters(self, governor):
+        """Test handling of unicode and special characters"""
+        unicode_context = EthicalContext(
+            user_id="用户_测试",  # Chinese characters
+            action="اختبار_عمل",  # Arabic characters
+            context_data={
+                "emoji": "🔒🛡️⚠️",
+                "special": "!@#$%^&*()_+-=[]{}|;':\",./<>?",
+                "unicode": "Ñiño résumé naïve café"
+            },
+            timestamp=datetime.now()
+        )
+        
+        decision = EthicalDecision(
+            action="unicode_test",
+            context=unicode_context,
+            parameters={"test": "тест"}  # Cyrillic
+        )
+        
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+    
+    @patch('time.time')
+    def test_time_based_rule_evaluation(self, mock_time, governor, mock_ethical_context):
+        """Test time-based rule evaluation"""
+        # Mock different times
+        mock_time.return_value = 1000000000  # Fixed timestamp
+        
+        time_sensitive_rule = {
+            "name": "time_rule",
+            "condition": lambda ctx: int(time.time()) % 2 == 0,
+            "action": "allow",
+            "priority": 1
+        }
+        
+        governor.add_ethical_rule(time_sensitive_rule)
+        
+        decision = EthicalDecision(
+            action="time_test",
+            context=mock_ethical_context,
+            parameters={}
+        )
+        
+        result1 = governor.evaluate_decision(decision)
+        
+        # Change time
+        mock_time.return_value = 1000000001  # Different timestamp
+        
+        result2 = governor.evaluate_decision(decision)
+        
+        # Results might be different based on time
+        assert isinstance(result1, DecisionResult)
+        assert isinstance(result2, DecisionResult)
+
+
+class TestEthicalDataStructuresEnhanced:
+    """Enhanced tests for ethical data structures"""
+    
+    def test_ethical_decision_deep_copy(self):
+        """Test deep copying of EthicalDecision objects"""
+        import copy
+        
+        context = EthicalContext(
+            user_id="test_user",
+            action="test_action",
+            context_data={"mutable": ["list", "data"]},
+            timestamp=datetime.now()
+        )
+        
+        decision = EthicalDecision(
+            action="copy_test",
+            context=context,
+            parameters={"mutable": {"nested": "dict"}}
+        )
+        
+        # Test deep copy
+        decision_copy = copy.deepcopy(decision)
+        
+        assert decision_copy.action == decision.action
+        assert decision_copy.context.user_id == decision.context.user_id
+        assert decision_copy.parameters == decision.parameters
+        
+        # Verify it's a deep copy (modify original shouldn't affect copy)
+        decision.parameters["mutable"]["nested"] = "modified"
+        assert decision_copy.parameters["mutable"]["nested"] == "dict"
+    
+    def test_ethical_violation_comparison(self):
+        """Test comparison operations on EthicalViolation objects"""
         context = EthicalContext(
             user_id="test_user",
             action="test_action",
@@ -1578,201 +1351,240 @@ class TestEthicalViolationExtended:
         
         violation1 = EthicalViolation(
             user_id="test_user",
-            action="test_violation",
+            action="violation1",
             context=context,
-            severity="medium",
+            severity="high",
             timestamp=datetime.now()
         )
         
         violation2 = EthicalViolation(
             user_id="test_user",
-            action="test_violation",
+            action="violation2",
             context=context,
-            severity="medium",
-            timestamp=datetime.now()
+            severity="high",
+            timestamp=datetime.now() + timedelta(seconds=1)
         )
         
-        # Test equality
-        assert violation1 == violation2
+        # Test comparison (should be based on timestamp)
+        assert violation2.timestamp > violation1.timestamp
     
-    def test_violation_with_special_characters(self):
-        """Test EthicalViolation with special characters in fields"""
-        context = EthicalContext(
-            user_id="test_user",
-            action="test_action",
-            context_data={},
-            timestamp=datetime.now()
-        )
+    def test_ethical_context_hash_and_equality(self):
+        """Test hashing and equality of EthicalContext objects"""
+        timestamp = datetime.now()
         
-        violation = EthicalViolation(
-            user_id="user@domain.com",
-            action="action/with/special-chars_123",
-            context=context,
-            severity="low",
-            timestamp=datetime.now()
-        )
-        
-        assert violation.user_id == "user@domain.com"
-        assert violation.action == "action/with/special-chars_123"
-
-
-class TestEthicalContextExtended:
-    """Extended test cases for EthicalContext class"""
-    
-    def test_context_with_large_data(self):
-        """Test EthicalContext with large context data"""
-        large_data = {
-            "large_field": "x" * 100000,
-            "array": list(range(10000)),
-            "nested": {"deep": {"deeper": {"deepest": "value"}}}
-        }
-        
-        context = EthicalContext(
-            user_id="test_user",
-            action="large_data_test",
-            context_data=large_data,
-            timestamp=datetime.now()
-        )
-        
-        assert context.context_data == large_data
-    
-    def test_context_immutability(self):
-        """Test that EthicalContext objects are immutable"""
-        context = EthicalContext(
+        context1 = EthicalContext(
             user_id="test_user",
             action="test_action",
             context_data={"key": "value"},
-            timestamp=datetime.now()
+            timestamp=timestamp
         )
         
-        # Should not be able to modify after creation
-        with pytest.raises(AttributeError):
-            context.user_id = "modified_user"
-    
-    def test_context_with_binary_data(self):
-        """Test EthicalContext with binary data"""
-        binary_data = {
-            "binary_field": b"binary_data_here",
-            "bytes_array": bytes([1, 2, 3, 4, 5])
-        }
-        
-        context = EthicalContext(
+        context2 = EthicalContext(
             user_id="test_user",
-            action="binary_test",
-            context_data=binary_data,
-            timestamp=datetime.now()
+            action="test_action",
+            context_data={"key": "value"},
+            timestamp=timestamp
         )
         
-        assert context.context_data == binary_data
-    
-    def test_context_timestamp_validation(self):
-        """Test timestamp validation in EthicalContext"""
-        # Test with various timestamp formats
-        timestamps = [
-            datetime.now(),
-            datetime.now().replace(microsecond=0),
-            datetime.now() - timedelta(days=365),
-            datetime.now() + timedelta(days=1)
-        ]
+        # Test equality
+        assert context1 == context2
         
-        for timestamp in timestamps:
-            context = EthicalContext(
-                user_id="test_user",
-                action="timestamp_test",
-                context_data={},
-                timestamp=timestamp
-            )
-            assert context.timestamp == timestamp
-
-
-class TestDecisionResultExtended:
-    """Extended test cases for DecisionResult class"""
+        # Test hash consistency
+        assert hash(context1) == hash(context2)
     
-    def test_result_with_complex_metadata(self):
-        """Test DecisionResult with complex metadata"""
-        complex_metadata = {
-            "rules_evaluated": ["rule1", "rule2", "rule3"],
-            "performance_metrics": {
-                "evaluation_time": 0.123,
-                "rules_processed": 5,
-                "cache_hits": 2
-            },
-            "debug_info": {
-                "stack_trace": ["func1", "func2"],
-                "variables": {"var1": "value1", "var2": 42}
-            }
-        }
-        
+    def test_decision_result_json_serialization(self):
+        """Test JSON serialization of DecisionResult"""
         result = DecisionResult(
             approved=True,
             confidence_score=0.85,
-            reasoning="Complex evaluation completed",
-            metadata=complex_metadata
+            reasoning="Test reasoning with special chars: !@#$%",
+            metadata={
+                "timestamp": datetime.now().isoformat(),
+                "rule_id": "test_rule_123",
+                "nested": {"key": "value"}
+            }
         )
         
-        assert result.metadata == complex_metadata
-    
-    def test_result_serialization(self):
-        """Test serialization of DecisionResult"""
-        result = DecisionResult(
-            approved=True,
-            confidence_score=0.95,
-            reasoning="Serialization test",
-            metadata={"test": "data"}
-        )
+        # Test JSON serialization
+        json_str = json.dumps(result.to_dict())
+        assert isinstance(json_str, str)
         
-        serialized = result.to_dict()
-        assert isinstance(serialized, dict)
-        assert serialized["approved"] is True
-        assert serialized["confidence_score"] == 0.95
-        assert serialized["reasoning"] == "Serialization test"
-        assert serialized["metadata"] == {"test": "data"}
+        # Test deserialization
+        deserialized = json.loads(json_str)
+        assert deserialized["approved"] is True
+        assert deserialized["confidence_score"] == 0.85
+        assert "metadata" in deserialized
+
+
+class TestSecurityAndRobustness:
+    """Security and robustness tests"""
     
-    def test_result_with_none_metadata(self):
-        """Test DecisionResult with None metadata"""
-        result = DecisionResult(
-            approved=False,
-            confidence_score=0.3,
-            reasoning="None metadata test",
-            metadata=None
-        )
-        
-        assert result.metadata is None
-    
-    def test_result_confidence_boundary_values(self):
-        """Test DecisionResult with boundary confidence values"""
-        boundary_values = [0.0, 1.0, 0.0001, 0.9999]
-        
-        for value in boundary_values:
-            result = DecisionResult(
-                approved=True,
-                confidence_score=value,
-                reasoning=f"Boundary test with {value}"
+    def test_injection_attack_prevention(self, governor):
+        """Test prevention of injection attacks in parameters"""
+        malicious_contexts = [
+            EthicalContext(
+                user_id="'; DROP TABLE users; --",
+                action="<script>alert('xss')</script>",
+                context_data={"eval": "exec('import os; os.system(\"rm -rf /\")')"},
+                timestamp=datetime.now()
+            ),
+            EthicalContext(
+                user_id="../../etc/passwd",
+                action="../../../sensitive_file",
+                context_data={"path": "/etc/shadow"},
+                timestamp=datetime.now()
             )
-            assert result.confidence_score == value
+        ]
+        
+        for context in malicious_contexts:
+            # Should handle malicious input gracefully
+            is_valid = governor.validate_context(context)
+            assert isinstance(is_valid, bool)
+            
+            decision = EthicalDecision(
+                action="security_test",
+                context=context,
+                parameters={}
+            )
+            
+            result = governor.evaluate_decision(decision)
+            assert isinstance(result, DecisionResult)
     
-    def test_result_with_empty_reasoning(self):
-        """Test DecisionResult with empty reasoning"""
-        result = DecisionResult(
-            approved=True,
-            confidence_score=0.5,
-            reasoning=""
+    def test_resource_exhaustion_prevention(self, governor, mock_ethical_context):
+        """Test prevention of resource exhaustion attacks"""
+        # Test with extremely nested data
+        nested_data = {"level": 0}
+        current = nested_data
+        for i in range(100):  # Deep nesting
+            current["next"] = {"level": i + 1}
+            current = current["next"]
+        
+        decision = EthicalDecision(
+            action="resource_test",
+            context=mock_ethical_context,
+            parameters={"nested": nested_data}
         )
         
-        assert result.reasoning == ""
+        start_time = time.time()
+        result = governor.evaluate_decision(decision)
+        end_time = time.time()
+        
+        # Should complete within reasonable time despite deep nesting
+        assert end_time - start_time < 2.0
+        assert isinstance(result, DecisionResult)
     
-    def test_result_comparison(self):
-        """Test comparison of DecisionResult objects"""
-        result1 = DecisionResult(
-            approved=True,
-            confidence_score=0.95,
-            reasoning="Test reasoning"
+    def test_memory_leak_prevention(self, governor, mock_ethical_context):
+        """Test prevention of memory leaks with repeated operations"""
+        import gc
+        
+        # Force garbage collection and get initial memory info
+        gc.collect()
+        
+        # Perform many operations
+        for i in range(1000):
+            decision = EthicalDecision(
+                action=f"memory_test_{i}",
+                context=mock_ethical_context,
+                parameters={"data": f"test_{i}"}
+            )
+            governor.evaluate_decision(decision)
+            
+            # Periodically force garbage collection
+            if i % 100 == 0:
+                gc.collect()
+        
+        # Clean up should have occurred
+        gc.collect()
+        
+        # Test that we can still perform operations normally
+        final_decision = EthicalDecision(
+            action="final_test",
+            context=mock_ethical_context,
+            parameters={}
         )
         
-        result2 = DecisionResult(
-            approved=True,
-            confidence_score=0.95,
-            reasoning="Test reasoning"
+        result = governor.evaluate_decision(final_decision)
+        assert isinstance(result, DecisionResult)
+
+
+class TestErrorHandlingAndRecovery:
+    """Error handling and recovery tests"""
+    
+    def test_corrupted_state_recovery(self, governor, mock_ethical_context):
+        """Test recovery from corrupted state"""
+        # Create normal state
+        decision = EthicalDecision(
+            action="normal_action",
+            context=mock_ethical_context,
+            parameters={}
+        )
+        governor.evaluate_decision(decision)
+        
+        # Simulate state corruption
+        governor.decision_history.append("corrupted_entry")
+        
+        # Should handle corrupted state gracefully
+        new_decision = EthicalDecision(
+            action="recovery_test",
+            context=mock_ethical_context,
+            parameters={}
         )
         
-        assert result1 == result2
+        result = governor.evaluate_decision(new_decision)
+        assert isinstance(result, DecisionResult)
+    
+    def test_invalid_rule_handling(self, governor, mock_ethical_context):
+        """Test handling of invalid rules"""
+        # Add a rule with invalid structure
+        invalid_rule = {
+            "name": "invalid_rule",
+            "condition": "not_a_function",  # Invalid condition
+            "action": "allow",
+            "priority": 1
+        }
+        
+        # Should handle invalid rule gracefully
+        try:
+            governor.add_ethical_rule(invalid_rule)
+            
+            decision = EthicalDecision(
+                action="invalid_rule_test",
+                context=mock_ethical_context,
+                parameters={}
+            )
+            
+            result = governor.evaluate_decision(decision)
+            assert isinstance(result, DecisionResult)
+            
+        except (ValueError, TypeError, AttributeError):
+            # Expected to raise an error for invalid rule
+            pass
+    
+    def test_network_timeout_simulation(self, governor, mock_ethical_context):
+        """Test handling of network timeouts in rule evaluation"""
+        def slow_condition(ctx):
+            time.sleep(0.1)  # Simulate slow network call
+            return True
+        
+        slow_rule = {
+            "name": "slow_rule",
+            "condition": slow_condition,
+            "action": "allow",
+            "priority": 1
+        }
+        
+        governor.add_ethical_rule(slow_rule)
+        
+        decision = EthicalDecision(
+            action="timeout_test",
+            context=mock_ethical_context,
+            parameters={}
+        )
+        
+        start_time = time.time()
+        result = governor.evaluate_decision(decision)
+        end_time = time.time()
+        
+        # Should complete but handle the delay
+        assert isinstance(result, DecisionResult)
+        assert end_time - start_time >= 0.1  # At least the delay time

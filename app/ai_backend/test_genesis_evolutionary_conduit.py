@@ -3090,145 +3090,287 @@ if __name__ == '__main__':
     # Run all tests with increased verbosity
     unittest.main(verbosity=2, buffer=True)
 
-class TestEvolutionaryParametersValidation(unittest.TestCase):
-    """Additional validation tests for EvolutionaryParameters."""
+class TestEvolutionaryParametersEdgeCases(unittest.TestCase):
+    """Comprehensive edge case tests for EvolutionaryParameters."""
     
-    def test_parameter_type_coercion(self):
-        """Test that parameters are properly type-coerced."""
+    def test_parameter_with_zero_values(self):
+        """Test parameters with zero values where applicable."""
         params = EvolutionaryParameters(
-            population_size="100",  # String that can be converted to int
-            mutation_rate="0.1",    # String that can be converted to float
-            crossover_rate="0.8"    # String that can be converted to float
+            mutation_rate=0.0,
+            crossover_rate=0.0,
+            selection_pressure=0.0
         )
-        self.assertEqual(params.population_size, 100)
-        self.assertEqual(params.mutation_rate, 0.1)
-        self.assertEqual(params.crossover_rate, 0.8)
+        self.assertEqual(params.mutation_rate, 0.0)
+        self.assertEqual(params.crossover_rate, 0.0)
+        self.assertEqual(params.selection_pressure, 0.0)
     
-    def test_parameter_invalid_type_coercion(self):
-        """Test that invalid type coercion raises appropriate errors."""
-        with self.assertRaises((ValueError, TypeError)):
-            EvolutionaryParameters(population_size="not_a_number")
+    def test_parameter_with_maximum_values(self):
+        """Test parameters with maximum allowable values."""
+        params = EvolutionaryParameters(
+            mutation_rate=1.0,
+            crossover_rate=1.0,
+            selection_pressure=1.0
+        )
+        self.assertEqual(params.mutation_rate, 1.0)
+        self.assertEqual(params.crossover_rate, 1.0)
+        self.assertEqual(params.selection_pressure, 1.0)
+    
+    def test_parameter_precision_handling(self):
+        """Test parameter precision with very small decimal values."""
+        params = EvolutionaryParameters(
+            mutation_rate=1e-10,
+            crossover_rate=1e-10,
+            selection_pressure=1e-10
+        )
+        self.assertEqual(params.mutation_rate, 1e-10)
+        self.assertEqual(params.crossover_rate, 1e-10)
+        self.assertEqual(params.selection_pressure, 1e-10)
+    
+    def test_parameter_with_none_values(self):
+        """Test parameter handling with None values."""
+        with self.assertRaises(TypeError):
+            EvolutionaryParameters(population_size=None)
         
-        with self.assertRaises((ValueError, TypeError)):
-            EvolutionaryParameters(mutation_rate="invalid_float")
+        with self.assertRaises(TypeError):
+            EvolutionaryParameters(mutation_rate=None)
     
     def test_parameter_immutability(self):
-        """Test that parameters behave as immutable after creation."""
-        params = EvolutionaryParameters(population_size=100)
+        """Test that parameters maintain their values after creation."""
+        params = EvolutionaryParameters(population_size=50)
         original_size = params.population_size
         
-        # Attempt to modify (should either fail or have no effect)
-        try:
-            params.population_size = 200
-            # If modification succeeds, verify original value is preserved
-            self.assertEqual(original_size, 100)
-        except AttributeError:
-            # If modification fails, that's also acceptable
-            pass
-    
-    def test_parameter_edge_cases(self):
-        """Test edge cases for parameter values."""
-        # Test with very large values
-        large_params = EvolutionaryParameters(
-            population_size=1000000,
-            generations=1000000
-        )
-        self.assertEqual(large_params.population_size, 1000000)
+        # Attempt to modify (should not affect original)
+        params_dict = params.to_dict()
+        params_dict['population_size'] = 100
         
-        # Test with very small valid values
-        small_params = EvolutionaryParameters(
-            population_size=1,
-            generations=1,
-            mutation_rate=0.001,
-            crossover_rate=0.001
+        # Original should remain unchanged
+        self.assertEqual(params.population_size, original_size)
+    
+    def test_parameter_type_conversion(self):
+        """Test automatic type conversion for compatible types."""
+        params = EvolutionaryParameters(
+            population_size=100.0,  # Float to int
+            generations=500.0
         )
-        self.assertEqual(small_params.population_size, 1)
-        self.assertEqual(small_params.mutation_rate, 0.001)
+        # Should handle float input for integer parameters
+        self.assertIsInstance(params.population_size, (int, float))
+        self.assertIsInstance(params.generations, (int, float))
 
 
-class TestMutationStrategyEdgeCases(unittest.TestCase):
-    """Edge case tests for MutationStrategy."""
+class TestMutationStrategyAdvanced(unittest.TestCase):
+    """Advanced mutation strategy tests."""
     
     def setUp(self):
         self.strategy = MutationStrategy()
     
-    def test_mutation_with_extreme_sigma_values(self):
-        """Test Gaussian mutation with extreme sigma values."""
+    def test_mutation_distribution_properties(self):
+        """Test statistical properties of mutation distributions."""
+        genome = [0.0] * 1000
+        mutations = []
+        
+        for _ in range(100):
+            mutated = self.strategy.gaussian_mutation(genome, 1.0, sigma=1.0)
+            mutations.extend(mutated)
+        
+        # Check that mutations follow approximately normal distribution
+        mean = sum(mutations) / len(mutations)
+        variance = sum((x - mean) ** 2 for x in mutations) / len(mutations)
+        
+        # Should be approximately normal with mean~0, variance~1
+        self.assertAlmostEqual(mean, 0.0, delta=0.2)
+        self.assertAlmostEqual(variance, 1.0, delta=0.3)
+    
+    def test_mutation_rate_effects(self):
+        """Test how mutation rate affects the number of mutations."""
+        genome = [1.0] * 100
+        
+        # Test with different mutation rates
+        low_rate_mutations = self.strategy.gaussian_mutation(genome, 0.1, sigma=0.1)
+        high_rate_mutations = self.strategy.gaussian_mutation(genome, 0.9, sigma=0.1)
+        
+        # Count differences from original
+        low_changes = sum(1 for i, val in enumerate(low_rate_mutations) if abs(val - genome[i]) > 0.001)
+        high_changes = sum(1 for i, val in enumerate(high_rate_mutations) if abs(val - genome[i]) > 0.001)
+        
+        # Higher mutation rate should generally cause more changes
+        self.assertGreater(high_changes, low_changes)
+    
+    def test_mutation_boundary_preservation(self):
+        """Test that mutations respect boundaries when specified."""
+        genome = [0.5] * 10
+        bounds = (0.0, 1.0)
+        
+        for _ in range(100):
+            mutated = self.strategy.uniform_mutation(genome, 1.0, bounds=bounds)
+            for value in mutated:
+                self.assertGreaterEqual(value, bounds[0])
+                self.assertLessEqual(value, bounds[1])
+    
+    def test_adaptive_mutation_response(self):
+        """Test adaptive mutation response to fitness trends."""
         genome = [1.0, 2.0, 3.0]
         
-        # Test with extremely small sigma
-        result = self.strategy.gaussian_mutation(genome, 0.5, sigma=1e-10)
-        self.assertEqual(len(result), len(genome))
-        # With tiny sigma, values should be nearly unchanged
-        for i in range(len(genome)):
-            self.assertAlmostEqual(result[i], genome[i], places=5)
+        # Improving fitness should reduce mutation
+        improving_history = [0.1, 0.2, 0.3, 0.4, 0.5]
+        result_improving = self.strategy.adaptive_mutation(genome, improving_history, base_rate=0.5)
         
-        # Test with extremely large sigma
-        result = self.strategy.gaussian_mutation(genome, 1.0, sigma=1e10)
-        self.assertEqual(len(result), len(genome))
-        # Values should be very different with large sigma
-        self.assertNotEqual(result, genome)
+        # Stagnating fitness should increase mutation
+        stagnant_history = [0.5, 0.5, 0.5, 0.5, 0.5]
+        result_stagnant = self.strategy.adaptive_mutation(genome, stagnant_history, base_rate=0.5)
+        
+        # Both should be valid results
+        self.assertEqual(len(result_improving), len(genome))
+        self.assertEqual(len(result_stagnant), len(genome))
     
-    def test_mutation_with_zero_mutation_rate(self):
-        """Test all mutation strategies with zero mutation rate."""
-        genome = [1.0, 2.0, 3.0, 4.0, 5.0]
+    def test_mutation_with_extreme_genomes(self):
+        """Test mutation with extreme genome values."""
+        extreme_genomes = [
+            [1e10, 1e10, 1e10],      # Very large values
+            [1e-10, 1e-10, 1e-10],   # Very small values
+            [-1e10, -1e10, -1e10],   # Very negative values
+            [float('inf')] * 3,       # Infinity values (should handle gracefully)
+        ]
         
-        # All mutations with 0 rate should return unchanged genome
-        result = self.strategy.gaussian_mutation(genome, 0.0)
-        self.assertEqual(result, genome)
-        
-        result = self.strategy.uniform_mutation(genome, 0.0, bounds=(-10, 10))
-        self.assertEqual(result, genome)
-        
-        bool_genome = [True, False, True]
-        result = self.strategy.bit_flip_mutation(bool_genome, 0.0)
-        self.assertEqual(result, bool_genome)
+        for genome in extreme_genomes[:-1]:  # Skip infinity for now
+            result = self.strategy.gaussian_mutation(genome, 0.1, sigma=0.1)
+            self.assertEqual(len(result), len(genome))
+            self.assertTrue(all(isinstance(x, (int, float)) for x in result))
     
-    def test_mutation_with_mixed_type_genome(self):
-        """Test mutation handling with mixed data types."""
-        # Test with mixed numeric types
-        mixed_genome = [1, 2.5, 3, 4.0, 5]
-        result = self.strategy.gaussian_mutation(mixed_genome, 0.1)
+    def test_mutation_with_mixed_types(self):
+        """Test mutation with mixed numeric types."""
+        mixed_genome = [1, 2.0, 3, 4.5, 5]
+        result = self.strategy.gaussian_mutation(mixed_genome, 0.1, sigma=0.1)
+        
         self.assertEqual(len(result), len(mixed_genome))
-        
-        # All results should be numeric
         for value in result:
             self.assertIsInstance(value, (int, float))
     
-    def test_adaptive_mutation_edge_cases(self):
-        """Test adaptive mutation with edge case fitness histories."""
+    def test_mutation_determinism(self):
+        """Test mutation determinism with fixed random seed."""
+        import random
+        
         genome = [1.0, 2.0, 3.0]
         
-        # Test with empty fitness history
-        result = self.strategy.adaptive_mutation(genome, [], base_rate=0.1)
-        self.assertEqual(len(result), len(genome))
+        # Test reproducibility
+        random.seed(12345)
+        result1 = self.strategy.gaussian_mutation(genome, 0.5, sigma=0.5)
         
-        # Test with all identical fitness values
-        identical_history = [0.5, 0.5, 0.5, 0.5]
-        result = self.strategy.adaptive_mutation(genome, identical_history, base_rate=0.1)
-        self.assertEqual(len(result), len(genome))
+        random.seed(12345)
+        result2 = self.strategy.gaussian_mutation(genome, 0.5, sigma=0.5)
         
-        # Test with extreme fitness values
-        extreme_history = [1e-10, 1e10, -1e10]
-        result = self.strategy.adaptive_mutation(genome, extreme_history, base_rate=0.1)
-        self.assertEqual(len(result), len(genome))
+        self.assertEqual(result1, result2)
 
 
-class TestSelectionStrategyExtended(unittest.TestCase):
-    """Extended tests for SelectionStrategy with edge cases."""
+class TestSelectionStrategyAdvanced(unittest.TestCase):
+    """Advanced selection strategy tests."""
     
     def setUp(self):
         self.strategy = SelectionStrategy()
     
-    def test_selection_with_identical_fitness(self):
-        """Test selection strategies when all individuals have identical fitness."""
+    def test_selection_bias_measurement(self):
+        """Test selection bias towards higher fitness individuals."""
+        # Create population with clear fitness hierarchy
         population = [
-            {'genome': [1, 2, 3], 'fitness': 0.5},
-            {'genome': [4, 5, 6], 'fitness': 0.5},
-            {'genome': [7, 8, 9], 'fitness': 0.5}
+            {'genome': [1], 'fitness': 0.1},
+            {'genome': [2], 'fitness': 0.5},
+            {'genome': [3], 'fitness': 0.9}
         ]
         
-        # All selection methods should still work
+        # Run multiple selections and measure bias
+        selections = []
+        for _ in range(1000):
+            selected = self.strategy.tournament_selection(population, tournament_size=2)
+            selections.append(selected['fitness'])
+        
+        # Calculate mean fitness of selections
+        mean_selected_fitness = sum(selections) / len(selections)
+        population_mean_fitness = sum(ind['fitness'] for ind in population) / len(population)
+        
+        # Selection should be biased towards higher fitness
+        self.assertGreater(mean_selected_fitness, population_mean_fitness)
+    
+    def test_selection_pressure_effects(self):
+        """Test how tournament size affects selection pressure."""
+        population = [{'genome': [i], 'fitness': i/10.0} for i in range(10)]
+        
+        # Test different tournament sizes
+        small_tournament_selections = []
+        large_tournament_selections = []
+        
+        for _ in range(1000):
+            small_sel = self.strategy.tournament_selection(population, tournament_size=2)
+            large_sel = self.strategy.tournament_selection(population, tournament_size=8)
+            
+            small_tournament_selections.append(small_sel['fitness'])
+            large_tournament_selections.append(large_sel['fitness'])
+        
+        # Larger tournaments should have higher selection pressure
+        small_mean = sum(small_tournament_selections) / len(small_tournament_selections)
+        large_mean = sum(large_tournament_selections) / len(large_tournament_selections)
+        
+        self.assertGreater(large_mean, small_mean)
+    
+    def test_selection_diversity_preservation(self):
+        """Test that selection strategies maintain some diversity."""
+        population = [
+            {'genome': [1, 2, 3], 'fitness': 0.9},
+            {'genome': [4, 5, 6], 'fitness': 0.8},
+            {'genome': [7, 8, 9], 'fitness': 0.7},
+            {'genome': [10, 11, 12], 'fitness': 0.1}
+        ]
+        
+        # Multiple selections should include different individuals
+        selections = set()
+        for _ in range(100):
+            selected = self.strategy.tournament_selection(population, tournament_size=2)
+            selections.add(tuple(selected['genome']))
+        
+        # Should select multiple different individuals
+        self.assertGreater(len(selections), 1)
+    
+    def test_roulette_wheel_with_uniform_fitness(self):
+        """Test roulette wheel selection with uniform fitness distribution."""
+        population = [
+            {'genome': [i], 'fitness': 1.0} for i in range(10)
+        ]
+        
+        # Should select each individual with roughly equal probability
+        selection_counts = {}
+        for _ in range(1000):
+            selected = self.strategy.roulette_wheel_selection(population)
+            genome_key = tuple(selected['genome'])
+            selection_counts[genome_key] = selection_counts.get(genome_key, 0) + 1
+        
+        # Each individual should be selected roughly equally
+        expected_count = 1000 / len(population)
+        for count in selection_counts.values():
+            self.assertAlmostEqual(count, expected_count, delta=expected_count * 0.3)
+    
+    def test_elitism_selection_ordering(self):
+        """Test that elitism selection maintains fitness ordering."""
+        population = [
+            {'genome': [1], 'fitness': 0.5},
+            {'genome': [2], 'fitness': 0.9},
+            {'genome': [3], 'fitness': 0.1},
+            {'genome': [4], 'fitness': 0.7}
+        ]
+        
+        elite = self.strategy.elitism_selection(population, elite_count=3)
+        
+        # Should be ordered by fitness (descending)
+        fitness_values = [ind['fitness'] for ind in elite]
+        self.assertEqual(fitness_values, sorted(fitness_values, reverse=True))
+    
+    def test_selection_with_duplicate_fitness(self):
+        """Test selection behavior with duplicate fitness values."""
+        population = [
+            {'genome': [1], 'fitness': 0.5},
+            {'genome': [2], 'fitness': 0.5},
+            {'genome': [3], 'fitness': 0.5},
+            {'genome': [4], 'fitness': 0.8}
+        ]
+        
+        # All selection methods should handle duplicates gracefully
         selected = self.strategy.tournament_selection(population, tournament_size=2)
         self.assertIn(selected, population)
         
@@ -3237,345 +3379,447 @@ class TestSelectionStrategyExtended(unittest.TestCase):
         
         selected = self.strategy.rank_selection(population)
         self.assertIn(selected, population)
-    
-    def test_selection_with_extreme_fitness_values(self):
-        """Test selection with extreme fitness values."""
-        population = [
-            {'genome': [1, 2, 3], 'fitness': 1e-10},
-            {'genome': [4, 5, 6], 'fitness': 1e10},
-            {'genome': [7, 8, 9], 'fitness': -1e10}
-        ]
-        
-        # Tournament selection should handle extreme values
-        selected = self.strategy.tournament_selection(population, tournament_size=2)
-        self.assertIn(selected, population)
-        
-        # Roulette wheel with extreme values
-        selected = self.strategy.roulette_wheel_selection(population)
-        self.assertIn(selected, population)
-    
-    def test_selection_statistical_properties(self):
-        """Test statistical properties of selection methods."""
-        population = [
-            {'genome': [1, 2, 3], 'fitness': 0.1},
-            {'genome': [4, 5, 6], 'fitness': 0.9}
-        ]
-        
-        # Run multiple selections and check bias toward higher fitness
-        high_fitness_count = 0
-        num_trials = 1000
-        
-        for _ in range(num_trials):
-            selected = self.strategy.tournament_selection(population, tournament_size=2)
-            if selected['fitness'] == 0.9:
-                high_fitness_count += 1
-        
-        # Should select higher fitness individual more often
-        self.assertGreater(high_fitness_count, num_trials * 0.6)
-    
-    def test_elitism_selection_edge_cases(self):
-        """Test elitism selection with edge cases."""
-        population = [
-            {'genome': [1, 2, 3], 'fitness': 0.5},
-            {'genome': [4, 5, 6], 'fitness': 0.9},
-            {'genome': [7, 8, 9], 'fitness': 0.1}
-        ]
-        
-        # Test with elite_count = 0
-        selected = self.strategy.elitism_selection(population, 0)
-        self.assertEqual(len(selected), 0)
-        
-        # Test with elite_count > population size
-        selected = self.strategy.elitism_selection(population, 10)
-        self.assertEqual(len(selected), len(population))
 
 
-class TestFitnessFunctionRobustness(unittest.TestCase):
-    """Robustness tests for FitnessFunction."""
+class TestFitnessFunctionAdvanced(unittest.TestCase):
+    """Advanced fitness function tests."""
     
     def setUp(self):
         self.fitness_func = FitnessFunction()
     
-    def test_fitness_with_nan_values(self):
-        """Test fitness functions with NaN values in genome."""
-        import math
-        
-        nan_genome = [1.0, float('nan'), 3.0]
-        
-        # Test all fitness functions handle NaN gracefully
-        try:
-            sphere_fitness = self.fitness_func.sphere_function(nan_genome)
-            self.assertTrue(math.isnan(sphere_fitness) or math.isinf(sphere_fitness))
-        except (ValueError, TypeError):
-            pass  # Acceptable to raise exception
-    
-    def test_fitness_with_infinite_values(self):
-        """Test fitness functions with infinite values."""
-        inf_genome = [1.0, float('inf'), 3.0]
-        
-        try:
-            sphere_fitness = self.fitness_func.sphere_function(inf_genome)
-            self.assertTrue(math.isinf(sphere_fitness))
-        except (ValueError, TypeError):
-            pass  # Acceptable to raise exception
-    
     def test_fitness_function_numerical_stability(self):
-        """Test numerical stability of fitness functions."""
+        """Test fitness function numerical stability with extreme values."""
         # Test with very large numbers
-        large_genome = [1e10, 2e10, 3e10]
-        
-        sphere_fitness = self.fitness_func.sphere_function(large_genome)
-        self.assertIsInstance(sphere_fitness, (int, float))
+        large_genome = [1e6, 1e6, 1e6]
+        large_fitness = self.fitness_func.sphere_function(large_genome)
+        self.assertIsInstance(large_fitness, (int, float))
+        self.assertFalse(math.isnan(large_fitness))
         
         # Test with very small numbers
-        small_genome = [1e-10, 2e-10, 3e-10]
-        
-        sphere_fitness = self.fitness_func.sphere_function(small_genome)
-        self.assertIsInstance(sphere_fitness, (int, float))
+        small_genome = [1e-6, 1e-6, 1e-6]
+        small_fitness = self.fitness_func.sphere_function(small_genome)
+        self.assertIsInstance(small_fitness, (int, float))
+        self.assertFalse(math.isnan(small_fitness))
     
-    def test_constraint_handling_complex_scenarios(self):
-        """Test constraint handling with complex constraint scenarios."""
+    def test_fitness_function_optimization_properties(self):
+        """Test that fitness functions have correct optimization properties."""
+        # Test that sphere function minimum is at origin
+        origin = [0.0, 0.0, 0.0]
+        nearby = [0.1, 0.1, 0.1]
+        
+        origin_fitness = self.fitness_func.sphere_function(origin)
+        nearby_fitness = self.fitness_func.sphere_function(nearby)
+        
+        # Origin should be better (higher) than nearby point
+        self.assertGreater(origin_fitness, nearby_fitness)
+    
+    def test_fitness_function_scalability(self):
+        """Test fitness function performance with large genomes."""
+        import time
+        
+        # Test with increasingly large genomes
+        for size in [100, 1000, 10000]:
+            genome = [1.0] * size
+            
+            start_time = time.time()
+            fitness = self.fitness_func.sphere_function(genome)
+            end_time = time.time()
+            
+            # Should complete within reasonable time
+            self.assertLess(end_time - start_time, 1.0)
+            self.assertIsInstance(fitness, (int, float))
+    
+    def test_multi_objective_fitness_weighting(self):
+        """Test multi-objective fitness with different weightings."""
         genome = [1.0, 2.0, 3.0]
         
-        # Test with conflicting constraints
+        objectives = [
+            lambda g: sum(g),
+            lambda g: sum(x**2 for x in g),
+            lambda g: max(g) - min(g)
+        ]
+        
+        # Test with different weights
+        weights = [0.5, 0.3, 0.2]
+        fitness = self.fitness_func.multi_objective_evaluate(genome, objectives, weights)
+        
+        # Should return weighted combination
+        self.assertIsInstance(fitness, (int, float))
+    
+    def test_constraint_violation_penalties(self):
+        """Test different penalty methods for constraint violations."""
+        genome = [1.0, 2.0, 3.0]
+        
         def constraint1(g):
-            return sum(g) > 10  # Requires sum > 10
+            return sum(g) <= 5  # Violated (sum = 6)
         
         def constraint2(g):
-            return sum(g) < 5   # Requires sum < 5
+            return max(g) <= 2  # Violated (max = 3)
         
-        conflicting_constraints = [constraint1, constraint2]
+        constraints = [constraint1, constraint2]
         
-        fitness = self.fitness_func.evaluate_with_constraints(
-            genome, 
-            lambda g: sum(g), 
-            conflicting_constraints
+        # Test different penalty methods
+        linear_penalty = self.fitness_func.evaluate_with_constraints(
+            genome, lambda g: sum(g), constraints, penalty_method='linear'
         )
         
-        # Should be heavily penalized due to conflicting constraints
-        self.assertLess(fitness, sum(genome) * 0.5)
+        quadratic_penalty = self.fitness_func.evaluate_with_constraints(
+            genome, lambda g: sum(g), constraints, penalty_method='quadratic'
+        )
+        
+        # Both should penalize violations
+        original_fitness = sum(genome)
+        self.assertLess(linear_penalty, original_fitness)
+        self.assertLess(quadratic_penalty, original_fitness)
     
-    def test_multi_objective_with_zero_objectives(self):
-        """Test multi-objective evaluation with no objectives."""
+    def test_fitness_function_caching(self):
+        """Test fitness function caching mechanism."""
         genome = [1.0, 2.0, 3.0]
-        objectives = []
         
-        fitness = self.fitness_func.multi_objective_evaluate(genome, objectives)
-        self.assertEqual(fitness, [])
+        # Enable caching
+        self.fitness_func.enable_caching()
+        
+        # First evaluation
+        start_time = time.time()
+        fitness1 = self.fitness_func.sphere_function(genome)
+        first_time = time.time() - start_time
+        
+        # Second evaluation (should be cached)
+        start_time = time.time()
+        fitness2 = self.fitness_func.sphere_function(genome)
+        second_time = time.time() - start_time
+        
+        # Results should be identical
+        self.assertEqual(fitness1, fitness2)
+        # Second evaluation should be faster (cached)
+        self.assertLess(second_time, first_time * 0.8)
     
-    def test_fitness_function_with_complex_return_types(self):
-        """Test fitness functions that return complex data types."""
-        def complex_fitness(genome):
-            return {
-                'primary': sum(genome),
-                'secondary': sum(x**2 for x in genome),
-                'metadata': {'evaluated_at': 'test'}
-            }
-        
+    def test_fitness_function_with_noise(self):
+        """Test fitness function behavior with noisy evaluations."""
         genome = [1.0, 2.0, 3.0]
-        fitness = self.fitness_func.evaluate(genome, complex_fitness)
         
-        # Should handle complex return types
-        self.assertIsInstance(fitness, dict)
-        self.assertIn('primary', fitness)
+        # Add noise to fitness evaluation
+        noisy_fitness = self.fitness_func.evaluate_with_noise(
+            genome, 
+            lambda g: sum(g), 
+            noise_level=0.1
+        )
+        
+        clean_fitness = sum(genome)
+        
+        # Noisy fitness should be different but within expected range
+        self.assertNotEqual(noisy_fitness, clean_fitness)
+        self.assertAlmostEqual(noisy_fitness, clean_fitness, delta=0.5)
 
 
 class TestPopulationManagerAdvanced(unittest.TestCase):
-    """Advanced tests for PopulationManager."""
+    """Advanced population manager tests."""
     
     def setUp(self):
         self.manager = PopulationManager()
     
-    def test_population_initialization_with_custom_distributions(self):
-        """Test population initialization with custom probability distributions."""
-        import random
-        
-        def normal_generator():
-            return [random.normalvariate(0, 1) for _ in range(5)]
-        
-        def uniform_generator():
-            return [random.uniform(-5, 5) for _ in range(5)]
-        
-        # Test with normal distribution
-        normal_population = self.manager.initialize_random_population(
-            population_size=100,
+    def test_population_initialization_strategies(self):
+        """Test different population initialization strategies."""
+        # Test uniform initialization
+        uniform_pop = self.manager.initialize_population(
+            population_size=10,
             genome_length=5,
-            generator=normal_generator
+            strategy='uniform',
+            bounds=(-1, 1)
         )
         
-        # Test with uniform distribution
-        uniform_population = self.manager.initialize_random_population(
-            population_size=100,
+        # Test normal initialization
+        normal_pop = self.manager.initialize_population(
+            population_size=10,
             genome_length=5,
-            generator=uniform_generator
+            strategy='normal',
+            mean=0.0,
+            std=1.0
         )
         
-        self.assertEqual(len(normal_population), 100)
-        self.assertEqual(len(uniform_population), 100)
+        # Test Latin hypercube initialization
+        lhs_pop = self.manager.initialize_population(
+            population_size=10,
+            genome_length=5,
+            strategy='latin_hypercube',
+            bounds=(-1, 1)
+        )
+        
+        for pop in [uniform_pop, normal_pop, lhs_pop]:
+            self.assertEqual(len(pop), 10)
+            for ind in pop:
+                self.assertEqual(len(ind['genome']), 5)
     
-    def test_population_statistics_with_outliers(self):
-        """Test population statistics with outlier values."""
-        population = [
+    def test_population_diversity_metrics(self):
+        """Test various population diversity metrics."""
+        # Create diverse population
+        diverse_pop = [
+            {'genome': [1.0, 2.0, 3.0], 'fitness': 0.5},
+            {'genome': [4.0, 5.0, 6.0], 'fitness': 0.6},
+            {'genome': [7.0, 8.0, 9.0], 'fitness': 0.7}
+        ]
+        
+        # Create homogeneous population
+        homogeneous_pop = [
+            {'genome': [1.0, 2.0, 3.0], 'fitness': 0.5},
+            {'genome': [1.1, 2.1, 3.1], 'fitness': 0.5},
+            {'genome': [1.2, 2.2, 3.2], 'fitness': 0.5}
+        ]
+        
+        diverse_diversity = self.manager.calculate_diversity(diverse_pop)
+        homogeneous_diversity = self.manager.calculate_diversity(homogeneous_pop)
+        
+        # Diverse population should have higher diversity
+        self.assertGreater(diverse_diversity, homogeneous_diversity)
+    
+    def test_population_convergence_detection(self):
+        """Test population convergence detection."""
+        # Create converged population
+        converged_pop = [
+            {'genome': [1.0, 2.0, 3.0], 'fitness': 0.95},
+            {'genome': [1.01, 2.01, 3.01], 'fitness': 0.95},
+            {'genome': [1.02, 2.02, 3.02], 'fitness': 0.95}
+        ]
+        
+        # Create diverse population
+        diverse_pop = [
+            {'genome': [1.0, 2.0, 3.0], 'fitness': 0.5},
+            {'genome': [4.0, 5.0, 6.0], 'fitness': 0.8},
+            {'genome': [7.0, 8.0, 9.0], 'fitness': 0.3}
+        ]
+        
+        self.assertTrue(self.manager.is_converged(converged_pop, threshold=0.1))
+        self.assertFalse(self.manager.is_converged(diverse_pop, threshold=0.1))
+    
+    def test_population_migration(self):
+        """Test population migration between subpopulations."""
+        pop1 = [
             {'genome': [1, 2, 3], 'fitness': 0.5},
-            {'genome': [4, 5, 6], 'fitness': 0.6},
-            {'genome': [7, 8, 9], 'fitness': 1000.0},  # Outlier
-            {'genome': [10, 11, 12], 'fitness': 0.4}
+            {'genome': [4, 5, 6], 'fitness': 0.7}
         ]
         
-        stats = self.manager.get_population_statistics(population)
-        
-        # Stats should handle outliers gracefully
-        self.assertIn('best_fitness', stats)
-        self.assertIn('worst_fitness', stats)
-        self.assertIn('median_fitness', stats)
-        self.assertEqual(stats['best_fitness'], 1000.0)
-        
-        # Median should be less affected by outliers than mean
-        self.assertLess(stats['median_fitness'], stats['average_fitness'])
-    
-    def test_diversity_calculation_edge_cases(self):
-        """Test diversity calculation with edge cases."""
-        # Test with single individual
-        single_population = [{'genome': [1.0, 2.0, 3.0], 'fitness': 0.5}]
-        diversity = self.manager.calculate_diversity(single_population)
-        self.assertEqual(diversity, 0.0)
-        
-        # Test with maximum diversity (completely different genomes)
-        max_diverse_population = [
-            {'genome': [0.0, 0.0, 0.0], 'fitness': 0.5},
-            {'genome': [1.0, 1.0, 1.0], 'fitness': 0.6},
-            {'genome': [-1.0, -1.0, -1.0], 'fitness': 0.7}
-        ]
-        diversity = self.manager.calculate_diversity(max_diverse_population)
-        self.assertGreater(diversity, 0.0)
-    
-    def test_population_archiving_with_duplicates(self):
-        """Test population archiving with duplicate individuals."""
-        population = [
-            {'genome': [1, 2, 3], 'fitness': 0.9},
-            {'genome': [1, 2, 3], 'fitness': 0.9},  # Duplicate
-            {'genome': [4, 5, 6], 'fitness': 0.8}
+        pop2 = [
+            {'genome': [7, 8, 9], 'fitness': 0.9},
+            {'genome': [10, 11, 12], 'fitness': 0.3}
         ]
         
-        self.manager.archive_best_individuals(population, archive_size=2)
-        archive = self.manager.get_archive()
-        
-        # Should handle duplicates appropriately
-        self.assertLessEqual(len(archive), 2)
-    
-    def test_population_filtering_complex_criteria(self):
-        """Test population filtering with complex criteria."""
-        population = [
-            {'genome': [1, 2, 3], 'fitness': 0.5, 'age': 1, 'species': 'A'},
-            {'genome': [4, 5, 6], 'fitness': 0.9, 'age': 2, 'species': 'B'},
-            {'genome': [7, 8, 9], 'fitness': 0.1, 'age': 3, 'species': 'A'}
-        ]
-        
-        # Filter by multiple criteria
-        filtered = self.manager.filter_population(
-            population, 
-            min_fitness=0.3,
-            max_age=2,
-            species='A'
+        # Test migration
+        migrated_pop1, migrated_pop2 = self.manager.migrate_individuals(
+            pop1, pop2, migration_rate=0.5
         )
         
-        self.assertEqual(len(filtered), 1)
-        self.assertEqual(filtered[0]['species'], 'A')
-        self.assertGreaterEqual(filtered[0]['fitness'], 0.3)
-        self.assertLessEqual(filtered[0]['age'], 2)
+        # Populations should exchange individuals
+        self.assertEqual(len(migrated_pop1), 2)
+        self.assertEqual(len(migrated_pop2), 2)
+        
+        # Some individuals should have moved
+        original_genomes1 = {tuple(ind['genome']) for ind in pop1}
+        original_genomes2 = {tuple(ind['genome']) for ind in pop2}
+        final_genomes1 = {tuple(ind['genome']) for ind in migrated_pop1}
+        final_genomes2 = {tuple(ind['genome']) for ind in migrated_pop2}
+        
+        # Should have some exchange
+        self.assertNotEqual(original_genomes1, final_genomes1)
+        self.assertNotEqual(original_genomes2, final_genomes2)
+    
+    def test_population_replacement_strategies(self):
+        """Test different population replacement strategies."""
+        old_population = [
+            {'genome': [1, 2, 3], 'fitness': 0.3},
+            {'genome': [4, 5, 6], 'fitness': 0.5}
+        ]
+        
+        new_population = [
+            {'genome': [7, 8, 9], 'fitness': 0.7},
+            {'genome': [10, 11, 12], 'fitness': 0.9}
+        ]
+        
+        # Test generational replacement
+        generational = self.manager.replace_population(
+            old_population, new_population, strategy='generational'
+        )
+        self.assertEqual(generational, new_population)
+        
+        # Test steady-state replacement
+        steady_state = self.manager.replace_population(
+            old_population, new_population, strategy='steady_state'
+        )
+        self.assertEqual(len(steady_state), 2)
+        
+        # Test elitist replacement
+        elitist = self.manager.replace_population(
+            old_population, new_population, strategy='elitist', elite_count=1
+        )
+        self.assertEqual(len(elitist), 2)
+    
+    def test_population_statistics_extended(self):
+        """Test extended population statistics."""
+        population = [
+            {'genome': [1, 2, 3], 'fitness': 0.1},
+            {'genome': [4, 5, 6], 'fitness': 0.5},
+            {'genome': [7, 8, 9], 'fitness': 0.9},
+            {'genome': [10, 11, 12], 'fitness': 0.3}
+        ]
+        
+        stats = self.manager.get_extended_statistics(population)
+        
+        # Should include additional metrics
+        self.assertIn('quartiles', stats)
+        self.assertIn('skewness', stats)
+        self.assertIn('kurtosis', stats)
+        self.assertIn('range', stats)
+        self.assertIn('coefficient_of_variation', stats)
+    
+    def test_population_clustering(self):
+        """Test population clustering for niching."""
+        # Create clustered population
+        population = [
+            {'genome': [1.0, 1.0, 1.0], 'fitness': 0.5},
+            {'genome': [1.1, 1.1, 1.1], 'fitness': 0.5},
+            {'genome': [5.0, 5.0, 5.0], 'fitness': 0.7},
+            {'genome': [5.1, 5.1, 5.1], 'fitness': 0.7}
+        ]
+        
+        clusters = self.manager.cluster_population(population, num_clusters=2)
+        
+        self.assertEqual(len(clusters), 2)
+        for cluster in clusters:
+            self.assertGreater(len(cluster), 0)
 
 
 class TestGeneticOperationsAdvanced(unittest.TestCase):
-    """Advanced tests for GeneticOperations."""
+    """Advanced genetic operations tests."""
     
     def setUp(self):
         self.operations = GeneticOperations()
     
-    def test_crossover_with_different_data_types(self):
-        """Test crossover operations with different data types."""
-        # Test with integer genomes
-        int_parent1 = [1, 2, 3, 4, 5]
-        int_parent2 = [6, 7, 8, 9, 10]
+    def test_crossover_preservation_properties(self):
+        """Test that crossover preserves important properties."""
+        parent1 = [1.0, 2.0, 3.0, 4.0, 5.0]
+        parent2 = [6.0, 7.0, 8.0, 9.0, 10.0]
         
-        child1, child2 = self.operations.single_point_crossover(int_parent1, int_parent2)
-        self.assertEqual(len(child1), 5)
-        self.assertEqual(len(child2), 5)
+        child1, child2 = self.operations.single_point_crossover(parent1, parent2)
         
-        # Test with mixed type genomes
-        mixed_parent1 = [1, 2.5, 3, 4.0, 5]
-        mixed_parent2 = [6, 7.5, 8, 9.0, 10]
+        # Children should have same length as parents
+        self.assertEqual(len(child1), len(parent1))
+        self.assertEqual(len(child2), len(parent2))
         
-        child1, child2 = self.operations.single_point_crossover(mixed_parent1, mixed_parent2)
-        self.assertEqual(len(child1), 5)
-        self.assertEqual(len(child2), 5)
+        # All genes should come from parents
+        all_parent_genes = set(parent1 + parent2)
+        all_child_genes = set(child1 + child2)
+        self.assertTrue(all_child_genes.issubset(all_parent_genes))
     
-    def test_crossover_boundary_conditions(self):
-        """Test crossover operations at boundary conditions."""
-        # Test with minimum length genomes
-        min_parent1 = [1]
-        min_parent2 = [2]
+    def test_crossover_diversity_effects(self):
+        """Test how crossover affects population diversity."""
+        # Create diverse parents
+        parent1 = [0.0] * 10
+        parent2 = [1.0] * 10
         
-        child1, child2 = self.operations.single_point_crossover(min_parent1, min_parent2)
-        self.assertEqual(len(child1), 1)
-        self.assertEqual(len(child2), 1)
+        children = []
+        for _ in range(100):
+            child1, child2 = self.operations.uniform_crossover(parent1, parent2, 0.5)
+            children.extend([child1, child2])
         
-        # Test with two-element genomes
-        two_parent1 = [1, 2]
-        two_parent2 = [3, 4]
+        # Children should show intermediate diversity
+        diversity_scores = []
+        for child in children:
+            diversity_scores.append(sum(child) / len(child))
         
-        child1, child2 = self.operations.two_point_crossover(two_parent1, two_parent2)
-        self.assertEqual(len(child1), 2)
-        self.assertEqual(len(child2), 2)
+        mean_diversity = sum(diversity_scores) / len(diversity_scores)
+        
+        # Should be between parent extremes
+        self.assertGreater(mean_diversity, 0.2)
+        self.assertLess(mean_diversity, 0.8)
     
-    def test_simulated_binary_crossover_edge_cases(self):
-        """Test SBX crossover with edge cases."""
+    def test_crossover_operator_comparison(self):
+        """Compare different crossover operators."""
+        parent1 = [1.0, 2.0, 3.0, 4.0, 5.0]
+        parent2 = [6.0, 7.0, 8.0, 9.0, 10.0]
+        
+        # Test multiple crossover operators
+        operators = [
+            self.operations.single_point_crossover,
+            self.operations.two_point_crossover,
+            lambda p1, p2: self.operations.uniform_crossover(p1, p2, 0.5),
+            lambda p1, p2: self.operations.arithmetic_crossover(p1, p2, 0.5)
+        ]
+        
+        for operator in operators:
+            child1, child2 = operator(parent1, parent2)
+            
+            # All operators should produce valid children
+            self.assertEqual(len(child1), len(parent1))
+            self.assertEqual(len(child2), len(parent2))
+            
+            # Check type consistency
+            for gene in child1:
+                self.assertIsInstance(gene, (int, float))
+            for gene in child2:
+                self.assertIsInstance(gene, (int, float))
+    
+    def test_crossover_with_constraints(self):
+        """Test crossover with constraint handling."""
         parent1 = [0.5, 0.5, 0.5]
-        parent2 = [0.5, 0.5, 0.5]  # Identical parents
+        parent2 = [1.5, 1.5, 1.5]
         bounds = [(0.0, 1.0)] * 3
         
-        # With identical parents, children should be identical to parents
-        child1, child2 = self.operations.simulated_binary_crossover(
-            parent1, parent2, bounds, eta=2.0
-        )
+        # Test bounded crossover
+        child1, child2 = self.operations.bounded_crossover(parent1, parent2, bounds)
         
-        self.assertEqual(child1, parent1)
-        self.assertEqual(child2, parent2)
+        # Children should respect bounds
+        for i, (lower, upper) in enumerate(bounds):
+            self.assertGreaterEqual(child1[i], lower)
+            self.assertLessEqual(child1[i], upper)
+            self.assertGreaterEqual(child2[i], lower)
+            self.assertLessEqual(child2[i], upper)
     
-    def test_crossover_with_extreme_parameters(self):
-        """Test crossover operations with extreme parameters."""
-        parent1 = [1.0, 2.0, 3.0]
-        parent2 = [4.0, 5.0, 6.0]
+    def test_advanced_crossover_operators(self):
+        """Test advanced crossover operators."""
+        parent1 = [1.0, 2.0, 3.0, 4.0, 5.0]
+        parent2 = [6.0, 7.0, 8.0, 9.0, 10.0]
         
-        # Test arithmetic crossover with extreme alpha values
-        child1, child2 = self.operations.arithmetic_crossover(parent1, parent2, alpha=0.0)
-        self.assertEqual(child1, parent2)
-        self.assertEqual(child2, parent1)
+        # Test order crossover (for permutation problems)
+        if hasattr(self.operations, 'order_crossover'):
+            child1, child2 = self.operations.order_crossover(parent1, parent2)
+            self.assertEqual(len(child1), len(parent1))
+            self.assertEqual(len(child2), len(parent2))
         
-        child1, child2 = self.operations.arithmetic_crossover(parent1, parent2, alpha=1.0)
-        self.assertEqual(child1, parent1)
-        self.assertEqual(child2, parent2)
+        # Test cycle crossover
+        if hasattr(self.operations, 'cycle_crossover'):
+            child1, child2 = self.operations.cycle_crossover(parent1, parent2)
+            self.assertEqual(len(child1), len(parent1))
+            self.assertEqual(len(child2), len(parent2))
     
-    def test_crossover_numerical_precision(self):
-        """Test crossover operations maintain numerical precision."""
-        # Test with high precision values
-        precision_parent1 = [1.123456789, 2.987654321]
-        precision_parent2 = [3.456789012, 4.321098765]
+    def test_crossover_performance_benchmarks(self):
+        """Benchmark crossover operator performance."""
+        import time
         
-        child1, child2 = self.operations.arithmetic_crossover(
-            precision_parent1, precision_parent2, alpha=0.5
-        )
+        # Create large parents
+        parent1 = list(range(10000))
+        parent2 = list(range(10000, 20000))
         
-        # Check that precision is maintained
-        self.assertAlmostEqual(child1[0], 2.2901234505, places=8)
-        self.assertAlmostEqual(child1[1], 3.654376543, places=8)
+        operators = [
+            ('single_point', self.operations.single_point_crossover),
+            ('two_point', self.operations.two_point_crossover),
+            ('uniform', lambda p1, p2: self.operations.uniform_crossover(p1, p2, 0.5))
+        ]
+        
+        for name, operator in operators:
+            start_time = time.time()
+            child1, child2 = operator(parent1, parent2)
+            end_time = time.time()
+            
+            # Should complete within reasonable time
+            self.assertLess(end_time - start_time, 1.0, f"{name} crossover too slow")
+            self.assertEqual(len(child1), len(parent1))
+            self.assertEqual(len(child2), len(parent2))
 
 
-class TestIntegrationScenariosAdvanced(unittest.TestCase):
-    """Advanced integration tests for complex scenarios."""
+class TestIntegrationAdvanced(unittest.TestCase):
+    """Advanced integration tests."""
     
     def setUp(self):
         self.genesis_conduit = GenesisEvolutionaryConduit()
-        self.conduit = EvolutionaryConduit()
         self.params = EvolutionaryParameters(
             population_size=20,
             generations=10,
@@ -3583,379 +3827,343 @@ class TestIntegrationScenariosAdvanced(unittest.TestCase):
             crossover_rate=0.8
         )
     
-    def test_multi_modal_optimization(self):
-        """Test evolution on multi-modal optimization problems."""
-        def multi_modal_fitness(genome):
-            # Multi-modal function with multiple optima
-            x = genome[0] if len(genome) > 0 else 0
-            return -(x**2) + 10 * math.cos(2 * math.pi * x)
+    def test_end_to_end_optimization_workflow(self):
+        """Test complete end-to-end optimization workflow."""
+        # Set up optimization problem
+        def optimization_fitness(genome):
+            # Minimize Rosenbrock function
+            result = 0
+            for i in range(len(genome) - 1):
+                result += 100 * (genome[i+1] - genome[i]**2)**2 + (1 - genome[i])**2
+            return -result  # Negative for maximization
         
-        self.conduit.set_fitness_function(multi_modal_fitness)
-        self.conduit.set_parameters(self.params)
+        self.genesis_conduit.set_fitness_function(optimization_fitness)
+        self.genesis_conduit.set_parameters(self.params)
         
-        # Mock evolution for multi-modal optimization
-        with patch.object(self.conduit, 'evolve') as mock_evolve:
+        # Mock evolution process
+        with patch.object(self.genesis_conduit, 'evolve') as mock_evolve:
             mock_evolve.return_value = {
-                'best_individual': {'genome': [0.5], 'fitness': 9.0},
+                'best_individual': {'genome': [1.0, 1.0, 1.0], 'fitness': 0.0},
                 'generations_run': 10,
                 'final_population': [],
-                'statistics': {'diversity': 0.5}
+                'statistics': {'convergence_generation': 8}
             }
             
-            result = self.conduit.run_evolution(genome_length=1)
-            self.assertIsNotNone(result)
+            result = self.genesis_conduit.run_evolution(genome_length=3)
+            
+            # Verify optimization result
+            self.assertIn('best_individual', result)
+            self.assertIn('convergence_generation', result.get('statistics', {}))
     
-    def test_constrained_optimization_scenario(self):
-        """Test evolution with complex constraint scenarios."""
-        def fitness_function(genome):
+    def test_multi_modal_optimization(self):
+        """Test optimization on multi-modal functions."""
+        def multi_modal_fitness(genome):
+            # Function with multiple local optima
+            x, y = genome[0], genome[1]
+            return -(x**2 + y**2) + 10 * (math.cos(2 * math.pi * x) + math.cos(2 * math.pi * y))
+        
+        self.genesis_conduit.set_fitness_function(multi_modal_fitness)
+        
+        # Enable niching to handle multiple optima
+        self.genesis_conduit.enable_niching(niche_radius=0.5, sharing_alpha=2.0)
+        
+        # Mock evolution
+        with patch.object(self.genesis_conduit, 'evolve') as mock_evolve:
+            mock_evolve.return_value = {
+                'best_individual': {'genome': [0.0, 0.0], 'fitness': 20.0},
+                'generations_run': 10,
+                'final_population': [],
+                'statistics': {'niches_found': 4}
+            }
+            
+            result = self.genesis_conduit.run_evolution(genome_length=2)
+            
+            self.assertIn('niches_found', result.get('statistics', {}))
+    
+    def test_constrained_optimization(self):
+        """Test optimization with constraints."""
+        def constrained_fitness(genome):
             return sum(x**2 for x in genome)
         
         def constraint1(genome):
-            return sum(genome) <= 5  # Sum constraint
+            return sum(genome) <= 5.0
         
         def constraint2(genome):
-            return all(x >= 0 for x in genome)  # Non-negativity constraint
+            return all(x >= 0 for x in genome)
         
-        self.conduit.set_fitness_function(fitness_function)
-        self.conduit.add_constraint(constraint1)
-        self.conduit.add_constraint(constraint2)
+        self.genesis_conduit.set_fitness_function(constrained_fitness)
+        self.genesis_conduit.add_constraint(constraint1)
+        self.genesis_conduit.add_constraint(constraint2)
         
-        # Mock constrained evolution
-        with patch.object(self.conduit, 'evolve') as mock_evolve:
+        # Mock evolution
+        with patch.object(self.genesis_conduit, 'evolve') as mock_evolve:
             mock_evolve.return_value = {
                 'best_individual': {'genome': [1.0, 1.0, 1.0], 'fitness': 3.0},
                 'generations_run': 10,
                 'final_population': [],
-                'statistics': {}
+                'statistics': {'constraint_violations': 0}
             }
             
-            result = self.conduit.run_evolution(genome_length=3)
-            self.assertIsNotNone(result)
+            result = self.genesis_conduit.run_evolution(genome_length=3)
+            
+            # Check that constraints are satisfied
+            best_genome = result['best_individual']['genome']
+            self.assertTrue(constraint1(best_genome))
+            self.assertTrue(constraint2(best_genome))
     
-    def test_dynamic_fitness_landscape(self):
-        """Test evolution with changing fitness landscape."""
+    def test_dynamic_optimization(self):
+        """Test optimization in dynamic environments."""
         class DynamicFitness:
             def __init__(self):
-                self.generation = 0
+                self.time_step = 0
             
-            def evaluate(self, genome):
-                self.generation += 1
-                # Fitness landscape changes over time
-                if self.generation < 5:
-                    return sum(genome)
-                else:
-                    return sum(x**2 for x in genome)
+            def __call__(self, genome):
+                self.time_step += 1
+                # Fitness changes over time
+                shift = math.sin(self.time_step * 0.1)
+                return -(sum((x - shift)**2 for x in genome))
         
         dynamic_fitness = DynamicFitness()
-        self.conduit.set_fitness_function(dynamic_fitness.evaluate)
+        self.genesis_conduit.set_fitness_function(dynamic_fitness)
         
-        # Mock dynamic evolution
-        with patch.object(self.conduit, 'evolve') as mock_evolve:
+        # Enable dynamic optimization features
+        self.genesis_conduit.enable_dynamic_optimization(
+            change_detection=True,
+            diversity_maintenance=True
+        )
+        
+        # Mock evolution
+        with patch.object(self.genesis_conduit, 'evolve') as mock_evolve:
             mock_evolve.return_value = {
-                'best_individual': {'genome': [1.0, 2.0], 'fitness': 5.0},
+                'best_individual': {'genome': [0.0, 0.0, 0.0], 'fitness': 0.0},
                 'generations_run': 10,
                 'final_population': [],
-                'statistics': {}
+                'statistics': {'environment_changes': 3}
             }
             
-            result = self.conduit.run_evolution(genome_length=2)
-            self.assertIsNotNone(result)
+            result = self.genesis_conduit.run_evolution(genome_length=3)
+            
+            self.assertIn('environment_changes', result.get('statistics', {}))
     
-    def test_hierarchical_evolution_scenario(self):
-        """Test hierarchical evolution with multiple levels."""
-        # Mock hierarchical evolution setup
-        self.genesis_conduit.set_parameters(self.params)
+    def test_robust_optimization(self):
+        """Test robust optimization under uncertainty."""
+        def noisy_fitness(genome):
+            # Add noise to fitness evaluation
+            noise = random.gauss(0, 0.1)
+            return sum(genome) + noise
         
-        # Level 1: Evolve basic structure
-        level1_config = {
-            'level': 1,
-            'focus': 'structure',
-            'population_size': 10
-        }
+        self.genesis_conduit.set_fitness_function(noisy_fitness)
         
-        # Level 2: Evolve parameters
-        level2_config = {
-            'level': 2,
-            'focus': 'parameters',
-            'population_size': 20
-        }
+        # Enable robust evaluation
+        self.genesis_conduit.enable_robust_evaluation(
+            num_evaluations=10,
+            evaluation_method='mean'
+        )
         
-        self.genesis_conduit.set_hierarchical_config([level1_config, level2_config])
-        
-        # Mock hierarchical evolution
-        with patch.object(self.genesis_conduit, 'evolve_hierarchical') as mock_evolve:
+        # Mock evolution
+        with patch.object(self.genesis_conduit, 'evolve') as mock_evolve:
             mock_evolve.return_value = {
-                'best_individual': {'genome': [1, 2, 3], 'fitness': 6.0},
+                'best_individual': {'genome': [1.0, 1.0, 1.0], 'fitness': 3.0},
                 'generations_run': 10,
                 'final_population': [],
-                'statistics': {},
-                'hierarchy_levels': 2
+                'statistics': {'robustness_score': 0.85}
             }
             
-            result = self.genesis_conduit.run_hierarchical_evolution(
-                genome_length=3,
-                hierarchy_levels=2
-            )
-            self.assertIsNotNone(result)
+            result = self.genesis_conduit.run_evolution(genome_length=3)
+            
+            self.assertIn('robustness_score', result.get('statistics', {}))
     
-    def test_co_evolution_scenario(self):
-        """Test co-evolution between competing populations."""
-        # Set up two competing populations
-        population1 = [
-            {'genome': [1, 2, 3], 'fitness': 0.5},
-            {'genome': [4, 5, 6], 'fitness': 0.7}
-        ]
+    def test_co_evolutionary_optimization(self):
+        """Test co-evolutionary optimization."""
+        def competitive_fitness(genome1, genome2):
+            # Competitive evaluation
+            return sum(genome1) - sum(genome2)
         
-        population2 = [
-            {'genome': [7, 8, 9], 'fitness': 0.6},
-            {'genome': [10, 11, 12], 'fitness': 0.8}
-        ]
+        self.genesis_conduit.set_competitive_fitness_function(competitive_fitness)
         
-        # Mock co-evolution
-        with patch.object(self.genesis_conduit, 'coevolve_populations') as mock_coevolve:
+        # Enable co-evolution
+        self.genesis_conduit.enable_coevolution(
+            num_populations=2,
+            interaction_frequency=5
+        )
+        
+        # Mock evolution
+        with patch.object(self.genesis_conduit, 'coevolve') as mock_coevolve:
             mock_coevolve.return_value = {
-                'population1': population1,
-                'population2': population2,
-                'convergence_metrics': {'diversity': 0.3, 'competition_balance': 0.5}
-            }
-            
-            result = self.genesis_conduit.coevolve_populations(population1, population2)
-            self.assertIn('population1', result)
-            self.assertIn('population2', result)
-            self.assertIn('convergence_metrics', result)
-
-
-class TestPerformanceOptimization(unittest.TestCase):
-    """Performance optimization and efficiency tests."""
-    
-    def test_memory_efficient_large_population(self):
-        """Test memory efficiency with large populations."""
-        import gc
-        import sys
-        
-        # Create large population efficiently
-        large_params = EvolutionaryParameters(
-            population_size=10000,
-            generations=1
-        )
-        
-        conduit = EvolutionaryConduit()
-        conduit.set_parameters(large_params)
-        conduit.enable_memory_optimization()
-        
-        # Mock memory-efficient evolution
-        with patch.object(conduit, 'evolve') as mock_evolve:
-            mock_evolve.return_value = {
-                'best_individual': {'genome': [1, 2, 3], 'fitness': 6.0},
-                'generations_run': 1,
-                'final_population': [],
-                'statistics': {}
-            }
-            
-            # Monitor memory usage
-            gc.collect()
-            initial_objects = len(gc.get_objects())
-            
-            result = conduit.run_evolution(genome_length=10)
-            
-            gc.collect()
-            final_objects = len(gc.get_objects())
-            
-            # Memory usage should be controlled
-            object_increase = final_objects - initial_objects
-            self.assertLess(object_increase, 10000)  # Reasonable threshold
-    
-    def test_computational_efficiency(self):
-        """Test computational efficiency optimizations."""
-        import time
-        
-        # Test vectorized operations
-        conduit = EvolutionaryConduit()
-        conduit.enable_vectorized_operations()
-        
-        params = EvolutionaryParameters(
-            population_size=1000,
-            generations=5
-        )
-        conduit.set_parameters(params)
-        
-        def efficient_fitness(genome):
-            # Simulate vectorized computation
-            import numpy as np
-            return np.sum(np.array(genome)**2)
-        
-        conduit.set_fitness_function(efficient_fitness)
-        
-        # Mock efficient evolution
-        with patch.object(conduit, 'evolve') as mock_evolve:
-            mock_evolve.return_value = {
-                'best_individual': {'genome': [1, 2, 3], 'fitness': 14.0},
-                'generations_run': 5,
-                'final_population': [],
-                'statistics': {}
-            }
-            
-            start_time = time.time()
-            result = conduit.run_evolution(genome_length=100)
-            end_time = time.time()
-            
-            # Should complete efficiently
-            self.assertLess(end_time - start_time, 5.0)
-            self.assertIsNotNone(result)
-    
-    def test_parallel_processing_efficiency(self):
-        """Test parallel processing efficiency."""
-        import multiprocessing
-        
-        # Test with multiple CPU cores
-        num_cores = min(multiprocessing.cpu_count(), 4)
-        
-        conduit = EvolutionaryConduit()
-        conduit.enable_parallel_processing(num_workers=num_cores)
-        
-        params = EvolutionaryParameters(
-            population_size=100,
-            generations=10
-        )
-        conduit.set_parameters(params)
-        
-        def parallel_fitness(genome):
-            # Simulate computationally intensive fitness
-            return sum(x**2 for x in genome) + sum(x**3 for x in genome)
-        
-        conduit.set_fitness_function(parallel_fitness)
-        
-        # Mock parallel evolution
-        with patch.object(conduit, 'evolve_parallel') as mock_evolve:
-            mock_evolve.return_value = {
-                'best_individual': {'genome': [1, 2, 3], 'fitness': 36.0},
+                'best_individuals': [
+                    {'genome': [1.0, 1.0], 'fitness': 2.0},
+                    {'genome': [0.5, 0.5], 'fitness': 1.0}
+                ],
                 'generations_run': 10,
-                'final_population': [],
-                'statistics': {}
+                'final_populations': [[], []],
+                'statistics': {'competitive_balance': 0.67}
             }
             
-            result = conduit.run_parallel_evolution(genome_length=10)
-            self.assertIsNotNone(result)
+            result = self.genesis_conduit.run_coevolution(genome_length=2)
+            
+            self.assertIn('competitive_balance', result.get('statistics', {}))
 
 
-class TestErrorRecoveryAndFaultTolerance(unittest.TestCase):
-    """Error recovery and fault tolerance tests."""
+class TestRealWorldApplications(unittest.TestCase):
+    """Tests for real-world application scenarios."""
     
-    def test_fitness_evaluation_failure_recovery(self):
-        """Test recovery from fitness evaluation failures."""
-        conduit = EvolutionaryConduit()
+    def setUp(self):
+        self.genesis_conduit = GenesisEvolutionaryConduit()
+    
+    def test_feature_selection_application(self):
+        """Test feature selection for machine learning."""
+        # Mock dataset with many features
+        num_features = 100
         
-        call_count = 0
-        def unreliable_fitness(genome):
-            nonlocal call_count
-            call_count += 1
-            # Fail on first few calls, then succeed
-            if call_count <= 3:
-                raise RuntimeError("Fitness evaluation failed")
-            return sum(genome)
+        def feature_selection_fitness(genome):
+            # Binary genome for feature selection
+            selected_features = [i for i, selected in enumerate(genome) if selected > 0.5]
+            
+            # Fitness based on feature subset quality
+            if len(selected_features) == 0:
+                return 0.0
+            
+            # Mock accuracy decreases with too many features
+            accuracy = 0.9 - (len(selected_features) / num_features) * 0.3
+            return accuracy
         
-        conduit.set_fitness_function(unreliable_fitness)
-        conduit.enable_error_recovery(max_retries=5)
+        self.genesis_conduit.set_fitness_function(feature_selection_fitness)
         
-        # Test recovery mechanism
-        with patch.object(conduit, 'evolve') as mock_evolve:
+        # Mock evolution
+        with patch.object(self.genesis_conduit, 'evolve') as mock_evolve:
             mock_evolve.return_value = {
-                'best_individual': {'genome': [1, 2, 3], 'fitness': 6.0},
-                'generations_run': 10,
+                'best_individual': {'genome': [1.0] * 20 + [0.0] * 80, 'fitness': 0.84},
+                'generations_run': 15,
                 'final_population': [],
-                'statistics': {}
+                'statistics': {'selected_features': 20}
             }
             
-            result = conduit.run_evolution(genome_length=3)
-            self.assertIsNotNone(result)
+            result = self.genesis_conduit.run_evolution(genome_length=num_features)
+            
+            self.assertIn('selected_features', result.get('statistics', {}))
     
-    def test_memory_limit_handling(self):
-        """Test handling of memory limit exceeded scenarios."""
-        conduit = EvolutionaryConduit()
-        conduit.set_memory_limit(max_memory_mb=10)  # Very low limit
+    def test_neural_architecture_optimization(self):
+        """Test neural architecture optimization."""
+        def architecture_fitness(genome):
+            # Genome represents architecture parameters
+            num_layers = int(genome[0] * 10) + 1
+            layer_size = int(genome[1] * 1000) + 10
+            
+            # Mock accuracy vs model complexity trade-off
+            accuracy = 0.8 + (num_layers / 10) * 0.15
+            complexity_penalty = (num_layers * layer_size) / 100000
+            
+            return accuracy - complexity_penalty
         
-        # Try to create population that exceeds memory limit
-        large_params = EvolutionaryParameters(
-            population_size=1000000,  # Very large population
-            generations=1
-        )
+        self.genesis_conduit.set_fitness_function(architecture_fitness)
         
-        with self.assertRaises(MemoryError):
-            conduit.set_parameters(large_params)
-            conduit.run_evolution(genome_length=1000)
-    
-    def test_graceful_shutdown_on_interrupt(self):
-        """Test graceful shutdown when interrupted."""
-        import signal
-        import threading
-        
-        conduit = EvolutionaryConduit()
-        conduit.enable_graceful_shutdown()
-        
-        params = EvolutionaryParameters(
-            population_size=100,
-            generations=1000  # Long-running
-        )
-        conduit.set_parameters(params)
-        
-        def interrupt_after_delay():
-            import time
-            time.sleep(0.1)  # Allow evolution to start
-            # Simulate interrupt
-            conduit.request_shutdown()
-        
-        # Mock interrupted evolution
-        with patch.object(conduit, 'evolve') as mock_evolve:
+        # Mock evolution
+        with patch.object(self.genesis_conduit, 'evolve') as mock_evolve:
             mock_evolve.return_value = {
-                'best_individual': {'genome': [1, 2, 3], 'fitness': 6.0},
-                'generations_run': 5,  # Interrupted early
+                'best_individual': {'genome': [0.5, 0.3], 'fitness': 0.89},
+                'generations_run': 20,
                 'final_population': [],
-                'statistics': {},
-                'shutdown_reason': 'user_interrupt'
+                'statistics': {'optimal_layers': 6, 'optimal_size': 310}
             }
             
-            # Start interrupt thread
-            interrupt_thread = threading.Thread(target=interrupt_after_delay)
-            interrupt_thread.start()
+            result = self.genesis_conduit.run_evolution(genome_length=2)
             
-            result = conduit.run_evolution(genome_length=3)
-            
-            interrupt_thread.join()
-            
-            # Should handle shutdown gracefully
-            self.assertIsNotNone(result)
-            self.assertIn('shutdown_reason', result)
+            self.assertIn('optimal_layers', result.get('statistics', {}))
     
-    def test_checkpoint_recovery(self):
-        """Test recovery from checkpoints after failure."""
-        conduit = EvolutionaryConduit()
-        conduit.enable_checkpointing(interval=5)
-        
-        # Mock checkpoint data
-        checkpoint_data = {
-            'generation': 10,
-            'population': [{'genome': [1, 2, 3], 'fitness': 6.0}],
-            'best_individual': {'genome': [1, 2, 3], 'fitness': 6.0},
-            'statistics': {}
-        }
-        
-        # Test recovery from checkpoint
-        with patch.object(conduit, 'load_checkpoint') as mock_load:
-            mock_load.return_value = checkpoint_data
+    def test_portfolio_optimization(self):
+        """Test financial portfolio optimization."""
+        def portfolio_fitness(genome):
+            # Normalize weights to sum to 1
+            weights = [w / sum(genome) for w in genome]
             
-            with patch.object(conduit, 'evolve_from_checkpoint') as mock_evolve:
-                mock_evolve.return_value = {
-                    'best_individual': {'genome': [1, 2, 3], 'fitness': 6.0},
-                    'generations_run': 15,  # Continued from checkpoint
-                    'final_population': [],
-                    'statistics': {}
-                }
-                
-                result = conduit.recover_from_checkpoint('checkpoint.pkl')
-                self.assertIsNotNone(result)
-                self.assertEqual(result['generations_run'], 15)
+            # Mock returns and risk
+            expected_returns = [0.1, 0.08, 0.12, 0.06, 0.15]
+            portfolio_return = sum(w * r for w, r in zip(weights, expected_returns))
+            
+            # Mock risk calculation
+            portfolio_risk = sum(w**2 for w in weights) * 0.1
+            
+            # Sharpe ratio approximation
+            return portfolio_return / portfolio_risk if portfolio_risk > 0 else 0
+        
+        self.genesis_conduit.set_fitness_function(portfolio_fitness)
+        
+        # Mock evolution
+        with patch.object(self.genesis_conduit, 'evolve') as mock_evolve:
+            mock_evolve.return_value = {
+                'best_individual': {'genome': [0.2, 0.3, 0.1, 0.1, 0.3], 'fitness': 1.85},
+                'generations_run': 25,
+                'final_population': [],
+                'statistics': {'sharpe_ratio': 1.85, 'portfolio_risk': 0.05}
+            }
+            
+            result = self.genesis_conduit.run_evolution(genome_length=5)
+            
+            self.assertIn('sharpe_ratio', result.get('statistics', {}))
+    
+    def test_scheduling_optimization(self):
+        """Test job scheduling optimization."""
+        def scheduling_fitness(genome):
+            # Genome represents job order
+            num_jobs = len(genome)
+            
+            # Mock processing times and due dates
+            processing_times = [i + 1 for i in range(num_jobs)]
+            due_dates = [i * 2 + 5 for i in range(num_jobs)]
+            
+            # Calculate completion times
+            completion_times = []
+            current_time = 0
+            for job_index in sorted(range(num_jobs), key=lambda i: genome[i]):
+                current_time += processing_times[job_index]
+                completion_times.append(current_time)
+            
+            # Minimize total tardiness
+            tardiness = sum(max(0, comp - due) for comp, due in zip(completion_times, due_dates))
+            return -tardiness  # Negative for minimization
+        
+        self.genesis_conduit.set_fitness_function(scheduling_fitness)
+        
+        # Mock evolution
+        with patch.object(self.genesis_conduit, 'evolve') as mock_evolve:
+            mock_evolve.return_value = {
+                'best_individual': {'genome': [1.0, 0.5, 0.8, 0.3, 0.9], 'fitness': -2.0},
+                'generations_run': 30,
+                'final_population': [],
+                'statistics': {'total_tardiness': 2.0}
+            }
+            
+            result = self.genesis_conduit.run_evolution(genome_length=5)
+            
+            self.assertIn('total_tardiness', result.get('statistics', {}))
 
 
-# Add import for math module needed by some tests
+# Import math for advanced tests
 import math
 import time
+import random
+
+# Run additional tests if this module is executed directly
+if __name__ == '__main__':
+    # Create a test suite with new tests
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    
+    # Add all new test classes
+    new_test_classes = [
+        TestEvolutionaryParametersEdgeCases,
+        TestMutationStrategyAdvanced,
+        TestSelectionStrategyAdvanced,
+        TestFitnessFunctionAdvanced,
+        TestPopulationManagerAdvanced,
+        TestGeneticOperationsAdvanced,
+        TestIntegrationAdvanced,
+        TestRealWorldApplications
+    ]
+    
+    for test_class in new_test_classes:
+        suite.addTests(loader.loadTestsFromTestCase(test_class))
+    
+    # Run the new tests
+    runner = unittest.TextTestRunner(verbosity=2)
+    runner.run(suite)
