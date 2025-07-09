@@ -109,6 +109,11 @@ import kotlin.math.*
  *
  * Renders agent nodes arranged in a circular halo around a central "GENESIS" node, supporting drag-and-drop and tap-based task assignment. Visual effects include animated rotation, pulsing glows for active agents, real-time status indicators, a task input overlay, a scrollable task history panel, and control buttons for rotation and history management. Integrates with the provided view model for agent data and asynchronous task processing.
  */
+/**
+ * Displays an interactive, animated halo UI for managing agents and delegating tasks.
+ *
+ * Renders agent nodes arranged in a rotating circular halo around a central "GENESIS" node, supporting drag-and-drop and tap-based task assignment. Visual effects include animated rotation, pulsing glows for active agents, real-time status indicators, and neon-themed styling. Users can assign tasks to agents by dragging nodes or tapping the center, input task descriptions, and view a scrollable task history panel. Control buttons allow toggling rotation, resetting the halo, and clearing task history. Integrates with a view model for agent data and simulates asynchronous task processing with status updates.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HaloView(viewModel: GenesisAgentViewModel = viewModel<GenesisAgentViewModel>()) {
