@@ -4,7 +4,7 @@ Tests cover initialization, state management, consciousness tracking, and edge c
 """
 
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch, MagicMock, mock_open
 import pytest
 import numpy as np
 from datetime import datetime, timedelta
@@ -12,6 +12,8 @@ import asyncio
 import json
 import tempfile
 import os
+import math
+import random
 from typing import Dict, List, Any
 
 # Assuming the main module exists - import with try/except for robustness
@@ -608,10 +610,6 @@ class TestMatrixIntegration(unittest.TestCase):
             self.assertEqual(restored_matrix.nodes[node_id].consciousness_level, consciousness_level)
 
 
-if __name__ == '__main__':
-    # Configure test runner
-    unittest.main(verbosity=2, buffer=True)
-
 class TestGenesisConsciousnessMatrixExtended(unittest.TestCase):
     """Extended test cases for Genesis Consciousness Matrix with additional edge cases and scenarios."""
     
@@ -1167,6 +1165,7 @@ except ImportError:
     # pytest not available, skip parametrized tests
     pass
 
+
 class TestGenesisConsciousnessMatrixAdvanced(unittest.TestCase):
     """Advanced test scenarios for Genesis Consciousness Matrix with complex edge cases."""
     
@@ -1239,8 +1238,6 @@ class TestGenesisConsciousnessMatrixAdvanced(unittest.TestCase):
             
     def test_consciousness_level_with_nan_and_inf(self):
         """Test consciousness level validation with NaN and infinity values."""
-        import math
-        
         invalid_levels = [float('nan'), float('inf'), float('-inf')]
         for invalid_level in invalid_levels:
             with self.assertRaises(ValueError):
@@ -1364,8 +1361,6 @@ class TestGenesisConsciousnessMatrixAdvanced(unittest.TestCase):
                 
     def test_matrix_file_operations_with_permissions(self):
         """Test matrix file operations with permission issues."""
-        import tempfile
-        import os
         import stat
         
         # Create a temporary directory with restricted permissions
@@ -1536,7 +1531,6 @@ class TestMatrixConcurrencyAndRaceConditions(unittest.TestCase):
         """Test concurrent node addition and removal operations."""
         import threading
         import time
-        import random
         
         operations_completed = []
         errors_encountered = []

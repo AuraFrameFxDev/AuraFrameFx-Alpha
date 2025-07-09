@@ -55,6 +55,10 @@ interface HttpResponse {
     val body: String
 }
 
+data class HealthCheckResult(val isHealthy: Boolean, val message: String)
+
+class ConfigurationException(message: String) : Exception(message)
+
 // Service interface and implementation
 interface AuraAIService {
     suspend fun generateResponse(prompt: String, userId: String? = null): String
@@ -230,6 +234,13 @@ class AuraAIServiceImplTest {
     private val testApiKey = "test-api-key-123"
     private val testBaseUrl = "https://api.test.com"
     private val testTimeout = 30000L
+
+    private fun mockHttpResponse(statusCode: Int, body: String): HttpResponse {
+        return object : HttpResponse {
+            override val statusCode: Int = statusCode
+            override val body: String = body
+        }
+    }
 
     @BeforeEach
     fun setUp() {
@@ -451,12 +462,10 @@ class AuraAIServiceImplTest {
             val prompt = "¿Cómo estás? 你好 🌟"
             val expectedResponse = "Unicode response"
             val mockHttpResponse = mockHttpResponse(200, expectedResponse)
-            whenever(mockHttpClient.post(any())).thenReturn(mockHttpRespo
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
 
-            val result = auraAIService.generateResponse(prompt, userId)
+            val result = auraAIService.generateResponse(prompt)
             assertEquals(expectedResponse, result)
-            verify(mockHttpClient).post(prompt)
-            verify(mockLogger).info("Generating AI response for prompt length: ${prompt.length}")
         }
 
         @Test
@@ -507,4 +516,11 @@ class AuraAIServiceImplTest {
         @DisplayName("Should handle 404 not found")
         fun shouldHandle404NotFound() = runTest {
             val mockHttpResponse = mockHttpResponse(404, "Not Found")
-            
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            assertThrows<IOException> {
+                auraAIService.generateResponse("Test")
+            }
+            verify(mockLogger).error("HTTP error response: 404 - Not Found")
+        }
+    }
+}

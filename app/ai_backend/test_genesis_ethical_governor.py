@@ -781,6 +781,7 @@ class TestGenesisEthicalGovernorIntegration:
         assert all(isinstance(result, DecisionResult) for result in results)
         assert len(governor.decision_history) == 100
 
+
 # Additional comprehensive tests for enhanced coverage
 
 class TestGenesisEthicalGovernorAdvanced:

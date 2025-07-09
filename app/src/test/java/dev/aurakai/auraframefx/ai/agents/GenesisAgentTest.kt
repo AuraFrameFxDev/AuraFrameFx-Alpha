@@ -480,7 +480,6 @@ class GenesisAgentTest {
     }
 
     @Test
-    @Test
     fun testParticipateWithAgents_cascadeMode() = runBlocking {
         val agent1 = DummyAgent("Agent1", "cascade response 1", 0.8f)
         val agent2 = DummyAgent("Agent2", "cascade response 2", 0.9f)
@@ -938,26 +937,7 @@ class GenesisAgentTest {
             assertTrue("Should throw for invalid enum value", true)
         }
     }
-        val agent = DummyAgent("ConcurrentAgent", "response")
-        val responses = ConcurrentHashMap<String, AgentResponse>()
 
-        val jobs = (1..10).map { i ->
-            kotlinx.coroutines.async {
-                val response = genesisAgent.participateWithAgents(
-                    context = emptyMap(),
-                    agents = listOf(agent),
-                    prompt = "concurrent test $i",
-                    mode = GenesisAgent.ConversationMode.TURN_ORDER
-                )
-                responses.putAll(response)
-            }
-        }
-        jobs.forEach { it.await() }
-
-        assertTrue("Should handle concurrent access", responses.isNotEmpty())
-        assertEquals("response", responses["ConcurrentAgent"]?.content)
-    }
-}
     @Test
     fun testConcurrentAccess() = runBlocking {
         val agent = DummyAgent("ConcurrentAgent", "response")
