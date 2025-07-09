@@ -45,9 +45,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initializes the NeuralWhisper service by setting up text-to-speech and speech-to-text components.
+     * Sets up the text-to-speech and speech-to-text components for the NeuralWhisper service.
      *
-     * Prepares the service for audio processing and AI interaction. Additional initialization steps may be added as needed.
+     * Prepares the service for audio processing and AI interaction by initializing required engines. Additional setup steps may be added in the future.
      */
     fun initialize() {
         Log.d(TAG, "Initializing NeuralWhisper...")
@@ -57,7 +57,7 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initializes the TextToSpeech engine and updates the initialization state flag.
+     * Initializes the TextToSpeech engine and updates the initialization state.
      *
      * Attempts to create a TextToSpeech instance and sets the initialization flag based on the result.
      * Language, voice, pitch, and rate configuration are not yet implemented.
@@ -105,10 +105,10 @@ class NeuralWhisper @Inject constructor(
     /**
      * Converts audio input to transcribed text using speech-to-text processing.
      *
-     * This is a placeholder implementation; actual speech recognition is not yet implemented.
+     * This is a placeholder implementation that simulates speech recognition and returns a fixed string.
      *
      * @param audioInput The audio data or trigger for initiating speech recognition.
-     * @return The transcribed text if successful, or null if speech recognition is not initialized.
+     * @return The transcribed text if speech recognition is initialized; otherwise, null.
      */
     suspend fun speechToText(audioInput: Any /* Placeholder type */): String? {
         // TODO: Implement actual STT logic.
@@ -132,10 +132,10 @@ class NeuralWhisper @Inject constructor(
     /**
      * Attempts to synthesize speech from the provided text using the text-to-speech engine.
      *
-     * This is a placeholder; actual speech synthesis is not performed.
+     * This is a placeholder implementation; no actual speech synthesis occurs.
      *
      * @param text The text to be spoken.
-     * @param locale The language and region for speech synthesis (defaults to US English).
+     * @param locale The locale for speech synthesis (defaults to US English).
      * @return `true` if the TTS engine is initialized and the request is accepted; `false` otherwise.
      */
     fun textToSpeech(text: String, locale: Locale = Locale.US): Boolean {
@@ -159,9 +159,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Processes a transcribed voice command and returns a placeholder action object.
+     * Processes a transcribed voice command and returns a placeholder action.
      *
-     * Updates the conversation state to indicate processing. Actual natural language understanding and command-to-action mapping are not yet implemented.
+     * Updates the conversation state to indicate processing. Actual natural language understanding and command-to-action mapping are not implemented.
      *
      * @param command The transcribed voice command to process.
      * @return A placeholder object representing the intended action for the given command.
@@ -180,9 +180,9 @@ class NeuralWhisper @Inject constructor(
 
 
     /**
-     * Shares context information with the Kai agent or controller.
+     * Updates the conversation state to reflect sharing context information with the Kai agent.
      *
-     * Updates the conversation state to indicate context sharing. Actual communication with the Kai agent is not implemented.
+     * This method does not perform actual communication with the Kai agent; it only updates internal state and logs the action.
      *
      * @param contextText The context information to be shared.
      */
@@ -215,9 +215,9 @@ class NeuralWhisper @Inject constructor(
     /**
      * Stops the current audio recording session and returns a message indicating the result.
      *
-     * Returns a success message if the operation completes without error, or a failure message with error details if an exception occurs.
+     * Returns a success message if the operation completes successfully, or a failure message with error details if an exception occurs.
      *
-     * @return A message describing whether the recording was stopped successfully or failed.
+     * @return A message describing the outcome of the stop recording operation.
      */
     fun stopRecording(): String {
         return try {

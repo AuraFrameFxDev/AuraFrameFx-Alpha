@@ -5,36 +5,38 @@ import android.os.IInterface
 
 interface IAuraDriveService : IInterface {
     /**
- * Returns a string summarizing the current operational status of the Oracle Drive.
+ * Returns the current operational status of the Oracle Drive as a string.
  *
- * @return A string representing the Oracle Drive's current status.
+ * The returned string provides a summary of the Oracle Drive's present state.
+ *
+ * @return The current status of the Oracle Drive.
  */
 fun getOracleDriveStatus(): String
     /**
  * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module's enabled state was successfully changed, or `false` if the operation failed.
+ * @return `true` if the module's enabled state was successfully changed, `false` otherwise.
  */
 fun toggleLSPosedModule(): Boolean  
     /**
- * Returns a detailed report containing comprehensive diagnostic or monitoring information about the Aura Drive service's internal state.
+ * Returns a detailed diagnostic report about the internal state of the Aura Drive service.
  *
- * @return A string with detailed internal status information.
+ * @return A string containing comprehensive information for monitoring or troubleshooting the service.
  */
 fun getDetailedInternalStatus(): String
     /**
- * Returns a list of internal diagnostics log entries for debugging or monitoring.
+ * Returns a list of internal diagnostics log entries for debugging or monitoring purposes.
  *
- * @return A list of strings, each containing a diagnostics log entry.
+ * @return A list of strings, where each string represents a diagnostics log entry.
  */
 fun getInternalDiagnosticsLog(): List<String>
     
     companion object {
         object Stub {
             /**
-             * Returns an `IAuraDriveService` implementation backed by the provided `IBinder`, or null if the binder is null.
+             * Returns an `IAuraDriveService` implementation backed by the given `IBinder`, or null if the binder is null.
              *
-             * The returned implementation is a stub that provides placeholder responses and does not perform actual service logic.
+             * The returned implementation is a stub that provides placeholder responses and does not perform any actual service logic.
              *
              * @param service The `IBinder` representing the remote service, or null.
              * @return An `IAuraDriveService` implementation if the binder is non-null; otherwise, null.
@@ -44,9 +46,9 @@ fun getInternalDiagnosticsLog(): List<String>
                 return if (service != null) {
                     object : IAuraDriveService {
                         /**
- * Returns the underlying IBinder associated with this interface implementation.
+ * Returns the IBinder instance backing this interface implementation.
  *
- * @return The IBinder backing this implementation.
+ * @return The underlying IBinder.
  */
 override fun asBinder(): IBinder = service
                         /**
@@ -64,15 +66,17 @@ override fun getOracleDriveStatus(): String = "Unknown"
  */
 override fun toggleLSPosedModule(): Boolean = false
                         /**
- * Returns a detailed report of the Aura Drive service's internal state.
+ * Returns a detailed diagnostic report of the Aura Drive service's internal state.
  *
- * @return A string containing comprehensive diagnostic or monitoring information about the service.
+ * @return A string containing comprehensive information for monitoring or troubleshooting the service.
  */
 override fun getDetailedInternalStatus(): String = "Not implemented"
                         /**
- * Returns an empty list as a placeholder for internal diagnostics log entries.
+ * Returns an empty list representing internal diagnostics log entries.
  *
- * @return An empty list of strings, indicating that no diagnostics logs are available in this stub implementation.
+ * This stub implementation does not provide actual diagnostics logs.
+ *
+ * @return An empty list of strings.
  */
 override fun getInternalDiagnosticsLog(): List<String> = emptyList()
                     }
