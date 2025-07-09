@@ -1,5 +1,3 @@
-
-
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.layout.*
@@ -19,6 +17,11 @@ import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonPurple
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
 
+/**
+ * Displays the main conference room UI, including agent selection, recording and transcription controls, chat interface, and message input.
+ *
+ * This composable manages local state for the selected agent, recording, and transcription status. It provides interactive controls for switching agents, starting/stopping recording and transcription, and sending chat messages. Several actions are placeholders for future implementation.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConferenceRoomScreen() {
@@ -141,6 +144,13 @@ fun ConferenceRoomScreen() {
     }
 }
 
+/**
+ * Displays a selectable button for an agent, highlighting it if selected.
+ *
+ * @param agent The name of the agent to display on the button.
+ * @param isSelected Whether this agent is currently selected.
+ * @param onClick Called when the button is pressed.
+ */
 @Composable
 fun AgentButton(
     agent: String,
@@ -167,6 +177,14 @@ fun AgentButton(
     }
 }
 
+/**
+ * Displays a large icon button for toggling the recording state.
+ *
+ * Shows a red stop icon when recording is active, or a purple circle icon when inactive. The button's icon and content description update based on the current recording state.
+ *
+ * @param isRecording Whether recording is currently active.
+ * @param onClick Called when the button is pressed to toggle recording.
+ */
 @Composable
 fun RecordingButton(
     isRecording: Boolean,
@@ -189,6 +207,12 @@ fun RecordingButton(
     }
 }
 
+/**
+ * Displays a button for toggling transcription state with an icon and color indicating the current status.
+ *
+ * @param isTranscribing Whether transcription is currently active.
+ * @param onClick Called when the button is pressed to toggle transcription.
+ */
 @Composable
 fun TranscribeButton(
     isTranscribing: Boolean,
@@ -211,6 +235,9 @@ fun TranscribeButton(
     }
 }
 
+/**
+ * Displays a design-time preview of the ConferenceRoomScreen composable within a Material theme.
+ */
 @Composable
 @Preview(showBackground = true)
 fun ConferenceRoomScreenPreview() {

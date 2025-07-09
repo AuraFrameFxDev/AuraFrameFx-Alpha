@@ -27,6 +27,13 @@ import dev.aurakai.auraframefx.ui.screens.SettingsScreen
  *
  * @param navController The navigation controller used to manage app navigation.
  */
+/**
+ * Sets up the main navigation graph for the AuraFrameFX app using the provided navigation controller.
+ *
+ * Defines the available composable destinations and their routes, linking each route to its corresponding screen.
+ *
+ * @param navController The navigation controller used to manage app navigation.
+ */
 @Composable
 fun AppNavGraph(navController: NavHostController) {
     NavHost(
