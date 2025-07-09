@@ -53,6 +53,11 @@ import dev.aurakai.auraframefx.ui.screens.SettingsScreen
  *
  * @param navController The navigation controller used to manage navigation between screens.
  */
+/**
+ * Defines the main navigation graph for the AuraFrameFX app using Jetpack Compose Navigation.
+ *
+ * Sets up navigation routes for Home, AI Chat, Profile, Settings, and Oracle Drive Control screens, enabling navigation between them via the provided [navController].
+ */
 @Composable
 fun AppNavGraph(navController: NavHostController) {
     NavHost(
