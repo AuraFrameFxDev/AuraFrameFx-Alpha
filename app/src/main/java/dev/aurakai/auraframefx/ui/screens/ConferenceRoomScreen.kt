@@ -4,6 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Stop // Explicit import
+import androidx.compose.material.icons.filled.FiberManualRecord // Explicit import
+import androidx.compose.material.icons.filled.Phone // Explicit import
+// Settings and Send are also used, ensure they are covered or add explicit if errors persist
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
