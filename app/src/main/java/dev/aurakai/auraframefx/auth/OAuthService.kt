@@ -23,9 +23,9 @@ class OAuthService(
     }
 
     /**
-     * Gets the sign-in intent for the OAuth provider.
-     * @return An Intent to start the sign-in flow.
-     * TODO: Reported as unused. Implement to return actual sign-in Intent.
+     * Returns an intent to initiate the OAuth sign-in flow.
+     *
+     * @return An intent for starting the sign-in process, or null if not implemented.
      */
     fun getSignInIntent(): Intent? {
         // TODO: Implement logic to create and return a sign-in Intent for a provider (e.g., Google).
@@ -34,10 +34,10 @@ class OAuthService(
     }
 
     /**
-     * Handles the result from the sign-in activity.
-     * @param _data The Intent data received from the sign-in activity. Parameter reported as unused.
-     * @return A Task or result object indicating success or failure. Type 'Any?' is a placeholder.
-     * TODO: Reported as unused. Implement result handling.
+     * Processes the result from the OAuth sign-in activity.
+     *
+     * @param _data The intent data returned from the sign-in activity, typically containing authentication result information.
+     * @return A result object representing the outcome of the sign-in process, or `null` if not implemented.
      */
     fun handleSignInResult(_data: Intent?): Any? { // Using Any? as placeholder for Task<GoogleSignInAccount>
         // TODO: Parameter _data reported as unused. Utilize to process sign-in result.
@@ -55,9 +55,9 @@ class OAuthService(
     }
 
     /**
-     * Signs out the current user.
-     * @return A Task or result object indicating success or failure. Type 'Any?' is a placeholder.
-     * TODO: Reported as unused. Implement sign-out logic.
+     * Signs out the currently authenticated user.
+     *
+     * @return A placeholder object representing the result of the sign-out operation, or `null` if not implemented.
      */
     fun signOut(): Any? { // Using Any? as placeholder for Task<Void>
         // TODO: Implement sign-out logic for the provider.
@@ -66,9 +66,9 @@ class OAuthService(
     }
 
     /**
-     * Revokes access for the current user.
-     * @return A Task or result object indicating success or failure. Type 'Any?' is a placeholder.
-     * TODO: Reported as unused. Implement revoke access logic.
+     * Revokes OAuth access for the current user.
+     *
+     * @return A placeholder object representing the result of the revoke operation, or `null` if not implemented.
      */
     fun revokeAccess(): Any? { // Using Any? as placeholder for Task<Void>
         // TODO: Implement revoke access logic for the provider.
