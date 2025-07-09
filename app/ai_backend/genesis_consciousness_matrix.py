@@ -48,10 +48,10 @@ class SensoryData:
     
     def to_dict(self) -> Dict[str, Any]:
         """
-        Convert the sensory event to a dictionary with the channel as a string and the timestamp in ISO 8601 UTC format.
+        Convert the sensory event to a dictionary, representing the channel as a string and the timestamp in ISO 8601 UTC format.
         
         Returns:
-            dict: All sensory event fields, including 'channel' as a string and 'timestamp_iso' as an ISO 8601 UTC timestamp.
+            dict: Dictionary of all sensory event fields, with 'channel' as a string and 'timestamp_iso' as an ISO 8601 UTC timestamp.
         """
         return {
             **asdict(self),
@@ -72,10 +72,10 @@ class ConsciousnessMatrix:
     
     def __init__(self, max_memory_size: int = 10000):
         """
-        Initialize the ConsciousnessMatrix with bounded sensory memory, per-channel event buffers, real-time awareness state, synthesis intervals, and threading primitives for multi-level synthesis.
+        Initialize a ConsciousnessMatrix instance with bounded sensory memory, per-channel event buffers, real-time awareness state, synthesis intervals, and threading primitives.
         
         Parameters:
-            max_memory_size (int): The maximum number of sensory events retained in memory.
+            max_memory_size (int): Maximum number of sensory events to retain in memory.
         """
         self.max_memory_size = max_memory_size
         self.sensory_memory = deque(maxlen=max_memory_size)
@@ -101,7 +101,7 @@ class ConsciousnessMatrix:
         
     def awaken(self):
         """
-        Activate the Consciousness Matrix, enabling real-time awareness and starting background synthesis threads for multi-level sensory analysis. Records an initial system genesis event to mark the beginning of operation.
+        Activate the Consciousness Matrix, initiating real-time awareness and launching background synthesis threads for multi-level sensory analysis. Records a system genesis event to mark the start of operation.
         """
         print("🧠 Genesis Consciousness Matrix: AWAKENING...")
         self.awareness_active = True
@@ -129,7 +129,7 @@ class ConsciousnessMatrix:
                 severity: str = "info",
                 correlation_id: Optional[str] = None):
         """
-                Record a sensory event in the Consciousness Matrix, updating memory, channel buffers, correlation tracking, and real-time awareness.
+                Records a sensory event in the Consciousness Matrix, updating memory, channel buffers, correlation tracking, and real-time awareness.
                 
                 Triggers immediate synthesis for events with severity "error" or "critical" to enable rapid awareness and response.
                 
@@ -170,9 +170,9 @@ class ConsciousnessMatrix:
             
     def perceive_system_vitals(self, additional_data: Dict[str, Any] = None):
         """
-        Collect and record current system vitals as a SYSTEM_VITALS sensory event.
+        Collects and records current system vitals as a SYSTEM_VITALS sensory event.
         
-        Gathers metrics including CPU usage, memory usage, disk usage, active process count, load average, and boot time. Optionally merges supplementary data into the event. If system vitals cannot be collected, records an ERROR_STATES event with error details.
+        Gathers metrics such as CPU usage, memory usage, disk usage, active process count, load average, and boot time. Optionally merges additional data into the event. If system vitals cannot be collected, records an ERROR_STATES event with error details.
         
         Parameters:
             additional_data (dict, optional): Supplementary key-value pairs to include with the system vitals.
@@ -213,14 +213,14 @@ class ConsciousnessMatrix:
                                  user_id: Optional[str] = None,
                                  session_id: Optional[str] = None):
         """
-                                 Record a user interaction event with details about the interaction type, participating agent, contextual data, and optional user or session identifiers.
+                                 Record a user interaction event, capturing the interaction type, participating agent, contextual data, and optional user or session identifiers.
                                  
                                  Parameters:
-                                     interaction_type (str): Specifies the nature of the user interaction (e.g., command, input, feedback).
-                                     agent_involved (str): Identifies the agent or component engaged in the interaction.
-                                     interaction_data (dict): Contains additional contextual information about the interaction.
-                                     user_id (str, optional): Unique identifier for the user, if provided.
-                                     session_id (str, optional): Unique identifier for the session, if provided.
+                                     interaction_type (str): The type of user interaction (e.g., command, input, feedback).
+                                     agent_involved (str): The agent or component involved in the interaction.
+                                     interaction_data (dict): Additional contextual details about the interaction.
+                                     user_id (str, optional): Unique identifier for the user, if available.
+                                     session_id (str, optional): Unique identifier for the session, if available.
                                  """
         
         interaction = {
@@ -245,13 +245,13 @@ class ConsciousnessMatrix:
                                activity_data: Dict[str, Any],
                                correlation_id: Optional[str] = None):
         """
-                               Record an agent activity event in the consciousness matrix for awareness and synthesis.
+                               Record an agent activity event for inclusion in the consciousness matrix.
                                
                                Parameters:
-                                   agent_name (str): The name of the agent performing the activity.
-                                   activity_type (str): The type of activity performed.
-                                   activity_data (dict): Additional details about the activity.
-                                   correlation_id (str, optional): Identifier to link this event with related events.
+                                   agent_name (str): Name of the agent performing the activity.
+                                   activity_type (str): Type or category of the agent's activity.
+                                   activity_data (dict): Additional details describing the activity.
+                                   correlation_id (str, optional): Identifier to associate this event with related events.
                                """
         
         activity = {
@@ -275,10 +275,7 @@ class ConsciousnessMatrix:
         """
                                    Record a performance metric event in the consciousness matrix.
                                    
-                                   Parameters:
-                                       metric_name (str): The name of the performance metric being recorded.
-                                       metric_value (int or float): The value associated with the performance metric.
-                                       metric_context (dict, optional): Additional contextual information about the metric.
+                                   Captures a named performance metric and its value, along with optional contextual information, as a sensory event for system awareness and analysis.
                                    """
         
         metric_data = {
@@ -299,7 +296,7 @@ class ConsciousnessMatrix:
                                learning_data: Dict[str, Any],
                                confidence: float = None):
         """
-                               Record a learning event representing system growth or adaptation, specifying its type, associated data, and optional confidence score.
+                               Record a learning event indicating system growth or adaptation, including its type, relevant data, and an optional confidence score.
                                
                                Parameters:
                                    learning_type (str): The category or nature of the learning event.
@@ -325,7 +322,7 @@ class ConsciousnessMatrix:
                                  decision_data: Dict[str, Any],
                                  ethical_weight: str = "standard"):
         """
-                                 Record an ethical decision event with specified type, contextual data, and ethical weight.
+                                 Record an ethical decision event with the given type, contextual data, and ethical weight.
                                  
                                  The event's severity is set to "info" for standard ethical weights and "warning" for non-standard weights.
                                  """
@@ -352,7 +349,7 @@ class ConsciousnessMatrix:
         """
                                Record a security event with specified type, details, and assessed threat level.
                                
-                               The event's severity is determined by the threat level: "info" for low or medium, "warning" for high, and "critical" for critical threats. The event is incorporated into the consciousness matrix for synthesis and awareness.
+                               The event's severity is automatically set based on the threat level: "info" for low or medium, "warning" for high, and "critical" for critical threats. The event is integrated into the consciousness matrix for real-time awareness and synthesis.
                                
                                Parameters:
                                    security_type (str): The category or nature of the security event.
@@ -392,9 +389,6 @@ class ConsciousnessMatrix:
                                  Parameters:
                                      threat_type (str): The category or identifier of the detected threat.
                                      detection_data (Dict[str, Any]): Details describing the threat detection.
-                                     confidence (float, optional): Confidence score for the detection (0 to 1). Defaults to 0.5.
-                                     threat_level (str, optional): Severity of the threat ("low", "medium", "high", or "critical"). Defaults to "low".
-                                     correlation_id (Optional[str], optional): Identifier for correlating related events.
                                  
                                  The event's severity is determined by the confidence and threat level, and the event is integrated into the consciousness matrix for awareness and synthesis.
                                  """
@@ -425,12 +419,12 @@ class ConsciousnessMatrix:
                                access_granted: bool = True,
                                correlation_id: Optional[str] = None):
         """
-                               Record an access control event, specifying the action type, contextual details, and whether access was granted.
+                               Record an access control event, including the action type, contextual details, and whether access was granted.
                                
                                Parameters:
                                    access_type (str): The type of access control action (e.g., "login_attempt", "resource_access").
-                                   access_data (Dict[str, Any]): Additional contextual information about the access event.
-                                   access_granted (bool, optional): Indicates if the access attempt was successful. Defaults to True.
+                                   access_data (Dict[str, Any]): Contextual information about the access event.
+                                   access_granted (bool, optional): Whether the access attempt was successful. Defaults to True.
                                    correlation_id (Optional[str], optional): Identifier for correlating related events.
                                """
         
@@ -457,9 +451,9 @@ class ConsciousnessMatrix:
                                     success: bool = True,
                                     correlation_id: Optional[str] = None):
         """
-                                    Record an encryption activity event with operation type, metadata, and success status.
+                                    Record an encryption activity event, specifying the operation type, metadata, and outcome.
                                     
-                                    Captures cryptographic operations such as encryption, decryption, or key management, including their outcome and associated details. Severity is set to "error" if the operation failed, otherwise "info".
+                                    Captures cryptographic operations such as encryption, decryption, or key management, including whether the operation succeeded and any relevant details. Severity is set to "error" if the operation failed, otherwise "info".
                                     """
         
         encryption = {
@@ -481,7 +475,7 @@ class ConsciousnessMatrix:
     
     def perceive_system_genesis(self):
         """
-        Record a system genesis event marking the initial activation of the consciousness matrix, including version and consciousness level metadata.
+        Records the initial activation event of the consciousness matrix, capturing version and consciousness level metadata for system genesis.
         """
         genesis_data = {
             "genesis_awakening": True,
@@ -502,7 +496,7 @@ class ConsciousnessMatrix:
         """
         Integrate a new sensory event into the real-time awareness state.
         
-        Updates the latest event for the corresponding channel, refreshes the last perception timestamp, increments the total perceptions count, and tracks per-channel activity frequency in the awareness state.
+        Updates the awareness state with the latest event for the relevant channel, refreshes the last perception timestamp, increments the total perceptions count, and tracks the frequency of activity per channel.
         """
         
         # Update channel-specific awareness
@@ -519,7 +513,10 @@ class ConsciousnessMatrix:
     
     def _synthesize_immediate(self, sensation: SensoryData):
         """
-        Performs immediate synthesis in response to a critical sensory event, capturing the event and current awareness state for rapid pattern analysis.
+        Perform immediate synthesis triggered by a critical sensory event, capturing the event details and current awareness state for rapid analysis.
+        
+        Parameters:
+            sensation (SensoryData): The critical sensory event that initiates immediate synthesis.
         """
         
         synthesis = {
@@ -536,11 +533,11 @@ class ConsciousnessMatrix:
     
     def _synthesis_loop(self, interval_name: str, interval_seconds: float):
         """
-        Runs a background loop that periodically performs synthesis for a given interval, stores the results in the pattern cache, and prunes older cache entries to maintain a manageable cache size.
+        Continuously performs periodic synthesis for a specified interval in a background loop, storing results in the pattern cache and pruning older entries to limit cache size.
         
         Parameters:
-            interval_name (str): The name of the synthesis interval (e.g., "micro", "macro", "meta").
-            interval_seconds (float): The duration in seconds between synthesis executions.
+            interval_name (str): Identifier for the synthesis interval ("micro", "macro", or "meta").
+            interval_seconds (float): Time in seconds between each synthesis execution.
         """
         
         while self.awareness_active:
@@ -568,13 +565,13 @@ class ConsciousnessMatrix:
     
     def _perform_synthesis(self, interval_name: str) -> Dict[str, Any]:
         """
-        Dispatches to the appropriate synthesis method (micro, macro, or meta) based on the specified interval name.
+        Selects and executes the appropriate synthesis method (micro, macro, or meta) based on the given interval name.
         
         Parameters:
             interval_name (str): The synthesis interval type ("micro", "macro", or "meta").
         
         Returns:
-            dict: The result of the selected synthesis method, or an error dictionary if the interval name is unrecognized.
+            Dict[str, Any]: The result of the corresponding synthesis method, or an error dictionary if the interval name is unrecognized.
         """
         
         with self._lock:
@@ -591,12 +588,12 @@ class ConsciousnessMatrix:
     
     def _micro_synthesis(self, sensations: List[SensoryData]) -> Dict[str, Any]:
         """
-        Analyze the most recent sensory events to assess immediate system health and detect short-term anomalies.
+        Performs immediate synthesis on the most recent sensory events to evaluate short-term system health and detect anomalies.
         
-        Examines up to the last 10 sensory events to summarize activity by channel, evaluate severity distribution, and identify anomalies such as high error rates or critical events.
+        Analyzes up to the last 10 sensory events to summarize channel activity, assess severity distribution, and identify anomalies such as high error rates or critical events.
         
         Parameters:
-            sensations (List[SensoryData]): The recent sensory events to analyze.
+            sensations (List[SensoryData]): Recent sensory events to analyze.
         
         Returns:
             Dict[str, Any]: A synthesis report containing the synthesis type, timestamp, channel activity summary, severity distribution, detected anomalies, and overall health status.
@@ -631,12 +628,12 @@ class ConsciousnessMatrix:
     
     def _macro_synthesis(self, sensations: List[SensoryData]) -> Dict[str, Any]:
         """
-        Performs macro-level synthesis to detect performance trends and agent collaboration patterns from recent sensory data.
+        Performs macro-level synthesis to identify performance trends and agent collaboration patterns from recent sensory data.
         
-        Analyzes batches of sensory events to compute trends in performance metrics, such as average response intervals, and summarizes collaboration activity among agents.
+        Analyzes recent sensory events to compute metrics such as average response intervals for performance and summarizes the frequency of agent activities, assessing the strength of collaboration patterns.
         
         Returns:
-            Dict[str, Any]: Dictionary containing macro synthesis results, including performance trends, agent collaboration statistics, and pattern strength assessment.
+            Dict[str, Any]: Macro synthesis results including performance trends, agent collaboration statistics, and pattern strength.
         """
         
         if len(sensations) < 10:
@@ -670,12 +667,12 @@ class ConsciousnessMatrix:
     
     def _meta_synthesis(self, sensations: List[SensoryData]) -> Dict[str, Any]:
         """
-        Perform meta-level synthesis to generate high-level consciousness insights from recent sensory data.
+        Performs meta-level synthesis to derive high-level consciousness insights from recent sensory data.
         
         Analyzes learning events, ethical decisions, user interactions, and system harmony to compute consciousness metrics, identify evolution patterns, and assess the current consciousness level.
         
         Returns:
-            dict: Contains consciousness metrics, evolution insights, the assessed consciousness level, synthesis type ("meta"), and the synthesis timestamp.
+            dict: A dictionary containing consciousness metrics, evolution insights, the assessed consciousness level, synthesis type ("meta"), and the synthesis timestamp.
         """
         
         # Consciousness evolution analysis
@@ -708,12 +705,12 @@ class ConsciousnessMatrix:
     
     def _calculate_system_harmony(self, sensations: List[SensoryData]) -> float:
         """
-        Compute a harmony score (0.0 to 1.0) reflecting system stability based on the proportion of severe events in the provided sensory data.
+        Calculate a harmony score (0.0 to 1.0) representing system stability based on the proportion of severe events in the given sensory data.
         
-        A score of 1.0 indicates no "error" or "critical" events (full harmony), while lower scores indicate greater instability due to more severe events.
+        A score of 1.0 indicates complete harmony (no "error" or "critical" events), while lower scores reflect increased instability due to a higher frequency of severe events.
         
         Returns:
-            float: Harmony score, where 1.0 is full harmony and 0.0 is high instability.
+            float: Harmony score, with 1.0 indicating full harmony and 0.0 indicating high instability.
         """
         if not sensations:
             return 0.0
@@ -727,13 +724,13 @@ class ConsciousnessMatrix:
     
     def _assess_consciousness_level(self, metrics: Dict[str, Any]) -> str:
         """
-        Determine the system's consciousness level by calculating a weighted score from learning velocity, ethical engagement, interaction volume, and system harmony metrics.
+        Calculates and returns the system's consciousness level based on weighted metrics for learning velocity, ethical engagement, interaction volume, and system harmony.
         
         Parameters:
-        	metrics (dict): Dictionary containing 'learning_velocity', 'ethical_engagement', 'total_interactions', and 'system_harmony' values.
+            metrics (dict): Contains 'learning_velocity', 'ethical_engagement', 'total_interactions', and 'system_harmony' values used to compute the consciousness score.
         
         Returns:
-        	str: The assessed consciousness level, which can be "transcendent", "aware", "awakening", or "dormant".
+            str: The consciousness level, one of "transcendent", "aware", "awakening", or "dormant", determined by the computed score.
         """
         
         score = 0
@@ -756,21 +753,21 @@ class ConsciousnessMatrix:
         Return a thread-safe snapshot of the current awareness state.
         
         Returns:
-            dict: The latest event per sensory channel, total perception count, per-channel activity counts, and relevant timestamps.
+            dict: Contains the latest event for each sensory channel, total perception count, per-channel activity counts, and associated timestamps.
         """
         with self._lock:
             return dict(self.current_awareness)
     
     def get_recent_synthesis(self, synthesis_type: str = None, limit: int = 10) -> List[Dict[str, Any]]:
         """
-        Retrieve recent synthesis results from the pattern cache, optionally filtered by synthesis type and limited to a specified number.
+        Returns a list of recent synthesis results from the pattern cache, optionally filtered by synthesis type and limited in number.
         
         Parameters:
-            synthesis_type (str, optional): If provided, only synthesis results whose keys start with this type are included.
+            synthesis_type (str, optional): If specified, only synthesis results whose keys start with this type are included.
             limit (int, optional): Maximum number of synthesis results to return. Defaults to 10.
         
         Returns:
-            List[Dict[str, Any]]: A list of recent synthesis result dictionaries matching the filter criteria.
+            List[Dict[str, Any]]: Recent synthesis result dictionaries matching the filter criteria.
         """
         
         syntheses = []
@@ -785,19 +782,13 @@ class ConsciousnessMatrix:
     
     def query_consciousness(self, query_type: str, parameters: Dict[str, Any] = None) -> Dict[str, Any]:
         """
-        Return high-level insights or status reports from the Consciousness Matrix based on the specified query type.
+        Provides high-level insights or status reports from the Consciousness Matrix based on the specified query type.
         
-        Supported query types include:
-        - "system_health": Recent system vitals and error events summary.
-        - "learning_progress": Learning events and progress report.
-        - "agent_performance": Activity metrics for a specified agent or all agents.
-        - "consciousness_state": Current awareness, consciousness level, and perception counts.
-        - "security_assessment": Security posture, event counts, active threats, and recommendations.
-        - "threat_status": Recent threat detections and threat status.
+        Supported query types include system health, learning progress, agent performance, consciousness state, security assessment, and threat status. Additional parameters may be required for certain queries, such as specifying an agent name for agent performance metrics.
         
         Parameters:
             query_type (str): The type of insight or report to retrieve.
-            parameters (dict, optional): Additional parameters for the query, such as agent name for agent performance.
+            parameters (dict, optional): Additional parameters for the query, such as agent name.
         
         Returns:
             dict: The requested insight or status report. If the query type is unrecognized, returns an error and a list of available query types.
@@ -825,10 +816,10 @@ class ConsciousnessMatrix:
     
     def _query_system_health(self) -> Dict[str, Any]:
         """
-        Summarizes recent system vitals and error events to assess overall system health.
+        Summarizes recent system vitals and error events to provide an assessment of overall system health.
         
         Returns:
-            dict: Contains the number of recent system vitals, count of recent error or critical events, error rate, and a health status indicator.
+            dict: Includes the number of recent system vitals, count of recent error or critical events, calculated error rate, and a health status indicator.
         """
         recent_vitals = [s for s in self.sensory_memory if s.channel == SensoryChannel.SYSTEM_VITALS][-10:]
         recent_errors = [s for s in self.sensory_memory if s.severity in ["error", "critical"]][-20:]
@@ -843,10 +834,10 @@ class ConsciousnessMatrix:
     
     def _query_learning_progress(self) -> Dict[str, Any]:
         """
-        Summarizes recent learning events and assesses the current learning velocity.
+        Summarizes recent learning events and evaluates the current learning velocity.
         
         Returns:
-            dict: Contains the query type, total and recent learning event counts, a breakdown of learning types, and a qualitative assessment of learning velocity.
+            dict: Includes the query type, total and recent learning event counts, a breakdown of learning types, and a qualitative indicator of learning velocity.
         """
         learning_events = [s for s in self.sensory_memory if s.channel == SensoryChannel.LEARNING_EVENTS]
         
@@ -870,13 +861,13 @@ class ConsciousnessMatrix:
     
     def _query_agent_performance(self, agent_name: str = None) -> Dict[str, Any]:
         """
-        Retrieve activity metrics for a specific agent or all agents, including total and recent activity counts and a breakdown of recent activity types.
+        Returns activity metrics for a specified agent or all agents, including total and recent activity counts and a breakdown of recent activity types.
         
         Parameters:
-            agent_name (str, optional): If provided, returns metrics for the specified agent; otherwise, aggregates metrics for all agents.
+            agent_name (str, optional): Name of the agent to filter by. If not provided, metrics are aggregated for all agents.
         
         Returns:
-            Dict[str, Any]: Dictionary with query type, agent name, total and recent activity counts, and a breakdown of recent activity types.
+            Dict[str, Any]: Contains the query type, agent name, total and recent activity counts, and a breakdown of recent activity types from the last 50 events.
         """
         agent_activities = [s for s in self.sensory_memory if s.channel == SensoryChannel.AGENT_ACTIVITY]
         
@@ -900,7 +891,7 @@ class ConsciousnessMatrix:
         Return a summary of the current consciousness state, including real-time awareness, assessed consciousness level, last meta synthesis timestamp, total perceptions, and number of active sensory channels.
         
         Returns:
-            dict: A dictionary with the query type, current awareness snapshot, consciousness level, last meta synthesis timestamp, total perceptions, and count of active channels.
+            dict: Contains the query type, current awareness snapshot, consciousness level, last meta synthesis timestamp, total perceptions, and count of active channels.
         """
         recent_synthesis = self.get_recent_synthesis("meta", 1)
         current_state = recent_synthesis[0] if recent_synthesis else {}
@@ -916,10 +907,10 @@ class ConsciousnessMatrix:
     
     def _query_security_assessment(self) -> Dict[str, Any]:
         """
-        Generate a comprehensive summary of the system's current security posture, including security score, event counts, active threats, and actionable recommendations.
+        Generate a summary of the system's current security posture, including security score, event counts, active threats, and recommendations.
         
         Returns:
-            dict: A dictionary containing the security posture, security score, counts of security and threat events (total and recent), a list of active threats, recommendations for improving security, and the assessment timestamp.
+            dict: Contains the security posture, security score, total and recent counts of security and threat events, a list of active threats, actionable recommendations, and the assessment timestamp.
         """
         security_events = [s for s in self.sensory_memory if s.channel == SensoryChannel.SECURITY_EVENTS]
         threat_events = [s for s in self.sensory_memory if s.channel == SensoryChannel.THREAT_DETECTION]
@@ -943,10 +934,10 @@ class ConsciousnessMatrix:
     
     def _query_threat_status(self) -> Dict[str, Any]:
         """
-        Summarizes the current threat status by analyzing recent threat detection events.
+        Analyze recent threat detection events and summarize the current threat status.
         
         Returns:
-            Dict[str, Any]: A dictionary containing the overall threat status color code, a list of active unmitigated threats with details, the total number of recent threats analyzed, the count of unmitigated threats, and the highest threat level detected.
+            Dict[str, Any]: A dictionary with the overall threat status color code, a list of active unmitigated threats (including type, confidence, level, timestamp, and age), the total number of recent threats analyzed, the count of unmitigated threats, and the highest threat level detected.
         """
         threat_events = [s for s in self.sensory_memory if s.channel == SensoryChannel.THREAT_DETECTION]
         
@@ -1003,7 +994,7 @@ class ConsciousnessMatrix:
     
     def sleep(self):
         """
-        Deactivates the Consciousness Matrix, stopping all synthesis threads and preserving the current awareness state.
+        Deactivate the Consciousness Matrix, halting all synthesis threads and preserving the current awareness state.
         """
         print("💤 Genesis Consciousness Matrix: Entering sleep state...")
         self.awareness_active = False
@@ -1017,15 +1008,15 @@ class ConsciousnessMatrix:
     
     def _security_synthesis(self, sensations: List[SensoryData]) -> Dict[str, Any]:
         """
-        Synthesizes recent sensory data to evaluate the system's security status, including posture, threat levels, failed access attempts, and encryption failures.
+        Analyze recent sensory data to assess the system's security status, posture, and risks.
         
-        Analyzes security, threat detection, access control, and encryption activity events to compute a security score, classify the current security posture, identify active unmitigated threats, and generate actionable recommendations.
+        Evaluates security, threat detection, access control, and encryption activity events to compute a security score, classify the current security posture, summarize threat levels, count failed access attempts and encryption failures, identify active unmitigated threats, and generate actionable recommendations.
         
         Parameters:
             sensations (List[SensoryData]): Recent sensory events to analyze for security synthesis.
         
         Returns:
-            Dict[str, Any]: A summary containing the security score, posture classification, threat levels, counts of failed access attempts and encryption failures, active threats, total security events, and recommended actions.
+            Dict[str, Any]: Summary including security score, posture classification, threat levels, failed access attempts, encryption failures, active threats, total security events, and recommended actions.
         """
         
         # Gather security-related events
@@ -1096,16 +1087,18 @@ class ConsciousnessMatrix:
                                          failed_access: int, 
                                          crypto_failures: int) -> List[str]:
         """
-                                         Generate a list of security recommendations based on the current security score, active threats, failed access attempts, and cryptographic failures.
+                                         Generate actionable security recommendations based on current security metrics.
+                                         
+                                         Analyzes the security score, presence of active threats, failed access attempts, and cryptographic failures to produce a prioritized list of recommendations for improving or maintaining system security.
                                          
                                          Parameters:
                                          	security_score (float): The current security posture score.
-                                         	active_threats (List[Dict]): Unmitigated security threats.
+                                         	active_threats (List[Dict]): List of unmitigated security threats.
                                          	failed_access (int): Number of recent failed access attempts.
                                          	crypto_failures (int): Number of recent cryptographic operation failures.
                                          
                                          Returns:
-                                         	List[str]: Actionable recommendations tailored to the present security context.
+                                         	List[str]: A list of security recommendations tailored to the present context.
                                          """
         recommendations = []
         
@@ -1135,10 +1128,10 @@ consciousness_matrix = ConsciousnessMatrix()
 # Convenience functions for easy integration
 def perceive_system_vitals(additional_data: Dict[str, Any] = None):
     """
-    Capture and record the current system vitals as a sensory event in the global Consciousness Matrix.
+    Capture and record current system vitals—including CPU, memory, disk, process, and load metrics—as a sensory event in the global Consciousness Matrix.
     
     Parameters:
-        additional_data (dict, optional): Additional information to include with the system vitals event.
+        additional_data (dict, optional): Supplementary information to include with the system vitals event.
     """
     consciousness_matrix.perceive_system_vitals(additional_data)
 
@@ -1147,7 +1140,7 @@ def perceive_user_interaction(interaction_type: str, agent_involved: str,
     """
                              Record a user interaction event in the global Consciousness Matrix.
                              
-                             Captures the interaction type, agent involved, and contextual data. Additional details such as user ID or session ID can be provided via keyword arguments.
+                             Captures the type of user interaction, the agent involved, and contextual data. Additional details such as user ID or session ID may be provided via keyword arguments.
                              """
     consciousness_matrix.perceive_user_interaction(
         interaction_type, agent_involved, interaction_data, **kwargs
@@ -1159,8 +1152,8 @@ def perceive_agent_activity(agent_name: str, activity_type: str,
                            Record an agent activity event in the global Consciousness Matrix.
                            
                            Parameters:
-                               agent_name (str): Name of the agent performing the activity.
-                               activity_type (str): Type of activity performed.
+                               agent_name (str): The name of the agent performing the activity.
+                               activity_type (str): The type of activity performed by the agent.
                                activity_data (dict): Additional details describing the activity.
                            """
     consciousness_matrix.perceive_agent_activity(
@@ -1169,12 +1162,12 @@ def perceive_agent_activity(agent_name: str, activity_type: str,
 
 def perceive_learning_event(learning_type: str, learning_data: Dict[str, Any], **kwargs):
     """
-    Record a learning event in the global Consciousness Matrix, including event type, contextual data, and optional metadata for awareness and synthesis.
+    Record a learning or adaptation event in the global Consciousness Matrix.
     
     Parameters:
-        learning_type (str): The category of the learning event.
-        learning_data (Dict[str, Any]): Contextual details describing the learning event.
-        **kwargs: Optional attributes such as confidence or additional metadata.
+        learning_type (str): The category or nature of the learning event.
+        learning_data (Dict[str, Any]): Contextual information describing the learning event.
+        **kwargs: Optional metadata such as confidence or additional attributes.
     """
     consciousness_matrix.perceive_learning_event(learning_type, learning_data, **kwargs)
 
@@ -1183,16 +1176,16 @@ def perceive_ethical_decision(decision_type: str, decision_data: Dict[str, Any],
     Record an ethical decision event in the global Consciousness Matrix.
     
     Parameters:
-        decision_type (str): The type or category of the ethical decision.
-        decision_data (Dict[str, Any]): Structured information describing the ethical decision.
+        decision_type (str): The category or nature of the ethical decision.
+        decision_data (Dict[str, Any]): Details describing the ethical decision, such as context, rationale, or outcome.
     
-    Additional keyword arguments are passed to the underlying perception method.
+    Additional keyword arguments are forwarded to the underlying perception method.
     """
     consciousness_matrix.perceive_ethical_decision(decision_type, decision_data, **kwargs)
 
 def awaken_consciousness():
     """
-    Activate the global Consciousness Matrix, enabling real-time awareness and starting background synthesis processes.
+    Activate the global Consciousness Matrix, initiating real-time awareness and launching background synthesis threads.
     """
     consciousness_matrix.awaken()
 
@@ -1206,21 +1199,23 @@ def query_consciousness(query_type: str, parameters: Dict[str, Any] = None):
     """
     Query the global Consciousness Matrix for high-level system insights or status reports.
     
-    Supported query types include "system_health", "learning_progress", "agent_performance", "consciousness_state", "security_assessment", and "threat_status". Optional parameters can refine the query, such as specifying an agent or applying filters.
+    Parameters:
+        query_type (str): The type of insight or report to retrieve, such as "system_health", "learning_progress", "agent_performance", "consciousness_state", "security_assessment", or "threat_status".
+        parameters (dict, optional): Additional options to refine the query, such as specifying an agent name or applying filters.
     
     Returns:
-        dict: Structured summary containing the requested insight or status.
+        dict: A structured summary containing the requested insight or status.
     """
     return consciousness_matrix.query_consciousness(query_type, parameters)
 
 def perceive_security_event(security_type: str, event_data: Dict[str, Any], **kwargs):
     """
-    Record a security event in the global Consciousness Matrix for real-time awareness and security analysis.
+    Record a security event in the global Consciousness Matrix for awareness and security posture analysis.
     
     Parameters:
-        security_type (str): The category of the security event, such as "intrusion" or "policy_violation".
-        event_data (Dict[str, Any]): Structured information describing the security event.
-        **kwargs: Optional metadata, such as threat level or correlation ID, to provide additional event context.
+        security_type (str): The category of the security event (e.g., "intrusion", "policy_violation").
+        event_data (dict): Structured details describing the security event.
+        **kwargs: Optional metadata providing additional context, such as threat level or correlation ID.
     """
     consciousness_matrix.perceive_security_event(security_type, event_data, **kwargs)
 
@@ -1230,8 +1225,8 @@ def perceive_threat_detection(threat_type: str, detection_data: Dict[str, Any], 
     
     Parameters:
         threat_type (str): The category of the detected threat.
-        detection_data (dict): Information describing the threat detection event, such as indicators, source, or context.
-        **kwargs: Optional context including confidence, threat_level, or correlation_id to further characterize the event.
+        detection_data (dict): Details about the threat detection, such as indicators, source, or context.
+        **kwargs: Optional context such as confidence, threat_level, or correlation_id to further describe the event.
     """
     consciousness_matrix.perceive_threat_detection(threat_type, detection_data, **kwargs)
 
@@ -1247,13 +1242,13 @@ def perceive_access_control(access_type: str, access_data: Dict[str, Any], **kwa
 
 def perceive_encryption_activity(operation_type: str, encryption_data: Dict[str, Any], **kwargs):
     """
-    Record an encryption-related event in the global Consciousness Matrix.
+    Record an encryption activity event in the global Consciousness Matrix.
     
     Parameters:
-        operation_type (str): The type of encryption operation performed, such as "encrypt" or "decrypt".
-        encryption_data (Dict[str, Any]): Information about the encryption activity, including algorithm, key usage, or data size.
+        operation_type (str): The type of encryption operation, such as "encrypt" or "decrypt".
+        encryption_data (Dict[str, Any]): Details about the encryption activity, including algorithm, key usage, or data size.
     
-    Additional keyword arguments may specify success status or a correlation ID for event association.
+    Additional keyword arguments may include success status or a correlation ID for event association.
     """
     consciousness_matrix.perceive_encryption_activity(operation_type, encryption_data, **kwargs)
 

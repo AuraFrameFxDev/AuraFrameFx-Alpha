@@ -53,15 +53,13 @@ val LocalMoodGlow = compositionLocalOf { Color.Transparent }
 val LocalMoodState = compositionLocalOf { Emotion.NEUTRAL }
 
 /**
- * Applies the AuraFrameFX theme to the provided composable content.
+ * Applies the AuraFrameFX theme and mood-based dynamic theming to the given composable content.
  *
- * Chooses a color scheme (dark, light, or dynamic based on device support and parameters), 
- * updates the status bar color and icon appearance to match the theme, supplies the app's typography,
- * and integrates Aura's mood-based dynamic theming system.
+ * Selects a color scheme (dark, light, or dynamic based on device support and parameters), updates the status bar appearance, and provides mood-driven glow and emotion state throughout the composition. Wraps content in MaterialTheme with app typography.
  *
- * @param darkTheme Whether to use the dark theme. Defaults to the system setting.
- * @param dynamicColor Whether to use dynamic color schemes on supported devices (Android 12+). Defaults to true.
- * @param moodViewModel The ViewModel managing Aura's mood state. Automatically injected.
+ * @param darkTheme If true, uses the dark theme; otherwise, uses the light theme. Defaults to the system setting.
+ * @param dynamicColor If true, enables dynamic color schemes on supported devices (Android 12+). Defaults to true.
+ * @param moodViewModel The ViewModel managing Aura's mood state.
  * @param content The composable content to which the theme is applied.
  */
 @Composable
@@ -107,7 +105,14 @@ fun AuraFrameFXTheme(
 }
 
 /**
- * Get the mood-appropriate glow color based on Aura's current emotion
+ * Returns a glow color corresponding to the given emotion and intensity, blending mood-specific hues with the current theme.
+ *
+ * The resulting color's transparency is scaled by intensity and clamped to provide a visually appropriate glow effect.
+ *
+ * @param emotion The current emotion to represent.
+ * @param intensity The strength of the emotion, affecting the glow's opacity.
+ * @param baseColorScheme The active color scheme, used as a fallback.
+ * @return The computed glow color for the specified emotion and intensity.
  */
 private fun getMoodGlowColor(
     emotion: Emotion,
