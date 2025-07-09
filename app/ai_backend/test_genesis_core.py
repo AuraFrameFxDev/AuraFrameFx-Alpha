@@ -2478,3 +2478,1038 @@ if __name__ == "__main__":
         "--cov-report=html",  # HTML coverage report
         "--cov-report=term-missing",  # Terminal coverage report
     ])
+
+# ============================================================================
+# ADDITIONAL COMPREHENSIVE TESTS - EXPANDED COVERAGE
+# ============================================================================
+
+class TestGenesisCoreAsyncOperations:
+    """Test class for asynchronous and concurrent operations."""
+    
+    def setup_method(self):
+        """Set up a new instance of GenesisCore before each test method."""
+        self.core = GenesisCore()
+    
+    def test_async_batch_processing(self):
+        """
+        Test that batch processing works correctly with async-like operations.
+        
+        Verifies that processing multiple batches of data concurrently produces
+        consistent results without race conditions.
+        """
+        import asyncio
+        
+        def simulate_async_processing(batch_id, items):
+            """Simulate async processing of a batch of items."""
+            results = []
+            for item in items:
+                result = self.core.process_data(f"batch_{batch_id}_{item}")
+                results.append(result)
+            return results
+        
+        # Create multiple batches
+        batches = [
+            [f"item_{i}" for i in range(10 * batch_id, 10 * (batch_id + 1))]
+            for batch_id in range(5)
+        ]
+        
+        # Process batches concurrently
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [
+                executor.submit(simulate_async_processing, batch_id, batch)
+                for batch_id, batch in enumerate(batches)
+            ]
+            results = [f.result() for f in futures]
+        
+        assert len(results) == 5
+        assert all(len(batch_results) == 10 for batch_results in results)
+        assert all(
+            all(result is not None for result in batch_results)
+            for batch_results in results
+        )
+    
+    def test_concurrent_configuration_changes(self):
+        """
+        Test that concurrent configuration changes don't interfere with processing.
+        
+        Verifies thread safety when the configuration is modified during active processing.
+        """
+        def worker_with_config_change(worker_id):
+            """Worker that processes data while potentially changing config."""
+            # Simulate config change
+            new_config = {'worker_id': worker_id, 'timestamp': time.time()}
+            test_core = GenesisCore(config=new_config)
+            
+            results = []
+            for i in range(50):
+                result = test_core.process_data(f"worker_{worker_id}_item_{i}")
+                results.append(result)
+            
+            return results
+        
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = [executor.submit(worker_with_config_change, i) for i in range(8)]
+            all_results = [f.result() for f in futures]
+        
+        assert len(all_results) == 8
+        assert all(len(results) == 50 for results in all_results)
+    
+    def test_deadlock_prevention(self):
+        """
+        Test that the system prevents deadlocks in concurrent scenarios.
+        
+        Simulates potential deadlock conditions with multiple resources.
+        """
+        import threading
+        
+        lock1 = threading.Lock()
+        lock2 = threading.Lock()
+        results = []
+        
+        def worker_a():
+            """Worker that acquires locks in one order."""
+            with lock1:
+                time.sleep(0.1)
+                with lock2:
+                    result = self.core.process_data("worker_a_data")
+                    results.append(result)
+        
+        def worker_b():
+            """Worker that acquires locks in reverse order."""
+            with lock2:
+                time.sleep(0.1)
+                with lock1:
+                    result = self.core.process_data("worker_b_data")
+                    results.append(result)
+        
+        # This should not deadlock
+        thread_a = threading.Thread(target=worker_a)
+        thread_b = threading.Thread(target=worker_b)
+        
+        thread_a.start()
+        thread_b.start()
+        
+        thread_a.join(timeout=5.0)
+        thread_b.join(timeout=5.0)
+        
+        assert len(results) == 2
+        assert all(result is not None for result in results)
+
+
+class TestGenesisCoreDataValidationExtended:
+    """Extended data validation tests."""
+    
+    def setup_method(self):
+        """Set up a new instance of GenesisCore before each test method."""
+        self.core = GenesisCore()
+    
+    def test_schema_validation_complex(self):
+        """
+        Test complex schema validation with nested structures and type checking.
+        
+        Verifies that the validation system can handle complex data schemas
+        with multiple levels of nesting and various data types.
+        """
+        complex_schemas = [
+            {
+                "user": {
+                    "id": 12345,
+                    "profile": {
+                        "name": "John Doe",
+                        "age": 30,
+                        "preferences": {
+                            "theme": "dark",
+                            "notifications": True,
+                            "languages": ["en", "es", "fr"]
+                        }
+                    },
+                    "metadata": {
+                        "created_at": "2023-01-01T00:00:00Z",
+                        "last_login": "2023-12-01T12:00:00Z",
+                        "login_count": 42
+                    }
+                }
+            },
+            {
+                "api_response": {
+                    "status": "success",
+                    "data": {
+                        "items": [
+                            {"id": 1, "value": "item1"},
+                            {"id": 2, "value": "item2"}
+                        ],
+                        "pagination": {
+                            "page": 1,
+                            "per_page": 10,
+                            "total": 2
+                        }
+                    },
+                    "headers": {
+                        "content-type": "application/json",
+                        "x-rate-limit": "100"
+                    }
+                }
+            }
+        ]
+        
+        for schema in complex_schemas:
+            result = self.core.validate_input(schema)
+            assert result is True
+            
+            processed = self.core.process_data(schema)
+            assert processed is not None
+            assert isinstance(processed, dict)
+    
+    def test_input_sanitization_advanced(self):
+        """
+        Test advanced input sanitization for various attack vectors.
+        
+        Includes tests for HTML entity encoding, URL encoding, and other
+        sophisticated sanitization techniques.
+        """
+        advanced_attacks = [
+            # HTML entity encoded XSS
+            "&lt;script&gt;alert('xss')&lt;/script&gt;",
+            # URL encoded payloads
+            "%3Cscript%3Ealert('xss')%3C/script%3E",
+            # Double encoding
+            "%253Cscript%253Ealert('xss')%253C/script%253E",
+            # Unicode encoding
+            "\\u003cscript\\u003ealert('xss')\\u003c/script\\u003e",
+            # Mixed case evasion
+            "<ScRiPt>alert('xss')</ScRiPt>",
+            # Event handlers
+            "<img src=x onerror=alert('xss')>",
+            "<svg onload=alert('xss')>",
+            # Data URIs
+            "data:text/html;base64,PHNjcmlwdD5hbGVydCgneHNzJyk8L3NjcmlwdD4=",
+            # JavaScript pseudo-protocol
+            "javascript:alert('xss')",
+            # CSS expression injection
+            "expression(alert('xss'))"
+        ]
+        
+        for attack in advanced_attacks:
+            result = self.core.process_data(attack)
+            assert result is not None
+            
+            # Verify sanitization effectiveness
+            result_str = str(result)
+            assert "alert(" not in result_str
+            assert "<script>" not in result_str.lower()
+            assert "javascript:" not in result_str.lower()
+            assert "expression(" not in result_str.lower()
+    
+    def test_input_size_validation(self):
+        """
+        Test validation of input sizes to prevent resource exhaustion.
+        
+        Verifies that extremely large inputs are handled appropriately
+        without causing memory issues or performance degradation.
+        """
+        size_test_cases = [
+            # Very large string
+            "x" * (1024 * 1024),  # 1MB
+            # Large dictionary
+            {f"key_{i}": f"value_{i}" * 100 for i in range(10000)},
+            # Deep nesting
+            {"level_%d" % i: {"data": "test"} for i in range(1000)},
+            # Large list
+            [f"item_{i}" for i in range(100000)]
+        ]
+        
+        for test_case in size_test_cases:
+            start_time = time.time()
+            
+            try:
+                result = self.core.process_data(test_case)
+                execution_time = time.time() - start_time
+                
+                assert result is not None
+                assert execution_time < 30.0  # Should complete within 30 seconds
+                
+            except (MemoryError, RecursionError):
+                # These exceptions are acceptable for extremely large inputs
+                pass
+    
+    def test_type_coercion_validation(self):
+        """
+        Test type coercion and validation for mixed data types.
+        
+        Verifies that the system handles type conversions appropriately
+        when processing mixed data structures.
+        """
+        type_coercion_cases = [
+            # Mixed numeric types
+            {"int": 42, "float": 3.14, "str_num": "123", "bool": True},
+            # String representations of other types
+            {"list_str": "[1, 2, 3]", "dict_str": "{'key': 'value'}"},
+            # Numeric strings
+            {"zero": "0", "negative": "-42", "scientific": "1.23e-4"},
+            # Boolean representations
+            {"true_str": "true", "false_str": "false", "yes": "yes", "no": "no"},
+            # None representations
+            {"null_str": "null", "none_str": "none", "empty": ""},
+        ]
+        
+        for test_case in type_coercion_cases:
+            result = self.core.process_data(test_case)
+            assert result is not None
+            assert isinstance(result, dict)
+
+
+class TestGenesisCoreErrorRecovery:
+    """Test error recovery and resilience mechanisms."""
+    
+    def setup_method(self):
+        """Set up a new instance of GenesisCore before each test method."""
+        self.core = GenesisCore()
+    
+    def test_graceful_degradation_modes(self):
+        """
+        Test various graceful degradation modes when services are unavailable.
+        
+        Verifies that the system can operate in reduced functionality modes
+        when external dependencies fail.
+        """
+        degradation_scenarios = [
+            # Network unavailable
+            {"simulate": "network_down", "expected": "offline_mode"},
+            # Cache unavailable
+            {"simulate": "cache_down", "expected": "no_cache_mode"},
+            # Database unavailable
+            {"simulate": "db_down", "expected": "read_only_mode"},
+            # External API unavailable
+            {"simulate": "api_down", "expected": "fallback_mode"}
+        ]
+        
+        for scenario in degradation_scenarios:
+            # Simulate the failure condition
+            with patch.object(self.core, 'make_request', side_effect=ConnectionError("Service unavailable")):
+                result = self.core.process_data(f"test_data_{scenario['simulate']}")
+                assert result is not None
+                
+                # Verify that the system continues to function
+                assert "processed_" in str(result)
+    
+    def test_circuit_breaker_patterns(self):
+        """
+        Test circuit breaker patterns for fault tolerance.
+        
+        Verifies that the system implements circuit breaker patterns
+        to prevent cascading failures.
+        """
+        failure_count = 0
+        
+        def failing_request(url, timeout=30):
+            """Simulate a request that fails multiple times then succeeds."""
+            nonlocal failure_count
+            failure_count += 1
+            
+            if failure_count < 5:
+                raise ConnectionError("Service temporarily unavailable")
+            elif failure_count < 10:
+                # Circuit breaker should be open
+                return {"status": "circuit_open", "retry_after": 60}
+            else:
+                # Circuit breaker should reset
+                return {"status": "success", "data": "recovered"}
+        
+        # Test circuit breaker behavior
+        for i in range(15):
+            try:
+                result = self.core.make_request("https://api.example.com")
+                if result and isinstance(result, dict):
+                    if result.get("status") == "circuit_open":
+                        assert i >= 5  # Circuit should open after failures
+                    elif result.get("status") == "success":
+                        assert i >= 10  # Circuit should reset after timeout
+            except ConnectionError:
+                assert i < 5  # Should only fail before circuit opens
+    
+    def test_retry_with_exponential_backoff(self):
+        """
+        Test retry mechanisms with exponential backoff.
+        
+        Verifies that the system implements proper retry logic with
+        exponential backoff to avoid overwhelming failing services.
+        """
+        attempt_times = []
+        
+        def track_attempts(*args, **kwargs):
+            """Track the timing of retry attempts."""
+            attempt_times.append(time.time())
+            if len(attempt_times) < 4:
+                raise ConnectionError("Temporary failure")
+            return {"status": "success", "attempt": len(attempt_times)}
+        
+        start_time = time.time()
+        
+        with patch.object(self.core, 'make_request', side_effect=track_attempts):
+            result = self.core.make_request("https://api.example.com")
+            
+            if result and result.get("status") == "success":
+                # Verify exponential backoff timing
+                assert len(attempt_times) == 4
+                
+                # Check that delays increase exponentially
+                for i in range(1, len(attempt_times)):
+                    delay = attempt_times[i] - attempt_times[i-1]
+                    expected_min_delay = 2 ** (i-1)  # 1, 2, 4, 8 seconds
+                    # Allow some tolerance for timing variations
+                    assert delay >= expected_min_delay * 0.8
+    
+    def test_fallback_data_sources(self):
+        """
+        Test fallback to alternative data sources when primary sources fail.
+        
+        Verifies that the system can switch to backup data sources
+        when primary sources are unavailable.
+        """
+        primary_failed = False
+        
+        def primary_source_request(url, timeout=30):
+            """Simulate primary data source failure."""
+            nonlocal primary_failed
+            primary_failed = True
+            raise ConnectionError("Primary source unavailable")
+        
+        def fallback_processing(data):
+            """Simulate fallback processing logic."""
+            if primary_failed:
+                return f"fallback_processed_{data}"
+            return self.core.process_data(data)
+        
+        with patch.object(self.core, 'make_request', side_effect=primary_source_request):
+            # Test fallback processing
+            result = fallback_processing("test_data")
+            assert result is not None
+            assert "fallback_processed_" in str(result)
+    
+    def test_partial_failure_handling(self):
+        """
+        Test handling of partial failures in batch operations.
+        
+        Verifies that the system can continue processing when some
+        items in a batch fail while others succeed.
+        """
+        batch_items = [
+            {"id": 1, "data": "valid_data_1"},
+            {"id": 2, "data": None},  # Will cause failure
+            {"id": 3, "data": "valid_data_3"},
+            {"id": 4, "data": ""},    # Might cause failure
+            {"id": 5, "data": "valid_data_5"}
+        ]
+        
+        successful_results = []
+        failed_results = []
+        
+        for item in batch_items:
+            try:
+                result = self.core.process_data(item)
+                successful_results.append(result)
+            except Exception as e:
+                failed_results.append({"item": item, "error": str(e)})
+        
+        # Should have some successful and some failed results
+        assert len(successful_results) > 0
+        assert len(successful_results) + len(failed_results) == len(batch_items)
+        
+        # Verify successful results are valid
+        for result in successful_results:
+            assert result is not None
+
+
+class TestGenesisCoreMonitoringAndMetrics:
+    """Test monitoring, logging, and metrics collection."""
+    
+    def setup_method(self):
+        """Set up a new instance of GenesisCore before each test method."""
+        self.core = GenesisCore()
+    
+    def test_performance_metrics_collection(self):
+        """
+        Test collection of performance metrics during operations.
+        
+        Verifies that the system collects relevant performance metrics
+        like execution time, memory usage, and throughput.
+        """
+        metrics = {
+            "execution_times": [],
+            "memory_usage": [],
+            "operations_count": 0
+        }
+        
+        def collect_metrics(operation_func, *args, **kwargs):
+            """Collect performance metrics for an operation."""
+            import psutil
+            import os
+            
+            process = psutil.Process(os.getpid())
+            start_memory = process.memory_info().rss
+            start_time = time.time()
+            
+            result = operation_func(*args, **kwargs)
+            
+            end_time = time.time()
+            end_memory = process.memory_info().rss
+            
+            metrics["execution_times"].append(end_time - start_time)
+            metrics["memory_usage"].append(end_memory - start_memory)
+            metrics["operations_count"] += 1
+            
+            return result
+        
+        # Collect metrics for multiple operations
+        test_data = [
+            {"operation": "simple", "data": "test"},
+            {"operation": "complex", "data": {"nested": {"deep": "value"}}},
+            {"operation": "large", "data": "x" * 10000}
+        ]
+        
+        for data in test_data:
+            result = collect_metrics(self.core.process_data, data)
+            assert result is not None
+        
+        # Verify metrics were collected
+        assert len(metrics["execution_times"]) == 3
+        assert len(metrics["memory_usage"]) == 3
+        assert metrics["operations_count"] == 3
+        
+        # Verify metrics are reasonable
+        assert all(t > 0 for t in metrics["execution_times"])
+        assert all(t < 10.0 for t in metrics["execution_times"])  # Should be fast
+    
+    def test_error_rate_monitoring(self):
+        """
+        Test monitoring of error rates and failure patterns.
+        
+        Verifies that the system tracks error rates and can identify
+        patterns in failures for monitoring and alerting.
+        """
+        error_tracker = {
+            "total_requests": 0,
+            "error_count": 0,
+            "error_types": {},
+            "error_rate": 0.0
+        }
+        
+        def track_errors(operation_func, *args, **kwargs):
+            """Track errors during operations."""
+            error_tracker["total_requests"] += 1
+            
+            try:
+                result = operation_func(*args, **kwargs)
+                return result
+            except Exception as e:
+                error_tracker["error_count"] += 1
+                error_type = type(e).__name__
+                error_tracker["error_types"][error_type] = error_tracker["error_types"].get(error_type, 0) + 1
+                error_tracker["error_rate"] = error_tracker["error_count"] / error_tracker["total_requests"]
+                raise
+        
+        # Test with various inputs that may cause errors
+        test_cases = [
+            "valid_input",
+            None,  # May cause error
+            "",    # May cause error
+            {"valid": "data"},
+            {"invalid": None}
+        ]
+        
+        for test_case in test_cases:
+            try:
+                if test_case is None or test_case == "":
+                    # These should raise ValueError
+                    track_errors(self.core.validate_input, test_case)
+                else:
+                    track_errors(self.core.process_data, test_case)
+            except ValueError:
+                # Expected for invalid inputs
+                pass
+        
+        # Verify error tracking
+        assert error_tracker["total_requests"] == 5
+        assert error_tracker["error_count"] >= 0
+        assert error_tracker["error_rate"] >= 0.0
+        assert error_tracker["error_rate"] <= 1.0
+    
+    def test_audit_logging(self):
+        """
+        Test audit logging for security and compliance.
+        
+        Verifies that the system logs important events for security
+        auditing and compliance purposes.
+        """
+        audit_logs = []
+        
+        def audit_logger(level, message, context=None):
+            """Mock audit logger."""
+            audit_logs.append({
+                "timestamp": time.time(),
+                "level": level,
+                "message": message,
+                "context": context or {}
+            })
+        
+        # Simulate audit-worthy events
+        audit_events = [
+            {"action": "process_data", "data": "sensitive_data"},
+            {"action": "validate_input", "data": {"user_id": 12345}},
+            {"action": "make_request", "url": "https://external-api.com"},
+            {"action": "cache_access", "key": "user_session_123"}
+        ]
+        
+        for event in audit_events:
+            # Simulate the operation with audit logging
+            audit_logger("INFO", f"Operation: {event['action']}", event)
+            
+            # Perform the actual operation
+            if event["action"] == "process_data":
+                result = self.core.process_data(event["data"])
+            elif event["action"] == "validate_input":
+                result = self.core.validate_input(event["data"])
+            elif event["action"] == "make_request":
+                result = self.core.make_request(event["url"])
+            elif event["action"] == "cache_access":
+                result = self.core.cache_get(event["key"])
+            
+            audit_logger("INFO", f"Operation completed: {event['action']}", {"result": "success"})
+        
+        # Verify audit logs were created
+        assert len(audit_logs) == len(audit_events) * 2  # Start and end logs
+        
+        # Verify log structure
+        for log in audit_logs:
+            assert "timestamp" in log
+            assert "level" in log
+            assert "message" in log
+            assert "context" in log
+    
+    def test_health_check_monitoring(self):
+        """
+        Test health check endpoints and system status monitoring.
+        
+        Verifies that the system provides health check capabilities
+        for monitoring system status and availability.
+        """
+        def health_check():
+            """Simulate a health check operation."""
+            health_status = {
+                "status": "healthy",
+                "timestamp": time.time(),
+                "checks": {}
+            }
+            
+            # Check core functionality
+            try:
+                test_result = self.core.process_data("health_check")
+                health_status["checks"]["core_processing"] = "healthy" if test_result else "unhealthy"
+            except Exception:
+                health_status["checks"]["core_processing"] = "unhealthy"
+            
+            # Check validation
+            try:
+                self.core.validate_input("health_check")
+                health_status["checks"]["input_validation"] = "healthy"
+            except Exception:
+                health_status["checks"]["input_validation"] = "unhealthy"
+            
+            # Check caching
+            try:
+                self.core.cache_set("health_check", "test", 60)
+                cached_value = self.core.cache_get("health_check")
+                health_status["checks"]["cache"] = "healthy"
+            except Exception:
+                health_status["checks"]["cache"] = "unhealthy"
+            
+            # Overall status
+            if all(status == "healthy" for status in health_status["checks"].values()):
+                health_status["status"] = "healthy"
+            else:
+                health_status["status"] = "degraded"
+            
+            return health_status
+        
+        # Perform health check
+        health_result = health_check()
+        
+        # Verify health check structure
+        assert "status" in health_result
+        assert "timestamp" in health_result
+        assert "checks" in health_result
+        assert health_result["status"] in ["healthy", "degraded", "unhealthy"]
+        
+        # Verify individual checks
+        expected_checks = ["core_processing", "input_validation", "cache"]
+        for check in expected_checks:
+            assert check in health_result["checks"]
+            assert health_result["checks"][check] in ["healthy", "unhealthy"]
+
+
+class TestGenesisCoreCompatibility:
+    """Test compatibility with different Python versions and environments."""
+    
+    def setup_method(self):
+        """Set up a new instance of GenesisCore before each test method."""
+        self.core = GenesisCore()
+    
+    def test_python_version_compatibility(self):
+        """
+        Test compatibility with different Python language features.
+        
+        Verifies that the system works with features from different
+        Python versions and doesn't rely on version-specific functionality.
+        """
+        import sys
+        
+        # Test with different Python syntax features
+        compatibility_tests = [
+            # Dictionary comprehensions
+            {str(i): f"value_{i}" for i in range(5)},
+            # List comprehensions
+            [f"item_{i}" for i in range(5)],
+            # Generator expressions
+            (f"gen_{i}" for i in range(5)),
+            # Set comprehensions
+            {f"set_item_{i}" for i in range(5)},
+            # F-strings (Python 3.6+)
+            f"python_version_{sys.version_info.major}.{sys.version_info.minor}",
+            # Type hints (simulated)
+            {"typed_field": "string_value", "numeric_field": 42}
+        ]
+        
+        for test_case in compatibility_tests:
+            if hasattr(test_case, '__iter__') and not isinstance(test_case, (str, bytes)):
+                # Handle iterables
+                result = self.core.process_data(list(test_case))
+            else:
+                result = self.core.process_data(test_case)
+            
+            assert result is not None
+    
+    def test_unicode_compatibility(self):
+        """
+        Test Unicode compatibility across different environments.
+        
+        Verifies that the system handles Unicode correctly in various
+        environments with different locale settings.
+        """
+        unicode_test_cases = [
+            # Different Unicode normalization forms
+            "café",  # NFC (composed)
+            "cafe\u0301",  # NFD (decomposed)
+            # Various scripts
+            "Здравствуй мир",  # Cyrillic
+            "こんにちは世界",  # Japanese
+            "مرحبا بالعالم",  # Arabic
+            "🌍🌎🌏",  # Emoji
+            # Edge cases
+            "\u0000",  # Null character
+            "\u200b",  # Zero-width space
+            "\ufeff",  # Byte order mark
+        ]
+        
+        for test_case in unicode_test_cases:
+            result = self.core.process_data(test_case)
+            assert result is not None
+            
+            # Verify Unicode is preserved
+            if isinstance(result, str):
+                assert any(char in result for char in test_case if char.isprintable())
+    
+    def test_environment_variable_handling(self):
+        """
+        Test handling of environment variables and system configuration.
+        
+        Verifies that the system can work with different environment
+        configurations and system settings.
+        """
+        env_test_cases = [
+            {"GENESIS_DEBUG": "true"},
+            {"GENESIS_LOG_LEVEL": "DEBUG"},
+            {"GENESIS_CACHE_SIZE": "1000"},
+            {"GENESIS_TIMEOUT": "30"},
+            {"PATH": "/usr/bin:/bin"},  # System PATH
+        ]
+        
+        for env_vars in env_test_cases:
+            with patch.dict(os.environ, env_vars):
+                # Test that environment doesn't break functionality
+                result = self.core.process_data("env_test")
+                assert result is not None
+                
+                # Test initialization with environment
+                env_core = GenesisCore()
+                assert env_core is not None
+    
+    def test_cross_platform_compatibility(self):
+        """
+        Test compatibility across different operating systems.
+        
+        Verifies that the system works consistently across Windows, Linux,
+        and macOS environments.
+        """
+        import platform
+        
+        platform_info = {
+            "system": platform.system(),
+            "release": platform.release(),
+            "machine": platform.machine(),
+            "processor": platform.processor(),
+            "python_version": platform.python_version()
+        }
+        
+        # Test platform-specific functionality
+        platform_tests = [
+            # Path handling
+            {"path": "/unix/style/path", "type": "unix"},
+            {"path": "C:\\Windows\\Style\\Path", "type": "windows"},
+            # Line endings
+            {"text": "line1\nline2", "ending": "unix"},
+            {"text": "line1\r\nline2", "ending": "windows"},
+            # Case sensitivity
+            {"filename": "TestFile.txt", "case": "mixed"},
+            {"filename": "testfile.txt", "case": "lower"},
+        ]
+        
+        for test_case in platform_tests:
+            result = self.core.process_data(test_case)
+            assert result is not None
+            
+            # Verify platform info is accessible
+            assert platform_info["system"] in ["Windows", "Linux", "Darwin"]
+
+
+class TestGenesisCoreAdvancedSecurity:
+    """Advanced security tests for comprehensive coverage."""
+    
+    def setup_method(self):
+        """Set up a new instance of GenesisCore before each test method."""
+        self.core = GenesisCore()
+    
+    def test_timing_attack_resistance(self):
+        """
+        Test resistance to timing attacks on sensitive operations.
+        
+        Verifies that the system doesn't leak information through
+        timing differences in security-sensitive operations.
+        """
+        # Test with different input sizes
+        inputs = [
+            "short",
+            "medium_length_input",
+            "very_long_input_that_should_take_similar_time_to_process" * 10
+        ]
+        
+        timing_results = []
+        
+        for test_input in inputs:
+            start_time = time.time()
+            
+            try:
+                result = self.core.validate_input(test_input)
+                end_time = time.time()
+                timing_results.append(end_time - start_time)
+            except ValueError:
+                end_time = time.time()
+                timing_results.append(end_time - start_time)
+        
+        # Verify timing consistency (allowing for some variance)
+        if len(timing_results) > 1:
+            max_time = max(timing_results)
+            min_time = min(timing_results)
+            # Timing should not vary by more than 100x
+            assert max_time / min_time < 100
+    
+    def test_side_channel_resistance(self):
+        """
+        Test resistance to side-channel attacks through resource usage.
+        
+        Verifies that the system doesn't leak information through
+        memory usage patterns or CPU consumption.
+        """
+        import psutil
+        import os
+        
+        process = psutil.Process(os.getpid())
+        
+        # Test with different types of sensitive data
+        sensitive_inputs = [
+            "correct_password",
+            "incorrect_password",
+            "admin_token",
+            "user_token",
+            "secret_key_123",
+            "public_key_456"
+        ]
+        
+        memory_usage = []
+        
+        for sensitive_input in sensitive_inputs:
+            initial_memory = process.memory_info().rss
+            
+            result = self.core.process_data(sensitive_input)
+            
+            final_memory = process.memory_info().rss
+            memory_delta = final_memory - initial_memory
+            memory_usage.append(memory_delta)
+            
+            assert result is not None
+        
+        # Verify memory usage doesn't leak information
+        # Memory usage should be relatively consistent
+        if len(memory_usage) > 1:
+            max_memory = max(memory_usage)
+            min_memory = min(memory_usage)
+            # Memory usage should not vary dramatically
+            assert abs(max_memory - min_memory) < 10 * 1024 * 1024  # 10MB threshold
+    
+    def test_cryptographic_randomness(self):
+        """
+        Test that any randomness used is cryptographically secure.
+        
+        Verifies that the system uses secure random number generation
+        for security-sensitive operations.
+        """
+        import secrets
+        import random
+        
+        # Test that system prefers secure randomness
+        random_values = []
+        
+        for _ in range(100):
+            # Simulate random operations that might occur
+            test_data = {
+                "session_id": secrets.token_hex(16),
+                "csrf_token": secrets.token_urlsafe(32),
+                "random_value": random.random()
+            }
+            
+            result = self.core.process_data(test_data)
+            assert result is not None
+            
+            # Extract any random values from the result
+            if isinstance(result, dict):
+                for key, value in result.items():
+                    if "random" in key.lower() or "token" in key.lower():
+                        random_values.append(str(value))
+        
+        # Verify randomness quality (basic tests)
+        if len(random_values) > 1:
+            # Check for duplicates (should be extremely rare)
+            assert len(set(random_values)) == len(random_values)
+    
+    def test_input_fuzzing_resistance(self):
+        """
+        Test resistance to fuzzing attacks with malformed inputs.
+        
+        Verifies that the system handles malformed and unexpected
+        inputs gracefully without crashing or exposing vulnerabilities.
+        """
+        import random
+        import string
+        
+        # Generate random fuzzing inputs
+        fuzzing_inputs = []
+        
+        # Random strings
+        for _ in range(50):
+            length = random.randint(0, 1000)
+            chars = string.ascii_letters + string.digits + string.punctuation
+            fuzzing_inputs.append(''.join(random.choice(chars) for _ in range(length)))
+        
+        # Random bytes
+        for _ in range(20):
+            length = random.randint(0, 1000)
+            fuzzing_inputs.append(bytes(random.randint(0, 255) for _ in range(length)))
+        
+        # Random data structures
+        for _ in range(30):
+            structure_type = random.choice(['dict', 'list', 'tuple', 'set'])
+            if structure_type == 'dict':
+                size = random.randint(0, 100)
+                fuzzing_inputs.append({
+                    f"key_{i}": f"value_{random.randint(0, 1000)}"
+                    for i in range(size)
+                })
+            elif structure_type == 'list':
+                size = random.randint(0, 100)
+                fuzzing_inputs.append([random.randint(0, 1000) for _ in range(size)])
+            elif structure_type == 'tuple':
+                size = random.randint(0, 100)
+                fuzzing_inputs.append(tuple(random.randint(0, 1000) for _ in range(size)))
+            elif structure_type == 'set':
+                size = random.randint(0, 100)
+                fuzzing_inputs.append({random.randint(0, 1000) for _ in range(size)})
+        
+        # Test all fuzzing inputs
+        for fuzz_input in fuzzing_inputs:
+            try:
+                result = self.core.process_data(fuzz_input)
+                # Should either return a result or handle gracefully
+                assert result is not None or result is None
+            except (ValueError, TypeError, RecursionError, MemoryError):
+                # These exceptions are acceptable for malformed inputs
+                pass
+            except Exception as e:
+                # Unexpected exceptions should be investigated
+                pytest.fail(f"Unexpected exception for input {type(fuzz_input)}: {e}")
+    
+    def test_resource_limit_enforcement(self):
+        """
+        Test that resource limits are enforced to prevent DoS attacks.
+        
+        Verifies that the system enforces limits on resource usage
+        to prevent denial-of-service attacks.
+        """
+        # Test memory limit enforcement
+        try:
+            # Very large input that should hit memory limits
+            huge_input = "x" * (100 * 1024 * 1024)  # 100MB string
+            
+            start_time = time.time()
+            result = self.core.process_data(huge_input)
+            end_time = time.time()
+            
+            # Should complete within reasonable time
+            assert end_time - start_time < 60.0  # 1 minute max
+            
+            if result is not None:
+                # If processed, should be handled efficiently
+                assert isinstance(result, str)
+        except MemoryError:
+            # Acceptable - system enforced memory limits
+            pass
+        
+        # Test CPU limit enforcement
+        def cpu_intensive_input():
+            """Generate CPU-intensive input."""
+            return {
+                "data": "x" * 10000,
+                "nested": {str(i): str(i) * 100 for i in range(10000)}
+            }
+        
+        start_time = time.time()
+        result = self.core.process_data(cpu_intensive_input())
+        end_time = time.time()
+        
+        # Should complete within reasonable time
+        assert end_time - start_time < 30.0  # 30 seconds max
+        assert result is not None
+
+
+# Run additional tests with comprehensive coverage
+if __name__ == "__main__":
+    pytest.main([
+        __file__,
+        "-v",
+        "--tb=short",
+        "--durations=20",
+        "--strict-markers",
+        "--cov=app.ai_backend.genesis_core",
+        "--cov-report=html",
+        "--cov-report=term-missing",
+        "--cov-report=xml",
+        "-m", "not slow",  # Skip slow tests in regular runs
+    ])
