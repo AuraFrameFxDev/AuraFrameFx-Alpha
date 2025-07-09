@@ -282,9 +282,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Verifies the application's integrity by retrieving its package signature, computing its SHA-256 hash, and returning integrity details.
+     * Verifies the application's integrity by checking its digital signature and retrieving version and installation details.
      *
-     * Returns an [ApplicationIntegrity] object containing verification status, app version, signature hash, install and update times, and error information if verification fails.
+     * Computes the SHA-256 hash of the app's signature and gathers version, install, and update information. If verification fails, returns an integrity result with error details.
+     *
+     * @return An [ApplicationIntegrity] object containing verification status, app version, signature hash, install and update times, and any error message.
      */
     fun verifyApplicationIntegrity(): ApplicationIntegrity {
         try {
@@ -339,9 +341,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Simulates the detection of security threats by randomly returning predefined threat objects for testing.
+     * Simulates the detection of security threats for testing purposes.
      *
-     * @return A list of simulated `SecurityThreat` instances, randomly included to mimic threat detection during beta testing.
+     * @return A randomly filtered list of simulated `SecurityThreat` objects to mimic threat detection during development or beta testing.
      */
     private fun detectThreats(): List<SecurityThreat> {
         // In a real implementation, this would perform actual threat analysis
@@ -365,11 +367,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Determines the overall threat level by evaluating the highest severity among detected security threats.
+     * Determines the overall threat level by evaluating the highest severity among the provided security threats.
      *
      * Returns `ThreatLevel.LOW` if the list is empty.
      *
-     * @param threats The list of detected security threats.
+     * @param threats The list of detected security threats to evaluate.
      * @return The highest threat level found, or `ThreatLevel.LOW` if no threats are present.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
@@ -388,9 +390,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Generates a random 16-byte (32-character) hexadecimal string for use as a secure identifier.
+     * Generates a secure random 16-byte identifier as a 32-character hexadecimal string.
      *
-     * @return A securely generated 32-character hexadecimal ID.
+     * @return A 32-character hexadecimal string representing the generated secure ID.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -399,7 +401,7 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Asynchronously logs a security event for auditing and monitoring purposes.
+     * Records a security event asynchronously for auditing and monitoring purposes.
      *
      * The event is serialized and written to the debug log. In production, events should be securely persisted.
      *
