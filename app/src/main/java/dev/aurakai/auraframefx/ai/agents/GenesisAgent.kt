@@ -617,10 +617,10 @@ class GenesisAgent @Inject constructor(
     private fun determineOptimalAgent(interaction: EnhancedInteractionData): String = "genesis"
 
     /**
-         * Generates a fallback interaction response from the "genesis" agent with a fixed confidence score and the current timestamp.
+         * Creates a fallback interaction response from the "genesis" agent with the given message, a fixed confidence score of 0.5, and the current timestamp.
          *
-         * @param message The content to include in the fallback response.
-         * @return An InteractionResponse with the specified message, agent set to "genesis", confidence 0.5, and the current timestamp.
+         * @param message The message content for the fallback response.
+         * @return An InteractionResponse containing the message, agent name "genesis", confidence 0.5, and the current timestamp in milliseconds.
          */
     private fun createFallbackResponse(message: String): InteractionResponse =
         InteractionResponse(message, "genesis", 0.5f, Clock.System.now().toEpochMilliseconds().toString())

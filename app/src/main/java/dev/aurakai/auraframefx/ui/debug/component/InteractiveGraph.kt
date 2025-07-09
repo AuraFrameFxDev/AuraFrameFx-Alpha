@@ -24,6 +24,20 @@ import dev.aurakai.auraframefx.ui.debug.model.NodeType
 import dev.aurakai.auraframefx.ui.debug.model.Offset as GraphOffset
 import kotlin.math.*
 
+/**
+ * Displays an interactive, zoomable, and pannable graph visualization with selectable nodes.
+ *
+ * Renders a graph of nodes and their connections on a canvas, supporting pinch-to-zoom and pan gestures.
+ * Nodes can be selected, triggering a pulsing animation effect. Connections are drawn with visual styles
+ * based on their type, and node labels are displayed below each node. The graph content is centered within
+ * the available space, and a grid background is rendered behind the graph.
+ *
+ * @param nodes The list of graph nodes to display, each with position and connection data.
+ * @param selectedNodeId The ID of the currently selected node, if any.
+ * @param onNodeSelected Callback invoked when a node is selected, receiving the node's ID.
+ * @param modifier Modifier to be applied to the graph container.
+ * @param contentPadding Padding to apply around the graph content.
+ */
 @Composable
 fun InteractiveGraph(
     nodes: List<GraphNode>,
@@ -101,6 +115,14 @@ fun InteractiveGraph(
     }
 }
 
+/**
+ * Draws a scalable grid background on the canvas, offset by the current translation.
+ *
+ * The grid lines are spaced proportionally to the zoom level and panning offset, providing visual reference for graph navigation.
+ *
+ * @param scale The current zoom level, affecting grid spacing and line thickness.
+ * @param translation The current pan offset, shifting the grid accordingly.
+ */
 private fun DrawScope.drawGrid(scale: Float, translation: ComposeOffset) {
     val gridSize = 40f / scale
     val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
@@ -126,6 +148,15 @@ private fun DrawScope.drawGrid(scale: Float, translation: ComposeOffset) {
     }
 }
 
+/**
+ * Draws a single graph node with visual styling and label.
+ *
+ * Renders the node at its position with a colored background, border, and icon placeholder.
+ * If the node is selected, a glowing ring is drawn around it. The node's name is displayed below the node.
+ *
+ * @param node The graph node to draw.
+ * @param isSelected Whether the node is currently selected, affecting its visual appearance.
+ */
 private fun DrawScope.drawNode(node: GraphNode, isSelected: Boolean) {
     val nodeSize = node.type.defaultSize.toPx()
     val center = node.position
@@ -190,6 +221,17 @@ private fun DrawScope.drawNode(node: GraphNode, isSelected: Boolean) {
     }
 }
 
+/**
+ * Draws a connection line with an arrowhead between two graph nodes, styled according to the connection type.
+ *
+ * The connection line is rendered as solid or dashed, with color and arrow direction determined by the connection type.
+ * The line starts and ends offset from the node centers by their radii to avoid overlapping node visuals.
+ * An arrowhead is drawn at the end of the connection to indicate directionality.
+ *
+ * @param from The source node of the connection.
+ * @param to The target node of the connection.
+ * @param connection The connection data specifying type and style.
+ */
 private fun DrawScope.drawConnection(
     from: GraphNode,
     to: GraphNode,
@@ -277,18 +319,46 @@ private fun DrawScope.drawConnection(
     }
 }
 
+/**
+ * Returns the sum of this [Offset] and another [Offset] as a new [Offset].
+ *
+ * The resulting [Offset] has its x and y components added element-wise.
+ *
+ * @return The element-wise sum of the two offsets.
+ */
 private operator fun Offset.plus(other: Offset): Offset {
     return Offset(x + other.x, y + other.y)
 }
 
+/**
+ * Returns the vector difference between this [Offset] and another [Offset].
+ *
+ * @return A new [Offset] representing the component-wise subtraction.
+ */
 private operator fun Offset.minus(other: Offset): Offset {
     return Offset(x - other.x, y - other.y)
 }
 
+/**
+ * Divides the components of this [Offset] by the given scalar value.
+ *
+ * @param scalar The value to divide both x and y components by.
+ * @return A new [Offset] with each component divided by [scalar].
+ */
 private operator fun Offset.div(scalar: Float): Offset {
     return Offset(x / scalar, y / scalar)
 }
 
+/**
+ * Rotates this offset around a specified pivot point by the given angle in radians.
+ *
+ * Optionally applies an additional offset to the pivot after rotation.
+ *
+ * @param angle The rotation angle in radians.
+ * @param pivot The point around which to rotate.
+ * @param pivotOffset An optional offset to apply to the pivot after rotation. Defaults to [ComposeOffset.Zero].
+ * @return The rotated offset.
+ */
 private fun ComposeOffset.rotate(angle: Float, pivot: ComposeOffset, pivotOffset: ComposeOffset = ComposeOffset.Zero): ComposeOffset {
     val cos = cos(angle)
     val sin = sin(angle)

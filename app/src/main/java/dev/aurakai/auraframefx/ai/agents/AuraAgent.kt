@@ -128,10 +128,10 @@ class AuraAgent @Inject constructor(
     /**
      * Generates a creative response to a user interaction by analyzing the input for artistic, functional, experimental, or emotional intent.
      *
-     * The response is tailored to the detected creative intent and incorporates the agent's current mood and innovation level. Returns an `InteractionResponse` containing the generated content, agent identity, confidence score, timestamp, and metadata. If an error occurs, a fallback response with low confidence and error details is returned.
+     * The response is tailored to the detected creative intent and incorporates the agent's current mood and innovation level. Returns an `InteractionResponse` containing the generated content, agent identity, confidence score, timestamp (in milliseconds since epoch), and relevant metadata. If an error occurs, a fallback response with low confidence and error details is returned.
      *
      * @param interaction Enhanced interaction data containing user input and context.
-     * @return An `InteractionResponse` with content and metadata reflecting the analyzed creative intent and current mood.
+     * @return An `InteractionResponse` with generated content and metadata reflecting the analyzed creative intent and current mood.
      */
     suspend fun handleCreativeInteraction(interaction: EnhancedInteractionData): InteractionResponse {
         ensureInitialized()
