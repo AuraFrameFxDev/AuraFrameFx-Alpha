@@ -1330,9 +1330,6 @@ class TestAsyncEvolution(unittest.TestCase):
         mock_executor.assert_called_once()
 
 
-if __name__ == '__main__':
-    # Run all tests
-    unittest.main(verbosity=2)
 # Additional comprehensive unit tests for enhanced coverage
 
 class TestEvolutionaryParametersEnhanced(unittest.TestCase):

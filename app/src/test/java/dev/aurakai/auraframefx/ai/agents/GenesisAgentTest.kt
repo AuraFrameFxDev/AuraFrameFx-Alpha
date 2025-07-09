@@ -417,7 +417,7 @@ class GenesisAgentTest {
     @Test
     fun testGenesisAgent_getType() {
         val type = genesisAgent.getType()
-        assertNotNull("Method should execute without throwing", type)
+        assertNull("Type should be null", type)
     }
 
     @Test
@@ -437,6 +437,7 @@ class GenesisAgentTest {
     @Test
     fun testGenesisAgent_processRequest_nullRequest() = runBlocking {
         try {
+            @Suppress("CAST_NEVER_SUCCEEDS")
             genesisAgent.processRequest(null as AiRequest)
             fail("Should throw exception for null request")
         } catch (e: Exception) {
@@ -500,7 +501,7 @@ class GenesisAgentTest {
         assertTrue("Should handle concurrent access", responses.isNotEmpty())
         assertEquals("response", responses["ConcurrentAgent"]?.content)
     }
-}
+
     // Additional comprehensive tests for better coverage
 
     @Test

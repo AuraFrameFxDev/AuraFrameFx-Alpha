@@ -453,18 +453,6 @@ class AuraAIServiceImplTest {
         }
     }
 
-    // Helper methods
-    private fun mockHttpResponse(statusCode: Int, body: String): HttpResponse {
-        val mockResponse = mock<HttpResponse>()
-        whenever(mockResponse.statusCode).thenReturn(statusCode)
-        whenever(mockResponse.body).thenReturn(body)
-        return mockResponse
-    }
-}
-
-// Exception and data types
-class ConfigurationException(message: String) : Exception(message)
-data class HealthCheckResult(val isHealthy: Boolean, val message: String)
     @Nested
     @DisplayName("Extended Generate Response Tests")
     inner class ExtendedGenerateResponseTests {
@@ -1141,8 +1129,8 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             auraAIService.updateBaseUrl("https://workflow.api.com")
             auraAIService.updateTimeout(5000L)
             
-            val healthResult = auraAIService.healthCheck()
             whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(200, "OK"))
+            val healthResult = auraAIService.healthCheck()
             assertTrue(healthResult.isHealthy)
             
             val prompt = "Complete workflow test"
@@ -1241,6 +1229,14 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
     }
 
+    // Helper methods
+    private fun mockHttpResponse(statusCode: Int, body: String): HttpResponse {
+        val mockResponse = mock<HttpResponse>()
+        whenever(mockResponse.statusCode).thenReturn(statusCode)
+        whenever(mockResponse.body).thenReturn(body)
+        return mockResponse
+    }
+
     // Additional helper methods for extended tests
     private fun mockHttpResponseWithHeaders(statusCode: Int, body: String, headers: Map<String, String> = emptyMap()): HttpResponse {
         val mockResponse = mock<HttpResponse>()
@@ -1255,3 +1251,7 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         whenever(mockConfigurationService.getTimeout()).thenReturn(timeout)
     }
 }
+
+// Exception and data types
+class ConfigurationException(message: String) : Exception(message)
+data class HealthCheckResult(val isHealthy: Boolean, val message: String)

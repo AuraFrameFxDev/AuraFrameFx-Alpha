@@ -4,15 +4,11 @@ Tests cover initialization, state management, consciousness tracking, and edge c
 """
 
 import unittest
-from unittest.mock import Mock, patch, MagicMock
-import pytest
-import numpy as np
-from datetime import datetime, timedelta
 import asyncio
 import json
 import tempfile
 import os
-from typing import Dict, List, Any
+from datetime import datetime
 
 # Assuming the main module exists - import with try/except for robustness
 try:

@@ -3,9 +3,8 @@ Genesis Core module for AI backend functionality.
 """
 
 import logging
-import json
 import time
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 import requests
 from functools import lru_cache
 
@@ -39,7 +38,7 @@ class GenesisCore:
             return {"status": "error", "message": "No data provided"}
         
         if isinstance(data, str):
-            if len(data) > 100000:  # Large input handling
+            if len(data) > MAX_INPUT_SIZE:  # Large input handling
                 logger.warning("Processing large input data")
             
             return {
