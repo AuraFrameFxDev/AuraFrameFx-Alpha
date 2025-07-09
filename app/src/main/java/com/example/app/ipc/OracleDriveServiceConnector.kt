@@ -35,7 +35,7 @@ class OracleDriveServiceConnector(private val context: Context) {
         /**
          * Handles disconnection from the AuraDrive service.
          *
-         * Clears the reference to the remote service and updates the connection state to indicate disconnection.
+         * Clears the reference to the remote service and updates the connection state to false.
          */
         override fun onServiceDisconnected(name: ComponentName?) {
             auraDriveService = null
@@ -46,7 +46,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Attempts to bind to the remote AuraDrive service using an explicit intent.
      *
-     * Updates the connection state to false if a SecurityException occurs during binding.
+     * Sets the connection state to false if a SecurityException occurs during binding.
      */
     fun bindService() {
         val intent = Intent().apply {
@@ -63,7 +63,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Unbinds from the AuraDrive service and sets the connection state to disconnected.
+     * Unbinds from the AuraDrive service and updates the connection state to disconnected.
      *
      * Any exceptions during unbinding are silently ignored.
      */
@@ -77,9 +77,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Retrieves the current status from the remote AuraDrive service.
+     * Retrieves the current status string from the remote AuraDrive service.
      *
-     * @return The status string reported by the remote service, or null if the service is unavailable or a RemoteException occurs.
+     * @return The status reported by the remote service, or null if the service is unavailable or a RemoteException occurs.
      */
     suspend fun getStatusFromOracleDrive(): String? = withContext(Dispatchers.IO) {
         try {
@@ -90,7 +90,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-         * Requests the remote Oracle Drive service to toggle the LSPosed module.
+         * Requests the remote AuraDrive service to toggle the LSPosed module.
          *
          * The `packageName` and `enable` parameters are not used by the remote service.
          *

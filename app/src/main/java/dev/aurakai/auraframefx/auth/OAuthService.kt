@@ -23,9 +23,9 @@ class OAuthService(
     }
 
     /**
-     * Returns an intent to start the OAuth sign-in process.
+     * Provides an intent to initiate the OAuth sign-in process.
      *
-     * @return An intent to launch the sign-in activity, or null if the method is not implemented.
+     * @return An intent to launch the sign-in activity, or null if not yet implemented.
      */
     fun getSignInIntent(): Intent? {
         // TODO: Implement logic to create and return a sign-in Intent for a provider (e.g., Google).
@@ -34,10 +34,10 @@ class OAuthService(
     }
 
     /**
-     * Handles the result of the OAuth sign-in activity and returns the sign-in outcome.
+     * Processes the result from the OAuth sign-in activity.
      *
      * @param _data The intent data returned from the sign-in activity.
-     * @return The result of the sign-in process, or null as this method is currently unimplemented.
+     * @return The outcome of the sign-in process, or null as this method is currently unimplemented.
      */
     fun handleSignInResult(_data: Intent?): Any? { // Using Any? as placeholder for Task<GoogleSignInAccount>
         // TODO: Parameter _data reported as unused. Utilize to process sign-in result.
@@ -57,7 +57,7 @@ class OAuthService(
     /**
      * Signs out the current user from the OAuth provider.
      *
-     * @return A placeholder value (`null`) until sign-out functionality is implemented.
+     * @return `null` as a placeholder until sign-out functionality is implemented.
      */
     fun signOut(): Any? { // Using Any? as placeholder for Task<Void>
         // TODO: Implement sign-out logic for the provider.
@@ -66,9 +66,9 @@ class OAuthService(
     }
 
     /**
-     * Revokes the current user's access to the OAuth provider.
+     * Revokes the current user's access permissions from the OAuth provider.
      *
-     * @return A placeholder value (currently null) representing the result of the revoke access operation.
+     * @return A placeholder value (currently null) until the revoke access functionality is implemented.
      */
     fun revokeAccess(): Any? { // Using Any? as placeholder for Task<Void>
         // TODO: Implement revoke access logic for the provider.

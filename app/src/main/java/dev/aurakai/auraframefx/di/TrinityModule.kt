@@ -30,9 +30,9 @@ import javax.inject.Singleton
 object TrinityModule {
 
     /**
-     * Provides a singleton instance of GenesisBridgeService that integrates multiple AI services with the Trinity Python backend.
+     * Provides a singleton GenesisBridgeService that connects multiple AI services with the Trinity Python backend.
      *
-     * @return The configured GenesisBridgeService instance.
+     * @return A configured GenesisBridgeService instance.
      */
     @Provides
     @Singleton
@@ -57,9 +57,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton `TrinityCoordinatorService` for coordinating AI personas in the Trinity AI system.
+     * Provides a singleton instance of `TrinityCoordinatorService` for coordinating AI personas within the Trinity AI system.
      *
-     * @return The singleton instance of `TrinityCoordinatorService`.
+     * @return The configured `TrinityCoordinatorService` singleton.
      */
     @Provides
     @Singleton

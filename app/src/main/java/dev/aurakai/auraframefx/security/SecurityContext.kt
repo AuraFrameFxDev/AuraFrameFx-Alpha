@@ -118,7 +118,10 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Check if the app has the specified permission
+     * Determines whether the specified permission is granted to the application.
+     *
+     * @param permission The name of the permission to check.
+     * @return `true` if the permission is granted, `false` otherwise.
      */
     fun hasPermission(permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
@@ -128,9 +131,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Updates the internal state with the current grant status of relevant app permissions.
+     * Updates the internal permissions state with the current grant status of predefined app permissions.
      *
-     * Checks a predefined list of permissions and records whether each is granted.
+     * Checks a set of relevant permissions and records whether each is currently granted by the system.
      */
     fun updatePermissionsState() {
         val permissionsToCheck = listOf(
@@ -148,11 +151,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Initializes the encryption subsystem using the Keystore.
+     * Initializes the encryption subsystem using the KeystoreManager.
      *
-     * Attempts to create or retrieve a secret key via the KeystoreManager. Updates the encryption status and security state to reflect the result.
+     * Attempts to create or retrieve a secret key for encryption. Updates the encryption status and security state based on the outcome.
      *
-     * @return `true` if encryption is successfully initialized; `false` if key creation or retrieval fails.
+     * @return `true` if the encryption subsystem is successfully initialized; `false` if key creation or retrieval fails.
      */
     fun initializeEncryption(): Boolean {
         Log.d(TAG, "Initializing encryption using KeystoreManager.")
@@ -178,9 +181,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Encrypts the provided string using AES encryption with a randomly generated IV via the Android Keystore.
+     * Encrypts a string using AES encryption with a randomly generated IV from the Android Keystore.
      *
-     * Attempts to initialize encryption if not already active. Returns an `EncryptedData` object containing the encrypted bytes, IV, timestamp, and metadata, or `null` if encryption fails.
+     * If encryption is not already initialized, attempts to initialize it. Returns an `EncryptedData` object containing the encrypted bytes, IV, timestamp, and metadata, or `null` if encryption fails.
      *
      * @param data The string to encrypt.
      * @return An `EncryptedData` object with the encrypted content, or `null` if encryption is unsuccessful.
@@ -281,9 +284,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Creates a shared secure context for communication with another agent.
+     * Creates a shared secure context for communication with a specified agent.
      *
-     * Generates a unique secure identifier and timestamp, and packages the provided context data as a byte array for sharing with the specified agent. The context is not encrypted in this implementation. The shared context expires after one hour.
+     * Generates a unique identifier and timestamp, packages the provided context data as a byte array, and sets an expiry time one hour from creation. The context data is not encrypted in this implementation.
      *
      * @param agentType The agent with whom the context will be shared.
      * @param context The context data to be shared.
@@ -304,7 +307,7 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Checks the application's integrity by retrieving its package signature and computing a SHA-256 hash.
+     * Verifies the application's integrity by retrieving its package signature and computing a SHA-256 hash.
      *
      * Returns an [ApplicationIntegrity] object containing the verification result, app version, signature hash, install and update times, or error details if verification fails.
      *
@@ -389,12 +392,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Determines the highest threat level present in a list of security threats.
+     * Returns the highest threat level found in the provided list of security threats.
      *
-     * Returns `ThreatLevel.LOW` if the list is empty.
+     * If the list is empty, returns `ThreatLevel.LOW`.
      *
-     * @param threats List of security threats to evaluate.
-     * @return The highest detected threat level, or `ThreatLevel.LOW` if none are present.
+     * @param threats List of security threats to assess.
+     * @return The most severe threat level detected, or `ThreatLevel.LOW` if the list is empty.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -412,9 +415,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Generates a cryptographically secure random 16-byte identifier as a 32-character hexadecimal string.
+     * Generates a cryptographically secure 16-byte random identifier as a 32-character hexadecimal string.
      *
-     * @return A 32-character hexadecimal string representing the secure random ID.
+     * @return A 32-character hexadecimal string representing the generated secure ID.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -423,11 +426,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Asynchronously records a security event for auditing and monitoring purposes.
+     * Asynchronously logs a security event for auditing and monitoring.
      *
-     * Serializes the provided security event and writes it to the debug log. Intended for development use; production implementations should securely persist security events.
+     * Serializes the given security event and writes it to the debug log. Intended for development; production use should securely persist events.
      *
-     * @param event The security event to record.
+     * @param event The security event to log.
      */
     fun logSecurityEvent(event: SecurityEvent) {
         scope.launch {
@@ -440,7 +443,7 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Records a security validation event for auditing without performing actual validation.
+     * Logs a security validation event for auditing purposes without performing any actual validation.
      *
      * @param requestType The type of request being logged.
      * @param requestData The data associated with the request.

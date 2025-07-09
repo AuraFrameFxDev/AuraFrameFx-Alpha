@@ -40,9 +40,12 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Sets Aura's current mood to the specified emotion and intensity.
+     * Updates Aura's current mood to the given emotion and intensity.
      *
-     * The intensity value is clamped between 0 and 1. The new mood is also added to the mood history.
+     * The intensity is clamped between 0 and 1. The updated mood is recorded in the mood history.
+     *
+     * @param emotion The emotion to set as the current mood.
+     * @param intensity The intensity of the emotion, defaulting to 0.5.
      */
     fun setMood(emotion: Emotion, intensity: Float = 0.5f) {
         val newMood = MoodState(
@@ -55,13 +58,12 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Gradually transitions Aura's mood to a target emotion and intensity over a specified duration.
+     * Smoothly transitions Aura's mood to a specified emotion and intensity over a given duration.
      *
-     * The transition interpolates intensity in multiple steps and switches emotion halfway through the process.
-     * After completion, the final mood is set exactly to the target values and recorded in the mood history.
+     * The transition interpolates the intensity in 20 steps, switching to the target emotion halfway through. After the transition, the mood is set precisely to the target emotion and intensity, and this final state is added to the mood history.
      *
      * @param targetEmotion The emotion to transition to.
-     * @param targetIntensity The target intensity for the new emotion (clamped between 0 and 1).
+     * @param targetIntensity The desired intensity for the target emotion (clamped between 0 and 1).
      * @param durationMs The total duration of the transition in milliseconds.
      */
     fun transitionToMood(
@@ -106,12 +108,12 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Adjusts Aura's mood in response to a user interaction.
+     * Updates Aura's mood in response to a specific user interaction, adjusting emotion and intensity based on interaction type and outcome.
      *
-     * The resulting mood and transition parameters depend on the interaction type and whether it was successful. Unrecognized interaction types trigger a gentle shift toward a neutral mood.
+     * Recognized interaction types trigger context-appropriate mood transitions, with the `success` flag influencing the resulting mood for certain types. Unrecognized types result in a gentle shift toward a neutral mood.
      *
-     * @param interactionType The type of user interaction (e.g., "chat", "task_completion", "creative_work").
-     * @param success Indicates if the interaction was successful; affects the resulting mood for certain interaction types.
+     * @param interactionType The category of user interaction (e.g., "chat", "task_completion", "creative_work").
+     * @param success Whether the interaction was successful; affects the resulting mood for some interaction types.
      */
     fun reactToInteraction(interactionType: String, success: Boolean = true) {
         val currentMood = _moodState.value
@@ -158,9 +160,9 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Initiates an ongoing process that gradually evolves Aura's mood over time.
+     * Launches a background process that periodically evolves Aura's mood.
      *
-     * This function periodically reduces mood intensity if there has been no recent interaction and occasionally triggers spontaneous mood shifts to reflect Aura's personality.
+     * Every 30 seconds, this function reduces the mood intensity if there has been no recent interaction and the intensity is above a threshold. With a 10% chance each cycle, it triggers a spontaneous mood shift to a random expressive emotion with moderate intensity, simulating Aura's personality dynamics.
      */
     private fun startMoodEvolution() {
         viewModelScope.launch {
@@ -195,7 +197,12 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Get mood-appropriate greeting
+     * Returns a greeting string tailored to the current mood's emotion.
+     *
+     * The greeting reflects the personality and emotional state represented by the current `MoodState`.
+     * If the emotion is unrecognized, a generic greeting is returned.
+     *
+     * @return A mood-appropriate greeting message.
      */
     fun getMoodGreeting(): String {
         return when (_moodState.value.emotion) {
@@ -214,11 +221,11 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Returns a descriptive string summarizing the current mood's intensity and emotion.
+     * Returns a qualitative description of the current mood, combining intensity and emotion.
      *
-     * The descriptor combines a qualitative intensity level ("Very", "Quite", "Somewhat", or "Mildly") with a human-readable emotion name (e.g., "Happy", "Serene").
+     * The result is a string such as "Quite Happy" or "Mildly Focused," reflecting both the current mood's intensity and its emotional state.
      *
-     * @return A string such as "Quite Happy" or "Mildly Focused" representing the current mood.
+     * @return A descriptive string summarizing the current mood's intensity and emotion.
      */
     fun getCurrentMoodDescriptor(): String {
         val mood = _moodState.value
@@ -247,9 +254,11 @@ class AuraMoodViewModel @Inject constructor() : ViewModel() {
     }
 
     /**
-     * Adds a new mood state to the mood history, maintaining a maximum of 50 entries.
+     * Appends a new mood state to the mood history, ensuring the history does not exceed 50 entries.
      *
-     * Removes the oldest mood state if the history exceeds the size limit.
+     * If the history exceeds 50 moods, the oldest entry is removed to maintain the size limit.
+     *
+     * @param mood The mood state to add to the history.
      */
     private fun addToHistory(mood: MoodState) {
         val currentHistory = _moodHistory.value.toMutableList()

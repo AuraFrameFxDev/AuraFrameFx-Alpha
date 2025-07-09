@@ -8,7 +8,7 @@ import androidx.startup.Initializer
 class AppInitializerInitializer : Initializer<Unit> {
 
     /**
-     * Performs application-specific initialization logic during app startup.
+     * Performs application-specific initialization during app startup.
      *
      * Called on the main thread when the application launches.
      *
