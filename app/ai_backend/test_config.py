@@ -92,7 +92,18 @@ URL_FORMATS = [
 
 # Test helpers
 def create_mock_response(status_code=200, json_data=None, headers=None, text=None):
-    """Create a mock response object for testing."""
+    """
+    Return a mock HTTP response object with customizable status code, headers, text, and optional JSON data for testing purposes.
+    
+    Parameters:
+        status_code (int, optional): HTTP status code to set on the mock response. Defaults to 200.
+        json_data (any, optional): Data to be returned by the mock's `.json()` method. If not provided, calling `.json()` raises a ValueError.
+        headers (dict, optional): Headers to include in the mock response. Defaults to an empty dictionary.
+        text (str, optional): Text content of the response. Defaults to an empty string.
+    
+    Returns:
+        Mock: A mock response object simulating the behavior of an HTTP response, including status code handling and JSON decoding.
+    """
     from unittest.mock import Mock
     
     mock_response = Mock()
@@ -113,7 +124,15 @@ def create_mock_response(status_code=200, json_data=None, headers=None, text=Non
     return mock_response
 
 def create_test_connector(config_overrides=None):
-    """Create a test GenesisConnector with optional config overrides."""
+    """
+    Instantiate and return a GenesisConnector for testing, applying optional configuration overrides.
+    
+    Parameters:
+        config_overrides (dict, optional): Dictionary of configuration values to override the defaults.
+    
+    Returns:
+        GenesisConnector: An instance configured for testing with the specified settings.
+    """
     config = TEST_CONFIG.copy()
     if config_overrides:
         config.update(config_overrides)

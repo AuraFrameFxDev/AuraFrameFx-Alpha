@@ -15,7 +15,9 @@ object InstantSerializer : KSerializer<Instant> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
     
     /**
-     * Serializes an [Instant] value as its ISO-8601 string representation using the provided [Encoder].
+     * Serializes an [Instant] as an ISO-8601 string using the given [encoder].
+     *
+     * Converts the [Instant] to its string representation before encoding.
      */
     override fun serialize(encoder: Encoder, value: Instant) {
         encoder.encodeString(value.toString())

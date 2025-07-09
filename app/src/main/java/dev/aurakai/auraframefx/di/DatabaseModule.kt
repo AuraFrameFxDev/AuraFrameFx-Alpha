@@ -16,6 +16,14 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
+    /**
+     * Provides a singleton instance of the Room database for the application.
+     *
+     * The database is built with a fallback to destructive migration, which clears and recreates the database if a migration is not found.
+     *
+     * @param context The application context used to build the database.
+     * @return The singleton instance of [AppDatabase].
+     */
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
@@ -30,6 +38,11 @@ object DatabaseModule {
         .build()
     }
 
+    /**
+     * Provides an instance of AgentMemoryDao from the given AppDatabase.
+     *
+     * @return The AgentMemoryDao for accessing agent memory data.
+     */
     @Provides
     fun provideAgentMemoryDao(database: AppDatabase): AgentMemoryDao {
         return database.agentMemoryDao()
