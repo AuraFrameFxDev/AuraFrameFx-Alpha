@@ -46,7 +46,7 @@ class SystemMonitor @Inject constructor(
      *
      * Launches a background coroutine that updates CPU, memory, and network metrics at the specified interval.
      *
-     * @param intervalMs The interval in milliseconds between metric updates. Defaults to 5000 ms.
+     * @param intervalMs Interval in milliseconds between metric updates. Defaults to 5000 ms.
      */
     fun startMonitoring(intervalMs: Long = 5000) {
         if (isMonitoring) return
@@ -68,7 +68,7 @@ class SystemMonitor @Inject constructor(
     }
 
     /**
-     * Stops the system performance monitoring process.
+     * Stops system performance monitoring.
      *
      * Disables periodic metric updates by setting the monitoring flag to false.
      */
@@ -80,10 +80,10 @@ class SystemMonitor @Inject constructor(
     /**
      * Retrieves a map of current system performance metrics for the specified component.
      *
-     * The map includes CPU usage percentage, memory usage and available memory in bytes, memory usage percentage, network bytes received and transmitted, process ID, thread count, JVM heap size and usage, and a timestamp.
+     * The map includes CPU usage percentage, memory usage and availability in bytes, memory usage percentage, network bytes received and transmitted, process ID, thread count, JVM heap size and usage, and a timestamp.
      *
-     * @param component The identifier for the component for which metrics are collected.
-     * @return A map where keys are metric names and values are their current readings.
+     * @param component The identifier for the component associated with the collected metrics.
+     * @return A map where each key is a metric name and each value is the corresponding current metric value.
      */
     fun getPerformanceMetrics(component: String): Map<String, Any> {
         logger.debug("SystemMonitor", "Getting performance metrics for: $component")
@@ -107,9 +107,11 @@ class SystemMonitor @Inject constructor(
     /**
      * Returns a normalized system health score based on current CPU usage and available memory.
      *
-     * The score ranges from 0.0 (poor health) to 1.0 (optimal health), calculated as the average of an inverted CPU usage score (capped at 100%) and a minimum-threshold available memory ratio.
+     * The score ranges from 0.0 (poor health) to 1.0 (optimal health), calculated as the average of:
+     * - An inverted CPU usage score (where lower CPU usage yields a higher score, capped at 100%)
+     * - The ratio of available memory to total memory (with a minimum threshold of 0.1)
      *
-     * @return The current system health score, where higher values indicate better health.
+     * @return The current system health score, where higher values indicate better system health.
      */
     fun getSystemHealthScore(): Float {
         val cpuScore = 1.0f - (_cpuUsage.value / 100f).coerceAtMost(1.0f)
@@ -121,9 +123,12 @@ class SystemMonitor @Inject constructor(
     /**
      * Returns `true` if the system is under stress due to high CPU usage, high memory usage percentage, or low available memory.
      *
-     * The system is considered under stress if CPU usage exceeds 80%, memory usage percentage exceeds 85%, or available memory drops below 50 MB.
+     * The system is considered under stress if any of the following are true:
+     * - CPU usage exceeds 80%
+     * - Memory usage percentage exceeds 85%
+     * - Available memory is less than 50 MB
      *
-     * @return `true` if any stress condition is met; otherwise, `false`.
+     * @return `true` if the system is under stress; `false` otherwise.
      */
     fun isSystemUnderStress(): Boolean {
         return _cpuUsage.value > 80f ||
@@ -134,9 +139,9 @@ class SystemMonitor @Inject constructor(
     /**
      * Returns a comprehensive snapshot of current system performance metrics and status.
      *
-     * The report includes CPU usage, memory usage, available memory, memory usage percentage, network activity, system health score, stress status, process and thread counts, JVM heap size and usage, and a timestamp.
+     * The report includes CPU usage, memory usage and availability, memory usage percentage, network activity, system health score, stress status, process and thread counts, JVM heap size and usage, and a timestamp.
      *
-     * @return A `SystemPerformanceReport` containing all monitored metrics and system status at the time of invocation.
+     * @return A `SystemPerformanceReport` containing all monitored system metrics and status at the time of invocation.
      */
     fun getPerformanceReport(): SystemPerformanceReport {
         return SystemPerformanceReport(
@@ -158,7 +163,7 @@ class SystemMonitor @Inject constructor(
     /**
      * Updates CPU usage, memory usage, and network activity metrics asynchronously on the IO dispatcher.
      *
-     * This method suspends while refreshing all monitored system metrics.
+     * This function suspends while collecting the latest system performance metrics.
      */
 
     private suspend fun updateMetrics() = withContext(Dispatchers.IO) {
@@ -183,9 +188,9 @@ class SystemMonitor @Inject constructor(
     }
 
     /**
-     * Refreshes memory usage metrics by querying the system's current memory status.
+     * Updates the available and used memory metrics by querying the system's current memory information.
      *
-     * Updates available and used memory values from the Android ActivityManager. If retrieval fails, retains previous metric values.
+     * Retrieves memory data from the Android ActivityManager and updates internal state flows. If retrieval fails, previous metric values remain unchanged.
      */
     private fun updateMemoryMetrics() {
         try {

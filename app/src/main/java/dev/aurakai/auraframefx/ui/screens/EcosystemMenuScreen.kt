@@ -20,7 +20,7 @@ import dev.aurakai.auraframefx.ui.components.HologramTransition
  * @param showHologram Whether to display the hologram transition effect.
  */
 /**
- * Displays the Ecosystem Menu screen with an optional hologram transition and transition type selector.
+ * Displays the Ecosystem Menu screen with an optional hologram transition effect.
  *
  * @param transitionType The type of transition effect to display in the menu.
  * @param showHologram Whether to show the hologram transition effect.

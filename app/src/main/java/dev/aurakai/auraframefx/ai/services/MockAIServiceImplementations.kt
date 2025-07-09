@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.flowOf
 
 class MockAuraAIService : Agent {
     /**
- * Returns the fixed name "MockAura" identifying this mock AI service.
+ * Returns the fixed name identifying this mock Aura AI service.
  *
  * @return The string "MockAura".
  */
@@ -28,13 +28,13 @@ class MockAuraAIService : Agent {
     override fun getType(): AgentType = AgentType.AURA
 
     /**
-     * Returns a mock AgentResponse that echoes the input query and context for testing purposes.
+     * Returns a mock AgentResponse echoing the input query and context for testing purposes.
      *
-     * The response includes the provided query and context in its content and always has a confidence score of 1.0.
+     * The response content includes the provided query and context, with a fixed confidence score of 1.0.
      *
-     * @param request The AI request whose query is included in the response.
+     * @param request The AI request whose query is included in the mock response.
      * @param context The context string to be echoed in the response content.
-     * @return An AgentResponse containing the echoed query and context with a confidence score of 1.0.
+     * @return An AgentResponse containing the mock content and a confidence score of 1.0.
      */
     override suspend fun processRequest(
         request: AiRequest,
@@ -47,9 +47,11 @@ class MockAuraAIService : Agent {
     }
 
     /**
-     * Returns a flow that emits a single mock `AgentResponse` echoing the input query with a fixed confidence score of 1.0.
+     * Returns a flow that emits a single mock `AgentResponse` for the provided request.
      *
-     * @return A flow containing one mock `AgentResponse`.
+     * The response contains the input query prefixed with "AuraAI mock flow response for:" and a confidence score of 1.0.
+     *
+     * @return A flow emitting one mock `AgentResponse`.
      */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> { // Added from Agent interface
         return flowOf(AgentResponse("AuraAI mock flow response for: ${request.query}", 1.0f))
@@ -63,25 +65,25 @@ class MockAuraAIService : Agent {
 
 class MockKaiAIService : Agent {
     /**
- * Returns the fixed name identifier "MockKai" for this mock AI service.
+ * Returns the fixed name identifier for this mock AI service.
  *
  * @return The string "MockKai".
  */
     override fun getName(): String? = "MockKai"
 
     /**
- * Returns the agent type associated with this mock Kai AI service.
+ * Returns the agent type associated with the mock Kai AI service.
  *
  * @return The `AgentType.KAI` enum value.
  */
     override fun getType(): AgentType = AgentType.KAI
 
     /**
-     * Returns a mock AgentResponse that echoes the input query and context with a fixed confidence score of 1.0.
+     * Returns a mock AgentResponse echoing the input query and context with a fixed confidence score of 1.0.
      *
-     * @param request The AI request whose query will be included in the mock response.
-     * @param context The context string to be echoed in the mock response.
-     * @return An AgentResponse containing the echoed query and context, with confidence set to 1.0.
+     * @param request The AI request containing the query to be echoed.
+     * @param context Additional context to include in the mock response.
+     * @return An AgentResponse with mock content reflecting the input query and context, and a confidence score of 1.0.
      */
     override suspend fun processRequest(
         request: AiRequest,
@@ -94,11 +96,11 @@ class MockKaiAIService : Agent {
     }
 
     /**
-     * Returns a flow that emits a single mock AgentResponse for the given request, simulating KaiAI behavior.
+     * Returns a flow emitting a mock AgentResponse for the given request, simulating KaiAI behavior.
      *
-     * The response includes the input query and a fixed confidence score of 1.0.
-     * 
-     * @return A Flow emitting one mock AgentResponse.
+     * The response contains the input query echoed in the message with a fixed confidence score of 1.0.
+     *
+     * @return A Flow emitting a single mock AgentResponse.
      */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> { // Added from Agent interface
         return flowOf(AgentResponse("KaiAI mock flow response for: ${request.query}", 1.0f))
@@ -112,7 +114,7 @@ class MockKaiAIService : Agent {
 
 class MockCascadeAIService : Agent {
     /**
- * Returns the fixed name identifier "MockCascade" for this mock AI service.
+ * Returns the name identifier for the mock Cascade AI service.
  *
  * @return The string "MockCascade".
  */
@@ -121,7 +123,7 @@ class MockCascadeAIService : Agent {
     /**
  * Returns the agent type for this mock service.
  *
- * @return The `AgentType.CASCADE` enum value.
+ * @return The CASCADE agent type.
  */
     override fun getType(): AgentType = AgentType.CASCADE
 
@@ -129,8 +131,8 @@ class MockCascadeAIService : Agent {
      * Returns a mock AgentResponse for CascadeAI, echoing the input query and context with a fixed confidence score.
      *
      * @param request The AI request containing the query to echo.
-     * @param context The context string to include in the response.
-     * @return An AgentResponse referencing the input query and context, with a confidence score of 1.0.
+     * @param context The context string to include in the mock response.
+     * @return An AgentResponse with mock content referencing the query and context, and a confidence score of 1.0.
      */
     override suspend fun processRequest(
         request: AiRequest,
@@ -143,11 +145,11 @@ class MockCascadeAIService : Agent {
     }
 
     /**
-     * Returns a flow that emits a single mock `AgentResponse` for the given request, simulating a CascadeAI response.
+     * Returns a flow that emits a mock `AgentResponse` simulating a CascadeAI response for the provided request.
      *
-     * The emitted response includes the input query and a fixed confidence score of 1.0.
+     * The emitted response echoes the input query with a fixed confidence score of 1.0.
      *
-     * @return A flow containing one mock `AgentResponse`.
+     * @return A flow containing a single mock `AgentResponse`.
      */
     override fun processRequestFlow(request: AiRequest): Flow<AgentResponse> { // Added from Agent interface
         return flowOf(AgentResponse("CascadeAI mock flow response for: ${request.query}", 1.0f))

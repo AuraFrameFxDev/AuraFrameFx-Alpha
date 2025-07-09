@@ -9,13 +9,13 @@ import kotlinx.coroutines.delay
 class VertexAIClientImpl : VertexAIClient {
 
     /**
-     * Returns a simulated, context-aware AI-generated text response based on the input prompt.
+     * Simulates AI text generation by returning a context-aware stub response based on the input prompt.
      *
-     * The response format adapts to keywords in the prompt ("code", "explain", or "analyze") and includes metadata reflecting the specified maxTokens and temperature. This method suspends briefly to mimic API latency.
+     * The response format adapts to keywords in the prompt (such as "code", "explain", or "analyze") and includes metadata reflecting the specified maxTokens and temperature values. The method introduces a brief delay to mimic API latency.
      *
-     * @param prompt The input prompt for which to generate a simulated response.
-     * @param maxTokens The maximum number of tokens to include in the response metadata.
-     * @param temperature The creativity level to include in the response metadata.
+     * @param prompt The input text prompt for which to generate a simulated response.
+     * @param maxTokens The maximum number of tokens to represent in the response metadata.
+     * @param temperature The creativity level to represent in the response metadata.
      * @return A multi-line string simulating an AI-generated response tailored to the prompt and parameters.
      */
     override suspend fun generateText(prompt: String, maxTokens: Int, temperature: Float): String {
@@ -79,19 +79,21 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Simulates the initialization of creative models for testing or development purposes.
+     * Stub method for creative model initialization; performs no operation.
      *
-     * This stub does not perform any real initialization or interact with AI models.
+     * Intended as a placeholder for future implementation or testing scenarios.
      */
     override suspend fun initializeCreativeModels() {
         // Stub implementation
     }
 
     /**
-     * Returns a placeholder string simulating generated content for the given prompt.
+     * Returns a stub content string embedding the provided prompt.
      *
-     * @param prompt The input prompt to include in the stub response.
-     * @return A fixed string embedding the provided prompt.
+     * Simulates content generation with a fixed response for testing or placeholder purposes.
+     *
+     * @param prompt The input prompt to include in the response.
+     * @return A placeholder string containing the prompt.
      */
     override suspend fun generateContent(prompt: String): String? {
         delay(100)
@@ -101,10 +103,10 @@ class VertexAIClientImpl : VertexAIClient {
     /**
      * Simulates code generation by returning a placeholder string for the specified specification, language, and style.
      *
-     * @param specification The description of the code to generate.
-     * @param language The programming language for the generated code.
-     * @param style The desired coding style.
-     * @return A stub string representing generated code in the specified language.
+     * @param specification Description of the code to generate.
+     * @param language Programming language for the generated code.
+     * @param style Desired coding style.
+     * @return A stub string indicating generated code in the specified language.
      */
     override suspend fun generateCode(
         specification: String,
@@ -116,18 +118,18 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Simulates a connection check and always returns `true` to indicate success in this stub implementation.
+     * Simulates a connection check to Vertex AI, always indicating a successful connection.
      *
-     * @return `true`, representing a successful connection.
+     * @return `true` to represent a successful connection in this stub implementation.
      */
     override suspend fun validateConnection(): Boolean {
         return true // Stub always returns true
     }
 
     /**
-     * No-op initialization method to fulfill interface requirements.
+     * No-op method included to fulfill interface requirements.
      *
-     * This method performs no actions in this stub implementation.
+     * This stub implementation performs no actions.
      */
     fun initialize() {
         // Stub implementation

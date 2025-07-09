@@ -21,7 +21,7 @@ class AppStateManager @Inject constructor() {
     /**
      * Updates the application state to the specified value.
      *
-     * @param newState The new state to apply to the application.
+     * @param newState The new application state to set.
      */
     fun updateAppState(newState: AppState) {
         _appState.value = newState

@@ -36,7 +36,7 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Retrieves memory items matching the specified query, filtered by agent and limited to the configured maximum number of items.
+     * Retrieves memory items matching the specified query, filtered by agent and limited to the maximum configured number.
      *
      * @param query The criteria used to filter and retrieve memory items.
      * @return A result containing the filtered memory items, their count, and the original query.
@@ -58,13 +58,13 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Retrieves a list of recent memory items within the configured context window.
+     * Retrieves recent memory items within the configured context window duration.
      *
-     * The returned list contains memory items whose timestamps fall within the maximum chain length duration,
-     * sorted by descending timestamp and limited to the configured maximum chain length.
+     * Filters memory items whose timestamps are within the maximum chain length duration from the current time,
+     * sorts them by descending timestamp, and returns up to the configured maximum number of items.
      *
      * @param task The task identifier (currently unused in filtering).
-     * @return A list of recent canonical memory items for the context window.
+     * @return A list of recent canonical memory items within the context window.
      */
     fun getContextWindow(task: String): List<CanonicalMemoryItem> { // Changed MemoryItem to CanonicalMemoryItem
         val recentItems = memoryStore.values
@@ -81,16 +81,14 @@ class MemoryManager @Inject constructor(
     /**
      * Returns the current memory statistics snapshot.
      *
-     * @return The latest `MemoryStats` representing the state of the memory store.
+     * @return The latest memory statistics, including total items, recent items, memory size, and last update time.
      */
     fun getMemoryStats(): MemoryStats {
         return _memoryStats.value
     }
 
     /**
-     * Refreshes the memory statistics to reflect the current state of the memory store.
-     *
-     * Updates include the total number of items, count of recent items within the configured chain length duration, aggregate memory size, and the current timestamp.
+     * Refreshes memory statistics, updating item counts, total memory size, and the last updated timestamp.
      */
     private fun updateStats() {
         _memoryStats.update { current ->

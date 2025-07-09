@@ -9,9 +9,9 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class AmbientMusicService @Inject constructor() : Service() {
     /**
-     * Always returns `null`, indicating that this service does not support binding.
+     * Handles binding requests to the service.
      *
-     * @return Always `null`.
+     * @return Always returns null, indicating that binding is not supported.
      */
 
     override fun onBind(_intent: Intent?): IBinder? { // intent -> _intent
@@ -21,9 +21,9 @@ class AmbientMusicService @Inject constructor() : Service() {
     }
 
     /**
-     * Handles a request to start the service and indicates that it should not be restarted automatically if terminated by the system.
+     * Handles a request to start the service and indicates that the service should not be restarted if terminated by the system.
      *
-     * @return `START_NOT_STICKY` to prevent the service from being recreated after being killed.
+     * @return `START_NOT_STICKY` to prevent automatic service restart after termination.
      */
     override fun onStartCommand(_intent: Intent?, _flags: Int, _startId: Int): Int {
         // TODO: Implement service logic for starting the service.

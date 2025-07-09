@@ -41,7 +41,7 @@ class TestEvolutionaryParameters(unittest.TestCase):
     
     def test_default_initialization(self):
         """
-        Test that EvolutionaryParameters initializes with expected default values for all attributes.
+        Verify that EvolutionaryParameters are initialized with the correct default values.
         """
         self.assertEqual(self.default_params.population_size, 100)
         self.assertEqual(self.default_params.generations, 500)
@@ -51,7 +51,7 @@ class TestEvolutionaryParameters(unittest.TestCase):
     
     def test_custom_initialization(self):
         """
-        Verify that custom initialization of evolutionary parameters assigns all provided values as expected.
+        Verify that custom initialization of evolutionary parameters assigns the specified values to all attributes.
         """
         self.assertEqual(self.custom_params.population_size, 200)
         self.assertEqual(self.custom_params.generations, 1000)
@@ -61,7 +61,7 @@ class TestEvolutionaryParameters(unittest.TestCase):
     
     def test_parameter_validation(self):
         """
-        Test that EvolutionaryParameters raises ValueError when initialized with invalid parameter values.
+        Test that EvolutionaryParameters raises ValueError when initialized with invalid population size, mutation rate, or crossover rate values.
         """
         with self.assertRaises(ValueError):
             EvolutionaryParameters(population_size=0)
@@ -94,7 +94,7 @@ class TestEvolutionaryParameters(unittest.TestCase):
     
     def test_from_dict(self):
         """
-        Test that EvolutionaryParameters can be created from a dictionary and that all attributes are correctly assigned.
+        Test that EvolutionaryParameters can be created from a dictionary and that all attributes match the input values.
         """
         params_dict = {
             'population_size': 150,
@@ -116,7 +116,7 @@ class TestMutationStrategy(unittest.TestCase):
     
     def setUp(self):
         """
-        Set up a MutationStrategy instance for use in mutation strategy tests.
+        Prepares a MutationStrategy instance for use in mutation strategy tests.
         """
         self.strategy = MutationStrategy()
     
@@ -137,7 +137,7 @@ class TestMutationStrategy(unittest.TestCase):
     
     def test_uniform_mutation(self):
         """
-        Verify that the uniform mutation strategy produces a mutated genome of the same length as the input, with all values remaining within the specified bounds.
+        Verify that the uniform mutation strategy produces a mutated genome of the same length as the input, with all gene values remaining within the specified bounds.
         """
         genome = [1.0, 2.0, 3.0, 4.0, 5.0]
         mutated = self.strategy.uniform_mutation(genome, mutation_rate=0.2, bounds=(-10, 10))
@@ -178,7 +178,7 @@ class TestMutationStrategy(unittest.TestCase):
     
     def test_invalid_mutation_rate(self):
         """
-        Verify that mutation methods raise a ValueError when mutation rates are outside the valid range.
+        Verify that mutation methods raise a ValueError when given mutation rates outside the valid range.
         """
         genome = [1.0, 2.0, 3.0]
         
@@ -206,9 +206,9 @@ class TestSelectionStrategy(unittest.TestCase):
     
     def test_tournament_selection(self):
         """
-        Test that tournament selection returns a valid individual from the population.
+        Verify that tournament selection returns a valid individual from the population.
         
-        Ensures the selected individual is a member of the population and includes both 'genome' and 'fitness' keys.
+        Checks that the selected individual is a dictionary present in the population and contains both 'genome' and 'fitness' keys.
         """
         selected = self.strategy.tournament_selection(self.population, tournament_size=2)
         
@@ -219,9 +219,9 @@ class TestSelectionStrategy(unittest.TestCase):
     
     def test_roulette_wheel_selection(self):
         """
-        Verify that roulette wheel selection returns a valid individual from the population.
+        Test that roulette wheel selection returns a valid individual from the population.
         
-        Ensures the selected individual exists in the population and contains both 'genome' and 'fitness' keys.
+        Ensures the selected individual is present in the population and includes both 'genome' and 'fitness' keys.
         """
         selected = self.strategy.roulette_wheel_selection(self.population)
         
@@ -247,7 +247,7 @@ class TestSelectionStrategy(unittest.TestCase):
         """
         Verify that the elitism selection strategy returns the top individuals with the highest fitness values.
         
-        Checks that the number of selected individuals matches the elite count and that the selected individuals are ordered by descending fitness.
+        Ensures the number of selected individuals equals the elite count and that the selected individuals are sorted in descending order of fitness.
         """
         elite_count = 2
         selected = self.strategy.elitism_selection(self.population, elite_count)
@@ -260,7 +260,7 @@ class TestSelectionStrategy(unittest.TestCase):
     
     def test_empty_population(self):
         """
-        Test that selection methods raise ValueError when called with an empty population.
+        Verify that selection methods raise ValueError when invoked with an empty population.
         """
         with self.assertRaises(ValueError):
             self.strategy.tournament_selection([], tournament_size=2)
@@ -284,13 +284,13 @@ class TestFitnessFunction(unittest.TestCase):
     
     def setUp(self):
         """
-        Initialize the test fixture with a FitnessFunction instance for use in test methods.
+        Prepare the test environment by creating a FitnessFunction instance for use in test methods.
         """
         self.fitness_func = FitnessFunction()
     
     def test_sphere_function(self):
         """
-        Verify that the sphere fitness function computes the negative sum of squares for a given genome.
+        Verify that the sphere fitness function computes and returns the negative sum of squares for a given genome.
         """
         genome = [1.0, 2.0, 3.0]
         fitness = self.fitness_func.sphere_function(genome)
@@ -311,7 +311,7 @@ class TestFitnessFunction(unittest.TestCase):
     
     def test_rosenbrock_function(self):
         """
-        Test that the Rosenbrock fitness function returns 0.0 for the genome [1.0, 1.0], its known global minimum.
+        Verify that the Rosenbrock fitness function returns 0.0 for the genome [1.0, 1.0], corresponding to its global minimum.
         """
         genome = [1.0, 1.0]
         fitness = self.fitness_func.rosenbrock_function(genome)
@@ -321,9 +321,9 @@ class TestFitnessFunction(unittest.TestCase):
     
     def test_ackley_function(self):
         """
-        Verify that the Ackley fitness function returns 0.0 at the origin.
+        Verify that the Ackley fitness function returns 0.0 when evaluated at the origin genome.
         
-        Ensures that evaluating the Ackley function with a genome of all zeros produces the expected global minimum value.
+        Ensures that a genome of all zeros produces the global minimum for the Ackley function.
         """
         genome = [0.0, 0.0, 0.0]
         fitness = self.fitness_func.ackley_function(genome)
@@ -333,17 +333,17 @@ class TestFitnessFunction(unittest.TestCase):
     
     def test_custom_function(self):
         """
-        Verify that a custom fitness function correctly computes the sum of genome values when used with the fitness evaluation method.
+        Verify that a custom fitness function calculating the sum of genome values produces the correct fitness when evaluated.
         """
         def custom_func(genome):
             """
-            Return the sum of all numeric values in the given genome.
+            Return the sum of all numeric elements in the provided genome.
             
             Parameters:
-                genome (iterable): A sequence of numeric values.
+                genome (iterable): Sequence of numeric values to be summed.
             
             Returns:
-                int or float: The total sum of the genome's elements.
+                int or float: The sum of the genome's elements.
             """
             return sum(genome)
         
@@ -354,7 +354,7 @@ class TestFitnessFunction(unittest.TestCase):
     
     def test_multi_objective_function(self):
         """
-        Verify that the multi-objective fitness function evaluates a genome against multiple objectives and returns the expected fitness values for each objective.
+        Verifies that the multi-objective fitness function evaluates a genome against multiple objectives and returns the correct fitness values for each objective.
         """
         genome = [1.0, 2.0, 3.0]
         objectives = [
@@ -370,22 +370,22 @@ class TestFitnessFunction(unittest.TestCase):
     
     def test_constraint_handling(self):
         """
-        Verify that the fitness function applies a penalty to genomes that violate specified constraints during evaluation.
+        Verifies that the fitness function applies a penalty to genomes that violate specified constraints during evaluation.
         
-        This test checks that when a genome does not meet the constraint (sum of elements less than 5), the resulting fitness is reduced compared to the unconstrained evaluation.
+        Checks that when a genome does not meet the constraint (sum less than 5), the resulting fitness is reduced compared to the unconstrained evaluation.
         """
         genome = [1.0, 2.0, 3.0]
         
         def constraint_func(g):
             # Constraint: sum should be less than 5
             """
-            Return True if the sum of elements in the input iterable is less than 5.
+            Checks whether the sum of elements in the input iterable is less than 5.
             
             Parameters:
                 g (iterable): An iterable of numeric values.
             
             Returns:
-                bool: True if the sum is less than 5, False otherwise.
+                bool: True if the sum of elements is less than 5, otherwise False.
             """
             return sum(g) < 5
         
@@ -404,7 +404,7 @@ class TestPopulationManager(unittest.TestCase):
     
     def setUp(self):
         """
-        Initialize the PopulationManager and default parameters for genome length and population size for use in population manager tests.
+        Initialize a PopulationManager instance and default genome length and population size for population manager tests.
         """
         self.manager = PopulationManager()
         self.genome_length = 5
@@ -412,9 +412,7 @@ class TestPopulationManager(unittest.TestCase):
     
     def test_initialize_random_population(self):
         """
-        Verify that the population manager generates a random population with the specified size and genome length.
-        
-        Ensures each individual in the population contains a genome of the correct length and a fitness attribute.
+        Verify that initializing a random population produces the correct number of individuals with genomes of the specified length and a fitness attribute.
         """
         population = self.manager.initialize_random_population(
             self.population_size, 
@@ -430,9 +428,9 @@ class TestPopulationManager(unittest.TestCase):
     
     def test_initialize_seeded_population(self):
         """
-        Test that initializing a population with seed genomes includes the seeds and produces the correct population size.
+        Verify that initializing a population with seed genomes includes the seeds and produces the correct population size.
         
-        Verifies that the provided seed genomes are present in the resulting population and that the total number of individuals matches the specified population size.
+        Ensures that all provided seed genomes are present in the resulting population and that the total number of individuals matches the specified population size.
         """
         seeds = [
             [1.0, 2.0, 3.0, 4.0, 5.0],
@@ -486,7 +484,7 @@ class TestPopulationManager(unittest.TestCase):
     
     def test_get_population_statistics(self):
         """
-        Verify that the population statistics method returns accurate best, worst, average, median, and standard deviation fitness values for a given population.
+        Verify that population statistics are correctly computed for best, worst, average, median, and standard deviation of fitness values in a population.
         """
         population = [
             {'genome': [1, 2, 3], 'fitness': 0.5},
@@ -508,7 +506,7 @@ class TestPopulationManager(unittest.TestCase):
     
     def test_diversity_calculation(self):
         """
-        Verify that calculating diversity for a population of distinct genomes returns a positive float value.
+        Verifies that the population diversity calculation returns a positive float for a population of distinct genomes.
         """
         population = [
             {'genome': [1.0, 2.0, 3.0], 'fitness': 0.5},
@@ -537,7 +535,7 @@ class TestGeneticOperations(unittest.TestCase):
     
     def setUp(self):
         """
-        Initialize the test fixture by creating a GeneticOperations instance for use in genetic operations tests.
+        Initialize a GeneticOperations instance for use in genetic operations tests.
         """
         self.operations = GeneticOperations()
     
@@ -560,7 +558,7 @@ class TestGeneticOperations(unittest.TestCase):
     
     def test_two_point_crossover(self):
         """
-        Verify that two-point crossover produces two offspring with genomes matching the length of the parent genomes.
+        Verify that two-point crossover produces two children whose genome lengths match those of the parent genomes.
         """
         parent1 = [1, 2, 3, 4, 5, 6, 7, 8]
         parent2 = [9, 10, 11, 12, 13, 14, 15, 16]
@@ -572,7 +570,7 @@ class TestGeneticOperations(unittest.TestCase):
     
     def test_uniform_crossover(self):
         """
-        Verify that the uniform crossover operation produces two offspring with genome lengths matching the parent genomes.
+        Verify that the uniform crossover operation produces two children with lengths equal to the parent genomes.
         """
         parent1 = [1, 2, 3, 4, 5]
         parent2 = [6, 7, 8, 9, 10]
@@ -584,9 +582,9 @@ class TestGeneticOperations(unittest.TestCase):
     
     def test_arithmetic_crossover(self):
         """
-        Test that arithmetic crossover generates children as weighted averages of two parent genomes.
+        Verify that arithmetic crossover generates children as weighted averages of two parent genomes.
         
-        Verifies that the resulting children have the correct genome length and that each gene is the arithmetic combination of the corresponding genes from the parents using the specified alpha value.
+        Checks that the resulting children have the correct length and that each gene is the arithmetic mean of the corresponding genes from the parents using the specified alpha value.
         """
         parent1 = [1.0, 2.0, 3.0, 4.0, 5.0]
         parent2 = [6.0, 7.0, 8.0, 9.0, 10.0]
@@ -605,7 +603,7 @@ class TestGeneticOperations(unittest.TestCase):
     
     def test_simulated_binary_crossover(self):
         """
-        Verify that the simulated binary crossover (SBX) operation produces two offspring with the correct genome lengths and that all gene values remain within the specified bounds.
+        Verifies that the simulated binary crossover (SBX) operation produces two children of correct length, with all gene values within the specified bounds.
         """
         parent1 = [1.0, 2.0, 3.0, 4.0, 5.0]
         parent2 = [6.0, 7.0, 8.0, 9.0, 10.0]
@@ -656,7 +654,7 @@ class TestEvolutionaryConduit(unittest.TestCase):
     
     def setUp(self):
         """
-        Initialize test fixtures for EvolutionaryConduit tests, including a conduit instance and default evolutionary parameters.
+        Prepare the test environment by creating an EvolutionaryConduit instance and initializing default evolutionary parameters for use in EvolutionaryConduit tests.
         """
         self.conduit = EvolutionaryConduit()
         self.params = EvolutionaryParameters(
@@ -668,7 +666,7 @@ class TestEvolutionaryConduit(unittest.TestCase):
     
     def test_initialization(self):
         """
-        Verify that all core components of the EvolutionaryConduit are initialized and not None.
+        Verify that all core components of the EvolutionaryConduit are properly initialized.
         """
         self.assertIsNotNone(self.conduit.mutation_strategy)
         self.assertIsNotNone(self.conduit.selection_strategy)
@@ -678,7 +676,7 @@ class TestEvolutionaryConduit(unittest.TestCase):
     
     def test_set_fitness_function(self):
         """
-        Verify that a custom fitness function can be assigned to the evolutionary conduit and is correctly used to evaluate genome fitness.
+        Verify that a custom fitness function can be assigned to the conduit and is correctly used to evaluate genome fitness.
         """
         def custom_fitness(genome):
             """
@@ -688,7 +686,7 @@ class TestEvolutionaryConduit(unittest.TestCase):
             	genome (iterable): Iterable of numeric values representing the genome.
             
             Returns:
-            	float or int: The sum of the genome's elements, representing its fitness score.
+            	float or int: The total sum of the genome's elements as the fitness score.
             """
             return sum(genome)
         
@@ -701,7 +699,7 @@ class TestEvolutionaryConduit(unittest.TestCase):
     
     def test_set_parameters(self):
         """
-        Verify that setting evolutionary parameters in the conduit updates all parameter values as expected.
+        Verifies that setting evolutionary parameters in the conduit updates the parameters to the specified values.
         """
         self.conduit.set_parameters(self.params)
         
@@ -713,7 +711,7 @@ class TestEvolutionaryConduit(unittest.TestCase):
     @patch('app.ai_backend.genesis_evolutionary_conduit.EvolutionaryConduit.evolve')
     def test_run_evolution(self, mock_evolve):
         """
-        Verify that the evolution process executes and returns a result containing the keys 'best_individual', 'generations_run', 'final_population', and 'statistics'.
+        Verify that the evolution process executes and returns a result dictionary containing the keys 'best_individual', 'generations_run', 'final_population', and 'statistics'.
         """
         mock_evolve.return_value = {
             'best_individual': {'genome': [1, 2, 3], 'fitness': 0.9},
@@ -758,7 +756,7 @@ class TestEvolutionaryConduit(unittest.TestCase):
         
         def test_callback(generation, population, best_individual):
             """
-            A test callback function that sets a flag when invoked during the evolution process.
+            A test callback that sets a flag when invoked during the evolution process.
             
             Parameters:
                 generation (int): The current generation number.
@@ -775,9 +773,9 @@ class TestEvolutionaryConduit(unittest.TestCase):
     
     def test_evolution_history_tracking(self):
         """
-        Verify that enabling history tracking in the evolutionary conduit correctly records evolution history during a run.
+        Verify that enabling history tracking in the evolutionary conduit results in history being recorded during an evolution run.
         
-        Ensures that after running a mocked evolution process with history tracking enabled, the conduit reports history tracking as active.
+        Ensures that after running a mocked evolution process with history tracking enabled, the conduit reports that history tracking is active.
         """
         self.conduit.set_parameters(self.params)
         self.conduit.enable_history_tracking()
@@ -817,7 +815,7 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     
     def setUp(self):
         """
-        Initialize test fixtures for GenesisEvolutionaryConduit tests, including a conduit instance and evolutionary parameters.
+        Initialize test fixtures for GenesisEvolutionaryConduit tests by creating a conduit instance and setting evolutionary parameters.
         """
         self.genesis_conduit = GenesisEvolutionaryConduit()
         self.params = EvolutionaryParameters(
@@ -838,7 +836,7 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     
     def test_neural_network_evolution(self):
         """
-        Verify that the neural network evolution process correctly creates a neural network instance when provided with valid network configuration parameters.
+        Verifies that configuring network parameters enables successful creation of a neural network instance during the evolution process.
         """
         # Set up network evolution parameters
         network_config = {
@@ -872,9 +870,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     
     def test_topology_evolution(self):
         """
-        Verify that mutating a neural network topology yields a valid structure with required keys.
+        Verify that mutating a neural network topology yields a valid dictionary structure with required keys.
         
-        Ensures the mutated topology is a dictionary containing both 'layers' and 'connections'.
+        Ensures the mutated topology contains both 'layers' and 'connections' entries after mutation.
         """
         # Start with simple topology
         topology = {
@@ -890,7 +888,7 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     
     def test_hyperparameter_optimization(self):
         """
-        Verify that hyperparameter optimization generates hyperparameters within the specified search space and includes all required keys.
+        Verify that hyperparameter optimization generates values within the specified search space and includes all required hyperparameter keys.
         """
         search_space = {
             'learning_rate': (0.001, 0.1),
@@ -913,7 +911,7 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     
     def test_multi_objective_optimization(self):
         """
-        Verifies that multi-objective optimization evaluates a genome against multiple objectives and returns a fitness vector with the correct number of objectives.
+        Verify that multi-objective optimization evaluates a genome against multiple objectives and returns a fitness vector with the correct length.
         """
         objectives = [
             'accuracy',
@@ -932,7 +930,7 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     
     def test_adaptive_mutation_rates(self):
         """
-        Tests that the adaptive mutation rate calculation returns a float within the valid range [0.0, 1.0] based on the population's fitness history.
+        Test that adaptive mutation rate calculation returns a float within [0, 1] based on population fitness history.
         """
         # Set up population with fitness history
         population = [
@@ -949,9 +947,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     
     def test_speciation(self):
         """
-        Test that the speciation process clusters individuals into species based on genome similarity.
+        Test that the speciation process groups individuals into species based on genome similarity.
         
-        Ensures that the resulting species structure is a non-empty list, indicating successful grouping for diversity maintenance.
+        Ensures that the returned species structure is a non-empty list, indicating successful grouping for population diversity.
         """
         population = [
             {'genome': [1.0, 2.0, 3.0], 'fitness': 0.5},
@@ -967,7 +965,7 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     
     def test_transfer_learning(self):
         """
-        Verify that a pretrained neural network genome can be successfully adapted to a new task using transfer learning.
+        Verify that a pretrained neural network genome can be adapted to a new task using transfer learning.
         
         Asserts that the adapted genome is a non-empty list after applying adaptation with a new task configuration.
         """
@@ -985,9 +983,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     
     def test_ensemble_evolution(self):
         """
-        Verifies that ensemble evolution selects the specified number of top-performing networks based on fitness.
+        Verify that ensemble evolution selects the specified number of top-performing networks based on fitness.
         
-        Ensures that the ensemble creation method returns the highest-fitness networks from the given population.
+        Ensures that the ensemble creation method returns the networks with the highest fitness values from the input population.
         """
         # Create multiple networks
         networks = [
@@ -1005,9 +1003,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     
     def test_novelty_search(self):
         """
-        Verify that novelty search assigns a numeric novelty score to each individual in the population.
+        Verify that novelty search computes a numeric novelty score for each individual in the population.
         
-        Checks that the number of novelty scores matches the population size and that all scores are numeric.
+        Ensures the number of novelty scores matches the population size and that all scores are numeric.
         """
         population = [
             {'genome': [1.0, 2.0, 3.0], 'fitness': 0.5},
@@ -1059,9 +1057,9 @@ class TestGenesisEvolutionaryConduit(unittest.TestCase):
     
     def test_distributed_evolution(self):
         """
-        Test distributed evolution with an island model and verify that migration produces updated populations.
+        Verify that distributed evolution with an island model correctly migrates individuals between islands and returns updated populations as a tuple.
         
-        This test configures multiple islands, simulates populations, and checks that migrating individuals between islands returns a tuple of updated populations.
+        This test configures multiple islands, simulates initial populations, performs migration, and asserts that the migration result is a tuple containing two updated populations.
         """
         # Mock distributed setup
         island_configs = [
@@ -1110,7 +1108,7 @@ class TestEvolutionaryException(unittest.TestCase):
     
     def test_exception_raising(self):
         """
-        Test that raising an EvolutionaryException is correctly handled as an expected exception.
+        Verify that raising an EvolutionaryException triggers the expected exception handling.
         """
         with self.assertRaises(EvolutionaryException):
             raise EvolutionaryException("Test exception")
@@ -1121,7 +1119,7 @@ class TestIntegrationScenarios(unittest.TestCase):
     
     def setUp(self):
         """
-        Initialize test fixtures for integration tests by creating a GenesisEvolutionaryConduit instance and default evolutionary parameters.
+        Prepare the integration test environment by creating a GenesisEvolutionaryConduit instance and default evolutionary parameters.
         """
         self.genesis_conduit = GenesisEvolutionaryConduit()
         self.params = EvolutionaryParameters(
@@ -1133,9 +1131,9 @@ class TestIntegrationScenarios(unittest.TestCase):
     
     def test_complete_evolution_cycle(self):
         """
-        Test that the entire evolution cycle executes from start to finish and returns the expected result structure.
+        Verify that the complete evolution cycle executes from initialization to completion and returns a result containing the best individual and the correct number of generations.
         
-        Verifies that, with the evolution process mocked, the result contains the best individual and the correct number of generations.
+        This test mocks the evolution process to ensure the returned result structure includes the expected keys and values.
         """
         # Set up fitness function
         def simple_fitness(genome):
@@ -1169,9 +1167,7 @@ class TestIntegrationScenarios(unittest.TestCase):
     
     def test_neural_network_evolution_pipeline(self):
         """
-        Tests the end-to-end neural network evolution pipeline using GenesisEvolutionaryConduit.
-        
-        Verifies that setting a network configuration and training data enables successful creation of a neural network instance.
+        Verifies the neural network evolution pipeline by configuring the network, providing training data, and creating a neural network instance using the GenesisEvolutionaryConduit.
         """
         # Set up network configuration
         network_config = {
@@ -1195,7 +1191,7 @@ class TestIntegrationScenarios(unittest.TestCase):
     
     def test_multi_objective_optimization_pipeline(self):
         """
-        Verify that the multi-objective optimization pipeline sets objectives and returns the correct fitness vector for a given genome.
+        Verifies that the multi-objective optimization pipeline sets objectives and returns the correct fitness vector for a given genome.
         """
         objectives = ['accuracy', 'model_size']
         self.genesis_conduit.set_objectives(objectives)
@@ -1214,9 +1210,7 @@ class TestIntegrationScenarios(unittest.TestCase):
     
     def test_adaptive_evolution_pipeline(self):
         """
-        Test that the adaptive evolution pipeline calculates a valid mutation rate based on population fitness.
-        
-        Ensures the computed adaptive mutation rate is a float within the range [0.0, 1.0] when given a population with diverse fitness values.
+        Verifies that the adaptive evolution pipeline calculates a mutation rate as a float within [0.0, 1.0] based on population fitness values.
         """
         # Set up population with varying fitness
         population = [
@@ -1234,9 +1228,9 @@ class TestIntegrationScenarios(unittest.TestCase):
     
     def test_error_handling_and_recovery(self):
         """
-        Verify that invalid evolutionary parameters and fitness evaluation failures raise the correct exceptions during the evolution process.
+        Verify that invalid evolutionary parameters raise a ValueError and that fitness evaluation failures during evolution raise an EvolutionaryException.
         
-        This test ensures that providing invalid parameters raises a `ValueError`, and that a failure in the fitness function triggers an `EvolutionaryException` when running evolution.
+        This test ensures robust error handling and recovery mechanisms in the evolutionary process.
         """
         # Test invalid parameters
         with self.assertRaises(ValueError):
@@ -1264,9 +1258,7 @@ class TestAsyncEvolution(unittest.TestCase):
     
     def setUp(self):
         """
-        Set up the test environment for asynchronous evolution tests.
-        
-        Initializes a GenesisEvolutionaryConduit instance and configures evolutionary parameters for use in test methods.
+        Prepare the test environment for asynchronous evolution tests by initializing the GenesisEvolutionaryConduit and setting basic evolutionary parameters.
         """
         self.genesis_conduit = GenesisEvolutionaryConduit()
         self.params = EvolutionaryParameters(
@@ -1277,13 +1269,13 @@ class TestAsyncEvolution(unittest.TestCase):
     @patch('asyncio.run')
     def test_async_evolution_execution(self, mock_run):
         """
-        Test that asynchronous evolution execution returns a valid result when the evolution process is mocked.
+        Verifies that asynchronous evolution execution returns a valid result when the evolution process is mocked.
         
-        Verifies that the `run_async_evolution` method of the evolutionary conduit produces a non-None result when the asynchronous evolution process is simulated.
+        This test ensures that the `run_async_evolution` method of the evolutionary conduit produces a non-None result when the asynchronous evolution process is simulated.
         """
         async def mock_async_evolve():
             """
-            Simulates an asynchronous evolutionary process and returns a mock result dictionary.
+            Simulates an asynchronous evolutionary process and returns mock evolutionary results.
             
             Returns:
                 dict: A dictionary containing a mock best individual, the number of generations run, the final population, and summary statistics.
@@ -1305,9 +1297,9 @@ class TestAsyncEvolution(unittest.TestCase):
     @patch('concurrent.futures.ThreadPoolExecutor')
     def test_parallel_fitness_evaluation(self, mock_executor):
         """
-        Test that population fitness evaluation is performed in parallel using a mocked executor.
+        Verify that population fitness evaluation is performed in parallel using a mocked executor.
         
-        Verifies that the parallel evaluation mechanism is invoked and that each individual in the population receives a fitness value.
+        Ensures that the parallel evaluation mechanism is invoked and that fitness values are assigned to each individual in the population.
         """
         # Mock parallel execution
         mock_executor.return_value.__enter__.return_value.map.return_value = [0.5, 0.7, 0.9]
@@ -1320,7 +1312,7 @@ class TestAsyncEvolution(unittest.TestCase):
         
         def fitness_func(genome):
             """
-            Calculate the fitness score of a genome as the sum of its elements.
+            Calculate the fitness score of a genome as the sum of its numeric elements.
             
             Parameters:
                 genome (Iterable[float]): Sequence of numeric values representing the genome.
