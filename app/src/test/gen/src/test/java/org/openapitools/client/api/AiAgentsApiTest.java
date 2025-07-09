@@ -16,7 +16,6 @@ import org.openapitools.client.ApiException;
 import org.openapitools.client.model.AgentMessage;
 import org.openapitools.client.model.AgentProcessRequest;
 import org.openapitools.client.model.AgentType;
-import org.openapitools.client.model.ApiError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -24,12 +23,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -154,8 +147,6 @@ public class AiAgentsApiTest {
             // Given
             AgentType agentType = AgentType.CHAT;
             AgentProcessRequest longContentRequest = new AgentProcessRequest();
-            // Create a very long string (10000 characters)
-            String longContent = "a".repeat(10000);
             // Set long content if the model supports it
             
             // When & Then
@@ -171,7 +162,6 @@ public class AiAgentsApiTest {
             // Given
             AgentType agentType = AgentType.CHAT;
             AgentProcessRequest specialCharRequest = new AgentProcessRequest();
-            String specialContent = "Hello! @#$%^&*()_+-=[]{}|;':\",./<>?~`";
             // Set special character content if the model supports it
             
             // When & Then
@@ -187,7 +177,6 @@ public class AiAgentsApiTest {
             // Given
             AgentType agentType = AgentType.CHAT;
             AgentProcessRequest unicodeRequest = new AgentProcessRequest();
-            String unicodeContent = "Hello 世界 🌍 مرحبا بالعالم";
             // Set unicode content if the model supports it
             
             // When & Then
@@ -302,9 +291,9 @@ public class AiAgentsApiTest {
         @DisplayName("Should handle null agent type gracefully")
         void shouldHandleNullAgentTypeGracefully(AgentType agentType) {
             // When & Then
-            assertThrows(Exception.class, () -> {
+            assertThrows(ApiException.class, () -> {
                 api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
-            }, "Should throw exception for null agent type");
+            }, "Should throw ApiException for null agent type");
         }
     }
 

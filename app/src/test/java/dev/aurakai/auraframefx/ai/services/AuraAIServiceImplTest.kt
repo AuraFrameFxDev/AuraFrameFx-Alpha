@@ -2,6 +2,9 @@ package dev.aurakai.auraframefx.ai.services
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.Deferred
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.AfterEach
@@ -541,34 +544,6 @@ class AuraAIServiceImplTest {
         }
     }
     
-    // Helper methods
-    private fun mockHttpResponse(statusCode: Int, body: String): HttpResponse {
-        val mockResponse = mock<HttpResponse>()
-        whenever(mockResponse.statusCode).thenReturn(statusCode)
-        whenever(mockResponse.body).thenReturn(body)
-        return mockResponse
-    }
-
-    private fun async(block: suspend () -> Any): Deferred<Any> {
-        // Mock async implementation for testing
-        return mock<Deferred<Any>>()
-    }
-
-    private fun <T> List<Deferred<T>>.awaitAll(): List<T> {
-        // Mock awaitAll implementation for testing
-        return this.map { mock<T>() }
-    }
-}
-
-// Custom exception classes for testing
-class BatchProcessingException(message: String) : Exception(message)
-class RateLimitException(message: String) : Exception(message)
-class AuthenticationException(message: String) : Exception(message)
-class QuotaExceededException(message: String) : Exception(message)
-class JsonParseException(message: String) : Exception(message)
-
-// Mock data classes
-data class HealthCheckResult(val isHealthy: Boolean, val message: String)
     @Nested
     @DisplayName("Performance and Load Tests")
     inner class PerformanceAndLoadTests {
@@ -1088,6 +1063,14 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             verify(mockLogger).info("Remaining quota: ${any<Int>()} requests")
         }
     }
+    
+    // Helper methods
+    private fun mockHttpResponse(statusCode: Int, body: String): HttpResponse {
+        val mockResponse = mock<HttpResponse>()
+        whenever(mockResponse.statusCode).thenReturn(statusCode)
+        whenever(mockResponse.body).thenReturn(body)
+        return mockResponse
+    }
 
     // Additional helper methods for new test scenarios
     private fun mockStreamingHttpResponse(chunks: List<String>): StreamingHttpResponse {
@@ -1097,11 +1080,19 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
     }
 }
 
-// Additional exception classes for comprehensive testing
+// Custom exception classes for testing
+class BatchProcessingException(message: String) : Exception(message)
+class RateLimitException(message: String) : Exception(message)
+class AuthenticationException(message: String) : Exception(message)
+class QuotaExceededException(message: String) : Exception(message)
+class JsonParseException(message: String) : Exception(message)
 class CircuitBreakerOpenException(message: String) : Exception(message)
 class SSLHandshakeException(message: String) : Exception(message)
 class CertificateExpiredException(message: String) : Exception(message)
 class CancellationException(message: String) : Exception(message)
+
+// Mock data classes
+data class HealthCheckResult(val isHealthy: Boolean, val message: String)
 
 // Additional mock interfaces for testing
 interface StreamingHttpResponse {
@@ -1110,4 +1101,55 @@ interface StreamingHttpResponse {
 
 interface CancellationToken {
     val isCancelled: Boolean
+}
+
+// Mock interfaces that need to be defined
+interface HttpClient {
+    suspend fun post(request: Any): HttpResponse
+    suspend fun get(url: Any): HttpResponse
+    suspend fun postStreaming(request: Any): StreamingHttpResponse
+}
+
+interface HttpResponse {
+    val statusCode: Int
+    val body: String
+    val headers: Map<String, String>
+}
+
+interface ConfigurationService {
+    fun getApiKey(): String?
+    fun getBaseUrl(): String
+    fun getTimeout(): Long
+    fun updateApiKey(apiKey: String)
+    fun updateBaseUrl(baseUrl: String)
+    fun updateTimeout(timeout: Long)
+    fun isCircuitBreakerHalfOpen(): Boolean
+    fun isCacheExpired(key: Any): Boolean
+}
+
+interface Logger {
+    fun info(message: String)
+    fun error(message: String)
+    fun warn(message: String)
+}
+
+// Mock AuraAIServiceImpl interface
+interface AuraAIServiceImpl {
+    suspend fun generateResponse(prompt: String): String
+    suspend fun generateBatchResponses(prompts: List<String>): List<String>
+    fun updateApiKey(apiKey: String)
+    fun updateBaseUrl(baseUrl: String)
+    fun updateTimeout(timeout: Long)
+    suspend fun healthCheck(): HealthCheckResult
+    suspend fun generateStreamingResponse(prompt: String, callback: (String) -> Unit)
+    suspend fun generateResponseAsync(prompt: String, cancellationToken: CancellationToken): String
+}
+
+// Constructor function for AuraAIServiceImpl
+fun AuraAIServiceImpl(
+    httpClient: HttpClient,
+    configurationService: ConfigurationService,
+    logger: Logger
+): AuraAIServiceImpl {
+    return mock<AuraAIServiceImpl>()
 }
