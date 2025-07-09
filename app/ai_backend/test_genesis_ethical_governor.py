@@ -1,6 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-import json
+from unittest.mock import patch
 import time
 from datetime import datetime, timedelta
 
@@ -296,7 +295,6 @@ class TestGenesisEthicalGovernor:
         """Test concurrent decision evaluation"""
         import threading
         
-        decisions = []
         results = []
         
         def make_decision(decision_id):
