@@ -38,9 +38,9 @@ object DatabaseModule {
     }
 
     /**
-     * Returns the AgentMemoryDao instance from the provided AppDatabase.
+     * Provides the AgentMemoryDao instance from the given AppDatabase.
      *
-     * @return The AgentMemoryDao used for accessing agent memory records.
+     * @return The DAO for accessing agent memory records.
      */
     @Provides
     fun provideAgentMemoryDao(database: AppDatabase): AgentMemoryDao {

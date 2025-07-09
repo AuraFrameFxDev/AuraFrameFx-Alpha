@@ -30,11 +30,11 @@ import javax.inject.Singleton
 object TrinityModule {
 
     /**
-     * Provides a singleton GenesisBridgeService instance that connects multiple AI services with the Trinity Python backend.
+     * Provides a singleton instance of GenesisBridgeService for integrating multiple AI services with the Trinity Python backend.
      *
-     * The returned service enables integrated communication between AI components, context management, security, and the application environment.
+     * The service facilitates communication between AI components, manages context and security, and operates within the application environment.
      *
-     * @return A configured GenesisBridgeService singleton instance.
+     * @return A configured GenesisBridgeService singleton.
      */
     @Provides
     @Singleton
@@ -59,9 +59,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton instance of TrinityCoordinatorService for coordinating AI personas in the Trinity AI system.
+     * Provides a singleton instance of `TrinityCoordinatorService` for orchestrating AI personas within the Trinity AI system.
      *
-     * @return A configured singleton instance of TrinityCoordinatorService.
+     * @return A singleton `TrinityCoordinatorService` configured with AI services, the Genesis bridge, security context, and logger.
      */
     @Provides
     @Singleton
@@ -82,11 +82,11 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton instance of SecurityMonitor for managing security operations within the Trinity AI system.
+     * Provides a singleton SecurityMonitor for managing security operations in the Trinity AI system.
      *
-     * The SecurityMonitor is configured with the specified security context, Genesis bridge service, and logger.
+     * The returned SecurityMonitor is configured with the given security context, Genesis bridge service, and logger.
      *
-     * @return A configured singleton SecurityMonitor instance.
+     * @return A singleton instance of SecurityMonitor.
      */
     @Provides
     @Singleton
