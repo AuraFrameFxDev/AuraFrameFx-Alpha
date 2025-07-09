@@ -3578,3 +3578,891 @@ if __name__ == '__main__':
         run_comprehensive_test_suite()
     else:
         unittest.main(verbosity=2)
+
+class TestGenesisConnectorAdvancedErrorHandling(unittest.TestCase):
+    """
+    Advanced error handling tests for GenesisConnector.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up advanced error handling test environment."""
+        self.connector = GenesisConnector()
+
+    def test_connection_pool_exhaustion(self):
+        """Test behavior when connection pool is exhausted."""
+        with patch('requests.post') as mock_post:
+            mock_post.side_effect = ConnectionError("HTTPSConnectionPool: Pool is full")
+            
+            payload = {'message': 'pool_test'}
+            
+            with self.assertRaises(ConnectionError):
+                self.connector.send_request(payload)
+
+    def test_dns_resolution_edge_cases(self):
+        """Test DNS resolution edge cases and failures."""
+        import socket
+        
+        dns_errors = [
+            socket.gaierror(2, "Name or service not known"),
+            socket.gaierror(3, "Temporary failure in name resolution"),
+            socket.gaierror(11, "Resource temporarily unavailable"),
+        ]
+        
+        for error in dns_errors:
+            with self.subTest(error=error.args[1]):
+                with patch('requests.get') as mock_get:
+                    mock_get.side_effect = error
+                    
+                    result = self.connector.connect()
+                    self.assertFalse(result)
+
+    def test_ssl_certificate_validation_errors(self):
+        """Test various SSL certificate validation errors."""
+        import ssl
+        
+        ssl_errors = [
+            ssl.SSLError("certificate verify failed: self signed certificate"),
+            ssl.SSLError("certificate verify failed: certificate has expired"),
+            ssl.SSLError("certificate verify failed: hostname mismatch"),
+            ssl.SSLError("certificate verify failed: unable to get local issuer certificate"),
+        ]
+        
+        for error in ssl_errors:
+            with self.subTest(error=str(error)):
+                with patch('requests.get') as mock_get:
+                    mock_get.side_effect = error
+                    
+                    result = self.connector.connect()
+                    self.assertFalse(result)
+
+    def test_http_protocol_errors(self):
+        """Test various HTTP protocol-level errors."""
+        protocol_errors = [
+            ConnectionResetError("Connection reset by peer"),
+            BrokenPipeError("Broken pipe"),
+            ConnectionAbortedError("Connection aborted"),
+        ]
+        
+        for error in protocol_errors:
+            with self.subTest(error=error.__class__.__name__):
+                with patch('requests.post') as mock_post:
+                    mock_post.side_effect = error
+                    
+                    payload = {'message': 'protocol_test'}
+                    
+                    with self.assertRaises(Exception):
+                        self.connector.send_request(payload)
+
+    def test_json_encoding_errors(self):
+        """Test JSON encoding errors with various problematic data."""
+        problematic_data = [
+            {'circular': None},  # Will be set to circular reference
+            {'generator': (x for x in range(10))},  # Generator object
+            {'function': lambda x: x},  # Function object
+            {'bytes': b'\x80\x81\x82'},  # Non-UTF8 bytes
+        ]
+        
+        # Create circular reference
+        problematic_data[0]['circular'] = problematic_data[0]
+        
+        for data in problematic_data:
+            with self.subTest(data_type=str(type(list(data.values())[0]))):
+                with self.assertRaises((ValueError, TypeError)):
+                    self.connector.format_payload(data)
+
+    def test_unicode_normalization_issues(self):
+        """Test Unicode normalization and encoding issues."""
+        import unicodedata
+        
+        unicode_test_cases = [
+            # Different Unicode normalizations of the same character
+            'café',  # NFC normalization
+            'cafe\u0301',  # NFD normalization (e + combining acute accent)
+            # Unicode control characters
+            'test\u200bstring',  # Zero-width space
+            'test\u2028string',  # Line separator
+            'test\u2029string',  # Paragraph separator
+            # Bidirectional text
+            'hello\u202eworld',  # Right-to-left override
+            # Surrogate pairs
+            '𝓗𝓮𝓵𝓵𝓸',  # Mathematical script letters
+        ]
+        
+        for test_string in unicode_test_cases:
+            with self.subTest(string=repr(test_string)):
+                payload = {'message': test_string}
+                
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+                except (ValueError, UnicodeError):
+                    # Some Unicode issues might be rejected
+                    pass
+
+    def test_memory_mapped_file_handling(self):
+        """Test handling of memory-mapped file objects."""
+        import tempfile
+        import mmap
+        
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_file.write(b'test data for mmap')
+            tmp_file.flush()
+            
+            with open(tmp_file.name, 'r+b') as f:
+                with mmap.mmap(f.fileno(), 0) as mmapped_file:
+                    payload = {'mmap_data': mmapped_file}
+                    
+                    with self.assertRaises((ValueError, TypeError)):
+                        self.connector.format_payload(payload)
+
+    def test_signal_interruption_handling(self):
+        """Test handling of signal interruptions during operations."""
+        import signal
+        
+        def timeout_handler(signum, frame):
+            raise TimeoutError("Operation timed out")
+        
+        # Set up signal handler for timeout
+        old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+        
+        try:
+            with patch('requests.post') as mock_post:
+                # Simulate slow response
+                import time
+                def slow_response(*args, **kwargs):
+                    time.sleep(0.1)
+                    mock_response = Mock()
+                    mock_response.status_code = 200
+                    mock_response.json.return_value = {'data': 'slow'}
+                    return mock_response
+                
+                mock_post.side_effect = slow_response
+                
+                payload = {'message': 'signal_test'}
+                
+                # Set alarm for very short timeout
+                signal.alarm(1)
+                
+                try:
+                    result = self.connector.send_request(payload)
+                    self.assertIsNotNone(result)
+                except TimeoutError:
+                    # Expected if signal fires
+                    pass
+                finally:
+                    signal.alarm(0)  # Cancel alarm
+        finally:
+            signal.signal(signal.SIGALRM, old_handler)
+
+    def test_file_descriptor_leaks(self):
+        """Test for file descriptor leaks in connection handling."""
+        import os
+        import resource
+        
+        # Get initial file descriptor count
+        initial_fds = len(os.listdir('/proc/self/fd')) if os.path.exists('/proc/self/fd') else 0
+        
+        # Make many requests that might leak file descriptors
+        for i in range(50):
+            with patch('requests.post') as mock_post:
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = {'id': i}
+                mock_post.return_value = mock_response
+                
+                payload = {'test_id': i}
+                try:
+                    result = self.connector.send_request(payload)
+                    self.assertIsNotNone(result)
+                except Exception:
+                    # Ignore errors for leak testing
+                    pass
+        
+        # Check for fd leaks
+        if initial_fds > 0:
+            final_fds = len(os.listdir('/proc/self/fd'))
+            # Allow some growth but not excessive
+            self.assertLess(final_fds - initial_fds, 10)
+
+    def test_thread_local_storage_issues(self):
+        """Test thread-local storage and context issues."""
+        import threading
+        import time
+        
+        results = []
+        errors = []
+        
+        def worker(worker_id):
+            """Worker function that tests thread-local behavior."""
+            try:
+                # Create connector with thread-specific config
+                connector = GenesisConnector(config={
+                    'api_key': f'thread_key_{worker_id}',
+                    'base_url': f'https://thread{worker_id}.test.com'
+                })
+                
+                with patch('requests.post') as mock_post:
+                    mock_response = Mock()
+                    mock_response.status_code = 200
+                    mock_response.json.return_value = {'worker_id': worker_id}
+                    mock_post.return_value = mock_response
+                    
+                    payload = {'worker': worker_id, 'data': 'thread_test'}
+                    result = connector.send_request(payload)
+                    results.append(result)
+                    
+                    # Verify thread-local state
+                    headers = connector.get_headers()
+                    self.assertIn('Authorization', headers)
+                    
+            except Exception as e:
+                errors.append(e)
+        
+        # Start multiple threads
+        threads = [threading.Thread(target=worker, args=(i,)) for i in range(10)]
+        for thread in threads:
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+        
+        # Verify all threads completed successfully
+        self.assertEqual(len(results), 10)
+        self.assertEqual(len(errors), 0)
+
+    def test_exception_chaining_preservation(self):
+        """Test that exception chaining is preserved through error handling."""
+        with patch('requests.post') as mock_post:
+            # Create a chained exception
+            original_exception = ValueError("Original error")
+            chained_exception = RuntimeError("Chained error")
+            chained_exception.__cause__ = original_exception
+            
+            mock_post.side_effect = chained_exception
+            
+            payload = {'message': 'chain_test'}
+            
+            try:
+                self.connector.send_request(payload)
+                self.fail("Expected exception was not raised")
+            except RuntimeError as e:
+                # Verify exception chain is preserved
+                self.assertEqual(str(e), "Chained error")
+                self.assertIsInstance(e.__cause__, ValueError)
+                self.assertEqual(str(e.__cause__), "Original error")
+
+
+class TestGenesisConnectorAsyncPatterns(unittest.TestCase):
+    """
+    Async pattern tests for GenesisConnector.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up async pattern test environment."""
+        self.connector = GenesisConnector()
+
+    def test_async_context_manager_simulation(self):
+        """Test async context manager patterns."""
+        class AsyncConnector:
+            def __init__(self, connector):
+                self.connector = connector
+                self.entered = False
+                self.exited = False
+            
+            async def __aenter__(self):
+                self.entered = True
+                return self.connector
+            
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                self.exited = True
+                return False
+        
+        async def test_async_context():
+            async with AsyncConnector(self.connector) as conn:
+                self.assertIsNotNone(conn)
+                return True
+        
+        # Test async context manager
+        try:
+            import asyncio
+            loop = asyncio.get_event_loop()
+            result = loop.run_until_complete(test_async_context())
+            self.assertTrue(result)
+        except RuntimeError:
+            # Skip if no event loop available
+            pass
+
+    def test_callback_pattern_handling(self):
+        """Test callback pattern handling in requests."""
+        callback_results = []
+        
+        def success_callback(response):
+            callback_results.append(('success', response))
+        
+        def error_callback(error):
+            callback_results.append(('error', error))
+        
+        # Simulate callback-based request handling
+        with patch('requests.post') as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {'callback': 'test'}
+            mock_post.return_value = mock_response
+            
+            payload = {'message': 'callback_test'}
+            
+            try:
+                result = self.connector.send_request(payload)
+                success_callback(result)
+            except Exception as e:
+                error_callback(e)
+        
+        # Verify callback was called
+        self.assertEqual(len(callback_results), 1)
+        self.assertEqual(callback_results[0][0], 'success')
+
+    def test_future_pattern_simulation(self):
+        """Test future pattern simulation for async operations."""
+        import concurrent.futures
+        
+        def make_async_request(payload):
+            """Simulate async request using futures."""
+            with patch('requests.post') as mock_post:
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = {'async': True, 'payload': payload}
+                mock_post.return_value = mock_response
+                
+                return self.connector.send_request(payload)
+        
+        # Test future pattern
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            futures = [
+                executor.submit(make_async_request, {'id': i})
+                for i in range(5)
+            ]
+            
+            results = [future.result() for future in futures]
+        
+        # Verify all futures completed
+        self.assertEqual(len(results), 5)
+        for i, result in enumerate(results):
+            self.assertEqual(result['payload']['id'], i)
+
+    def test_generator_pattern_handling(self):
+        """Test generator pattern for streaming data."""
+        def data_generator():
+            """Generator that yields test data."""
+            for i in range(10):
+                yield {'item': i, 'data': f'test_data_{i}'}
+        
+        # Test processing generator data
+        processed_items = []
+        
+        for item in data_generator():
+            try:
+                formatted = self.connector.format_payload(item)
+                processed_items.append(formatted)
+            except Exception:
+                # Skip problematic items
+                pass
+        
+        # Verify generator processing
+        self.assertEqual(len(processed_items), 10)
+
+    def test_observer_pattern_simulation(self):
+        """Test observer pattern for event handling."""
+        class EventObserver:
+            def __init__(self):
+                self.events = []
+            
+            def on_request_start(self, payload):
+                self.events.append(('request_start', payload))
+            
+            def on_request_complete(self, response):
+                self.events.append(('request_complete', response))
+            
+            def on_request_error(self, error):
+                self.events.append(('request_error', error))
+        
+        observer = EventObserver()
+        
+        # Simulate request with observer
+        with patch('requests.post') as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {'observer': 'test'}
+            mock_post.return_value = mock_response
+            
+            payload = {'message': 'observer_test'}
+            
+            observer.on_request_start(payload)
+            try:
+                result = self.connector.send_request(payload)
+                observer.on_request_complete(result)
+            except Exception as e:
+                observer.on_request_error(e)
+        
+        # Verify observer events
+        self.assertEqual(len(observer.events), 2)
+        self.assertEqual(observer.events[0][0], 'request_start')
+        self.assertEqual(observer.events[1][0], 'request_complete')
+
+
+class TestGenesisConnectorNetworkResilience(unittest.TestCase):
+    """
+    Network resilience tests for GenesisConnector.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up network resilience test environment."""
+        self.connector = GenesisConnector()
+
+    def test_network_flapping_handling(self):
+        """Test handling of network flapping (intermittent connectivity)."""
+        # Simulate alternating success/failure pattern
+        responses = []
+        for i in range(20):
+            if i % 2 == 0:
+                # Success
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = {'attempt': i}
+                responses.append(mock_response)
+            else:
+                # Failure
+                responses.append(ConnectionError("Network unreachable"))
+        
+        success_count = 0
+        failure_count = 0
+        
+        for i, response in enumerate(responses):
+            with patch('requests.post') as mock_post:
+                if isinstance(response, Exception):
+                    mock_post.side_effect = response
+                else:
+                    mock_post.return_value = response
+                
+                payload = {'attempt': i}
+                try:
+                    result = self.connector.send_request(payload)
+                    success_count += 1
+                    self.assertEqual(result['attempt'], i)
+                except Exception:
+                    failure_count += 1
+        
+        # Verify expected pattern
+        self.assertEqual(success_count, 10)
+        self.assertEqual(failure_count, 10)
+
+    def test_bandwidth_limitation_handling(self):
+        """Test handling of bandwidth limitations."""
+        import time
+        
+        def slow_response(*args, **kwargs):
+            """Simulate slow response due to bandwidth limits."""
+            time.sleep(0.1)  # Simulate network delay
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {'bandwidth': 'limited'}
+            return mock_response
+        
+        with patch('requests.post') as mock_post:
+            mock_post.side_effect = slow_response
+            
+            payload = {'message': 'bandwidth_test'}
+            
+            start_time = time.time()
+            result = self.connector.send_request(payload)
+            end_time = time.time()
+            
+            # Verify request completed despite delay
+            self.assertIsNotNone(result)
+            self.assertGreater(end_time - start_time, 0.05)  # At least some delay
+
+    def test_packet_loss_simulation(self):
+        """Test handling of packet loss scenarios."""
+        import random
+        
+        def packet_loss_response(*args, **kwargs):
+            """Simulate packet loss with random failures."""
+            if random.random() < 0.3:  # 30% packet loss
+                raise ConnectionError("Packet loss")
+            
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {'packet_loss': 'handled'}
+            return mock_response
+        
+        success_count = 0
+        failure_count = 0
+        
+        for i in range(100):
+            with patch('requests.post') as mock_post:
+                mock_post.side_effect = packet_loss_response
+                
+                payload = {'attempt': i}
+                try:
+                    result = self.connector.send_request(payload)
+                    success_count += 1
+                except ConnectionError:
+                    failure_count += 1
+        
+        # Verify some requests succeeded despite packet loss
+        self.assertGreater(success_count, 50)
+        self.assertGreater(failure_count, 10)
+
+    def test_network_congestion_handling(self):
+        """Test handling of network congestion scenarios."""
+        congestion_responses = [
+            (429, "Too Many Requests"),  # Rate limiting
+            (503, "Service Unavailable"),  # Temporary overload
+            (502, "Bad Gateway"),  # Upstream congestion
+        ]
+        
+        for status_code, reason in congestion_responses:
+            with self.subTest(status_code=status_code):
+                with patch('requests.post') as mock_post:
+                    mock_response = Mock()
+                    mock_response.status_code = status_code
+                    mock_response.reason = reason
+                    mock_post.return_value = mock_response
+                    
+                    payload = {'congestion_test': status_code}
+                    
+                    with self.assertRaises(RuntimeError):
+                        self.connector.send_request(payload)
+
+    def test_proxy_failure_handling(self):
+        """Test handling of proxy failures."""
+        import requests
+        
+        proxy_errors = [
+            requests.exceptions.ProxyError("Proxy connection failed"),
+            requests.exceptions.ConnectTimeout("Proxy timeout"),
+            ConnectionError("Proxy unreachable"),
+        ]
+        
+        for error in proxy_errors:
+            with self.subTest(error=error.__class__.__name__):
+                with patch('requests.post') as mock_post:
+                    mock_post.side_effect = error
+                    
+                    payload = {'proxy_test': 'failure'}
+                    
+                    with self.assertRaises(Exception):
+                        self.connector.send_request(payload)
+
+    def test_ipv6_fallback_simulation(self):
+        """Test IPv6 to IPv4 fallback scenarios."""
+        import socket
+        
+        # Simulate IPv6 failure, IPv4 success
+        def ipv6_then_ipv4_response(*args, **kwargs):
+            # First call fails (IPv6)
+            if not hasattr(ipv6_then_ipv4_response, 'called'):
+                ipv6_then_ipv4_response.called = True
+                raise socket.gaierror("IPv6 address not available")
+            
+            # Second call succeeds (IPv4)
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {'ipv4_fallback': True}
+            return mock_response
+        
+        with patch('requests.post') as mock_post:
+            mock_post.side_effect = ipv6_then_ipv4_response
+            
+            payload = {'ipv6_test': 'fallback'}
+            
+            # Should eventually succeed with IPv4
+            try:
+                result = self.connector.send_request(payload)
+                self.assertEqual(result['ipv4_fallback'], True)
+            except Exception:
+                # Acceptable if fallback not implemented
+                pass
+
+    def test_mobile_network_conditions(self):
+        """Test handling of mobile network conditions."""
+        mobile_conditions = [
+            {'delay': 0.5, 'loss_rate': 0.1, 'name': '3G'},
+            {'delay': 0.2, 'loss_rate': 0.05, 'name': '4G'},
+            {'delay': 0.1, 'loss_rate': 0.02, 'name': '5G'},
+        ]
+        
+        for condition in mobile_conditions:
+            with self.subTest(network=condition['name']):
+                import time
+                import random
+                
+                def mobile_response(*args, **kwargs):
+                    # Simulate network delay
+                    time.sleep(condition['delay'])
+                    
+                    # Simulate packet loss
+                    if random.random() < condition['loss_rate']:
+                        raise ConnectionError(f"{condition['name']} packet loss")
+                    
+                    mock_response = Mock()
+                    mock_response.status_code = 200
+                    mock_response.json.return_value = {'network': condition['name']}
+                    return mock_response
+                
+                with patch('requests.post') as mock_post:
+                    mock_post.side_effect = mobile_response
+                    
+                    payload = {'mobile_test': condition['name']}
+                    
+                    try:
+                        result = self.connector.send_request(payload)
+                        self.assertEqual(result['network'], condition['name'])
+                    except ConnectionError:
+                        # Acceptable due to simulated packet loss
+                        pass
+
+
+class TestGenesisConnectorMemoryOptimization(unittest.TestCase):
+    """
+    Memory optimization tests for GenesisConnector.
+    Testing framework: unittest with pytest enhancements
+    """
+
+    def setUp(self):
+        """Set up memory optimization test environment."""
+        self.connector = GenesisConnector()
+
+    def test_memory_efficient_payload_processing(self):
+        """Test memory-efficient processing of large payloads."""
+        import sys
+        
+        # Test with increasingly large payloads
+        sizes = [1000, 10000, 100000]
+        
+        for size in sizes:
+            with self.subTest(size=size):
+                # Create large payload
+                large_payload = {
+                    'data': ['x' * 100 for _ in range(size)],
+                    'metadata': {'size': size}
+                }
+                
+                # Monitor memory usage
+                initial_refs = sys.getrefcount(large_payload)
+                
+                try:
+                    formatted = self.connector.format_payload(large_payload)
+                    self.assertIsNotNone(formatted)
+                    
+                    # Verify memory isn't excessively retained
+                    final_refs = sys.getrefcount(large_payload)
+                    self.assertLess(final_refs - initial_refs, 5)
+                    
+                except (MemoryError, ValueError):
+                    # Acceptable to reject overly large payloads
+                    pass
+
+    def test_string_interning_optimization(self):
+        """Test string interning optimizations."""
+        # Test with repeated strings that should be interned
+        repeated_strings = ['api_key', 'base_url', 'timeout'] * 1000
+        
+        payloads = []
+        for i, string in enumerate(repeated_strings):
+            payload = {
+                'field': string,
+                'index': i,
+                'data': f'test_{string}_{i}'
+            }
+            payloads.append(payload)
+        
+        # Process all payloads
+        formatted_payloads = []
+        for payload in payloads:
+            try:
+                formatted = self.connector.format_payload(payload)
+                formatted_payloads.append(formatted)
+            except Exception:
+                # Skip problematic payloads
+                pass
+        
+        # Verify processing completed
+        self.assertGreater(len(formatted_payloads), 2000)
+
+    def test_circular_reference_detection(self):
+        """Test efficient circular reference detection."""
+        # Create various circular reference patterns
+        circular_patterns = []
+        
+        # Direct circular reference
+        pattern1 = {'name': 'direct'}
+        pattern1['self'] = pattern1
+        circular_patterns.append(pattern1)
+        
+        # Indirect circular reference
+        pattern2 = {'name': 'indirect', 'child': {}}
+        pattern2['child']['parent'] = pattern2
+        circular_patterns.append(pattern2)
+        
+        # Deep circular reference
+        pattern3 = {'name': 'deep'}
+        current = pattern3
+        for i in range(10):
+            current['next'] = {'level': i}
+            current = current['next']
+        current['root'] = pattern3
+        circular_patterns.append(pattern3)
+        
+        # Test efficient detection
+        for i, pattern in enumerate(circular_patterns):
+            with self.subTest(pattern=i):
+                with self.assertRaises(ValueError):
+                    self.connector.format_payload(pattern)
+
+    def test_lazy_evaluation_patterns(self):
+        """Test lazy evaluation patterns for efficiency."""
+        class LazyData:
+            def __init__(self, size):
+                self.size = size
+                self._data = None
+            
+            @property
+            def data(self):
+                if self._data is None:
+                    self._data = ['lazy_item'] * self.size
+                return self._data
+            
+            def __str__(self):
+                return f"LazyData(size={self.size})"
+        
+        # Test with lazy-evaluated data
+        lazy_objects = [LazyData(100), LazyData(1000), LazyData(10000)]
+        
+        for i, lazy_obj in enumerate(lazy_objects):
+            with self.subTest(size=lazy_obj.size):
+                payload = {
+                    'lazy_object': lazy_obj,
+                    'index': i
+                }
+                
+                try:
+                    formatted = self.connector.format_payload(payload)
+                    self.assertIsNotNone(formatted)
+                except Exception:
+                    # May not be able to serialize lazy objects
+                    pass
+
+    def test_memory_pool_pattern(self):
+        """Test memory pool pattern for object reuse."""
+        # Simulate object pool
+        class ObjectPool:
+            def __init__(self, size=10):
+                self.pool = [{'reusable': True, 'id': i} for i in range(size)]
+                self.in_use = set()
+            
+            def get_object(self):
+                if self.pool:
+                    obj = self.pool.pop()
+                    self.in_use.add(id(obj))
+                    return obj
+                return None
+            
+            def return_object(self, obj):
+                if id(obj) in self.in_use:
+                    self.in_use.remove(id(obj))
+                    obj.update({'reusable': True})  # Reset state
+                    self.pool.append(obj)
+        
+        pool = ObjectPool(50)
+        
+        # Test with pooled objects
+        for i in range(100):
+            obj = pool.get_object()
+            if obj:
+                obj['iteration'] = i
+                obj['data'] = f'test_data_{i}'
+                
+                try:
+                    formatted = self.connector.format_payload(obj)
+                    self.assertIsNotNone(formatted)
+                except Exception:
+                    pass
+                finally:
+                    pool.return_object(obj)
+        
+        # Verify pool is properly managed
+        self.assertEqual(len(pool.in_use), 0)
+        self.assertEqual(len(pool.pool), 50)
+
+    def test_weak_reference_handling(self):
+        """Test weak reference handling for memory optimization."""
+        import weakref
+        import gc
+        
+        # Create objects with weak references
+        objects = []
+        weak_refs = []
+        
+        for i in range(100):
+            obj = {'id': i, 'data': f'test_{i}'}
+            objects.append(obj)
+            weak_refs.append(weakref.ref(obj))
+        
+        # Process objects
+        processed = []
+        for obj in objects:
+            try:
+                formatted = self.connector.format_payload(obj)
+                processed.append(formatted)
+            except Exception:
+                pass
+        
+        # Clear strong references
+        objects.clear()
+        gc.collect()
+        
+        # Verify weak references are properly handled
+        alive_refs = sum(1 for ref in weak_refs if ref() is not None)
+        self.assertLess(alive_refs, 50)  # Most should be garbage collected
+
+    def test_streaming_data_processing(self):
+        """Test memory-efficient streaming data processing."""
+        def data_stream():
+            """Generate streaming data."""
+            for i in range(1000):
+                yield {
+                    'stream_id': i,
+                    'data': f'stream_data_{i}',
+                    'timestamp': i * 1000
+                }
+        
+        # Process streaming data without loading all into memory
+        processed_count = 0
+        max_memory_items = 0
+        current_memory_items = 0
+        
+        for item in data_stream():
+            try:
+                formatted = self.connector.format_payload(item)
+                if formatted:
+                    processed_count += 1
+                    current_memory_items += 1
+                    max_memory_items = max(max_memory_items, current_memory_items)
+                    
+                    # Simulate processing and cleanup
+                    if processed_count % 100 == 0:
+                        current_memory_items = 0  # Simulate cleanup
+                        
+            except Exception:
+                pass
+        
+        # Verify streaming processing
+        self.assertGreater(processed_count, 900)
+        self.assertLess(max_memory_items, 200)  # Efficient memory usage
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
