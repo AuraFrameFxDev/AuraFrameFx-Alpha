@@ -203,11 +203,11 @@ object KineticIdentity {
     // ========== UTILITY FUNCTIONS ==========
     
     /**
-     * Returns an infinite repeatable animation spec that smoothly pulses a float value between its initial and target value.
+     * Creates an infinite repeatable animation spec that pulses a float value smoothly between its initial and target values.
      *
-     * The animation uses linear easing and reverses direction each cycle, creating a continuous breathing or pulsing effect.
+     * The animation uses linear easing and reverses direction each cycle, producing a continuous breathing or pulsing effect.
      *
-     * @param durationMillis Duration of one pulse cycle in milliseconds.
+     * @param durationMillis The duration of one pulse cycle in milliseconds.
      * @param targetValue The maximum value reached during the pulse.
      * @return An infinite repeatable animation spec for smoothly pulsing float values.
      */
@@ -220,13 +220,12 @@ object KineticIdentity {
     )
 
     /**
-     * Creates a tween animation spec with linear easing for glitch or shake effects.
+     * Returns a linear tween animation spec suitable for glitch or shake effects.
      *
-     * The `intensity` parameter is present for API consistency but does not affect the animation.
+     * The `intensity` parameter is unused and included only for API consistency.
      *
      * @param durationMillis Duration of the animation in milliseconds.
-     * @param intensity Unused parameter for intended shake intensity.
-     * @return An animation spec suitable for glitch or shake animations.
+     * @return A tween animation spec with linear easing for glitch or shake animations.
      */
     fun createGlitchShake(
         durationMillis: Int = MICRO_DURATION,
@@ -237,13 +236,13 @@ object KineticIdentity {
     )
 
     /**
-     * Returns an animation spec that adds a pause before executing the given action animation, with dramatic cubic bezier easing.
+     * Creates an animation spec that introduces a pause before executing the specified action animation, using dramatic cubic bezier easing.
      *
-     * The total duration is the sum of the pause and the action animation durations. If the action spec is not a tween, a standard duration is used.
+     * The total duration is the sum of the pause and the action animation durations. If the action spec is not a tween, a standard duration is used for the action.
      *
-     * @param pauseDurationMillis Duration of the pause before the action animation, in milliseconds.
-     * @param actionSpec The animation spec to perform after the pause.
-     * @return An animation spec representing the combined pause and action, using dramatic easing.
+     * @param pauseDurationMillis The duration of the initial pause in milliseconds.
+     * @param actionSpec The animation spec to execute after the pause.
+     * @return An animation spec representing the combined pause and action with dramatic easing.
      */
     fun createDramaticPause(
         pauseDurationMillis: Int = 500,
