@@ -68,6 +68,13 @@ import androidx.navigation.NavHostController
  *
  * @param navController Used to handle navigation actions from the home screen.
  */
+/**
+ * Displays the main home screen with centered app title, subtitle, beta status, and navigation buttons.
+ *
+ * Shows the app's name, a subtitle, and a beta status message, along with buttons for navigating to the AI Chat screen and a placeholder for Settings.
+ *
+ * @param navController Used to handle navigation actions from the home screen.
+ */
 @Composable
 fun HomeScreen(navController: NavHostController) {
     Column(

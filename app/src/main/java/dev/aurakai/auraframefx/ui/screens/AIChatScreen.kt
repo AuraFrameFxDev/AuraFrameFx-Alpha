@@ -121,11 +121,11 @@ fun AiChatScreen() {
 }
 
 /**
- * Renders a chat message as a styled bubble, aligning and coloring it according to the sender.
+ * Displays a single chat message as a styled bubble, aligning and coloring it based on the sender.
  *
- * User messages appear right-aligned with primary container colors and an outgoing bubble shape, while AI messages are left-aligned with surface variant colors and an incoming bubble shape.
+ * User messages are right-aligned with primary container colors and an outgoing bubble shape, while AI messages are left-aligned with surface variant colors and an incoming bubble shape.
  *
- * @param message The chat message to render.
+ * @param message The chat message to display.
  */
 @Composable
 fun ChatMessageItem(message: ChatMessage) {
@@ -164,7 +164,7 @@ fun ChatMessageItem(message: ChatMessage) {
 }
 
 /**
- * Provides a design-time preview of the AI chat screen wrapped in the custom AuraFrameFXTheme.
+ * Displays a preview of the AI chat screen within the custom AuraFrameFXTheme for design-time visualization.
  */
 @Preview(showBackground = true)
 @Composable

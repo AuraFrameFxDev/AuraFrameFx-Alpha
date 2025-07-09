@@ -14,22 +14,22 @@ interface VertexAIClient {
     suspend fun generateContent(prompt: String): String?
 
     /**
- * Generates text based on a prompt, with options to control output length and creativity.
+ * Generates text from a prompt with configurable output length and randomness.
  *
- * @param prompt The input text prompt for content generation.
- * @param maxTokens The maximum number of tokens to generate in the output.
- * @param temperature Controls the randomness of the generated text; higher values produce more varied results.
+ * @param prompt The text prompt that guides the content generation.
+ * @param maxTokens The maximum number of tokens to include in the generated text.
+ * @param temperature The degree of randomness in the output; higher values yield more diverse results.
  * @return The generated text.
  */
     suspend fun generateText(prompt: String, maxTokens: Int = 1000, temperature: Float = 0.7f): String
 
     /**
- * Generates source code according to a given specification, programming language, and coding style.
+ * Generates source code based on a specification, programming language, and coding style.
  *
- * @param specification Description of the intended functionality or requirements for the generated code.
- * @param language The programming language to use for code generation.
- * @param style The coding style or conventions to follow.
- * @return The generated source code as a string, or null if code generation fails.
+ * @param specification Description of the desired functionality or requirements for the code.
+ * @param language Programming language in which to generate the code.
+ * @param style Coding style or conventions to apply.
+ * @return The generated source code as a string, or null if generation fails.
  */
     suspend fun generateCode(specification: String, language: String, style: String): String?
 
@@ -41,7 +41,7 @@ interface VertexAIClient {
     suspend fun validateConnection(): Boolean
 
     /**
- * Prepares creative AI models in Vertex AI for use in content generation.
+ * Initializes creative AI models within Vertex AI for content generation tasks.
  */
     suspend fun initializeCreativeModels()
 
