@@ -595,3 +595,666 @@ class AuraAIServiceImplTest {
         }
     }
 }
+    @Nested
+    @DisplayName("Streaming Operations Tests")
+    inner class StreamingOperationsTests {
+
+        @Test
+        @DisplayName("Should handle streaming text generation")
+        fun shouldHandleStreamingTextGeneration() = runTest {
+            val prompt = "Generate streaming response"
+            val mockStreamResponse = StreamingResponse(
+                chunks = listOf("Hello", " World", "!"),
+                usage = TokenUsage(10, 15, 25),
+                model = "gpt-3.5-turbo"
+            )
+
+            whenever(mockHttpClient.postStream(any(), any())).thenReturn(mockStreamResponse)
+
+            val result = auraAIService.generateTextStreaming(prompt)
+            val chunks = mutableListOf<String>()
+            result.collect { chunk ->
+                chunks.add(chunk)
+            }
+
+            assertEquals(listOf("Hello", " World", "!"), chunks)
+            verify(mockHttpClient).postStream(any(), any())
+        }
+
+        @Test
+        @DisplayName("Should handle streaming interruption")
+        fun shouldHandleStreamingInterruption() = runTest {
+            whenever(mockHttpClient.postStream(any(), any())).thenThrow(
+                StreamingInterruptedException("Stream interrupted")
+            )
+
+            assertThrows<StreamingInterruptedException> {
+                auraAIService.generateTextStreaming("test").collect()
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle empty streaming response")
+        fun shouldHandleEmptyStreamingResponse() = runTest {
+            val mockStreamResponse = StreamingResponse(
+                chunks = emptyList(),
+                usage = TokenUsage(5, 0, 5),
+                model = "gpt-3.5-turbo"
+            )
+
+            whenever(mockHttpClient.postStream(any(), any())).thenReturn(mockStreamResponse)
+
+            val result = auraAIService.generateTextStreaming("test")
+            val chunks = mutableListOf<String>()
+            result.collect { chunk ->
+                chunks.add(chunk)
+            }
+
+            assertTrue(chunks.isEmpty())
+        }
+    }
+
+    @Nested
+    @DisplayName("Batch Operations Tests")
+    inner class BatchOperationsTests {
+
+        @Test
+        @DisplayName("Should handle batch text generation")
+        fun shouldHandleBatchTextGeneration() = runTest {
+            val prompts = listOf("Prompt 1", "Prompt 2", "Prompt 3")
+            val mockBatchResponse = BatchResponse(
+                responses = listOf(
+                    AIResponse("Response 1", TokenUsage(5, 10, 15), "gpt-3.5-turbo"),
+                    AIResponse("Response 2", TokenUsage(6, 11, 17), "gpt-3.5-turbo"),
+                    AIResponse("Response 3", TokenUsage(7, 12, 19), "gpt-3.5-turbo")
+                ),
+                totalUsage = TokenUsage(18, 33, 51)
+            )
+
+            whenever(mockHttpClient.postBatch(any(), any())).thenReturn(mockBatchResponse)
+
+            val result = auraAIService.generateTextBatch(prompts)
+
+            assertEquals(3, result.responses.size)
+            assertEquals("Response 1", result.responses[0].text)
+            assertEquals("Response 2", result.responses[1].text)
+            assertEquals("Response 3", result.responses[2].text)
+            verify(mockHttpClient).postBatch(any(), any())
+        }
+
+        @Test
+        @DisplayName("Should handle partial batch failures")
+        fun shouldHandlePartialBatchFailures() = runTest {
+            val prompts = listOf("Valid prompt", "Invalid prompt")
+            val mockBatchResponse = BatchResponse(
+                responses = listOf(
+                    AIResponse("Valid response", TokenUsage(5, 10, 15), "gpt-3.5-turbo"),
+                    AIResponse.error("Invalid request", AIErrorCode.INVALID_REQUEST)
+                ),
+                totalUsage = TokenUsage(5, 10, 15)
+            )
+
+            whenever(mockHttpClient.postBatch(any(), any())).thenReturn(mockBatchResponse)
+
+            val result = auraAIService.generateTextBatch(prompts)
+
+            assertEquals(2, result.responses.size)
+            assertFalse(result.responses[0].isError)
+            assertTrue(result.responses[1].isError)
+        }
+
+        @Test
+        @DisplayName("Should handle empty batch request")
+        fun shouldHandleEmptyBatchRequest() = runTest {
+            assertThrows<IllegalArgumentException> {
+                auraAIService.generateTextBatch(emptyList())
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle batch size limits")
+        fun shouldHandleBatchSizeLimits() = runTest {
+            val largeBatch = (1..1000).map { "Prompt $it" }
+
+            whenever(mockHttpClient.postBatch(any(), any())).thenThrow(
+                BatchSizeLimitExceededException("Batch size exceeds limit")
+            )
+
+            assertThrows<BatchSizeLimitExceededException> {
+                auraAIService.generateTextBatch(largeBatch)
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Model Management Tests")
+    inner class ModelManagementTests {
+
+        @Test
+        @DisplayName("Should list available models")
+        fun shouldListAvailableModels() = runTest {
+            val mockModels = listOf(
+                ModelInfo("gpt-3.5-turbo", "OpenAI GPT-3.5 Turbo", 4096, true),
+                ModelInfo("gpt-4", "OpenAI GPT-4", 8192, true),
+                ModelInfo("claude-v1", "Anthropic Claude", 9000, false)
+            )
+
+            whenever(mockHttpClient.getModels()).thenReturn(mockModels)
+
+            val result = auraAIService.getAvailableModels()
+
+            assertEquals(3, result.size)
+            assertTrue(result.any { it.name == "gpt-3.5-turbo" })
+            assertTrue(result.any { it.name == "gpt-4" })
+            assertTrue(result.any { it.name == "claude-v1" })
+        }
+
+        @Test
+        @DisplayName("Should get model capabilities")
+        fun shouldGetModelCapabilities() = runTest {
+            val modelName = "gpt-4"
+            val mockCapabilities = ModelCapabilities(
+                supportStreaming = true,
+                supportBatch = true,
+                maxTokens = 8192,
+                supportedFeatures = setOf("text-generation", "code-completion", "chat")
+            )
+
+            whenever(mockHttpClient.getModelCapabilities(modelName)).thenReturn(mockCapabilities)
+
+            val result = auraAIService.getModelCapabilities(modelName)
+
+            assertTrue(result.supportStreaming)
+            assertTrue(result.supportBatch)
+            assertEquals(8192, result.maxTokens)
+            assertTrue(result.supportedFeatures.contains("text-generation"))
+        }
+
+        @Test
+        @DisplayName("Should handle model not found")
+        fun shouldHandleModelNotFound() = runTest {
+            whenever(mockHttpClient.getModelCapabilities("nonexistent-model"))
+                .thenThrow(ModelNotFoundException("Model not found"))
+
+            assertThrows<ModelNotFoundException> {
+                auraAIService.getModelCapabilities("nonexistent-model")
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Advanced Parameter Validation Tests")
+    inner class AdvancedParameterValidationTests {
+
+        @Test
+        @DisplayName("Should validate presence penalty bounds")
+        fun shouldValidatePresencePenaltyBounds() = runTest {
+            val parameters = AIParameters(presencePenalty = 3.0f) // Out of bounds
+
+            assertThrows<IllegalArgumentException> {
+                auraAIService.generateText("test", parameters)
+            }
+        }
+
+        @Test
+        @DisplayName("Should validate frequency penalty bounds")
+        fun shouldValidateFrequencyPenaltyBounds() = runTest {
+            val parameters = AIParameters(frequencyPenalty = -3.0f) // Out of bounds
+
+            assertThrows<IllegalArgumentException> {
+                auraAIService.generateText("test", parameters)
+            }
+        }
+
+        @Test
+        @DisplayName("Should validate stop sequences")
+        fun shouldValidateStopSequences() = runTest {
+            val parameters = AIParameters(stopSequences = (1..100).map { "stop$it" }) // Too many
+
+            assertThrows<IllegalArgumentException> {
+                auraAIService.generateText("test", parameters)
+            }
+        }
+
+        @Test
+        @DisplayName("Should validate logit bias parameters")
+        fun shouldValidateLogitBiasParameters() = runTest {
+            val parameters = AIParameters(
+                logitBias = mapOf(
+                    "token1" to 150.0f, // Out of bounds
+                    "token2" to -150.0f  // Out of bounds
+                )
+            )
+
+            assertThrows<IllegalArgumentException> {
+                auraAIService.generateText("test", parameters)
+            }
+        }
+
+        @Test
+        @DisplayName("Should validate model selection")
+        fun shouldValidateModelSelection() = runTest {
+            val parameters = AIParameters(model = "invalid-model-name")
+
+            whenever(mockHttpClient.post(any(), any())).thenThrow(
+                ModelNotFoundException("Invalid model")
+            )
+
+            assertThrows<ModelNotFoundException> {
+                auraAIService.generateText("test", parameters)
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Health Check and Monitoring Tests")
+    inner class HealthCheckTests {
+
+        @Test
+        @DisplayName("Should perform health check")
+        fun shouldPerformHealthCheck() = runTest {
+            val mockHealthStatus = HealthStatus(
+                isHealthy = true,
+                responseTime = 150L,
+                apiVersion = "v1.0.0",
+                availableModels = 5
+            )
+
+            whenever(mockHttpClient.healthCheck()).thenReturn(mockHealthStatus)
+
+            val result = auraAIService.healthCheck()
+
+            assertTrue(result.isHealthy)
+            assertEquals(150L, result.responseTime)
+            assertEquals("v1.0.0", result.apiVersion)
+            assertEquals(5, result.availableModels)
+        }
+
+        @Test
+        @DisplayName("Should handle unhealthy service")
+        fun shouldHandleUnhealthyService() = runTest {
+            val mockHealthStatus = HealthStatus(
+                isHealthy = false,
+                responseTime = 5000L,
+                apiVersion = "v1.0.0",
+                availableModels = 0,
+                errorMessage = "Service degraded"
+            )
+
+            whenever(mockHttpClient.healthCheck()).thenReturn(mockHealthStatus)
+
+            val result = auraAIService.healthCheck()
+
+            assertFalse(result.isHealthy)
+            assertEquals("Service degraded", result.errorMessage)
+        }
+
+        @Test
+        @DisplayName("Should get usage statistics")
+        fun shouldGetUsageStatistics() = runTest {
+            val mockUsageStats = UsageStatistics(
+                totalRequests = 1000L,
+                totalTokens = 50000L,
+                averageResponseTime = 200L,
+                errorRate = 0.01f,
+                quotaUsed = 0.75f
+            )
+
+            whenever(mockHttpClient.getUsageStats()).thenReturn(mockUsageStats)
+
+            val result = auraAIService.getUsageStatistics()
+
+            assertEquals(1000L, result.totalRequests)
+            assertEquals(50000L, result.totalTokens)
+            assertEquals(200L, result.averageResponseTime)
+            assertEquals(0.01f, result.errorRate)
+            assertEquals(0.75f, result.quotaUsed)
+        }
+    }
+
+    @Nested
+    @DisplayName("Security and Authentication Tests")
+    inner class SecurityTests {
+
+        @Test
+        @DisplayName("Should handle API key rotation")
+        fun shouldHandleApiKeyRotation() = runTest {
+            val newApiKey = "new-api-key-123"
+            
+            auraAIService.rotateApiKey(newApiKey)
+
+            whenever(mockHttpClient.post(any(), any())).thenReturn(
+                AIResponse("success", TokenUsage(5, 10, 15), "gpt-3.5-turbo")
+            )
+
+            auraAIService.generateText("test")
+
+            verify(mockConfiguration).updateApiKey(newApiKey)
+        }
+
+        @Test
+        @DisplayName("Should handle invalid API key format")
+        fun shouldHandleInvalidApiKeyFormat() = runTest {
+            val invalidApiKey = "invalid-key"
+
+            assertThrows<IllegalArgumentException> {
+                auraAIService.rotateApiKey(invalidApiKey)
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle unauthorized access")
+        fun shouldHandleUnauthorizedAccess() = runTest {
+            whenever(mockHttpClient.post(any(), any())).thenThrow(
+                UnauthorizedException("Invalid API key")
+            )
+
+            assertThrows<UnauthorizedException> {
+                auraAIService.generateText("test")
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle forbidden operations")
+        fun shouldHandleForbiddenOperations() = runTest {
+            whenever(mockHttpClient.post(any(), any())).thenThrow(
+                ForbiddenException("Operation not allowed")
+            )
+
+            assertThrows<ForbiddenException> {
+                auraAIService.generateText("test")
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Content Filtering Tests")
+    inner class ContentFilteringTests {
+
+        @Test
+        @DisplayName("Should handle content policy violations")
+        fun shouldHandleContentPolicyViolations() = runTest {
+            whenever(mockHttpClient.post(any(), any())).thenThrow(
+                ContentPolicyViolationException("Content violates policy")
+            )
+
+            assertThrows<ContentPolicyViolationException> {
+                auraAIService.generateText("inappropriate content")
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle content filtering in responses")
+        fun shouldHandleContentFilteringInResponses() = runTest {
+            val mockResponse = AIResponse(
+                text = "[FILTERED]",
+                usage = TokenUsage(10, 0, 10),
+                model = "gpt-3.5-turbo",
+                contentFiltered = true,
+                filterReason = "inappropriate_content"
+            )
+
+            whenever(mockHttpClient.post(any(), any())).thenReturn(mockResponse)
+
+            val result = auraAIService.generateText("test")
+
+            assertTrue(result.contentFiltered)
+            assertEquals("inappropriate_content", result.filterReason)
+            assertEquals("[FILTERED]", result.text)
+        }
+
+        @Test
+        @DisplayName("Should handle safety settings")
+        fun shouldHandleSafetySettings() = runTest {
+            val parameters = AIParameters(
+                safetySettings = SafetySettings(
+                    blockHate = true,
+                    blockViolence = true,
+                    blockSexual = true,
+                    blockDangerous = true
+                )
+            )
+
+            val mockResponse = AIResponse(
+                text = "Safe response",
+                usage = TokenUsage(5, 10, 15),
+                model = "gpt-3.5-turbo"
+            )
+
+            whenever(mockHttpClient.post(any(), any())).thenReturn(mockResponse)
+
+            val result = auraAIService.generateText("test", parameters)
+
+            assertEquals("Safe response", result.text)
+            assertFalse(result.contentFiltered)
+        }
+    }
+
+    @Nested
+    @DisplayName("Memory and Resource Management Tests")
+    inner class MemoryManagementTests {
+
+        @Test
+        @DisplayName("Should handle memory pressure")
+        fun shouldHandleMemoryPressure() = runTest {
+            whenever(mockHttpClient.post(any(), any())).thenThrow(
+                OutOfMemoryError("Insufficient memory")
+            )
+
+            assertThrows<AIException> {
+                auraAIService.generateText("test")
+            }
+        }
+
+        @Test
+        @DisplayName("Should cleanup resources after failure")
+        fun shouldCleanupResourcesAfterFailure() = runTest {
+            whenever(mockHttpClient.post(any(), any())).thenThrow(
+                RuntimeException("Unexpected error")
+            )
+
+            try {
+                auraAIService.generateText("test")
+            } catch (e: Exception) {
+                // Expected
+            }
+
+            verify(mockHttpClient).cleanup()
+        }
+
+        @Test
+        @DisplayName("Should handle connection pool exhaustion")
+        fun shouldHandleConnectionPoolExhaustion() = runTest {
+            whenever(mockHttpClient.post(any(), any())).thenThrow(
+                ConnectionPoolExhaustedException("No available connections")
+            )
+
+            assertThrows<ConnectionPoolExhaustedException> {
+                auraAIService.generateText("test")
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Circuit Breaker Tests")
+    inner class CircuitBreakerTests {
+
+        @Test
+        @DisplayName("Should open circuit breaker after failures")
+        fun shouldOpenCircuitBreakerAfterFailures() = runTest {
+            // Simulate repeated failures
+            whenever(mockHttpClient.post(any(), any())).thenThrow(
+                ServerException("Server error", 500)
+            )
+
+            repeat(5) {
+                try {
+                    auraAIService.generateText("test")
+                } catch (e: Exception) {
+                    // Expected
+                }
+            }
+
+            // Circuit breaker should be open now
+            assertThrows<CircuitBreakerOpenException> {
+                auraAIService.generateText("test")
+            }
+        }
+
+        @Test
+        @DisplayName("Should close circuit breaker after recovery")
+        fun shouldCloseCircuitBreakerAfterRecovery() = runTest {
+            // Open circuit breaker
+            whenever(mockHttpClient.post(any(), any())).thenThrow(
+                ServerException("Server error", 500)
+            )
+
+            repeat(5) {
+                try {
+                    auraAIService.generateText("test")
+                } catch (e: Exception) {
+                    // Expected
+                }
+            }
+
+            // Simulate recovery
+            whenever(mockHttpClient.post(any(), any())).thenReturn(
+                AIResponse("success", TokenUsage(5, 10, 15), "gpt-3.5-turbo")
+            )
+
+            // Wait for circuit breaker to half-open
+            Thread.sleep(1000)
+
+            val result = auraAIService.generateText("test")
+            assertEquals("success", result.text)
+        }
+    }
+
+    @Nested
+    @DisplayName("Caching Tests")
+    inner class CachingTests {
+
+        @Test
+        @DisplayName("Should cache repeated identical requests")
+        fun shouldCacheRepeatedIdenticalRequests() = runTest {
+            val prompt = "Cached prompt"
+            val mockResponse = AIResponse(
+                text = "Cached response",
+                usage = TokenUsage(5, 10, 15),
+                model = "gpt-3.5-turbo"
+            )
+
+            whenever(mockHttpClient.post(any(), any())).thenReturn(mockResponse)
+
+            // First request
+            val result1 = auraAIService.generateText(prompt)
+            // Second request should be cached
+            val result2 = auraAIService.generateText(prompt)
+
+            assertEquals("Cached response", result1.text)
+            assertEquals("Cached response", result2.text)
+            
+            // Should only call HTTP client once due to caching
+            verify(mockHttpClient, times(1)).post(any(), any())
+        }
+
+        @Test
+        @DisplayName("Should invalidate cache after timeout")
+        fun shouldInvalidateCacheAfterTimeout() = runTest {
+            val prompt = "Timeout test"
+            val mockResponse = AIResponse(
+                text = "Response",
+                usage = TokenUsage(5, 10, 15),
+                model = "gpt-3.5-turbo"
+            )
+
+            whenever(mockHttpClient.post(any(), any())).thenReturn(mockResponse)
+
+            // First request
+            auraAIService.generateText(prompt)
+            
+            // Simulate cache timeout
+            Thread.sleep(1100) // Assuming 1 second cache timeout
+            
+            // Second request should hit the service again
+            auraAIService.generateText(prompt)
+
+            verify(mockHttpClient, times(2)).post(any(), any())
+        }
+
+        @Test
+        @DisplayName("Should handle cache miss gracefully")
+        fun shouldHandleCacheMissGracefully() = runTest {
+            val prompt = "Cache miss test"
+            val mockResponse = AIResponse(
+                text = "Fresh response",
+                usage = TokenUsage(5, 10, 15),
+                model = "gpt-3.5-turbo"
+            )
+
+            whenever(mockHttpClient.post(any(), any())).thenReturn(mockResponse)
+
+            val result = auraAIService.generateText(prompt)
+
+            assertEquals("Fresh response", result.text)
+            verify(mockHttpClient).post(any(), any())
+        }
+    }
+
+    @Nested
+    @DisplayName("Instrumentation and Observability Tests")
+    inner class InstrumentationTests {
+
+        @Test
+        @DisplayName("Should emit metrics for successful requests")
+        fun shouldEmitMetricsForSuccessfulRequests() = runTest {
+            val mockResponse = AIResponse(
+                text = "Success",
+                usage = TokenUsage(5, 10, 15),
+                model = "gpt-3.5-turbo"
+            )
+
+            whenever(mockHttpClient.post(any(), any())).thenReturn(mockResponse)
+
+            auraAIService.generateText("test")
+
+            verify(mockMetricsCollector).recordSuccessfulRequest(any(), any())
+            verify(mockMetricsCollector).recordTokenUsage(15)
+            verify(mockMetricsCollector).recordResponseTime(any())
+        }
+
+        @Test
+        @DisplayName("Should emit metrics for failed requests")
+        fun shouldEmitMetricsForFailedRequests() = runTest {
+            whenever(mockHttpClient.post(any(), any())).thenThrow(
+                ServerException("Server error", 500)
+            )
+
+            try {
+                auraAIService.generateText("test")
+            } catch (e: Exception) {
+                // Expected
+            }
+
+            verify(mockMetricsCollector).recordFailedRequest(any(), any())
+            verify(mockMetricsCollector).recordError("ServerException")
+        }
+
+        @Test
+        @DisplayName("Should log request details")
+        fun shouldLogRequestDetails() = runTest {
+            val mockResponse = AIResponse(
+                text = "Logged response",
+                usage = TokenUsage(5, 10, 15),
+                model = "gpt-3.5-turbo"
+            )
+
+            whenever(mockHttpClient.post(any(), any())).thenReturn(mockResponse)
+
+            auraAIService.generateText("test prompt")
+
+            verify(mockLogger).info(contains("Generating text for prompt"))
+            verify(mockLogger).info(contains("Text generation completed"))
+        }
+    }
+}
