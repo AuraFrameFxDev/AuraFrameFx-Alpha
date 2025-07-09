@@ -20,59 +20,132 @@ class AuraAIServiceImpl @Inject constructor(
     private val auraFxLogger: dev.aurakai.auraframefx.data.logging.AuraFxLogger,
 ) : AuraAIService {
 
+    /**
+     * Returns a placeholder response for the given analytics query.
+     *
+     * This method does not perform any analytics processing and always returns a fixed string.
+     *
+     * @param _query The analytics query string.
+     * @return A static placeholder analytics response.
+     */
     override fun analyticsQuery(_query: String): String {
         // TODO: Implement analytics query; Reported as unused
         println("AuraAIServiceImpl.analyticsQuery called with query: $_query")
         return "Placeholder analytics response for '$_query'"
     }
 
+    /**
+     * Placeholder for downloading a file by its identifier.
+     *
+     * This method does not perform any file download and always returns null.
+     *
+     * @param _fileId The identifier of the file to download.
+     * @return Always null.
+     */
     override suspend fun downloadFile(_fileId: String): File? {
         // TODO: Implement file download; Reported as unused
         println("AuraAIServiceImpl.downloadFile called for fileId: $_fileId")
         return null
     }
 
+    /**
+     * Stub method for image generation that always returns null.
+     *
+     * Logs the provided prompt but does not perform any image generation or return image data.
+     *
+     * @param _prompt The prompt describing the desired image.
+     * @return Always null, as image generation is not implemented.
+     */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         // TODO: Implement image generation; Reported as unused
         println("AuraAIServiceImpl.generateImage called with prompt: $_prompt")
         return null
     }
 
+    /**
+     * Returns a placeholder string simulating generated text for the given prompt.
+     *
+     * @param prompt The input text to guide the simulated text generation.
+     * @param options Optional parameters for text generation (currently ignored).
+     * @return A fixed string representing generated text for the prompt.
+     */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         // TODO: Implement text generation; Reported as unused
         println("AuraAIServiceImpl.generateText called with prompt: $prompt")
         return "Placeholder generated text for '$prompt'"
     }
 
+    /**
+     * Returns a static placeholder AI response string for the given prompt.
+     *
+     * No actual AI processing is performed; the `options` parameter is ignored.
+     *
+     * @param prompt The input text for which an AI response is requested.
+     * @return A fixed placeholder AI response string.
+     */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         // TODO: Implement AI response retrieval; Reported as unused
         println("AuraAIServiceImpl.getAIResponse called with prompt: $prompt")
         return "Placeholder AI Response for '$prompt'"
     }
 
+    /**
+     * Returns a placeholder string representing the memory value for the given key.
+     *
+     * This method does not access any actual memory storage and always returns a fixed placeholder value.
+     *
+     * @param _memoryKey The key for which to retrieve the memory value.
+     * @return A placeholder string for the specified key.
+     */
     override fun getMemory(_memoryKey: String): String? {
         // TODO: Implement memory retrieval; Reported as unused
         println("AuraAIServiceImpl.getMemory called for key: $_memoryKey")
         return "Placeholder memory for key: $_memoryKey"
     }
 
+    /**
+     * Placeholder for saving a value to memory under the specified key.
+     *
+     * This method does not persist any data and is intended as a stub for future implementation.
+     *
+     * @param key The identifier for the memory entry.
+     * @param value The value to associate with the key.
+     */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement memory saving; Reported as unused
         println("AuraAIServiceImpl.saveMemory called for key: $key with value: $value")
     }
 
+    /**
+     * Returns whether the service is connected.
+     *
+     * This placeholder implementation always returns `true` and does not perform any real connectivity check.
+     *
+     * @return Always `true`.
+     */
     override fun isConnected(): Boolean {
         // TODO: Implement actual connection check; Reported to always return true
         println("AuraAIServiceImpl.isConnected called")
         return true
     }
 
+    /**
+     * Placeholder method for publishing a message to a PubSub topic.
+     *
+     * Logs the topic and message but does not perform any actual message publishing.
+     */
     override fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing; Reported as unused
         println("AuraAIServiceImpl.publishPubSub called for topic '$_topic' with message: $_message")
         // For suspend version, change signature and use appropriate coroutine scope
     }
 
+    /**
+     * Simulates uploading a file and returns a placeholder file ID string based on the file name.
+     *
+     * @param _file The file to be "uploaded."
+     * @return A placeholder file ID string derived from the file name.
+     */
     override suspend fun uploadFile(_file: File): String? {
         // TODO: Implement file upload; Reported as unused
         println("AuraAIServiceImpl.uploadFile called for file: ${_file.name}")

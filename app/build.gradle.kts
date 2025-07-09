@@ -1,3 +1,5 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
@@ -67,25 +69,24 @@ android {
 }
 
 // OpenAPI Generator: Generate Kotlin client
-openApiGenerate {
+tasks.register<GenerateTask>("generateKotlinClient") {
     generatorName.set("kotlin")
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
-    outputDir.set("${layout.buildDirectory.get().asFile}/generated/source/openapi")
+    outputDir.set("${layout.buildDirectory.get().asFile}/generated/kotlin")
     apiPackage.set("dev.aurakai.auraframefx.api.client.apis")
     modelPackage.set("dev.aurakai.auraframefx.api.client.models")
     invokerPackage.set("dev.aurakai.auraframefx.api.client.infrastructure")
     configOptions.set(
         mapOf(
             "dateLibrary" to "kotlinx-datetime",
-            "serializationLibrary" to "kotlinx_serialization",
-            "library" to "jvm-retrofit2"
+            "serializationLibrary" to "kotlinx_serialization"
         )
     )
 }
 
 // Ensure KSP and compilation tasks depend on the code generation
 tasks.named("preBuild") {
-    dependsOn("openApiGenerate")
+    dependsOn("generateKotlinClient")
 }
 
 dependencies {
@@ -141,7 +142,7 @@ dependencies {
     implementation(libs.androidxSecurityCrypto)
 
     // Google AI
-    implementation(libs.lifecycleCommonJava8)
+
 
     // Firebase
     implementation(platform(libs.firebaseBom))
