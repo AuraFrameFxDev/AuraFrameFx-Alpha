@@ -30,6 +30,11 @@ import androidx.navigation.NavHostController
  *
  * The screen includes the app name ("AuraFrameFX Alpha"), a subtitle ("Trinity AI System"), a status message, and two buttons: one to navigate to the AI chat screen and another placeholder for settings.
  */
+/**
+ * Displays the main home screen with the app title, subtitle, status message, and navigation buttons.
+ *
+ * The content is vertically centered and includes buttons for navigating to the AI chat screen and a placeholder for settings.
+ */
 @Composable
 fun HomeScreen(navController: NavHostController) {
     Column(
@@ -69,9 +74,9 @@ fun HomeScreen(navController: NavHostController) {
 }
 
 /**
- * Displays the AI chat interface with a centered headline and readiness status message.
+ * Displays the AI chat interface screen with a centered headline and readiness status message.
  *
- * This composable arranges the headline and status message vertically centered on the screen.
+ * Arranges the headline and status message vertically centered within the screen using Compose layout components.
  */
 @Composable
 fun BetaAiChatScreen() {

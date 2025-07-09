@@ -14,11 +14,11 @@ interface VertexAIClient {
     suspend fun generateContent(prompt: String): String?
 
     /**
-     * Generates text from the provided prompt, allowing customization of output length and randomness.
+     * Generates text based on the given prompt, with configurable output length and creativity.
      *
-     * @param prompt The input prompt to guide text generation.
-     * @param maxTokens Maximum number of tokens to generate in the output.
-     * @param temperature Degree of randomness in the generated text; higher values yield more diverse results.
+     * @param prompt The prompt that guides the text generation.
+     * @param maxTokens The maximum number of tokens to include in the generated text.
+     * @param temperature Controls the randomness of the output; higher values produce more varied results.
      * @return The generated text.
      */
     suspend fun generateText(
@@ -28,34 +28,36 @@ interface VertexAIClient {
     ): String
 
     /**
-     * Generates source code based on a specification, target programming language, and coding style.
-     *
-     * @param specification Description of the desired functionality or requirements for the code.
-     * @param language The programming language in which to generate the code.
-     * @param style The coding style or conventions to follow.
-     * @return The generated source code as a string, or null if generation fails.
-     */
+ * Generates source code according to the provided specification, programming language, and coding style.
+ *
+ * @param specification Description of the intended functionality or requirements for the generated code.
+ * @param language The programming language for the generated code.
+ * @param style The coding style or conventions to apply.
+ * @return The generated source code as a string, or null if code generation is unsuccessful.
+ */
     suspend fun generateCode(specification: String, language: String, style: String): String?
 
     /**
-     * Checks whether the Vertex AI service is reachable and responsive.
-     *
-     * @return `true` if the service is accessible, `false` if not.
-     */
+ * Verifies if the Vertex AI service is accessible and responsive.
+ *
+ * @return `true` if the service is reachable; `false` otherwise.
+ */
     suspend fun validateConnection(): Boolean
 
     /**
-     * Initializes and configures creative AI models for content generation within Vertex AI.
-     */
+ * Initializes creative AI models in Vertex AI for content generation.
+ *
+ * Prepares and configures models required for generating creative content.
+ */
     suspend fun initializeCreativeModels()
 
     /**
-     * Analyzes image data based on a guiding text prompt and returns the analysis result.
-     *
-     * @param imageData Raw bytes representing the image to be analyzed.
-     * @param prompt Text prompt that directs the analysis process.
-     * @return The analysis result as a string.
-     */
+ * Analyzes the provided image data using a guiding text prompt and returns the analysis result.
+ *
+ * @param imageData The raw bytes of the image to analyze.
+ * @param prompt The text prompt that guides the analysis.
+ * @return The result of the image analysis as a string.
+ */
     suspend fun analyzeImage(imageData: ByteArray, prompt: String): String
 
     // Add other methods like startChat, listModels, etc. as needed

@@ -46,9 +46,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Sets up the NeuralWhisper service by initializing text-to-speech and speech recognition components.
+     * Initializes the NeuralWhisper service by setting up text-to-speech and speech recognition engines.
      *
-     * This method prepares the service for audio processing and AI interaction by configuring the necessary engines.
+     * Prepares the service for audio processing and AI interaction by configuring required components.
      */
     fun initialize() {
         Log.d(TAG, "Initializing NeuralWhisper...")
@@ -58,7 +58,7 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initializes the TextToSpeech engine and updates the TTS initialization state.
+     * Initializes the TextToSpeech engine and updates the initialization state.
      *
      * Attempts to create a TextToSpeech instance and sets the initialization flag based on the result.
      * Language, voice, pitch, and rate configuration are not yet implemented.
@@ -134,12 +134,12 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Requests text-to-speech synthesis for the provided text using the specified locale.
+     * Initiates text-to-speech synthesis for the given text using the specified locale.
      *
      * Updates the conversation state to indicate speaking. Returns `false` if the TTS engine is not initialized or unavailable; otherwise, returns `true` as a placeholder indicating the request was accepted.
      *
-     * @param text The text to be synthesized into speech.
-     * @param locale The locale for speech synthesis (defaults to US English).
+     * @param text The text to synthesize into speech.
+     * @param locale The locale to use for speech synthesis (defaults to US English).
      * @return `true` if the synthesis request is accepted (placeholder), or `false` if TTS is not initialized.
      */
     fun textToSpeech(text: String, locale: Locale = Locale.US): Boolean {
@@ -165,10 +165,10 @@ class NeuralWhisper @Inject constructor(
     /**
      * Processes a transcribed voice command and returns a placeholder response.
      *
-     * Updates the conversation state to indicate processing. Intended as a stub for future natural language understanding and command-to-action mapping.
+     * Updates the conversation state to indicate processing. This method serves as a stub for future implementation of natural language understanding and command-to-action mapping.
      *
      * @param command The transcribed voice command to process.
-     * @return A placeholder response representing the result of command processing.
+     * @return A placeholder response string representing the result of command processing.
      */
     fun processVoiceCommand(command: String): Any { // Placeholder return type
         // TODO: Implement NLU and command mapping.
@@ -220,7 +220,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Stops the current audio recording session and returns a status message.
      *
-     * @return A message indicating whether the recording was stopped successfully or describing the failure.
+     * @return A message indicating the result of the stop operation, or an error description if stopping fails.
      */
     fun stopRecording(): String {
         return try {

@@ -56,6 +56,12 @@ class TaskScheduler @Inject constructor(
         return task
     }
 
+    /**
+     * Calculates scheduling scores for the given task, updates its metadata, adds it to the task queue,
+     * sorts the queue by total score, and triggers processing of the queue.
+     *
+     * Handles any exceptions by delegating to the error handler with relevant context and task metadata.
+     */
     private fun scheduleTask(task: Task) {
         try {
             val priorityScore = calculatePriorityScore(task)
@@ -90,9 +96,9 @@ class TaskScheduler @Inject constructor(
     }
 
     /**
-     * Processes the task queue, executing tasks in order of priority while respecting the maximum number of active tasks.
+     * Processes the task queue and executes eligible tasks based on priority and available capacity.
      *
-     * Continues scheduling tasks from the queue as long as there are available slots for active tasks and each task's dependencies and agent requirements are met.
+     * Continuously schedules tasks from the queue while there are available slots for active tasks and each task's dependencies and agent requirements are satisfied.
      */
     private fun processQueue() {
         while (_taskQueue.isNotEmpty() && _activeTasks.size < config.maxActiveTasks) {
@@ -107,9 +113,10 @@ class TaskScheduler @Inject constructor(
     }
 
     /**
-     * Checks if a task is eligible for execution based on completion of its dependencies and agent requirements.
+     * Determines whether a task can be executed by verifying that all its dependencies are completed and required agents are (assumed) available.
      *
-     * Returns `true` if all dependencies are completed and agent requirements are considered met; otherwise, returns `false`.
+     * @param task The task to check for execution eligibility.
+     * @return `true` if all dependencies are completed and agent requirements are considered met; otherwise, `false`.
      */
     private fun canExecuteTask(task: Task): Boolean {
         // Check dependencies
@@ -129,9 +136,9 @@ class TaskScheduler @Inject constructor(
     }
 
     /**
-     * Sets the specified task to in-progress status, assigns its required agents, and updates active and tracked task collections.
+     * Marks a task as in progress, assigns its required agents, and updates active and tracked task collections.
      *
-     * @param task The task to update and mark as in progress.
+     * @param task The task to be executed.
      */
     private fun executeTask(task: Task) {
         val updatedTask = task.copy(
@@ -184,28 +191,28 @@ class TaskScheduler @Inject constructor(
     }
 
     /**
-     * Computes the weighted priority score for the given task using its priority value and the configured priority weight.
+     * Calculates the weighted priority score for a task based on its priority value and the configured priority weight.
      *
-     * @return The weighted priority score.
+     * @return The computed weighted priority score for the task.
      */
     private fun calculatePriorityScore(task: Task): Float {
         return task.priority.value * config.priorityWeight
     }
 
     /**
-     * Computes the weighted urgency score for the given task using its urgency value and the configured urgency weight.
+     * Calculates the weighted urgency score for a task based on its urgency value and the configured urgency weight.
      *
-     * @param task The task for which to calculate the urgency score.
-     * @return The weighted urgency score.
+     * @param task The task whose urgency score is to be calculated.
+     * @return The weighted urgency score as a Float.
      */
     private fun calculateUrgencyScore(task: Task): Float {
         return task.urgency.value * config.urgencyWeight
     }
 
     /**
-     * Computes the weighted importance score for the given task using its importance value and the configured importance weight.
+     * Calculates the weighted importance score for a task based on its importance value and the configured importance weight.
      *
-     * @return The calculated importance score.
+     * @return The weighted importance score for the task.
      */
     private fun calculateImportanceScore(task: Task): Float {
         return task.importance.value * config.importanceWeight

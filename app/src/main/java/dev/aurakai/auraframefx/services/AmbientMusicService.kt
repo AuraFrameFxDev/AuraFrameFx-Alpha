@@ -9,11 +9,11 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class AmbientMusicService @Inject constructor() : Service() {
     /**
-     * Called when a client attempts to bind to the service.
+     * Handles binding requests from clients.
      *
-     * Always returns null, indicating that binding is not supported for this service.
+     * Always returns null, indicating that this service does not support binding.
      *
-     * @return null, preventing clients from binding.
+     * @return Always null.
      */
 
     override fun onBind(_intent: Intent?): IBinder? { // intent -> _intent
@@ -23,9 +23,9 @@ class AmbientMusicService @Inject constructor() : Service() {
     }
 
     /**
-     * Handles a request to start the service and specifies that it should not be restarted if terminated by the system.
+     * Handles a request to start the service and indicates that it should not be restarted if terminated by the system.
      *
-     * @return `START_NOT_STICKY` to indicate the service will not be recreated automatically after being killed.
+     * @return `START_NOT_STICKY` to prevent automatic recreation of the service after it is killed.
      */
     override fun onStartCommand(_intent: Intent?, _flags: Int, _startId: Int): Int {
         // TODO: Implement service logic for starting the service.
@@ -34,7 +34,9 @@ class AmbientMusicService @Inject constructor() : Service() {
     }
 
     /**
-     * Called by the system when the service is first created to perform one-time initialization.
+     * Initializes the service when it is first created.
+     *
+     * Called once by the system to perform any setup required before the service starts handling commands.
      */
     override fun onCreate() {
         super.onCreate()
@@ -42,9 +44,9 @@ class AmbientMusicService @Inject constructor() : Service() {
     }
 
     /**
-     * Handles cleanup operations when the service is destroyed.
+     * Called when the service is being destroyed.
      *
-     * Called before the service is terminated to allow for resource release or other shutdown tasks.
+     * Intended for cleanup operations before the service is terminated. Currently, no additional cleanup is implemented.
      */
     override fun onDestroy() {
         super.onDestroy()
@@ -54,7 +56,7 @@ class AmbientMusicService @Inject constructor() : Service() {
     /**
      * Pauses music playback.
      *
-     * This method is a placeholder and does not perform any action.
+     * This method is a placeholder and currently has no implementation.
      */
     fun pause() {
         // TODO: Implement pause logic. Reported as unused. Implement or remove.

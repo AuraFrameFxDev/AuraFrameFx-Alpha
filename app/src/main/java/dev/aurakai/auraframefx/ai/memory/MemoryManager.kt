@@ -23,10 +23,10 @@ class MemoryManager @Inject constructor(
     val memoryStats: StateFlow<MemoryStats> = _memoryStats
 
     /**
-     * Stores the given memory item in the memory store, updates memory statistics, and tracks recent access.
+     * Stores a memory item in the in-memory store, updates memory statistics, and records recent access.
      *
-     * @param item The memory item to be stored.
-     * @return The unique ID of the stored memory item.
+     * @param item The memory item to store.
+     * @return The unique identifier of the stored memory item.
      */
     fun storeMemory(item: MemoryItem): String {
         memoryStore[item.id] = item
@@ -36,12 +36,12 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Retrieves memory items that match the specified query criteria.
+     * Retrieves memory items matching the specified query criteria.
      *
-     * Filters memory items by agent if an agent filter is provided in the query, sorts them by descending timestamp, and limits the results to the configured maximum number of items.
+     * Filters stored memory items by agent if an agent filter is provided in the query, sorts them by descending timestamp, and limits the results to the maximum number of items configured.
      *
-     * @param query The memory query specifying filtering criteria, such as agent filters.
-     * @return A result containing the retrieved memory items, their count, and the original query.
+     * @param query The criteria for filtering memory items, including optional agent filters.
+     * @return A result containing the filtered memory items, their count, and the original query.
      */
     fun retrieveMemory(query: MemoryQuery): MemoryRetrievalResult {
         val items = memoryStore.values
@@ -60,11 +60,11 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Returns memory items whose timestamps are within the configured context window duration from the current time.
+     * Retrieves memory items with timestamps within the configured context window duration from the current time.
      *
-     * Items are sorted by descending timestamp and limited to the maximum number specified in the configuration.
+     * Items are sorted by descending timestamp and limited to the maximum chain length specified in the configuration.
      *
-     * @param task The task identifier (currently not used for filtering).
+     * @param task The task identifier (currently unused).
      * @return A list of recent memory items within the context window.
      */
     fun getContextWindow(task: String): List<MemoryItem> {
@@ -80,18 +80,18 @@ class MemoryManager @Inject constructor(
     }
 
     /**
-     * Retrieves the latest memory statistics snapshot.
+     * Returns the current snapshot of memory statistics for the memory store.
      *
-     * @return The current `MemoryStats` representing the state of the memory store.
+     * @return The latest `MemoryStats` reflecting total items, recent items, memory size, and last update time.
      */
     fun getMemoryStats(): MemoryStats {
         return _memoryStats.value
     }
 
     /**
-     * Updates the memory statistics with the current total number of items, count of recent items, and total memory size.
+     * Refreshes memory statistics, updating the total item count, recent item count, and aggregate memory size.
      *
-     * Recent items are those with timestamps within the configured maximum chain length duration from the current time.
+     * Recent items are determined by whether their timestamps fall within the configured context window duration from the current time.
      */
     private fun updateStats() {
         _memoryStats.update { current ->
