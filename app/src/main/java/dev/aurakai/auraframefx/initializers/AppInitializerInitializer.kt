@@ -20,8 +20,7 @@ class AppInitializerInitializer : Initializer<Unit> {
     /**
      * Returns a list of initializer classes that this initializer depends on.
      *
-     * Currently returns an empty list, indicating that there are no dependencies.
-     * @return An empty list of dependencies.
+     * @return An empty list, indicating that this initializer has no dependencies.
      */
     override fun dependencies(): List<Class<out Initializer<*>>> {
         // TODO: Define dependencies if this initializer depends on others.

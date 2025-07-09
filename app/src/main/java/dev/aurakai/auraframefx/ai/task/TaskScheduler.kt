@@ -93,8 +93,7 @@ class TaskScheduler @Inject constructor(
     /**
      * Processes the task queue, executing tasks in order of priority while respecting the maximum number of active tasks.
      *
-     * Continues to execute tasks from the queue as long as there are tasks ready for execution and the active task limit is not exceeded.
-     * Tasks are only executed if their dependencies are satisfied and required agents are available.
+     * Continues scheduling tasks from the queue as long as there are available slots for active tasks and each task's dependencies and agent requirements are met.
      */
     private fun processQueue() {
         while (_taskQueue.isNotEmpty() && _activeTasks.size < config.maxActiveTasks) {
@@ -109,9 +108,9 @@ class TaskScheduler @Inject constructor(
     }
 
     /**
-     * Checks if the specified task is ready for execution by verifying that all dependencies are completed and required agents are specified.
+     * Checks if a task is eligible for execution based on completion of its dependencies and agent requirements.
      *
-     * Returns `true` if all dependencies have status `COMPLETED` and agent requirements are present (agent availability is not yet enforced); otherwise, returns `false`.
+     * Returns `true` if all dependencies are completed and agent requirements are considered met; otherwise, returns `false`.
      */
     private fun canExecuteTask(task: Task): Boolean {
         // Check dependencies
@@ -133,7 +132,7 @@ class TaskScheduler @Inject constructor(
     /**
      * Sets the specified task to in-progress status, assigns its required agents, and updates active and tracked task collections.
      *
-     * @param task The task to transition to in-progress state.
+     * @param task The task to update and mark as in progress.
      */
     private fun executeTask(task: Task) {
         val updatedTask = task.copy(
@@ -150,7 +149,7 @@ class TaskScheduler @Inject constructor(
     /**
      * Updates the status of a task and manages its transition between active, completed, and failed states.
      *
-     * Moves the task to the completed list if the status is `COMPLETED`, or removes it from active tasks and triggers error handling if the status is `FAILED`. Updates the task record, refreshes task statistics, and processes the scheduling queue.
+     * Moves the task to the appropriate collection based on the new status, triggers error handling if the task failed, updates the task record and statistics, and continues scheduling pending tasks.
      *
      * @param taskId The unique identifier of the task to update.
      * @param status The new status to assign to the task.
@@ -186,34 +185,35 @@ class TaskScheduler @Inject constructor(
     }
 
     /**
-     * Calculates the weighted priority score for the given task using its priority value and the configured priority weight.
+     * Computes the weighted priority score for the given task using its priority value and the configured priority weight.
      *
-     * @return The weighted priority score as a Float.
+     * @return The weighted priority score.
      */
     private fun calculatePriorityScore(task: Task): Float {
         return task.priority.value * config.priorityWeight
     }
 
     /**
-     * Calculates the weighted urgency score for the given task using its urgency value and the configured urgency weight.
+     * Computes the weighted urgency score for the given task using its urgency value and the configured urgency weight.
      *
-     * @return The urgency score as a Float.
+     * @param task The task for which to calculate the urgency score.
+     * @return The weighted urgency score.
      */
     private fun calculateUrgencyScore(task: Task): Float {
         return task.urgency.value * config.urgencyWeight
     }
 
     /**
-     * Calculates the weighted importance score for the given task using its importance value and the configured importance weight.
+     * Computes the weighted importance score for the given task using its importance value and the configured importance weight.
      *
-     * @return The computed importance score as a Float.
+     * @return The calculated importance score.
      */
     private fun calculateImportanceScore(task: Task): Float {
         return task.importance.value * config.importanceWeight
     }
 
     /**
-     * Updates the aggregated task statistics to reflect the latest state after a task is added or its status changes.
+     * Updates the aggregated task statistics to reflect the current state after a task is added or its status changes.
      *
      * Increments the total task count, updates counts for active, completed, and pending tasks, refreshes the last updated timestamp, and adjusts the count for the task's current status.
      *

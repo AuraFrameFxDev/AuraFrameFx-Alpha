@@ -21,10 +21,10 @@ class AuraAIServiceImpl @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : AuraAIService {
     /**
-     * Returns a fixed placeholder response for an analytics query.
+     * Returns a fixed placeholder response for any analytics query.
      *
-     * This implementation ignores the input query and always returns a static string.
-     * @return A placeholder analytics response.
+     * This implementation ignores the input and always returns a static string.
+     * @return The placeholder analytics response.
      */
     override fun analyticsQuery(_query: String): String {
         return "Analytics response placeholder"
@@ -60,9 +60,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a fixed placeholder AI response string.
-     *
-     * Ignores the provided prompt and options.
+     * Returns a fixed placeholder string as the AI response for the given prompt and options.
      *
      * @return The string "AI response placeholder".
      */
@@ -71,12 +69,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Retrieves a memory value for the specified key.
-     *
-     * This stub implementation always returns null, indicating memory retrieval is not implemented.
+     * Returns `null` for any memory key, as memory retrieval is not implemented in this stub.
      *
      * @param _memoryKey The key for the memory entry to retrieve.
-     * @return Always null.
+     * @return Always returns `null`.
      */
     override fun getMemory(_memoryKey: String): String? {
         return null
@@ -85,7 +81,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Placeholder method for saving a value to memory with the specified key.
      *
-     * This implementation does not store the value and performs no operation.
+     * This implementation does not perform any operation and serves as a stub for future functionality.
      */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement memory saving
