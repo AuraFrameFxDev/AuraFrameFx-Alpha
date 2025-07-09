@@ -47,21 +47,19 @@ enum class Emotion {
 
     companion object {
         /**
- * Returns a randomly selected Emotion from all defined values.
- *
- * Useful for generating varied or unpredictable emotional states.
+ * Selects and returns a random Emotion from all available values.
  *
  * @return A randomly chosen Emotion.
  */
         fun random(): Emotion = values().random()
 
         /**
-             * Returns the Emotion corresponding to the given string, ignoring case.
+             * Returns the Emotion that matches the given string, ignoring case.
              *
-             * If the string does not match any defined Emotion, NEUTRAL is returned.
+             * If no matching Emotion is found, returns NEUTRAL.
              *
-             * @param name The string to match against Emotion names.
-             * @return The matching Emotion, or NEUTRAL if no match is found.
+             * @param name The name to match against available Emotion values.
+             * @return The corresponding Emotion, or NEUTRAL if no match exists.
              */
         fun fromString(name: String): Emotion =
             values().find { it.name.equals(name, ignoreCase = true) } ?: NEUTRAL

@@ -24,9 +24,9 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Composes the main conference room interface with agent selection, recording and transcription controls, chat display, and message input.
+ * Displays the main conference room UI with agent selection, recording and transcription controls, chat area, and message input.
  *
- * Manages local UI state for the selected agent, recording, and transcription toggles. Provides interactive controls for agent selection, starting or stopping recording and transcription, and a chat area with a message input field. Some actions are placeholders for future implementation.
+ * Manages local state for the selected agent, recording, and transcription toggles. Provides interactive controls for switching agents, starting or stopping recording and transcription, and entering chat messages. Some actions are placeholders for future implementation.
  */
 @Composable
 fun ConferenceRoomScreen() {
@@ -150,13 +150,13 @@ fun ConferenceRoomScreen() {
 }
 
 /**
- * Displays a button for selecting an agent, visually highlighting when selected.
+ * Renders a selectable button for an agent, visually indicating selection state.
  *
- * The button changes its background and text color to indicate selection and invokes the provided callback when clicked.
+ * Highlights the button when selected and triggers the provided callback when pressed.
  *
- * @param agent The name of the agent to display on the button.
- * @param isSelected Whether this agent is currently selected.
- * @param onClick Callback triggered when the button is pressed.
+ * @param agent The label to display for the agent.
+ * @param isSelected True if this agent is currently selected.
+ * @param onClick Invoked when the button is clicked.
  */
 @Composable
 fun AgentButton(
@@ -185,12 +185,12 @@ fun AgentButton(
 }
 
 /**
- * Displays a toggle button for starting or stopping recording, with icon and color indicating the current state.
+ * Renders a toggle button for controlling recording state, visually indicating whether recording is active.
  *
- * Shows a stop icon with red tint when recording is active, and a circle icon with purple tint when inactive. The content description updates for accessibility.
+ * Displays a red stop icon when recording is active, or a purple circle icon when inactive. The button's content description updates for accessibility based on the current state.
  *
- * @param isRecording True if recording is currently active; false otherwise.
- * @param onClick Called when the button is pressed.
+ * @param isRecording Whether recording is currently active.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun RecordingButton(
@@ -215,12 +215,12 @@ fun RecordingButton(
 }
 
 /**
- * Displays a toggle button for starting or stopping transcription, updating its icon and color to reflect the current state.
+ * Renders a toggle button for controlling transcription state, displaying a stop icon when active and a phone icon when inactive.
  *
- * Shows a stop icon with a red tint when transcription is active, or a phone icon with a blue tint when inactive. Invokes the provided callback when pressed.
+ * The button updates its icon and color to indicate whether transcription is currently active. Pressing the button triggers the provided callback.
  *
- * @param isTranscribing True if transcription is currently active; false otherwise.
- * @param onClick Called when the button is pressed.
+ * @param isTranscribing Indicates whether transcription is currently active.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun TranscribeButton(
@@ -245,9 +245,9 @@ fun TranscribeButton(
 }
 
 /**
- * Renders a design-time preview of the ConferenceRoomScreen composable using the MaterialTheme.
+ * Displays a preview of the ConferenceRoomScreen composable within a MaterialTheme for design-time visualization.
  *
- * Intended for use with Android Studio's Compose preview to visualize the UI layout and styling.
+ * Intended for use with Android Studio's Compose preview to inspect the UI layout and appearance.
  */
 @Composable
 @Preview(showBackground = true)
