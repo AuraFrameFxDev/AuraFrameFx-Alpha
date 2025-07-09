@@ -25,17 +25,17 @@ print_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
-# print_warning prints a message to stdout with a yellow [WARNING] prefix.
+# print_warning prints a warning message to stdout with a yellow [WARNING] prefix.
 print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
-# print_error prints the given message to stdout with a red [ERROR] prefix.
+# print_error prints a message with a red [ERROR] prefix to indicate an error condition.
 print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# print_genesis prints a message to stdout with a purple [GENESIS] prefix for Genesis Layer notifications.
+# print_genesis prints a message with a purple [GENESIS] prefix for Genesis Layer notifications.
 print_genesis() {
     echo -e "${PURPLE}[GENESIS]${NC} $1"
 }

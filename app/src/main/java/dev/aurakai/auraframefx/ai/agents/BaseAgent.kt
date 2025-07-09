@@ -20,16 +20,16 @@ open class BaseAgent(
     ) : Agent {
 
     /**
-     * Retrieves the agent's name.
+     * Returns the agent's name, or null if no name is set.
      *
-     * @return The agent's name, or null if it has not been set.
+     * @return The agent's name, or null if unset.
      */
     override fun getName(): String? {
         return _agentName
     }
 
     /**
-     * Returns the agent's type as an `AgentType` enum.
+     * Retrieves the agent's type as an `AgentType` enum.
      *
      * @return The `AgentType` corresponding to the agent's internal type string.
      * @throws IllegalArgumentException if the internal type string does not match any valid `AgentType`.
@@ -153,13 +153,13 @@ open class BaseAgent(
      * @return A default [AgentResponse] referencing the request and context.
      */
     /**
-     * Processes an AI request with the provided context and returns a default agent response.
+     * Processes an AI request with the given context and returns a default agent response.
      *
-     * The response includes a message referencing the request query, agent name, and context, with a fixed confidence score of 1.0.
-     * Subclasses should override this method to implement custom request handling logic.
+     * The response contains a message referencing the request query, agent name, and context, with a fixed confidence score of 1.0.
+     * Intended to be overridden by subclasses for custom request handling.
      *
      * @param request The AI request to process.
-     * @param context Additional context for processing the request.
+     * @param context Additional context for the request.
      * @return A default [AgentResponse] referencing the request, agent name, and context.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
@@ -288,9 +288,9 @@ open class BaseAgent(
      * @return A flow emitting one AgentResponse generated with a default context.
      */
     /**
-     * Returns a flow emitting a single agent response for the given request using a default context.
+     * Returns a flow that emits a single agent response for the given request using a default context.
      *
-     * Subclasses can override this method to implement streaming or multi-step response logic.
+     * Subclasses may override this method to provide streaming or multi-step responses.
      *
      * @param request The AI request to process.
      * @return A [Flow] emitting a single [AgentResponse] generated with a default context.
@@ -305,42 +305,42 @@ open class BaseAgent(
 
     // These methods are not part of the Agent interface, so @Override is removed.
     /**
-     * Retrieves metadata describing the agent's capabilities.
+     * Returns a map containing metadata about the agent's capabilities.
      *
-     * The returned map contains the agent's name, type, and a boolean flag `"base_implemented"` set to true, indicating this is the base implementation.
+     * The map includes the agent's name, type, and a flag indicating this is the base implementation.
      *
-     * @return A map with keys `"name"`, `"type"`, and `"base_implemented"`.
+     * @return A map with keys "name", "type", and "base_implemented".
      */
     fun getCapabilities(): Map<String, Any> {
         return mapOf("name" to _agentName, "type" to _agentType, "base_implemented" to true)
     }
 
     /**
-     * Returns the agent's continuous memory object, or null if not implemented.
+     * Retrieves the agent's continuous memory object, if available.
      *
-     * Subclasses may override this method to provide persistent or long-term memory functionality.
+     * By default, returns null to indicate that continuous memory is not supported. Subclasses can override this method to provide persistent or long-term memory functionality.
      *
-     * @return The continuous memory object, or null if the agent does not support continuous memory.
+     * @return The continuous memory object, or null if unsupported.
      */
     fun getContinuousMemory(): Any? {
         return null
     }
 
     /**
-     * Returns a list of default ethical principles that guide the base agent's behavior.
+     * Retrieves the default ethical guidelines that govern the base agent's behavior.
      *
-     * @return A list of ethical guidelines.
+     * @return A list of ethical principles, including helpfulness, harmlessness, and adherence to base agent principles.
      */
     fun getEthicalGuidelines(): List<String> {
         return listOf("Be helpful.", "Be harmless.", "Adhere to base agent principles.")
     }
 
     /**
-     * Retrieves the agent's learning history.
+     * Returns the agent's learning history.
      *
-     * By default, returns an empty list, indicating that no learning history is stored. Subclasses may override to provide actual learning history data.
+     * By default, returns an empty list. Subclasses may override to provide actual learning history data.
      *
-     * @return An empty list if no learning history is available.
+     * @return A list of learning history entries, or an empty list if none are available.
      */
     fun getLearningHistory(): List<String> {
         return emptyList()
