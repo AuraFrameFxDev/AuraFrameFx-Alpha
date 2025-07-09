@@ -409,4 +409,63 @@ class OracleDriveControlViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
         
         // Then - should end in idle state
-        verify { mockS
+        verify { mockStateObserver.onChanged(DriveState.IDLE) }    }
+
+    @Test
+    fun `should handle extremely large speed values`() = runTest {
+        // Given
+        val maxSpeed = Double.MAX_VALUE
+        
+        // When
+        viewModel.updateSpeed(maxSpeed)
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        // Then
+        verify { mockErrorObserver.onChanged("Speed exceeds maximum limit: $maxSpeed") }
+        coVerify(exactly = 0) { mockRepository.updateSpeed(any()) }
+    }
+
+    @Test
+    fun `should handle zero speed value`() = runTest {
+        // Given
+        val zeroSpeed = 0.0
+        coEvery { mockRepository.updateSpeed(zeroSpeed) } returns Result.success(Unit)
+        
+        // When
+        viewModel.updateSpeed(zeroSpeed)
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        // Then
+        coVerify { mockRepository.updateSpeed(zeroSpeed) }
+    }
+
+    @Test
+    fun `should handle infinite speed value`() = runTest {
+        // Given
+        val infiniteSpeed = Double.POSITIVE_INFINITY
+        
+        // When
+        viewModel.updateSpeed(infiniteSpeed)
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        // Then
+        verify { mockErrorObserver.onChanged("Invalid speed value: Infinity") }
+        coVerify(exactly = 0) { mockRepository.updateSpeed(any()) }
+    }
+
+    @Test
+    fun `should handle negative infinite speed value`() = runTest {
+        // Given
+        val negativeInfiniteSpeed = Double.NEGATIVE_INFINITY
+        
+        // When
+        viewModel.updateSpeed(negativeInfiniteSpeed)
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        // Then
+        verify { mockErrorObserver.onChanged("Invalid speed value: -Infinity") }
+        coVerify(exactly = 0) { mockRepository.updateSpeed(any()) }
+    }
+
+    @Test
+    fun `should handle all D
