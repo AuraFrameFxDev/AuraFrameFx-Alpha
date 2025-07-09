@@ -30,18 +30,24 @@ class TestGenesisAPI:
     """Test class for GenesisAPI functionality."""
 
     def setup_method(self):
-        """Setup method run before each test."""
+        """
+        Initializes a GenesisAPI instance with test API key and base URL before each test.
+        """
         self.api_key = "test_api_key_123"
         self.base_url = "https://api.genesis.example.com"
         self.genesis_api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
 
     def teardown_method(self):
-        """Teardown method run after each test."""
+        """
+        Cleans up resources after each test method execution.
+        """
         # Clean up any resources
         pass
 
     def test_genesis_api_initialization(self):
-        """Test GenesisAPI initialization with valid parameters."""
+        """
+        Test that GenesisAPI initializes correctly with valid API key and base URL, and sets default timeout and max_retries values.
+        """
         api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
         assert api.api_key == self.api_key
         assert api.base_url == self.base_url
@@ -60,7 +66,9 @@ class TestGenesisAPI:
         assert api.max_retries == 5
 
     def test_genesis_api_initialization_invalid_api_key(self):
-        """Test GenesisAPI initialization with invalid API key."""
+        """
+        Test that initializing GenesisAPI with an invalid API key raises a GenesisAPIAuthenticationError.
+        """
         with pytest.raises(GenesisAPIAuthenticationError):
             GenesisAPI(api_key="", base_url=self.base_url)
 
@@ -71,7 +79,9 @@ class TestGenesisAPI:
 
     @pytest.mark.asyncio
     async def test_generate_text_success(self):
-        """Test successful text generation."""
+        """
+        Asynchronously tests that `generate_text` returns a valid response object on successful text generation.
+        """
         mock_response = {
             "id": "test_id_123",
             "text": "Generated text response",
@@ -92,7 +102,9 @@ class TestGenesisAPI:
 
     @pytest.mark.asyncio
     async def test_generate_text_with_parameters(self):
-        """Test text generation with custom parameters."""
+        """
+        Asynchronously tests that text generation with custom parameters returns the expected response and sends the correct request payload.
+        """
         mock_response = {
             "id": "test_id_123",
             "text": "Generated text response",
@@ -121,7 +133,9 @@ class TestGenesisAPI:
 
     @pytest.mark.asyncio
     async def test_generate_text_authentication_error(self):
-        """Test handling of authentication errors."""
+        """
+        Test that `generate_text` raises a `GenesisAPIAuthenticationError` when the API returns a 401 authentication error.
+        """
         with patch('aiohttp.ClientSession.post') as mock_post:
             mock_post.return_value.__aenter__.return_value.status = 401
             mock_post.return_value.__aenter__.return_value.json = AsyncMock(
@@ -133,7 +147,9 @@ class TestGenesisAPI:
 
     @pytest.mark.asyncio
     async def test_generate_text_rate_limit_error(self):
-        """Test handling of rate limit errors."""
+        """
+        Test that the generate_text method raises GenesisAPIRateLimitError when the API returns a 429 rate limit error.
+        """
         with patch('aiohttp.ClientSession.post') as mock_post:
             mock_post.return_value.__aenter__.return_value.status = 429
             mock_post.return_value.__aenter__.return_value.json = AsyncMock(
@@ -145,7 +161,9 @@ class TestGenesisAPI:
 
     @pytest.mark.asyncio
     async def test_generate_text_server_error(self):
-        """Test handling of server errors."""
+        """
+        Test that a server error (HTTP 500) during text generation raises a GenesisAPIServerError exception.
+        """
         with patch('aiohttp.ClientSession.post') as mock_post:
             mock_post.return_value.__aenter__.return_value.status = 500
             mock_post.return_value.__aenter__.return_value.json = AsyncMock(
@@ -157,7 +175,9 @@ class TestGenesisAPI:
 
     @pytest.mark.asyncio
     async def test_generate_text_timeout_error(self):
-        """Test handling of timeout errors."""
+        """
+        Test that a timeout during text generation raises a GenesisAPITimeoutError.
+        """
         with patch('aiohttp.ClientSession.post') as mock_post:
             mock_post.return_value.__aenter__.side_effect = asyncio.TimeoutError()
             
@@ -166,19 +186,27 @@ class TestGenesisAPI:
 
     @pytest.mark.asyncio
     async def test_generate_text_empty_prompt(self):
-        """Test handling of empty prompt."""
+        """
+        Test that generating text with an empty prompt raises a ValueError.
+        """
         with pytest.raises(ValueError):
             await self.genesis_api.generate_text("")
 
     @pytest.mark.asyncio
     async def test_generate_text_none_prompt(self):
-        """Test handling of None prompt."""
+        """
+        Test that `generate_text` raises a ValueError when called with a None prompt.
+        """
         with pytest.raises(ValueError):
             await self.genesis_api.generate_text(None)
 
     @pytest.mark.asyncio
     async def test_generate_text_very_long_prompt(self):
-        """Test handling of very long prompts."""
+        """
+        Test that the API returns an error when attempting to generate text with a very long prompt.
+        
+        Verifies that a prompt exceeding the allowed length results in a 400 error and raises a GenesisAPIError.
+        """
         long_prompt = "A" * 10000
         
         with patch('aiohttp.ClientSession.post') as mock_post:
@@ -192,7 +220,9 @@ class TestGenesisAPI:
 
     @pytest.mark.asyncio
     async def test_generate_text_with_retry_logic(self):
-        """Test retry logic on transient failures."""
+        """
+        Tests that the `generate_text` method retries on transient failures and succeeds after a retry when the initial response is a 503 error.
+        """
         mock_response = {
             "id": "test_id_123",
             "text": "Generated text response",
@@ -218,12 +248,16 @@ class TestGenesisAPI:
                 assert result.text == "Generated text response"
 
     def test_validate_api_key_valid(self):
-        """Test API key validation with valid key."""
+        """
+        Test that `validate_api_key` returns True for a valid API key.
+        """
         valid_key = "sk-1234567890abcdef"
         assert validate_api_key(valid_key) == True
 
     def test_validate_api_key_invalid(self):
-        """Test API key validation with invalid key."""
+        """
+        Tests that `validate_api_key` returns False for various invalid API key formats.
+        """
         invalid_keys = [
             "",
             None,
@@ -237,7 +271,9 @@ class TestGenesisAPI:
             assert validate_api_key(key) == False
 
     def test_format_genesis_prompt_basic(self):
-        """Test basic prompt formatting."""
+        """
+        Tests that `format_genesis_prompt` correctly formats a basic prompt and returns a dictionary with expected fields.
+        """
         prompt = "Hello world"
         formatted = format_genesis_prompt(prompt)
         assert isinstance(formatted, dict)
@@ -246,7 +282,9 @@ class TestGenesisAPI:
         assert "max_tokens" in formatted
 
     def test_format_genesis_prompt_with_parameters(self):
-        """Test prompt formatting with custom parameters."""
+        """
+        Tests that `format_genesis_prompt` correctly formats a prompt with specified model, max_tokens, and temperature parameters.
+        """
         prompt = "Test prompt"
         formatted = format_genesis_prompt(
             prompt=prompt,
@@ -261,17 +299,23 @@ class TestGenesisAPI:
         assert formatted["temperature"] == 0.9
 
     def test_format_genesis_prompt_invalid_temperature(self):
-        """Test prompt formatting with invalid temperature."""
+        """
+        Test that `format_genesis_prompt` raises a ValueError when given an invalid temperature value.
+        """
         with pytest.raises(ValueError):
             format_genesis_prompt("Test", temperature=1.5)
 
     def test_format_genesis_prompt_invalid_max_tokens(self):
-        """Test prompt formatting with invalid max_tokens."""
+        """
+        Test that `format_genesis_prompt` raises a ValueError when called with an invalid `max_tokens` value.
+        """
         with pytest.raises(ValueError):
             format_genesis_prompt("Test", max_tokens=-1)
 
     def test_parse_genesis_response_valid(self):
-        """Test parsing valid Genesis API response."""
+        """
+        Verify that a valid Genesis API response dictionary is correctly parsed into a GenesisResponse object.
+        """
         response_data = {
             "id": "test_id_123",
             "text": "Generated text",
@@ -289,7 +333,11 @@ class TestGenesisAPI:
         assert result.usage["prompt_tokens"] == 10
 
     def test_parse_genesis_response_missing_required_fields(self):
-        """Test parsing response with missing required fields."""
+        """
+        Verify that parsing a response missing required fields raises a GenesisAPIError.
+        
+        Tests multiple invalid response dictionaries to ensure the parser enforces presence of all mandatory fields.
+        """
         invalid_responses = [
             {},
             {"id": "test"},
@@ -302,7 +350,9 @@ class TestGenesisAPI:
                 parse_genesis_response(response)
 
     def test_parse_genesis_response_invalid_usage_format(self):
-        """Test parsing response with invalid usage format."""
+        """
+        Test that parsing a response with an invalid usage field format raises a GenesisAPIError.
+        """
         response_data = {
             "id": "test_id_123",
             "text": "Generated text",
@@ -315,28 +365,38 @@ class TestGenesisAPI:
             parse_genesis_response(response_data)
 
     def test_handle_genesis_error_401(self):
-        """Test error handling for 401 status."""
+        """
+        Test that a 401 status code triggers a GenesisAPIAuthenticationError when handled by handle_genesis_error.
+        """
         with pytest.raises(GenesisAPIAuthenticationError):
             handle_genesis_error(401, {"error": "Unauthorized"})
 
     def test_handle_genesis_error_429(self):
-        """Test error handling for 429 status."""
+        """
+        Test that a 429 status code triggers a GenesisAPIRateLimitError when handled by handle_genesis_error.
+        """
         with pytest.raises(GenesisAPIRateLimitError):
             handle_genesis_error(429, {"error": "Rate limit exceeded"})
 
     def test_handle_genesis_error_500(self):
-        """Test error handling for 500 status."""
+        """
+        Test that a 500 status code triggers a GenesisAPIServerError when handled by handle_genesis_error.
+        """
         with pytest.raises(GenesisAPIServerError):
             handle_genesis_error(500, {"error": "Internal server error"})
 
     def test_handle_genesis_error_generic(self):
-        """Test error handling for generic errors."""
+        """
+        Test that `handle_genesis_error` raises a `GenesisAPIError` for generic error responses with status code 400.
+        """
         with pytest.raises(GenesisAPIError):
             handle_genesis_error(400, {"error": "Bad request"})
 
     @pytest.mark.asyncio
     async def test_retry_with_exponential_backoff_success(self):
-        """Test retry with exponential backoff on successful retry."""
+        """
+        Tests that `retry_with_exponential_backoff` retries a failing asynchronous function and returns the result upon a successful retry.
+        """
         mock_func = AsyncMock()
         mock_func.side_effect = [
             GenesisAPIServerError("Server error"),
@@ -350,7 +410,9 @@ class TestGenesisAPI:
 
     @pytest.mark.asyncio
     async def test_retry_with_exponential_backoff_max_retries(self):
-        """Test retry with exponential backoff reaching max retries."""
+        """
+        Test that `retry_with_exponential_backoff` stops retrying after reaching the maximum number of retries and raises the last encountered exception.
+        """
         mock_func = AsyncMock()
         mock_func.side_effect = GenesisAPIServerError("Server error")
         
@@ -361,7 +423,11 @@ class TestGenesisAPI:
 
     @pytest.mark.asyncio
     async def test_retry_with_exponential_backoff_non_retryable_error(self):
-        """Test retry with exponential backoff on non-retryable error."""
+        """
+        Test that `retry_with_exponential_backoff` does not retry when a non-retryable error is raised.
+        
+        Verifies that the function immediately raises a non-retryable exception (such as `GenesisAPIAuthenticationError`) without performing any retries.
+        """
         mock_func = AsyncMock()
         mock_func.side_effect = GenesisAPIAuthenticationError("Auth error")
         
@@ -388,7 +454,9 @@ class TestGenesisRequest:
         assert request.temperature == 0.7
 
     def test_genesis_request_to_dict(self):
-        """Test converting GenesisRequest to dictionary."""
+        """
+        Test that GenesisRequest instances are correctly converted to dictionaries with expected field values.
+        """
         request = GenesisRequest(
             prompt="Test prompt",
             model="genesis-v1",
@@ -404,7 +472,9 @@ class TestGenesisRequest:
         assert result["temperature"] == 0.7
 
     def test_genesis_request_from_dict(self):
-        """Test creating GenesisRequest from dictionary."""
+        """
+        Test that a GenesisRequest object is correctly created from a dictionary input.
+        """
         data = {
             "prompt": "Test prompt",
             "model": "genesis-v1",
@@ -419,7 +489,9 @@ class TestGenesisRequest:
         assert request.temperature == 0.7
 
     def test_genesis_request_validation(self):
-        """Test GenesisRequest validation."""
+        """
+        Tests that `GenesisRequest` raises a `ValueError` for invalid prompt, model, or max_tokens values.
+        """
         with pytest.raises(ValueError):
             GenesisRequest(prompt="", model="genesis-v1")
         
@@ -434,7 +506,9 @@ class TestGenesisResponse:
     """Test class for GenesisResponse data class."""
 
     def test_genesis_response_creation(self):
-        """Test creating GenesisResponse instance."""
+        """
+        Test that a GenesisResponse instance is created with the correct field values.
+        """
         response = GenesisResponse(
             id="test_id",
             text="Generated text",
@@ -450,7 +524,9 @@ class TestGenesisResponse:
         assert response.usage["prompt_tokens"] == 10
 
     def test_genesis_response_to_dict(self):
-        """Test converting GenesisResponse to dictionary."""
+        """
+        Verify that the GenesisResponse object's to_dict method returns a dictionary with correct field values.
+        """
         response = GenesisResponse(
             id="test_id",
             text="Generated text",
@@ -468,7 +544,9 @@ class TestGenesisResponse:
         assert result["usage"]["prompt_tokens"] == 10
 
     def test_genesis_response_from_dict(self):
-        """Test creating GenesisResponse from dictionary."""
+        """
+        Verify that a GenesisResponse object is correctly created from a dictionary and its fields are properly populated.
+        """
         data = {
             "id": "test_id",
             "text": "Generated text",
@@ -501,13 +579,17 @@ class TestGenesisAPIExceptions:
         assert isinstance(error, GenesisAPIError)
 
     def test_genesis_api_rate_limit_error(self):
-        """Test GenesisAPIRateLimitError exception."""
+        """
+        Verify that the GenesisAPIRateLimitError exception is correctly instantiated, stringified, and inherits from GenesisAPIError.
+        """
         error = GenesisAPIRateLimitError("Rate limit error")
         assert str(error) == "Rate limit error"
         assert isinstance(error, GenesisAPIError)
 
     def test_genesis_api_server_error(self):
-        """Test GenesisAPIServerError exception."""
+        """
+        Test that the GenesisAPIServerError exception is correctly instantiated and inherits from GenesisAPIError.
+        """
         error = GenesisAPIServerError("Server error")
         assert str(error) == "Server error"
         assert isinstance(error, GenesisAPIError)
@@ -523,13 +605,17 @@ class TestGenesisAPIIntegration:
     """Integration tests for Genesis API."""
 
     def setup_method(self):
-        """Setup method for integration tests."""
+        """
+        Initializes test configuration for integration tests by setting the API key and base URL.
+        """
         self.api_key = "test_api_key_123"
         self.base_url = "https://api.genesis.example.com"
 
     @pytest.mark.asyncio
     async def test_end_to_end_text_generation(self):
-        """Test end-to-end text generation workflow."""
+        """
+        Tests the complete text generation workflow of GenesisAPI, verifying that a valid response is correctly parsed and returned.
+        """
         genesis_api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
         
         mock_response = {
@@ -554,7 +640,9 @@ class TestGenesisAPIIntegration:
 
     @pytest.mark.asyncio
     async def test_concurrent_requests(self):
-        """Test handling of concurrent requests."""
+        """
+        Tests that the GenesisAPI can handle multiple concurrent text generation requests and returns correct responses for each.
+        """
         genesis_api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
         
         mock_response = {
@@ -584,7 +672,9 @@ class TestGenesisAPIIntegration:
 
     @pytest.mark.asyncio
     async def test_context_manager_usage(self):
-        """Test using GenesisAPI as a context manager."""
+        """
+        Verify that GenesisAPI can be used as an asynchronous context manager and successfully generates text within the context.
+        """
         with patch('aiohttp.ClientSession') as mock_session:
             async with GenesisAPI(api_key=self.api_key, base_url=self.base_url) as api:
                 mock_response = {
@@ -605,7 +695,9 @@ class TestGenesisAPIIntegration:
 # Fixtures for common test data
 @pytest.fixture
 def sample_genesis_request():
-    """Fixture providing a sample GenesisRequest."""
+    """
+    Pytest fixture that returns a sample GenesisRequest instance for testing purposes.
+    """
     return GenesisRequest(
         prompt="Test prompt",
         model="genesis-v1",
@@ -616,7 +708,9 @@ def sample_genesis_request():
 
 @pytest.fixture
 def sample_genesis_response():
-    """Fixture providing a sample GenesisResponse."""
+    """
+    Pytest fixture that returns a sample GenesisResponse object for use in tests.
+    """
     return GenesisResponse(
         id="test_id_123",
         text="Generated text response",
@@ -628,7 +722,9 @@ def sample_genesis_response():
 
 @pytest.fixture
 def mock_genesis_api():
-    """Fixture providing a mocked GenesisAPI instance."""
+    """
+    Fixture that returns a mocked GenesisAPI instance for testing purposes.
+    """
     return GenesisAPI(api_key="test_api_key", base_url="https://api.genesis.example.com")
 
 
@@ -638,7 +734,9 @@ class TestGenesisAPIPerformance:
 
     @pytest.mark.asyncio
     async def test_response_time_measurement(self):
-        """Test measuring response time for API calls."""
+        """
+        Tests that the API call response time is measured and that the mocked response is returned within an acceptable duration.
+        """
         genesis_api = GenesisAPI(api_key="test_key", base_url="https://api.genesis.example.com")
         
         mock_response = {
@@ -663,7 +761,11 @@ class TestGenesisAPIPerformance:
 
     @pytest.mark.asyncio
     async def test_large_batch_processing(self):
-        """Test processing large batches of requests."""
+        """
+        Asynchronously tests the processing of a large batch of text generation requests using GenesisAPI.
+        
+        Verifies that multiple concurrent requests return the expected responses and that batch processing handles the specified number of prompts correctly.
+        """
         genesis_api = GenesisAPI(api_key="test_key", base_url="https://api.genesis.example.com")
         
         mock_response = {
@@ -696,7 +798,9 @@ class TestGenesisAPIEdgeCases:
 
     @pytest.mark.asyncio
     async def test_unicode_prompt_handling(self):
-        """Test handling of Unicode characters in prompts."""
+        """
+        Tests that the GenesisAPI correctly processes prompts containing Unicode characters, ensuring proper handling and response.
+        """
         genesis_api = GenesisAPI(api_key="test_key", base_url="https://api.genesis.example.com")
         
         unicode_prompt = "Hello 世界 🌍 émojis and spëcial chars"
@@ -718,7 +822,9 @@ class TestGenesisAPIEdgeCases:
 
     @pytest.mark.asyncio
     async def test_malformed_json_response(self):
-        """Test handling of malformed JSON responses."""
+        """
+        Test that GenesisAPI raises a GenesisAPIError when the API response contains malformed JSON.
+        """
         genesis_api = GenesisAPI(api_key="test_key", base_url="https://api.genesis.example.com")
         
         with patch('aiohttp.ClientSession.post') as mock_post:
@@ -732,7 +838,9 @@ class TestGenesisAPIEdgeCases:
 
     @pytest.mark.asyncio
     async def test_network_connection_error(self):
-        """Test handling of network connection errors."""
+        """
+        Test that a network connection error during text generation raises a GenesisAPIError.
+        """
         genesis_api = GenesisAPI(api_key="test_key", base_url="https://api.genesis.example.com")
         
         with patch('aiohttp.ClientSession.post') as mock_post:
@@ -750,14 +858,20 @@ class TestGenesisAPIAdvancedScenarios:
     """Advanced test scenarios for comprehensive coverage."""
     
     def setup_method(self):
-        """Setup method for advanced tests."""
+        """
+        Initializes a GenesisAPI instance with test credentials for use in advanced scenario tests.
+        """
         self.api_key = "test_api_key_advanced"
         self.base_url = "https://api.genesis.example.com"
         self.genesis_api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
 
     @pytest.mark.asyncio
     async def test_generate_text_with_extreme_parameters(self):
-        """Test text generation with extreme parameter values."""
+        """
+        Test that the GenesisAPI generates text correctly when called with extreme values for max_tokens and temperature parameters.
+        
+        Verifies that the API handles maximum token limits, minimum temperature, and maximum temperature without errors and returns the expected response.
+        """
         mock_response = {
             "id": "extreme_test_id",
             "text": "Extreme parameters response",
@@ -794,7 +908,9 @@ class TestGenesisAPIAdvancedScenarios:
 
     @pytest.mark.asyncio
     async def test_memory_efficient_large_response_handling(self):
-        """Test handling of very large API responses efficiently."""
+        """
+        Tests that the API client can efficiently handle and process very large text responses without errors or performance degradation.
+        """
         large_text = "A" * 50000  # 50KB response
         mock_response = {
             "id": "large_response_id",
@@ -814,7 +930,9 @@ class TestGenesisAPIAdvancedScenarios:
 
     @pytest.mark.asyncio
     async def test_api_key_security_validation(self):
-        """Test security aspects of API key handling."""
+        """
+        Test that the API key is securely handled and not exposed in the string representation of the GenesisAPI instance.
+        """
         # Test that API key is not logged or exposed
         with patch('logging.getLogger') as mock_logger:
             api = GenesisAPI(api_key="secret_key_123", base_url=self.base_url)
@@ -823,7 +941,9 @@ class TestGenesisAPIAdvancedScenarios:
             assert "secret_key_123" not in api_str
             
     def test_validate_api_key_comprehensive_formats(self):
-        """Test API key validation with comprehensive format checking."""
+        """
+        Tests the `validate_api_key` function with a wide range of valid and invalid API key formats to ensure comprehensive format validation.
+        """
         # Valid formats
         valid_keys = [
             "sk-1234567890abcdef1234567890abcdef",
@@ -849,7 +969,11 @@ class TestGenesisAPIAdvancedScenarios:
 
     @pytest.mark.asyncio
     async def test_concurrent_rate_limiting_scenarios(self):
-        """Test behavior under concurrent rate limiting scenarios."""
+        """
+        Test that concurrent requests to the GenesisAPI correctly raise a rate limiting error when the API responds with HTTP 429.
+        
+        This test simulates multiple simultaneous requests encountering rate limiting and verifies that the appropriate exception is raised for each.
+        """
         genesis_api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
         
         with patch('aiohttp.ClientSession.post') as mock_post:
@@ -870,7 +994,9 @@ class TestGenesisAPIAdvancedScenarios:
 
     @pytest.mark.asyncio
     async def test_request_id_tracking(self):
-        """Test request ID tracking and correlation."""
+        """
+        Verifies that the request ID returned by the API is correctly tracked, matches the expected UUID, and is properly formatted.
+        """
         request_id = str(uuid.uuid4())
         mock_response = {
             "id": request_id,
@@ -892,7 +1018,9 @@ class TestGenesisAPIAdvancedScenarios:
 
     @pytest.mark.asyncio
     async def test_response_streaming_simulation(self):
-        """Test simulation of streaming response handling."""
+        """
+        Simulates and tests the handling of streaming API responses by mocking a chunked response and verifying correct text extraction.
+        """
         # Test chunked response processing
         mock_response = {
             "id": "stream_test_id",
@@ -911,7 +1039,9 @@ class TestGenesisAPIAdvancedScenarios:
 
     @pytest.mark.asyncio
     async def test_connection_pool_management(self):
-        """Test connection pool management and cleanup."""
+        """
+        Verify that the GenesisAPI context manager correctly manages and cleans up the underlying HTTP connection pool during asynchronous usage.
+        """
         # Test that connections are properly managed
         async with GenesisAPI(api_key=self.api_key, base_url=self.base_url) as api:
             mock_response = {
@@ -930,7 +1060,9 @@ class TestGenesisAPIAdvancedScenarios:
                 assert result.text == "Connection pool response"
 
     def test_format_genesis_prompt_boundary_values(self):
-        """Test prompt formatting with boundary values."""
+        """
+        Tests that the prompt formatting function correctly handles minimum and maximum boundary values for max_tokens and temperature.
+        """
         # Test minimum values
         formatted = format_genesis_prompt(
             prompt="A",
@@ -951,7 +1083,9 @@ class TestGenesisAPIAdvancedScenarios:
         assert formatted["temperature"] == 1.0
 
     def test_parse_genesis_response_with_optional_fields(self):
-        """Test parsing responses with various optional field combinations."""
+        """
+        Tests that the `parse_genesis_response` function correctly handles responses with only required fields as well as those containing additional optional or extra fields.
+        """
         # Response with minimal required fields
         minimal_response = {
             "id": "minimal_id",
@@ -983,7 +1117,11 @@ class TestGenesisAPIAdvancedScenarios:
 
     @pytest.mark.asyncio
     async def test_retry_with_jitter_and_backoff_variations(self):
-        """Test retry mechanisms with various backoff strategies."""
+        """
+        Tests that the retry logic with exponential backoff and jitter correctly retries on transient errors and succeeds after multiple failures.
+        
+        Verifies that the function under test is retried the expected number of times, and that the backoff mechanism is invoked appropriately.
+        """
         mock_func = AsyncMock()
         
         # Test with increasing failure then success
@@ -1002,7 +1140,11 @@ class TestGenesisAPIAdvancedScenarios:
             assert mock_sleep.call_count == 3
 
     def test_genesis_request_immutability_and_copying(self):
-        """Test GenesisRequest immutability and copying behavior."""
+        """
+        Verify that GenesisRequest instances are immutable and that copying via dictionary conversion does not affect the original object.
+        
+        This test ensures that modifying a dictionary representation of a GenesisRequest does not alter the original instance, and that a new instance created from the modified dictionary reflects only the intended changes.
+        """
         original_request = GenesisRequest(
             prompt="Original prompt",
             model="genesis-v1",
@@ -1022,7 +1164,9 @@ class TestGenesisAPIAdvancedScenarios:
         assert original_request.prompt == "Original prompt"
 
     def test_genesis_response_timestamp_handling(self):
-        """Test proper handling of timestamp fields in responses."""
+        """
+        Verify that the `GenesisResponse` correctly preserves and handles the `created` timestamp field, including conversion to a UTC-aware `datetime` object.
+        """
         current_timestamp = int(datetime.now(timezone.utc).timestamp())
         
         response = GenesisResponse(
@@ -1042,7 +1186,9 @@ class TestGenesisAPIAdvancedScenarios:
 
     @pytest.mark.asyncio
     async def test_error_recovery_and_graceful_degradation(self):
-        """Test error recovery and graceful degradation scenarios."""
+        """
+        Tests that the API client raises the appropriate exception and preserves error details when the service is partially unavailable, ensuring graceful degradation and error recovery.
+        """
         genesis_api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
         
         with patch('aiohttp.ClientSession.post') as mock_post:
@@ -1058,7 +1204,9 @@ class TestGenesisAPIAdvancedScenarios:
             assert "Service partially unavailable" in str(exc_info.value)
 
     def test_exception_hierarchy_and_inheritance(self):
-        """Test exception class hierarchy and proper inheritance."""
+        """
+        Verify that all custom GenesisAPI exceptions inherit from GenesisAPIError and Exception.
+        """
         # Test that all custom exceptions inherit from GenesisAPIError
         auth_error = GenesisAPIAuthenticationError("Auth test")
         rate_limit_error = GenesisAPIRateLimitError("Rate limit test")
@@ -1078,12 +1226,22 @@ class TestGenesisAPIAdvancedScenarios:
 
     @pytest.mark.asyncio
     async def test_request_cancellation_handling(self):
-        """Test proper handling of request cancellation."""
+        """
+        Test that the GenesisAPI correctly handles cancellation of an in-progress text generation request.
+        
+        This ensures that cancelling an asynchronous generate_text call raises asyncio.CancelledError and does not leave hanging tasks.
+        """
         genesis_api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
         
         with patch('aiohttp.ClientSession.post') as mock_post:
             # Simulate a long-running request that gets cancelled
             async def slow_request(*args, **kwargs):
+                """
+                Simulates a slow asynchronous request by introducing a delay before returning a mock response.
+                
+                Returns:
+                    MagicMock: A mock object representing the response.
+                """
                 await asyncio.sleep(10)  # Simulate slow request
                 return MagicMock()
             
@@ -1099,7 +1257,11 @@ class TestGenesisAPIAdvancedScenarios:
 
     @pytest.mark.asyncio
     async def test_malformed_response_structure_variants(self):
-        """Test handling of various malformed response structures."""
+        """
+        Test that the GenesisAPI correctly raises a GenesisAPIError when receiving various malformed response structures from the API.
+        
+        This test covers scenarios where required fields are missing, empty, or set to None in the API response.
+        """
         genesis_api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
         
         malformed_responses = [
@@ -1120,7 +1282,9 @@ class TestGenesisAPIAdvancedScenarios:
                     await genesis_api.generate_text("Test malformed response")
 
     def test_configuration_validation_comprehensive(self):
-        """Test comprehensive configuration validation."""
+        """
+        Tests that the GenesisAPI raises ValueError for invalid configuration parameters, including negative or zero timeouts, negative max_retries, and malformed or missing base URLs.
+        """
         # Test invalid timeout values
         with pytest.raises(ValueError):
             GenesisAPI(api_key=self.api_key, base_url=self.base_url, timeout=-1)
@@ -1148,7 +1312,11 @@ class TestGenesisAPIAdvancedScenarios:
 
     @pytest.mark.asyncio
     async def test_response_size_limits_and_handling(self):
-        """Test handling of responses exceeding size limits."""
+        """
+        Test that the API client can handle and process extremely large response payloads without errors.
+        
+        Verifies that a response exceeding typical size limits (e.g., 1MB of text) is correctly received and parsed by the client.
+        """
         genesis_api = GenesisAPI(api_key=self.api_key, base_url=self.base_url)
         
         # Simulate extremely large response
@@ -1175,7 +1343,9 @@ class TestGenesisAPISecurityAndValidation:
     """Security and validation focused tests."""
     
     def test_input_sanitization_and_injection_prevention(self):
-        """Test input sanitization and injection attack prevention."""
+        """
+        Verify that prompt formatting preserves potentially malicious input unchanged and that API key validation rejects injection attempts.
+        """
         potentially_malicious_inputs = [
             "'; DROP TABLE users; --",
             "<script>alert('xss')</script>",
@@ -1195,7 +1365,9 @@ class TestGenesisAPISecurityAndValidation:
             assert validate_api_key(malicious_input) == False
 
     def test_rate_limiting_headers_parsing(self):
-        """Test parsing of rate limiting headers."""
+        """
+        Tests that rate limiting headers are correctly parsed and that a `GenesisAPIRateLimitError` is raised when appropriate headers are present in the response.
+        """
         rate_limit_scenarios = [
             (429, {"X-RateLimit-Remaining": "0", "X-RateLimit-Reset": "1234567890"}),
             (429, {"Retry-After": "60"}),
@@ -1209,7 +1381,9 @@ class TestGenesisAPISecurityAndValidation:
 
     @pytest.mark.asyncio
     async def test_ssl_and_certificate_validation(self):
-        """Test SSL/TLS certificate validation behavior."""
+        """
+        Test that SSL/TLS certificate validation errors are properly handled and raise a GenesisAPIError during text generation.
+        """
         genesis_api = GenesisAPI(api_key="test_key", base_url="https://api.genesis.example.com")
         
         with patch('aiohttp.ClientSession.post') as mock_post:
@@ -1225,7 +1399,9 @@ class TestGenesisAPIObservabilityAndDebugging:
     
     @pytest.mark.asyncio
     async def test_request_response_logging(self):
-        """Test request and response logging for debugging."""
+        """
+        Verifies that request and response logging occurs during text generation for debugging purposes.
+        """
         genesis_api = GenesisAPI(api_key="test_key", base_url="https://api.genesis.example.com")
         
         mock_response = {
@@ -1250,7 +1426,9 @@ class TestGenesisAPIObservabilityAndDebugging:
                 assert logger_instance.debug.called or logger_instance.info.called
 
     def test_error_context_preservation(self):
-        """Test that error context is preserved for debugging."""
+        """
+        Verify that exceptions raised by `handle_genesis_error` include relevant error context for debugging purposes.
+        """
         error_scenarios = [
             (401, {"error": "Invalid API key", "error_code": "AUTH_001"}),
             (429, {"error": "Rate limit exceeded", "retry_after": 60}),
@@ -1268,7 +1446,9 @@ class TestGenesisAPIObservabilityAndDebugging:
 
     @pytest.mark.asyncio
     async def test_performance_metrics_collection(self):
-        """Test collection of performance metrics."""
+        """
+        Tests that performance metrics such as request duration and token usage are correctly collected during a text generation API call.
+        """
         genesis_api = GenesisAPI(api_key="test_key", base_url="https://api.genesis.example.com")
         
         mock_response = {
@@ -1297,7 +1477,12 @@ class TestGenesisAPIObservabilityAndDebugging:
 # Additional fixtures for the new tests
 @pytest.fixture
 def malformed_response_data():
-    """Fixture providing various malformed response data for testing."""
+    """
+    Provides a list of malformed response data dictionaries for testing error handling in response parsing.
+    
+    Returns:
+        list: A list of dictionaries representing various malformed API responses.
+    """
     return [
         {},  # Empty response
         {"id": "test"},  # Missing required fields
@@ -1308,7 +1493,9 @@ def malformed_response_data():
 
 @pytest.fixture
 def security_test_inputs():
-    """Fixture providing security-related test inputs."""
+    """
+    Provides a list of test inputs designed to simulate common security threats such as SQL injection, XSS, path traversal, command injection, template injection, and LDAP injection.
+    """
     return [
         "'; DROP TABLE users; --",
         "<script>alert('xss')</script>",
@@ -1321,7 +1508,9 @@ def security_test_inputs():
 
 @pytest.fixture
 def performance_test_config():
-    """Fixture providing configuration for performance tests."""
+    """
+    Provides configuration parameters for performance tests, including batch size, response time threshold, memory usage limit, and number of concurrent requests.
+    """
     return {
         "large_batch_size": 100,
         "response_time_threshold": 5.0,
@@ -1333,14 +1522,24 @@ def performance_test_config():
 # Parameterized tests for comprehensive coverage
 @pytest.mark.parametrize("invalid_temp", [-0.1, 1.1, 2.0, -1.0, 1.5])
 def test_temperature_validation_parameterized(invalid_temp):
-    """Parameterized test for temperature validation."""
+    """
+    Tests that invalid temperature values raise a ValueError when formatting a Genesis prompt.
+    
+    Parameters:
+        invalid_temp: An invalid temperature value to test input validation.
+    """
     with pytest.raises(ValueError):
         format_genesis_prompt("Test prompt", temperature=invalid_temp)
 
 
 @pytest.mark.parametrize("invalid_tokens", [-1, 0, 10000, -100])
 def test_max_tokens_validation_parameterized(invalid_tokens):
-    """Parameterized test for max_tokens validation."""
+    """
+    Tests that `format_genesis_prompt` raises a ValueError when provided with invalid `max_tokens` values.
+    
+    Parameters:
+        invalid_tokens: An invalid value for the `max_tokens` parameter to verify input validation.
+    """
     with pytest.raises(ValueError):
         format_genesis_prompt("Test prompt", max_tokens=invalid_tokens)
 
@@ -1356,6 +1555,12 @@ def test_max_tokens_validation_parameterized(invalid_tokens):
     (503, GenesisAPIServerError),
 ])
 def test_error_handling_parameterized(status_code, expected_exception):
-    """Parameterized test for error handling based on status codes."""
+    """
+    Tests that the correct exception is raised by `handle_genesis_error` for a given HTTP status code.
+    
+    Parameters:
+        status_code (int): The HTTP status code to test.
+        expected_exception (Exception): The exception type expected to be raised.
+    """
     with pytest.raises(expected_exception):
         handle_genesis_error(status_code, {"error": f"Error {status_code}"})
