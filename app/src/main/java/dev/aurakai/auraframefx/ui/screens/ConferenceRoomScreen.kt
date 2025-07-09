@@ -24,9 +24,9 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays the main conference room UI, including agent selection, recording and transcription controls, chat area, and message input.
+ * Composes the main conference room interface with agent selection, recording and transcription controls, chat display, and message input.
  *
- * This composable manages local UI state for the selected agent, recording, and transcription toggles. It provides interactive controls for selecting an agent, starting/stopping recording and transcription, and a chat interface with a message input field. Several actions are placeholders for future implementation.
+ * Manages local UI state for the selected agent, recording, and transcription toggles. Provides interactive controls for agent selection, starting or stopping recording and transcription, and a chat area with a message input field. Some actions are placeholders for future implementation.
  */
 @Composable
 fun ConferenceRoomScreen() {
@@ -150,13 +150,13 @@ fun ConferenceRoomScreen() {
 }
 
 /**
- * Renders a button representing an agent, visually indicating selection state.
+ * Displays a button for selecting an agent, visually highlighting when selected.
  *
- * The button updates its background and text color based on whether it is selected, and triggers the provided callback when pressed.
+ * The button changes its background and text color to indicate selection and invokes the provided callback when clicked.
  *
- * @param agent The display name of the agent.
- * @param isSelected True if this agent is currently selected.
- * @param onClick Invoked when the button is clicked.
+ * @param agent The name of the agent to display on the button.
+ * @param isSelected Whether this agent is currently selected.
+ * @param onClick Callback triggered when the button is pressed.
  */
 @Composable
 fun AgentButton(
@@ -185,10 +185,12 @@ fun AgentButton(
 }
 
 /**
- * Renders a toggle button for recording, displaying a stop icon with red tint when active and a circle icon with purple tint when inactive.
+ * Displays a toggle button for starting or stopping recording, with icon and color indicating the current state.
  *
- * @param isRecording Indicates whether recording is currently active.
- * @param onClick Invoked when the button is pressed.
+ * Shows a stop icon with red tint when recording is active, and a circle icon with purple tint when inactive. The content description updates for accessibility.
+ *
+ * @param isRecording True if recording is currently active; false otherwise.
+ * @param onClick Called when the button is pressed.
  */
 @Composable
 fun RecordingButton(
@@ -213,12 +215,12 @@ fun RecordingButton(
 }
 
 /**
- * Renders a toggle button for controlling transcription state, updating its icon and color based on whether transcription is active.
+ * Displays a toggle button for starting or stopping transcription, updating its icon and color to reflect the current state.
  *
- * Shows a stop icon with a red tint when transcription is active, and a phone icon with a blue tint otherwise. Invokes the provided callback when pressed.
+ * Shows a stop icon with a red tint when transcription is active, or a phone icon with a blue tint when inactive. Invokes the provided callback when pressed.
  *
- * @param isTranscribing Indicates if transcription is currently active.
- * @param onClick Callback invoked when the button is pressed.
+ * @param isTranscribing True if transcription is currently active; false otherwise.
+ * @param onClick Called when the button is pressed.
  */
 @Composable
 fun TranscribeButton(
@@ -243,7 +245,9 @@ fun TranscribeButton(
 }
 
 /**
- * Displays a preview of the ConferenceRoomScreen composable within a MaterialTheme for design-time inspection.
+ * Renders a design-time preview of the ConferenceRoomScreen composable using the MaterialTheme.
+ *
+ * Intended for use with Android Studio's Compose preview to visualize the UI layout and styling.
  */
 @Composable
 @Preview(showBackground = true)

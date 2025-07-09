@@ -225,13 +225,13 @@ object KineticIdentity {
     // ========== UTILITY FUNCTIONS ==========
 
     /**
-     * Returns an infinite repeatable animation spec that smoothly pulses a float value between its initial state and a target value.
+     * Creates an infinite animation spec that pulses a float value between its initial and target values.
      *
-     * The animation uses a linear tween and reverses direction each cycle, creating a continuous breathing or pulsing effect.
+     * The animation uses a linear tween for each cycle and reverses direction, producing a continuous breathing or pulsing effect.
      *
      * @param durationMillis Duration of one pulse cycle in milliseconds. Default is 2000 ms.
-     * @param targetValue The peak value reached during the pulse. Default is 1.1.
-     * @return An infinite repeatable animation spec for use in Compose animations.
+     * @param targetValue The maximum value reached during the pulse. Default is 1.1.
+     * @return An infinite repeatable animation spec for pulsing float values in Compose animations.
      */
     fun createBreathingAnimation(
         durationMillis: Int = 2000,
@@ -242,10 +242,12 @@ object KineticIdentity {
     )
 
     /**
-     * Returns a tween animation spec with linear easing for glitch or shake effects.
+     * Creates a tween animation spec with linear easing for glitch or shake effects.
+     *
+     * The `intensity` parameter is included for API consistency but is not used in the animation.
      *
      * @param durationMillis Duration of the animation in milliseconds. Defaults to [MICRO_DURATION].
-     * @param intensity Intended shake intensity (not used in the animation spec).
+     * @param intensity Intended shake intensity (unused).
      * @return An [AnimationSpec] for animating float values in glitch or shake transitions.
      */
     fun createGlitchShake(
@@ -257,13 +259,13 @@ object KineticIdentity {
     )
 
     /**
-     * Returns an animation spec that introduces a dramatic pause before executing an action animation.
+     * Creates an animation spec that adds a dramatic pause before starting the specified action animation.
      *
-     * The resulting animation spec has a total duration equal to the pause plus the action animation's duration, and uses a dramatic cubic bezier easing curve.
+     * The total duration is the sum of the pause and the action animation's duration. Uses a dramatic cubic bezier easing curve for the entire animation.
      *
-     * @param pauseDurationMillis The duration of the pause before the action, in milliseconds.
-     * @param actionSpec The animation spec representing the action to follow the pause.
-     * @return An animation spec with the combined pause and action duration, using dramatic easing.
+     * @param pauseDurationMillis Duration of the pause before the action, in milliseconds.
+     * @param actionSpec The animation spec to execute after the pause.
+     * @return An animation spec with combined pause and action durations, using dramatic easing.
      */
     fun createDramaticPause(
         pauseDurationMillis: Int = 500,
@@ -280,13 +282,13 @@ object KineticIdentity {
  */
 
 /**
- * Returns a tween animation spec that delays the start of the original animation by the specified number of milliseconds.
- *
- * The total duration is the sum of the delay and the original animation's duration. For spring-based specs, the duration is estimated as 1000 ms; for other types, a standard duration is used.
- *
- * @param delayMillis The delay in milliseconds before the animation begins.
- * @return A tween animation spec with the combined delay and animation duration.
- */
+     * Creates a tween animation spec that introduces a delay before starting the original animation.
+     *
+     * The resulting animation's duration is the sum of the specified delay and the original animation's duration. For spring-based specs, the duration is estimated as 1000 ms; for other types, a standard duration is used.
+     *
+     * @param delayMillis The number of milliseconds to delay before the animation starts.
+     * @return A tween animation spec with the combined delay and animation duration.
+     */
 fun <T> AnimationSpec<T>.afterDelay(delayMillis: Int): AnimationSpec<T> =
     tween(
         durationMillis = delayMillis + when (this) {
@@ -297,19 +299,19 @@ fun <T> AnimationSpec<T>.afterDelay(delayMillis: Int): AnimationSpec<T> =
     )
 
 /**
- * Converts this animation spec into an infinite repeatable animation with the specified repeat mode.
- *
- * @param repeatMode The mode determining how the animation repeats; either [RepeatMode.Restart] or [RepeatMode.Reverse]. Defaults to [RepeatMode.Restart].
- * @return An [InfiniteRepeatableSpec] that repeats this animation indefinitely.
- */
+     * Returns an infinite repeatable animation spec based on this animation, using the given repeat mode.
+     *
+     * @param repeatMode Determines whether the animation restarts or reverses direction on each repeat. Defaults to [RepeatMode.Restart].
+     * @return An [InfiniteRepeatableSpec] that repeats this animation endlessly.
+     */
 fun <T> AnimationSpec<T>.infinite(repeatMode: RepeatMode = RepeatMode.Restart): InfiniteRepeatableSpec<T> =
     infiniteRepeatable(this as DurationBasedAnimationSpec<T>, repeatMode)
 
 /**
- * Applies the specified easing to this animation spec if it is a tween; otherwise, returns the original spec.
+ * Returns a copy of this animation spec with the given easing if it is a tween; otherwise, returns the original spec unchanged.
  *
- * @param easing The easing function to use if creating a new tween animation spec.
- * @return A tween animation spec with the given easing, or the original spec if not a tween.
+ * @param easing The easing function to apply if this is a tween animation spec.
+ * @return A tween animation spec with the specified easing, or the original animation spec if not a tween.
  */
 fun AnimationSpec<Float>.withEasing(easing: Easing): AnimationSpec<Float> = when (this) {
     is TweenSpec -> tween(this.durationMillis, easing = easing)

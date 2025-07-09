@@ -100,10 +100,20 @@ class GenesisAgentViewModel @Inject constructor(
         _agentStatus.value = initialStatuses
     }
 
+    /**
+     * Toggles the rotation state between active and inactive.
+     */
     fun toggleRotation() {
         _isRotating.value = !_isRotating.value
     }
 
+    /**
+     * Toggles the operational status of the specified agent between active and inactive states.
+     *
+     * Updates the agent's status in the state flow and records the change in the task history.
+     *
+     * @param agent The agent whose status should be toggled.
+     */
     fun toggleAgent(agent: AgentType) {
         viewModelScope.launch {
             // Toggle agent active state
@@ -150,6 +160,15 @@ class GenesisAgentViewModel @Inject constructor(
         _agentStatus.value = currentStatuses
     }
 
+    /**
+     * Asynchronously assigns a task to the specified agent, updating its status and recording the task in history.
+     *
+     * The agent's status is set to processing during task execution, then reset to idle upon completion.
+     * If an error occurs, the agent's status is set to error and the error is logged in the task history.
+     *
+     * @param agent The agent to which the task is assigned.
+     * @param taskDescription A description of the task to assign.
+     */
     fun assignTaskToAgent(agent: AgentType, taskDescription: String) {
         viewModelScope.launch {
             try {
@@ -171,6 +190,12 @@ class GenesisAgentViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Appends a completed task entry for the specified agent to the task history.
+     *
+     * @param agent The agent associated with the task.
+     * @param description A description of the completed task.
+     */
     private fun addTaskToHistory(agent: AgentType, description: String) {
         val newTask = HistoricalTask(
             id = System.currentTimeMillis(),
@@ -182,18 +207,38 @@ class GenesisAgentViewModel @Inject constructor(
         _taskHistory.value = _taskHistory.value + newTask
     }
 
+    /**
+     * Removes all entries from the task history.
+     */
     fun clearTaskHistory() {
         _taskHistory.value = emptyList()
     }
 
+    /**
+     * Returns the current status string of the specified agent.
+     *
+     * If the agent's status is not found, returns the default idle status.
+     *
+     * @param agent The agent whose status is to be retrieved.
+     * @return The current status string of the agent, or idle status if not set.
+     */
     fun getAgentStatus(agent: AgentType): String {
         return _agentStatus.value[agent] ?: STATUS_IDLE
     }
 
+    /**
+     * Returns the agent configuration matching the given name, or null if not found.
+     *
+     * @param name The name of the agent to search for (case-insensitive).
+     * @return The corresponding HierarchyAgentConfig if found, otherwise null.
+     */
     fun getAgentByName(name: String): HierarchyAgentConfig? {
         return _agents.value.find { it.name.equals(name, ignoreCase = true) }
     }
 
+    /**
+     * Resets the status of all agents to the idle state.
+     */
     fun clearAllAgentStatuses() {
         val currentStatuses = _agentStatus.value.toMutableMap()
         currentStatuses.keys.forEach { agent ->
@@ -202,20 +247,47 @@ class GenesisAgentViewModel @Inject constructor(
         _agentStatus.value = currentStatuses
     }
 
+    /**
+     * Returns a list of agents that possess the specified capability.
+     *
+     * @param capability The capability to search for (case-insensitive).
+     * @return A list of agent configurations whose capabilities include the specified value.
+     */
     fun getAgentsByCapability(capability: String): List<HierarchyAgentConfig> {
         return _agents.value.filter { agent ->
             agent.capabilities.any { it.equals(capability, ignoreCase = true) }
         }
     }
 
+    /**
+     * Returns a list of agents that have the specified role.
+     *
+     * @param role The role to filter agents by.
+     * @return A list of agent configurations matching the given role.
+     */
     fun getAgentsByRole(role: AgentRole): List<HierarchyAgentConfig> {
         return _agents.value.filter { it.role == role }
     }
 
+    /**
+     * Returns a list of agents that match the specified priority.
+     *
+     * @param priority The priority level to filter agents by.
+     * @return A list of agent configurations with the given priority.
+     */
     fun getAgentsByPriority(priority: AgentPriority): List<HierarchyAgentConfig> {
         return _agents.value.filter { it.priority == priority }
     }
 
+    /**
+     * Initiates asynchronous processing of a batch of tasks for the specified agent.
+     *
+     * Each task is assigned to the agent sequentially with a delay between assignments. Returns immediately with an empty list, as task processing occurs asynchronously.
+     *
+     * @param agent The agent to which tasks will be assigned.
+     * @param tasks The list of task descriptions to process.
+     * @return An empty list, as results are not available synchronously.
+     */
     fun processBatchTasks(agent: AgentType, tasks: List<String>): List<Boolean> {
         viewModelScope.launch {
             tasks.forEach { task ->
@@ -227,31 +299,31 @@ class GenesisAgentViewModel @Inject constructor(
     }
 
     /**
-     * Returns the configuration for the agent with the specified name, or null if not found.
+     * Retrieves the configuration of an agent by its name.
      *
-     * @param name The name of the agent to look up.
-     * @return The corresponding agent configuration, or null if no agent with that name exists.
+     * @param name The name of the agent to search for (case-insensitive).
+     * @return The agent's configuration if found, or null otherwise.
      */
     fun getAgentConfig(name: String): HierarchyAgentConfig? {
         return _agents.value.find { it.name.equals(name, ignoreCase = true) }
     }
 
     /**
-     * Retrieves a list of agent configurations ordered by priority, from highest to lowest.
+     * Returns a list of agent configurations sorted by ascending priority.
      *
-     * @return A list of `HierarchyAgentConfig` objects sorted by priority.
+     * @return A list of `HierarchyAgentConfig` objects ordered from lowest to highest priority value.
      */
     fun getAgentsByPriority(): List<HierarchyAgentConfig> {
         return _agents.value.sortedBy { it.priority }
     }
 
     /**
-     * Initiates asynchronous processing of a query by the GenesisAgent and returns an empty list immediately.
+     * Starts asynchronous processing of a query and returns immediately with an empty list.
      *
-     * The query is processed in the background; no results are returned synchronously from this function.
+     * The query is handled in the background; this function does not provide synchronous results.
      *
-     * @param query The query string to be processed.
-     * @return An empty list, as query results are not available synchronously.
+     * @param query The query string to process.
+     * @return An empty list, as results are not returned synchronously.
      */
     fun processQuery(query: String): List<HierarchyAgentConfig> {
         viewModelScope.launch {
