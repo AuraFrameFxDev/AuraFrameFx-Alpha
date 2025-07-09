@@ -20,12 +20,28 @@ class AuraAIServiceImpl @Inject constructor(
     private val auraFxLogger: dev.aurakai.auraframefx.data.logging.AuraFxLogger,
 ) : AuraAIService {
 
+    /**
+     * Returns a placeholder analytics response string for the specified query.
+     *
+     * This method currently provides a fixed response and does not perform any real analytics processing.
+     *
+     * @param _query The analytics query string.
+     * @return A placeholder response string for the given query.
+     */
     override fun analyticsQuery(_query: String): String {
         // TODO: Implement analytics query; Reported as unused
         println("AuraAIServiceImpl.analyticsQuery called with query: $_query")
         return "Placeholder analytics response for '$_query'"
     }
 
+    /**
+     * Returns null as a placeholder for downloading a file by its ID.
+     *
+     * This method currently does not perform any file download and always returns null.
+     *
+     * @param _fileId The identifier of the file to download.
+     * @return Always null.
+     */
     override suspend fun downloadFile(_fileId: String): File? {
         // TODO: Implement file download; Reported as unused
         println("AuraAIServiceImpl.downloadFile called for fileId: $_fileId")
@@ -33,9 +49,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Generates an image based on the provided prompt.
+     * Generates an image based on the provided text prompt.
      *
-     * @param _prompt The textual description used to generate the image.
+     * @param _prompt The description of the image to generate.
      * @return A byte array representing the generated image, or null if not implemented.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
@@ -45,11 +61,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Generates text based on the provided prompt and optional parameters.
+     * Returns a placeholder string simulating generated text for the provided prompt and options.
      *
-     * @param prompt The input text prompt for text generation.
-     * @param options Optional parameters that may influence text generation.
-     * @return A placeholder generated text string for the given prompt.
+     * @param prompt The input text prompt to generate text from.
+     * @param options Optional parameters that could influence text generation.
+     * @return A placeholder string representing the generated text.
      */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         // TODO: Implement text generation; Reported as unused
@@ -58,11 +74,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a placeholder AI-generated response for the given prompt.
+     * Returns a placeholder AI-generated response for the given prompt and options.
      *
-     * @param prompt The input text to generate a response for.
-     * @param options Optional parameters for customizing the AI response.
-     * @return A placeholder response string, or null if not implemented.
+     * @param prompt The input text for which to generate a response.
+     * @param options Optional parameters to customize the AI response.
+     * @return A placeholder response string.
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         // TODO: Implement AI response retrieval; Reported as unused
@@ -74,7 +90,7 @@ class AuraAIServiceImpl @Inject constructor(
      * Retrieves a placeholder memory value for the specified key.
      *
      * @param _memoryKey The key identifying the memory entry to retrieve.
-     * @return A placeholder string representing the memory value for the given key.
+     * @return A placeholder string representing the memory value for the given key, or null if not available.
      */
     override fun getMemory(_memoryKey: String): String? {
         // TODO: Implement memory retrieval; Reported as unused
@@ -83,10 +99,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stores a value in memory associated with the specified key.
+     * Stores a value in memory under the specified key.
      *
-     * @param key The identifier for the memory entry.
-     * @param value The value to be stored.
+     * This is a placeholder implementation with no actual memory persistence.
+     *
+     * @param key The identifier for the value to be stored.
+     * @param value The value to associate with the given key.
      */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement memory saving; Reported as unused
@@ -98,7 +116,7 @@ class AuraAIServiceImpl @Inject constructor(
      *
      * This placeholder implementation always returns true.
      *
-     * @return Always true.
+     * @return Always true, indicating the service is considered connected.
      */
     override fun isConnected(): Boolean {
         // TODO: Implement actual connection check; Reported to always return true
@@ -107,9 +125,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder for publishing a message to a PubSub topic.
+     * Placeholder method for publishing a message to a PubSub topic.
      *
-     * Currently logs the topic and message; actual PubSub publishing is not implemented.
+     * Logs the topic and message but does not perform any actual publishing.
      */
     override fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing; Reported as unused
@@ -118,9 +136,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Uploads a file and returns a placeholder file ID.
+     * Uploads a file and returns a placeholder file ID string.
      *
-     * @return A placeholder file ID string for the uploaded file, or null if not implemented.
+     * @param _file The file to upload.
+     * @return A placeholder file ID string based on the file name.
      */
     override suspend fun uploadFile(_file: File): String? {
         // TODO: Implement file upload; Reported as unused

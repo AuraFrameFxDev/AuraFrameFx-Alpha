@@ -3,19 +3,17 @@ import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
-    alias(libs.plugins.kotlinCompose)
-    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.googleServices)
+    alias(libs.plugins.kotlinCompose)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.openapiGenerator)
 }
 
 android {
     namespace = "dev.aurakai.auraframefx"
     compileSdk = 36
-    ndkVersion = "27.0.12077973"
-
 
     defaultConfig {
         applicationId = "dev.aurakai.auraframefx"
@@ -32,49 +30,39 @@ android {
         }
     }
 
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_24
+        targetCompatibility = JavaVersion.VERSION_24
+    }
+
+    kotlinOptions {
+        jvmTarget = "24"
+        freeCompilerArgs = listOf(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xjvm-default=all"
+        )
     }
 
     buildFeatures {
         compose = true
     }
 
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
+    }
 
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
             version = "3.22.1"
         }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-}
-
-kotlin {
-    jvmToolchain(17)
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
-        freeCompilerArgs.addAll(
-            "-opt-in=kotlin.RequiresOptIn",
-            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
-            "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
-            "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-opt-in=kotlin.time.ExperimentalTime",
-            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi"
-        )
     }
 }
 
@@ -116,7 +104,7 @@ dependencies {
     kspTest(libs.daggerHiltAndroidCompiler)
 
     // Time and Date
-    implementation(libs.kotlinxDatetime)
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat")
 
     // AndroidX & Compose
     implementation(libs.androidxCoreKtx)
@@ -132,7 +120,7 @@ dependencies {
 
     // Animation
     implementation(libs.androidxComposeAnimation)
-    debugImplementation(libs.composeUiTooling)
+    debugImplementation(libs.animationTooling)
 
     // Lifecycle
     implementation(libs.lifecycleViewmodelCompose)
@@ -149,10 +137,10 @@ dependencies {
     ksp(libs.androidxRoomCompiler)
 
     // Security
-    implementation(libs.androidxSecurityCrypto)
+    implementation("androidx.security:security-crypto:1.1.0-beta01")
 
     // Google AI
-    implementation(libs.guava)
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 
     // Firebase
     implementation(platform(libs.firebaseBom))
@@ -208,3 +196,4 @@ dependencies {
     debugImplementation(libs.composeUiTooling)
     debugImplementation(libs.composeUiTestManifest)
 }
+

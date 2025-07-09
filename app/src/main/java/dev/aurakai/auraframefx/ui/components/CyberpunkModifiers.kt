@@ -24,6 +24,18 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
      *
      * Adds an 8.dp elevation shadow and a 1.dp border with rounded corners, using a neon blue color scheme for a cyberpunk appearance.
      */
+    /**
+     * Applies a neon blue edge glow effect with a soft shadow and semi-transparent border to the UI element.
+     *
+     * @return The modified [Modifier] with the cyber edge glow styling applied.
+     */
+    /**
+     * Applies a neon blue edge glow effect to the UI element.
+     *
+     * Adds an 8.dp elevation shadow and a 1.dp border with 60% opacity neon blue color, both using a rounded corner shape of 4.dp.
+     *
+     * @return The modified [Modifier] with the cyber edge glow effect applied.
+     */
     fun Modifier.cyberEdgeGlow() = this
     .shadow(
         elevation = 8.dp,
@@ -38,9 +50,11 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
     )
 
 /**
-     * Applies a digital glitch effect with neon purple coloring to the modifier.
+     * Applies a neon purple digital glitch effect to the modifier.
      *
-     * Adds a 4.dp elevation shadow and a 2.dp border with rounded corners, both using neon purple for a cyberpunk glitch appearance.
+     * This effect adds a 4.dp elevation shadow and a 2.dp border with 2.dp rounded corners, both styled with neon purple. The border uses 80% opacity to enhance the cyberpunk glitch aesthetic.
+     *
+     * @return The modified [Modifier] with the digital glitch effect applied.
      */
 fun Modifier.digitalGlitchEffect() = this
     .shadow(
@@ -56,9 +70,11 @@ fun Modifier.digitalGlitchEffect() = this
     )
 
 /**
-     * Applies a pixelated cyberpunk effect with a neon teal shadow and border to the modifier.
+     * Applies a pixelated cyberpunk effect with neon teal shadow and border to the modifier.
      *
-     * Adds a 6.dp shadow and a 1.dp border with slightly rounded corners, using NeonTeal color at 70% opacity for a digital pixel visual style.
+     * Adds a 6.dp elevation shadow and a 1.dp border with 70% opacity neon teal color, both using slightly rounded corners for a digital pixel aesthetic.
+     *
+     * @return The modifier with the pixelated neon teal effect applied.
      */
 fun Modifier.digitalPixelEffect() = this
     .shadow(
