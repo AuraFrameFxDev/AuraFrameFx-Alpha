@@ -32,7 +32,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null to indicate that file download is not supported.
+     * Stub implementation that always returns null, indicating file download is not supported.
      *
      * @param _fileId The identifier of the file to download.
      * @return Always null, as file download functionality is not implemented.
@@ -42,9 +42,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null to indicate that image generation is not supported.
+     * Stub method for image generation; always returns null.
      *
-     * This method is a stub and does not perform any image generation.
+     * This implementation does not generate images and serves as a placeholder.
      *
      * @return Always null.
      */
@@ -53,7 +53,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a fixed placeholder string for any text generation request.
+     * Returns a fixed placeholder string for text generation requests.
      *
      * This method does not perform actual text generation and always returns "Generated text placeholder" regardless of the input.
      *
@@ -75,9 +75,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Retrieves the memory value associated with the given key.
+     * Retrieves the memory value associated with the specified key.
      *
-     * This implementation always returns null, indicating that memory retrieval is not supported.
+     * This stub implementation always returns null, indicating that memory retrieval is not supported.
      *
      * @return Always null.
      */
@@ -86,9 +86,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for saving a value in memory associated with a key.
+     * Placeholder method for saving a value in memory associated with a key.
      *
-     * This implementation does not persist any data and performs no action.
+     * This implementation does not store any data and performs no operation.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.

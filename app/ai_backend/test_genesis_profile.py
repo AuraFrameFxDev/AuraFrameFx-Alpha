@@ -20,7 +20,11 @@ class TestGenesisProfile(unittest.TestCase):
     """Test suite for GenesisProfile class"""
     
     def setUp(self):
-        """Set up test fixtures before each test method."""
+        """
+        Initializes a sample profile and test data before each test method.
+        
+        Creates a sample profile data dictionary and instantiates a `GenesisProfile` object for use in individual tests.
+        """
         self.sample_profile_data = {
             "id": "test_profile_123",
             "name": "Test User",
@@ -39,12 +43,18 @@ class TestGenesisProfile(unittest.TestCase):
         self.profile = GenesisProfile(self.sample_profile_data)
     
     def tearDown(self):
-        """Clean up after each test method."""
+        """
+        Performs cleanup after each test method execution.
+        
+        Intended for resetting global or shared state between tests if necessary.
+        """
         # Reset any global state if needed
         pass
     
     def test_genesis_profile_initialization_valid_data(self):
-        """Test GenesisProfile initialization with valid data"""
+        """
+        Tests that a GenesisProfile is correctly initialized with valid data, verifying all key attributes are set as expected.
+        """
         profile = GenesisProfile(self.sample_profile_data)
         self.assertEqual(profile.id, "test_profile_123")
         self.assertEqual(profile.name, "Test User")
@@ -53,25 +63,33 @@ class TestGenesisProfile(unittest.TestCase):
         self.assertIsInstance(profile.metadata, dict)
     
     def test_genesis_profile_initialization_empty_data(self):
-        """Test GenesisProfile initialization with empty data"""
+        """
+        Test that initializing a GenesisProfile with empty data raises a ValueError.
+        """
         with self.assertRaises(ValueError):
             GenesisProfile({})
     
     def test_genesis_profile_initialization_missing_required_fields(self):
-        """Test GenesisProfile initialization with missing required fields"""
+        """
+        Test that initializing a GenesisProfile with missing required fields raises a KeyError.
+        """
         incomplete_data = {"name": "Test User"}
         with self.assertRaises(KeyError):
             GenesisProfile(incomplete_data)
     
     def test_genesis_profile_initialization_invalid_email(self):
-        """Test GenesisProfile initialization with invalid email"""
+        """
+        Test that initializing a GenesisProfile with an invalid email address raises a ValueError.
+        """
         invalid_data = self.sample_profile_data.copy()
         invalid_data["email"] = "invalid_email"
         with self.assertRaises(ValueError):
             GenesisProfile(invalid_data)
     
     def test_genesis_profile_to_dict(self):
-        """Test converting GenesisProfile to dictionary"""
+        """
+        Tests that converting a GenesisProfile instance to a dictionary returns the correct structure and expected field values.
+        """
         result = self.profile.to_dict()
         self.assertIsInstance(result, dict)
         self.assertEqual(result["id"], "test_profile_123")
@@ -80,20 +98,26 @@ class TestGenesisProfile(unittest.TestCase):
         self.assertIn("metadata", result)
     
     def test_genesis_profile_from_json_valid(self):
-        """Test creating GenesisProfile from valid JSON string"""
+        """
+        Tests that a GenesisProfile can be correctly created from a valid JSON string representation of profile data.
+        """
         json_string = json.dumps(self.sample_profile_data)
         profile = GenesisProfile.from_json(json_string)
         self.assertEqual(profile.id, "test_profile_123")
         self.assertEqual(profile.name, "Test User")
     
     def test_genesis_profile_from_json_invalid(self):
-        """Test creating GenesisProfile from invalid JSON string"""
+        """
+        Test that creating a GenesisProfile from an invalid JSON string raises a JSONDecodeError.
+        """
         invalid_json = "invalid json string"
         with self.assertRaises(json.JSONDecodeError):
             GenesisProfile.from_json(invalid_json)
     
     def test_genesis_profile_update_preferences(self):
-        """Test updating profile preferences"""
+        """
+        Test that updating a GenesisProfile's preferences correctly applies new values while preserving existing preferences not specified in the update.
+        """
         new_preferences = {"language": "es", "theme": "light"}
         self.profile.update_preferences(new_preferences)
         self.assertEqual(self.profile.preferences["language"], "es")
@@ -101,7 +125,11 @@ class TestGenesisProfile(unittest.TestCase):
         self.assertTrue(self.profile.preferences["notifications"])  # Should preserve existing
     
     def test_genesis_profile_update_preferences_invalid_type(self):
-        """Test updating preferences with invalid type"""
+        """
+        Test that updating GenesisProfile preferences with an invalid type raises a TypeError.
+        
+        Ensures that the update operation enforces type constraints on preferences and rejects invalid input types.
+        """
         with self.assertRaises(TypeError):
         """
         with self.assertRaises((TypeError, ValueError)):

@@ -32,7 +32,7 @@ object DataStoreModule {
     /**
      * Provides a singleton DataStore for application preferences.
      *
-     * The DataStore stores preferences in a file named "aura_settings" located in the application's storage directory.
+     * The DataStore stores preferences in a file named "aura_settings" within the application's storage directory.
      *
      * @return A singleton DataStore instance for application preferences.
      */

@@ -18,6 +18,11 @@ import dev.aurakai.auraframefx.ui.theme.NeonPurple
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays the main conference room UI, including agent selection, recording and transcription controls, chat area, and message input.
+ *
+ * This composable manages local UI state for the selected agent, recording, and transcription modes. It arranges the interface into a header, agent selection buttons, recording/transcription controls, a chat message area (not yet implemented), and a message input field with a send button. Several actions and chat features are placeholders for future implementation.
+ */
 @Composable
 fun ConferenceRoomScreen() {
     var selectedAgent by remember { mutableStateOf("Aura") }
@@ -140,13 +145,13 @@ fun ConferenceRoomScreen() {
 }
 
 /**
- * Displays a selectable button for an agent with dynamic styling based on selection state.
+ * Renders a button representing an agent, visually indicating selection state.
  *
- * The button highlights when selected and invokes the provided callback when clicked.
+ * The button displays the agent's name and updates its appearance when selected. Invokes the provided callback when pressed.
  *
- * @param agent The name of the agent to display on the button.
- * @param isSelected Whether this agent is currently selected.
- * @param onClick Callback invoked when the button is pressed.
+ * @param agent The agent's display name.
+ * @param isSelected True if this agent is currently selected.
+ * @param onClick Called when the button is clicked.
  */
 @Composable
 fun AgentButton(
@@ -205,12 +210,12 @@ fun RecordingButton(
 }
 
 /**
- * Displays a button for toggling the transcription state in the conference room UI.
+ * Renders a button that toggles the transcription state in the conference room interface.
  *
- * Shows a red stop icon when transcription is active, or a NeonBlue phone icon when inactive.
+ * The button displays a red stop icon when transcription is active, or a NeonBlue phone icon when inactive. The icon and its content description update to reflect the current transcription state.
  *
- * @param isTranscribing Indicates whether transcription is currently active.
- * @param onClick Called when the button is pressed.
+ * @param isTranscribing True if transcription is active; false otherwise.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun TranscribeButton(
