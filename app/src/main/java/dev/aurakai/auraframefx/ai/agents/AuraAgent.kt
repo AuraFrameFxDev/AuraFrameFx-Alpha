@@ -1,16 +1,24 @@
 package dev.aurakai.auraframefx.ai.agents
 
-import dev.aurakai.auraframefx.ai.*
 import dev.aurakai.auraframefx.ai.clients.VertexAIClient
 import dev.aurakai.auraframefx.ai.services.AuraAIService
-import kotlinx.datetime.Clock
 import dev.aurakai.auraframefx.context.ContextManager
-import dev.aurakai.auraframefx.model.*
+import dev.aurakai.auraframefx.model.AgentResponse
+import dev.aurakai.auraframefx.model.AiRequest
+import dev.aurakai.auraframefx.model.ProcessingState
+import dev.aurakai.auraframefx.model.VisionState
 import dev.aurakai.auraframefx.security.SecurityContext
 import dev.aurakai.auraframefx.utils.AuraFxLogger
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import java.lang.System
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -271,7 +279,7 @@ class AuraAgent @Inject constructor(
      * @return A map with keys: "animation_code" (the generated Kotlin code), "timing_curves" (timing curve details), "interaction_states" (possible animation states), and "performance_optimization" (suggested optimization strategies).
      */
     private suspend fun handleAnimationDesign(request: AiRequest): Map<String, Any> {
-        val animationType = request.context["type"] ?: "transition"
+        val animationType = request.context?.get("type") ?: "transition"
         val duration = 300 // Default duration
 
         logger.info("AuraAgent", "Designing mesmerizing $animationType animation")

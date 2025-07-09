@@ -17,11 +17,6 @@ import dev.aurakai.auraframefx.ui.theme.NeonBlue
 import dev.aurakai.auraframefx.ui.theme.NeonPurple
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
 
-/**
- * Displays the main conference room UI, allowing users to select an agent, control recording and transcription, view chat messages, and send new messages.
- *
- * This composable manages local state for agent selection, recording, and transcription. Interactive elements for settings, chat, and message input are present but not yet implemented.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConferenceRoomScreen() {
@@ -69,17 +64,20 @@ fun ConferenceRoomScreen() {
             AgentButton(
                 agent = stringResource(R.string.agent_aura),
                 isSelected = selectedAgent == stringResource(R.string.agent_aura),
-                onClick = { selectedAgent = stringResource(R.string.agent_aura) }
+                onClick = { selectedAgent = stringResource(R.string.agent_aura) },
+                modifier = Modifier.weight(1f) // Apply weight here
             )
             AgentButton(
                 agent = stringResource(R.string.agent_kai),
                 isSelected = selectedAgent == stringResource(R.string.agent_kai),
-                onClick = { selectedAgent = stringResource(R.string.agent_kai) }
+                onClick = { selectedAgent = stringResource(R.string.agent_kai) },
+                modifier = Modifier.weight(1f) // Apply weight here
             )
             AgentButton(
                 agent = stringResource(R.string.agent_cascade),
                 isSelected = selectedAgent == stringResource(R.string.agent_cascade),
-                onClick = { selectedAgent = stringResource(R.string.agent_cascade) }
+                onClick = { selectedAgent = stringResource(R.string.agent_cascade) },
+                modifier = Modifier.weight(1f) // Apply weight here
             )
         }
 
@@ -144,20 +142,12 @@ fun ConferenceRoomScreen() {
     }
 }
 
-/**
- * Displays a selectable button for an agent with visual indication of selection state.
- *
- * The button's background and text color change based on whether it is selected.
- *
- * @param agent The name of the agent to display on the button.
- * @param isSelected Whether this agent is currently selected.
- * @param onClick Called when the button is pressed.
- */
 @Composable
 fun AgentButton(
     agent: String,
     isSelected: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier // Added modifier parameter
 ) {
     val backgroundColor = if (isSelected) NeonTeal else Color.Black
     val contentColor = if (isSelected) Color.White else NeonTeal
@@ -168,9 +158,8 @@ fun AgentButton(
             containerColor = backgroundColor,
             contentColor = contentColor
         ),
-        modifier = Modifier
-            .weight(1f)
-            .padding(horizontal = 8.dp)
+        modifier = modifier // Apply the passed modifier
+            .padding(horizontal = 8.dp) 
     ) {
         Text(
             text = agent,
@@ -180,10 +169,10 @@ fun AgentButton(
 }
 
 /**
- * Renders a button that toggles the recording state, displaying a stop icon when recording or a record icon otherwise.
+ * Displays a button for toggling the recording state with an appropriate icon and color.
  *
- * @param isRecording Indicates whether recording is currently active.
- * @param onClick Invoked when the button is pressed to toggle the recording state.
+ * @param isRecording Whether recording is currently active.
+ * @param onClick Called when the button is pressed to toggle recording.
  */
 @Composable
 fun RecordingButton(
@@ -207,14 +196,6 @@ fun RecordingButton(
     }
 }
 
-/**
- * Displays a button that toggles the transcription state.
- *
- * The button icon and color indicate whether transcription is active. Pressing the button triggers the provided click handler.
- *
- * @param isTranscribing Whether transcription is currently active.
- * @param onClick Called when the button is pressed.
- */
 @Composable
 fun TranscribeButton(
     isTranscribing: Boolean,

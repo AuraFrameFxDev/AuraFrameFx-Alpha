@@ -1,5 +1,6 @@
 package dev.aurakai.auraframefx.ui.screens
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -7,27 +8,54 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import dev.aurakai.auraframefx.R // Already present, good.
-import dev.aurakai.auraframefx.ui.animation.*
-import dev.aurakai.auraframefx.ui.components.CyberMenuItem
-import dev.aurakai.auraframefx.ui.components.CyberpunkText
-import dev.aurakai.auraframefx.ui.components.FloatingCyberWindow
-import dev.aurakai.auraframefx.ui.components.AuraSparkleButton
-import dev.aurakai.auraframefx.ui.components.CornerStyle
-import dev.aurakai.auraframefx.ui.components.BackgroundStyle
-import dev.aurakai.auraframefx.ui.components.HexagonGridBackground
-import dev.aurakai.auraframefx.ui.components.DigitalLandscapeBackground
-import dev.aurakai.auraframefx.ui.components.digitalGlitchEffect // Explicit import
-import dev.aurakai.auraframefx.ui.components.cyberEdgeGlow // Explicit import for consistency
+import dev.aurakai.auraframefx.R
+import dev.aurakai.auraframefx.ui.animation.cyberEdgeGlow
+import dev.aurakai.auraframefx.ui.animation.digitalPixelEffect
+import dev.aurakai.auraframefx.ui.components.*
 import dev.aurakai.auraframefx.ui.navigation.NavDestination
 import dev.aurakai.auraframefx.ui.theme.*
+import dev.aurakai.auraframefx.ui.theme.CyberpunkTextColor
+import dev.aurakai.auraframefx.ui.theme.CyberpunkTextStyle
+import dev.aurakai.auraframefx.ui.theme.NeonBlue
+import dev.aurakai.auraframefx.ui.theme.NeonCyan
+import dev.aurakai.auraframefx.ui.theme.NeonPink
+
+/**
+ * Safely gets a string resource with a fallback value.
+ * @param resId The resource ID of the string
+ * @param fallback The fallback string to return if the resource is not found
+ * @return The string resource if found, otherwise the fallback string
+ */
+@Composable
+private fun getStringResourceSafe(@StringRes resId: Int, fallback: String): String {
+    val context = LocalContext.current
+    return remember(resId) {
+        try {
+            context.getString(resId)
+        } catch (e: Exception) {
+            fallback
+        }
+    }
+}
 
 
 /**
  * Home screen for the AuraFrameFX app with cyberpunk-style floating UI
+
+val dashboardText = getStringResourceSafe(R.string.menu_dashboard, "Dashboard")
+val analyticsText = getStringResourceSafe(R.string.menu_analytics, "Analytics")
+val conferenceRoomText = getStringResourceSafe(R.string.menu_conference_room, "Conference Room")
+
+val menuItems = listOf(
+dashboardText to null, // No navigation for now
+analyticsText to null, // No navigation for now
+conferenceRoomText to NavDestination.AiChat.route
+)
+
  *
  * Features a digital landscape background with floating transparent windows
  * and hexagonal UI elements inspired by futuristic cyberpunk interfaces.
@@ -37,15 +65,17 @@ import dev.aurakai.auraframefx.ui.theme.*
  *
  * The screen features a digital landscape and hexagon grid background, a stylized title header, a main navigation menu with selectable items and AI chat access, action buttons for system functions, and a status panel showing neural and quantum system states. Navigation actions are triggered based on user interaction with menu items and buttons.
  */
-/**
- * Displays the main home screen UI for the AuraFrameFX app with a cyberpunk theme.
- *
- * The screen features layered animated backgrounds, a floating window header, a navigation menu with selectable items and AI chat access, action buttons for system navigation, and a status panel showing system states. Navigation to other screens is triggered by user interaction with menu items or buttons.
- */
 @Composable
 fun HomeScreen(navController: NavController) {
     // Track selected menu item
     var selectedMenuItem by remember { mutableStateOf("") }
+    
+    // Define menu items with their navigation destinations
+    val menuItems = listOf(
+        "Dashboard" to null,
+        "Analytics" to null,
+        "Conference Room" to NavDestination.AiChat.route
+    )
 
     // Background with digital landscape and hexagon grid
     Box(modifier = Modifier.fillMaxSize()) {
@@ -107,29 +137,25 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .cyberEdgeGlow(),
-                title = stringResource(R.string.virtual_monitorization),
+                title = getStringResourceSafe(R.string.virtual_monitorization, "Virtual Monitorization"),
                 cornerStyle = CornerStyle.SHARP
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    val menuItems = listOf(
-                        stringResource(R.string.menu_dashboard) to null,
-                        stringResource(R.string.menu_analytics) to null,
-                        stringResource(R.string.menu_conference_room) to NavDestination.AiChat.route
-                    )
-
-                    menuItems.forEach { (menuItem, destination) ->
+                    // Get string resources safely with fallback values
+                    menuItems.forEach { (menuItem: String, destination: String?) ->
                         CyberMenuItem(
                             text = menuItem,
+                            onClick = {
+                                selectedMenuItem = menuItem
+                                destination?.let { route ->
+                                    navController.navigate(route)
+                                }
+                                // If destination is null, handle appropriately (e.g., show toast, log)
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
-                                .digitalPixelEffect(visible = selectedMenuItem == menuItem)
-                                .clickable {
-                                    selectedMenuItem = menuItem
-                                    destination?.let { route ->
-                                        navController.navigate(route)
-                                    }
-                                },
+                                .digitalPixelEffect(visible = selectedMenuItem == menuItem),
                             isSelected = selectedMenuItem == menuItem
                         )
                     }
@@ -178,7 +204,8 @@ fun HomeScreen(navController: NavController) {
                         .size(80.dp)
                         .cyberEdgeGlow(
                             primaryColor = NeonPink,
-                            secondaryColor = NeonBlue
+                            secondaryColor = NeonBlue,
+                            enabled = true
                         )
                         .clickable { navController.navigate(NavDestination.Profile.route) },
                     cornerStyle = CornerStyle.ROUNDED,
