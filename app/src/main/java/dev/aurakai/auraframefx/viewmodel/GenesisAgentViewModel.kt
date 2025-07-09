@@ -125,7 +125,7 @@ class GenesisAgentViewModel /* @Inject constructor(
      *
      * Updates the agent's status in the state flow and records the status change in the task history.
      *
-     * @param agent The agent whose operational status will be toggled.
+     * @param agent The agent whose status will be toggled.
      */
     fun toggleAgent(agent: AgentType) {
         viewModelScope.launch {
