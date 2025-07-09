@@ -67,6 +67,7 @@ android {
             version = "3.22.1"
         }
     }
+
 }
 
 // OpenAPI Generator: Generate Kotlin client
