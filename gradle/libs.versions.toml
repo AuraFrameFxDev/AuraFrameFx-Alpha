@@ -1,15 +1,13 @@
 [versions]
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
 agp = "8.11.0"
-generativeai = "0.9.0"
+javaxInject = "1"
 kotlin = "2.2.0"
+kotlinxCoroutinesCore = "1.10.2"
 ksp = "2.2.0-2.0.2"
 hilt = "2.56.2"
 composeBom = "2025.06.01"
-composeCompiler = "2.2.0"
 googleServices = "4.4.3"
-firebaseCrashlyticsPlugin = "3.2.1"
-firebasePerfPlugin = "1.4.3"
 toolchainsFoojayResolver = "1.0.0"
 
 # --- APP Dependencies ---
@@ -29,7 +27,6 @@ workManager = "2.10.2"
 hiltWork = "1.2.0"
 datastore = "1.1.7"
 datastoreCore = "1.1.7"
-securityCrypto = "1.0.0"
 firebaseBomVersion = "33.16.0"
 firebaseConfigKtx = "22.1.2"
 firebaseStorageKtx = "21.0.2"
@@ -55,7 +52,6 @@ openapiGeneratorPlugin = "7.14.0"
 
 [libraries]
 # Hilt (Core & Testing)
-generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hiltCompiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" } # KSP
 hiltNavigationCompose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
@@ -82,6 +78,9 @@ androidxNavigationCompose = { module = "androidx.navigation:navigation-compose",
 androidxLifecycleRuntimeKtx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidxLifecycleViewmodelKtx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidxLifecycleLivedataKtx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
+javaxInject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
+kotlinStdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib" }
+kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 lifecycleCommonJava8 = { module = "androidx.lifecycle:lifecycle-common-java8", version.ref = "lifecycle" }
 androidxLifecycleProcess = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
 androidxLifecycleService = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle" }
@@ -105,7 +104,6 @@ firebaseConfigKtx = { module = "com.google.firebase:firebase-config-ktx", versio
 firebaseStorageKtx = { module = "com.google.firebase:firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 
 # KotlinX
-kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinxCoroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinxCoroutinesPlayServices = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
 kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
@@ -144,7 +142,4 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 openapiGenerator = { id = "org.openapi.generator", version.ref = "openapiGeneratorPlugin" }
-firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
-firebasePerf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerfPlugin" }
 kotlinCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-gradleToolchainsFoojayResolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "toolchainsFoojayResolver" }
