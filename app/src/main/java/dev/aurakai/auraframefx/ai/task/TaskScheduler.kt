@@ -102,11 +102,14 @@ class TaskScheduler @Inject constructor(
         }
     }
 
+<<<<<<< HEAD
     /**
      * Determines whether a task is ready to be executed based on its dependencies and required agents.
      *
      * Returns `true` if all dependencies are completed and agent requirements (currently always allowed) are met; otherwise, returns `false`.
      */
+=======
+>>>>>>> pr458merge
     private fun canExecuteTask(task: Task): Boolean {
         // Check dependencies
         val dependencies = task.dependencies.mapNotNull { _tasks.value[it] }
@@ -124,11 +127,14 @@ class TaskScheduler @Inject constructor(
         return true
     }
 
+<<<<<<< HEAD
     /**
      * Marks the given task as in progress, assigns required agents, and updates active and tracked tasks.
      *
      * @param task The task to be executed.
      */
+=======
+>>>>>>> pr458merge
     private fun executeTask(task: Task) {
         val updatedTask = task.copy(
             status = TaskStatus.IN_PROGRESS,
@@ -141,6 +147,7 @@ class TaskScheduler @Inject constructor(
         }
     }
 
+<<<<<<< HEAD
     /**
      * Updates the status of a task and manages its transition between active, completed, and failed states.
      *
@@ -149,6 +156,8 @@ class TaskScheduler @Inject constructor(
      * @param taskId The unique identifier of the task to update.
      * @param status The new status to assign to the task.
      */
+=======
+>>>>>>> pr458merge
     fun updateTaskStatus(taskId: String, status: TaskStatus) {
         val task = _tasks.value[taskId] ?: return
         val updatedTask = task.copy(status = status)
@@ -179,33 +188,43 @@ class TaskScheduler @Inject constructor(
         processQueue()
     }
 
+<<<<<<< HEAD
     /**
      * Calculates the weighted priority score for a task based on its priority value and the configured priority weight.
      *
      * @return The computed priority score as a floating-point value.
      */
+=======
+>>>>>>> pr458merge
     private fun calculatePriorityScore(task: Task): Float {
         return task.priority.value * config.priorityWeight
     }
 
+<<<<<<< HEAD
     /**
      * Calculates the urgency score for a task based on its urgency value and the configured urgency weight.
      *
      * @return The weighted urgency score as a Float.
      */
+=======
+>>>>>>> pr458merge
     private fun calculateUrgencyScore(task: Task): Float {
         return task.urgency.value * config.urgencyWeight
     }
 
+<<<<<<< HEAD
     /**
      * Calculates the importance score for a task based on its importance value and the configured importance weight.
      *
      * @return The weighted importance score as a Float.
      */
+=======
+>>>>>>> pr458merge
     private fun calculateImportanceScore(task: Task): Float {
         return task.importance.value * config.importanceWeight
     }
 
+<<<<<<< HEAD
     /**
      * Updates the aggregated task statistics to reflect the addition or status change of a task.
      *
@@ -214,6 +233,8 @@ class TaskScheduler @Inject constructor(
      *
      * @param task The task whose status or addition triggers the statistics update.
      */
+=======
+>>>>>>> pr458merge
     private fun updateStats(task: Task) {
         _taskStats.update { current ->
             current.copy(

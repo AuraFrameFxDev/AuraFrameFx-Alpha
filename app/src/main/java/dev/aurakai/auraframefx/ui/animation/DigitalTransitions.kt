@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color // Added import for Color
 
 // Moved extension functions to top-level for direct use on Modifier
 
+<<<<<<< HEAD
 /**
  * Applies a cyber-themed edge glow effect to the modifier.
  *
@@ -30,6 +31,11 @@ fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this /**
  * Currently a placeholder with no effect.
  * @return The original modifier unchanged.
  */
+=======
+fun Modifier.cyberEdgeGlow(): Modifier = this // Placeholder implementation
+fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier = this // Placeholder
+fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this // Placeholder
+>>>>>>> pr458merge
 fun Modifier.digitalGlitchEffect(): Modifier = this // Placeholder
 
 // The object can be removed if it serves no other purpose,

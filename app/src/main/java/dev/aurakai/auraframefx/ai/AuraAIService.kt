@@ -6,12 +6,19 @@ import java.io.File
 interface AuraAIService {
 
     /**
+<<<<<<< HEAD
      * Returns a placeholder response for an analytics query.
      *
      * This method is currently unimplemented and always returns a fixed placeholder string.
      *
      * @param _query The analytics query string.
      * @return A placeholder response string.
+=======
+     * Returns a placeholder response indicating that analytics query functionality is not implemented.
+     *
+     * @param _query The analytics query string.
+     * @return A fixed placeholder string for analytics queries.
+>>>>>>> pr458merge
      */
     fun analyticsQuery(_query: String): String {
         // TODO: Implement analytics query
@@ -19,7 +26,11 @@ interface AuraAIService {
     }
 
     /**
+<<<<<<< HEAD
      * Downloads a file by its ID.
+=======
+     * Asynchronously downloads a file by its unique identifier.
+>>>>>>> pr458merge
      *
      * @param _fileId The unique identifier of the file to download.
      * @return The downloaded file, or null if the file could not be retrieved.
@@ -30,10 +41,17 @@ interface AuraAIService {
     }
 
     /**
+<<<<<<< HEAD
      * Generates an image based on the provided prompt.
      *
      * @param _prompt The textual description used to generate the image.
      * @return A ByteArray containing the generated image data, or null if image generation fails or is not implemented.
+=======
+     * Asynchronously generates an image from a text prompt.
+     *
+     * @param _prompt The text description to guide image creation.
+     * @return The generated image as a ByteArray, or null if image generation is unavailable.
+>>>>>>> pr458merge
      */
     suspend fun generateImage(_prompt: String): ByteArray? { // Returns URL or path to image -> ByteArray?
         // TODO: Implement image generation
@@ -41,11 +59,21 @@ interface AuraAIService {
     }
 
     /**
+<<<<<<< HEAD
      * Generates AI-generated text based on the provided prompt and optional configuration options.
      *
      * @param prompt The input text prompt for the AI model.
      * @param options Optional configuration map supporting keys such as "temperature" (Double) and "max_tokens" (Int).
      * @return A string containing the generated text, configuration details, and a status message, or an error message if generation fails.
+=======
+     * Asynchronously generates a structured text response based on the given prompt and optional configuration.
+     *
+     * The response includes the original prompt, applied generation options ("temperature" and "max_tokens"), and a status message. If an error occurs, an error message string is returned.
+     *
+     * @param prompt The input prompt for text generation.
+     * @param options Optional configuration map supporting "temperature" (Double) and "max_tokens" (Int).
+     * @return A string containing the generated text, configuration details, or an error message if generation fails.
+>>>>>>> pr458merge
      */
     suspend fun generateText(prompt: String, options: Map<String, Any>? = null): String {
         try {
@@ -65,11 +93,21 @@ interface AuraAIService {
     }
 
     /**
+<<<<<<< HEAD
      * Generates an AI response string for the given prompt, optionally incorporating context and system instructions from the provided options.
      *
      * @param prompt The input prompt for the AI.
      * @param options Optional map containing "context" and "system_prompt" keys to influence the response.
      * @return A structured AI response string, or an error message if an exception occurs.
+=======
+     * Generates a formatted AI response string based on the provided prompt, optionally including context and system instructions from the options map.
+     *
+     * If "context" or "system_prompt" are present in the options, they are incorporated into the response. Returns an error message string if an exception occurs.
+     *
+     * @param prompt The input prompt for the AI.
+     * @param options Optional map that may contain "context" (String) and/or "system_prompt" (String) to customize the response.
+     * @return The generated AI response string, or an error message if generation fails.
+>>>>>>> pr458merge
      */
     fun getAIResponse(
         prompt: String,
@@ -94,25 +132,44 @@ interface AuraAIService {
     }
 
     /**
+<<<<<<< HEAD
  * Retrieves a stored memory value associated with the given key.
  *
  * @param memoryKey The key identifying the memory entry to retrieve.
  * @return The stored value as a string, or null if not found.
+=======
+ * Retrieves the value stored under the specified memory key.
+ *
+ * @param memoryKey The unique identifier for the memory entry.
+ * @return The associated string value, or null if the key does not exist.
+>>>>>>> pr458merge
  */
 fun getMemory(memoryKey: String): String?
     
     /**
+<<<<<<< HEAD
  * Saves a value in memory under the specified key.
  *
  * @param key The identifier for the memory entry.
+=======
+ * Stores a value associated with the given key for later retrieval by the AI service.
+ *
+ * @param key The unique identifier for the memory entry.
+>>>>>>> pr458merge
  * @param value The value to store.
  */
 fun saveMemory(key: String, value: Any)
 
     /**
+<<<<<<< HEAD
      * Returns whether the AI service is currently connected.
      *
      * @return Always returns `true`.
+=======
+     * Indicates whether the AI service is currently connected.
+     *
+     * @return Always returns true, signifying the service is considered available.
+>>>>>>> pr458merge
      */
     fun isConnected(): Boolean {
         // TODO: Implement actual connection check if necessary, though report implies always true.
@@ -120,10 +177,17 @@ fun saveMemory(key: String, value: Any)
     }
 
     /**
+<<<<<<< HEAD
      * Publishes a message to the specified Pub/Sub topic.
      *
      * @param _topic The name of the topic to publish to.
      * @param _message The message to be published.
+=======
+     * Publishes a message to a specified Pub/Sub topic.
+     *
+     * @param _topic The target topic for the message.
+     * @param _message The content to publish.
+>>>>>>> pr458merge
      */
     fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing
@@ -132,10 +196,17 @@ fun saveMemory(key: String, value: Any)
 
 
     /**
+<<<<<<< HEAD
      * Uploads a file and returns its file ID or URL.
      *
      * @param _file The file to upload.
      * @return The file ID or URL if the upload is successful, or null if not implemented.
+=======
+     * Asynchronously uploads a file and returns its unique identifier or URL.
+     *
+     * @param _file The file to upload.
+     * @return The unique identifier or URL of the uploaded file, or null if the upload is not implemented.
+>>>>>>> pr458merge
      */
     suspend fun uploadFile(_file: File): String? { // Returns file ID or URL
         // TODO: Implement file upload

@@ -9,32 +9,32 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 @pytest.fixture
 def mock_api_key():
     """
-    Return a static mock API key string for use in Genesis API integration tests.
+    Provides a static mock API key string for use in Genesis API integration tests.
     
     Returns:
-        str: The mock API key value.
+        str: A fixed mock API key value.
     """
     return "test_api_key_12345"
 
 @pytest.fixture
 def mock_base_url():
     """
-    Return a static mock base URL representing the Genesis API endpoint for use in integration tests.
+    Returns a static mock base URL string representing the Genesis API endpoint for use in integration tests.
     
     Returns:
-        str: The mock Genesis API base URL.
+        str: The mock Genesis API endpoint URL.
     """
     return "https://api.genesis.test"
 
 @pytest.fixture
 def sample_api_response():
     """
-    Return a mock dictionary simulating a successful Genesis API chat completion response.
+    Return a dictionary that simulates a successful Genesis API chat completion response.
     
-    The returned dictionary includes fields for response ID, object type, creation timestamp, model name, a list of choices with an assistant message and finish reason, and token usage statistics. Useful for tests that require a realistic Genesis API response structure.
+    The mock response includes metadata fields, a list of choices with an assistant message, a finish reason, and token usage statistics. Intended for use in tests requiring a realistic Genesis API response structure.
     
     Returns:
-        dict: Simulated Genesis API chat completion response.
+        dict: Mocked Genesis API chat completion response.
     """
     return {
         "id": "test_response_id",
@@ -61,9 +61,9 @@ def sample_api_response():
 @pytest.fixture
 def sample_error_response():
     """
-    Return a dictionary simulating an error response from the Genesis API.
+    Return a simulated error response dictionary representing a typical Genesis API error.
     
-    The returned dictionary contains an `error` object with fields for error type, message, parameter, and code, enabling tests to verify error handling logic for Genesis API integration.
+    The returned dictionary contains an `error` object with fields specifying the error type, message, parameter involved, and error code. This fixture is intended for testing error handling scenarios in Genesis API integrations.
     
     Returns:
         dict: Mock Genesis API error response.
@@ -82,7 +82,7 @@ def mock_environment():
     """
     Automatically sets and removes Genesis API environment variables before and after each test.
     
-    This autouse pytest fixture ensures that `GENESIS_API_KEY` and `GENESIS_BASE_URL` are set to test values at the start of each test and deleted afterward, maintaining test isolation.
+    This autouse pytest fixture ensures that `GENESIS_API_KEY` and `GENESIS_BASE_URL` are set to test values at the start of each test and deleted afterward to maintain test isolation.
     """
     os.environ["GENESIS_API_KEY"] = "test_env_key"
     os.environ["GENESIS_BASE_URL"] = "https://api.genesis.test"

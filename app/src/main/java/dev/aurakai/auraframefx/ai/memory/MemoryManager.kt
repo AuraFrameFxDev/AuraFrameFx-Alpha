@@ -22,12 +22,15 @@ class MemoryManager @Inject constructor(
     private val _memoryStats = MutableStateFlow(MemoryStats())
     val memoryStats: StateFlow<MemoryStats> = _memoryStats
 
+<<<<<<< HEAD
     /**
      * Stores a memory item in the memory store and updates statistics and recent access tracking.
      *
      * @param item The memory item to store.
      * @return The ID of the stored memory item.
      */
+=======
+>>>>>>> pr458merge
     fun storeMemory(item: MemoryItem): String {
         memoryStore[item.id] = item
         updateStats()
@@ -35,6 +38,7 @@ class MemoryManager @Inject constructor(
         return item.id
     }
 
+<<<<<<< HEAD
     /**
      * Retrieves memory items matching the specified query criteria.
      *
@@ -43,6 +47,8 @@ class MemoryManager @Inject constructor(
      * @param query The criteria used to filter and retrieve memory items.
      * @return A result object containing the retrieved memory items, their total count, and the query used.
      */
+=======
+>>>>>>> pr458merge
     fun retrieveMemory(query: MemoryQuery): MemoryRetrievalResult {
         val items = memoryStore.values
             .filter { item ->
@@ -59,6 +65,7 @@ class MemoryManager @Inject constructor(
         )
     }
 
+<<<<<<< HEAD
     /**
      * Retrieves recent memory items within the configured context window duration.
      *
@@ -68,6 +75,8 @@ class MemoryManager @Inject constructor(
      * @param task The task identifier (currently unused in filtering).
      * @return A list of recent memory items for the context window.
      */
+=======
+>>>>>>> pr458merge
     fun getContextWindow(task: String): List<MemoryItem> {
         val recentItems = memoryStore.values
             .filter {
@@ -80,20 +89,26 @@ class MemoryManager @Inject constructor(
         return recentItems
     }
 
+<<<<<<< HEAD
     /**
      * Returns the current snapshot of memory statistics.
      *
      * @return The latest `MemoryStats` reflecting the state of the memory store.
      */
+=======
+>>>>>>> pr458merge
     fun getMemoryStats(): MemoryStats {
         return _memoryStats.value
     }
 
+<<<<<<< HEAD
     /**
      * Updates the memory statistics state with the current total item count, recent item count, and aggregate memory size.
      *
      * The recent item count is determined by items whose timestamps fall within the configured maximum chain length duration.
      */
+=======
+>>>>>>> pr458merge
     private fun updateStats() {
         _memoryStats.update { current ->
             current.copy(

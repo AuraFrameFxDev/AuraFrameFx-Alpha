@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
+>>>>>>> pr458merge
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
@@ -67,25 +72,40 @@ android {
 }
 
 // OpenAPI Generator: Generate Kotlin client
+<<<<<<< HEAD
 openApiGenerate {
     generatorName.set("kotlin")
     inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
     outputDir.set("${layout.buildDirectory.get().asFile}/generated/source/openapi")
+=======
+tasks.register<GenerateTask>("generateKotlinClient") {
+    generatorName.set("kotlin")
+    inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
+    outputDir.set("${layout.buildDirectory.get().asFile}/generated/kotlin")
+>>>>>>> pr458merge
     apiPackage.set("dev.aurakai.auraframefx.api.client.apis")
     modelPackage.set("dev.aurakai.auraframefx.api.client.models")
     invokerPackage.set("dev.aurakai.auraframefx.api.client.infrastructure")
     configOptions.set(
         mapOf(
             "dateLibrary" to "kotlinx-datetime",
+<<<<<<< HEAD
             "serializationLibrary" to "kotlinx_serialization",
             "library" to "jvm-retrofit2"
+=======
+            "serializationLibrary" to "kotlinx_serialization"
+>>>>>>> pr458merge
         )
     )
 }
 
 // Ensure KSP and compilation tasks depend on the code generation
 tasks.named("preBuild") {
+<<<<<<< HEAD
     dependsOn("openApiGenerate")
+=======
+    dependsOn("generateKotlinClient")
+>>>>>>> pr458merge
 }
 
 dependencies {
@@ -105,7 +125,11 @@ dependencies {
     kspTest(libs.daggerHiltAndroidCompiler)
 
     // Time and Date
+<<<<<<< HEAD
     implementation(libs.kotlinxDatetime)
+=======
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+>>>>>>> pr458merge
 
     // AndroidX & Compose
     implementation(libs.androidxCoreKtx)
@@ -138,10 +162,17 @@ dependencies {
     ksp(libs.androidxRoomCompiler)
 
     // Security
+<<<<<<< HEAD
     implementation(libs.androidxSecurityCrypto)
 
     // Google AI
     implementation(libs.lifecycleCommonJava8)
+=======
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    // Google AI
+    implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
+>>>>>>> pr458merge
 
     // Firebase
     implementation(platform(libs.firebaseBom))

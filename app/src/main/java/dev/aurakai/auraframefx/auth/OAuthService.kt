@@ -23,9 +23,15 @@ class OAuthService(
     }
 
     /**
+<<<<<<< HEAD
      * Returns an intent to initiate the OAuth sign-in flow.
      *
      * @return An intent for starting the sign-in process, or null if not implemented.
+=======
+     * Gets the sign-in intent for the OAuth provider.
+     * @return An Intent to start the sign-in flow.
+     * TODO: Reported as unused. Implement to return actual sign-in Intent.
+>>>>>>> pr458merge
      */
     fun getSignInIntent(): Intent? {
         // TODO: Implement logic to create and return a sign-in Intent for a provider (e.g., Google).
@@ -34,10 +40,17 @@ class OAuthService(
     }
 
     /**
+<<<<<<< HEAD
      * Processes the result from the OAuth sign-in activity.
      *
      * @param _data The intent data returned from the sign-in activity.
      * @return A result object representing the outcome of the sign-in process, or null if unimplemented.
+=======
+     * Handles the result from the sign-in activity.
+     * @param _data The Intent data received from the sign-in activity. Parameter reported as unused.
+     * @return A Task or result object indicating success or failure. Type 'Any?' is a placeholder.
+     * TODO: Reported as unused. Implement result handling.
+>>>>>>> pr458merge
      */
     fun handleSignInResult(_data: Intent?): Any? { // Using Any? as placeholder for Task<GoogleSignInAccount>
         // TODO: Parameter _data reported as unused. Utilize to process sign-in result.
@@ -55,9 +68,15 @@ class OAuthService(
     }
 
     /**
+<<<<<<< HEAD
      * Signs out the current user from the OAuth provider.
      *
      * @return A placeholder object representing the result of the sign-out operation, or `null` if unimplemented.
+=======
+     * Signs out the current user.
+     * @return A Task or result object indicating success or failure. Type 'Any?' is a placeholder.
+     * TODO: Reported as unused. Implement sign-out logic.
+>>>>>>> pr458merge
      */
     fun signOut(): Any? { // Using Any? as placeholder for Task<Void>
         // TODO: Implement sign-out logic for the provider.
@@ -66,9 +85,15 @@ class OAuthService(
     }
 
     /**
+<<<<<<< HEAD
      * Revokes the current user's access to the OAuth provider.
      *
      * @return A placeholder object representing the result of the revoke operation, or null if unimplemented.
+=======
+     * Revokes access for the current user.
+     * @return A Task or result object indicating success or failure. Type 'Any?' is a placeholder.
+     * TODO: Reported as unused. Implement revoke access logic.
+>>>>>>> pr458merge
      */
     fun revokeAccess(): Any? { // Using Any? as placeholder for Task<Void>
         // TODO: Implement revoke access logic for the provider.

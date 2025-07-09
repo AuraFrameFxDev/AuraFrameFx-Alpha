@@ -1,7 +1,10 @@
 [versions]
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
 agp = "8.11.0"
+<<<<<<< HEAD
 generativeai = "0.9.0"
+=======
+>>>>>>> pr458merge
 kotlin = "2.2.0"
 ksp = "2.2.0-2.0.2"
 hilt = "2.56.2"
@@ -32,9 +35,15 @@ firebaseConfigKtx = "22.1.2"
 firebaseStorageKtx = "21.0.2"
 kotlinxCoroutines = "1.10.2"
 kotlinxSerializationJson = "1.9.0"
+<<<<<<< HEAD
 kotlinxDatetime = "0.7.1-0.6.x-compat"
 retrofit = "3.0.0"
 okhttp = "5.1.0"
+=======
+kotlinxDatetime = "0.7.0"
+retrofit = "3.0.0"
+okhttp = "5.0.0"
+>>>>>>> pr458merge
 converterGson = "3.0.0"
 retrofitKotlinxSerializationConverter = "1.0.0"
 coilCompose = "2.7.0"
@@ -55,7 +64,10 @@ toolchainsFoojayResolver = "1.0.0"
 
 [libraries]
 # Hilt (Core & Testing)
+<<<<<<< HEAD
 generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
+=======
+>>>>>>> pr458merge
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hiltCompiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" } # KSP
 hiltNavigationCompose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
