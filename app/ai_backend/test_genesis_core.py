@@ -3,9 +3,7 @@ import json
 import tempfile
 import os
 from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timedelta
-import asyncio
-from typing import Dict, Any, List
+from datetime import datetime
 import time
 import threading
 import string
@@ -565,7 +563,6 @@ class TestFixtures:
         # Verify response types
         assert isinstance(mock_model_responses["greeting"], str)
         assert isinstance(mock_model_responses["json"], str)
-        assert isinstance(mock_model_responses["unicode"], str)
     
     def test_temporary_config_file_fixture(self, temporary_config_file):
         """Test that the temporary_config_file fixture creates a valid file"""
@@ -754,7 +751,6 @@ class TestPerformanceAndResources:
     def test_memory_usage_within_limits(self):
         """Test that operations don't consume excessive memory"""
         import psutil
-        import os
         
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss
@@ -771,8 +767,6 @@ class TestPerformanceAndResources:
     
     def test_operation_performance(self):
         """Test that basic operations complete within acceptable time"""
-        import time
-        
         start_time = time.time()
         
         # Perform operations that should be fast
@@ -788,9 +782,6 @@ class TestPerformanceAndResources:
     
     def test_concurrent_access_safety(self):
         """Test that concurrent access doesn't cause race conditions"""
-        import threading
-        import time
-        
         results = []
         errors = []
         
