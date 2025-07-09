@@ -24,10 +24,30 @@ except ImportError:
     # Create mock classes and functions for testing
     class MockGenesisCore:
         def __init__(self, config=None):
+            """
+            Initialize a MockGenesisCore instance with the provided configuration.
+            
+            Parameters:
+                config (dict, optional): Configuration dictionary to initialize the instance. Defaults to an empty dictionary if not provided.
+            """
             self.config = config or {}
             self.initialized = True
             
         def process_data(self, data):
+            """
+            Processes input data by prefixing strings or dictionary values with 'processed_'.
+            
+            If the input is a string, returns the string prefixed with 'processed_'.  
+            If the input is a dictionary, returns a new dictionary with each value prefixed with 'processed_'.  
+            If the input is empty or None, returns None.  
+            For all other types, returns the input unchanged.
+            
+            Parameters:
+                data: The input data to process (string, dictionary, or other types).
+            
+            Returns:
+                The processed data with strings or dictionary values prefixed, or None for empty input.
+            """
             if not data:
                 return None
             if isinstance(data, str):
@@ -37,6 +57,15 @@ except ImportError:
             return data
             
         def validate_input(self, data):
+            """
+            Validate that the input data is not None or an empty string.
+            
+            Raises:
+                ValueError: If the input is None or an empty string.
+            
+            Returns:
+                bool: True if the input is valid.
+            """
             if data is None:
                 raise ValueError("Input cannot be None")
             if isinstance(data, str) and len(data) == 0:
@@ -45,12 +74,44 @@ except ImportError:
             
         def make_request(self, url, timeout=30):
             # Mock HTTP request
+            """
+            Simulate an HTTP request and return a mock response.
+            
+            Parameters:
+                url (str): The URL to which the request is made.
+                timeout (int, optional): The timeout for the request in seconds. Defaults to 30.
+            
+            Returns:
+                dict: A mock response dictionary with status and data fields.
+            """
             return {"status": "success", "data": "mock_response"}
             
         def cache_get(self, key):
+            """
+            Retrieve a value from the cache for the given key.
+            
+            Always returns None to simulate a cache miss in the mock implementation.
+            
+            Parameters:
+                key: The cache key to look up.
+            
+            Returns:
+                None: Indicates the key was not found in the cache.
+            """
             return None
             
         def cache_set(self, key, value, ttl=3600):
+            """
+            Simulate setting a value in the cache for the given key.
+            
+            Parameters:
+                key: The cache key.
+                value: The value to store.
+                ttl (int, optional): Time-to-live for the cache entry in seconds. Defaults to 3600.
+            
+            Returns:
+                bool: Always returns True to indicate the cache set operation succeeded.
+            """
             return True
     
     # Mock the classes we'll test
@@ -61,7 +122,9 @@ class TestGenesisCoreInitialization:
     """Test class for genesis core initialization and setup."""
     
     def test_module_import(self):
-        """Test that the genesis_core module can be imported without raising an ImportError."""
+        """
+        Verify that the `genesis_core` module can be imported successfully, or that the test suite can proceed with mocks if the module is unavailable.
+        """
         if GENESIS_CORE_AVAILABLE:
             try:
                 import app.ai_backend.genesis_core
@@ -73,7 +136,11 @@ class TestGenesisCoreInitialization:
             assert True
     
     def test_initialization_with_valid_config(self):
-        """Test successful initialization of genesis_core with a valid configuration."""
+        """
+        Test that GenesisCore initializes successfully with a valid configuration dictionary.
+        
+        Asserts that the configuration is set correctly and the instance is marked as initialized.
+        """
         valid_config = {
             'api_key': 'test_key',
             'base_url': 'https://api.example.com',
@@ -87,7 +154,11 @@ class TestGenesisCoreInitialization:
         assert core.initialized is True
     
     def test_initialization_with_invalid_config(self):
-        """Test that initializing genesis_core with invalid configuration handles errors appropriately."""
+        """
+        Test that initializing GenesisCore with various invalid configurations does not raise errors and results in a valid config attribute.
+        
+        Verifies that passing empty, malformed, or None configurations to GenesisCore results in a dictionary config, with None defaulting to an empty dict.
+        """
         invalid_configs = [
             {'api_key': ''},  # Empty API key
             {'timeout': -1},  # Negative timeout
@@ -106,7 +177,11 @@ class TestGenesisCoreInitialization:
                 assert isinstance(core.config, dict)
     
     def test_initialization_with_missing_config(self):
-        """Test how the module initializes when required configuration data is missing."""
+        """
+        Test initialization of GenesisCore when configuration data is missing or incomplete.
+        
+        Verifies that GenesisCore initializes with default settings when no config is provided, and correctly sets its config when only partial configuration is supplied.
+        """
         core = GenesisCore()
         assert core.config == {}
         assert core.initialized is True
@@ -117,7 +192,9 @@ class TestGenesisCoreInitialization:
         assert core_partial.config == partial_config
     
     def test_initialization_with_environment_variables(self):
-        """Test initialization using environment variables."""
+        """
+        Test that GenesisCore initializes correctly when configuration is provided via environment variables.
+        """
         with patch.dict(os.environ, {
             'GENESIS_API_KEY': 'env_api_key',
             'GENESIS_BASE_URL': 'https://env.example.com',
@@ -132,7 +209,9 @@ class TestGenesisCoreCoreFunctionality:
     """Test class for core functionality of genesis_core module."""
     
     def setup_method(self):
-        """Sets up a mock configuration dictionary for each test method."""
+        """
+        Prepare a GenesisCore instance with a mock configuration before each test method.
+        """
         self.mock_config = {
             'api_key': 'test_api_key',
             'base_url': 'https://api.example.com',
@@ -142,12 +221,16 @@ class TestGenesisCoreCoreFunctionality:
         self.core = GenesisCore(config=self.mock_config)
     
     def teardown_method(self):
-        """Performs cleanup after each test method."""
+        """
+        Cleans up the test environment after each test method by resetting the core instance.
+        """
         # Clear any global state or cached data
         self.core = None
     
     def test_process_data_happy_path(self):
-        """Test that the data processing function returns correct output for valid input."""
+        """
+        Verify that the data processing function returns the expected output for valid string and dictionary inputs.
+        """
         test_cases = [
             ("simple_string", "processed_simple_string"),
             ({"key": "value"}, {"key": "processed_value"}),
@@ -159,7 +242,9 @@ class TestGenesisCoreCoreFunctionality:
             assert result == expected
     
     def test_process_data_empty_input(self):
-        """Test that the data processing function handles empty input gracefully."""
+        """
+        Test that the data processing function returns None or the input itself when given empty input values such as None, empty string, empty dict, or empty list.
+        """
         empty_inputs = [None, "", {}, []]
         
         for empty_input in empty_inputs:
@@ -168,7 +253,11 @@ class TestGenesisCoreCoreFunctionality:
                 assert result is None or result == empty_input
     
     def test_process_data_invalid_type(self):
-        """Test handling of invalid input types."""
+        """
+        Test that `process_data` handles invalid input types gracefully without raising exceptions.
+        
+        Verifies that when provided with unsupported types such as numbers, empty lists, sets, or functions, the method either returns the original value or a non-None result, ensuring robustness against unexpected input.
+        """
         invalid_inputs = [
             123,  # Numbers might be handled differently
             [],   # Empty list
@@ -182,7 +271,11 @@ class TestGenesisCoreCoreFunctionality:
             assert result is not None or result == invalid_input
     
     def test_process_data_large_input(self):
-        """Test handling of large input data."""
+        """
+        Test that the process_data method correctly handles large string and dictionary inputs without errors.
+        
+        Verifies that processing a very large string and a large dictionary returns non-None results and preserves the expected dictionary size.
+        """
         large_string = "x" * 100000
         large_dict = {f"key_{i}": f"value_{i}" for i in range(1000)}
         
@@ -195,7 +288,9 @@ class TestGenesisCoreCoreFunctionality:
         assert len(result_dict) == 1000
     
     def test_process_data_unicode_input(self):
-        """Test handling of Unicode characters."""
+        """
+        Test that the process_data method correctly handles and preserves Unicode characters in various input formats.
+        """
         unicode_inputs = [
             "测试数据🧪",
             {"unicode_key": "测试值"},
@@ -211,7 +306,9 @@ class TestGenesisCoreCoreFunctionality:
                 assert "测试" in result or "🧪" in result or "Iñtërnâtiônàlizætiøn" in result or "🚀" in result
     
     def test_process_data_nested_structures(self):
-        """Test processing of nested data structures."""
+        """
+        Test that the process_data method correctly processes deeply nested dictionaries and lists.
+        """
         nested_data = {
             "level1": {
                 "level2": {
@@ -226,8 +323,21 @@ class TestGenesisCoreCoreFunctionality:
         assert isinstance(result, dict)
     
     def test_process_data_concurrent_access(self):
-        """Test thread safety of data processing."""
+        """
+        Test concurrent access to the process_data method to verify thread safety.
+        
+        Ensures that multiple threads can process data simultaneously without errors or data corruption.
+        """
         def process_worker(data):
+            """
+            Processes the given data using the core's `process_data` method, prefixing it with 'worker_' before processing.
+            
+            Parameters:
+                data: The input data to be processed, which will be converted to a string prefixed with 'worker_'.
+            
+            Returns:
+                The result of processing the prefixed data using the core's `process_data` method.
+            """
             return self.core.process_data(f"worker_{data}")
         
         with ThreadPoolExecutor(max_workers=5) as executor:
@@ -242,10 +352,17 @@ class TestGenesisCoreErrorHandling:
     """Test class for error handling in genesis_core module."""
     
     def setup_method(self):
+        """
+        Create a new instance of GenesisCore before each test method in the test class.
+        """
         self.core = GenesisCore()
     
     def test_network_error_handling(self):
-        """Test handling of network-related errors."""
+        """
+        Test that network-related errors are handled gracefully by the core's request method.
+        
+        Simulates a network connection error and verifies that the method either returns a non-None result or re-raises the exception with appropriate context.
+        """
         with patch('requests.get') as mock_get:
             mock_get.side_effect = ConnectionError("Network error")
             
@@ -259,7 +376,9 @@ class TestGenesisCoreErrorHandling:
                 pass
     
     def test_timeout_handling(self):
-        """Test handling of timeout exceptions."""
+        """
+        Test that the `make_request` method correctly handles timeout exceptions when a request exceeds the specified timeout period.
+        """
         with patch('requests.get') as mock_get:
             mock_get.side_effect = Timeout("Request timeout")
             
@@ -271,7 +390,11 @@ class TestGenesisCoreErrorHandling:
                 pass
     
     def test_authentication_error_handling(self):
-        """Test handling of authentication errors."""
+        """
+        Test that authentication errors (HTTP 401) are handled correctly by the make_request method.
+        
+        Simulates an HTTP 401 Unauthorized response and verifies that the method returns a non-None result, indicating appropriate error handling.
+        """
         with patch('requests.get') as mock_get:
             mock_response = Mock()
             mock_response.status_code = 401
@@ -283,7 +406,9 @@ class TestGenesisCoreErrorHandling:
             assert result is not None
     
     def test_permission_error_handling(self):
-        """Test handling of permission denied errors."""
+        """
+        Test that permission denied (HTTP 403) responses are handled correctly by the make_request method.
+        """
         with patch('requests.get') as mock_get:
             mock_response = Mock()
             mock_response.status_code = 403
@@ -294,7 +419,11 @@ class TestGenesisCoreErrorHandling:
             assert result is not None
     
     def test_invalid_response_handling(self):
-        """Test handling of invalid or malformed API responses."""
+        """
+        Test that the core handles invalid or malformed JSON responses from the API gracefully.
+        
+        Simulates a scenario where the API returns a 200 status code but the response body is not valid JSON, ensuring that the `make_request` method does not raise an exception and returns a non-None result.
+        """
         with patch('requests.get') as mock_get:
             mock_response = Mock()
             mock_response.status_code = 200
@@ -306,7 +435,11 @@ class TestGenesisCoreErrorHandling:
             assert result is not None
     
     def test_http_error_handling(self):
-        """Test handling of HTTP errors."""
+        """
+        Test that HTTP errors raised during a request are properly handled by the make_request method.
+        
+        This test simulates an HTTPError when making a request and verifies that the exception is either handled or propagated as expected.
+        """
         with patch('requests.get') as mock_get:
             mock_get.side_effect = HTTPError("HTTP Error")
             
@@ -317,7 +450,9 @@ class TestGenesisCoreErrorHandling:
                 pass
     
     def test_validation_error_handling(self):
-        """Test input validation error handling."""
+        """
+        Test that input validation raises a ValueError for invalid inputs such as None, empty strings, or whitespace-only strings.
+        """
         invalid_inputs = [None, "", "   "]
         
         for invalid_input in invalid_inputs:
@@ -325,7 +460,9 @@ class TestGenesisCoreErrorHandling:
                 self.core.validate_input(invalid_input)
     
     def test_exception_logging(self):
-        """Test that exceptions are properly logged."""
+        """
+        Verify that exceptions raised by input validation are logged using the logger.
+        """
         with patch('logging.getLogger') as mock_logger:
             mock_logger_instance = Mock()
             mock_logger.return_value = mock_logger_instance
@@ -343,10 +480,15 @@ class TestGenesisCoreEdgeCases:
     """Test class for edge cases and boundary conditions."""
     
     def setup_method(self):
+        """
+        Create a new instance of GenesisCore before each test method in the test class.
+        """
         self.core = GenesisCore()
     
     def test_maximum_input_size(self):
-        """Test processing of maximum allowed input size."""
+        """
+        Tests that processing a maximum-size input (1MB string) completes successfully and within an acceptable time limit.
+        """
         max_size_input = "x" * (10**6)  # 1MB string
         
         start_time = time.time()
@@ -357,7 +499,9 @@ class TestGenesisCoreEdgeCases:
         assert execution_time < 10.0  # Should complete within reasonable time
     
     def test_minimum_input_size(self):
-        """Test processing of minimum input size."""
+        """
+        Test that the process_data method returns a non-None result for minimum-sized inputs, including a single character string, a single-key dictionary, and a single-element list.
+        """
         min_inputs = ["a", {"k": "v"}, [1]]
         
         for min_input in min_inputs:
@@ -365,8 +509,19 @@ class TestGenesisCoreEdgeCases:
             assert result is not None
     
     def test_concurrent_requests(self):
-        """Test thread safety with concurrent requests."""
+        """
+        Verify that the `make_request` method handles multiple concurrent requests correctly and returns a valid response for each.
+        """
         def make_concurrent_request(url):
+            """
+            Makes a request to the specified API endpoint using the core's request method.
+            
+            Parameters:
+                url (str): The endpoint path to append to the base API URL.
+            
+            Returns:
+                dict: The response from the API request.
+            """
             return self.core.make_request(f"https://api.example.com/{url}")
         
         with ThreadPoolExecutor(max_workers=10) as executor:
@@ -377,7 +532,11 @@ class TestGenesisCoreEdgeCases:
         assert all(result is not None for result in results)
     
     def test_memory_usage_large_dataset(self):
-        """Test memory efficiency with large datasets."""
+        """
+        Test that processing a large dataset does not cause excessive memory usage.
+        
+        Asserts that the memory increase after processing 1,000 large items remains below 100MB.
+        """
         large_dataset = [{"id": i, "data": f"item_{i}" * 100} for i in range(1000)]
         
         import psutil
@@ -395,7 +554,11 @@ class TestGenesisCoreEdgeCases:
         assert memory_increase < 100 * 1024 * 1024  # Less than 100MB increase
     
     def test_rate_limiting_behavior(self):
-        """Test rate limiting handling."""
+        """
+        Test that the GenesisCore instance correctly handles HTTP 429 rate limiting responses.
+        
+        Simulates a rate-limited HTTP response and verifies that the `make_request` method returns a non-None result.
+        """
         with patch('requests.get') as mock_get:
             mock_response = Mock()
             mock_response.status_code = 429
@@ -406,7 +569,11 @@ class TestGenesisCoreEdgeCases:
             assert result is not None
     
     def test_boundary_conditions(self):
-        """Test various boundary conditions."""
+        """
+        Test the process_data method with boundary input cases, including empty strings, long strings, empty key-value pairs, and dictionaries with many keys.
+        
+        Verifies that the method handles these edge cases correctly by asserting expected outputs or ensuring non-None results where applicable.
+        """
         boundary_cases = [
             ("", ""),  # Empty string
             ("a" * 1000, f"processed_{'a' * 1000}"),  # Long string
@@ -422,7 +589,9 @@ class TestGenesisCoreEdgeCases:
                 assert result is not None
     
     def test_null_and_undefined_handling(self):
-        """Test handling of null and undefined values."""
+        """
+        Test that the process_data method handles null (None) values in various data structures without raising errors.
+        """
         null_cases = [
             None,
             {"key": None},
@@ -440,10 +609,15 @@ class TestGenesisCoreIntegration:
     """Test class for integration scenarios."""
     
     def setup_method(self):
+        """
+        Create a new instance of GenesisCore before each test method in the test class.
+        """
         self.core = GenesisCore()
     
     def test_end_to_end_workflow(self):
-        """Test complete end-to-end workflow."""
+        """
+        Tests the complete end-to-end workflow of input validation, data processing, and output verification using the GenesisCore instance.
+        """
         # Simulate a complete workflow
         test_data = {"input": "test_workflow", "type": "integration"}
         
@@ -458,7 +632,11 @@ class TestGenesisCoreIntegration:
         assert isinstance(processed_data, dict)
     
     def test_configuration_loading(self):
-        """Test configuration loading from various sources."""
+        """
+        Test that the GenesisCore instance can load configuration from a file-based source.
+        
+        This test creates a temporary JSON configuration file and verifies that a GenesisCore instance initializes with a non-empty configuration.
+        """
         # Test file-based config
         config_data = {
             "api_key": "file_api_key",
@@ -478,7 +656,11 @@ class TestGenesisCoreIntegration:
             os.unlink(config_file)
     
     def test_logging_functionality(self):
-        """Test logging functionality."""
+        """
+        Test that the logging functionality is triggered during data processing.
+        
+        This test verifies that the logger is called when `process_data` is executed, ensuring that logging is integrated into the data processing workflow.
+        """
         with patch('logging.getLogger') as mock_logger:
             mock_logger_instance = Mock()
             mock_logger.return_value = mock_logger_instance
@@ -490,7 +672,11 @@ class TestGenesisCoreIntegration:
             mock_logger.assert_called()
     
     def test_caching_behavior(self):
-        """Test caching mechanism."""
+        """
+        Test the caching mechanism for cache miss and cache set operations.
+        
+        Verifies that retrieving a non-existent key returns None and that setting a cache value succeeds.
+        """
         # Test cache miss
         result1 = self.core.cache_get("test_key")
         assert result1 is None
@@ -504,7 +690,11 @@ class TestGenesisCoreIntegration:
         # assert result2 == "test_value"
     
     def test_error_recovery(self):
-        """Test error recovery mechanisms."""
+        """
+        Test that the system retries and successfully recovers from an initial request failure.
+        
+        Simulates a failed request followed by a successful retry, verifying that the recovery mechanism returns a valid result.
+        """
         # Test that the system can recover from errors
         with patch.object(self.core, 'make_request') as mock_request:
             mock_request.side_effect = [
@@ -521,10 +711,17 @@ class TestGenesisCorePerformance:
     """Test class for performance-related tests."""
     
     def setup_method(self):
+        """
+        Create a new instance of GenesisCore before each test method in the test class.
+        """
         self.core = GenesisCore()
     
     def test_response_time_within_limits(self):
-        """Test that functions complete within acceptable time limits."""
+        """
+        Test that the process_data method completes execution within one second for typical input.
+        
+        Asserts that the result is not None and that the operation finishes within the specified time limit.
+        """
         test_data = {"key": "value" * 100}
         
         start_time = time.time()
@@ -535,7 +732,9 @@ class TestGenesisCorePerformance:
         assert execution_time < 1.0  # Should complete within 1 second
     
     def test_memory_usage_within_limits(self):
-        """Test memory usage efficiency."""
+        """
+        Verify that processing multiple data items does not increase memory usage by more than 50MB.
+        """
         import psutil
         import os
         
@@ -553,7 +752,9 @@ class TestGenesisCorePerformance:
         assert memory_increase < 50 * 1024 * 1024  # Less than 50MB
     
     def test_cpu_usage_efficiency(self):
-        """Test CPU usage efficiency."""
+        """
+        Test that processing 1000 data items completes within 5 seconds, ensuring CPU usage efficiency.
+        """
         start_time = time.time()
         
         # Perform CPU-intensive operations
@@ -567,7 +768,9 @@ class TestGenesisCorePerformance:
         assert execution_time < 5.0  # Should complete within 5 seconds
     
     def test_batch_processing_performance(self):
-        """Test performance with batch processing."""
+        """
+        Tests that batch processing of 1000 items completes within 10 seconds and returns non-None results for each item.
+        """
         batch_data = [{"id": i, "data": f"item_{i}"} for i in range(1000)]
         
         start_time = time.time()
@@ -579,8 +782,19 @@ class TestGenesisCorePerformance:
         assert execution_time < 10.0  # Should complete within 10 seconds
     
     def test_concurrent_performance(self):
-        """Test performance under concurrent load."""
+        """
+        Tests that the core's data processing method can handle 50 concurrent tasks efficiently, ensuring all results are returned within 5 seconds.
+        """
         def concurrent_task(task_id):
+            """
+            Processes a concurrent task by passing a unique task identifier to the core's data processing method.
+            
+            Parameters:
+                task_id (int): The unique identifier for the concurrent task.
+            
+            Returns:
+                The result of processing the task identifier string using the core's process_data method.
+            """
             return self.core.process_data(f"concurrent_task_{task_id}")
         
         start_time = time.time()
@@ -600,10 +814,15 @@ class TestGenesisCoreValidation:
     """Test class for input validation and sanitization."""
     
     def setup_method(self):
+        """
+        Create a new instance of GenesisCore before each test method in the test class.
+        """
         self.core = GenesisCore()
     
     def test_input_validation_valid_data(self):
-        """Test validation of valid input data."""
+        """
+        Test that valid input data passes the input validation method without errors.
+        """
         valid_inputs = [
             {"key": "value"},
             {"number": 42},
@@ -619,7 +838,11 @@ class TestGenesisCoreValidation:
             assert result is True
     
     def test_input_validation_invalid_data(self):
-        """Test validation of invalid input data."""
+        """
+        Test that invalid input data raises a ValueError during validation.
+        
+        Verifies that None, empty strings, and whitespace-only strings are rejected by the validate_input method.
+        """
         invalid_inputs = [
             None,
             "",
@@ -631,7 +854,9 @@ class TestGenesisCoreValidation:
                 self.core.validate_input(input_data)
     
     def test_input_sanitization(self):
-        """Test sanitization of potentially dangerous inputs."""
+        """
+        Test that the data processing function sanitizes or escapes potentially dangerous input strings to prevent security vulnerabilities such as XSS, SQL injection, and template or expression injection.
+        """
         potentially_dangerous_inputs = [
             "<script>alert('xss')</script>",
             "'; DROP TABLE users; --",
@@ -649,7 +874,11 @@ class TestGenesisCoreValidation:
             assert "alert" not in str(result) or "DROP TABLE" not in str(result)
     
     def test_schema_validation(self):
-        """Test schema validation for structured data."""
+        """
+        Tests that structured data with valid schema passes input validation.
+        
+        Validates that data matching the expected schema is accepted by the input validator. Invalid schema cases are noted but not enforced in this test.
+        """
         valid_schema_data = [
             {"id": 1, "name": "test", "active": True},
             {"id": 2, "name": "another", "active": False},
@@ -671,7 +900,11 @@ class TestGenesisCoreValidation:
         #         self.core.validate_input(invalid_data)
     
     def test_data_type_validation(self):
-        """Test validation of different data types."""
+        """
+        Test that input validation accepts various supported data types.
+        
+        Verifies that the `validate_input` method returns True for valid inputs of types string, integer, float, list, dictionary, and boolean.
+        """
         type_test_cases = [
             ("string", str),
             (123, int),
@@ -687,7 +920,9 @@ class TestGenesisCoreValidation:
             assert isinstance(value, expected_type)
     
     def test_length_validation(self):
-        """Test validation of input length limits."""
+        """
+        Test that input strings of both normal and very long lengths are accepted by the input validation logic.
+        """
         # Test string length limits
         normal_string = "a" * 100
         long_string = "a" * 100000
@@ -697,7 +932,9 @@ class TestGenesisCoreValidation:
         assert self.core.validate_input(long_string) is True
     
     def test_encoding_validation(self):
-        """Test validation of different character encodings."""
+        """
+        Tests that the input validation correctly accepts strings with various character encodings, including ASCII, accented characters, non-Latin scripts, emojis, and mixed international characters.
+        """
         encoding_test_cases = [
             "normal_ascii",
             "café",  # UTF-8 with accents
@@ -715,10 +952,17 @@ class TestGenesisCoreUtilityFunctions:
     """Test class for utility functions."""
     
     def setup_method(self):
+        """
+        Create a new instance of GenesisCore before each test method in the test class.
+        """
         self.core = GenesisCore()
     
     def test_helper_functions(self):
-        """Test utility helper functions."""
+        """
+        Test the utility helper functions of the GenesisCore instance.
+        
+        Verifies that data processing utilities handle typical input dictionaries and return processed results of the expected type.
+        """
         # Test common utility functions that might exist
         test_data = {"key": "value", "number": 42}
         
@@ -728,7 +972,11 @@ class TestGenesisCoreUtilityFunctions:
         assert isinstance(processed, dict)
     
     def test_data_transformation_functions(self):
-        """Test data transformation utilities."""
+        """
+        Test that data transformation utilities correctly convert, trim, and normalize input data.
+        
+        Verifies that the `process_data` method applies expected transformations such as case conversion, whitespace trimming, and normalization to dictionary values.
+        """
         transformation_test_cases = [
             ({"camelCase": "value"}, {"camel_case": "value"}),  # Case conversion
             ({"key": "  value  "}, {"key": "value"}),  # Trimming
@@ -741,7 +989,11 @@ class TestGenesisCoreUtilityFunctions:
             # Specific transformation logic would depend on implementation
     
     def test_validation_functions(self):
-        """Test validation utility functions."""
+        """
+        Test the validation utility functions with various input scenarios.
+        
+        Verifies that the `validate_input` method correctly accepts valid inputs and raises `ValueError` for invalid ones, covering strings, None, dictionaries, and lists.
+        """
         # Test various validation scenarios
         validation_cases = [
             ("valid_string", True),
@@ -765,7 +1017,11 @@ class TestGenesisCoreUtilityFunctions:
                     assert False, f"Expected validation to pass for {input_data}"
     
     def test_string_utilities(self):
-        """Test string utility functions."""
+        """
+        Test that string utility functions in the core correctly process various string formats.
+        
+        Verifies that processing different string patterns returns a non-empty string result.
+        """
         string_test_cases = [
             "normal_string",
             "string_with_spaces",
@@ -781,7 +1037,11 @@ class TestGenesisCoreUtilityFunctions:
             assert len(result) > 0
     
     def test_collection_utilities(self):
-        """Test collection utility functions."""
+        """
+        Test that collection utility functions correctly process various collection types.
+        
+        Verifies that the `process_data` method can handle lists, dictionaries, sets, and tuples, ensuring the result is not None and that the collection structure is maintained or appropriately transformed.
+        """
         collection_test_cases = [
             [1, 2, 3, 4, 5],
             ["a", "b", "c"],
@@ -799,7 +1059,12 @@ class TestGenesisCoreUtilityFunctions:
 # Enhanced test fixtures
 @pytest.fixture
 def mock_config():
-    """Provides a comprehensive mock configuration for testing."""
+    """
+    Return a comprehensive mock configuration dictionary for use in tests.
+    
+    Returns:
+        dict: A dictionary containing mock configuration values for API key, base URL, timeout, retries, cache TTL, log level, rate limit, maximum concurrent requests, and user agent.
+    """
     return {
         'api_key': 'test_api_key_12345',
         'base_url': 'https://api.test.com',
@@ -815,7 +1080,12 @@ def mock_config():
 
 @pytest.fixture
 def mock_response():
-    """Create a comprehensive mock HTTP response."""
+    """
+    Return a mock HTTP response object with predefined status, headers, and JSON content for testing purposes.
+    
+    Returns:
+        response (MagicMock): A mock HTTP response with status code 200, JSON content, and appropriate headers.
+    """
     response = MagicMock()
     response.status_code = 200
     response.headers = {'Content-Type': 'application/json'}
@@ -830,7 +1100,12 @@ def mock_response():
 
 @pytest.fixture
 def sample_data():
-    """Comprehensive sample data for testing."""
+    """
+    Provides a comprehensive set of sample data covering simple, complex, edge case, and validation scenarios for testing purposes.
+    
+    Returns:
+        dict: A dictionary containing various structured data samples for use in tests.
+    """
     return {
         "simple": {"key": "value"},
         "complex": {
@@ -854,7 +1129,11 @@ def sample_data():
 
 @pytest.fixture
 def temp_config_file():
-    """Create a temporary configuration file for testing."""
+    """
+    Yields the path to a temporary JSON configuration file for use in tests.
+    
+    The file contains a sample configuration and is deleted after use.
+    """
     config_data = {
         "api_key": "file_api_key",
         "base_url": "https://file.example.com",
@@ -880,7 +1159,13 @@ def temp_config_file():
     (None, None)
 ])
 def test_parameterized_processing(input_value, expected_output):
-    """Comprehensive parameterized test for data processing."""
+    """
+    Tests the `process_data` method with various input values and verifies the output matches the expected result.
+    
+    Parameters:
+        input_value: The input data to be processed, which may include None, strings, or other supported types.
+        expected_output: The expected result after processing the input value.
+    """
     core = GenesisCore()
     
     if input_value is None:
@@ -902,7 +1187,13 @@ def test_parameterized_processing(input_value, expected_output):
     (None, True),  # None config should work with defaults
 ])
 def test_parameterized_config_validation(config, should_succeed):
-    """Test configuration validation with various inputs."""
+    """
+    Test GenesisCore initialization with various configuration dictionaries, asserting expected success or failure.
+    
+    Parameters:
+    	config: The configuration dictionary to initialize GenesisCore with.
+    	should_succeed: Whether initialization is expected to succeed.
+    """
     try:
         core = GenesisCore(config=config)
         if should_succeed:
@@ -920,7 +1211,11 @@ def test_parameterized_config_validation(config, should_succeed):
 # Performance benchmarks
 @pytest.mark.benchmark
 def test_performance_benchmark():
-    """Performance benchmark test using timing."""
+    """
+    Measures the throughput of the `process_data` method by executing 1000 operations and asserting performance thresholds.
+    
+    Asserts that all operations complete within 5 seconds and that the processing rate exceeds 100 operations per second.
+    """
     core = GenesisCore()
     test_data = {"key": "value" * 100}
     
@@ -944,7 +1239,9 @@ def test_performance_benchmark():
 # Integration test markers
 @pytest.mark.integration
 def test_integration_scenario():
-    """Integration test for genesis_core with external dependencies."""
+    """
+    Tests integration of GenesisCore with an external HTTP service by mocking a successful API response.
+    """
     core = GenesisCore()
     
     # Test integration with mock external services
@@ -960,7 +1257,9 @@ def test_integration_scenario():
 # Slow test markers
 @pytest.mark.slow
 def test_slow_operation():
-    """Test for long-running operations."""
+    """
+    Tests that processing a large batch of data items completes successfully and within a 30-second time limit.
+    """
     core = GenesisCore()
     
     # Simulate slow operation
@@ -981,7 +1280,9 @@ def test_slow_operation():
 # Security tests
 @pytest.mark.security
 def test_security_sql_injection():
-    """Test protection against SQL injection attempts."""
+    """
+    Verify that the data processing logic mitigates SQL injection attempts by ensuring processed outputs do not contain dangerous SQL keywords.
+    """
     core = GenesisCore()
     
     sql_injection_attempts = [
@@ -1003,7 +1304,9 @@ def test_security_sql_injection():
 
 @pytest.mark.security
 def test_security_xss_protection():
-    """Test protection against XSS attacks."""
+    """
+    Verifies that the data processing function mitigates common XSS attack vectors by ensuring processed outputs do not contain dangerous script tags or JavaScript code.
+    """
     core = GenesisCore()
     
     xss_attempts = [

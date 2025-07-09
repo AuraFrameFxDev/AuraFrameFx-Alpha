@@ -23,7 +23,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Returns a fixed placeholder string for any analytics query.
      *
-     * This implementation does not process the query and always returns "Analytics response placeholder".
+     * This implementation ignores the input and always returns "Analytics response placeholder".
      *
      * @return The placeholder analytics response string.
      */
@@ -32,19 +32,17 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null to indicate that file download is not supported.
+     * Always returns null, indicating that file download functionality is not implemented in this stub.
      *
      * @param _fileId The identifier of the file to download.
-     * @return Always null, as file download functionality is not implemented.
+     * @return Always null.
      */
     override suspend fun downloadFile(_fileId: String): File? {
         return null
     }
 
     /**
-     * Returns null to indicate that image generation is not supported.
-     *
-     * This method is a stub and does not perform any image generation.
+     * Stub implementation that always returns null, indicating image generation is not supported.
      *
      * @return Always null.
      */
@@ -75,9 +73,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Retrieves the memory value associated with the given key.
+     * Retrieves the memory value for the specified key.
      *
-     * This implementation always returns null, indicating that memory retrieval is not supported.
+     * This stub implementation always returns null, indicating that memory retrieval is not supported.
      *
      * @return Always null.
      */
@@ -86,9 +84,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for saving a value in memory associated with a key.
+     * Stub implementation for saving a value in memory associated with a key.
      *
-     * This implementation does not persist any data and performs no action.
+     * This method does not persist any data and performs no operation.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.

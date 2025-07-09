@@ -22,11 +22,11 @@ import javax.inject.Singleton
 object VertexAIModule {
 
     /**
-     * Provides a singleton `VertexAIConfig` instance preconfigured for production use with Vertex AI.
+     * Provides a singleton `VertexAIConfig` instance preconfigured for production integration with Vertex AI.
      *
-     * The configuration includes project details, API endpoint, model, version, security settings, retry policy, timeout, concurrency, and caching.
+     * The configuration includes project ID, location, API endpoint, model name, API version, security features, retry policy, timeout, concurrency limits, and caching settings.
      *
-     * @return A `VertexAIConfig` instance ready for Vertex AI integration.
+     * @return A production-ready `VertexAIConfig` instance for Vertex AI services.
      */
     @Provides
     @Singleton
