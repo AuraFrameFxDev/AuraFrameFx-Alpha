@@ -50,11 +50,11 @@ data class VertexAIConfig(
     val enableFunctionCalling: Boolean = true
 ) {
     /**
-     * Validates the configuration and returns a list of error messages for any missing or invalid values.
+     * Checks the configuration for missing or invalid values and returns a list of error messages.
      *
-     * Ensures required fields are present and numeric parameters are within acceptable ranges.
+     * Validates required fields and ensures numeric parameters are within acceptable ranges.
      *
-     * @return A list of error messages if configuration values are invalid or missing; an empty list if the configuration is valid.
+     * @return A list of error messages describing invalid or missing configuration values, or an empty list if all values are valid.
      */
     fun validate(): List<String> {
         val errors = mutableListOf<String>()
@@ -80,31 +80,31 @@ data class VertexAIConfig(
     }
     
     /**
-     * Constructs the base URL for Vertex AI API requests using the configured endpoint, API version, project ID, and location.
+     * Returns the base URL for Vertex AI API requests based on the configured endpoint, API version, project ID, and location.
      *
-     * @return The full base endpoint URL as a string.
+     * @return The constructed base endpoint URL as a string.
      */
     fun getFullEndpoint(): String {
         return "https://$endpoint/$apiVersion/projects/$projectId/locations/$location"
     }
     
     /**
-     * Constructs and returns the complete URL for the content generation API endpoint using the configured model.
+     * Returns the full URL for the content generation API endpoint using the configured model.
      *
-     * The URL includes the base endpoint, API version, project ID, location, and model name.
+     * The URL incorporates the base endpoint, API version, project ID, location, and model name.
      *
-     * @return The full URL for invoking content generation with the specified model.
+     * @return The complete URL for invoking content generation with the specified model.
      */
     fun getModelEndpoint(): String {
         return "${getFullEndpoint()}/publishers/google/models/$modelName:generateContent"
     }
     
     /**
-     * Returns a copy of the configuration with settings tailored for production environments.
+     * Returns a configuration copy optimized for production environments.
      *
-     * The production configuration enables safety filters, increases retry count and timeout, activates caching, metrics, and logging, and sets the log level to "WARN" to enhance reliability and security.
+     * The production configuration enables safety filters, increases retry count and timeout, activates caching, metrics, and logging, and sets the log level to "WARN" for enhanced reliability and security.
      *
-     * @return A new `VertexAIConfig` instance optimized for production use.
+     * @return A new `VertexAIConfig` instance with production-oriented settings.
      */
     fun forProduction(): VertexAIConfig {
         return copy(
@@ -119,11 +119,11 @@ data class VertexAIConfig(
     }
     
     /**
-     * Creates a configuration copy optimized for development environments.
+     * Returns a copy of the configuration with settings adjusted for development use.
      *
-     * The returned configuration disables safety filters and caching, reduces retries and timeout for rapid iteration, and enables verbose logging and metrics for debugging.
+     * The development configuration disables safety filters and caching, reduces retries and timeout for faster iteration, and enables detailed logging and metrics for debugging.
      *
-     * @return A new `VertexAIConfig` instance with settings tailored for development use.
+     * @return A new `VertexAIConfig` instance optimized for development environments.
      */
     fun forDevelopment(): VertexAIConfig {
         return copy(

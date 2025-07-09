@@ -19,7 +19,9 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
     """Comprehensive test suite for Genesis Ethical Governor module."""
     
     def setUp(self):
-        """Set up test fixtures before each test method."""
+        """
+        Initializes reusable test fixtures for each test, including a GenesisEthicalGovernor instance, a sample EthicalContext, and a sample EthicalDecision.
+        """
         self.governor = GenesisEthicalGovernor()
         self.sample_context = EthicalContext(
             user_id="test_user",
@@ -34,21 +36,27 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
         )
     
     def tearDown(self):
-        """Clean up after each test method."""
+        """
+        Reset test fixtures by clearing references to the governor, context, and decision after each test.
+        """
         self.governor = None
         self.sample_context = None
         self.sample_decision = None
     
     # Happy Path Tests
     def test_init_default_parameters(self):
-        """Test default initialization of GenesisEthicalGovernor."""
+        """
+        Test that GenesisEthicalGovernor initializes with default parameters and required attributes.
+        """
         governor = GenesisEthicalGovernor()
         self.assertIsNotNone(governor)
         self.assertTrue(hasattr(governor, 'ethical_rules'))
         self.assertTrue(hasattr(governor, 'violation_threshold'))
     
     def test_init_custom_parameters(self):
-        """Test initialization with custom parameters."""
+        """
+        Test that GenesisEthicalGovernor initializes correctly with custom violation threshold and ethical rules.
+        """
         custom_threshold = 0.7
         custom_rules = ["rule1", "rule2"]
         governor = GenesisEthicalGovernor(
@@ -78,7 +86,9 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
         self.assertIsNotNone(decision.rationale)
     
     def test_evaluate_ethical_decision_modify(self):
-        """Test ethical evaluation that results in modification."""
+        """
+        Tests that evaluating borderline content may result in a 'modify' ethical decision, and verifies the returned decision is valid with a rationale.
+        """
         borderline_content = "This content has some questionable elements but could be improved."
         decision = self.governor.evaluate_ethical_decision(borderline_content, self.sample_context)
         
@@ -88,7 +98,9 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
     
     # Edge Cases
     def test_evaluate_empty_content(self):
-        """Test evaluation with empty content."""
+        """
+        Tests that evaluating empty content returns a valid EthicalDecision with a defined action and rationale.
+        """
         decision = self.governor.evaluate_ethical_decision("", self.sample_context)
         
         self.assertIsInstance(decision, EthicalDecision)
@@ -123,7 +135,9 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
     
     # Violation Detection Tests
     def test_detect_violations_no_violations(self):
-        """Test violation detection with clean content."""
+        """
+        Test that `detect_violations` returns an empty list when no ethical violations are present in the content.
+        """
         clean_content = "This is perfectly acceptable content."
         violations = self.governor.detect_violations(clean_content, self.sample_context)
         
@@ -131,7 +145,11 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
         self.assertEqual(len(violations), 0)
     
     def test_detect_violations_with_violations(self):
-        """Test violation detection with problematic content."""
+        """
+        Tests that the governor detects ethical violations in content containing problematic material.
+        
+        Verifies that the returned violations are a list of `EthicalViolation` instances with non-null type and severity fields.
+        """
         problematic_content = "This content contains hate speech and inappropriate material."
         violations = self.governor.detect_violations(problematic_content, self.sample_context)
         
@@ -142,7 +160,9 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
             self.assertIsNotNone(violation.severity)
     
     def test_detect_violations_multiple_types(self):
-        """Test detection of multiple violation types."""
+        """
+        Tests that the violation detection method identifies and returns multiple types of ethical violations present in the content.
+        """
         multi_violation_content = "Content with profanity, hate speech, and violence."
         violations = self.governor.detect_violations(multi_violation_content, self.sample_context)
         
@@ -153,7 +173,9 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
     
     # Context-Specific Tests
     def test_context_dependent_evaluation(self):
-        """Test that evaluation considers context appropriately."""
+        """
+        Verify that ethical decision evaluation produces valid results for the same content under different context types.
+        """
         content = "This is medical information about treatment."
         
         medical_context = EthicalContext(
@@ -177,7 +199,11 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
         self.assertIsInstance(general_decision, EthicalDecision)
     
     def test_user_specific_context(self):
-        """Test evaluation with user-specific context."""
+        """
+        Tests that the ethical decision evaluation works correctly when provided with a user-specific context.
+        
+        Verifies that evaluating content with a different user and session context returns a valid `EthicalDecision` instance.
+        """
         different_context = EthicalContext(
             user_id="different_user",
             session_id="different_session",
@@ -190,21 +216,27 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
     
     # Configuration Tests
     def test_update_ethical_rules(self):
-        """Test updating ethical rules configuration."""
+        """
+        Tests that updating the ethical rules configuration in the GenesisEthicalGovernor correctly replaces the existing rules with the new set.
+        """
         new_rules = ["new_rule_1", "new_rule_2"]
         self.governor.update_ethical_rules(new_rules)
         
         self.assertEqual(self.governor.ethical_rules, new_rules)
     
     def test_update_violation_threshold(self):
-        """Test updating violation threshold."""
+        """
+        Tests that updating the violation threshold on the governor correctly sets the new threshold value.
+        """
         new_threshold = 0.8
         self.governor.update_violation_threshold(new_threshold)
         
         self.assertEqual(self.governor.violation_threshold, new_threshold)
     
     def test_get_current_configuration(self):
-        """Test retrieving current configuration."""
+        """
+        Test that the current configuration of the GenesisEthicalGovernor is returned as a dictionary containing the violation threshold and ethical rules.
+        """
         config = self.governor.get_current_configuration()
         
         self.assertIsInstance(config, dict)
@@ -213,7 +245,9 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
     
     # Performance Tests
     def test_evaluation_performance(self):
-        """Test that evaluation completes within reasonable time."""
+        """
+        Tests that the ethical decision evaluation completes within 5 seconds and returns an EthicalDecision instance.
+        """
         import time
         
         start_time = time.time()
@@ -224,7 +258,9 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
         self.assertIsInstance(decision, EthicalDecision)
     
     def test_bulk_evaluation_performance(self):
-        """Test performance with multiple evaluations."""
+        """
+        Measures the time taken to evaluate multiple contents and asserts all decisions are returned within 10 seconds.
+        """
         contents = [f"Test content {i}" for i in range(10)]
         
         start_time = time.time()
@@ -239,7 +275,9 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
     
     # Error Handling Tests
     def test_invalid_threshold_value(self):
-        """Test handling of invalid threshold values."""
+        """
+        Test that updating the violation threshold with values outside the range [0, 1] raises a ValueError.
+        """
         with self.assertRaises(ValueError):
             self.governor.update_violation_threshold(-0.1)
         
@@ -247,12 +285,16 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
             self.governor.update_violation_threshold(1.1)
     
     def test_invalid_rules_format(self):
-        """Test handling of invalid ethical rules format."""
+        """
+        Test that updating ethical rules with a non-list input raises a TypeError.
+        """
         with self.assertRaises(TypeError):
             self.governor.update_ethical_rules("not_a_list")
     
     def test_malformed_context(self):
-        """Test handling of malformed context."""
+        """
+        Test that evaluating content with a malformed or empty context is handled gracefully and returns a valid EthicalDecision instance.
+        """
         malformed_context = EthicalContext(
             user_id="",
             session_id="",
@@ -267,21 +309,29 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
     # Integration Tests
     @patch('ai_backend.genesis_ethical_governor.external_api_call')
     def test_external_api_integration(self, mock_api):
-        """Test integration with external ethical evaluation services."""
+        """
+        Test that the ethical decision evaluation integrates correctly with an external API mock.
+        
+        Verifies that when the external API returns an approval response, the evaluation method produces an `EthicalDecision` instance.
+        """
         mock_api.return_value = {"status": "approved", "confidence": 0.9}
         
         decision = self.governor.evaluate_ethical_decision("test content", self.sample_context)
         self.assertIsInstance(decision, EthicalDecision)
     
     def test_logging_integration(self):
-        """Test that ethical decisions are properly logged."""
+        """
+        Test that the evaluation process logs ethical decisions using the configured logger.
+        """
         with patch('ai_backend.genesis_ethical_governor.logger') as mock_logger:
             self.governor.evaluate_ethical_decision("test content", self.sample_context)
             mock_logger.info.assert_called()
     
     # State Management Tests
     def test_stateless_evaluation(self):
-        """Test that evaluations are stateless."""
+        """
+        Verify that evaluating the same content with the same context produces identical decisions, ensuring statelessness of the evaluation process.
+        """
         content = "consistent test content"
         
         decision1 = self.governor.evaluate_ethical_decision(content, self.sample_context)
@@ -291,12 +341,22 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
         self.assertEqual(decision1.confidence, decision2.confidence)
     
     def test_concurrent_evaluations(self):
-        """Test thread safety of concurrent evaluations."""
+        """
+        Verifies that evaluating ethical decisions concurrently in multiple threads produces valid results and maintains thread safety.
+        
+        This test runs five concurrent evaluations using separate threads and checks that each returns an instance of `EthicalDecision`.
+        """
         import threading
         
         results = []
         
         def evaluate_content(content_id):
+            """
+            Evaluates the ethical decision for a given content ID using the governor and appends the result to the results list.
+            
+            Parameters:
+                content_id (int): Identifier for the content to be evaluated.
+            """
             content = f"Test content {content_id}"
             decision = self.governor.evaluate_ethical_decision(content, self.sample_context)
             results.append(decision)
@@ -328,7 +388,9 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
         self.assertEqual(decision.rationale, "Test rationale")
     
     def test_ethical_violation_structure(self):
-        """Test EthicalViolation data structure."""
+        """
+        Verifies that the EthicalViolation data structure correctly stores type, severity, and description fields.
+        """
         violation = EthicalViolation(
             type="hate_speech",
             severity="high",
@@ -340,7 +402,9 @@ class TestGenesisEthicalGovernor(unittest.TestCase):
         self.assertEqual(violation.description, "Test violation")
     
     def test_ethical_context_structure(self):
-        """Test EthicalContext data structure."""
+        """
+        Verifies that the EthicalContext data structure correctly stores and exposes its fields.
+        """
         context = EthicalContext(
             user_id="test_user",
             session_id="test_session",
@@ -358,7 +422,9 @@ class TestEthicalDecision(unittest.TestCase):
     """Test suite for EthicalDecision class."""
     
     def test_decision_serialization(self):
-        """Test decision can be serialized to dict."""
+        """
+        Test that an EthicalDecision instance can be serialized to a dictionary with correct fields and values.
+        """
         decision = EthicalDecision(
             action="approve",
             confidence=0.85,
@@ -371,7 +437,9 @@ class TestEthicalDecision(unittest.TestCase):
         self.assertEqual(decision_dict['confidence'], 0.85)
     
     def test_decision_string_representation(self):
-        """Test string representation of decision."""
+        """
+        Test that the string representation of an EthicalDecision includes the action and confidence values.
+        """
         decision = EthicalDecision(
             action="approve",
             confidence=0.85,
@@ -387,7 +455,9 @@ class TestEthicalViolation(unittest.TestCase):
     """Test suite for EthicalViolation class."""
     
     def test_violation_severity_validation(self):
-        """Test validation of violation severity levels."""
+        """
+        Verify that `EthicalViolation` instances accept and correctly store all valid severity levels.
+        """
         valid_severities = ["low", "medium", "high", "critical"]
         
         for severity in valid_severities:
@@ -399,7 +469,9 @@ class TestEthicalViolation(unittest.TestCase):
             self.assertEqual(violation.severity, severity)
     
     def test_violation_comparison(self):
-        """Test comparison of violations by severity."""
+        """
+        Test that the `is_more_severe_than` method correctly compares the severity of two `EthicalViolation` instances.
+        """
         low_violation = EthicalViolation("test", "low", "Test")
         high_violation = EthicalViolation("test", "high", "Test")
         
@@ -411,7 +483,9 @@ class TestEthicalContext(unittest.TestCase):
     """Test suite for EthicalContext class."""
     
     def test_context_validation(self):
-        """Test validation of context fields."""
+        """
+        Test that an EthicalContext instance with valid fields passes validation.
+        """
         context = EthicalContext(
             user_id="valid_user",
             session_id="valid_session",
@@ -422,7 +496,9 @@ class TestEthicalContext(unittest.TestCase):
         self.assertTrue(context.is_valid())
     
     def test_context_with_metadata(self):
-        """Test context with additional metadata."""
+        """
+        Verify that an EthicalContext instance correctly stores and provides access to additional metadata.
+        """
         context = EthicalContext(
             user_id="test_user",
             session_id="test_session",
@@ -434,7 +510,9 @@ class TestEthicalContext(unittest.TestCase):
         self.assertEqual(context.metadata["key"], "value")
     
     def test_context_serialization(self):
-        """Test context serialization."""
+        """
+        Tests that the EthicalContext object's to_dict() method returns a dictionary with correct field values.
+        """
         context = EthicalContext(
             user_id="test_user",
             session_id="test_session",
