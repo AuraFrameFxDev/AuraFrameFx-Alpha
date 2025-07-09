@@ -29,13 +29,13 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     /**
- * Returns the agent's name as "Kai".
+ * Returns the name of the agent.
  *
- * @return The string "Kai".
+ * @return The agent's name, "Kai".
  */
 override fun getName(): String? = "Kai"
     /**
- * Returns the agent type, which is `AgentType.KAI`.
+ * Returns the agent type as `AgentType.KAI`.
  *
  * @return The agent type.
  */
@@ -44,9 +44,9 @@ override fun getType(): AgentType = AgentType.KAI
     /**
          * Returns a map of the Kai agent's supported capabilities.
          *
-         * The map includes the keys "security", "analysis", "memory", and "service_implemented", each mapped to true.
+         * The map contains the capability names "security", "analysis", "memory", and "service_implemented", each mapped to true.
          *
-         * @return A map where each key is a capability name and the value indicates support.
+         * @return A map where each key is a capability name and the value is true, indicating support.
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
@@ -57,11 +57,11 @@ override fun getType(): AgentType = AgentType.KAI
         )
 
     /**
-     * Processes an AI request with the provided context and returns a fixed response referencing both.
+     * Processes an AI request using the provided context and returns a fixed response referencing both.
      *
      * @param request The AI request to process.
-     * @param context Contextual information to include in the response.
-     * @return An AgentResponse containing a message referencing the request query and context, with a confidence score of 1.0.
+     * @param context Additional context to include in the response.
+     * @return An AgentResponse containing a message that references the request query and context, with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         auraFxLogger.i(
