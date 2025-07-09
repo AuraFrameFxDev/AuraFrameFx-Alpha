@@ -3844,3 +3844,901 @@ class TestDocumentationAndUsability:
         for messages in message_examples:
             # Should validate without errors
             client._validate_messages(messages)
+# Additional comprehensive test coverage for missing scenarios and edge cases
+
+class TestGenesisAPIClientRobustness:
+    """Additional robustness tests for GenesisAPIClient."""
+    
+    @pytest.mark.asyncio
+    async def test_chat_completion_with_extremely_long_api_key(self):
+        """Test client behavior with extremely long API key."""
+        long_api_key = "sk-" + "a" * 1000  # Very long API key
+        
+        try:
+            client = GenesisAPIClient(api_key=long_api_key)
+            assert client.api_key == long_api_key
+        except ValueError:
+            # Acceptable if there's a reasonable length limit
+            pass
+    
+    @pytest.mark.asyncio
+    async def test_chat_completion_with_special_characters_in_api_key(self):
+        """Test client behavior with special characters in API key."""
+        special_api_keys = [
+            "sk-test!@#$%^&*()",
+            "sk-test-unicode-世界",
+            "sk-test\twithtab",
+            "sk-test\nwithnewline"
+        ]
+        
+        for api_key in special_api_keys:
+            try:
+                client = GenesisAPIClient(api_key=api_key)
+                headers = client._build_headers()
+                assert 'Authorization' in headers
+            except ValueError:
+                # Acceptable if special characters are rejected
+                pass
+    
+    @pytest.mark.asyncio
+    async def test_base_url_normalization(self):
+        """Test that base URLs are properly normalized."""
+        url_variations = [
+            "https://api.genesis.ai/v1",
+            "https://api.genesis.ai/v1/",
+            "https://api.genesis.ai/v1//",
+            "https://api.genesis.ai/v1///",
+        ]
+        
+        for url in url_variations:
+            try:
+                client = GenesisAPIClient(api_key="test-key", base_url=url)
+                # Should normalize URL consistently
+                assert client.base_url.endswith('/v1') or client.base_url.endswith('/v1/')
+            except ValueError:
+                # Acceptable if malformed URLs are rejected
+                pass
+    
+    @pytest.mark.asyncio
+    async def test_chat_completion_with_extremely_high_temperature(self):
+        """Test model config with boundary temperature values."""
+        config = ModelConfig(name="test-model")
+        
+        # Test exactly at boundary
+        config.temperature = 2.0
+        client = GenesisAPIClient(api_key="test-key")
+        
+        try:
+            client._validate_model_config(config)
+        except ValidationError:
+            # Should not raise for valid boundary value
+            pytest.fail("Valid boundary temperature should not raise ValidationError")
+    
+    @pytest.mark.asyncio
+    async def test_chat_completion_with_zero_max_tokens_edge_case(self):
+        """Test model config with zero max_tokens handling."""
+        config = ModelConfig(name="test-model", max_tokens=0)
+        client = GenesisAPIClient(api_key="test-key")
+        
+        with pytest.raises(ValidationError, match="Max tokens must be positive"):
+            client._validate_model_config(config)
+    
+    @pytest.mark.asyncio
+    async def test_message_validation_with_extremely_long_role(self):
+        """Test message validation with extremely long role names."""
+        client = GenesisAPIClient(api_key="test-key")
+        long_role = "a" * 1000
+        
+        invalid_messages = [
+            ChatMessage(role=long_role, content="Test content")
+        ]
+        
+        with pytest.raises(ValidationError):
+            client._validate_messages(invalid_messages)
+    
+    @pytest.mark.asyncio
+    async def test_concurrent_session_creation_and_cleanup(self):
+        """Test concurrent session creation and cleanup."""
+        configs = [{'api_key': f'test-key-{i}'} for i in range(5)]
+        
+        async def create_and_close_client(config):
+            async with GenesisAPIClient(**config) as client:
+                assert client.session is not None
+                await asyncio.sleep(0.01)  # Small delay to test concurrency
+            return client.session.closed
+        
+        # Test concurrent client creation and cleanup
+        tasks = [create_and_close_client(config) for config in configs]
+        results = await asyncio.gather(*tasks)
+        
+        # All sessions should be properly closed
+        assert all(results)
+    
+    @pytest.mark.asyncio
+    async def test_memory_leak_prevention_with_many_requests(self):
+        """Test that many requests don't cause memory leaks."""
+        client = GenesisAPIClient(api_key="test-key")
+        
+        mock_response = {
+            'id': 'memory-test',
+            'choices': [{'message': {'content': 'Test'}}],
+            'usage': {'total_tokens': 5}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            # Make many requests in sequence
+            for i in range(100):
+                result = await client.create_chat_completion(
+                    messages=[ChatMessage(role="user", content=f"Request {i}")],
+                    model_config=ModelConfig(name="test-model")
+                )
+                assert result.id == 'memory-test'
+            
+            # Session should still be healthy
+            assert not client.session.closed
+        
+        await client.close()
+
+
+class TestAdvancedStreamingScenarios:
+    """Advanced streaming test scenarios."""
+    
+    @pytest.mark.asyncio
+    async def test_streaming_with_very_slow_chunks(self):
+        """Test streaming with very slow chunk delivery."""
+        client = GenesisAPIClient(api_key="test-key")
+        
+        async def slow_stream():
+            chunks = [
+                {'choices': [{'delta': {'content': 'Slow'}}]},
+                {'choices': [{'delta': {'content': ' chunk'}}]},
+                {'choices': [{'delta': {}, 'finish_reason': 'stop'}]}
+            ]
+            
+            for chunk in chunks:
+                await asyncio.sleep(0.1)  # Simulate slow delivery
+                yield json.dumps(chunk).encode()
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
+                return_value=slow_stream()
+            )
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            start_time = asyncio.get_event_loop().time()
+            chunks = []
+            
+            async for chunk in client.create_chat_completion_stream(
+                messages=[ChatMessage(role="user", content="Test")],
+                model_config=ModelConfig(name="test-model")
+            ):
+                chunks.append(chunk)
+            
+            end_time = asyncio.get_event_loop().time()
+            
+            # Should handle slow chunks gracefully
+            assert len(chunks) == 3
+            assert end_time - start_time >= 0.2  # Should take at least 0.2 seconds
+        
+        await client.close()
+    
+    @pytest.mark.asyncio
+    async def test_streaming_with_binary_content_in_chunks(self):
+        """Test streaming with binary content mixed in chunks."""
+        client = GenesisAPIClient(api_key="test-key")
+        
+        async def binary_stream():
+            # Mix of valid JSON and binary data
+            chunks = [
+                b'{"choices": [{"delta": {"content": "Valid"}}]}',
+                b'\x00\x01\x02\x03',  # Binary data
+                b'{"choices": [{"delta": {"content": " text"}}]}',
+                b'{"choices": [{"delta": {}, "finish_reason": "stop"}]}'
+            ]
+            
+            for chunk in chunks:
+                yield chunk
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
+                return_value=binary_stream()
+            )
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            chunks = []
+            async for chunk in client.create_chat_completion_stream(
+                messages=[ChatMessage(role="user", content="Test")],
+                model_config=ModelConfig(name="test-model")
+            ):
+                chunks.append(chunk)
+            
+            # Should skip binary chunks and process valid ones
+            assert len(chunks) >= 2  # At least the valid chunks
+        
+        await client.close()
+    
+    @pytest.mark.asyncio
+    async def test_streaming_with_chunk_size_variations(self):
+        """Test streaming with various chunk sizes."""
+        client = GenesisAPIClient(api_key="test-key")
+        
+        # Test different chunk sizes
+        chunk_sizes = [1, 10, 100, 1000, 10000]
+        
+        for size in chunk_sizes:
+            content = "x" * size
+            
+            async def variable_size_stream():
+                chunks = [
+                    {'choices': [{'delta': {'content': content}}]},
+                    {'choices': [{'delta': {}, 'finish_reason': 'stop'}]}
+                ]
+                
+                for chunk in chunks:
+                    yield json.dumps(chunk).encode()
+            
+            with patch('aiohttp.ClientSession.post') as mock_post:
+                mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
+                    return_value=variable_size_stream()
+                )
+                mock_post.return_value.__aenter__.return_value.status = 200
+                
+                chunks = []
+                async for chunk in client.create_chat_completion_stream(
+                    messages=[ChatMessage(role="user", content="Test")],
+                    model_config=ModelConfig(name="test-model")
+                ):
+                    chunks.append(chunk)
+                
+                # Should handle various chunk sizes
+                assert len(chunks) == 2
+                assert len(chunks[0].choices[0].delta.content) == size
+        
+        await client.close()
+
+
+class TestDataValidationEdgeCases:
+    """Edge cases for data validation."""
+    
+    def test_chat_message_with_numeric_content(self):
+        """Test ChatMessage with numeric content."""
+        # Test that numeric content is properly handled
+        try:
+            message = ChatMessage(role="user", content=12345)
+            assert str(message.content) == "12345"
+        except (TypeError, ValidationError):
+            # Acceptable if only string content is supported
+            pass
+    
+    def test_chat_message_with_boolean_content(self):
+        """Test ChatMessage with boolean content."""
+        try:
+            message = ChatMessage(role="user", content=True)
+            assert str(message.content) == "True"
+        except (TypeError, ValidationError):
+            # Acceptable if only string content is supported
+            pass
+    
+    def test_model_config_with_string_numeric_values(self):
+        """Test ModelConfig with string numeric values."""
+        try:
+            config = ModelConfig(
+                name="test-model",
+                max_tokens="1000",  # String instead of int
+                temperature="0.7"   # String instead of float
+            )
+            assert isinstance(config.max_tokens, int) or config.max_tokens == "1000"
+            assert isinstance(config.temperature, float) or config.temperature == "0.7"
+        except (TypeError, ValidationError):
+            # Acceptable if type conversion is not supported
+            pass
+    
+    def test_model_config_with_infinity_values(self):
+        """Test ModelConfig with infinity values."""
+        config = ModelConfig(name="test-model")
+        client = GenesisAPIClient(api_key="test-key")
+        
+        # Test positive infinity
+        config.temperature = float('inf')
+        with pytest.raises(ValidationError):
+            client._validate_model_config(config)
+        
+        # Test negative infinity
+        config.temperature = float('-inf')
+        with pytest.raises(ValidationError):
+            client._validate_model_config(config)
+    
+    def test_model_config_with_nan_values(self):
+        """Test ModelConfig with NaN values."""
+        config = ModelConfig(name="test-model")
+        config.temperature = float('nan')
+        
+        client = GenesisAPIClient(api_key="test-key")
+        with pytest.raises(ValidationError):
+            client._validate_model_config(config)
+    
+    def test_message_validation_with_list_content(self):
+        """Test message validation with list content."""
+        client = GenesisAPIClient(api_key="test-key")
+        
+        # Test with list content (for multimodal messages)
+        list_content_message = ChatMessage(
+            role="user",
+            content=["Hello", "World"]
+        )
+        
+        try:
+            client._validate_messages([list_content_message])
+        except ValidationError:
+            # Acceptable if list content is not supported
+            pass
+    
+    def test_message_validation_with_dict_content(self):
+        """Test message validation with dictionary content."""
+        client = GenesisAPIClient(api_key="test-key")
+        
+        # Test with dict content (for structured messages)
+        dict_content_message = ChatMessage(
+            role="user",
+            content={"text": "Hello", "type": "message"}
+        )
+        
+        try:
+            client._validate_messages([dict_content_message])
+        except ValidationError:
+            # Acceptable if dict content is not supported
+            pass
+
+
+class TestErrorRecoveryPatterns:
+    """Test error recovery and resilience patterns."""
+    
+    @pytest.mark.asyncio
+    async def test_recovery_from_json_decode_errors(self):
+        """Test recovery from JSON decode errors."""
+        client = GenesisAPIClient(api_key="test-key")
+        
+        call_count = 0
+        
+        async def json_error_then_success(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            
+            mock_response = Mock()
+            if call_count == 1:
+                # First call: JSON decode error
+                mock_response.status = 200
+                mock_response.json = AsyncMock(side_effect=json.JSONDecodeError("Invalid JSON", "", 0))
+            else:
+                # Second call: success
+                mock_response.status = 200
+                mock_response.json = AsyncMock(return_value={
+                    'id': 'recovery-test',
+                    'choices': [{'message': {'content': 'Recovered'}}],
+                    'usage': {'total_tokens': 10}
+                })
+            
+            return mock_response
+        
+        with patch('aiohttp.ClientSession.post', side_effect=json_error_then_success):
+            with patch('asyncio.sleep'):
+                with pytest.raises(GenesisAPIError, match="Invalid response format"):
+                    await client.create_chat_completion(
+                        messages=[ChatMessage(role="user", content="Test")],
+                        model_config=ModelConfig(name="test-model")
+                    )
+        
+        await client.close()
+    
+    @pytest.mark.asyncio
+    async def test_recovery_from_partial_response_corruption(self):
+        """Test handling of partially corrupted responses."""
+        client = GenesisAPIClient(api_key="test-key")
+        
+        # Simulate partially corrupted response
+        partial_response = {
+            'id': 'partial-test',
+            'choices': [{
+                'message': {'content': 'Partial'},
+                # Missing required fields
+            }],
+            # Missing usage field
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.status = 200
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=partial_response)
+            
+            with pytest.raises(GenesisAPIError):
+                await client.create_chat_completion(
+                    messages=[ChatMessage(role="user", content="Test")],
+                    model_config=ModelConfig(name="test-model")
+                )
+        
+        await client.close()
+    
+    @pytest.mark.asyncio
+    async def test_graceful_handling_of_unexpected_status_codes(self):
+        """Test handling of unexpected HTTP status codes."""
+        client = GenesisAPIClient(api_key="test-key")
+        
+        # Test various unexpected status codes
+        unexpected_codes = [418, 451, 502, 503, 504, 507, 508, 510, 511]
+        
+        for status_code in unexpected_codes:
+            with patch('aiohttp.ClientSession.post') as mock_post:
+                mock_post.return_value.__aenter__.return_value.status = status_code
+                mock_post.return_value.__aenter__.return_value.json = AsyncMock(
+                    return_value={'error': {'message': f'Unexpected error {status_code}'}}
+                )
+                
+                with pytest.raises(GenesisAPIError):
+                    await client.create_chat_completion(
+                        messages=[ChatMessage(role="user", content="Test")],
+                        model_config=ModelConfig(name="test-model")
+                    )
+        
+        await client.close()
+
+
+class TestPerformanceCharacteristics:
+    """Test performance characteristics and optimizations."""
+    
+    @pytest.mark.asyncio
+    async def test_request_batching_simulation(self):
+        """Test simulated request batching performance."""
+        client = GenesisAPIClient(api_key="test-key")
+        
+        batch_size = 20
+        mock_response = {
+            'id': 'batch-perf-test',
+            'choices': [{'message': {'content': 'Batch response'}}],
+            'usage': {'total_tokens': 10}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            start_time = asyncio.get_event_loop().time()
+            
+            # Simulate batch processing
+            tasks = []
+            for i in range(batch_size):
+                task = client.create_chat_completion(
+                    messages=[ChatMessage(role="user", content=f"Batch {i}")],
+                    model_config=ModelConfig(name="test-model")
+                )
+                tasks.append(task)
+            
+            results = await asyncio.gather(*tasks)
+            end_time = asyncio.get_event_loop().time()
+            
+            # Verify all requests completed
+            assert len(results) == batch_size
+            for result in results:
+                assert result.id == 'batch-perf-test'
+            
+            # Performance should be reasonable
+            assert end_time - start_time < 10.0  # Should complete within 10 seconds
+        
+        await client.close()
+    
+    @pytest.mark.asyncio
+    async def test_streaming_throughput_characteristics(self):
+        """Test streaming throughput characteristics."""
+        client = GenesisAPIClient(api_key="test-key")
+        
+        # Create a stream with many small chunks
+        num_chunks = 100
+        
+        async def high_throughput_stream():
+            for i in range(num_chunks):
+                chunk = {'choices': [{'delta': {'content': f'Chunk{i} '}}]}
+                yield json.dumps(chunk).encode()
+            
+            # Final chunk
+            final_chunk = {'choices': [{'delta': {}, 'finish_reason': 'stop'}]}
+            yield json.dumps(final_chunk).encode()
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
+                return_value=high_throughput_stream()
+            )
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            start_time = asyncio.get_event_loop().time()
+            chunk_count = 0
+            
+            async for chunk in client.create_chat_completion_stream(
+                messages=[ChatMessage(role="user", content="Throughput test")],
+                model_config=ModelConfig(name="test-model")
+            ):
+                chunk_count += 1
+            
+            end_time = asyncio.get_event_loop().time()
+            
+            # Should process all chunks efficiently
+            assert chunk_count == num_chunks + 1  # +1 for final chunk
+            
+            # Performance should be reasonable
+            processing_time = end_time - start_time
+            assert processing_time < 5.0  # Should complete within 5 seconds
+            
+            # Calculate throughput
+            throughput = chunk_count / processing_time
+            assert throughput > 10  # Should process at least 10 chunks per second
+        
+        await client.close()
+
+
+class TestConfigurationValidation:
+    """Comprehensive configuration validation tests."""
+    
+    def test_api_key_format_validation(self):
+        """Test API key format validation."""
+        # Test various API key formats
+        valid_keys = [
+            "sk-1234567890abcdef",
+            "sk-proj-1234567890abcdef",
+            "sk-org-1234567890abcdef",
+            "user-1234567890abcdef",
+        ]
+        
+        invalid_keys = [
+            "",
+            "   ",
+            "invalid-key",
+            "sk-",
+            None,
+            123,
+            []
+        ]
+        
+        for key in valid_keys:
+            try:
+                client = GenesisAPIClient(api_key=key)
+                assert client.api_key == key
+            except ValueError:
+                # Some formats might not be supported
+                pass
+        
+        for key in invalid_keys:
+            with pytest.raises((ValueError, TypeError)):
+                GenesisAPIClient(api_key=key)
+    
+    def test_base_url_validation_comprehensive(self):
+        """Test comprehensive base URL validation."""
+        valid_urls = [
+            "https://api.genesis.ai",
+            "https://api.genesis.ai/v1",
+            "https://custom.api.com/v1",
+            "https://localhost:8080/api/v1",
+        ]
+        
+        invalid_urls = [
+            "http://insecure.com",  # Non-HTTPS
+            "ftp://invalid.com",    # Invalid protocol
+            "not-a-url",           # Not a URL
+            "",                    # Empty string
+            "https://",            # Incomplete URL
+        ]
+        
+        for url in valid_urls:
+            try:
+                client = GenesisAPIClient(api_key="test-key", base_url=url)
+                assert client.base_url == url or client.base_url.startswith(url)
+            except ValueError:
+                # Some URLs might not be supported
+                pass
+        
+        for url in invalid_urls:
+            with pytest.raises(ValueError):
+                GenesisAPIClient(api_key="test-key", base_url=url)
+    
+    def test_timeout_configuration_edge_cases(self):
+        """Test timeout configuration edge cases."""
+        # Test various timeout values
+        timeout_values = [
+            0.1,    # Very short timeout
+            1.0,    # Short timeout
+            30.0,   # Standard timeout
+            300.0,  # Long timeout
+            3600.0, # Very long timeout
+        ]
+        
+        for timeout in timeout_values:
+            client = GenesisAPIClient(api_key="test-key", timeout=timeout)
+            assert client.timeout == timeout
+    
+    def test_retry_configuration_validation(self):
+        """Test retry configuration validation."""
+        # Test various retry values
+        retry_values = [0, 1, 3, 5, 10, 20]
+        
+        for retries in retry_values:
+            client = GenesisAPIClient(api_key="test-key", max_retries=retries)
+            assert client.max_retries == retries
+    
+    def test_client_initialization_with_all_parameters(self):
+        """Test client initialization with all parameters."""
+        config = {
+            'api_key': 'test-comprehensive-key',
+            'base_url': 'https://api.genesis.ai/v1',
+            'timeout': 45.0,
+            'max_retries': 5,
+        }
+        
+        client = GenesisAPIClient(**config)
+        
+        assert client.api_key == config['api_key']
+        assert client.base_url == config['base_url']
+        assert client.timeout == config['timeout']
+        assert client.max_retries == config['max_retries']
+
+
+class TestUtilityFunctionsComprehensive:
+    """Comprehensive tests for utility functions."""
+    
+    def test_timestamp_formatting_edge_cases(self):
+        """Test timestamp formatting with edge cases."""
+        from app.ai_backend.genesis_api import format_timestamp
+        
+        # Test various timestamp formats
+        test_timestamps = [
+            0,           # Unix epoch
+            1234567890,  # Regular timestamp
+            2147483647,  # Max 32-bit timestamp
+            -1,          # Before epoch
+            1.5,         # Float timestamp
+        ]
+        
+        for timestamp in test_timestamps:
+            try:
+                formatted = format_timestamp(timestamp)
+                assert isinstance(formatted, str)
+                assert len(formatted) > 0
+            except (ValueError, OSError):
+                # Some timestamps might not be valid
+                pass
+    
+    def test_token_estimation_with_edge_cases(self):
+        """Test token estimation with edge cases."""
+        from app.ai_backend.genesis_api import estimate_tokens
+        
+        # Test various content types
+        test_contents = [
+            "",                    # Empty string
+            " ",                   # Single space
+            "a",                   # Single character
+            "Hello, world!",       # Basic text
+            "🌍🚀💻🔥",           # Only emojis
+            "   multiple   spaces   ",  # Multiple spaces
+            "\n\t\r\v\f",         # Whitespace characters
+            "Mixed 123 !@# 🌍",   # Mixed content
+            "a" * 10000,          # Very long text
+            "1234567890" * 100,   # Numeric content
+        ]
+        
+        for content in test_contents:
+            tokens = estimate_tokens(content)
+            assert isinstance(tokens, int)
+            assert tokens >= 0
+    
+    def test_token_usage_calculation_comprehensive(self):
+        """Test comprehensive token usage calculation."""
+        from app.ai_backend.genesis_api import calculate_token_usage
+        
+        # Test various message combinations
+        test_scenarios = [
+            # Empty messages
+            [],
+            
+            # Single message
+            [ChatMessage(role="user", content="Hello")],
+            
+            # Multiple messages
+            [
+                ChatMessage(role="system", content="You are helpful"),
+                ChatMessage(role="user", content="Hello"),
+                ChatMessage(role="assistant", content="Hi there!"),
+            ],
+            
+            # Very long messages
+            [ChatMessage(role="user", content="a" * 1000)],
+            
+            # Messages with special characters
+            [ChatMessage(role="user", content="Hello! 🌍 How are you? 😊")],
+            
+            # Mixed content types
+            [
+                ChatMessage(role="user", content="Short"),
+                ChatMessage(role="user", content="Medium length message"),
+                ChatMessage(role="user", content="Very long message " * 100),
+            ],
+        ]
+        
+        for messages in test_scenarios:
+            usage = calculate_token_usage(messages)
+            assert isinstance(usage, dict)
+            assert 'estimated_tokens' in usage
+            assert isinstance(usage['estimated_tokens'], int)
+            assert usage['estimated_tokens'] >= 0
+    
+    def test_utility_function_error_handling(self):
+        """Test utility function error handling."""
+        from app.ai_backend.genesis_api import estimate_tokens, calculate_token_usage
+        
+        # Test with invalid inputs
+        invalid_inputs = [None, 123, [], {}, True, False]
+        
+        for invalid_input in invalid_inputs:
+            try:
+                result = estimate_tokens(invalid_input)
+                # If it doesn't raise an exception, ensure it returns a reasonable value
+                assert isinstance(result, int) and result >= 0
+            except (TypeError, AttributeError):
+                # Expected for invalid inputs
+                pass
+        
+        # Test calculate_token_usage with invalid inputs
+        for invalid_input in invalid_inputs:
+            try:
+                result = calculate_token_usage(invalid_input)
+                # If it doesn't raise an exception, ensure it returns a reasonable value
+                assert isinstance(result, dict)
+                assert 'estimated_tokens' in result
+            except (TypeError, AttributeError):
+                # Expected for invalid inputs
+                pass
+
+
+# Additional integration tests for end-to-end scenarios
+class TestEndToEndIntegration:
+    """End-to-end integration tests."""
+    
+    @pytest.mark.asyncio
+    async def test_complete_conversation_flow(self):
+        """Test complete conversation flow with multiple turns."""
+        config = {'api_key': 'test-integration-key'}
+        
+        # Simulate a multi-turn conversation
+        conversation_responses = [
+            {
+                'id': 'conv-1',
+                'choices': [{'message': {'role': 'assistant', 'content': 'Hello! How can I help you?'}}],
+                'usage': {'total_tokens': 15}
+            },
+            {
+                'id': 'conv-2',
+                'choices': [{'message': {'role': 'assistant', 'content': 'I can help you with that!'}}],
+                'usage': {'total_tokens': 25}
+            },
+            {
+                'id': 'conv-3',
+                'choices': [{'message': {'role': 'assistant', 'content': 'Is there anything else?'}}],
+                'usage': {'total_tokens': 20}
+            }
+        ]
+        
+        conversation_messages = [
+            [ChatMessage(role="user", content="Hello")],
+            [
+                ChatMessage(role="user", content="Hello"),
+                ChatMessage(role="assistant", content="Hello! How can I help you?"),
+                ChatMessage(role="user", content="I need help with something")
+            ],
+            [
+                ChatMessage(role="user", content="Hello"),
+                ChatMessage(role="assistant", content="Hello! How can I help you?"),
+                ChatMessage(role="user", content="I need help with something"),
+                ChatMessage(role="assistant", content="I can help you with that!"),
+                ChatMessage(role="user", content="Thanks, that's all")
+            ]
+        ]
+        
+        call_count = 0
+        
+        async def conversation_handler(*args, **kwargs):
+            nonlocal call_count
+            response_data = conversation_responses[call_count]
+            call_count += 1
+            
+            mock_response = Mock()
+            mock_response.status = 200
+            mock_response.json = AsyncMock(return_value=response_data)
+            return mock_response
+        
+        with patch('aiohttp.ClientSession.post', side_effect=conversation_handler):
+            async with GenesisAPIClient(**config) as client:
+                results = []
+                
+                for messages in conversation_messages:
+                    result = await client.create_chat_completion(
+                        messages=messages,
+                        model_config=ModelConfig(name="genesis-gpt-4")
+                    )
+                    results.append(result)
+                
+                # Verify conversation flow
+                assert len(results) == 3
+                assert results[0].id == 'conv-1'
+                assert results[1].id == 'conv-2'
+                assert results[2].id == 'conv-3'
+                
+                # Verify token usage tracking
+                total_tokens = sum(result.usage.total_tokens for result in results)
+                assert total_tokens == 60  # 15 + 25 + 20
+    
+    @pytest.mark.asyncio
+    async def test_streaming_conversation_flow(self):
+        """Test streaming conversation flow."""
+        config = {'api_key': 'test-streaming-key'}
+        
+        # Simulate streaming conversation
+        streaming_responses = [
+            [
+                {'choices': [{'delta': {'content': 'Hello'}}]},
+                {'choices': [{'delta': {'content': ' there!'}}]},
+                {'choices': [{'delta': {}, 'finish_reason': 'stop'}]}
+            ],
+            [
+                {'choices': [{'delta': {'content': 'I'}}]},
+                {'choices': [{'delta': {'content': ' can'}}]},
+                {'choices': [{'delta': {'content': ' help!'}}]},
+                {'choices': [{'delta': {}, 'finish_reason': 'stop'}]}
+            ]
+        ]
+        
+        response_index = 0
+        
+        async def streaming_handler():
+            nonlocal response_index
+            chunks = streaming_responses[response_index]
+            response_index += 1
+            
+            for chunk in chunks:
+                yield json.dumps(chunk).encode()
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
+                side_effect=streaming_handler
+            )
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            async with GenesisAPIClient(**config) as client:
+                # First streaming request
+                response1 = ""
+                async for chunk in client.create_chat_completion_stream(
+                    messages=[ChatMessage(role="user", content="Hello")],
+                    model_config=ModelConfig(name="genesis-gpt-4")
+                ):
+                    if chunk.choices[0].delta.content:
+                        response1 += chunk.choices[0].delta.content
+                
+                # Second streaming request
+                response2 = ""
+                async for chunk in client.create_chat_completion_stream(
+                    messages=[
+                        ChatMessage(role="user", content="Hello"),
+                        ChatMessage(role="assistant", content="Hello there!"),
+                        ChatMessage(role="user", content="Can you help me?")
+                    ],
+                    model_config=ModelConfig(name="genesis-gpt-4")
+                ):
+                    if chunk.choices[0].delta.content:
+                        response2 += chunk.choices[0].delta.content
+                
+                # Verify streaming responses
+                assert response1 == "Hello there!"
+                assert response2 == "I can help!"
+
+
+if __name__ == "__main__":
+    # Run the additional comprehensive tests
+    pytest.main([
+        __file__,
+        "-v",
