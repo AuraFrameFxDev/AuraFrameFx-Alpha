@@ -29,24 +29,24 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     /**
- * Returns the name of the agent.
+ * Returns the agent's name, "Kai".
  *
- * @return The agent's name, "Kai".
+ * @return The string "Kai".
  */
 override fun getName(): String? = "Kai"
     /**
- * Returns the agent type as `AgentType.KAI`.
+ * Returns the agent type, which is `AgentType.KAI`.
  *
- * @return The agent type for this agent.
+ * @return The type of this agent.
  */
 override fun getType(): AgentType = AgentType.KAI
 
     /**
-         * Returns a map indicating the Kai agent's supported capabilities.
+         * Returns a map of the Kai agent's supported capabilities.
          *
-         * The returned map contains the keys "security", "analysis", "memory", and "service_implemented", each mapped to true to signify support for these features.
+         * The map includes "security", "analysis", "memory", and "service_implemented" as keys, each mapped to true to indicate support.
          *
-         * @return A map of capability names to their support status.
+         * @return A map where each key is a capability name and the value is true if supported.
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
@@ -57,10 +57,10 @@ override fun getType(): AgentType = AgentType.KAI
         )
 
     /**
-     * Processes an AI request using the provided context and returns a response referencing both.
+     * Processes an AI request with the given context and returns a response referencing both.
      *
-     * @param request The AI request to handle.
-     * @param context Additional context to include in the response.
+     * @param request The AI request to process.
+     * @param context Contextual information to include in the response.
      * @return An AgentResponse containing a message that references the request query and context, with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context

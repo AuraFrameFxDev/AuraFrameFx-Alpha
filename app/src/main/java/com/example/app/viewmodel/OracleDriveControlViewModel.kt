@@ -40,7 +40,7 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates unbinding from the Oracle Drive service in beta mode.
      *
-     * Updates the internal connection state and status message to reflect a disconnected state. No real unbinding or service interaction occurs.
+     * Sets the internal connection state to disconnected and updates the status message. No actual service interaction is performed.
      */
     fun unbindService() {
         // Beta stub: No actual unbinding
@@ -49,9 +49,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Simulates refreshing the Oracle Drive service status with static placeholder messages for UI testing in beta mode.
+     * Simulates a status refresh for the Oracle Drive service using static placeholder messages.
      *
-     * Updates the status, detailed status, and diagnostics log with predefined values. No actual status or diagnostics data is retrieved.
+     * Updates the status, detailed status, and diagnostics log with predefined beta-mode values for UI testing. No real status or diagnostics information is retrieved.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -61,11 +61,11 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Simulates toggling a module by updating the diagnostics log with a placeholder message.
+     * Simulates toggling a module by updating the diagnostics log with a message indicating the intended action.
      *
-     * Provides simulated feedback for UI testing in beta mode without affecting any actual module state.
+     * This method does not alter any real module state and only provides placeholder feedback for UI testing in beta mode.
      *
-     * @param packageName The identifier of the module to simulate toggling.
+     * @param packageName The name of the module to simulate enabling or disabling.
      * @param enable If `true`, simulates enabling the module; if `false`, simulates disabling it.
      */
     fun toggleModule(packageName: String, enable: Boolean) {

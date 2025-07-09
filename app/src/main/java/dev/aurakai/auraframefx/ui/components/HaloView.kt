@@ -92,6 +92,13 @@ import kotlin.math.*
  *
  * @param viewModel The view model providing agent data and task processing logic. Defaults to a local instance.
  */
+/**
+ * Displays an interactive rotating halo UI for managing agents and delegating tasks.
+ *
+ * Renders a circular arrangement of agent nodes around a central "GENESIS" node, allowing users to assign tasks to agents via drag-and-drop or by tapping the center node. Features include animated rotation, pulsing visual effects for active agents, real-time status indicators, a scrollable task history panel, and control buttons for rotation and history management. Integrates gesture detection, state management, and coroutine-based asynchronous task simulation.
+ *
+ * @param viewModel The view model providing agent data and task processing logic. Defaults to a local instance.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HaloView(viewModel: GenesisAgentViewModel = viewModel<GenesisAgentViewModel>()) {
