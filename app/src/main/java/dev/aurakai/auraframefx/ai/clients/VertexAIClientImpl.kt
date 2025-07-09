@@ -9,14 +9,14 @@ import kotlinx.coroutines.delay
 class VertexAIClientImpl : VertexAIClient {
 
     /**
-     * Generates a simulated AI text response based on the input prompt, token limit, and creativity level.
+     * Simulates an AI-generated text response tailored to the input prompt, token limit, and creativity level.
      *
-     * The response adapts its format and content according to keywords in the prompt ("code", "explain", "analyze"), and includes metadata reflecting the specified `maxTokens` (capped at 500) and `temperature` (as a percentage). The method suspends briefly to mimic API latency.
+     * The response format adapts to keywords in the prompt ("code", "explain", "analyze") and includes metadata reflecting the capped token count and temperature as a percentage. The function suspends briefly to mimic API latency.
      *
      * @param prompt The input prompt guiding the simulated response.
-     * @param maxTokens The maximum number of tokens to represent in the response metadata.
+     * @param maxTokens The maximum number of tokens to represent in the response metadata (capped at 500).
      * @param temperature The creativity level to represent in the response metadata.
-     * @return A multi-line string simulating an AI-generated response tailored to the prompt and parameters.
+     * @return A multi-line string simulating an AI-generated response based on the prompt and parameters.
      */
     override suspend fun generateText(prompt: String, maxTokens: Int, temperature: Float): String {
         delay(200) // Simulate realistic API latency
@@ -67,11 +67,11 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Simulates image analysis and returns a placeholder response referencing the provided prompt.
+     * Simulates image analysis and returns a stub response referencing the provided prompt.
      *
-     * @param imageData The image data to be analyzed (not actually processed).
+     * @param imageData The image data to be analyzed.
      * @param prompt The prompt describing the analysis request.
-     * @return A fixed string indicating simulated image analysis for the given prompt.
+     * @return A placeholder string indicating simulated image analysis for the given prompt.
      */
     override suspend fun analyzeImage(imageData: ByteArray, prompt: String): String {
         delay(100) // Simulate API call
@@ -79,19 +79,19 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Stub method for initializing creative models; performs no actions.
+     * Stub method for creative model initialization; does nothing.
      *
-     * Intended for use in testing or development environments where actual model initialization is unnecessary.
+     * Intended for use in testing or development environments where actual model setup is not required.
      */
     override suspend fun initializeCreativeModels() {
         // Stub implementation
     }
 
     /**
-     * Simulates content generation by returning a stub string containing the provided prompt after a short delay.
+     * Returns a stub content string referencing the provided prompt after a simulated delay.
      *
-     * @param prompt The input prompt to embed in the simulated response.
-     * @return A placeholder content string referencing the prompt.
+     * @param prompt The input prompt to include in the placeholder response.
+     * @return A simulated content string referencing the prompt.
      */
     override suspend fun generateContent(prompt: String): String? {
         delay(100)
@@ -99,14 +99,12 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Returns a placeholder string simulating generated code for the given specification and language.
-     *
-     * The returned string is a stub and does not contain actual code logic.
+     * Simulates code generation by returning a stub string referencing the specification and language.
      *
      * @param specification Description of the code to generate.
      * @param language Programming language for the generated code.
      * @param style Desired coding style.
-     * @return A stub string representing generated code in the specified language, or null.
+     * @return A placeholder string representing generated code in the specified language, or null.
      */
     override suspend fun generateCode(
         specification: String,
@@ -118,27 +116,27 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Simulates a connection check to Vertex AI and always returns `true`.
+     * Simulates a connection check and always returns `true` to indicate success.
      *
-     * @return `true` to indicate a successful connection in this stub implementation.
+     * @return `true` to represent a successful connection in this stub implementation.
      */
     override suspend fun validateConnection(): Boolean {
         return true // Stub always returns true
     }
 
     /**
-     * Performs no initialization actions in this stub implementation.
+     * No-op initialization method included to fulfill interface requirements.
      *
-     * Included to satisfy interface requirements; has no effect.
+     * This stub implementation performs no actions.
      */
     fun initialize() {
         // Stub implementation
     }
 
     /**
-     * Validates that the prompt string is not blank.
+     * Checks that the prompt string is not blank.
      *
-     * @param prompt The prompt string to check.
+     * @param prompt The prompt string to validate.
      * @throws IllegalArgumentException if the prompt is blank.
      */
     private fun validatePrompt(prompt: String) {
@@ -148,9 +146,9 @@ class VertexAIClientImpl : VertexAIClient {
     }
 
     /**
-     * Validates that the provided image data is not empty.
+     * Checks that the image data array is not empty.
      *
-     * @param imageData The image data to check.
+     * @param imageData The image data to validate.
      * @throws IllegalArgumentException if the image data array is empty.
      */
     private fun validateImageData(imageData: ByteArray) {
