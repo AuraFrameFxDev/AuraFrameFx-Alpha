@@ -58,6 +58,13 @@ class CascadeDebugViewModel @Inject constructor(
  * @param viewModel The ViewModel that provides the agent state data and handles updates.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays a debug interface for inspecting and updating the vision and processing states of a CascadeAgent.
+ *
+ * This composable provides UI controls to view the current vision and processing states, manually update them, and review their state histories. Intended for development and debugging purposes.
+ *
+ * @param viewModel The ViewModel providing state and update methods for the CascadeAgent. Defaults to an injected instance.
+ */
 @Composable
 fun CascadeZOrderPlayground(
     viewModel: CascadeDebugViewModel = hiltViewModel(),
