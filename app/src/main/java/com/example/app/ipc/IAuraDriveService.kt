@@ -12,23 +12,23 @@ interface IAuraDriveService : IInterface {
     fun getOracleDriveStatus(): String
 
     /**
- * Toggles the enabled or disabled state of the LSPosed module.
+ * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module state was successfully changed, or `false` if the operation did not succeed.
+ * @return `true` if the module state was successfully toggled, `false` otherwise.
  */
     fun toggleLSPosedModule(): Boolean
 
     /**
- * Returns a detailed internal status report of the Aura Drive service.
+ * Retrieves a comprehensive internal status report of the Aura Drive service.
  *
- * @return A string containing comprehensive diagnostic and monitoring information about the service's internal state.
+ * @return A string containing detailed diagnostic and monitoring information about the service's internal state.
  */
     fun getDetailedInternalStatus(): String
 
     /**
- * Retrieves diagnostic log entries related to the Aura Drive service.
+ * Returns a list of diagnostic log entries for the Aura Drive service.
  *
- * @return A list of strings, each representing a diagnostic log entry.
+ * @return A list of strings, each containing a diagnostic log entry.
  */
     fun getInternalDiagnosticsLog(): List<String>
 
@@ -37,9 +37,9 @@ interface IAuraDriveService : IInterface {
             /**
              * Returns an `IAuraDriveService` implementation backed by the provided `IBinder`, or `null` if the binder is `null`.
              *
-             * Typically used to obtain a service interface for IPC binding scenarios.
+             * Use this method to obtain an interface for interacting with the Aura Drive service over IPC.
              *
-             * @param service The `IBinder` representing the remote service, or `null`.
+             * @param service The `IBinder` representing the remote Aura Drive service, or `null`.
              * @return An `IAuraDriveService` implementation if the binder is non-null; otherwise, `null`.
              */
             fun asInterface(service: IBinder?): IAuraDriveService? {
@@ -47,37 +47,37 @@ interface IAuraDriveService : IInterface {
                 return if (service != null) {
                     object : IAuraDriveService {
                         /**
- * Returns the `IBinder` instance associated with this interface implementation.
+ * Returns the underlying `IBinder` associated with this interface implementation.
  *
- * @return The underlying `IBinder` instance.
+ * @return The `IBinder` instance used for IPC communication.
  */
                         override fun asBinder(): IBinder = service
 
                         /**
- * Returns a summary of the current operational status of the Oracle Drive.
+ * Retrieves a summary of the current operational status of the Oracle Drive.
  *
  * @return A string describing the Oracle Drive's status.
  */
                         override fun getOracleDriveStatus(): String = "Unknown"
 
                         /**
- * Attempts to toggle the enabled state of the LSPosed module.
+ * Toggles the enabled or disabled state of the LSPosed module.
  *
- * @return `true` if the module's state was successfully changed, `false` otherwise.
+ * @return `true` if the module state was successfully toggled, `false` otherwise.
  */
                         override fun toggleLSPosedModule(): Boolean = false
 
                         /**
- * Returns a detailed internal status report of the Aura Drive service.
+ * Retrieves a detailed internal status report of the Aura Drive service.
  *
- * @return A string containing diagnostic information about the service's internal state.
+ * @return A string containing comprehensive diagnostic information about the service's internal state.
  */
                         override fun getDetailedInternalStatus(): String = "Not implemented"
 
                         /**
- * Returns diagnostic log entries for the Aura Drive service.
+ * Retrieves diagnostic log entries related to the Aura Drive service.
  *
- * @return A list of diagnostic log entries.
+ * @return A list of strings, each representing a diagnostic log entry.
  */
                         override fun getInternalDiagnosticsLog(): List<String> = emptyList()
                     }

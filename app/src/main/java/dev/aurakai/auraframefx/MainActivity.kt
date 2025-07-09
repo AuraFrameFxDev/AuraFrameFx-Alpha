@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
 /**
  * Composes the main application screen with a scaffolded layout, bottom navigation bar, and optional digital pixel visual effect.
  *
- * Sets up the navigation controller, manages the state for digital effects, and displays the app's navigation graph within a Material3 scaffold.
+ * Initializes the navigation controller, manages the state for enabling digital effects, and displays the app's navigation graph within a Material3 scaffold.
  */
 @Composable
 fun MainScreen() {
