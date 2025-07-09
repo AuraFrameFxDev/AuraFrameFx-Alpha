@@ -5539,3 +5539,187 @@ if __name__ == "__main__":
         "-k", "TestSecurityAndSanitization or TestResourceManagement or TestAdvancedErrorScenarios or TestStateConsistency or TestBoundaryConditions or TestAdvancedMocking",
         "--durations=10"
     ])
+
+
+# ========================================================================
+# ADDITIONAL COMPREHENSIVE TEST COVERAGE
+# ========================================================================
+
+class TestExtendedAPIValidation:
+    """Extended API validation tests for comprehensive coverage."""
+    
+    @pytest.mark.asyncio
+    async def test_chat_completion_with_null_values_in_response(self, client, sample_messages, sample_model_config):
+        """Test handling of null values in API response fields."""
+        null_response = {
+            'id': 'null-test',
+            'object': 'chat.completion',
+            'created': None,  # Null timestamp
+            'model': 'genesis-gpt-4',
+            'choices': [{
+                'index': 0,
+                'message': {
+                    'role': 'assistant',
+                    'content': 'Valid content',
+                    'name': None  # Null name field
+                },
+                'finish_reason': 'stop'
+            }],
+            'usage': {
+                'prompt_tokens': None,  # Null token count
+                'completion_tokens': 10,
+                'total_tokens': 10
+            }
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=null_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            result = await client.create_chat_completion(
+                messages=sample_messages,
+                model_config=sample_model_config
+            )
+            
+            assert result.id == 'null-test'
+            assert result.choices[0].message.content == 'Valid content'
+    
+    @pytest.mark.asyncio
+    async def test_streaming_with_multiple_choice_deltas(self, client, sample_messages, sample_model_config):
+        """Test streaming with multiple choice deltas in single chunk."""
+        multi_choice_chunks = [
+            {
+                'choices': [
+                    {'index': 0, 'delta': {'content': 'First choice: Hello'}},
+                    {'index': 1, 'delta': {'content': 'Second choice: Hi'}}
+                ]
+            },
+            {
+                'choices': [
+                    {'index': 0, 'delta': {'content': ' world'}},
+                    {'index': 1, 'delta': {'content': ' there'}}
+                ]
+            },
+            {
+                'choices': [
+                    {'index': 0, 'delta': {}, 'finish_reason': 'stop'},
+                    {'index': 1, 'delta': {}, 'finish_reason': 'stop'}
+                ]
+            }
+        ]
+        
+        async def multi_choice_stream():
+            for chunk in multi_choice_chunks:
+                yield json.dumps(chunk).encode()
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
+                return_value=multi_choice_stream()
+            )
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            chunks = []
+            async for chunk in client.create_chat_completion_stream(
+                messages=sample_messages,
+                model_config=sample_model_config
+            ):
+                chunks.append(chunk)
+            
+            assert len(chunks) == 3
+            # Verify multiple choices are handled
+            assert len(chunks[0].choices) == 2
+    
+    def test_message_validation_with_recursive_structures(self, client):
+        """Test message validation with recursive data structures."""
+        # Create recursive structure
+        recursive_dict = {}
+        recursive_dict['self'] = recursive_dict
+        
+        recursive_message = ChatMessage(role="user", content=recursive_dict)
+        
+        # Should handle recursive structures without infinite loops
+        try:
+            client._validate_messages([recursive_message])
+        except (ValidationError, RecursionError, ValueError):
+            # Acceptable to reject recursive structures
+            pass
+    
+    @pytest.mark.asyncio
+    async def test_request_with_extremely_deep_json_nesting(self, client, sample_model_config):
+        """Test requests with extremely deep JSON nesting."""
+        # Create deeply nested content
+        deep_content = {"level": 1}
+        current = deep_content
+        for i in range(2, 1000):  # Create 999 levels of nesting
+            current["next"] = {"level": i}
+            current = current["next"]
+        
+        deep_message = ChatMessage(role="user", content=json.dumps(deep_content))
+        
+        mock_response = {
+            'id': 'deep-json-test',
+            'choices': [{'message': {'content': 'Handled deep nesting'}}],
+            'usage': {'total_tokens': 50}
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            # Should handle deep nesting without stack overflow
+            try:
+                result = await client.create_chat_completion(
+                    messages=[deep_message],
+                    model_config=sample_model_config
+                )
+                assert result.id == 'deep-json-test'
+            except (ValidationError, RecursionError):
+                # Acceptable to reject extremely deep structures
+                pass
+
+    @pytest.mark.asyncio
+    async def test_response_with_non_standard_http_headers(self, client, sample_messages, sample_model_config):
+        """Test handling of responses with non-standard HTTP headers."""
+        mock_response = {
+            'id': 'non-standard-headers',
+            'choices': [{'message': {'content': 'Response with custom headers'}}],
+            'usage': {'total_tokens': 15}
+        }
+        
+        # Non-standard headers that might be present
+        non_standard_headers = {
+            'X-Genesis-Request-ID': 'req-12345',
+            'X-Genesis-Model-Version': 'v2.1.0',
+            'X-RateLimit-Remaining': '99',
+            'X-RateLimit-Reset': '1640995200',
+            'Server': 'Genesis-API/1.0',
+            'X-Content-Type-Options': 'nosniff',
+            'X-Frame-Options': 'DENY'
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_response_obj = Mock()
+            mock_response_obj.json = AsyncMock(return_value=mock_response)
+            mock_response_obj.status = 200
+            mock_response_obj.headers = non_standard_headers
+            mock_post.return_value.__aenter__.return_value = mock_response_obj
+            
+            result = await client.create_chat_completion(
+                messages=sample_messages,
+                model_config=sample_model_config
+            )
+            
+            assert result.id == 'non-standard-headers'
+            # Should handle non-standard headers gracefully
+
+
+class TestAdvancedTokenUsageScenarios:
+    """Test advanced token usage calculation scenarios."""
+    
+    def test_token_estimation_with_code_blocks(self):
+        """Test token estimation for content with code blocks."""
+        from app.ai_backend.genesis_api import estimate_tokens
+        
+        code_content = '''
+
+git add .
