@@ -7,19 +7,19 @@ interface IAuraDriveService : IInterface {
     /**
  * Retrieves a summary of the current operational status of the Oracle Drive.
  *
- * @return A string describing the Oracle Drive's status.
+ * @return A string describing the Oracle Drive's status, or "Unknown" if the status cannot be determined.
  */
 fun getOracleDriveStatus(): String
     /**
  * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module state was successfully toggled, or `false` if the operation failed or is unsupported.
+ * @return `true` if the module state was successfully toggled, or `false` if the operation failed.
  */
 fun toggleLSPosedModule(): Boolean  
     /**
  * Retrieves a detailed internal status report of the Aura Drive service.
  *
- * The returned string provides diagnostic or monitoring information about the service's current internal state.
+ * The returned string provides diagnostic or monitoring information about the current internal state of the service.
  *
  * @return A string containing the detailed internal status report.
  */
@@ -34,7 +34,7 @@ fun getInternalDiagnosticsLog(): List<String>
     companion object {
         object Stub {
             /**
-             * Creates an `IAuraDriveService` interface backed by the provided `IBinder`, or returns `null` if the binder is `null`.
+             * Returns an `IAuraDriveService` interface backed by the provided `IBinder`, or `null` if the binder is `null`.
              *
              * Typically used to obtain a service interface for IPC communication with a remote Aura Drive service.
              *
@@ -54,13 +54,13 @@ override fun asBinder(): IBinder = service
                         /**
  * Retrieves the current operational status of the Oracle Drive.
  *
- * @return "Unknown" to indicate that the Oracle Drive status cannot be determined in this stub implementation.
+ * @return A string describing the Oracle Drive's status, or "Unknown" if the status cannot be determined.
  */
 override fun getOracleDriveStatus(): String = "Unknown"
                         /**
  * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module state was successfully changed; `false` if the operation failed or is not supported.
+ * @return `true` if the module state was successfully changed, or `false` if the operation failed or is not supported.
  */
 override fun toggleLSPosedModule(): Boolean = false
                         /**
@@ -68,11 +68,11 @@ override fun toggleLSPosedModule(): Boolean = false
  *
  * In this stub implementation, always returns "Not implemented".
  *
- * @return A string containing the detailed internal status.
+ * @return A string containing the detailed internal status, or "Not implemented" if unavailable.
  */
 override fun getDetailedInternalStatus(): String = "Not implemented"
                         /**
- * Retrieves an empty list of diagnostic log entries, as diagnostics are not supported in this stub implementation.
+ * Returns an empty list, as this stub does not provide diagnostic log entries.
  *
  * @return An empty list of diagnostic log entries.
  */

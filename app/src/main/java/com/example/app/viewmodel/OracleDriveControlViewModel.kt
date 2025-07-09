@@ -49,9 +49,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Simulates a status refresh by setting status, detailed status, and diagnostics log to static placeholder messages.
+     * Updates the status, detailed status, and diagnostics log with static placeholder messages for UI testing in beta mode.
      *
-     * All updates are for UI testing in beta mode; no actual status or diagnostics data is retrieved.
+     * This method does not retrieve or reflect real Oracle Drive service data; all updates are simulated for beta testing purposes.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -65,7 +65,7 @@ class OracleDriveControlViewModel : ViewModel() {
      *
      * Provides simulated feedback for UI testing in beta mode without affecting any actual module state.
      *
-     * @param packageName The name of the module to simulate toggling.
+     * @param packageName The name of the module to simulate enabling or disabling.
      * @param enable If `true`, simulates enabling the module; if `false`, simulates disabling it.
      */
     fun toggleModule(packageName: String, enable: Boolean) {

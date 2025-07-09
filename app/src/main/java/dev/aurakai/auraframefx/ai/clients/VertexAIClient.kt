@@ -6,7 +6,7 @@ package dev.aurakai.auraframefx.ai.clients
  */
 interface VertexAIClient {
     /**
- * Generates content based on a text prompt.
+ * Generates content based on the given text prompt.
  *
  * @param prompt The text prompt to guide content generation.
  * @return The generated content as a string, or null if generation fails.
@@ -14,11 +14,11 @@ interface VertexAIClient {
     suspend fun generateContent(prompt: String): String?
 
     /**
- * Generates text from a prompt with configurable maximum length and randomness.
+ * Generates text from a prompt with configurable maximum token count and randomness.
  *
- * @param prompt The text prompt that guides the generated output.
+ * @param prompt The text prompt to guide generation.
  * @param maxTokens The maximum number of tokens to generate.
- * @param temperature The degree of randomness in the output; higher values yield more diverse text.
+ * @param temperature Degree of randomness in the output; higher values yield more diverse text.
  * @return The generated text.
  */
     suspend fun generateText(prompt: String, maxTokens: Int = 1000, temperature: Float = 0.7f): String
@@ -28,15 +28,15 @@ interface VertexAIClient {
  *
  * @param specification Description of the desired functionality or requirements for the code.
  * @param language The programming language in which to generate the code.
- * @param style The coding style or conventions to apply.
- * @return The generated source code, or null if generation fails.
+ * @param style The coding style or conventions to apply to the generated code.
+ * @return The generated source code as a string, or null if code generation fails.
  */
     suspend fun generateCode(specification: String, language: String, style: String): String?
 
     /**
  * Verifies whether the Vertex AI service is accessible and responsive.
  *
- * @return `true` if the service can be reached; `false` otherwise.
+ * @return `true` if the service can be reached and responds; `false` otherwise.
  */
     suspend fun validateConnection(): Boolean
 
@@ -46,10 +46,10 @@ interface VertexAIClient {
     suspend fun initializeCreativeModels()
 
     /**
- * Analyzes image data using a text prompt and returns the analysis result as a string.
+ * Analyzes image data using a guiding text prompt and returns the analysis result as a string.
  *
  * @param imageData Raw bytes of the image to be analyzed.
- * @param prompt Text prompt guiding the analysis.
+ * @param prompt Text prompt that guides the analysis process.
  * @return The analysis result as a string.
  */
     suspend fun analyzeImage(imageData: ByteArray, prompt: String): String
