@@ -22,6 +22,11 @@ import dev.aurakai.auraframefx.ui.theme.*
  * Features a digital landscape background with floating transparent windows
  * and hexagonal UI elements inspired by futuristic cyberpunk interfaces.
  */
+/**
+ * Displays the main home screen UI for the AuraFrameFX app with a cyberpunk-themed floating interface.
+ *
+ * Presents a digital landscape background with animated hexagon grid overlay, floating windows for the app title, navigation menu, action buttons, and system status panel. Users can select menu items to navigate to different app sections, with visual feedback and warnings for certain selections. Action buttons provide quick access to profile, settings, and OracleDrive controls. The layout and styling emphasize a futuristic, cyberpunk aesthetic.
+ */
 @Composable
 fun HomeScreen(navController: NavController) {
     // Track selected menu item

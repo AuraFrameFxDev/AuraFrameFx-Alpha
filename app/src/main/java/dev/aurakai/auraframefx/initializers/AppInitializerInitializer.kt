@@ -7,11 +7,22 @@ import androidx.startup.Initializer
 // Replace 'Unit' with the actual type this initializer provides if different.
 class AppInitializerInitializer : Initializer<Unit> {
 
+    /**
+     * Performs application-specific initialization during app startup on the main thread.
+     *
+     * This method is invoked automatically by the Android App Startup library.
+     */
     override fun create(context: Context) {
         // TODO: Implement initialization logic here.
         // This method is called on the main thread during app startup.
     }
 
+    /**
+     * Returns a list of initializer classes that this initializer depends on.
+     *
+     * Currently returns an empty list, indicating no dependencies.
+     * @return An empty list of dependencies.
+     */
     override fun dependencies(): List<Class<out Initializer<*>>> {
         // TODO: Define dependencies if this initializer depends on others.
         return emptyList()

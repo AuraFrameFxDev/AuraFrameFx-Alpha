@@ -22,6 +22,12 @@ class MemoryManager @Inject constructor(
     private val _memoryStats = MutableStateFlow(MemoryStats())
     val memoryStats: StateFlow<MemoryStats> = _memoryStats
 
+    /**
+     * Stores a memory item in the memory store and updates memory statistics and recent access tracking.
+     *
+     * @param item The memory item to store.
+     * @return The ID of the stored memory item.
+     */
     fun storeMemory(item: MemoryItem): String {
         memoryStore[item.id] = item
         updateStats()
@@ -29,6 +35,14 @@ class MemoryManager @Inject constructor(
         return item.id
     }
 
+    /**
+     * Retrieves memory items matching the specified query.
+     *
+     * Filters stored memory items by agent if an agent filter is provided in the query, sorts them by descending timestamp, and limits the results to the maximum number configured. Returns a result containing the filtered items, their count, and the original query.
+     *
+     * @param query The criteria used to filter and retrieve memory items.
+     * @return A result containing the retrieved memory items, their total count, and the query used.
+     */
     fun retrieveMemory(query: MemoryQuery): MemoryRetrievalResult {
         val items = memoryStore.values
             .filter { item ->
@@ -45,6 +59,14 @@ class MemoryManager @Inject constructor(
         )
     }
 
+    /**
+     * Retrieves a list of recent memory items within the configured context window.
+     *
+     * Filters memory items whose timestamps fall within the most recent time window defined by `maxChainLength` in the configuration, sorts them by descending timestamp, and limits the result to the maximum chain length.
+     *
+     * @param task The task identifier (currently unused in filtering).
+     * @return A list of recent `MemoryItem` objects within the context window.
+     */
     fun getContextWindow(task: String): List<MemoryItem> {
         val recentItems = memoryStore.values
             .filter {
@@ -57,10 +79,18 @@ class MemoryManager @Inject constructor(
         return recentItems
     }
 
+    /**
+     * Returns the current memory statistics snapshot.
+     *
+     * @return The current state of memory statistics.
+     */
     fun getMemoryStats(): MemoryStats {
         return _memoryStats.value
     }
 
+    /**
+     * Updates the memory statistics with the current total item count, number of recent items within the configured context window, and total memory content size.
+     */
     private fun updateStats() {
         _memoryStats.update { current ->
             current.copy(
