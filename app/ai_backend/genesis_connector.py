@@ -153,7 +153,7 @@ class GenesisBridgeServer:
         """
         Starts the Genesis bridge server, signaling readiness to the Android client and enabling asynchronous processing of JSON requests from standard input.
         
-        Launches a background thread for request handling and continuously reads, parses, and enqueues incoming JSON requests. Handles invalid JSON input gracefully and supports shutdown via keyboard interruption.
+        Continuously reads and enqueues incoming JSON requests, launches a background thread for request handling, gracefully manages invalid JSON input, and supports shutdown on keyboard interruption.
         """
         self.running = True
         print("Genesis Ready", flush=True)  # Signal to Android that we're ready
@@ -199,10 +199,10 @@ class GenesisBridgeServer:
     
     def _handle_request(self, request):
         """
-        Routes an incoming JSON request to the appropriate handler and returns the handler's response.
+        Routes an incoming JSON request to the appropriate handler based on its type and returns the handler's response.
         
         Parameters:
-            request (dict): The JSON-decoded request containing a "requestType" field and optional additional data.
+            request (dict): The JSON-decoded request containing a "requestType" field and optional additional fields.
         
         Returns:
             dict: The response from the relevant handler, or an error response if the request type is unrecognized or an exception occurs.

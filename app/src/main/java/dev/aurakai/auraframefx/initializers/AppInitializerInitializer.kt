@@ -10,9 +10,9 @@ import android.util.Log // Added import for Log
 class AppInitializerInitializer : Initializer<Unit> {
 
     /**
-     * Invoked during app startup to initialize AuraFrameFX core components.
+     * Called during app startup to initialize application components.
      *
-     * Currently, this method only logs its invocation and does not perform any initialization.
+     * This method is invoked on the main thread by the App Startup library. Currently, it only logs a debug message and does not perform any initialization logic.
      */
     override fun create(context: Context) {
         Log.d("AppInitializer", "AppInitializerInitializer - create called.")

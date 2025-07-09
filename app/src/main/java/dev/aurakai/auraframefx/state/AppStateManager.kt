@@ -28,9 +28,9 @@ class AppStateManager @Inject constructor() {
     }
 
     /**
-     * Updates the application's loading status.
+     * Sets the application's loading status.
      *
-     * @param loading True if the application is currently loading; false otherwise.
+     * @param loading True if the application is loading; false otherwise.
      */
     fun setLoading(loading: Boolean) {
         _isLoading.value = loading

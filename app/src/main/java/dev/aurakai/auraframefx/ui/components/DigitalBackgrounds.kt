@@ -19,10 +19,9 @@ import kotlin.math.sin
  * @param color The color used for the grid lines, defaulting to semi-transparent cyan.
  */
 /**
- * Displays a digital landscape background as a grid of evenly spaced vertical and horizontal lines.
+ * Composable that renders a digital landscape grid background using a Canvas.
  *
- * @param modifier Modifier to be applied to the Canvas.
- * @param color The color of the grid lines, with a default semi-transparent cyan.
+ * Draws evenly spaced vertical and horizontal lines to create a grid pattern, with customizable color and modifier.
  */
 @Composable
 fun DigitalLandscapeBackground(
@@ -35,11 +34,10 @@ fun DigitalLandscapeBackground(
 }
 
 /**
- * Renders a hexagon grid pattern as a background using a Canvas composable.
+ * Renders a hexagon grid pattern as a background using a Canvas.
  *
- * @param modifier Modifier applied to the Canvas.
- * @param alpha Opacity of the hexagon grid, from 0.0 (fully transparent) to 1.0 (fully opaque).
- * @param color Color of the hexagon outlines, with the specified alpha applied.
+ * @param alpha The opacity of the hexagon grid, where 1.0 is fully opaque and 0.0 is fully transparent.
+ * @param color The color of the hexagon outlines, with the specified alpha applied.
  */
 @Composable
 fun HexagonGridBackground(
@@ -81,9 +79,9 @@ private fun DrawScope.drawDigitalLandscape(color: Color) {
 /**
  * Draws a staggered grid of hexagon outlines across the canvas with the specified color.
  *
- * Each row is horizontally offset to form a continuous hexagonal tiling pattern.
+ * Each row is horizontally offset to create a continuous hexagon tiling effect.
  *
- * @param color The color used for the hexagon outlines.
+ * @param color The color to use for the hexagon outlines.
  */
 private fun DrawScope.drawHexagonGrid(color: Color) {
     // Simple hexagon grid pattern
@@ -109,7 +107,7 @@ private fun DrawScope.drawHexagonGrid(color: Color) {
 /**
  * Draws a hexagon outline centered at the given position with the specified radius and color.
  *
- * The hexagon is constructed by connecting six vertices spaced 60 degrees apart around the center.
+ * The hexagon is constructed by connecting six vertices spaced at 60-degree intervals around the center.
  *
  * @param center The center point of the hexagon.
  * @param radius The distance from the center to each vertex.

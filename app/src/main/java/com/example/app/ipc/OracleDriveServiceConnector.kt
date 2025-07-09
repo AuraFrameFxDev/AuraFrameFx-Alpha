@@ -20,9 +20,9 @@ class OracleDriveServiceConnector(private val context: Context) {
 
     private val serviceConnection = object : ServiceConnection {
         /**
-         * Called when the AuraDrive service is connected.
+         * Handles the AuraDrive service connection event.
          *
-         * Obtains the remote `IAuraDriveService` interface from the provided binder and updates the connection state to connected.
+         * Retrieves the remote `IAuraDriveService` interface from the provided binder and updates the connection state to connected.
          *
          * @param name The component name of the connected service.
          * @param service The binder interface to the connected service.
@@ -33,7 +33,7 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
 
         /**
-         * Called when the AuraDrive service is disconnected, clearing the service reference and updating the connection state to false.
+         * Handles disconnection from the AuraDrive service by clearing the service reference and updating the connection state to disconnected.
          *
          * @param name The component name of the disconnected service.
          */
@@ -46,7 +46,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Initiates binding to the remote AuraDrive service using an explicit intent.
      *
-     * Sets the connection state to disconnected if a SecurityException occurs during the binding attempt.
+     * Updates the connection state to disconnected if a security exception occurs during the binding attempt.
      */
     fun bindService() {
         val intent = Intent().apply {
@@ -63,9 +63,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Unbinds from the AuraDrive service and marks the connection as disconnected.
+     * Unbinds from the AuraDrive service and updates the connection state to disconnected.
      *
-     * Any exceptions during unbinding are silently ignored.
+     * Any exceptions during unbinding are ignored.
      */
     fun unbindService() {
         try {
