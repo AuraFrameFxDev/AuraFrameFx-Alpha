@@ -32,7 +32,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null to indicate that file download is not supported.
+     * Stub implementation that always returns null, indicating file download is not supported.
      *
      * @param _fileId The identifier of the file to download.
      * @return Always null, as file download functionality is not implemented.
@@ -42,9 +42,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null to indicate that image generation is not supported.
-     *
-     * This method is a stub and does not perform any image generation.
+     * Stub implementation that always returns null, indicating image generation is not implemented.
      *
      * @return Always null.
      */
@@ -55,7 +53,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Returns a fixed placeholder string for any text generation request.
      *
-     * This method does not perform actual text generation and always returns "Generated text placeholder" regardless of the input.
+     * This method does not perform any real text generation and always returns "Generated text placeholder" regardless of the input.
      *
      * @return The string "Generated text placeholder".
      */
@@ -75,9 +73,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Retrieves the memory value associated with the given key.
-     *
-     * This implementation always returns null, indicating that memory retrieval is not supported.
+     * Returns null for any memory key, indicating that memory retrieval is not implemented in this stub.
      *
      * @return Always null.
      */
