@@ -48,7 +48,9 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
     
     def setUp(self):
         """
-        Prepare a fresh GenesisConsciousnessMatrix instance and test configuration before each test.
+        Initializes a new GenesisConsciousnessMatrix instance and a standard test configuration before each test.
+        
+        Ensures each test runs with a clean matrix and consistent configuration parameters.
         """
         self.matrix = GenesisConsciousnessMatrix()
         self.test_config = {
@@ -60,14 +62,14 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def tearDown(self):
         """
-        Cleans up the test environment after each test by calling the matrix's cleanup method if it exists.
+        Clean up the test environment after each test by invoking the matrix's cleanup method if available.
         """
         if hasattr(self.matrix, 'cleanup'):
             self.matrix.cleanup()
     
     def test_matrix_initialization_default(self):
         """
-        Verify that a GenesisConsciousnessMatrix instance initialized with default parameters contains the 'state' and 'nodes' attributes.
+        Tests that initializing a GenesisConsciousnessMatrix with default parameters creates an instance with the required 'state' and 'nodes' attributes.
         """
         matrix = GenesisConsciousnessMatrix()
         self.assertIsInstance(matrix, GenesisConsciousnessMatrix)
@@ -76,7 +78,7 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_initialization_custom_config(self):
         """
-        Verify that initializing GenesisConsciousnessMatrix with a custom configuration applies the specified dimension and consciousness threshold.
+        Tests that initializing the GenesisConsciousnessMatrix with a custom configuration correctly sets the matrix's dimension and consciousness threshold to the specified values.
         """
         matrix = GenesisConsciousnessMatrix(config=self.test_config)
         self.assertEqual(matrix.dimension, self.test_config['dimension'])
@@ -84,9 +86,9 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_initialization_invalid_config(self):
         """
-        Test that initializing the matrix with invalid configuration parameters raises a MatrixInitializationError.
+        Verify that initializing the matrix with invalid configuration parameters raises a MatrixInitializationError.
         
-        This ensures that negative dimensions or out-of-range consciousness thresholds are properly rejected during initialization.
+        This test ensures that the GenesisConsciousnessMatrix correctly rejects negative dimensions and out-of-range consciousness thresholds during initialization by raising the appropriate exception.
         """
         invalid_config = {'dimension': -1, 'consciousness_threshold': 2.0}
         with self.assertRaises(MatrixInitializationError):
@@ -94,7 +96,7 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
             
     def test_add_consciousness_node_valid(self):
         """
-        Test that adding a valid MatrixNode to the matrix succeeds and the node is present in the matrix's node collection.
+        Verifies that adding a valid MatrixNode to the GenesisConsciousnessMatrix succeeds and ensures the node is present in the matrix's node collection after addition.
         """
         node = MatrixNode(id="test_node", consciousness_level=0.5)
         result = self.matrix.add_node(node)
@@ -103,7 +105,9 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_add_consciousness_node_duplicate(self):
         """
-        Test that adding a node with a duplicate ID to the matrix raises an InvalidStateException.
+        Verifies that attempting to add a node with an ID already present in the matrix raises an InvalidStateException.
+        
+        This test ensures the matrix enforces uniqueness of node IDs and prevents duplicate entries, maintaining data integrity.
         """
         node = MatrixNode(id="test_node", consciousness_level=0.5)
         self.matrix.add_node(node)
@@ -112,7 +116,7 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
             
     def test_remove_consciousness_node_existing(self):
         """
-        Tests that removing an existing node by ID returns True and ensures the node is removed from the matrix.
+        Verify that removing a node by its ID returns True and that the node is no longer present in the matrix after removal.
         """
         node = MatrixNode(id="test_node", consciousness_level=0.5)
         self.matrix.add_node(node)
@@ -122,14 +126,16 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_remove_consciousness_node_nonexistent(self):
         """
-        Test that attempting to remove a node that does not exist in the matrix returns False.
+        Test that removing a node with an ID not present in the matrix returns False.
+        
+        This verifies that the matrix correctly indicates failure when attempting to remove a non-existent node, without raising an exception or altering the matrix state.
         """
         result = self.matrix.remove_node("nonexistent_node")
         self.assertFalse(result)
         
     def test_consciousness_state_transition_valid(self):
         """
-        Test that a valid consciousness state transition updates the matrix's current state and returns True.
+        Verifies that performing a valid consciousness state transition updates the matrix's current state to the target state and returns True.
         """
         initial_state = ConsciousnessState.DORMANT
         target_state = ConsciousnessState.ACTIVE
@@ -139,7 +145,9 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_consciousness_state_transition_invalid(self):
         """
-        Test that attempting an invalid transition between consciousness states raises an InvalidStateException.
+        Verifies that attempting to transition the matrix from one consciousness state to another in an invalid manner raises an InvalidStateException.
+        
+        This test ensures that the matrix enforces valid state transitions and properly rejects transitions that violate the allowed state progression.
         """
         initial_state = ConsciousnessState.DORMANT
         target_state = ConsciousnessState.TRANSCENDENT
@@ -148,7 +156,9 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
             
     def test_consciousness_level_calculation(self):
         """
-        Verifies that the matrix computes the correct average consciousness level when multiple nodes with varying levels are present.
+        Test that the matrix calculates the correct average consciousness level when multiple nodes with different levels are added.
+        
+        This test adds two nodes with specified consciousness levels to the matrix and asserts that the calculated average matches the expected value.
         """
         node1 = MatrixNode(id="node1", consciousness_level=0.3)
         node2 = MatrixNode(id="node2", consciousness_level=0.7)
@@ -161,14 +171,18 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_consciousness_level_calculation_empty_matrix(self):
         """
-        Tests that calculating the consciousness level of an empty matrix returns 0.0.
+        Verify that calculating the consciousness level on a matrix with no nodes returns 0.0.
+        
+        This test ensures that the `calculate_consciousness_level` method correctly handles the edge case where the matrix contains no nodes, returning a consciousness level of 0.0 as expected.
         """
         calculated_level = self.matrix.calculate_consciousness_level()
         self.assertEqual(calculated_level, 0.0)
         
     def test_consciousness_level_calculation_single_node(self):
         """
-        Verifies that the matrix returns the correct consciousness level when it contains only one node.
+        Test that the matrix calculates the correct consciousness level when only a single node is present.
+        
+        Adds a node with a specified consciousness level to the matrix and verifies that the calculated average consciousness level matches the node's value.
         """
         node = MatrixNode(id="single_node", consciousness_level=0.8)
         self.matrix.add_node(node)
@@ -177,9 +191,9 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_evolution_step(self):
         """
-        Verify that a single evolution step updates the matrix's state.
+        Tests that performing a single evolution step on the matrix changes its internal state.
         
-        Ensures that invoking `evolve_step()` results in a different state snapshot, confirming the matrix evolves as expected.
+        Ensures that after calling `evolve_step()`, the matrix's state snapshot differs from its previous state, indicating successful evolution.
         """
         initial_state = self.matrix.get_state_snapshot()
         self.matrix.evolve_step()
@@ -188,14 +202,18 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_evolution_convergence(self):
         """
-        Test that the matrix evolution process detects convergence within a specified maximum number of iterations.
+        Test that the matrix evolution process correctly identifies convergence within a limited number of iterations.
+        
+        This test invokes the matrix's evolution process with a maximum iteration limit and asserts that the matrix reports convergence after the process completes.
         """
         self.matrix.evolve_until_convergence(max_iterations=10)
         self.assertTrue(self.matrix.has_converged())
         
     def test_matrix_reset_to_initial_state(self):
         """
-        Verifies that resetting the matrix removes all nodes and sets its state to DORMANT.
+        Tests that invoking the matrix's reset method clears all nodes and restores the matrix state to DORMANT.
+        
+        Ensures that after adding nodes and evolving the matrix, a reset operation results in an empty node collection and the state is set to DORMANT.
         """
         # Add some nodes and evolve
         node = MatrixNode(id="temp_node", consciousness_level=0.5)
@@ -209,7 +227,9 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_serialization(self):
         """
-        Verify that the matrix serializes to a JSON string containing the correct nodes and state fields.
+        Tests that serializing the matrix to JSON produces a string containing the expected 'nodes' and 'state' fields.
+        
+        Ensures the output is a valid JSON string and includes all necessary matrix data for persistence or transfer.
         """
         node = MatrixNode(id="serialize_test", consciousness_level=0.6)
         self.matrix.add_node(node)
@@ -224,7 +244,7 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_deserialization(self):
         """
-        Tests that deserializing a matrix from a JSON string restores all nodes and their consciousness levels correctly.
+        Verify that deserializing a GenesisConsciousnessMatrix from a JSON string accurately restores all nodes and their associated consciousness levels.
         """
         # Create a matrix with data
         node = MatrixNode(id="deserialize_test", consciousness_level=0.4)
@@ -238,7 +258,7 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_save_load_file(self):
         """
-        Test that saving the matrix to a JSON file and loading it restores all nodes and their consciousness levels accurately.
+        Verifies that saving the matrix to a JSON file and subsequently loading it restores all nodes and their consciousness levels without loss or alteration.
         """
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
             temp_file = f.name
@@ -260,7 +280,7 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
                 
     def test_matrix_node_connections(self):
         """
-        Verifies that connecting two nodes stores the connection with the specified strength and that the connection can be retrieved accurately.
+        Tests that connecting two nodes in the matrix with a specified strength correctly stores the connection and allows accurate retrieval of the connection strength.
         """
         node1 = MatrixNode(id="node1", consciousness_level=0.3)
         node2 = MatrixNode(id="node2", consciousness_level=0.7)
@@ -277,14 +297,18 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_node_connections_invalid_nodes(self):
         """
-        Test that attempting to connect two nodes that do not exist in the matrix raises an InvalidStateException.
+        Verifies that connecting two non-existent nodes in the matrix raises an InvalidStateException.
+        
+        This test ensures the matrix enforces node existence when establishing connections, maintaining data integrity by preventing invalid node references.
         """
         with self.assertRaises(InvalidStateException):
             self.matrix.connect_nodes("nonexistent1", "nonexistent2", strength=0.5)
             
     def test_consciousness_emergence_detection(self):
         """
-        Test that consciousness emergence is detected when multiple nodes in the matrix have high consciousness levels.
+        Verifies that the matrix correctly detects the emergence of consciousness when several nodes possess high consciousness levels.
+        
+        This test adds multiple nodes with consciousness levels above the emergence threshold and asserts that the matrix's emergence detection mechanism returns True, indicating successful detection of collective consciousness.
         """
         # Add nodes with high consciousness levels
         for i in range(5):
@@ -296,7 +320,9 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_consciousness_emergence_detection_insufficient(self):
         """
-        Test that consciousness emergence is not detected when all nodes have consciousness levels below the emergence threshold.
+        Verify that consciousness emergence is not detected when all nodes in the matrix have consciousness levels below the emergence threshold.
+        
+        This test adds multiple nodes with low consciousness levels and asserts that the matrix does not report the emergence of consciousness.
         """
         # Add nodes with low consciousness levels
         for i in range(2):
@@ -308,7 +334,9 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_metrics_calculation(self):
         """
-        Verify that the matrix calculates and returns performance metrics, including average consciousness, node count, and connection density, after nodes are added.
+        Tests that the matrix correctly computes and returns key performance metrics after nodes are added.
+        
+        This test verifies that the metrics dictionary includes average consciousness, node count, and connection density, and that the node count matches the number of nodes added.
         """
         # Add some nodes
         node1 = MatrixNode(id="metrics_node1", consciousness_level=0.6)
@@ -324,7 +352,7 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_performance_under_load(self):
         """
-        Verify that a matrix evolution step with 100 nodes completes in less than one second.
+        Tests that performing an evolution step on a matrix populated with 100 nodes completes in under one second, ensuring acceptable performance under load.
         """
         # Add many nodes
         for i in range(100):
@@ -341,7 +369,7 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_memory_usage(self):
         """
-        Verify that the matrix accurately tracks node membership by increasing the node count when nodes are added and decreasing it when nodes are removed.
+        Tests that the matrix's node count increases as nodes are added and decreases as nodes are removed, ensuring accurate tracking of node membership.
         """
         initial_node_count = len(self.matrix.nodes)
         
@@ -359,7 +387,9 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
     def test_matrix_error_handling_corrupted_data(self):
         """
-        Verifies that attempting to deserialize corrupted JSON data raises a MatrixException.
+        Test that deserializing corrupted JSON data raises a MatrixException.
+        
+        This ensures the matrix correctly handles and reports errors when provided with malformed or incomplete JSON input.
         """
         corrupted_json = '{"nodes": {"invalid": "data"}, "state":'
         
@@ -368,7 +398,9 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
             
     def test_matrix_thread_safety(self):
         """
-        Test that adding nodes concurrently from multiple threads succeeds, confirming thread safety of the matrix's node addition operation.
+        Test concurrent addition of nodes from multiple threads to ensure thread safety of the matrix's node addition operation.
+        
+        This test spawns multiple threads, each adding unique nodes to the matrix. It verifies that all additions succeed without errors, confirming that the matrix handles concurrent modifications safely.
         """
         import threading
         import time
@@ -377,10 +409,10 @@ class TestGenesisConsciousnessMatrix(unittest.TestCase):
         
         def add_nodes_thread(thread_id):
             """
-            Add ten `MatrixNode` instances with unique IDs for the specified thread, recording whether each addition succeeds in a shared results list.
+            Adds ten uniquely identified `MatrixNode` instances for a given thread, recording the success of each addition in a shared results list.
             
             Parameters:
-                thread_id (int): The thread identifier used to generate unique node IDs.
+                thread_id (int): Identifier used to generate unique node IDs for this thread.
             """
             for i in range(10):
                 node = MatrixNode(id=f"thread_{thread_id}_node_{i}", consciousness_level=0.5)
@@ -410,7 +442,11 @@ class TestConsciousnessState(unittest.TestCase):
     """Test cases for ConsciousnessState enumeration and transitions."""
     
     def test_consciousness_state_values(self):
-        """Test consciousness state enumeration values."""
+        """
+        Verify that each ConsciousnessState enumeration member has the correct integer value.
+        
+        This test ensures that the DORMANT, ACTIVE, AWARE, and TRANSCENDENT states are assigned values 0, 1, 2, and 3 respectively.
+        """
         self.assertEqual(ConsciousnessState.DORMANT.value, 0)
         self.assertEqual(ConsciousnessState.ACTIVE.value, 1)
         self.assertEqual(ConsciousnessState.AWARE.value, 2)
@@ -418,7 +454,9 @@ class TestConsciousnessState(unittest.TestCase):
         
     def test_consciousness_state_ordering(self):
         """
-        Tests that consciousness state enumeration values are ordered correctly from DORMANT to TRANSCENDENT.
+        Verify that the ordering of consciousness state enumeration values progresses correctly from DORMANT through ACTIVE and AWARE to TRANSCENDENT.
+        
+        This test ensures that the defined order of the ConsciousnessState enum reflects increasing levels of consciousness, which is critical for correct state transitions and comparisons within the matrix.
         """
         self.assertLess(ConsciousnessState.DORMANT, ConsciousnessState.ACTIVE)
         self.assertLess(ConsciousnessState.ACTIVE, ConsciousnessState.AWARE)
@@ -426,7 +464,9 @@ class TestConsciousnessState(unittest.TestCase):
         
     def test_consciousness_state_string_representation(self):
         """
-        Checks that each ConsciousnessState enum value's string representation matches its name.
+        Verifies that the string representation of each ConsciousnessState enum value matches its corresponding name.
+        
+        Ensures that converting each enum member to a string yields the expected identifier, confirming correct implementation of the enum's __str__ method.
         """
         self.assertEqual(str(ConsciousnessState.DORMANT), "DORMANT")
         self.assertEqual(str(ConsciousnessState.ACTIVE), "ACTIVE")
@@ -439,13 +479,15 @@ class TestMatrixNode(unittest.TestCase):
     
     def setUp(self):
         """
-        Initializes a MatrixNode with a predefined ID and consciousness level before each test.
+        Set up a MatrixNode instance with a fixed ID and consciousness level for use in each test case.
         """
         self.node = MatrixNode(id="test_node", consciousness_level=0.5)
         
     def test_node_initialization(self):
         """
-        Test that a MatrixNode is created with the specified ID and consciousness level.
+        Verifies that a MatrixNode instance is correctly initialized with the provided ID and consciousness level.
+        
+        This test ensures that the node's attributes match the values specified during creation.
         """
         node = MatrixNode(id="init_test", consciousness_level=0.7)
         self.assertEqual(node.id, "init_test")
@@ -453,7 +495,7 @@ class TestMatrixNode(unittest.TestCase):
         
     def test_node_initialization_invalid_consciousness_level(self):
         """
-        Verify that initializing a MatrixNode with a consciousness level outside the range [0.0, 1.0] raises a ValueError.
+        Test that creating a MatrixNode with a consciousness level outside the valid range [0.0, 1.0] raises a ValueError.
         """
         with self.assertRaises(ValueError):
             MatrixNode(id="invalid_node", consciousness_level=1.5)
@@ -463,21 +505,23 @@ class TestMatrixNode(unittest.TestCase):
             
     def test_node_consciousness_level_update(self):
         """
-        Verify that updating a node's consciousness level to a valid value correctly updates its state.
+        Test that updating a MatrixNode's consciousness level to a valid value successfully changes its internal state.
         """
         self.node.update_consciousness_level(0.8)
         self.assertEqual(self.node.consciousness_level, 0.8)
         
     def test_node_consciousness_level_update_invalid(self):
         """
-        Test that updating a node's consciousness level to an invalid value raises a ValueError.
+        Verify that attempting to update a node's consciousness level to an out-of-bounds value raises a ValueError.
+        
+        This test ensures that the MatrixNode enforces valid consciousness levels within the accepted range and rejects invalid updates.
         """
         with self.assertRaises(ValueError):
             self.node.update_consciousness_level(1.2)
             
     def test_node_equality(self):
         """
-        Verify that MatrixNode instances with the same ID and consciousness level are equal, and instances with different IDs are not equal.
+        Test that MatrixNode instances are considered equal if they share the same ID and consciousness level, and not equal if their IDs differ.
         """
         node1 = MatrixNode(id="equal_test", consciousness_level=0.5)
         node2 = MatrixNode(id="equal_test", consciousness_level=0.5)
@@ -488,9 +532,7 @@ class TestMatrixNode(unittest.TestCase):
         
     def test_node_hash(self):
         """
-        Verify that MatrixNode instances with the same ID produce identical hash values.
-        
-        Ensures that nodes with the same ID are treated equivalently in hash-based collections, regardless of their consciousness levels.
+        Tests that MatrixNode instances with the same ID generate identical hash values, confirming consistent behavior in hash-based collections regardless of consciousness level.
         """
         node1 = MatrixNode(id="hash_test", consciousness_level=0.5)
         node2 = MatrixNode(id="hash_test", consciousness_level=0.7)
@@ -500,7 +542,7 @@ class TestMatrixNode(unittest.TestCase):
         
     def test_node_string_representation(self):
         """
-        Tests that the string representation of a MatrixNode includes its ID and consciousness level.
+        Verify that the string representation of a MatrixNode instance contains both its node ID and consciousness level.
         """
         node_str = str(self.node)
         self.assertIn("test_node", node_str)
@@ -512,7 +554,11 @@ class TestMatrixExceptions(unittest.TestCase):
     
     def test_matrix_exception_inheritance(self):
         """
-        Tests that custom matrix exceptions inherit from the correct base exception classes.
+        Verify that custom matrix exception classes inherit from their intended base exception classes.
+        
+        This test ensures that:
+        - `MatrixException` is a subclass of Python's built-in `Exception`.
+        - `InvalidStateException` and `MatrixInitializationError` are subclasses of `MatrixException`.
         """
         self.assertTrue(issubclass(MatrixException, Exception))
         self.assertTrue(issubclass(InvalidStateException, MatrixException))
@@ -520,7 +566,9 @@ class TestMatrixExceptions(unittest.TestCase):
         
     def test_matrix_exception_messages(self):
         """
-        Verify that custom matrix exceptions produce the expected error messages when raised and converted to strings.
+        Tests that custom matrix exceptions return the correct error messages when raised and converted to strings.
+        
+        Raises MatrixException and InvalidStateException with specific messages and asserts that their string representations match the expected values.
         """
         try:
             raise MatrixException("Test matrix error")
@@ -538,13 +586,13 @@ class TestMatrixIntegration(unittest.TestCase):
     
     def setUp(self):
         """
-        Set up a fresh GenesisConsciousnessMatrix instance before each integration test.
+        Initializes a new GenesisConsciousnessMatrix instance before each integration test to ensure test isolation.
         """
         self.matrix = GenesisConsciousnessMatrix()
         
     def test_complete_consciousness_evolution_cycle(self):
         """
-        Simulates a full evolution cycle by adding nodes, connecting them, evolving the matrix until convergence, and verifying that the overall consciousness level changes.
+        Simulates a complete evolution cycle of the GenesisConsciousnessMatrix by adding multiple nodes, connecting them, evolving the matrix until convergence, and verifying that the overall consciousness level changes as a result of the evolution process.
         """
         # Initialize matrix with nodes
         for i in range(10):
@@ -565,9 +613,9 @@ class TestMatrixIntegration(unittest.TestCase):
         
     def test_consciousness_emergence_full_cycle(self):
         """
-        Verifies that consciousness emergence is only detected after all nodes' consciousness levels are raised above the emergence threshold.
+        Tests that consciousness emergence is detected only after all nodes' consciousness levels exceed the emergence threshold.
         
-        This test first adds nodes with low consciousness levels and confirms that emergence is not detected. It then increases all node levels above the threshold and checks that emergence is detected.
+        The test adds multiple nodes with low consciousness levels and verifies that emergence is not detected. It then raises all nodes' consciousness levels above the threshold and confirms that emergence is detected.
         """
         # Start with low consciousness
         for i in range(5):
@@ -585,7 +633,7 @@ class TestMatrixIntegration(unittest.TestCase):
         
     def test_matrix_persistence_integrity(self):
         """
-        Tests that serializing and deserializing the matrix preserves all nodes, their consciousness levels, and node connections, ensuring data integrity after persistence operations.
+        Verifies that serializing and deserializing the matrix preserves all nodes, their consciousness levels, and node connections, ensuring data integrity after persistence operations.
         """
         # Create complex matrix state
         nodes_data = []

@@ -139,6 +139,15 @@ fun ConferenceRoomScreen() {
     }
 }
 
+/**
+ * Displays a selectable button for an agent with dynamic styling based on selection state.
+ *
+ * The button highlights when selected and calls the provided callback when pressed.
+ *
+ * @param agent The name of the agent to display on the button.
+ * @param isSelected Whether this agent is currently selected.
+ * @param onClick Callback invoked when the button is clicked.
+ */
 @Composable
 fun AgentButton(
     agent: String,

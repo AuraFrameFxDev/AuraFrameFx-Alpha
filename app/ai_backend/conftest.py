@@ -9,29 +9,32 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 @pytest.fixture
 def mock_api_key():
     """
-    Provides a static mock API key string for use in Genesis API integration tests.
+    Return a static mock API key string for use in Genesis API integration tests.
     
     Returns:
-        str: A mock API key.
+        str: The mock API key.
     """
     return "test_api_key_12345"
 
 @pytest.fixture
 def mock_base_url():
     """
-    Returns a mock base URL string representing the Genesis API endpoint for testing purposes.
+    Return a mock base URL string for the Genesis API used in integration tests.
+    
+    Returns:
+        str: The mock Genesis API endpoint URL.
     """
     return "https://api.genesis.test"
 
 @pytest.fixture
 def sample_api_response():
     """
-    Return a mock dictionary simulating a successful Genesis API chat completion response.
+    Return a mock dictionary representing a successful Genesis API chat completion response.
     
-    The response includes metadata, an assistant message, and token usage statistics, suitable for use in integration tests.
+    The response includes metadata, an assistant message, and token usage statistics for use in integration tests.
     
     Returns:
-        dict: Simulated Genesis API chat completion response.
+        dict: Mocked Genesis API chat completion response.
     """
     return {
         "id": "test_response_id",
@@ -77,9 +80,9 @@ def sample_error_response():
 @pytest.fixture(autouse=True)
 def mock_environment():
     """
-    Pytest autouse fixture that sets and cleans up test environment variables for Genesis API integration.
+    Automatically sets and removes Genesis API environment variables for each test to ensure a consistent test environment.
     
-    Sets `GENESIS_API_KEY` and `GENESIS_BASE_URL` to test values before each test and removes them afterward to ensure isolated and consistent test environments.
+    This autouse fixture assigns test values to `GENESIS_API_KEY` and `GENESIS_BASE_URL` before each test runs, and deletes them after the test completes to prevent side effects between tests.
     """
     os.environ["GENESIS_API_KEY"] = "test_env_key"
     os.environ["GENESIS_BASE_URL"] = "https://api.genesis.test"

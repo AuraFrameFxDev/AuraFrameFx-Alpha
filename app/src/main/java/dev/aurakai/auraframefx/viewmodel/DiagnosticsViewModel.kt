@@ -101,9 +101,9 @@ class DiagnosticsViewModel @Inject constructor(
     }
 
     /**
-     * Asynchronously fetches and updates the observable state with the current day's logs.
+     * Asynchronously retrieves and updates the observable state with the current day's logs.
      *
-     * Sets a loading message during retrieval, displays the logs if available, or a placeholder if none are found. Updates the state with an error message if log retrieval fails.
+     * Displays a loading message during retrieval, shows the logs if available, or a placeholder if none are found. Updates the state with an error message if log retrieval fails.
      */
     fun refreshLogs() {
         viewModelScope.launch {
@@ -134,10 +134,10 @@ class DiagnosticsViewModel @Inject constructor(
     }
 
     /**
-     * Retrieves all available log entries up to the specified maximum number of lines.
+     * Retrieves up to the specified number of log entries.
      *
      * @param maxLines The maximum number of log lines to retrieve. Defaults to 500.
-     * @return A list of log entries, or a single-item list with an error message if retrieval fails.
+     * @return A list of log entries, or a single-item list containing an error message if retrieval fails.
      */
     fun getAllLogs(maxLines: Int = 500): List<String> {
         return try {
@@ -149,12 +149,12 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
-     * Retrieves log entries containing the specified severity level.
+     * Returns log entries that match the specified severity level.
      *
-     * Filters up to 1000 log entries, returning only those that include the given level (case-insensitive) in square brackets (e.g., "[ERROR]"). If an error occurs during filtering, returns a list with an error message.
+     * Retrieves up to 1000 log entries and filters them to include only those containing the given level (case-insensitive) in square brackets (e.g., "[ERROR]"). If an error occurs, returns a list with an error message.
      *
-     * @param level The severity level to filter by (e.g., "ERROR", "INFO").
-     * @return A list of log entries matching the specified level, or a list containing an error message if filtering fails.
+     * @param level The severity level to filter for (e.g., "ERROR", "INFO").
+     * @return A list of log entries matching the specified level, or a single-item list with an error message if filtering fails.
      */
     fun getLogsByLevel(level: String): List<String> {
         return try {
@@ -169,9 +169,9 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
-     * Asynchronously clears all application logs and updates the observable logs state with the result.
+     * Asynchronously clears all application logs and updates the observable logs state with a success or error message.
      *
-     * Sets the logs state to a success or error message based on the outcome, enabling the UI to display the result.
+     * Updates the logs state to reflect the outcome, allowing the UI to display whether logs were cleared successfully or if an error occurred.
      */
     fun clearLogs() {
         viewModelScope.launch {
@@ -187,9 +187,9 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
-     * Manually checks cloud connectivity and appends the result to the current logs.
+     * Initiates a manual check of cloud connectivity and appends the result to the current logs.
      *
-     * Updates the logs with the connectivity status or an error message if the check fails.
+     * Updates the observable logs state with either the connectivity status ("CONNECTED" or "DISCONNECTED") or an error message if the check fails.
      */
     fun checkCloudReachability() {
         viewModelScope.launch {
@@ -211,11 +211,9 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
-     * Retrieves and returns a string representation of critical offline configuration data.
+     * Returns a string representation of critical offline configuration data, or an error message if retrieval fails.
      *
-     * If retrieval fails, returns an error message describing the failure.
-     *
-     * @return A string containing the critical offline data, or an error message if retrieval fails.
+     * @return A string containing the critical offline data, or an error message if retrieval is unsuccessful.
      */
     fun loadDetailedConfig(): String {
         return try {
