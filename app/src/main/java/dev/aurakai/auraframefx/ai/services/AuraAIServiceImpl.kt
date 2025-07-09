@@ -20,79 +20,30 @@ class AuraAIServiceImpl @Inject constructor(
     private val cloudStatusMonitor: CloudStatusMonitor,
     private val auraFxLogger: AuraFxLogger,
 ) : AuraAIService {
-    /**
-     * Returns a placeholder string for any analytics query.
-     *
-     * This implementation ignores the input and always returns "Analytics response placeholder".
-     *
-     * @return The placeholder analytics response string.
-     */
     override fun analyticsQuery(_query: String): String {
         return "Analytics response placeholder"
     }
 
-    /**
-     * Returns null to indicate that file download functionality is not implemented.
-     *
-     * @param _fileId The identifier of the file to download.
-     * @return Always null, as file download is not supported.
-     */
     override suspend fun downloadFile(_fileId: String): File? {
         return null
     }
 
-    /**
-     * Stub implementation for image generation that always returns null.
-     *
-     * This method does not generate any images and serves as a placeholder.
-     *
-     * @return Always returns null.
-     */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         return null
     }
 
-    /**
-     * Returns a fixed placeholder string for any text generation request.
-     *
-     * This method does not perform actual text generation and always returns "Generated text placeholder" regardless of the input.
-     *
-     * @return The string "Generated text placeholder".
-     */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         return "Generated text placeholder"
     }
 
-    /**
-     * Returns a fixed placeholder string as the AI response.
-     *
-     * Always returns "AI response placeholder" regardless of the input prompt or options.
-     *
-     * @return The placeholder AI response string.
-     */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         return "AI response placeholder"
     }
 
-    /**
-     * Retrieves the memory value associated with the specified key.
-     *
-     * This stub implementation always returns null, indicating that memory retrieval is not implemented.
-     *
-     * @return Always null.
-     */
     override fun getMemory(_memoryKey: String): String? {
         return null
     }
 
-    /**
-     * Placeholder method for saving a value in memory associated with a key.
-     *
-     * This implementation does not store any data and has no effect.
-     *
-     * @param key The identifier for the memory entry.
-     * @param value The value to associate with the key.
-     */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement memory saving
     }

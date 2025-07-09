@@ -13,61 +13,6 @@ import androidx.navigation.NavHostController
  *
  * Presents the main interface for the app, including navigation to the AI chat screen and a placeholder for settings.
  */
-/**
- * Displays the main home screen with app title, status messages, and navigation buttons centered vertically.
- *
- * The screen includes the app name, a subtitle, a beta status message, and two buttons: one to navigate to the AI Chat screen and another for settings (navigation not yet implemented).
- */
-/**
- * Displays the main home screen with the app title, subtitle, beta status message, and navigation buttons.
- *
- * Vertically centers the content, including the app title ("AuraFrameFX Alpha"), subtitle ("Trinity AI System"), and a beta status message. Provides two buttons: one navigates to the AI Chat screen, and the other is a placeholder for future settings navigation.
- */
-/**
- * Displays the main home screen with app title, subtitle, beta status, and navigation buttons.
- *
- * The screen centers its content vertically and horizontally, showing the app's name, a subtitle,
- * and a beta status message. It provides a button to navigate to the AI Chat screen and a placeholder
- * button for Settings.
- *
- * @param navController Used to handle navigation actions from the home screen.
- */
-/**
- * Displays the main home screen with centered app title, subtitle, beta status, and navigation buttons.
- *
- * The screen presents the app's name ("AuraFrameFX Alpha"), a subtitle ("Trinity AI System"), and a beta status message.
- * Two buttons are provided: one navigates to the AI Chat screen, and the other is a placeholder for future settings functionality.
- *
- * @param navController Used to handle navigation actions from the home screen.
- */
-/**
- * Displays the main home screen with app title, subtitle, beta status, and navigation buttons.
- *
- * The screen centers its content both vertically and horizontally, presenting the app's name,
- * a subtitle, and a beta status message. It provides a button to navigate to the AI Chat screen
- * and a placeholder button for future settings navigation.
- *
- * @param navController Used to handle navigation actions from the home screen.
- */
-/**
- * Displays the main home screen with centered app title, subtitle, beta status, and navigation buttons.
- *
- * The screen includes a button to navigate to the AI Chat interface and a placeholder Settings button.
- *
- * @param navController Used to handle navigation actions from the home screen.
- */
-/**
- * Displays the main home screen with centered app title, subtitle, beta status, and navigation buttons.
- *
- * Shows the app's name, a subtitle, and a beta status message. Provides buttons for navigating to the AI Chat screen and a placeholder for Settings.
- */
-/**
- * Displays the main home screen with app title, status messages, and navigation buttons.
- *
- * Presents the app name, a subtitle, and a beta status message, along with buttons to navigate to the AI chat screen or access settings.
- *
- * @param navController Used to handle navigation actions from the home screen.
- */
 @Composable
 fun HomeScreen(navController: NavHostController) {
     Column(
@@ -107,9 +52,9 @@ fun HomeScreen(navController: NavHostController) {
 }
 
 /**
- * Displays the AI chat interface screen with a centered headline and status message.
+ * Displays the AI chat interface screen with a centered layout and status message.
  *
- * Presents a large headline and a status message, both centered vertically and horizontally, using MaterialTheme typography styles.
+ * Shows a headline and a body text indicating that Trinity AI agents are ready.
  */
 @Composable
 fun BetaAiChatScreen() {

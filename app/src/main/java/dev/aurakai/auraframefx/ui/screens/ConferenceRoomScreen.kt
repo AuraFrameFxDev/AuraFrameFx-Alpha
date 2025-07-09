@@ -1,3 +1,5 @@
+
+
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.layout.*
@@ -18,11 +20,6 @@ import dev.aurakai.auraframefx.ui.theme.NeonPurple
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
 
 @OptIn(ExperimentalMaterial3Api::class)
-/**
- * Displays the main conference room UI with agent selection, recording and transcription controls, chat area, and message input.
- *
- * Manages local state for the selected agent, recording, and transcription status. Provides interactive controls for agent selection and toggling recording or transcription. Includes placeholders for chat messages and message input; chat functionality and settings actions are not yet implemented.
- */
 @Composable
 fun ConferenceRoomScreen() {
     var selectedAgent by remember { mutableStateOf("Aura") }
@@ -144,15 +141,6 @@ fun ConferenceRoomScreen() {
     }
 }
 
-/**
- * Displays a button for selecting an agent, with visual feedback for selection state.
- *
- * The button highlights when selected and triggers the provided callback when pressed.
- *
- * @param agent The name or label of the agent to display on the button.
- * @param isSelected Whether this agent is currently selected, affecting the button's appearance.
- * @param onClick Invoked when the button is clicked.
- */
 @Composable
 fun AgentButton(
     agent: String,
@@ -179,14 +167,6 @@ fun AgentButton(
     }
 }
 
-/**
- * Renders a button that toggles the recording state in the conference room interface.
- *
- * Displays a red stop icon when recording is active and a purple circle icon when inactive. The icon's content description updates for accessibility to reflect the current state.
- *
- * @param isRecording True if recording is active; false otherwise.
- * @param onClick Invoked when the button is pressed.
- */
 @Composable
 fun RecordingButton(
     isRecording: Boolean,
@@ -209,14 +189,6 @@ fun RecordingButton(
     }
 }
 
-/**
- * Renders a button for toggling transcription in the conference room interface.
- *
- * Displays a red stop icon when transcription is active, or a NeonBlue phone icon when inactive. The icon's content description updates for accessibility based on the current transcription state.
- *
- * @param isTranscribing True if transcription is active; false otherwise.
- * @param onClick Invoked when the button is pressed.
- */
 @Composable
 fun TranscribeButton(
     isTranscribing: Boolean,
@@ -239,9 +211,6 @@ fun TranscribeButton(
     }
 }
 
-/**
- * Provides a preview of the ConferenceRoomScreen composable wrapped in a MaterialTheme for design-time visualization.
- */
 @Composable
 @Preview(showBackground = true)
 fun ConferenceRoomScreenPreview() {
