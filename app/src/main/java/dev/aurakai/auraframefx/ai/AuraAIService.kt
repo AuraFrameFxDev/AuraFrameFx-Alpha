@@ -9,7 +9,7 @@ interface AuraAIService {
      * Returns a placeholder response for an analytics query.
      *
      * @param _query The analytics query string.
-     * @return A placeholder string indicating the analytics query response.
+     * @return A placeholder string representing the analytics response.
      */
     fun analyticsQuery(_query: String): String {
         // TODO: Implement analytics query
@@ -17,9 +17,9 @@ interface AuraAIService {
     }
 
     /**
-     * Downloads a file by its ID.
+     * Downloads a file by its identifier.
      *
-     * @param _fileId The identifier of the file to download.
+     * @param _fileId The unique identifier of the file to download.
      * @return The downloaded file, or null if the file could not be retrieved.
      */
     suspend fun downloadFile(_fileId: String): File? {
@@ -41,7 +41,7 @@ interface AuraAIService {
     /**
      * Generates AI-generated text from a prompt with optional configuration.
      *
-     * @param prompt The input text prompt for generation.
+     * @param prompt The input text prompt for text generation.
      * @param options Optional map for configuration, supporting "temperature" (Double) and "max_tokens" (Int).
      * @return A structured string with the generated text, configuration details, and status, or an error message if generation fails.
      */
@@ -65,11 +65,11 @@ interface AuraAIService {
     /**
      * Generates a formatted AI response string based on the given prompt and optional context or system instructions.
      *
-     * If options are provided, the "context" and "system_prompt" keys influence the response formatting. Returns an error message if an exception occurs.
+     * If options are provided, the "context" and "system_prompt" keys influence the response formatting. Returns an error message string if an exception occurs.
      *
      * @param prompt The input prompt for the AI.
-     * @param options Optional map with "context" and "system_prompt" to customize the response.
-     * @return The formatted AI response string, or an error message if generation fails.
+     * @param options Optional map with "context" and "system_prompt" keys to customize the response.
+     * @return The formatted AI response string, or an error message if an exception occurs.
      */
     fun getAIResponse(
         prompt: String,
@@ -95,22 +95,22 @@ interface AuraAIService {
     }
 
     /**
- * Retrieves the stored value associated with the specified memory key.
+ * Retrieves the value stored under the specified memory key.
  *
- * @param memoryKey The key for the memory entry to retrieve.
- * @return The stored value as a string, or null if the key does not exist.
+ * @param memoryKey The identifier for the memory entry.
+ * @return The stored string value, or null if the key does not exist.
  */
 fun getMemory(memoryKey: String): String?
 
     /**
- * Persists a value in memory associated with the given key.
+ * Stores a value in memory associated with the given key for later retrieval.
  *
- * Implementations should ensure the value can be retrieved later using the same key.
+ * Implementations should ensure the value can be retrieved using the same key.
  */
 fun saveMemory(key: String, value: Any)
 
     /**
-     * Indicates whether the AI service is currently connected.
+     * Indicates whether the AI service is connected.
      *
      * @return Always returns true.
      */
@@ -122,7 +122,7 @@ fun saveMemory(key: String, value: Any)
     /**
      * Publishes a message to a specified Pub/Sub topic.
      *
-     * @param _topic The topic to which the message will be published.
+     * @param _topic The target topic for the message.
      * @param _message The message content to publish.
      */
     fun publishPubSub(_topic: String, _message: String) {

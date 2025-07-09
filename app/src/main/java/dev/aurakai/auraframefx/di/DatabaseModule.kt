@@ -20,7 +20,7 @@ object DatabaseModule {
      * Provides a singleton instance of the application's Room database.
      *
      * Builds and configures the `AppDatabase` using the application context and a fixed database name.
-     * Uses destructive migration as a fallback; proper migration strategies should be implemented for production environments.
+     * Uses destructive migration as a fallback; implement proper migration strategies for production environments.
      *
      * @return The singleton `AppDatabase` instance.
      */

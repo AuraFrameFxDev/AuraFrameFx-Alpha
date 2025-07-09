@@ -47,7 +47,7 @@ enum class Emotion {
 
     companion object {
         /**
- * Returns a randomly selected Emotion from all defined values.
+ * Selects and returns a random Emotion from all available values.
  *
  * Useful for introducing variability or unpredictability in emotional state selection.
  *
@@ -58,7 +58,7 @@ enum class Emotion {
         /**
              * Returns the Emotion that matches the provided string, ignoring case.
              *
-             * If no matching emotion is found, NEUTRAL is returned.
+             * If the input does not correspond to any defined emotion, NEUTRAL is returned.
              *
              * @param name The string to match against emotion names.
              * @return The corresponding Emotion, or NEUTRAL if no match is found.

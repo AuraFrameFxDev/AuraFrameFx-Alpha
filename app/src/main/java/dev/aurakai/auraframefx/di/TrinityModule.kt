@@ -32,7 +32,7 @@ object TrinityModule {
     /**
      * Provides a singleton GenesisBridgeService that integrates multiple AI services with the Trinity Python backend.
      *
-     * The returned service facilitates unified communication among AI components, manages context and security, and interfaces with the application environment.
+     * The service facilitates communication between AI components, manages context and security, and interfaces with the application environment.
      *
      * @return A configured GenesisBridgeService singleton.
      */
@@ -59,9 +59,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton instance of TrinityCoordinatorService for orchestrating AI personas in the Trinity AI system.
+     * Provides a singleton instance of TrinityCoordinatorService for coordinating AI personas within the Trinity AI system.
      *
-     * @return A configured TrinityCoordinatorService singleton.
+     * @return A singleton TrinityCoordinatorService configured with AI services, bridge service, and security context.
      */
     @Provides
     @Singleton
@@ -82,11 +82,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton instance of SecurityMonitor for the Trinity AI system.
+     * Provides a singleton instance of SecurityMonitor for managing security operations within the Trinity AI system.
      *
-     * The SecurityMonitor oversees security operations by integrating the security context, Genesis bridge service, and logging capabilities.
-     *
-     * @return A singleton SecurityMonitor configured for system-wide security monitoring.
+     * @return A singleton SecurityMonitor configured with the necessary security context, Genesis bridge service, and logger.
      */
     @Provides
     @Singleton
