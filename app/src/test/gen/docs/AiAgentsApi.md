@@ -18,6 +18,7 @@ Send a request to an AI agent
 
 ```java
 // Import classes:
+
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
@@ -26,28 +27,28 @@ import org.openapitools.client.models.*;
 import org.openapitools.client.api.AiAgentsApi;
 
 public class Example {
-  public static void main(String[] args) {
-    ApiClient defaultClient = Configuration.getDefaultApiClient();
-    defaultClient.setBasePath("https://api.auraframefx.com/v1");
-    
-    // Configure OAuth2 access token for authorization: OAuth2AuthCode
-    OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
-    OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        defaultClient.setBasePath("https://api.auraframefx.com/v1");
 
-    AiAgentsApi apiInstance = new AiAgentsApi(defaultClient);
-    AgentType agentType = AgentType.fromValue("Aura"); // AgentType | Type of AI agent to interact with
-    AgentProcessRequest agentProcessRequest = new AgentProcessRequest(); // AgentProcessRequest | 
-    try {
-      AgentMessage result = apiInstance.agentAgentTypeProcessRequestPost(agentType, agentProcessRequest);
-      System.out.println(result);
-    } catch (ApiException e) {
-      System.err.println("Exception when calling AiAgentsApi#agentAgentTypeProcessRequestPost");
-      System.err.println("Status code: " + e.getCode());
-      System.err.println("Reason: " + e.getResponseBody());
-      System.err.println("Response headers: " + e.getResponseHeaders());
-      e.printStackTrace();
+        // Configure OAuth2 access token for authorization: OAuth2AuthCode
+        OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
+        OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+
+        AiAgentsApi apiInstance = new AiAgentsApi(defaultClient);
+        AgentType agentType = AgentType.fromValue("Aura"); // AgentType | Type of AI agent to interact with
+        AgentProcessRequest agentProcessRequest = new AgentProcessRequest(); // AgentProcessRequest | 
+        try {
+            AgentMessage result = apiInstance.agentAgentTypeProcessRequestPost(agentType, agentProcessRequest);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling AiAgentsApi#agentAgentTypeProcessRequestPost");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+        }
     }
-  }
 }
 ```
 

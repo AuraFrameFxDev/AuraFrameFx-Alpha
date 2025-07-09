@@ -11,12 +11,11 @@ extern "C" {
 #endif
 
 /**
- * @brief Initializes the language identifier with a given model path.
+ * @brief Initializes the native language identifier with the provided model path.
  *
- * Sets up the language identification system using built-in heuristics. Returns the version string "1.2.0" if the provided model path is valid, or an empty string if the model path is null.
+ * Converts the Java string model path to a UTF-8 C string and logs it for potential future use. Returns the native library version string "1.2.0". If the model path is null, returns an empty string.
  *
- * @param modelPath Java string specifying the path to the language model.
- * @return jstring Version string "1.2.0" if initialization succeeds, or an empty string if modelPath is null.
+ * @return jstring The native library version string, or an empty string if the model path is null.
  */
 JNIEXPORT jstring
 
@@ -34,19 +33,21 @@ Java_com_example_app_language_LanguageIdentifier_nativeInitialize(
 
     // Initialize language identification with basic patterns
     // This implementation uses character frequency analysis and common word patterns
-    // for basic language detection without external model dependencies
+    // for basic language detection without external model dependencies.
+    // Currently, the rule-based nativeDetectLanguage does not require this model path,
+    // but it's logged for potential future use with a model-based approach.
 
     env->ReleaseStringUTFChars(modelPath, path);
     return env->NewStringUTF("1.2.0"); // Updated version to reflect improvements
 }
 
 /**
- * @brief Identifies the language of the input text using heuristic analysis.
+ * @brief Identifies the language of the input text using heuristic keyword and character analysis.
  *
- * Examines the provided text for language-specific words, articles, and the proportion of accented characters to determine if it is written in English, Spanish, French, German, Italian, or Portuguese. Returns "mul" if the text contains a high proportion of accented characters without a clear language match, or "und" if the input is null or cannot be processed.
+ * Examines the input string for language-specific keywords and articles to detect Spanish ("es"), French ("fr"), German ("de"), Italian ("it"), or Portuguese ("pt"). Defaults to English ("en") if no match is found. If the text contains a high proportion of non-ASCII characters and no language is matched, returns "mul" for multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
  *
- * @param text The text to analyze for language identification.
- * @return jstring The detected language code: "en" (English), "es" (Spanish), "fr" (French), "de" (German), "it" (Italian), "pt" (Portuguese), "mul" (ambiguous or multiple accented languages), or "und" (undetermined).
+ * @param text Input text to analyze for language identification.
+ * @return jstring Detected language code: "en", "es", "fr", "de", "it", "pt", "mul", or "und".
  */
 JNIEXPORT jstring
 
@@ -75,48 +76,75 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
     std::transform(textStr.begin(), textStr.end(), textStr.begin(), ::tolower);
 
     // Language detection based on common words, articles, and patterns
+    // Keywords are checked with spaces around them to avoid matching substrings within words.
     if (textStr.find(" el ") != std::string::npos ||
         textStr.find(" la ") != std::string::npos ||
         textStr.find(" de ") != std::string::npos ||
-        textStr.find(" que ") != std::string::npos ||
+        // Also in Portuguese, but more prominent in Spanish start
+        textStr.find(" que ") != std::string::npos || // Also in French/Portuguese
         textStr.find(" es ") != std::string::npos ||
-        textStr.find(" con ") != std::string::npos) {
+        textStr.find(" con ") != std::string::npos || // Also in Italian
+        textStr.find(" y ") != std::string::npos ||
+        textStr.find(" en ") != std::string::npos ||
+        textStr.find(" un ") != std::string::npos || // Also in French/Italian
+        textStr.find(" una ") != std::string::npos) { // Also in Italian
         result = "es"; // Spanish
     } else if (textStr.find(" le ") != std::string::npos ||
-               textStr.find(" la ") != std::string::npos ||
+               textStr.find(" la ") != std::string::npos || // Also in Spanish/Italian
                textStr.find(" et ") != std::string::npos ||
                textStr.find(" ce ") != std::string::npos ||
                textStr.find(" qui ") != std::string::npos ||
-               textStr.find(" avec ") != std::string::npos) {
+               textStr.find(" avec ") != std::string::npos ||
+               textStr.find(" est ") != std::string::npos ||
+               textStr.find(" dans ") != std::string::npos ||
+               textStr.find(" pour ") != std::string::npos ||
+               textStr.find(" un ") != std::string::npos) { // Also in Spanish/Italian
         result = "fr"; // French
     } else if (textStr.find(" und ") != std::string::npos ||
                textStr.find(" der ") != std::string::npos ||
                textStr.find(" die ") != std::string::npos ||
                textStr.find(" das ") != std::string::npos ||
                textStr.find(" mit ") != std::string::npos ||
-               textStr.find(" ist ") != std::string::npos) {
+               textStr.find(" ist ") != std::string::npos ||
+               textStr.find(" ein ") != std::string::npos ||
+               textStr.find(" eine ") != std::string::npos ||
+               textStr.find(" auf ") != std::string::npos ||
+               textStr.find(" von ") != std::string::npos) {
         result = "de"; // German
     } else if (textStr.find(" il ") != std::string::npos ||
                textStr.find(" che ") != std::string::npos ||
-               textStr.find(" con ") != std::string::npos ||
+               textStr.find(" con ") != std::string::npos || // Also in Spanish
                textStr.find(" per ") != std::string::npos ||
-               textStr.find(" sono ") != std::string::npos) {
+               textStr.find(" sono ") != std::string::npos ||
+               textStr.find(" e ") != std::string::npos || // Also in Portuguese
+               textStr.find(" in ") != std::string::npos ||
+               textStr.find(" un ") != std::string::npos || // Also in Spanish/French
+               textStr.find(" una ") != std::string::npos || // Also in Spanish
+               textStr.find(" non ") != std::string::npos) {
         result = "it"; // Italian
-    } else if (textStr.find(" o ") != std::string::npos ||
+    } else if (textStr.find(" o ") != std::string::npos || // Common words, 'o' and 'a' are articles
                textStr.find(" a ") != std::string::npos ||
-               textStr.find(" que ") != std::string::npos ||
+               textStr.find(" que ") != std::string::npos || // Also in Spanish/French
                textStr.find(" para ") != std::string::npos ||
-               textStr.find(" com ") != std::string::npos) {
+               textStr.find(" com ") != std::string::npos || // Also in Spanish
+               textStr.find(" e ") != std::string::npos || // Also in Italian
+               textStr.find(" em ") != std::string::npos ||
+               textStr.find(" um ") != std::string::npos ||
+               textStr.find(" uma ") != std::string::npos ||
+               textStr.find(" de ") != std::string::npos) { // Also in Spanish
         result = "pt"; // Portuguese
     }
 
     // Additional character frequency analysis for better accuracy
     int accentCount = 0;
     for (char c: textStr) {
+        // Basic check for non-ASCII characters. A more sophisticated approach might
+        // involve checking specific Unicode ranges for common accented characters.
         if (c < 0 || c > 127) accentCount++; // Non-ASCII characters
     }
 
-    // If high accent frequency and no clear language match, default to multi-lingual
+    // If a significant portion of the text contains non-ASCII characters (potential accents)
+    // and no specific language was detected via keywords (still "en"), classify as "mul".
     if (accentCount > textStr.length() * 0.1 && result == "en") {
         result = "mul"; // Multiple/unknown with accents
     }
@@ -126,11 +154,11 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
 }
 
 /**
- * @brief Logs the cleanup of a language identifier instance.
+ * @brief Placeholder for releasing resources associated with a language identifier handle.
  *
- * If the provided handle is non-zero, logs that resources for the language identifier have been cleaned up. No explicit resource deallocation is performed.
+ * Currently, this function does not perform any resource deallocation, as the implementation is stateless and does not allocate resources. Intended for future use if resource management is added.
  *
- * @param handle Identifier of the language identifier instance.
+ * @param handle Native handle for the language identifier instance.
  */
 JNIEXPORT void JNICALL
 Java_com_example_app_language_LanguageIdentifier_nativeRelease(
@@ -139,20 +167,30 @@ Java_com_example_app_language_LanguageIdentifier_nativeRelease(
         jobject /* this */,
         jlong handle
 ) {
-    // Clean up resources if needed
+    // Clean up resources if needed.
+    // In the current implementation, nativeInitialize does not allocate any specific resources
+    // tied to the handle, as detection is stateless and rule-based.
+    // This function serves as a placeholder for potential future enhancements
+    // where dynamic resources might be managed.
     if (handle != 0) {
         // Resource cleanup completed - handle closed
-        LOGI("Language identifier resources cleaned up for handle: %lld", (long long) handle);
+        LOGI("Language identifier resources cleaned up for handle: %lld (Placeholder - no specific resources allocated)",
+             (long long) handle);
     }
 }
 
+/**
+ * @brief Retrieves the version string of the native language identifier library.
+ *
+ * @return jstring The version string, such as "1.2.0".
+ */
 JNIEXPORT jstring
 
 JNICALL
 Java_com_example_app_language_LanguageIdentifier_nativeGetVersion(
         JNIEnv *env,
         jclass /* clazz */) {
-    return env->NewStringUTF("1.0.0");
+    return env->NewStringUTF("1.2.0"); // Standardized version
 }
 
 #ifdef __cplusplus

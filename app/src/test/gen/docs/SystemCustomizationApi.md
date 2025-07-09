@@ -19,6 +19,7 @@ Get lock screen configuration
 
 ```java
 // Import classes:
+
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
@@ -27,26 +28,26 @@ import org.openapitools.client.models.*;
 import org.openapitools.client.api.SystemCustomizationApi;
 
 public class Example {
-  public static void main(String[] args) {
-    ApiClient defaultClient = Configuration.getDefaultApiClient();
-    defaultClient.setBasePath("https://api.auraframefx.com/v1");
-    
-    // Configure OAuth2 access token for authorization: OAuth2AuthCode
-    OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
-    OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        defaultClient.setBasePath("https://api.auraframefx.com/v1");
 
-    SystemCustomizationApi apiInstance = new SystemCustomizationApi(defaultClient);
-    try {
-      LockScreenConfig result = apiInstance.systemLockscreenConfigGet();
-      System.out.println(result);
-    } catch (ApiException e) {
-      System.err.println("Exception when calling SystemCustomizationApi#systemLockscreenConfigGet");
-      System.err.println("Status code: " + e.getCode());
-      System.err.println("Reason: " + e.getResponseBody());
-      System.err.println("Response headers: " + e.getResponseHeaders());
-      e.printStackTrace();
+        // Configure OAuth2 access token for authorization: OAuth2AuthCode
+        OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
+        OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+
+        SystemCustomizationApi apiInstance = new SystemCustomizationApi(defaultClient);
+        try {
+            LockScreenConfig result = apiInstance.systemLockscreenConfigGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling SystemCustomizationApi#systemLockscreenConfigGet");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+        }
     }
-  }
 }
 ```
 
@@ -86,6 +87,7 @@ Update lock screen configuration
 
 ```java
 // Import classes:
+
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
@@ -94,26 +96,26 @@ import org.openapitools.client.models.*;
 import org.openapitools.client.api.SystemCustomizationApi;
 
 public class Example {
-  public static void main(String[] args) {
-    ApiClient defaultClient = Configuration.getDefaultApiClient();
-    defaultClient.setBasePath("https://api.auraframefx.com/v1");
-    
-    // Configure OAuth2 access token for authorization: OAuth2AuthCode
-    OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
-    OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        defaultClient.setBasePath("https://api.auraframefx.com/v1");
 
-    SystemCustomizationApi apiInstance = new SystemCustomizationApi(defaultClient);
-    LockScreenConfig lockScreenConfig = new LockScreenConfig(); // LockScreenConfig | 
-    try {
-      apiInstance.systemLockscreenConfigPut(lockScreenConfig);
-    } catch (ApiException e) {
-      System.err.println("Exception when calling SystemCustomizationApi#systemLockscreenConfigPut");
-      System.err.println("Status code: " + e.getCode());
-      System.err.println("Reason: " + e.getResponseBody());
-      System.err.println("Response headers: " + e.getResponseHeaders());
-      e.printStackTrace();
+        // Configure OAuth2 access token for authorization: OAuth2AuthCode
+        OAuth OAuth2AuthCode = (OAuth) defaultClient.getAuthentication("OAuth2AuthCode");
+        OAuth2AuthCode.setAccessToken("YOUR ACCESS TOKEN");
+
+        SystemCustomizationApi apiInstance = new SystemCustomizationApi(defaultClient);
+        LockScreenConfig lockScreenConfig = new LockScreenConfig(); // LockScreenConfig | 
+        try {
+            apiInstance.systemLockscreenConfigPut(lockScreenConfig);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling SystemCustomizationApi#systemLockscreenConfigPut");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+        }
     }
-  }
 }
 ```
 

@@ -1,5 +1,6 @@
 package dev.aurakai.auraframefx.viewmodel
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.aurakai.auraframefx.ai.task.HistoricalTask
 import dev.aurakai.auraframefx.model.AgentPriority
@@ -14,44 +15,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
-HierarchyAgentConfig(
-name = "Genesis",
-role = AgentRole.HIVE_MIND,
-priority = AgentPriority.PRIMARY,
-capabilities = setOf("core_ai", "coordination", "meta_analysis")
-),
-HierarchyAgentConfig(
-name = "Cascade",
-role = AgentRole.ANALYTICS,
-priority = AgentPriority.BRIDGE,
-capabilities = setOf("analytics", "data_processing", "pattern_recognition")
-)cycle.ViewModel
-import androidx.lifecycle.viewModelScope
-// import dagger.hilt.android.lifecycle.HiltViewModel
-// import dev.aurakai.auraframefx.ai.agents.GenesisAgent
-import dev.aurakai.auraframefx.ai.task.HistoricalTask
-import dev.aurakai.auraframefx.model.HierarchyAgentConfig
-import dev.aurakai.auraframefx.model.AgentType
-import dev.aurakai.auraframefx.model.AgentRole
-import dev.aurakai.auraframefx.model.AgentPriority
-import dev.aurakai.auraframefx.utils.AppConstants.STATUS_ERROR
-import dev.aurakai.auraframefx.utils.AppConstants.STATUS_IDLE
-import dev.aurakai.auraframefx.utils.AppConstants.STATUS_PROCESSING
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-
-// import javax.inject.Inject
+import javax.inject.Inject
 
 // import javax.inject.Singleton // ViewModels should use @HiltViewModel
 
-// @HiltViewModel - Disabled for beta to avoid circular dependencies
-class GenesisAgentViewModel /* @Inject constructor(
-    private val genesisAgent: GenesisAgent,
-) */ : ViewModel() {
+class GenesisAgentViewModel @Inject constructor(
+    // private val genesisAgent: GenesisAgent
+) : ViewModel() {
 
     // Beta stub: No actual GenesisAgent dependency
     // private val genesisAgent: GenesisAgent? = null
@@ -130,20 +100,10 @@ class GenesisAgentViewModel /* @Inject constructor(
         _agentStatus.value = initialStatuses
     }
 
-    /**
-     * Toggles the rotation state between active and inactive.
-     */
     fun toggleRotation() {
         _isRotating.value = !_isRotating.value
     }
 
-    /**
-     * Toggles the operational status of the specified agent between active and inactive states.
-     *
-     * Updates the agent's status in the state flow and logs the status change in the task history.
-     *
-     * @param agent The agent whose status will be toggled.
-     */
     fun toggleAgent(agent: AgentType) {
         viewModelScope.launch {
             // Toggle agent active state
@@ -207,6 +167,33 @@ class GenesisAgentViewModel /* @Inject constructor(
             } catch (e: Exception) {
                 updateAgentStatus(agent, STATUS_ERROR)
                 addTaskToHistory(agent, "Error: ${e.message}")
+            }
+        }
+    }
+
+    private fun addTaskToHistory(agent: AgentType, description: String) {
+        val newTask = HistoricalTask(
+            id = System.currentTimeMillis(),
+            agentType = agent,
+            description = description,
+            timestamp = System.currentTimeMillis(),
+            status = "Completed"
+        )
+        _taskHistory.value = _taskHistory.value + newTask
+    }
+
+    fun clearTaskHistory() {
+        _taskHistory.value = emptyList()
+    }
+
+    fun getAgentStatus(agent: AgentType): String {
+        return _agentStatus.value[agent] ?: STATUS_IDLE
+    }
+
+    fun getAgentByName(name: String): HierarchyAgentConfig? {
+        return _agents.value.find { it.name.equals(name, ignoreCase = true) }
+    }
+)
             }
         }
     }
@@ -279,11 +266,16 @@ class GenesisAgentViewModel /* @Inject constructor(
         return emptyList() // Return empty list since processing is async
     }
 }
-// Note: This ViewModel is designed to be used with Hilt for dependency injection.
-// If you're not using Hilt, you can remove the @Inject annotation and manually instantiate it
-// in your activity or fragment. The ViewModel should be scoped to the lifecycle of the activity
-// or fragment that uses it, typically using ViewModelProvider.Factory or HiltViewModelFactory
-// if you're using Hilt.
+/**
+ * ViewModel for managing the Genesis Agent state and operations.
+ * This ViewModel is designed to work with Hilt for dependency injection.
+ * 
+ * Key Features:
+ * - Manages agent status and state
+ * - Handles task assignment and history
+ * - Provides agent configuration and capabilities
+ * - Supports agent toggling and status updates
+ */
 // Ensure you have the necessary dependencies for ViewModel and Hilt in your build.gradle file:
 // implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1
 // implementation "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0"

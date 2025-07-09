@@ -41,11 +41,12 @@ Refer to the [OSSRH Guide](http://central.sonatype.org/pages/ossrh-guide.html) f
 Add this dependency to your project's POM:
 
 ```xml
+
 <dependency>
-  <groupId>org.openapitools</groupId>
-  <artifactId>openapi-java-client</artifactId>
-  <version>1.0.0</version>
-  <scope>compile</scope>
+    <groupId>org.openapitools</groupId>
+    <artifactId>openapi-java-client</artifactId>
+    <version>1.0.0</version>
+    <scope>compile</scope>
 </dependency>
 ```
 
@@ -55,13 +56,15 @@ Add this dependency to your project's build file:
 
 ```groovy
   repositories {
-    mavenCentral()     // Needed if the 'openapi-java-client' jar has been published to maven central.
-    mavenLocal()       // Needed if the 'openapi-java-client' jar has been published to the local maven repo.
-  }
+    mavenCentral()
+    // Needed if the 'openapi-java-client' jar has been published to maven central.
+    mavenLocal()
+    // Needed if the 'openapi-java-client' jar has been published to the local maven repo.
+}
 
-  dependencies {
-     implementation "org.openapitools:openapi-java-client:1.0.0"
-  }
+dependencies {
+    implementation "org.openapitools:openapi-java-client:1.0.0"
+}
 ```
 
 ### Others
@@ -84,6 +87,7 @@ Please follow the [installation](#installation) instruction and execute the foll
 ```java
 
 // Import classes:
+
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
@@ -92,29 +96,29 @@ import org.openapitools.client.models.*;
 import org.openapitools.client.api.AdlApi;
 
 public class Example {
-  public static void main(String[] args) {
-    ApiClient defaultClient = Configuration.getDefaultApiClient();
-    defaultClient.setBasePath("https://api.auraframefx.com/v1");
-    
-    // Configure API key authorization: ApiKeyAuth
-    ApiKeyAuth ApiKeyAuth = (ApiKeyAuth) defaultClient.getAuthentication("ApiKeyAuth");
-    ApiKeyAuth.setApiKey("YOUR API KEY");
-    // Uncomment the following line to set a prefix for the API key, e.g. "Token" (defaults to null)
-    //ApiKeyAuth.setApiKeyPrefix("Token");
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        defaultClient.setBasePath("https://api.auraframefx.com/v1");
 
-    AdlApi apiInstance = new AdlApi(defaultClient);
-    ADLRelayRequest adLRelayRequest = new ADLRelayRequest(); // ADLRelayRequest | 
-    try {
-      ADLRelayResponse result = apiInstance.adlRelayPost(adLRelayRequest);
-      System.out.println(result);
-    } catch (ApiException e) {
-      System.err.println("Exception when calling AdlApi#adlRelayPost");
-      System.err.println("Status code: " + e.getCode());
-      System.err.println("Reason: " + e.getResponseBody());
-      System.err.println("Response headers: " + e.getResponseHeaders());
-      e.printStackTrace();
+        // Configure API key authorization: ApiKeyAuth
+        ApiKeyAuth ApiKeyAuth = (ApiKeyAuth) defaultClient.getAuthentication("ApiKeyAuth");
+        ApiKeyAuth.setApiKey("YOUR API KEY");
+        // Uncomment the following line to set a prefix for the API key, e.g. "Token" (defaults to null)
+        //ApiKeyAuth.setApiKeyPrefix("Token");
+
+        AdlApi apiInstance = new AdlApi(defaultClient);
+        ADLRelayRequest adLRelayRequest = new ADLRelayRequest(); // ADLRelayRequest | 
+        try {
+            ADLRelayResponse result = apiInstance.adlRelayPost(adLRelayRequest);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling AdlApi#adlRelayPost");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+        }
     }
-  }
 }
 
 ```
