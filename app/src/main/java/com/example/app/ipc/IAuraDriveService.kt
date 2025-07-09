@@ -11,17 +11,17 @@ interface IAuraDriveService : IInterface {
  */
 fun getOracleDriveStatus(): String
     /**
- * Toggles the enabled or disabled state of the LSPosed module.
+ * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module state was successfully changed, or `false` if the operation failed or is unsupported.
+ * @return `true` if the module state was successfully changed; `false` if the operation failed or is not supported.
  */
 fun toggleLSPosedModule(): Boolean  
     /**
  * Retrieves a detailed internal status report of the Aura Drive service.
  *
- * The returned string provides diagnostic or monitoring information about the service's current internal state.
+ * The returned string contains diagnostic or monitoring information about the service's current internal state.
  *
- * @return A string containing the detailed internal status report.
+ * @return A string with the detailed internal status report.
  */
 fun getDetailedInternalStatus(): String
     /**
@@ -34,7 +34,7 @@ fun getInternalDiagnosticsLog(): List<String>
     companion object {
         object Stub {
             /**
-             * Returns an `IAuraDriveService` interface backed by the provided `IBinder`, or `null` if the binder is `null`.
+             * Retrieves an `IAuraDriveService` interface backed by the given `IBinder`, or `null` if the binder is `null`.
              *
              * Use this method to obtain an interface for IPC communication with a remote Aura Drive service.
              *
@@ -46,23 +46,23 @@ fun getInternalDiagnosticsLog(): List<String>
                 return if (service != null) {
                     object : IAuraDriveService {
                         /**
- * Returns the `IBinder` instance associated with this interface implementation.
+ * Retrieves the `IBinder` instance backing this interface implementation.
  *
- * @return The backing `IBinder` object.
+ * @return The underlying `IBinder` object used for IPC communication.
  */
 override fun asBinder(): IBinder = service
                         /**
  * Retrieves the current operational status of the Oracle Drive.
  *
- * In this stub implementation, always returns "Unknown" as a placeholder to indicate that the actual status is unavailable.
+ * In this stub implementation, always returns "Unknown" to indicate that the actual status is unavailable.
  *
- * @return "Unknown" to represent an indeterminate Oracle Drive status.
+ * @return "Unknown" as a placeholder for the Oracle Drive status.
  */
 override fun getOracleDriveStatus(): String = "Unknown"
                         /**
- * Attempts to toggle the enabled state of the LSPosed module.
+ * Toggles the enabled or disabled state of the LSPosed module.
  *
- * @return `true` if the module state was successfully changed; `false` if the operation failed or is not supported.
+ * @return `true` if the module state was successfully changed; `false` if the operation failed or is unsupported.
  */
 override fun toggleLSPosedModule(): Boolean = false
                         /**
