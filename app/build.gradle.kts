@@ -1,5 +1,3 @@
-import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
@@ -107,7 +105,7 @@ dependencies {
     kspTest(libs.daggerHiltAndroidCompiler)
 
     // Time and Date
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+    implementation(libs.kotlinxDatetime)
 
     // AndroidX & Compose
     implementation(libs.androidxCoreKtx)
@@ -140,10 +138,10 @@ dependencies {
     ksp(libs.androidxRoomCompiler)
 
     // Security
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation(libs.androidxSecurityCrypto)
 
     // Google AI
-    implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
+    implementation(libs.lifecycleCommonJava8)
 
     // Firebase
     implementation(platform(libs.firebaseBom))
