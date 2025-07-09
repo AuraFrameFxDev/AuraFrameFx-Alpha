@@ -6,7 +6,7 @@ data class OfflineData(
 
 class OfflineDataManager {
     /**
-     * Loads critical offline data required by the application.
+     * Loads essential offline data for the application.
      *
      * @return An [OfflineData] instance if available, or `null` if no offline data exists.
      */

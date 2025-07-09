@@ -27,9 +27,9 @@ class OracleDriveControlViewModel : ViewModel() {
     val diagnosticsLog: StateFlow<String> = _diagnosticsLog.asStateFlow()
 
     /**
-     * Simulates binding to the Oracle Drive service in beta mode.
+     * Simulates a service bind operation for Oracle Drive in beta mode.
      *
-     * Updates internal state to indicate that service binding is disabled. No actual service connection is performed.
+     * Updates internal state to reflect that service binding is disabled; does not perform any real service connection.
      */
     fun bindService() {
         // Beta stub: No actual binding
@@ -40,7 +40,7 @@ class OracleDriveControlViewModel : ViewModel() {
     /**
      * Simulates unbinding from the Oracle Drive service in beta mode.
      *
-     * Updates the service connection state and status message to reflect a disconnected state, without performing any real unbinding.
+     * Sets the service connection state to disconnected and updates the status message with a placeholder, without performing any real unbinding operation.
      */
     fun unbindService() {
         // Beta stub: No actual unbinding
@@ -49,9 +49,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
 
     /**
-     * Updates the status, detailed status, and diagnostics log with static messages indicating Oracle Drive features are disabled in beta mode.
+     * Sets status, detailed status, and diagnostics log to static messages indicating Oracle Drive is disabled in beta mode.
      *
-     * Intended as a no-op stub for UI testing; does not perform any real status or diagnostics retrieval.
+     * This stub method does not perform any real status or diagnostics retrieval and is intended only for UI testing.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -61,12 +61,12 @@ class OracleDriveControlViewModel : ViewModel() {
     }
 
     /**
-     * Simulates toggling a module's enabled state by updating the diagnostics log with a placeholder message.
+     * Simulates enabling or disabling a module by updating the diagnostics log with a placeholder message.
      *
-     * Intended for UI testing in beta mode; does not alter any actual module state.
+     * This method does not affect any real module state and is intended solely for UI testing in beta mode.
      *
      * @param packageName The package name of the module to simulate toggling.
-     * @param enable Whether to simulate enabling (`true`) or disabling (`false`) the module.
+     * @param enable If `true`, simulates enabling the module; if `false`, simulates disabling it.
      */
     fun toggleModule(packageName: String, enable: Boolean) {
         // Beta stub: Just log the action without actually doing anything

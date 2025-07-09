@@ -3585,11 +3585,17 @@ class TestGenesisConnectorAdvancedEdgeCases(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up advanced edge case test environment."""
+        """
+        Initializes a new GenesisConnector instance for advanced edge case tests.
+        """
         self.connector = GenesisConnector()
 
     def test_unicode_normalization_handling(self):
-        """Test handling of Unicode normalization forms."""
+        """
+        Verifies that the connector correctly formats payloads containing text in various Unicode normalization forms.
+        
+        Ensures that Unicode strings normalized to NFC, NFD, NFKC, and NFKD are handled without data loss or formatting errors.
+        """
         import unicodedata
         
         # Test different Unicode normalization forms
@@ -3606,7 +3612,11 @@ class TestGenesisConnectorAdvancedEdgeCases(unittest.TestCase):
                 self.assertIn('message', formatted)
 
     def test_zero_width_character_handling(self):
-        """Test handling of zero-width and invisible Unicode characters."""
+        """
+        Tests the connector's ability to handle payloads containing zero-width and invisible Unicode characters.
+        
+        Verifies that formatting payloads with various invisible Unicode characters either succeeds or raises a ValueError if such characters are rejected for security reasons.
+        """
         invisible_chars = [
             '\u200b',  # Zero Width Space
             '\u200c',  # Zero Width Non-Joiner
@@ -3628,7 +3638,11 @@ class TestGenesisConnectorAdvancedEdgeCases(unittest.TestCase):
                     pass
 
     def test_right_to_left_text_handling(self):
-        """Test handling of right-to-left (RTL) text and bidirectional text."""
+        """
+        Tests the connector's ability to handle right-to-left (RTL) and bidirectional text in payloads.
+        
+        Verifies that payloads containing RTL scripts, mixed RTL/LTR content, and Unicode directionality overrides are correctly formatted and preserved by the connector.
+        """
         rtl_test_cases = [
             'مرحبا بالعالم',  # Arabic
             'שלום עולם',      # Hebrew
@@ -3646,7 +3660,11 @@ class TestGenesisConnectorAdvancedEdgeCases(unittest.TestCase):
                 self.assertIn('rtl_message', formatted)
 
     def test_surrogate_pair_handling(self):
-        """Test handling of Unicode surrogate pairs."""
+        """
+        Tests the connector's ability to handle Unicode surrogate pairs in payloads.
+        
+        Verifies that payloads containing characters represented by surrogate pairs, such as certain emojis and CJK Extension B characters, are formatted without errors or raise appropriate exceptions.
+        """
         surrogate_test_cases = [
             '𝓗𝓮𝓵𝓵𝓸',  # Mathematical script letters
             '🏳️‍🌈',      # Flag with ZWJ sequence
@@ -3667,7 +3685,11 @@ class TestGenesisConnectorAdvancedEdgeCases(unittest.TestCase):
                     pass
 
     def test_locale_specific_formatting(self):
-        """Test payload formatting with locale-specific considerations."""
+        """
+        Tests that payloads containing locale-specific number formats are correctly formatted without errors.
+        
+        Verifies that the connector's payload formatting handles various locale representations of numbers, including Western, European, Arabic, and Persian numeral systems.
+        """
         import locale
         
         locale_test_cases = [
@@ -3690,7 +3712,9 @@ class TestGenesisConnectorAdvancedEdgeCases(unittest.TestCase):
 
     @patch('requests.post')
     def test_response_content_type_edge_cases(self, mock_post):
-        """Test handling of unusual content types in responses."""
+        """
+        Verify that the connector correctly processes responses with a variety of unusual or non-standard Content-Type headers, ensuring JSON parsing and result handling remain robust.
+        """
         unusual_content_types = [
             'application/json; charset=utf-8; boundary=something',
             'text/plain; charset=iso-8859-1',
@@ -3715,9 +3739,22 @@ class TestGenesisConnectorAdvancedEdgeCases(unittest.TestCase):
                 self.assertIsNotNone(result)
 
     def test_extremely_nested_json_structures(self):
-        """Test handling of extremely deeply nested JSON structures."""
+        """
+        Tests the connector's ability to format and handle extremely deeply nested JSON structures.
+        
+        Verifies that the payload formatting either succeeds or raises an appropriate exception (RecursionError or ValueError) when processing nested dictionaries at increasing depths.
+        """
         # Create deeply nested structure beyond typical recursion limits
         def create_nested_dict(depth):
+            """
+            Recursively creates a nested dictionary structure to a specified depth.
+            
+            Parameters:
+                depth (int): The number of nested levels to generate.
+            
+            Returns:
+                dict or str: A nested dictionary with the specified depth, where the innermost value is the string 'deep_value'.
+            """
             if depth == 0:
                 return 'deep_value'
             return {'level': depth, 'nested': create_nested_dict(depth - 1)}
@@ -3737,7 +3774,11 @@ class TestGenesisConnectorAdvancedEdgeCases(unittest.TestCase):
                     self.assertIsInstance(e, (RecursionError, ValueError))
 
     def test_json_with_unusual_number_formats(self):
-        """Test JSON parsing with unusual but valid number formats."""
+        """
+        Tests the connector's ability to parse JSON objects containing numbers in unusual but valid formats, such as scientific notation, negative zero, and numbers with leading or trailing decimal points.
+        
+        Verifies that the parsed response includes the expected numeric field, and gracefully handles cases where parsing fails due to unsupported formats.
+        """
         unusual_numbers = [
             '1e10',      # Scientific notation
             '1E-10',     # Scientific with negative exponent
@@ -3762,7 +3803,9 @@ class TestGenesisConnectorAdvancedEdgeCases(unittest.TestCase):
                     pass
 
     def test_mixed_encoding_payload(self):
-        """Test handling of payloads with mixed character encodings."""
+        """
+        Tests that the connector can format and handle payloads containing strings with various character encodings, including ASCII, Latin-1, Unicode BMP, extended Unicode, Cyrillic, and Arabic scripts. Verifies that all fields are preserved in the formatted output.
+        """
         mixed_encoding_data = {
             'ascii': 'Simple ASCII text',
             'latin1': 'Café résumé naïve',
@@ -3782,7 +3825,11 @@ class TestGenesisConnectorAdvancedEdgeCases(unittest.TestCase):
 
     @patch('requests.post')
     def test_server_sent_events_simulation(self, mock_post):
-        """Test handling of server-sent events like responses."""
+        """
+        Tests the connector's ability to handle server-sent events (SSE) style responses.
+        
+        Simulates an SSE response and verifies that the connector can process streamed event data when sending a request with streaming enabled. If SSE handling is not implemented, the test passes without failure.
+        """
         # Simulate SSE response format
         sse_response = """data: {"event": "start", "id": 1}
 
@@ -3809,7 +3856,11 @@ data: {"event": "end", "id": 3, "result": "complete"}
             pass
 
     def test_websocket_upgrade_simulation(self):
-        """Test handling of WebSocket upgrade scenarios."""
+        """
+        Tests the connector's behavior when receiving a WebSocket upgrade (HTTP 101 Switching Protocols) response.
+        
+        Verifies that the connector can handle or gracefully ignore WebSocket upgrade responses, ensuring no unexpected exceptions are raised.
+        """
         with patch('requests.get') as mock_get:
             # Simulate WebSocket upgrade response
             mock_response = Mock()
@@ -3830,7 +3881,9 @@ data: {"event": "end", "id": 3, "result": "complete"}
                 pass
 
     def test_multipart_form_data_edge_cases(self):
-        """Test edge cases in multipart form data handling."""
+        """
+        Tests the handling of multipart form data uploads with various edge case file scenarios, including empty files, binary content, unusual and very long filenames, and Unicode filenames. Verifies successful upload or appropriate error handling for unsupported cases.
+        """
         edge_case_files = [
             # Empty file
             ('empty.txt', '', 'text/plain'),
@@ -3863,7 +3916,11 @@ data: {"event": "end", "id": 3, "result": "complete"}
                         pass
 
     def test_http_method_override_scenarios(self):
-        """Test HTTP method override scenarios."""
+        """
+        Tests that the connector correctly handles HTTP method override scenarios using the `X-HTTP-Method-Override` header.
+        
+        Verifies that requests sent with a base HTTP method and an override header are processed as the intended override method, if supported. Handles cases where method override is not implemented by allowing exceptions to pass.
+        """
         method_overrides = [
             ('POST', 'PUT'),
             ('POST', 'DELETE'), 
@@ -3896,7 +3953,9 @@ data: {"event": "end", "id": 3, "result": "complete"}
                         pass
 
     def test_custom_json_encoder_scenarios(self):
-        """Test scenarios requiring custom JSON encoding."""
+        """
+        Tests that the connector's payload formatting correctly handles objects requiring custom JSON encoding, such as decimals, datetimes, UUIDs, bytes, sets, frozensets, and complex numbers. Verifies serialization or appropriate exception handling for unsupported types.
+        """
         from decimal import Decimal
         from datetime import datetime, date, time
         import uuid
@@ -3929,7 +3988,11 @@ data: {"event": "end", "id": 3, "result": "complete"}
 
     @patch('requests.post')
     def test_http2_and_http3_compatibility(self, mock_post):
-        """Test compatibility with HTTP/2 and HTTP/3 features."""
+        """
+        Verifies that the connector can handle responses indicating HTTP/1.1, HTTP/2, and HTTP/3 compatibility.
+        
+        This test simulates server responses with different HTTP protocol versions and checks that the connector correctly processes and returns the reported version in the response.
+        """
         http_versions = ['HTTP/1.1', 'HTTP/2', 'HTTP/3']
         
         for version in http_versions:
@@ -3950,7 +4013,9 @@ data: {"event": "end", "id": 3, "result": "complete"}
                     pass
 
     def test_content_encoding_variations(self):
-        """Test handling of various content encodings."""
+        """
+        Tests that the connector correctly processes responses with various HTTP content encodings, including gzip, deflate, Brotli, and identity. Skips or passes on exceptions if an encoding is unsupported.
+        """
         with patch('requests.post') as mock_post:
             encodings = ['gzip', 'deflate', 'br', 'identity']
             
@@ -3979,11 +4044,15 @@ class TestGenesisConnectorAdvancedSecurity2(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up advanced security test environment."""
+        """
+        Initializes a new GenesisConnector instance for each advanced security test.
+        """
         self.connector = GenesisConnector()
 
     def test_prototype_pollution_prevention(self):
-        """Test prevention of prototype pollution attacks."""
+        """
+        Verifies that the connector prevents prototype pollution attacks by sanitizing or rejecting payloads containing prototype-related keys.
+        """
         malicious_payloads = [
             {'__proto__': {'admin': True}},
             {'constructor': {'prototype': {'admin': True}}},
@@ -4003,7 +4072,11 @@ class TestGenesisConnectorAdvancedSecurity2(unittest.TestCase):
                     pass
 
     def test_billion_laughs_attack_prevention(self):
-        """Test prevention of billion laughs (XML bomb) style attacks."""
+        """
+        Verifies that the connector prevents or safely handles exponentially recursive payloads to mitigate billion laughs (XML bomb) style attacks.
+        
+        This test constructs increasingly recursive data structures and attempts to format them, ensuring the connector either processes them safely or raises an appropriate exception without causing uncontrolled memory usage or crashes.
+        """
         recursive_payloads = []
         
         # Create exponentially expanding structure
@@ -4026,7 +4099,11 @@ class TestGenesisConnectorAdvancedSecurity2(unittest.TestCase):
                     pass
 
     def test_zip_bomb_simulation(self):
-        """Test handling of zip bomb style compressed data."""
+        """
+        Tests the connector's ability to handle or reject highly compressible, large payloads that simulate a zip bomb attack.
+        
+        This ensures the connector either processes such payloads without memory issues or safely rejects them to prevent resource exhaustion.
+        """
         # Simulate highly compressible but large data
         repetitive_data = {
             'message': 'A' * 1000000,  # 1MB of repeated character
@@ -4042,7 +4119,11 @@ class TestGenesisConnectorAdvancedSecurity2(unittest.TestCase):
             pass
 
     def test_side_channel_attack_resistance(self):
-        """Test resistance to side-channel attacks through timing."""
+        """
+        Verify that configuration validation timing does not vary significantly based on input, ensuring resistance to timing-based side-channel attacks.
+        
+        This test checks that the time taken to validate different API key values does not differ by orders of magnitude, preventing attackers from inferring sensitive information through timing analysis.
+        """
         import time
         
         # Test timing consistency for validation operations
@@ -4073,7 +4154,9 @@ class TestGenesisConnectorAdvancedSecurity2(unittest.TestCase):
             self.assertLess(ratio, 100)  # Less than 100x difference
 
     def test_deserialization_bomb_prevention(self):
-        """Test prevention of deserialization bombs."""
+        """
+        Tests that the connector detects and prevents deserialization bomb attacks by rejecting or safely handling excessively nested or large JSON payloads.
+        """
         malicious_json_strings = [
             # Deeply nested arrays
             '[' * 1000 + '1' + ']' * 1000,
@@ -4095,7 +4178,9 @@ class TestGenesisConnectorAdvancedSecurity2(unittest.TestCase):
                     pass
 
     def test_unicode_security_issues(self):
-        """Test handling of Unicode-based security issues."""
+        """
+        Tests that the connector detects and handles Unicode-based security issues such as homograph, right-to-left override, normalization, and zero-width character attacks in configuration values.
+        """
         unicode_attacks = [
             # Homograph attacks
             'аdmin',  # Cyrillic 'а' instead of Latin 'a'
@@ -4132,16 +4217,28 @@ class TestGenesisConnectorAdvancedNetworking(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up advanced networking test environment."""
+        """
+        Initializes a GenesisConnector instance for advanced networking tests.
+        """
         self.connector = GenesisConnector()
 
     @patch('requests.post')
     def test_connection_persistence_across_requests(self, mock_post):
-        """Test connection persistence and reuse across multiple requests."""
+        """
+        Verifies that the connector can handle multiple sequential requests and tracks connection reuse across them.
+        
+        This test simulates sending several requests in succession and ensures that each request is processed, allowing observation of connection persistence or reuse behavior.
+        """
         # Track connection reuse
         connection_ids = []
         
         def track_connection(*args, **kwargs):
+            """
+            Mocks a connection request by returning a response with a unique connection ID and tracking each invocation.
+            
+            Returns:
+                Mock: A mock response object with a unique 'connection_id' in its JSON payload.
+            """
             mock_response = Mock()
             mock_response.status_code = 200
             mock_response.json.return_value = {'connection_id': len(connection_ids)}
@@ -4161,7 +4258,11 @@ class TestGenesisConnectorAdvancedNetworking(unittest.TestCase):
 
     @patch('socket.socket')
     def test_socket_option_configuration(self, mock_socket):
-        """Test various socket option configurations."""
+        """
+        Tests that the GenesisConnector applies various socket option configurations when sending requests.
+        
+        Verifies that the connector can be initialized with different socket options and that requests are processed successfully, or gracefully handles cases where socket configuration is not supported.
+        """
         socket_configs = [
             {'SO_KEEPALIVE': True},
             {'TCP_NODELAY': True},
@@ -4194,7 +4295,11 @@ class TestGenesisConnectorAdvancedNetworking(unittest.TestCase):
                     pass
 
     def test_ipv6_compatibility(self):
-        """Test IPv6 address compatibility."""
+        """
+        Verifies that the connector's configuration validation supports IPv6 addresses in the base URL.
+        
+        Tests various IPv6 URL formats, including localhost, standard IPv6, and addresses with zone IDs, ensuring the validation method accepts or gracefully rejects them.
+        """
         ipv6_urls = [
             'https://[::1]:8080',  # IPv6 localhost
             'https://[2001:db8::1]:443',  # IPv6 address
@@ -4217,7 +4322,11 @@ class TestGenesisConnectorAdvancedNetworking(unittest.TestCase):
 
     @patch('requests.post')
     def test_network_interface_binding(self, mock_post):
-        """Test binding to specific network interfaces."""
+        """
+        Verifies that the connector can bind outgoing requests to specified network interfaces, or gracefully handles unsupported configurations.
+        
+        Tests binding to various interfaces and checks if the response reflects the intended interface, skipping or passing if the feature is unsupported.
+        """
         interfaces = ['127.0.0.1', '0.0.0.0', 'localhost']
         
         for interface in interfaces:
@@ -4241,7 +4350,11 @@ class TestGenesisConnectorAdvancedNetworking(unittest.TestCase):
                     pass
 
     def test_dns_resolution_strategies(self):
-        """Test different DNS resolution strategies."""
+        """
+        Tests the GenesisConnector's ability to handle various DNS resolution strategies specified in the configuration.
+        
+        Verifies that the connector can be instantiated with different DNS strategies, including system default, custom servers, IPv4-only, and IPv6-preferred modes. Accepts that some configurations may not be supported and may raise exceptions.
+        """
         dns_configs = [
             {'strategy': 'system'},
             {'strategy': 'custom', 'servers': ['8.8.8.8', '1.1.1.1']},
@@ -4272,11 +4385,15 @@ class TestGenesisConnectorDataIntegrity(unittest.TestCase):
     """
 
     def setUp(self):
-        """Set up data integrity test environment."""
+        """
+        Initializes a new GenesisConnector instance for each data integrity test.
+        """
         self.connector = GenesisConnector()
 
     def test_payload_hash_verification(self):
-        """Test payload integrity through hash verification."""
+        """
+        Verifies that the payload's structure and key fields are preserved after formatting by comparing hash values and checking for key presence.
+        """
         import hashlib
         
         payload = {
@@ -4302,7 +4419,9 @@ class TestGenesisConnectorDataIntegrity(unittest.TestCase):
         self.assertIn('data', formatted)
 
     def test_request_idempotency_verification(self):
-        """Test that identical requests produce identical results."""
+        """
+        Verifies that sending identical requests multiple times yields identical results, ensuring idempotency of the connector's request handling.
+        """
         with patch('requests.post') as mock_post:
             mock_response = Mock()
             mock_response.status_code = 200
@@ -4322,7 +4441,9 @@ class TestGenesisConnectorDataIntegrity(unittest.TestCase):
                 self.assertEqual(result, results[0])
 
     def test_data_corruption_detection(self):
-        """Test detection of data corruption during processing."""
+        """
+        Verifies that the connector can detect and handle data corruption by ensuring a checksum included in the payload is preserved or processed correctly during formatting.
+        """
         # Create payload with checksum
         original_data = {
             'message': 'corruption_test',
@@ -4343,13 +4464,21 @@ class TestGenesisConnectorDataIntegrity(unittest.TestCase):
             self.assertIn('checksum', formatted)
 
     def test_concurrent_data_consistency(self):
-        """Test data consistency under concurrent operations."""
+        """
+        Verify that data remains consistent and operations complete successfully when multiple threads perform concurrent payload formatting and updates.
+        """
         import threading
         import time
         
         shared_data = {'counter': 0, 'operations': []}
         
         def concurrent_operation(thread_id):
+            """
+            Performs a series of concurrent payload formatting operations, updating shared data with each formatted payload.
+            
+            Parameters:
+                thread_id (int): Identifier for the current thread performing the operation.
+            """
             for i in range(10):
                 # Simulate concurrent payload formatting
                 payload = {
@@ -4385,7 +4514,9 @@ class TestGenesisConnectorDataIntegrity(unittest.TestCase):
         self.assertGreater(shared_data['counter'], 0)
 
     def test_payload_size_consistency(self):
-        """Test consistency of payload size calculations."""
+        """
+        Verify that payload size calculations remain consistent after formatting, ensuring no excessive overhead is introduced during serialization for various payload types.
+        """
         test_payloads = [
             {'small': 'data'},
             {'medium': 'x' * 1000},

@@ -50,9 +50,9 @@ data class VertexAIConfig(
     val enableFunctionCalling: Boolean = true
 ) {
     /**
-     * Validates the configuration fields and collects error messages for any missing or invalid values.
+     * Validates the configuration fields and returns error messages for any missing or invalid values.
      *
-     * Ensures required string fields are not blank and numeric parameters are within valid ranges.
+     * Checks that required string fields are not blank and numeric parameters are within valid ranges.
      *
      * @return A list of error messages for invalid fields, or an empty list if all validations pass.
      */
@@ -80,9 +80,9 @@ data class VertexAIConfig(
     }
 
     /**
-     * Constructs the base URL for Vertex AI API requests using the configured endpoint, API version, project ID, and location.
+     * Builds the base URL for Vertex AI API requests using the configured endpoint, API version, project ID, and location.
      *
-     * @return The base endpoint URL for Vertex AI API requests.
+     * @return The constructed base endpoint URL for Vertex AI API requests.
      */
     fun getFullEndpoint(): String {
         return "https://$endpoint/$apiVersion/projects/$projectId/locations/$location"

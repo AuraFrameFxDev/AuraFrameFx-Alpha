@@ -664,11 +664,11 @@ class TestUtilityFunctions:
     ])
     def test_estimate_tokens(self, content, expected_tokens):
         """
-        Test that the token estimation function returns the expected token count for the given input.
+        Verify that the token estimation function returns the expected token count for a given input string.
         
         Parameters:
             content (str): The input text to estimate tokens for.
-            expected_tokens (int): The expected token count to compare against.
+            expected_tokens (int): The expected number of tokens.
         """
         from app.ai_backend.genesis_api import estimate_tokens
         

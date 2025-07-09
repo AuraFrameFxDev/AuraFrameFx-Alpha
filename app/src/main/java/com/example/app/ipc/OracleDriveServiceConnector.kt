@@ -20,9 +20,9 @@ class OracleDriveServiceConnector(private val context: Context) {
 
     private val serviceConnection = object : ServiceConnection {
         /**
-         * Handles the AuraDrive service connection event.
+         * Called when the AuraDrive service is connected.
          *
-         * Retrieves the remote `IAuraDriveService` interface from the provided binder and updates the connection state to connected.
+         * Obtains the remote `IAuraDriveService` interface from the provided binder and sets the connection state to connected.
          *
          * @param name The component name of the connected service.
          * @param service The binder interface to the connected service.
@@ -33,7 +33,7 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
 
         /**
-         * Handles disconnection from the AuraDrive service by clearing the service reference and updating the connection state to disconnected.
+         * Handles the AuraDrive service disconnection event by clearing the service reference and updating the connection state to disconnected.
          *
          * @param name The component name of the disconnected service.
          */
@@ -46,7 +46,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Initiates binding to the remote AuraDrive service using an explicit intent.
      *
-     * Updates the connection state to disconnected if a security exception occurs during the binding attempt.
+     * If a security exception occurs during the binding attempt, the connection state is set to disconnected.
      */
     fun bindService() {
         val intent = Intent().apply {
@@ -63,7 +63,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Unbinds from the AuraDrive service and updates the connection state to disconnected.
+     * Unbinds from the AuraDrive service and sets the connection state to disconnected.
      *
      * Any exceptions during unbinding are ignored.
      */
