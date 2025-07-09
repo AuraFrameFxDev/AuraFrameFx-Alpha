@@ -13,6 +13,11 @@ class LockScreenHooker(
     private val classLoader: ClassLoader,
     private val config: LockScreenConfig
 ) {
+    /**
+     * Applies Xposed hooks to customize Android lock screen components based on the current configuration.
+     *
+     * Hooks are set up for the lock screen status bar, clock, and bottom area to enable features such as hiding the status bar, injecting custom clock layouts or styles, customizing lock screen shortcuts, and preparing for custom animations. Actual UI modifications are conceptual and indicated by logging statements.
+     */
     fun applyLockScreenHooks() {
         // TODO: Implement Xposed hooks for the Lock Screen
         XposedBridge.log("AuraFrameFX: Applying LockScreenHooks. Config: customClock=${config.customClockEnabled}, customShortcuts=${config.customShortcutsEnabled}")

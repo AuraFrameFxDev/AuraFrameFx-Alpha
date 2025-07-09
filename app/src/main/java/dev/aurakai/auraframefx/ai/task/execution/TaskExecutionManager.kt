@@ -61,9 +61,11 @@ class TaskExecutionManager @Inject constructor(
     }
 
     /**
-     * Updates the maximum number of concurrent tasks.
-     * NB: This should ideally be driven by a centralized configuration system.
-     * @param newLimit The new limit for concurrent tasks. Must be positive.
+     * Sets a new maximum limit for concurrent task executions.
+     *
+     * Updates the concurrency limit for running tasks if the provided value is positive; otherwise, the limit remains unchanged.
+     *
+     * @param newLimit The new maximum number of concurrent tasks. Must be greater than zero.
      */
     fun setMaxConcurrentTasks(newLimit: Int) {
         if (newLimit > 0) {

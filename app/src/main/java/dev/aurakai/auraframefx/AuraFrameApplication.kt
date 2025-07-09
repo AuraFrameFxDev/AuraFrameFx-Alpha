@@ -22,6 +22,11 @@ class AuraFrameApplication : Application(), Configuration.Provider, IYukiHookXpo
             .setMinimumLoggingLevel(Log.INFO)
             .build()
 
+    /**
+     * Initializes YukiHookAPI configuration for the application.
+     *
+     * Enables debug logging, module app resources caching, and data channel support for YukiHookAPI during application startup in the Xposed environment.
+     */
     override fun onInit() {
         XposedBridge.log("AuraFrameFX: YukiHookAPI onInit in Application")
         YukiHookAPI.configs {
@@ -36,6 +41,11 @@ class AuraFrameApplication : Application(), Configuration.Provider, IYukiHookXpo
         // val prefs = YukiHookPrefsBridge.from("dev.aurakai.auraframefx_preferences")
     }
 
+    /**
+     * Applies Xposed hooks to supported packages using YukiHookAPI.
+     *
+     * For each loaded package (excluding the module itself), initializes and applies hooks for notch bar, quick settings, and lock screen features with default configurations.
+     */
     override fun onHook() {
         XposedBridge.log("AuraFrameFX: YukiHookAPI onHook in Application")
         YukiHookAPI.encase {
@@ -66,6 +76,12 @@ class AuraFrameApplication : Application(), Configuration.Provider, IYukiHookXpo
         }
     }
 
+    /**
+     * Handles application startup logic, logging whether the app is running in an Xposed environment.
+     *
+     * This method distinguishes between Xposed and non-Xposed environments and logs the result.
+     * Hook initialization is deferred to `onInit` and `onHook` when using `IYukiHookXposedInit`.
+     */
     override fun onCreate() {
         super.onCreate()
         if (YukiHookBridge.isXposedEnvironment) {

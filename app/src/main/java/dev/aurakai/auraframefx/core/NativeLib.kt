@@ -16,39 +16,44 @@ class NativeLib {
         }
 
         /**
-         * A native method that is implemented by the 'aura-native-lib' native library,
-         * which is packaged with this application.
-         */
+ * Returns a string from the native 'aura-native-lib' library.
+ *
+ * The content of the returned string is determined by the native implementation.
+ * @return A string provided by the native library.
+ */
         external fun stringFromJNI(): String
 
         // --- Language Identification JNI Functions ---
 
         /**
-         * Initializes the native language identifier.
-         * @param modelPath Path to the language model (currently logged, not used by detector).
-         * @return A version string or status indicator. For example, "1.2.0".
-         */
+ * Initializes the native language identifier with the specified model path.
+ *
+ * @param modelPath The file system path to the language model. This parameter may be logged but is not currently used by the detector.
+ * @return A string indicating the version or status of the native language identifier, such as "1.2.0".
+ */
         external fun nativeInitialize(modelPath: String): String
 
         /**
-         * Detects the language of the given text.
-         * @param handle A handle obtained from nativeInitialize (if applicable, current C++ code doesn't use it).
-         *               Consider removing or redesigning if nativeInitialize doesn't provide a meaningful handle.
-         * @param text The text to analyze.
-         * @return A string representing the detected language code (e.g., "en", "es").
-         */
+ * Identifies the language of the specified text using the native language detection library.
+ *
+ * @param handle The native handle for the language identifier, typically obtained from `nativeInitialize`. May be unused depending on native implementation.
+ * @param text The text to analyze for language detection.
+ * @return The detected language code as a string (e.g., "en", "es").
+ */
         external fun nativeDetectLanguage(handle: Long, text: String): String // Or (text: String) if handle is not used
 
         /**
-         * Releases any resources associated with the language identifier.
-         * @param handle A handle obtained from nativeInitialize (if applicable).
-         */
+ * Releases resources associated with the specified language identifier handle.
+ *
+ * @param handle The handle referencing the native language identifier instance to be released.
+ */
         external fun nativeRelease(handle: Long) // Or remove if no handle/resources
 
         /**
-         * Gets the version of the native language detection library.
-         * @return The version string.
-         */
+ * Returns the version string of the native language detection library.
+ *
+ * @return The version string of the native library.
+ */
         external fun nativeGetVersion(): String
     }
 }

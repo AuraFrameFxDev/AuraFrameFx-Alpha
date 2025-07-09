@@ -110,10 +110,10 @@ fun getMemory(memoryKey: String): String?
 fun saveMemory(key: String, value: Any)
 
     /**
-     * Indicates whether the AI service is currently connected.
-     *
-     * @return True if connected, false otherwise.
-     */
+ * Returns whether the AI service is currently connected.
+ *
+ * @return `true` if the service is connected; `false` otherwise.
+ */
     fun isConnected(): Boolean
 
     /**

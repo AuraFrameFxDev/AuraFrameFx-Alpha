@@ -12,6 +12,12 @@ class NotchBarHooker(
     private val classLoader: ClassLoader,
     private val config: NotchBarConfig
 ) {
+    /**
+     * Applies Xposed hooks to modify the behavior and appearance of the device's notch bar based on the current configuration.
+     *
+     * Hooks system UI methods to control notch bar visibility and status bar icon styles, using the provided configuration flags.
+     * Placeholder and example hooks are included for further customization and device-specific implementations.
+     */
     fun applyNotchBarHooks() {
         // TODO: Implement Xposed hooks for the Notch Bar
         // This is a placeholder implementation. Specific class and method names may vary.
