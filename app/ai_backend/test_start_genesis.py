@@ -379,20 +379,20 @@ class TestStartGenesis:
 class TestStartGenesisIntegration:
     """Integration tests for the start_genesis module."""
 
-    def test_end_to_end_conversation_flow(self):
+    def test_end_to_end_conversation_flow(self, sample_config):
         """Test complete conversation flow from initialization to response."""
         with patch.object(start_genesis, 'initialize', return_value=True), \
              patch.object(start_genesis, 'generate_response', return_value="Test response"), \
              patch.object(start_genesis, 'cleanup', return_value=True):
-            
+
             # Initialize
-            init_result = start_genesis.initialize(self.mock_config)
+            init_result = start_genesis.initialize(sample_config)
             assert init_result is True
-            
+
             # Generate response
             response = start_genesis.generate_response("Test prompt")
             assert response == "Test response"
-            
+
             # Cleanup
             cleanup_result = start_genesis.cleanup()
             assert cleanup_result is True
