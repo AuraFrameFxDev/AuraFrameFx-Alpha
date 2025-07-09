@@ -30,9 +30,9 @@ data class ChatMessage(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays an interactive AI chat interface with persistent conversation history and input field.
+ * Renders an AI chat interface with persistent conversation history and message input.
  *
- * Presents a scrollable list of user and AI messages, visually distinguishing between senders. Users can compose and send messages, which are added to the conversation along with a simulated AI reply. Both the chat history and the input text are preserved across configuration changes and recompositions.
+ * Displays a scrollable list of user and AI messages, visually distinguishing between senders. Users can compose and send messages, which are appended to the conversation along with a simulated AI reply. Both the chat history and input text are preserved across recompositions and configuration changes.
  */
 @Composable
 fun AiChatScreen() {
@@ -121,11 +121,11 @@ fun AiChatScreen() {
 }
 
 /**
- * Displays a chat message bubble with visual styling based on the sender.
+ * Renders a single chat message bubble with alignment, color, and shape determined by the sender.
  *
- * User messages are shown as right-aligned outgoing bubbles with primary container colors, while AI messages are left-aligned incoming bubbles with surface variant colors. Bubble shape, alignment, and text color are determined by the message sender.
+ * User messages appear as right-aligned bubbles with primary container styling, while AI messages are left-aligned with surface variant styling.
  *
- * @param message The chat message to display.
+ * @param message The chat message to render.
  */
 @Composable
 fun ChatMessageItem(message: ChatMessage) {
@@ -164,7 +164,7 @@ fun ChatMessageItem(message: ChatMessage) {
 }
 
 /**
- * Displays a design-time preview of the AI chat screen using the custom AuraFrameFXTheme.
+ * Renders a preview of the AI chat screen within the AuraFrameFXTheme for design-time inspection.
  */
 @Preview(showBackground = true)
 @Composable

@@ -51,6 +51,12 @@ class NeuralWhisper @Inject constructor(
         // TODO: Any other initialization for audio processing or AI interaction components.
     }
 
+    /**
+     * Initializes the Text-to-Speech (TTS) engine and updates the initialization status.
+     *
+     * Creates a `TextToSpeech` instance and sets the initialization flag based on the result.
+     * Language, voice, and other TTS settings are not yet configured and are marked as TODO.
+     */
     private fun initializeTts() {
         // TODO: Implement robust TTS initialization, including language availability checks.
         // Consider user preferences for voice, pitch, speed.
@@ -73,10 +79,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initializes the speech-to-text (STT) engine if speech recognition is available on the device.
+     * Initializes the speech-to-text (STT) engine if supported on the device.
      *
-     * Sets up the `SpeechRecognizer` instance and updates the STT initialization status.
-     * Logs an error if speech recognition is not supported on the device.
+     * Creates a `SpeechRecognizer` instance and updates the STT initialization status. Logs an error if speech recognition is unavailable.
      */
     private fun initializeStt() {
         // TODO: Implement STT initialization using Android's SpeechRecognizer or a third-party library.
@@ -93,9 +98,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Converts audio input to transcribed text using speech-to-text processing.
+     * Transcribes audio input to text using speech-to-text processing.
      *
-     * Updates the conversation state to reflect listening and processing stages. Returns a placeholder transcription if speech-to-text is initialized; otherwise, returns null.
+     * Updates the conversation state to indicate listening and processing stages. Returns a placeholder transcription if speech-to-text is initialized; otherwise, returns null.
      *
      * @param audioInput The audio data or trigger for speech recognition.
      * @return The transcribed text, or null if speech-to-text is not initialized.
@@ -120,12 +125,12 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initiates text-to-speech synthesis for the provided text using the specified locale.
+     * Initiates text-to-speech synthesis for the given text using the specified locale.
      *
-     * Updates the conversation state to "Speaking." Returns `false` if the TTS engine is not initialized; otherwise, returns `true` as a placeholder.
+     * Updates the conversation state to "Speaking." Returns `false` if the text-to-speech engine is not initialized; otherwise, returns `true` as a placeholder.
      *
-     * @param text The text to be converted to speech.
-     * @param locale The locale for speech synthesis (defaults to US English).
+     * @param text The text to convert to speech.
+     * @param locale The locale to use for speech synthesis (defaults to US English).
      * @return `true` if the synthesis request is accepted (placeholder), or `false` if TTS is not initialized.
      */
     fun textToSpeech(text: String, locale: Locale = Locale.US): Boolean {
@@ -151,10 +156,10 @@ class NeuralWhisper @Inject constructor(
     /**
      * Processes a transcribed voice command and returns a placeholder response.
      *
-     * Updates the conversation state to indicate processing. Intended for future implementation of natural language understanding and command-to-action mapping.
+     * Updates the conversation state to indicate processing. This method is intended as a placeholder for future natural language understanding and command-to-action mapping.
      *
      * @param command The transcribed voice command to process.
-     * @return A placeholder response representing the result of command processing.
+     * @return A placeholder response string representing the result of command processing.
      */
     fun processVoiceCommand(command: String): Any { // Placeholder return type
         // TODO: Implement NLU and command mapping.
@@ -170,11 +175,11 @@ class NeuralWhisper @Inject constructor(
 
 
     /**
-     * Updates the conversation state to indicate context is being shared with the Kai agent.
+     * Updates the conversation state to reflect that context is being shared with the Kai agent.
      *
-     * This function logs the context sharing action but does not perform actual communication with the Kai agent.
+     * Logs the context sharing action. Does not perform actual communication with the Kai agent.
      *
-     * @param contextText The context information to share.
+     * @param contextText The context information intended for sharing.
      */
     fun shareContextWithKai(contextText: String) {
         _conversationStateFlow.value = ConversationState.Processing("Sharing with Kai: $contextText")
@@ -205,7 +210,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Stops the current audio recording session and returns a status message.
      *
-     * Updates the conversation state to "Processing" while stopping the recording.
+     * Updates the conversation state to "Processing" during the stop operation.
      *
      * @return A message indicating whether the recording was stopped successfully or describing the failure.
      */
