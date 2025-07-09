@@ -23,7 +23,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Returns a fixed placeholder string for any analytics query.
      *
-     * This implementation does not process the query and always returns "Analytics response placeholder".
+     * This implementation ignores the input and always returns "Analytics response placeholder".
      *
      * @return The placeholder analytics response string.
      */
@@ -32,19 +32,19 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null to indicate that file download is not supported.
+     * Indicates that file download functionality is not implemented.
      *
      * @param _fileId The identifier of the file to download.
-     * @return Always null, as file download functionality is not implemented.
+     * @return Always returns null.
      */
     override suspend fun downloadFile(_fileId: String): File? {
         return null
     }
 
     /**
-     * Returns null to indicate that image generation is not supported.
+     * Stub method for image generation; always returns null.
      *
-     * This method is a stub and does not perform any image generation.
+     * This implementation does not support image generation and serves as a placeholder.
      *
      * @return Always null.
      */
@@ -75,7 +75,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Retrieves the memory value associated with the given key.
+     * Retrieves the memory value associated with the specified key.
      *
      * This implementation always returns null, indicating that memory retrieval is not supported.
      *
