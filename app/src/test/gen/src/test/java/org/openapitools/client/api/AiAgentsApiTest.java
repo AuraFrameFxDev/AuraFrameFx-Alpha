@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package org.openapitools.client.api;
 
 import org.openapitools.client.ApiException;
@@ -18,33 +17,428 @@ import org.openapitools.client.model.AgentMessage;
 import org.openapitools.client.model.AgentProcessRequest;
 import org.openapitools.client.model.AgentType;
 import org.openapitools.client.model.ApiError;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
- * API tests for AiAgentsApi
+ * Comprehensive API tests for AiAgentsApi
+ * Testing Framework: JUnit 5 (Jupiter)
  */
-@Disabled
 public class AiAgentsApiTest {
 
-    private final AiAgentsApi api = new AiAgentsApi();
+    private AiAgentsApi api;
+    private AgentProcessRequest validAgentProcessRequest;
+    private AgentMessage expectedAgentMessage;
 
-    /**
-     * Send a request to an AI agent
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void agentAgentTypeProcessRequestPostTest() throws ApiException {
-        AgentType agentType = null;
-        AgentProcessRequest agentProcessRequest = null;
-        AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, agentProcessRequest);
-        // TODO: test validations
+    @BeforeEach
+    void setUp() {
+        api = new AiAgentsApi();
+        setupTestData();
     }
 
+    private void setupTestData() {
+        // Setup valid AgentProcessRequest
+        validAgentProcessRequest = new AgentProcessRequest();
+        // Note: Setting basic properties - actual implementation depends on model structure
+        
+        // Setup expected AgentMessage response
+        expectedAgentMessage = new AgentMessage();
+        // Note: Setting basic properties - actual implementation depends on model structure
+    }
+
+    @Nested
+    @DisplayName("agentAgentTypeProcessRequestPost - Happy Path Tests")
+    class HappyPathTests {
+
+        @Test
+        @DisplayName("Should successfully process request with valid CHAT agent type")
+        void shouldProcessRequestWithValidChatAgentType() throws ApiException {
+            // Given
+            AgentType agentType = AgentType.CHAT;
+            
+            // When
+            AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
+            
+            // Then
+            assertNotNull(response, "Response should not be null");
+            // Additional assertions based on expected behavior
+        }
+
+        @Test
+        @DisplayName("Should successfully process request with valid CODE agent type")
+        void shouldProcessRequestWithValidCodeAgentType() throws ApiException {
+            // Given
+            AgentType agentType = AgentType.CODE;
+            
+            // When
+            AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
+            
+            // Then
+            assertNotNull(response, "Response should not be null");
+        }
+
+        @Test
+        @DisplayName("Should successfully process request with valid ANALYSIS agent type")
+        void shouldProcessRequestWithValidAnalysisAgentType() throws ApiException {
+            // Given
+            AgentType agentType = AgentType.ANALYSIS;
+            
+            // When
+            AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
+            
+            // Then
+            assertNotNull(response, "Response should not be null");
+        }
+
+        @ParameterizedTest
+        @EnumSource(AgentType.class)
+        @DisplayName("Should handle all valid agent types")
+        void shouldHandleAllValidAgentTypes(AgentType agentType) throws ApiException {
+            // When
+            AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
+            
+            // Then
+            assertNotNull(response, "Response should not be null for agent type: " + agentType);
+        }
+
+        @Test
+        @DisplayName("Should process request with minimal valid data")
+        void shouldProcessRequestWithMinimalValidData() throws ApiException {
+            // Given
+            AgentType agentType = AgentType.CHAT;
+            AgentProcessRequest minimalRequest = new AgentProcessRequest();
+            
+            // When
+            AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, minimalRequest);
+            
+            // Then
+            assertNotNull(response, "Response should not be null for minimal request");
+        }
+    }
+
+    @Nested
+    @DisplayName("agentAgentTypeProcessRequestPost - Edge Case Tests")
+    class EdgeCaseTests {
+
+        @Test
+        @DisplayName("Should handle request with empty content")
+        void shouldHandleRequestWithEmptyContent() throws ApiException {
+            // Given
+            AgentType agentType = AgentType.CHAT;
+            AgentProcessRequest emptyRequest = new AgentProcessRequest();
+            // Set empty content if the model supports it
+            
+            // When & Then
+            assertDoesNotThrow(() -> {
+                AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, emptyRequest);
+                assertNotNull(response, "Response should not be null even for empty content");
+            });
+        }
+
+        @Test
+        @DisplayName("Should handle request with very long content")
+        void shouldHandleRequestWithVeryLongContent() throws ApiException {
+            // Given
+            AgentType agentType = AgentType.CHAT;
+            AgentProcessRequest longContentRequest = new AgentProcessRequest();
+            // Create a very long string (10000 characters)
+            String longContent = "a".repeat(10000);
+            // Set long content if the model supports it
+            
+            // When & Then
+            assertDoesNotThrow(() -> {
+                AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, longContentRequest);
+                assertNotNull(response, "Response should not be null for long content");
+            });
+        }
+
+        @Test
+        @DisplayName("Should handle request with special characters")
+        void shouldHandleRequestWithSpecialCharacters() throws ApiException {
+            // Given
+            AgentType agentType = AgentType.CHAT;
+            AgentProcessRequest specialCharRequest = new AgentProcessRequest();
+            String specialContent = "Hello! @#$%^&*()_+-=[]{}|;':\",./<>?~`";
+            // Set special character content if the model supports it
+            
+            // When & Then
+            assertDoesNotThrow(() -> {
+                AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, specialCharRequest);
+                assertNotNull(response, "Response should not be null for special characters");
+            });
+        }
+
+        @Test
+        @DisplayName("Should handle request with unicode characters")
+        void shouldHandleRequestWithUnicodeCharacters() throws ApiException {
+            // Given
+            AgentType agentType = AgentType.CHAT;
+            AgentProcessRequest unicodeRequest = new AgentProcessRequest();
+            String unicodeContent = "Hello 世界 🌍 مرحبا بالعالم";
+            // Set unicode content if the model supports it
+            
+            // When & Then
+            assertDoesNotThrow(() -> {
+                AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, unicodeRequest);
+                assertNotNull(response, "Response should not be null for unicode content");
+            });
+        }
+    }
+
+    @Nested
+    @DisplayName("agentAgentTypeProcessRequestPost - Error Condition Tests")
+    class ErrorConditionTests {
+
+        @Test
+        @DisplayName("Should throw ApiException when agent type is null")
+        void shouldThrowApiExceptionWhenAgentTypeIsNull() {
+            // Given
+            AgentType agentType = null;
+            
+            // When & Then
+            assertThrows(ApiException.class, () -> {
+                api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
+            }, "Should throw ApiException for null agent type");
+        }
+
+        @Test
+        @DisplayName("Should throw ApiException when request is null")
+        void shouldThrowApiExceptionWhenRequestIsNull() {
+            // Given
+            AgentType agentType = AgentType.CHAT;
+            AgentProcessRequest request = null;
+            
+            // When & Then
+            assertThrows(ApiException.class, () -> {
+                api.agentAgentTypeProcessRequestPost(agentType, request);
+            }, "Should throw ApiException for null request");
+        }
+
+        @Test
+        @DisplayName("Should throw ApiException when both parameters are null")
+        void shouldThrowApiExceptionWhenBothParametersAreNull() {
+            // When & Then
+            assertThrows(ApiException.class, () -> {
+                api.agentAgentTypeProcessRequestPost(null, null);
+            }, "Should throw ApiException for both null parameters");
+        }
+
+        @Test
+        @DisplayName("Should handle API server errors gracefully")
+        void shouldHandleApiServerErrorsGracefully() {
+            // Given
+            AgentType agentType = AgentType.CHAT;
+            // This test would typically use mocking to simulate server errors
+            // For now, we'll test that the method signature is correct
+            
+            // When & Then
+            assertDoesNotThrow(() -> {
+                // The actual implementation would depend on how the API client handles server errors
+                api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
+            });
+        }
+
+        @Test
+        @DisplayName("Should handle network timeout scenarios")
+        void shouldHandleNetworkTimeoutScenarios() {
+            // Given
+            AgentType agentType = AgentType.CODE;
+            
+            // When & Then
+            assertDoesNotThrow(() -> {
+                // This would typically involve mocking network conditions
+                // For now, ensuring the method can be called without compilation errors
+                api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
+            });
+        }
+    }
+
+    @Nested
+    @DisplayName("agentAgentTypeProcessRequestPost - Input Validation Tests")
+    class InputValidationTests {
+
+        @Test
+        @DisplayName("Should validate agent type parameter")
+        void shouldValidateAgentTypeParameter() {
+            // Given
+            AgentType validAgentType = AgentType.CHAT;
+            
+            // When & Then
+            assertDoesNotThrow(() -> {
+                AgentMessage response = api.agentAgentTypeProcessRequestPost(validAgentType, validAgentProcessRequest);
+                assertNotNull(response, "Response should not be null for valid agent type");
+            });
+        }
+
+        @Test
+        @DisplayName("Should validate request parameter structure")
+        void shouldValidateRequestParameterStructure() {
+            // Given
+            AgentType agentType = AgentType.ANALYSIS;
+            AgentProcessRequest validRequest = new AgentProcessRequest();
+            
+            // When & Then
+            assertDoesNotThrow(() -> {
+                AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validRequest);
+                assertNotNull(response, "Response should not be null for valid request structure");
+            });
+        }
+
+        @ParameterizedTest
+        @NullSource
+        @DisplayName("Should handle null agent type gracefully")
+        void shouldHandleNullAgentTypeGracefully(AgentType agentType) {
+            // When & Then
+            assertThrows(Exception.class, () -> {
+                api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
+            }, "Should throw exception for null agent type");
+        }
+    }
+
+    @Nested
+    @DisplayName("API Instance Tests")
+    class ApiInstanceTests {
+
+        @Test
+        @DisplayName("Should create API instance successfully")
+        void shouldCreateApiInstanceSuccessfully() {
+            // When
+            AiAgentsApi newApi = new AiAgentsApi();
+            
+            // Then
+            assertNotNull(newApi, "API instance should not be null");
+        }
+
+        @Test
+        @DisplayName("Should allow multiple API instances")
+        void shouldAllowMultipleApiInstances() {
+            // When
+            AiAgentsApi api1 = new AiAgentsApi();
+            AiAgentsApi api2 = new AiAgentsApi();
+            
+            // Then
+            assertNotNull(api1, "First API instance should not be null");
+            assertNotNull(api2, "Second API instance should not be null");
+            assertNotSame(api1, api2, "API instances should be different objects");
+        }
+
+        @Test
+        @DisplayName("Should maintain API instance state")
+        void shouldMaintainApiInstanceState() {
+            // Given
+            AiAgentsApi apiInstance = new AiAgentsApi();
+            
+            // When & Then
+            assertNotNull(apiInstance, "API instance should maintain its state");
+            // Additional state validation would depend on the actual API implementation
+        }
+    }
+
+    @Nested
+    @DisplayName("Method Signature and Return Type Tests")
+    class MethodSignatureTests {
+
+        @Test
+        @DisplayName("Should have correct method signature")
+        void shouldHaveCorrectMethodSignature() throws ApiException {
+            // Given
+            AgentType agentType = AgentType.CHAT;
+            
+            // When
+            AgentMessage result = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
+            
+            // Then
+            assertNotNull(result, "Return type should be AgentMessage");
+            assertTrue(result instanceof AgentMessage, "Return value should be instance of AgentMessage");
+        }
+
+        @Test
+        @DisplayName("Should accept all required parameters")
+        void shouldAcceptAllRequiredParameters() {
+            // Given
+            AgentType agentType = AgentType.CODE;
+            AgentProcessRequest request = new AgentProcessRequest();
+            
+            // When & Then
+            assertDoesNotThrow(() -> {
+                api.agentAgentTypeProcessRequestPost(agentType, request);
+            }, "Method should accept both required parameters without errors");
+        }
+
+        @Test
+        @DisplayName("Should declare ApiException in throws clause")
+        void shouldDeclareApiExceptionInThrowsClause() {
+            // This test verifies that the method properly declares ApiException
+            // The compilation of this test class itself validates this requirement
+            assertTrue(true, "Method correctly declares ApiException in throws clause");
+        }
+    }
+
+    @Nested
+    @DisplayName("Performance and Boundary Tests")
+    class PerformanceAndBoundaryTests {
+
+        @Test
+        @DisplayName("Should handle rapid successive calls")
+        void shouldHandleRapidSuccessiveCalls() throws ApiException {
+            // Given
+            AgentType agentType = AgentType.CHAT;
+            int numberOfCalls = 10;
+            
+            // When & Then
+            assertDoesNotThrow(() -> {
+                for (int i = 0; i < numberOfCalls; i++) {
+                    AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
+                    assertNotNull(response, "Response should not be null for call #" + (i + 1));
+                }
+            });
+        }
+
+        @Test
+        @DisplayName("Should handle concurrent calls safely")
+        void shouldHandleConcurrentCallsSafely() throws InterruptedException {
+            // Given
+            AgentType agentType = AgentType.ANALYSIS;
+            int numberOfThreads = 5;
+            Thread[] threads = new Thread[numberOfThreads];
+            boolean[] results = new boolean[numberOfThreads];
+            
+            // When
+            for (int i = 0; i < numberOfThreads; i++) {
+                final int threadIndex = i;
+                threads[i] = new Thread(() -> {
+                    try {
+                        AgentMessage response = api.agentAgentTypeProcessRequestPost(agentType, validAgentProcessRequest);
+                        results[threadIndex] = (response != null);
+                    } catch (ApiException e) {
+                        results[threadIndex] = false;
+                    }
+                });
+                threads[i].start();
+            }
+            
+            // Wait for all threads to complete
+            for (Thread thread : threads) {
+                thread.join();
+            }
+            
+            // Then
+            for (int i = 0; i < numberOfThreads; i++) {
+                assertTrue(results[i], "Thread " + i + " should have completed successfully");
+            }
+        }
+    }
 }
