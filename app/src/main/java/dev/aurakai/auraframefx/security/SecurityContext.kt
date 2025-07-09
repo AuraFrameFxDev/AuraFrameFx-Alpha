@@ -172,7 +172,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Encrypt sensitive data using Keystore.
+     * Encrypts the provided string using the Android Keystore with AES/CBC/PKCS7Padding.
+     *
+     * Attempts to initialize the encryption subsystem if it is not already active. Returns an `EncryptedData` object containing the encrypted bytes, initialization vector, timestamp, and metadata, or null if encryption fails.
+     *
+     * @param data The plaintext string to encrypt.
+     * @return The encrypted data and associated metadata, or null if encryption is unsuccessful.
      */
     fun encrypt(data: String): EncryptedData? {
         if (_encryptionStatus.value != EncryptionStatus.ACTIVE) {
@@ -270,13 +275,13 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Creates a shared secure context for communication with another agent.
+     * Creates a shared secure context for communication with a specified agent.
      *
-     * Generates a unique identifier and timestamp, and packages the provided context for sharing. The content is not encrypted in this implementation.
+     * Generates a unique identifier and timestamp, and packages the provided context data for sharing. The content is included as a byte array and is not encrypted in this implementation.
      *
-     * @param agentType The target agent to share the context with.
-     * @param context The context data to be shared.
-     * @return A SharedSecureContext containing the packaged context and metadata.
+     * @param agentType The agent with whom the context will be shared.
+     * @param context The context data to share.
+     * @return A SharedSecureContext containing the packaged context and associated metadata.
      */
     fun shareSecureContextWith(agentType: AgentType, context: String): SharedSecureContext {
         val secureId = generateSecureId()
@@ -293,9 +298,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Checks the application's integrity by retrieving and hashing its signature.
+     * Verifies the application's integrity by retrieving its signature, computing a SHA-256 hash, and collecting app metadata.
      *
-     * Returns an [ApplicationIntegrity] object containing verification status, app version, signature hash, install and update times, and error information if verification fails.
+     * Returns an [ApplicationIntegrity] object containing the verification result, app version, signature hash, install and update times, and error information if verification fails.
+     *
+     * @return An [ApplicationIntegrity] instance with integrity verification details and metadata.
      */
     fun verifyApplicationIntegrity(): ApplicationIntegrity {
         try {
@@ -350,7 +357,7 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Simulates detection of security threats for testing and beta purposes.
+     * Simulates the detection of security threats for testing and beta environments.
      *
      * @return A randomly generated list of simulated security threats.
      */
@@ -376,12 +383,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Determines the overall threat level based on the highest severity found in the provided list of security threats.
+     * Determines the overall threat level based on the highest severity among the provided security threats.
      *
      * Returns `ThreatLevel.LOW` if the list is empty.
      *
-     * @param threats The list of detected security threats.
-     * @return The highest threat level among the threats, or `ThreatLevel.LOW` if the list is empty.
+     * @param threats List of detected security threats to evaluate.
+     * @return The highest threat level present, or `ThreatLevel.LOW` if no threats are provided.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -399,7 +406,7 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Generates a random 16-byte hexadecimal string for use as a secure identifier.
+     * Generates a random 16-byte hexadecimal string to serve as a secure identifier.
      *
      * @return A securely generated 32-character hexadecimal ID.
      */
@@ -410,11 +417,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Asynchronously logs a security event for auditing and monitoring.
+     * Asynchronously logs a security event for auditing and monitoring purposes.
      *
-     * The event is serialized and written to the debug log. In production environments, events should be securely persisted.
+     * The event is serialized and written to the debug log. In production, events should be securely persisted rather than logged.
      *
-     * @param event The security event to log.
+     * @param event The security event to be logged.
      */
     fun logSecurityEvent(event: SecurityEvent) {
         scope.launch {
@@ -425,11 +432,11 @@ class SecurityContext @Inject constructor(
             // In a real implementation, this would store events securely
         }
     }    /**
-     * Logs a security validation event for the specified request type and data.
+     * Records a security validation event for the given request type and data for auditing purposes.
      *
-     * This method records the validation event for auditing but does not perform any actual validation.
+     * This function logs the validation event but does not perform any actual validation of the request.
      *
-     * @param requestType The type of request being logged.
+     * @param requestType The type of request being audited.
      * @param requestData The data associated with the request.
      */
     fun validateRequest(requestType: String, requestData: String) {

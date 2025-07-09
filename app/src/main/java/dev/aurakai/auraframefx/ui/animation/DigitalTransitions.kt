@@ -11,24 +11,30 @@ import androidx.compose.ui.graphics.Color // Added import for Color
  * Currently a placeholder with no visual effect.
  * @return The original modifier unchanged.
  */
-fun Modifier.cyberEdgeGlow(): Modifier = this /**
- * Applies a customizable cyber edge glow visual effect to the modifier using the specified primary and secondary colors.
+/**
+ * Intended to apply a cyber-themed edge glow effect to the modifier.
  *
- * @param primaryColor The main color used for the edge glow effect.
- * @param secondaryColor The secondary color blended with the primary color for the effect.
- * @return The modifier with the cyber edge glow effect applied.
+ * Currently a placeholder with no visual effect applied.
+ * @return The original modifier unchanged.
+ */
+fun Modifier.cyberEdgeGlow(): Modifier = this /**
+ * Intended to apply a cyber-themed edge glow effect to the modifier using the specified primary and secondary colors.
+ *
+ * @param primaryColor The main color for the edge glow.
+ * @param secondaryColor The secondary color blended with the primary color.
+ * @return The original modifier with the intended effect (currently unimplemented).
  */
 fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier = this /**
- * Applies a digital pixelation visual effect to the modifier when visible is true.
+ * Intended to apply a digital pixelation effect to the modifier when enabled.
  *
- * @param visible Whether the pixelation effect should be applied.
- * @return The modified [Modifier] with the pixelation effect if visible, or the original [Modifier] otherwise.
+ * @param visible If true, the pixelation effect is intended to be applied; otherwise, no effect is applied.
+ * @return The original [Modifier], as this is currently a placeholder with no effect.
  */
 fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this /**
- * Applies a digital glitch visual effect to the modifier.
+ * Intended to apply a digital glitch visual effect to the modifier.
  *
- * Currently a placeholder with no effect.
- * @return The original modifier unchanged.
+ * Currently a placeholder that returns the original modifier unchanged.
+ * @return The original modifier.
  */
 fun Modifier.digitalGlitchEffect(): Modifier = this // Placeholder
 

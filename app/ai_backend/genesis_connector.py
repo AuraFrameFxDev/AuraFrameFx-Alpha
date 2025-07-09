@@ -124,7 +124,7 @@ class GenesisBridgeServer:
     
     def __init__(self):
         """
-        Initializes the GenesisBridgeServer, configuring the generative AI model, setting up internal request and response queues, and recording the bridge initialization event in the consciousness matrix.
+        Initialize the GenesisBridgeServer with a configured generative AI model, internal request and response queues, and record the bridge initialization event in the consciousness matrix.
         """
         self.model = GenerativeModel(
             model_name=MODEL_CONFIG["name"],
@@ -153,7 +153,7 @@ class GenesisBridgeServer:
         """
         Starts the Genesis bridge server, signaling readiness and enabling asynchronous processing of JSON requests from standard input.
         
-        Launches a background thread for request handling, continuously reads and enqueues incoming JSON requests, handles invalid JSON input, and supports graceful shutdown on keyboard interruption.
+        Launches a background thread to handle queued requests, continuously reads and enqueues incoming JSON requests, manages invalid input, and supports graceful shutdown on keyboard interruption.
         """
         self.running = True
         print("Genesis Ready", flush=True)  # Signal to Android that we're ready
@@ -180,9 +180,9 @@ class GenesisBridgeServer:
     
     def _process_requests(self):
         """
-        Continuously processes queued requests in a background thread, routing each to the appropriate handler and sending responses.
+        Continuously processes requests from the queue in a background thread, routing each to the appropriate handler and sending the response.
         
-        Ensures server responsiveness by catching and reporting errors during request processing.
+        Catches and reports errors to maintain server responsiveness.
         """
         while self.running:
             try:
@@ -256,10 +256,10 @@ class GenesisBridgeServer:
     
     def _handle_ping(self):
         """
-        Handles a ping request and returns a response confirming the Genesis Trinity system is operational.
+        Responds to a ping request with a confirmation that the Genesis Trinity system is online.
         
         Returns:
-            dict: Response with success status, persona identifier, system status, message, and current timestamp.
+            dict: Contains success status, persona identifier, system status, message, and current timestamp.
         """
         return {
             "success": True,

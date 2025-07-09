@@ -53,13 +53,13 @@ val LocalMoodGlow = compositionLocalOf { Color.Transparent }
 val LocalMoodState = compositionLocalOf { Emotion.NEUTRAL }
 
 /**
- * Applies the AuraFrameFX theme and mood-based dynamic theming to the given composable content.
+ * Applies the AuraFrameFX theme and mood-adaptive dynamic theming to the provided composable content.
  *
- * Selects a color scheme (dark, light, or dynamic based on device support and parameters), updates the system status bar appearance, and provides mood-driven glow and emotion state to the composition. Integrates Aura's mood system for adaptive UI theming.
+ * Selects and applies a color scheme (dark, light, or dynamic based on device support and parameters), updates the system status bar appearance to match the theme, and supplies mood-driven glow color and emotion state to the composition. Integrates Aura's mood system for adaptive UI theming.
  *
- * @param darkTheme If true, uses the dark theme; otherwise, uses the light theme. Defaults to the system setting.
- * @param dynamicColor If true, enables dynamic color schemes on supported devices (Android 12+). Defaults to true.
- * @param moodViewModel ViewModel managing the current mood state.
+ * @param darkTheme Whether to use the dark theme; defaults to the system setting.
+ * @param dynamicColor Whether to enable dynamic color schemes on supported devices (Android 12+); defaults to true.
+ * @param moodViewModel ViewModel providing the current mood state.
  * @param content The composable content to which the theme and mood context are applied.
  */
 @Composable
@@ -105,9 +105,15 @@ fun AuraFrameFXTheme(
 }
 
 /**
- * Returns a color for the mood glow effect based on the given emotion, intensity, and color scheme.
+ * Computes the glow color for a given emotion and intensity, using the provided color scheme as a fallback.
  *
- * The color and its transparency are determined by the emotion and intensity, with a fallback to the primary color of the provided color scheme.
+ * The returned color is selected based on the emotion, with its alpha transparency modulated by the intensity value.
+ * If the emotion is not recognized, the primary color from the base color scheme is used with reduced alpha.
+ *
+ * @param emotion The current emotion to represent.
+ * @param intensity The strength of the emotion, affecting the color's transparency.
+ * @param baseColorScheme The color scheme to use for fallback coloring.
+ * @return The computed glow color with appropriate transparency.
  */
 private fun getMoodGlowColor(
     emotion: Emotion,
