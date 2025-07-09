@@ -25,11 +25,11 @@ class ErrorHandler @Inject constructor(
     val errorStats: StateFlow<ErrorStats> = _errorStats
 
     /**
-     * Processes an error by determining its type, recording its details, updating error statistics, and initiating recovery actions.
+     * Handles an error by categorizing it, recording its details, updating error statistics, and triggering recovery actions.
      *
      * All metadata values are converted to strings before being stored in the error record.
      *
-     * @param agent The agent involved in the error event.
+     * @param agent The agent associated with the error event.
      * @param context Description of where or how the error occurred.
      * @param metadata Additional information about the error; all values are stringified.
      * @return The AIError instance representing the recorded error.
