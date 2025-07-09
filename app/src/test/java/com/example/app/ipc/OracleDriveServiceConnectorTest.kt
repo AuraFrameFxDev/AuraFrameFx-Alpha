@@ -1183,3 +1183,661 @@ class ServiceDegradedException(message: String) : Exception(message)
 // Additional data classes for testing
 data class UploadResult(val uploadId: String, val checksum: String)
 data class ResourceUsageStats(val connectionsCreated: Int, val memoryUsed: Long)
+    @Nested
+    @DisplayName("Security and Authentication Edge Cases")
+    inner class SecurityAuthenticationEdgeCases {
+        
+        @Test
+        @DisplayName("Should handle token refresh race conditions")
+        fun testTokenRefreshRaceConditions() = runTest {
+            // Given
+            val expiredToken = Credentials("expired", "endpoint")
+            val refreshedToken = Credentials("refreshed", "endpoint")
+            
+            whenever(mockAuthProvider.getCredentials())
+                .thenReturn(expiredToken)
+                .thenReturn(refreshedToken)
+            whenever(mockConnectionManager.connect(expiredToken))
+                .thenThrow(SecurityException("Token expired"))
+            whenever(mockConnectionManager.connect(refreshedToken))
+                .thenReturn(true)
+            
+            // When - simulate concurrent token refresh attempts
+            val results = (1..10).map {
+                async { connector.connectWithTokenRefresh() }
+            }
+            
+            // Then
+            results.forEach { result ->
+                assertTrue(result.await())
+            }
+            verify(mockAuthProvider, atLeast(1)).getCredentials()
+        }
+        
+        @Test
+        @DisplayName("Should handle malformed authentication tokens")
+        fun testMalformedAuthenticationTokens() = runTest {
+            // Given
+            val malformedCredentials = Credentials("invalid-token-format", "endpoint")
+            whenever(mockAuthProvider.getCredentials()).thenReturn(malformedCredentials)
+            whenever(mockConnectionManager.connect(any()))
+                .thenThrow(SecurityException("Invalid token format"))
+            
+            // When & Then
+            assertThrows<SecurityException> {
+                connector.connect()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle authentication with expired certificates")
+        fun testExpiredCertificateHandling() = runTest {
+            // Given
+            val credentials = Credentials("valid_token", "endpoint")
+            whenever(mockAuthProvider.getCredentials()).thenReturn(credentials)
+            whenever(mockConnectionManager.connect(any()))
+                .thenThrow(CertificateExpiredException("Certificate expired"))
+            
+            // When & Then
+            assertThrows<CertificateExpiredException> {
+                connector.connect()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle privilege escalation attempts")
+        fun testPrivilegeEscalationAttempts() = runTest {
+            // Given
+            val fileName = "../../../etc/passwd"
+            val fileData = "malicious content".toByteArray()
+            
+            // When & Then
+            assertThrows<SecurityException> {
+                connector.uploadFile(fileName, fileData)
+            }
+        }
+        
+        @Test
+        @DisplayName("Should sanitize file names to prevent path traversal")
+        fun testFileNameSanitization() = runTest {
+            // Given
+            val maliciousFileNames = listOf(
+                "..\\..\\windows\\system32\\config\\sam",
+                "../../../../etc/shadow",
+                "file\u0000.txt",
+                "con.txt",
+                "prn.log"
+            )
+            val fileData = "content".toByteArray()
+            
+            // When & Then
+            maliciousFileNames.forEach { fileName ->
+                assertThrows<IllegalArgumentException> {
+                    connector.uploadFile(fileName, fileData)
+                }
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle multi-factor authentication failures")
+        fun testMultiFactorAuthenticationFailures() = runTest {
+            // Given
+            whenever(mockAuthProvider.getCredentials())
+                .thenThrow(MfaRequiredException("Multi-factor authentication required"))
+            
+            // When & Then
+            assertThrows<MfaRequiredException> {
+                connector.connect()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle role-based access control violations")
+        fun testRoleBasedAccessControlViolations() = runTest {
+            // Given
+            val fileName = "admin_only_file.txt"
+            val fileData = "restricted content".toByteArray()
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(
+                    InsufficientPermissionsException("Access denied: insufficient permissions")))
+            
+            // When & Then
+            assertThrows<InsufficientPermissionsException> {
+                connector.uploadFile(fileName, fileData).get()
+            }
+        }
+    }
+    
+    @Nested
+    @DisplayName("Data Validation and Integrity Tests")
+    inner class DataValidationIntegrityTests {
+        
+        @Test
+        @DisplayName("Should validate file size limits")
+        fun testFileSizeLimits() = runTest {
+            // Given
+            val tooLargeFile = ByteArray(1024 * 1024 * 1024) // 1GB
+            val fileName = "too_large.dat"
+            
+            // When & Then
+            assertThrows<FileSizeExceededException> {
+                connector.uploadFile(fileName, tooLargeFile)
+            }
+        }
+        
+        @Test
+        @DisplayName("Should validate file content types")
+        fun testFileContentTypeValidation() = runTest {
+            // Given
+            val executableContent = byteArrayOf(0x4D, 0x5A) // MZ header for PE executable
+            val fileName = "malicious.exe"
+            
+            // When & Then
+            assertThrows<UnsupportedFileTypeException> {
+                connector.uploadFile(fileName, executableContent)
+            }
+        }
+        
+        @Test
+        @DisplayName("Should detect and prevent file corruption during upload")
+        fun testFileCorruptionDetection() = runTest {
+            // Given
+            val originalData = "original content".toByteArray()
+            val corruptedData = "corrupted content".toByteArray()
+            val fileName = "integrity_test.txt"
+            val originalChecksum = "original_checksum"
+            
+            whenever(mockServiceClient.uploadFileWithChecksum(any(), any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(
+                    ChecksumMismatchException("Checksum mismatch detected")))
+            
+            // When & Then
+            assertThrows<ChecksumMismatchException> {
+                connector.uploadFileWithChecksum(fileName, corruptedData, originalChecksum).get()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should validate metadata consistency")
+        fun testMetadataConsistency() = runTest {
+            // Given
+            val fileName = "metadata_test.txt"
+            val fileData = "content".toByteArray()
+            val inconsistentMetadata = mapOf(
+                "size" to "100",
+                "actual_size" to "50"
+            )
+            
+            whenever(mockServiceClient.uploadFileWithMetadata(any(), any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(
+                    MetadataInconsistencyException("Metadata inconsistent with file content")))
+            
+            // When & Then
+            assertThrows<MetadataInconsistencyException> {
+                connector.uploadFileWithMetadata(fileName, fileData, inconsistentMetadata).get()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle encoding issues with international characters")
+        fun testEncodingIssuesWithInternationalCharacters() = runTest {
+            // Given
+            val fileName = "测试_файл_🎯.txt"
+            val internationalContent = "Hello 世界! Привет мир! 🌍".toByteArray(Charsets.UTF_8)
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture("international_upload"))
+            
+            // When
+            val result = connector.uploadFile(fileName, internationalContent)
+            
+            // Then
+            assertEquals("international_upload", result.get())
+            verify(mockServiceClient).uploadFile(fileName, internationalContent)
+        }
+        
+        @Test
+        @DisplayName("Should validate file name length limits")
+        fun testFileNameLengthLimits() = runTest {
+            // Given
+            val tooLongFileName = "a".repeat(256) + ".txt"
+            val fileData = "content".toByteArray()
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                connector.uploadFile(tooLongFileName, fileData)
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle zero-byte files appropriately")
+        fun testZeroByteFiles() = runTest {
+            // Given
+            val zeroByteFile = ByteArray(0)
+            val fileName = "zero_byte.txt"
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                connector.uploadFile(fileName, zeroByteFile)
+            }
+        }
+    }
+    
+    @Nested
+    @DisplayName("Advanced Network and Connectivity Tests")
+    inner class AdvancedNetworkConnectivityTests {
+        
+        @Test
+        @DisplayName("Should handle network partition scenarios")
+        fun testNetworkPartitionScenarios() = runTest {
+            // Given
+            val fileName = "partition_test.txt"
+            val fileData = "content".toByteArray()
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(
+                    NetworkPartitionException("Network partition detected")))
+            
+            // When & Then
+            assertThrows<NetworkPartitionException> {
+                connector.uploadFile(fileName, fileData).get()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle DNS resolution failures")
+        fun testDnsResolutionFailures() = runTest {
+            // Given
+            val unreachableCredentials = Credentials("token", "nonexistent.example.com")
+            whenever(mockAuthProvider.getCredentials()).thenReturn(unreachableCredentials)
+            whenever(mockConnectionManager.connect(any()))
+                .thenThrow(UnknownHostException("DNS resolution failed"))
+            
+            // When & Then
+            assertThrows<UnknownHostException> {
+                connector.connect()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle SSL/TLS handshake failures")
+        fun testSslTlsHandshakeFailures() = runTest {
+            // Given
+            val credentials = Credentials("token", "ssl-invalid.example.com")
+            whenever(mockAuthProvider.getCredentials()).thenReturn(credentials)
+            whenever(mockConnectionManager.connect(any()))
+                .thenThrow(SSLHandshakeException("SSL handshake failed"))
+            
+            // When & Then
+            assertThrows<SSLHandshakeException> {
+                connector.connect()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle proxy authentication failures")
+        fun testProxyAuthenticationFailures() = runTest {
+            // Given
+            val credentials = Credentials("token", "endpoint")
+            whenever(mockAuthProvider.getCredentials()).thenReturn(credentials)
+            whenever(mockConnectionManager.connect(any()))
+                .thenThrow(ProxyAuthenticationException("Proxy authentication failed"))
+            
+            // When & Then
+            assertThrows<ProxyAuthenticationException> {
+                connector.connect()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle network congestion gracefully")
+        fun testNetworkCongestionHandling() = runTest {
+            // Given
+            val fileName = "congestion_test.txt"
+            val fileData = "content".toByteArray()
+            val slowFuture = CompletableFuture<String>()
+            
+            whenever(mockServiceClient.uploadFile(any(), any())).thenReturn(slowFuture)
+            
+            // When
+            val uploadFuture = connector.uploadFile(fileName, fileData)
+            
+            // Simulate slow network by completing after delay
+            async {
+                delay(2000)
+                slowFuture.complete("slow_upload")
+            }
+            
+            // Then
+            assertEquals("slow_upload", uploadFuture.get())
+        }
+        
+        @Test
+        @DisplayName("Should handle intermittent connectivity issues")
+        fun testIntermittentConnectivityIssues() = runTest {
+            // Given
+            val fileName = "intermittent_test.txt"
+            val fileData = "content".toByteArray()
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(IOException("Connection reset")))
+                .thenReturn(CompletableFuture.failedFuture(IOException("Connection timeout")))
+                .thenReturn(CompletableFuture.completedFuture("intermittent_success"))
+            
+            // When
+            val result = connector.uploadFileWithRetry(fileName, fileData, maxRetries = 3)
+            
+            // Then
+            assertEquals("intermittent_success", result.get())
+            verify(mockServiceClient, times(3)).uploadFile(fileName, fileData)
+        }
+        
+        @Test
+        @DisplayName("Should handle bandwidth throttling")
+        fun testBandwidthThrottling() = runTest {
+            // Given
+            val largeFile = ByteArray(10 * 1024 * 1024) // 10MB
+            val fileName = "bandwidth_test.dat"
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(
+                    BandwidthThrottledException("Bandwidth limit exceeded")))
+                .thenReturn(CompletableFuture.completedFuture("throttled_upload"))
+            
+            // When
+            val result = connector.uploadFileWithThrottling(fileName, largeFile)
+            
+            // Then
+            assertEquals("throttled_upload", result.get())
+            verify(mockServiceClient, times(2)).uploadFile(fileName, largeFile)
+        }
+    }
+    
+    @Nested
+    @DisplayName("Advanced Error Recovery and Resilience Tests")
+    inner class AdvancedErrorRecoveryTests {
+        
+        @Test
+        @DisplayName("Should implement exponential backoff for retries")
+        fun testExponentialBackoffRetries() = runTest {
+            // Given
+            val fileName = "backoff_test.txt"
+            val fileData = "content".toByteArray()
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(IOException("Transient failure")))
+                .thenReturn(CompletableFuture.failedFuture(IOException("Transient failure")))
+                .thenReturn(CompletableFuture.completedFuture("backoff_success"))
+            
+            // When
+            val startTime = System.currentTimeMillis()
+            val result = connector.uploadFileWithExponentialBackoff(fileName, fileData)
+            val endTime = System.currentTimeMillis()
+            
+            // Then
+            assertEquals("backoff_success", result.get())
+            assertTrue(endTime - startTime >= 3000) // Should take at least 3 seconds due to backoff
+        }
+        
+        @Test
+        @DisplayName("Should implement circuit breaker pattern")
+        fun testCircuitBreakerPattern() = runTest {
+            // Given
+            val fileName = "circuit_breaker_test.txt"
+            val fileData = "content".toByteArray()
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(IOException("Service unavailable")))
+            
+            // When - trigger circuit breaker
+            repeat(5) {
+                assertThrows<IOException> {
+                    connector.uploadFile(fileName, fileData).get()
+                }
+            }
+            
+            // Then - circuit should be open
+            assertThrows<CircuitBreakerOpenException> {
+                connector.uploadFile(fileName, fileData).get()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle cascading failures gracefully")
+        fun testCascadingFailureHandling() = runTest {
+            // Given
+            val fileName = "cascade_test.txt"
+            val fileData = "content".toByteArray()
+            
+            whenever(mockConnectionManager.isConnected()).thenReturn(false)
+            whenever(mockAuthProvider.getCredentials()).thenThrow(SecurityException("Auth service down"))
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(ServiceUnavailableException("Service down")))
+            
+            // When & Then
+            assertThrows<SecurityException> {
+                connector.connect()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle bulkhead pattern for resource isolation")
+        fun testBulkheadPatternResourceIsolation() = runTest {
+            // Given
+            val uploadFileData = "upload content".toByteArray()
+            val downloadFileId = "download_file"
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(ResourceExhaustedException("Upload pool exhausted")))
+            whenever(mockServiceClient.downloadFile(any()))
+                .thenReturn(CompletableFuture.completedFuture("download content".toByteArray()))
+            
+            // When
+            val uploadResult = connector.uploadFile("upload.txt", uploadFileData)
+            val downloadResult = connector.downloadFile(downloadFileId)
+            
+            // Then - download should succeed even if upload fails
+            assertThrows<ResourceExhaustedException> {
+                uploadResult.get()
+            }
+            assertArrayEquals("download content".toByteArray(), downloadResult.get())
+        }
+        
+        @Test
+        @DisplayName("Should handle timeout escalation scenarios")
+        fun testTimeoutEscalationScenarios() = runTest {
+            // Given
+            val fileName = "timeout_escalation.txt"
+            val fileData = "content".toByteArray()
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(TimeoutException("Request timeout")))
+                .thenReturn(CompletableFuture.failedFuture(TimeoutException("Extended timeout")))
+                .thenReturn(CompletableFuture.completedFuture("escalation_success"))
+            
+            // When
+            val result = connector.uploadFileWithTimeoutEscalation(fileName, fileData)
+            
+            // Then
+            assertEquals("escalation_success", result.get())
+            verify(mockServiceClient, times(3)).uploadFile(fileName, fileData)
+        }
+    }
+    
+    @Nested
+    @DisplayName("Advanced Configuration and Environment Tests")
+    inner class AdvancedConfigurationTests {
+        
+        @Test
+        @DisplayName("Should handle configuration hot reloading")
+        fun testConfigurationHotReloading() = runTest {
+            // Given
+            val initialConfig = ConnectionConfig(timeout = 5000, retries = 3)
+            val updatedConfig = ConnectionConfig(timeout = 10000, retries = 5)
+            
+            whenever(mockConnectionManager.getConfig()).thenReturn(initialConfig)
+            
+            // When
+            connector.reloadConfiguration(updatedConfig)
+            
+            // Then
+            verify(mockConnectionManager).updateConfig(updatedConfig)
+        }
+        
+        @Test
+        @DisplayName("Should handle environment-specific configurations")
+        fun testEnvironmentSpecificConfigurations() = runTest {
+            // Given
+            val devConfig = EnvironmentConfig(environment = "development", debug = true)
+            val prodConfig = EnvironmentConfig(environment = "production", debug = false)
+            
+            // When
+            connector.setEnvironmentConfig(devConfig)
+            val devResult = connector.connect()
+            
+            connector.setEnvironmentConfig(prodConfig)
+            val prodResult = connector.connect()
+            
+            // Then
+            assertTrue(devResult)
+            assertTrue(prodResult)
+            verify(mockConnectionManager, times(2)).connect(any())
+        }
+        
+        @Test
+        @DisplayName("Should validate configuration parameters")
+        fun testConfigurationParameterValidation() = runTest {
+            // Given
+            val invalidConfig = ConnectionConfig(timeout = -1, retries = -1)
+            
+            // When & Then
+            assertThrows<IllegalArgumentException> {
+                connector.updateConfiguration(invalidConfig)
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle missing configuration gracefully")
+        fun testMissingConfigurationHandling() = runTest {
+            // Given
+            whenever(mockConnectionManager.getConfig()).thenReturn(null)
+            
+            // When & Then
+            assertThrows<ConfigurationException> {
+                connector.connect()
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle configuration file corruption")
+        fun testConfigurationFileCorruption() = runTest {
+            // Given
+            whenever(mockConnectionManager.loadConfiguration())
+                .thenThrow(ConfigurationCorruptedException("Configuration file corrupted"))
+            
+            // When & Then
+            assertThrows<ConfigurationCorruptedException> {
+                connector.initialize()
+            }
+        }
+    }
+    
+    @Nested
+    @DisplayName("Advanced Monitoring and Metrics Tests")
+    inner class AdvancedMonitoringTests {
+        
+        @Test
+        @DisplayName("Should track detailed performance metrics")
+        fun testDetailedPerformanceMetrics() = runTest {
+            // Given
+            val fileName = "metrics_test.txt"
+            val fileData = "content".toByteArray()
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture("metrics_upload"))
+            
+            // When
+            val result = connector.uploadFileWithMetrics(fileName, fileData)
+            
+            // Then
+            assertEquals("metrics_upload", result.get())
+            val metrics = connector.getPerformanceMetrics()
+            assertTrue(metrics.uploadCount > 0)
+            assertTrue(metrics.averageUploadTime > 0)
+        }
+        
+        @Test
+        @DisplayName("Should handle metrics collection failures")
+        fun testMetricsCollectionFailures() = runTest {
+            // Given
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture("upload_success"))
+            
+            // When - simulate metrics collection failure
+            connector.disableMetrics()
+            val result = connector.uploadFile("test.txt", "content".toByteArray())
+            
+            // Then - operation should still succeed
+            assertEquals("upload_success", result.get())
+        }
+        
+        @Test
+        @DisplayName("Should generate health check reports")
+        fun testHealthCheckReports() = runTest {
+            // Given
+            whenever(mockConnectionManager.isConnected()).thenReturn(true)
+            whenever(mockServiceClient.isHealthy()).thenReturn(true)
+            
+            // When
+            val healthReport = connector.generateHealthReport()
+            
+            // Then
+            assertTrue(healthReport.isHealthy)
+            assertEquals("HEALTHY", healthReport.status)
+            assertTrue(healthReport.checks.isNotEmpty())
+        }
+        
+        @Test
+        @DisplayName("Should handle alerting for critical failures")
+        fun testCriticalFailureAlerting() = runTest {
+            // Given
+            val criticalException = CriticalSystemException("Critical system failure")
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(criticalException))
+            
+            // When & Then
+            assertThrows<CriticalSystemException> {
+                connector.uploadFile("critical.txt", "content".toByteArray()).get()
+            }
+            
+            // Verify alert was triggered
+            verify(mockConnectionManager).triggerAlert(any())
+        }
+    }
+}
+
+// Additional exception classes for comprehensive testing
+class CertificateExpiredException(message: String) : Exception(message)
+class MfaRequiredException(message: String) : Exception(message)
+class InsufficientPermissionsException(message: String) : Exception(message)
+class FileSizeExceededException(message: String) : Exception(message)
+class UnsupportedFileTypeException(message: String) : Exception(message)
+class ChecksumMismatchException(message: String) : Exception(message)
+class MetadataInconsistencyException(message: String) : Exception(message)
+class NetworkPartitionException(message: String) : Exception(message)
+class UnknownHostException(message: String) : Exception(message)
+class SSLHandshakeException(message: String) : Exception(message)
+class ProxyAuthenticationException(message: String) : Exception(message)
+class BandwidthThrottledException(message: String) : Exception(message)
+class CircuitBreakerOpenException(message: String) : Exception(message)
+class ResourceExhaustedException(message: String) : Exception(message)
+class ConfigurationException(message: String) : Exception(message)
+class ConfigurationCorruptedException(message: String) : Exception(message)
+class CriticalSystemException(message: String) : Exception(message)
+
+// Additional data classes for testing
+data class ConnectionConfig(val timeout: Int, val retries: Int)
+data class EnvironmentConfig(val environment: String, val debug: Boolean)
+data class PerformanceMetrics(val uploadCount: Int, val averageUploadTime: Long)
+data class HealthReport(val isHealthy: Boolean, val status: String, val checks: List<String>)
