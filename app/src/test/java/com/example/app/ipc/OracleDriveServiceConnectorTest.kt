@@ -552,11 +552,7 @@ class OracleDriveServiceConnectorTest {
             verify(mockConnectionManager).connect(refreshedCredentials)
         }
     }
-}
-
-// Helper data classes for testing
-data class Credentials(val token: String, val endpoint: String)
-class ServiceUnavailableException(message: String) : Exception(message)
+    
     @Nested
     @DisplayName("Advanced Edge Cases and Boundary Tests")
     inner class AdvancedEdgeCasesTests {
@@ -1171,6 +1167,11 @@ class ServiceUnavailableException(message: String) : Exception(message)
             assertTrue(uploadFuture.isCancelled)
         }
     }
+}
+
+// Helper data classes for testing
+data class Credentials(val token: String, val endpoint: String)
+class ServiceUnavailableException(message: String) : Exception(message)
 
 // Additional exception classes for comprehensive testing
 class RateLimitException(message: String) : Exception(message)

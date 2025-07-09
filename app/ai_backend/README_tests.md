@@ -2,8 +2,8 @@
 
 ## Testing Framework
 
-**Primary Framework**:  (Python standard library)
-**Additional Framework**:  (for parametrized tests)
+**Primary Framework**: unittest (Python standard library)  
+**Additional Framework**: pytest (for parametrized tests)
 
 ## Test Coverage
 
