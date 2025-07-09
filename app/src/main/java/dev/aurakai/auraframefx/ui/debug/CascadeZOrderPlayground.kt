@@ -135,8 +135,14 @@ fun CascadeZOrderPlayground(
 
     // Update node states when view model states change
     LaunchedEffect(visionState, processingState) {
-        nodes.find { it.type == NodeType.VISION }?.state = visionState
-        nodes.find { it.type == NodeType.PROCESSING }?.state = processingState
+        val visionNodeIndex = nodes.indexOfFirst { it.type == NodeType.VISION }
+        if (visionNodeIndex != -1) {
+            nodes[visionNodeIndex] = nodes[visionNodeIndex].withUpdatedState(visionState)
+        }
+        val processingNodeIndex = nodes.indexOfFirst { it.type == NodeType.PROCESSING }
+        if (processingNodeIndex != -1) {
+            nodes[processingNodeIndex] = nodes[processingNodeIndex].withUpdatedState(processingState)
+        }
     }
 
     Scaffold(
@@ -264,7 +270,7 @@ private fun NodeDetails(node: GraphNode) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = node.state ?: "No data",
+                text = node.state?.toString() ?: "No data",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -301,7 +307,7 @@ private fun NodeDetails(node: GraphNode) {
                     modifier = Modifier.padding(vertical = 2.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Circle,
+                        imageVector = Icons.Filled.Circle, // Changed from Default to Filled
                         contentDescription = null,
                         tint = node.type.color,
                         modifier = Modifier.size(8.dp)
