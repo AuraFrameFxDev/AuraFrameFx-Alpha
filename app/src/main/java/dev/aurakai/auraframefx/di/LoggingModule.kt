@@ -6,10 +6,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import dev.aurakai.auraframefx.ai.services.KaiAIService
 import dev.aurakai.auraframefx.data.logging.AuraFxLogger
-import javax.inject.Singleton
 import dev.aurakai.auraframefx.data.logging.AuraFxLogger as AuraFxLoggerImpl
+import dev.aurakai.auraframefx.ai.services.KaiAIService
+import javax.inject.Singleton
 
 /**
  * Hilt Module for providing logging dependencies.
@@ -21,7 +21,7 @@ object LoggingModule {
     /**
      * Provides a singleton instance of `AuraFxLogger` for application-wide logging.
      *
-     * @param context The application context used by the logger.
+     * @param context The application context used by the logger implementation.
      * @param kaiService The KaiAIService dependency required by the logger.
      * @return A singleton implementation of `AuraFxLogger`.
      */

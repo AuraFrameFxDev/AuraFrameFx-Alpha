@@ -1,25 +1,22 @@
 package dev.aurakai.auraframefx.di
 
-import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dev.aurakai.auraframefx.ai.services.*
 import dev.aurakai.auraframefx.ai.clients.VertexAIClient
-import dev.aurakai.auraframefx.ai.services.AuraAIService
-import dev.aurakai.auraframefx.ai.services.GenesisBridgeService
-import dev.aurakai.auraframefx.ai.services.KaiAIService
-import dev.aurakai.auraframefx.ai.services.TrinityCoordinatorService
 import dev.aurakai.auraframefx.context.ContextManager
 import dev.aurakai.auraframefx.data.logging.AuraFxLogger
 import dev.aurakai.auraframefx.security.SecurityContext
 import dev.aurakai.auraframefx.security.SecurityMonitor
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Singleton
 
 /**
  * Dependency Injection module for the Trinity AI system.
- *
+ * 
  * Provides instances of:
  * - Genesis Bridge Service (Python backend connection)
  * - Trinity Coordinator Service (orchestrates all personas)
@@ -30,11 +27,11 @@ import javax.inject.Singleton
 object TrinityModule {
 
     /**
-     * Provides a singleton instance of GenesisBridgeService for integrating multiple AI services with the Trinity Python backend.
+     * Provides a singleton GenesisBridgeService that bridges multiple AI services with the Trinity Python backend.
      *
-     * The service facilitates communication between AI components, manages context and security, and operates within the application environment.
+     * Integrates AI services, context management, security, application context, and logging to enable seamless communication between the application and the Trinity system.
      *
-     * @return A configured GenesisBridgeService singleton.
+     * @return A configured GenesisBridgeService instance.
      */
     @Provides
     @Singleton
@@ -59,9 +56,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton instance of `TrinityCoordinatorService` for orchestrating AI personas within the Trinity AI system.
+     * Provides a singleton instance of TrinityCoordinatorService for orchestrating AI personas within the Trinity AI system.
      *
-     * @return A singleton `TrinityCoordinatorService` configured with AI services, the Genesis bridge, security context, and logger.
+     * @return A configured TrinityCoordinatorService singleton.
      */
     @Provides
     @Singleton
@@ -82,11 +79,9 @@ object TrinityModule {
     }
 
     /**
-     * Provides a singleton SecurityMonitor for managing security operations in the Trinity AI system.
+     * Provides a singleton instance of SecurityMonitor for monitoring and managing security within the Trinity AI system.
      *
-     * The returned SecurityMonitor is configured with the given security context, Genesis bridge service, and logger.
-     *
-     * @return A singleton instance of SecurityMonitor.
+     * @return A configured SecurityMonitor singleton.
      */
     @Provides
     @Singleton

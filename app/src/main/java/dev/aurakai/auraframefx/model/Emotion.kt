@@ -2,66 +2,68 @@ package dev.aurakai.auraframefx.model
 
 /**
  * Emotion states for Aura's mood system
- *
+ * 
  * These emotions drive the dynamic theming and personality
  * of the AuraFrameFX interface.
  */
 enum class Emotion {
     /** Bright, energetic, optimistic */
     HAPPY,
-
+    
     /** Calm, peaceful, balanced */
     SERENE,
-
+    
     /** Intense, passionate, fiery */
     ANGRY,
-
+    
     /** Thoughtful, analytical, deep */
     CONTEMPLATIVE,
-
+    
     /** Playful, mischievous, chaotic */
     MISCHIEVOUS,
-
+    
     /** Focused, determined, powerful */
     FOCUSED,
-
+    
     /** Sad, melancholic, withdrawn */
     MELANCHOLIC,
-
+    
     /** Excited, enthusiastic, energetic */
     EXCITED,
-
+    
     /** Mysterious, enigmatic, shadowy */
     MYSTERIOUS,
-
+    
     /** Confident, bold, commanding */
     CONFIDENT,
-
+    
     /** Neutral baseline state */
     NEUTRAL,
-
+    
     /** Legacy emotions for compatibility */
     SAD,
     SURPRISED,
     CALM;
-
+    
     companion object {
         /**
-         * Selects and returns a random Emotion from all available values.
-         *
-         * @return A randomly chosen Emotion.
-         */
+ * Selects and returns a random emotion from all defined Emotion values.
+ *
+ * Useful for generating unpredictable or varied emotional states.
+ *
+ * @return A randomly chosen Emotion.
+ */
         fun random(): Emotion = values().random()
-
+        
         /**
-         * Returns the Emotion corresponding to the given string, ignoring case.
-         *
-         * If the input does not match any defined emotion, NEUTRAL is returned.
-         *
-         * @param name The name of the emotion to look up.
-         * @return The matching Emotion, or NEUTRAL if no match exists.
-         */
-        fun fromString(name: String): Emotion =
+             * Returns the Emotion that matches the given string, ignoring case.
+             *
+             * If the input does not match any defined emotion, NEUTRAL is returned.
+             *
+             * @param name The string to match against emotion names.
+             * @return The corresponding Emotion, or NEUTRAL if no match is found.
+             */
+        fun fromString(name: String): Emotion = 
             values().find { it.name.equals(name, ignoreCase = true) } ?: NEUTRAL
     }
 }
@@ -76,10 +78,10 @@ data class MoodState(
 ) {
     /** Check if this mood is considered "active" (high intensity) */
     val isActive: Boolean get() = intensity > 0.6f
-
+    
     /** Check if this mood is subtle (low intensity) */
     val isSubtle: Boolean get() = intensity < 0.3f
-
+    
     /** Get age of this mood in seconds */
     val ageSeconds: Long get() = (System.currentTimeMillis() - timestamp) / 1000
 }

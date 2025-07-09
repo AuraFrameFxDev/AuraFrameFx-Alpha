@@ -1,16 +1,14 @@
 package dev.aurakai.auraframefx.ai.memory
 
-import dev.aurakai.auraframefx.model.AgentType
-import dev.aurakai.auraframefx.serialization.InstantSerializer
+import dev.aurakai.auraframefx.model.AgentType // Keep one import
+import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CanonicalMemoryItem(
-    // Renamed from MemoryItem
-    val id: String = "mem_${System.currentTimeMillis()}",
+data class MemoryItem(
+    val id: String = "mem_${Clock.System.now().toEpochMilliseconds()}",
     val content: String,
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val agent: AgentType,
@@ -33,7 +31,7 @@ data class MemoryQuery(
 
 @Serializable
 data class MemoryRetrievalResult(
-    @Contextual val items: List<CanonicalMemoryItem>, // Changed MemoryItem to CanonicalMemoryItem
+    val items: List<MemoryItem>,
     val total: Int,
     val query: MemoryQuery,
 )

@@ -1,15 +1,14 @@
 package dev.aurakai.auraframefx.ai.task.execution
 
-// Removed import kotlinx.datetime.Clock.System as System is now java.lang.System
 import dev.aurakai.auraframefx.model.AgentType
-import dev.aurakai.auraframefx.serialization.InstantSerializer
+import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class TaskExecution(
-    val id: String = "exec_${System.currentTimeMillis()}",
+    val id: String = "exec_${Clock.System.now().toEpochMilliseconds()}",
     val taskId: String,
     val agent: AgentType,
     val type: String,
@@ -33,7 +32,7 @@ data class TaskExecution(
 
 @Serializable
 data class ExecutionPlan(
-    val id: String = "plan_${System.currentTimeMillis()}",
+    val id: String = "plan_${Clock.System.now().toEpochMilliseconds()}",
     val steps: List<ExecutionStep>,
     val estimatedDuration: Long,
     val requiredResources: Set<String>,
@@ -42,7 +41,7 @@ data class ExecutionPlan(
 
 @Serializable
 data class ExecutionStep(
-    val id: String = "step_${System.currentTimeMillis()}",
+    val id: String = "step_${Clock.System.now().toEpochMilliseconds()}",
     val description: String,
     val type: StepType,
     val priority: Float = 0.5f,
@@ -53,7 +52,7 @@ data class ExecutionStep(
 
 @Serializable
 data class Checkpoint(
-    val id: String = "chk_${System.currentTimeMillis()}",
+    val id: String = "chk_${Clock.System.now().toEpochMilliseconds()}",
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val stepId: String,
     val status: CheckpointStatus,
@@ -61,7 +60,7 @@ data class Checkpoint(
     val metadata: Map<String, String> = emptyMap(),
 )
 
-@Serializable
+@Serializable // Added annotation
 enum class ExecutionStatus {
     PENDING,
     INITIALIZING,
@@ -73,7 +72,7 @@ enum class ExecutionStatus {
     TIMEOUT
 }
 
-@Serializable
+@Serializable // Added annotation
 enum class ExecutionResult {
     SUCCESS,
     PARTIAL_SUCCESS,
@@ -83,7 +82,7 @@ enum class ExecutionResult {
     UNKNOWN
 }
 
-@Serializable
+@Serializable // Added annotation
 enum class StepType {
     COMPUTATION,
     COMMUNICATION,
@@ -95,7 +94,7 @@ enum class StepType {
     REPORTING
 }
 
-@Serializable
+@Serializable // Added annotation
 enum class CheckpointStatus {
     PENDING,
     STARTED,
@@ -110,6 +109,6 @@ enum class TaskPriority {
     NORMAL,
     HIGH,
     URGENT;
-
+    
     val value: Int get() = ordinal
 }

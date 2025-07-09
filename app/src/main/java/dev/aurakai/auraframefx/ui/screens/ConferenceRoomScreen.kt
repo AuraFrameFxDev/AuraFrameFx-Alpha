@@ -1,13 +1,11 @@
+
+
 package dev.aurakai.auraframefx.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.Stop // Explicit import
-import androidx.compose.material.icons.filled.FiberManualRecord // Explicit import
-import androidx.compose.material.icons.filled.Phone // Explicit import
-// Settings and Send are also used, ensure they are covered or add explicit if errors persist
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -68,20 +66,17 @@ fun ConferenceRoomScreen() {
             AgentButton(
                 agent = stringResource(R.string.agent_aura),
                 isSelected = selectedAgent == stringResource(R.string.agent_aura),
-                onClick = { selectedAgent = stringResource(R.string.agent_aura) },
-                modifier = Modifier.weight(1f) // Apply weight here
+                onClick = { selectedAgent = stringResource(R.string.agent_aura) }
             )
             AgentButton(
                 agent = stringResource(R.string.agent_kai),
                 isSelected = selectedAgent == stringResource(R.string.agent_kai),
-                onClick = { selectedAgent = stringResource(R.string.agent_kai) },
-                modifier = Modifier.weight(1f) // Apply weight here
+                onClick = { selectedAgent = stringResource(R.string.agent_kai) }
             )
             AgentButton(
                 agent = stringResource(R.string.agent_cascade),
                 isSelected = selectedAgent == stringResource(R.string.agent_cascade),
-                onClick = { selectedAgent = stringResource(R.string.agent_cascade) },
-                modifier = Modifier.weight(1f) // Apply weight here
+                onClick = { selectedAgent = stringResource(R.string.agent_cascade) }
             )
         }
 
@@ -151,7 +146,6 @@ fun AgentButton(
     agent: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier // Added modifier parameter
 ) {
     val backgroundColor = if (isSelected) NeonTeal else Color.Black
     val contentColor = if (isSelected) Color.White else NeonTeal
@@ -162,7 +156,8 @@ fun AgentButton(
             containerColor = backgroundColor,
             contentColor = contentColor
         ),
-        modifier = modifier // Apply the passed modifier
+        modifier = Modifier
+            .weight(1f)
             .padding(horizontal = 8.dp)
     ) {
         Text(
@@ -172,18 +167,12 @@ fun AgentButton(
     }
 }
 
-/**
- * Displays a button for toggling the recording state with an appropriate icon and color.
- *
- * @param isRecording Whether recording is currently active.
- * @param onClick Called when the button is pressed to toggle recording.
- */
 @Composable
 fun RecordingButton(
     isRecording: Boolean,
     onClick: () -> Unit,
 ) {
-    val icon = if (isRecording) Icons.Default.Stop else Icons.Default.FiberManualRecord
+    val icon = if (isRecording) Icons.Default.Stop else Icons.Default.Circle
     val color = if (isRecording) Color.Red else NeonPurple
 
     IconButton(
@@ -222,9 +211,6 @@ fun TranscribeButton(
     }
 }
 
-/**
- * Displays a design-time preview of the ConferenceRoomScreen composable within a MaterialTheme.
- */
 @Composable
 @Preview(showBackground = true)
 fun ConferenceRoomScreenPreview() {

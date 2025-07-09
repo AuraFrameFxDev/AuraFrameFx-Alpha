@@ -101,24 +101,24 @@ class ConferenceRoomViewModel @Inject constructor(
             AgentType.AURA -> auraService.processRequestFlow(
                 AiRequest(
                     query = message,
-                    context = mapOf("requestType" to "text", "userProvidedContext" to context)
+                    type = "text",
+                    context = mapOf("userContext" to context)
                 )
             )
 
             AgentType.KAI -> kaiService.processRequestFlow(
                 AiRequest(
                     query = message,
-                    context = mapOf("requestType" to "text", "userProvidedContext" to context)
+                    type = "text",
+                    context = mapOf("userContext" to context)
                 )
             )
 
             AgentType.CASCADE -> cascadeService.processRequestFlow(
                 AiRequest(
                     query = message,
-                    context = mapOf(
-                        "requestType" to "context_query",
-                        "userProvidedContext" to context
-                    )
+                    type = "context",
+                    context = mapOf("userContext" to context)
                 )
             )
 

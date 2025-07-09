@@ -1,20 +1,19 @@
 package dev.aurakai.auraframefx.ai.context
 
-import dev.aurakai.auraframefx.ai.memory.CanonicalMemoryItem // Changed import
-import dev.aurakai.auraframefx.model.AgentType
-import dev.aurakai.auraframefx.serialization.InstantSerializer
+import dev.aurakai.auraframefx.ai.memory.MemoryItem
+import dev.aurakai.auraframefx.model.AgentType // Explicit import
+import dev.aurakai.auraframefx.serialization.InstantSerializer // Import for serializer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ContextChain(
-    val id: String = "ctx_${System.currentTimeMillis()}",
+    val id: String = "ctx_${Clock.System.now().toEpochMilliseconds()}",
     val rootContext: String,
     val currentContext: String,
     val contextHistory: List<ContextNode> = emptyList(),
-    @Contextual val relatedMemories: List<CanonicalMemoryItem> = emptyList(), // Changed to CanonicalMemoryItem
+    val relatedMemories: List<MemoryItem> = emptyList(),
     val metadata: Map<String, String> = emptyMap(),
     val priority: Float = 0.5f,
     val relevanceScore: Float = 0.0f,

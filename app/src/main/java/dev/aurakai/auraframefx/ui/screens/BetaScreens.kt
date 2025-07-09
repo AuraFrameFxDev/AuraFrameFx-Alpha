@@ -1,15 +1,8 @@
 package dev.aurakai.auraframefx.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,11 +12,6 @@ import androidx.navigation.NavHostController
  * Displays the home screen with app titles, status messages, and navigation buttons.
  *
  * Presents the main interface for the app, including navigation to the AI chat screen and a placeholder for settings.
- */
-/**
- * Displays the home screen with app title, status messages, and navigation buttons in a centered column layout.
- *
- * Presents the app name, a subtitle, and a status message, along with buttons to navigate to the AI chat screen or (in the future) the settings screen.
  */
 @Composable
 fun HomeScreen(navController: NavHostController) {
@@ -64,7 +52,9 @@ fun HomeScreen(navController: NavHostController) {
 }
 
 /**
- * Displays the AI chat interface screen with a centered headline and readiness status message.
+ * Displays the AI chat interface screen with a centered layout and status message.
+ *
+ * Shows a headline and a body text indicating that Trinity AI agents are ready.
  */
 @Composable
 fun BetaAiChatScreen() {

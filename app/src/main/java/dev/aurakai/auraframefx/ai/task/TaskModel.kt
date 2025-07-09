@@ -1,14 +1,14 @@
 package dev.aurakai.auraframefx.ai.task
 
 import dev.aurakai.auraframefx.model.AgentType
-import dev.aurakai.auraframefx.serialization.InstantSerializer
+import dev.aurakai.auraframefx.serialization.InstantSerializer // Added import
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Task(
-    val id: String = "task_${System.currentTimeMillis()}",
+    val id: String = "task_${Clock.System.now().toEpochMilliseconds()}",
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val priority: TaskPriority = TaskPriority.NORMAL,
     val urgency: TaskUrgency = TaskUrgency.MEDIUM,
@@ -80,7 +80,7 @@ data class TaskImportance(
     }
 }
 
-@Serializable
+@Serializable // Added annotation
 enum class TaskStatus {
     PENDING,
     IN_PROGRESS,
@@ -91,7 +91,7 @@ enum class TaskStatus {
     WAITING
 }
 
-@Serializable
+@Serializable // Added annotation
 enum class DependencyType {
     BLOCKING,
     SEQUENTIAL,

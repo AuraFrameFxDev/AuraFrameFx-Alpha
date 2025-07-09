@@ -1,6 +1,6 @@
 /*
  * AuraFrameFX Ecosystem API
- * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features.
+ * A comprehensive API for interacting with the AuraFrameFX AI Super Dimensional Ecosystem. Provides access to generative AI capabilities, system customization, user management, and core application features. 
  *
  * The version of the OpenAPI document: 1.0.0
  * Contact: support@auraframefx.com
@@ -21,7 +21,6 @@ import com.google.gson.internal.bind.util.ISO8601Utils;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.google.gson.JsonElement;
->>>>>>>origin/coderabbitai/docstrings/78f34ad
 import io.gsonfire.GsonFireBuilder;
 import io.gsonfire.TypeSelector;
 
@@ -47,73 +46,6 @@ import java.util.HashMap;
  * NOTE: in the future, this class may be converted to static, which may break
  *       backward-compatibility
  */
-
-        public static void setDateFormat(DateFormat dateFormat) {
-            dateTypeAdapter.setFormat(dateFormat);
-        }
-
-        public static void setSqlDateFormat(DateFormat dateFormat) {
-            sqlDateTypeAdapter.setFormat(dateFormat);
-        }
-
-        /**
-         * Gson TypeAdapter for java.util.Date type
-         * If the dateFormat is null, ISO8601Utils will be used.
-         */
-        public static class DateTypeAdapter extends TypeAdapter<Date> {
-
-            private DateFormat dateFormat;
-
-            public DateTypeAdapter() {
-            }
-
-            public DateTypeAdapter(DateFormat dateFormat) {
-                this.dateFormat = dateFormat;
-            }
-
-            public void setFormat(DateFormat dateFormat) {
-                this.dateFormat = dateFormat;
-            }
-
-            @Override
-            public void write(JsonWriter out, Date date) throws IOException {
-                if (date == null) {
-                    out.nullValue();
-                } else {
-                    String value;
-                    if (dateFormat != null) {
-                        value = dateFormat.format(date);
-                    } else {
-                        value = ISO8601Utils.format(date, true);
-                    }
-                    out.value(value);
-                }
-            }
-
-            @Override
-            public Date read(JsonReader in) throws IOException {
-                try {
-                    switch (in.peek()) {
-                        case NULL:
-                            in.nextNull();
-                            return null;
-                        default:
-                            String date = in.nextString();
-                            try {
-                                if (dateFormat != null) {
-                                    return dateFormat.parse(date);
-                                }
-                                return ISO8601Utils.parse(date, new ParsePosition(0));
-                            } catch (ParseException e) {
-                                throw new JsonParseException(e);
-                            }
-                    }
-                } catch (IllegalArgumentException e) {
-                    throw new JsonParseException(e);
-                }
-            }
-        }
-
 public class JSON {
     private static Gson gson;
     private static boolean isLenientOnJson = false;
@@ -122,6 +54,37 @@ public class JSON {
     private static OffsetDateTimeTypeAdapter offsetDateTimeTypeAdapter = new OffsetDateTimeTypeAdapter();
     private static LocalDateTypeAdapter localDateTypeAdapter = new LocalDateTypeAdapter();
     private static ByteArrayAdapter byteArrayAdapter = new ByteArrayAdapter();
+
+    @SuppressWarnings("unchecked")
+    public static GsonBuilder createGson() {
+        GsonFireBuilder fireBuilder = new GsonFireBuilder()
+        ;
+        GsonBuilder builder = fireBuilder.createGsonBuilder();
+        return builder;
+    }
+
+    private static String getDiscriminatorValue(JsonElement readElement, String discriminatorField) {
+        JsonElement element = readElement.getAsJsonObject().get(discriminatorField);
+        if (null == element) {
+            throw new IllegalArgumentException("missing discriminator field: <" + discriminatorField + ">");
+        }
+        return element.getAsString();
+    }
+
+    /**
+     * Returns the Java class that implements the OpenAPI schema for the specified discriminator value.
+     *
+     * @param classByDiscriminatorValue The map of discriminator values to Java classes.
+     * @param discriminatorValue The value of the OpenAPI discriminator in the input data.
+     * @return The Java class that implements the OpenAPI schema
+     */
+    private static Class getClassByDiscriminator(Map classByDiscriminatorValue, String discriminatorValue) {
+        Class clazz = (Class) classByDiscriminatorValue.get(discriminatorValue);
+        if (null == clazz) {
+            throw new IllegalArgumentException("cannot determine model class of name: <" + discriminatorValue + ">");
+        }
+        return clazz;
+    }
 
     static {
         GsonBuilder gsonBuilder = createGson();
@@ -156,43 +119,6 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new org.openapitools.client.model.UserPreferences.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new org.openapitools.client.model.UserPreferencesUpdate.CustomTypeAdapterFactory());
         gson = gsonBuilder.create();
-    }
-
-    public SqlDateTypeAdapter() {
-    }
-
-    public SqlDateTypeAdapter(DateFormat dateFormat) {
-        this.dateFormat = dateFormat;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static GsonBuilder createGson() {
-        GsonFireBuilder fireBuilder = new GsonFireBuilder();
-        GsonBuilder builder = fireBuilder.createGsonBuilder();
-        return builder;
-    }
-
-    private static String getDiscriminatorValue(JsonElement readElement, String discriminatorField) {
-        JsonElement element = readElement.getAsJsonObject().get(discriminatorField);
-        if (null == element) {
-            throw new IllegalArgumentException("missing discriminator field: <" + discriminatorField + ">");
-        }
-        return element.getAsString();
-    }
-
-    /**
-     * Returns the Java class that implements the OpenAPI schema for the specified discriminator value.
-     *
-     * @param classByDiscriminatorValue The map of discriminator values to Java classes.
-     * @param discriminatorValue        The value of the OpenAPI discriminator in the input data.
-     * @return The Java class that implements the OpenAPI schema
-     */
-    private static Class getClassByDiscriminator(Map classByDiscriminatorValue, String discriminatorValue) {
-        Class clazz = (Class) classByDiscriminatorValue.get(discriminatorValue);
-        if (null == clazz) {
-            throw new IllegalArgumentException("cannot determine model class of name: <" + discriminatorValue + ">");
-        }
-        return clazz;
     }
 
     /**
@@ -254,44 +180,6 @@ public class JSON {
             } else {
                 throw (e);
             }
-        }
-    }
-
-    public void setFormat(DateFormat dateFormat) {
-        this.dateFormat = dateFormat;
-    }
-
-    @Override
-    public void write(JsonWriter out, java.sql.Date date) throws IOException {
-        if (date == null) {
-            out.nullValue();
-        } else {
-            String value;
-            if (dateFormat != null) {
-                value = dateFormat.format(date);
-            } else {
-                value = date.toString();
-            }
-            out.value(value);
-        }
-    }
-
-    @Override
-    public java.sql.Date read(JsonReader in) throws IOException {
-        switch (in.peek()) {
-            case NULL:
-                in.nextNull();
-                return null;
-            default:
-                String date = in.nextString();
-                try {
-                    if (dateFormat != null) {
-                        return new java.sql.Date(dateFormat.parse(date).getTime());
-                    }
-                    return new java.sql.Date(ISO8601Utils.parse(date, new ParsePosition(0)).getTime());
-                } catch (ParseException e) {
-                    throw new JsonParseException(e);
-                }
         }
     }
 
@@ -360,7 +248,7 @@ public class JSON {
                 default:
                     String date = in.nextString();
                     if (date.endsWith("+0000")) {
-                        date = date.substring(0, date.length() - 5) + "Z";
+                        date = date.substring(0, date.length()-5) + "Z";
                     }
                     return OffsetDateTime.parse(date, formatter);
             }
@@ -407,5 +295,131 @@ public class JSON {
             }
         }
     }
-}
+
+    public static void setOffsetDateTimeFormat(DateTimeFormatter dateFormat) {
+        offsetDateTimeTypeAdapter.setFormat(dateFormat);
+    }
+
+    public static void setLocalDateFormat(DateTimeFormatter dateFormat) {
+        localDateTypeAdapter.setFormat(dateFormat);
+    }
+
+    /**
+     * Gson TypeAdapter for java.sql.Date type
+     * If the dateFormat is null, a simple "yyyy-MM-dd" format will be used
+     * (more efficient than SimpleDateFormat).
+     */
+    public static class SqlDateTypeAdapter extends TypeAdapter<java.sql.Date> {
+
+        private DateFormat dateFormat;
+
+        public SqlDateTypeAdapter() {}
+
+        public SqlDateTypeAdapter(DateFormat dateFormat) {
+            this.dateFormat = dateFormat;
+        }
+
+        public void setFormat(DateFormat dateFormat) {
+            this.dateFormat = dateFormat;
+        }
+
+        @Override
+        public void write(JsonWriter out, java.sql.Date date) throws IOException {
+            if (date == null) {
+                out.nullValue();
+            } else {
+                String value;
+                if (dateFormat != null) {
+                    value = dateFormat.format(date);
+                } else {
+                    value = date.toString();
+                }
+                out.value(value);
+            }
+        }
+
+        @Override
+        public java.sql.Date read(JsonReader in) throws IOException {
+            switch (in.peek()) {
+                case NULL:
+                    in.nextNull();
+                    return null;
+                default:
+                    String date = in.nextString();
+                    try {
+                        if (dateFormat != null) {
+                            return new java.sql.Date(dateFormat.parse(date).getTime());
+                        }
+                        return new java.sql.Date(ISO8601Utils.parse(date, new ParsePosition(0)).getTime());
+                    } catch (ParseException e) {
+                        throw new JsonParseException(e);
+                    }
+            }
+        }
+    }
+
+    /**
+     * Gson TypeAdapter for java.util.Date type
+     * If the dateFormat is null, ISO8601Utils will be used.
+     */
+    public static class DateTypeAdapter extends TypeAdapter<Date> {
+
+        private DateFormat dateFormat;
+
+        public DateTypeAdapter() {}
+
+        public DateTypeAdapter(DateFormat dateFormat) {
+            this.dateFormat = dateFormat;
+        }
+
+        public void setFormat(DateFormat dateFormat) {
+            this.dateFormat = dateFormat;
+        }
+
+        @Override
+        public void write(JsonWriter out, Date date) throws IOException {
+            if (date == null) {
+                out.nullValue();
+            } else {
+                String value;
+                if (dateFormat != null) {
+                    value = dateFormat.format(date);
+                } else {
+                    value = ISO8601Utils.format(date, true);
+                }
+                out.value(value);
+            }
+        }
+
+        @Override
+        public Date read(JsonReader in) throws IOException {
+            try {
+                switch (in.peek()) {
+                    case NULL:
+                        in.nextNull();
+                        return null;
+                    default:
+                        String date = in.nextString();
+                        try {
+                            if (dateFormat != null) {
+                                return dateFormat.parse(date);
+                            }
+                            return ISO8601Utils.parse(date, new ParsePosition(0));
+                        } catch (ParseException e) {
+                            throw new JsonParseException(e);
+                        }
+                }
+            } catch (IllegalArgumentException e) {
+                throw new JsonParseException(e);
+            }
+        }
+    }
+
+    public static void setDateFormat(DateFormat dateFormat) {
+        dateTypeAdapter.setFormat(dateFormat);
+    }
+
+    public static void setSqlDateFormat(DateFormat dateFormat) {
+        sqlDateTypeAdapter.setFormat(dateFormat);
+    }
 }

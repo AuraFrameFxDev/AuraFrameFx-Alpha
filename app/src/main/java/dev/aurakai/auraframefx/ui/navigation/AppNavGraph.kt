@@ -4,11 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import dev.aurakai.auraframefx.ui.transitions.DigitalTransitions
 import dev.aurakai.auraframefx.ui.screens.AiChatScreen
 import dev.aurakai.auraframefx.ui.screens.HomeScreen
+import dev.aurakai.auraframefx.ui.screens.oracledrive.OracleDriveControlScreen
 import dev.aurakai.auraframefx.ui.screens.ProfileScreen
 import dev.aurakai.auraframefx.ui.screens.SettingsScreen
-import dev.aurakai.auraframefx.ui.screens.oracledrive.OracleDriveControlScreen
 
 /**
  * Main navigation graph for the AuraFrameFX app with digital transition animations
@@ -25,20 +26,6 @@ import dev.aurakai.auraframefx.ui.screens.oracledrive.OracleDriveControlScreen
  * Defines the available composable destinations and their routes, including Home, AI Chat, Profile, Settings, and Oracle Drive Control (currently a placeholder).
  *
  * @param navController The navigation controller used to manage app navigation.
- */
-/**
- * Defines the main navigation graph for the AuraFrameFX app using Jetpack Compose Navigation.
- *
- * Sets up navigation routes for Home, AI Chat, Profile, Settings, and Oracle Drive Control screens.
- *
- * @param navController The navigation controller used to manage app navigation.
- */
-/**
- * Sets up the main navigation graph for the AuraFrameFX app using Jetpack Compose Navigation.
- *
- * Defines navigation routes and associates each with its corresponding composable screen, including Home, AI Chat, Profile, Settings, and Oracle Drive Control.
- *
- * @param navController The navigation controller used to manage navigation between screens.
  */
 @Composable
 fun AppNavGraph(navController: NavHostController) {
@@ -74,9 +61,9 @@ fun AppNavGraph(navController: NavHostController) {
             route = NavDestination.OracleDriveControl.route
         ) {
             // Fixed: Use actual OracleDriveControlScreen instead of placeholder
-            OracleDriveControlScreen()
+            dev.aurakai.auraframefx.ui.screens.oracledrive.OracleDriveControlScreen()
         }
-
+        
         // Add AI Content navigation
         // aiContentNavigation() // Disabled for beta - AI content will be in main chat
 

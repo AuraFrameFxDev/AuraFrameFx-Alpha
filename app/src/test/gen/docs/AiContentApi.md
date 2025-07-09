@@ -2,15 +2,14 @@
 
 All URIs are relative to *https://api.auraframefx.com/v1*
 
-| Method                                                                               | HTTP request                            | Description                         |
-|--------------------------------------------------------------------------------------|-----------------------------------------|-------------------------------------|
+| Method | HTTP request | Description |
+|------------- | ------------- | -------------|
 | [**aiGenerateImageDescriptionPost**](AiContentApi.md#aiGenerateImageDescriptionPost) | **POST** /ai/generate/image-description | Generate image description using AI |
-| [**generateTextPost**](AiContentApi.md#generateTextPost)                             | **POST** /generate-text                 | Generate text content               |
+| [**generateTextPost**](AiContentApi.md#generateTextPost) | **POST** /generate-text | Generate text content |
+
 
 <a id="aiGenerateImageDescriptionPost"></a>
-
 # **aiGenerateImageDescriptionPost**
-
 > GenerateImageDescriptionResponse aiGenerateImageDescriptionPost(generateImageDescriptionRequest)
 
 Generate image description using AI
@@ -18,9 +17,6 @@ Generate image description using AI
 Generate a description for the provided image URL
 
 ### Example
-
-> > > > > > > origin/coderabbitai/docstrings/78f34ad
-
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -52,9 +48,9 @@ public class Example {
 
 ### Parameters
 
-| Name                                | Type                                                                      | Description | Notes |
-|-------------------------------------|---------------------------------------------------------------------------|-------------|-------|
-| **generateImageDescriptionRequest** | [**GenerateImageDescriptionRequest**](GenerateImageDescriptionRequest.md) |             |       |
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **generateImageDescriptionRequest** | [**GenerateImageDescriptionRequest**](GenerateImageDescriptionRequest.md)|  | |
 
 ### Return type
 
@@ -66,27 +62,23 @@ No authorization required
 
 ### HTTP request headers
 
-- **Content-Type**: application/json
-- **Accept**: application/json
+ - **Content-Type**: application/json
+ - **Accept**: application/json
 
 ### HTTP response details
-
-| Status code | Description                              | Response headers |
-|-------------|------------------------------------------|------------------|
-| **200**     | Image description generated successfully | -                |
-| **400**     | Invalid request parameters               | -                |
-| **500**     | Internal server error                    | -                |
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Image description generated successfully |  -  |
+| **400** | Invalid request parameters |  -  |
+| **500** | Internal server error |  -  |
 
 <a id="generateTextPost"></a>
-
 # **generateTextPost**
-
 > GenerateTextResponse generateTextPost(generateTextRequest)
 
 Generate text content
 
 ### Example
-
 ```java
 // Import classes:
 import org.openapitools.client.ApiClient;
@@ -123,9 +115,9 @@ public class Example {
 
 ### Parameters
 
-| Name                    | Type                                              | Description | Notes |
-|-------------------------|---------------------------------------------------|-------------|-------|
-| **generateTextRequest** | [**GenerateTextRequest**](GenerateTextRequest.md) |             |       |
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **generateTextRequest** | [**GenerateTextRequest**](GenerateTextRequest.md)|  | |
 
 ### Return type
 
@@ -137,15 +129,14 @@ public class Example {
 
 ### HTTP request headers
 
-- **Content-Type**: application/json
-- **Accept**: application/json
+ - **Content-Type**: application/json
+ - **Accept**: application/json
 
 ### HTTP response details
-
-| Status code | Description                                          | Response headers |
-|-------------|------------------------------------------------------|------------------|
-| **200**     | Text generated successfully                          | -                |
-| **400**     | Invalid request format or parameters                 | -                |
-| **401**     | Authentication credentials were missing or incorrect | -                |
-| **429**     | Rate limit exceeded                                  | -                |
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Text generated successfully |  -  |
+| **400** | Invalid request format or parameters |  -  |
+| **401** | Authentication credentials were missing or incorrect |  -  |
+| **429** | Rate limit exceeded |  -  |
 

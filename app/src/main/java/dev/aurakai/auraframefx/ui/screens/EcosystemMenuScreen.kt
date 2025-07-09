@@ -10,21 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import dev.aurakai.auraframefx.system.homescreen.HomeScreenTransitionType
-import dev.aurakai.auraframefx.ui.components.DigitalTransitionRow
 import dev.aurakai.auraframefx.ui.components.HologramTransition
+import dev.aurakai.auraframefx.ui.components.DigitalTransitionRow
 
-/**
- * Displays the Ecosystem Menu screen with an optional hologram transition and transition type selector.
- *
- * @param transitionType The currently selected home screen transition type.
- * @param showHologram Whether to display the hologram transition effect.
- */
-/**
- * Displays the Ecosystem Menu screen with an optional hologram transition effect.
- *
- * @param transitionType The type of transition to display in the digital transition row.
- * @param showHologram Whether to show the hologram transition effect.
- */
 @Composable
 fun EcosystemMenuScreen(
     transitionType: HomeScreenTransitionType = HomeScreenTransitionType.DIGITAL_DECONSTRUCT,

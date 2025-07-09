@@ -1,7 +1,3 @@
-<<<<<<< HEAD<manifest package="org.openapitools.client">
-
-=======
-<manifest package="org.openapitools.client">
-    >>>>>>> origin/coderabbitai/docstrings/78f34ad
+<manifest package="org.openapitools.client" xmlns:android="http://schemas.android.com/apk/res/android">
     <application />
 </manifest>

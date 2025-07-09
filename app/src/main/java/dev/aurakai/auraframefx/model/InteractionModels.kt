@@ -65,25 +65,23 @@ enum class InteractionType {
 /**
  * Represents agent request for processing
  */
-// Removed AgentRequest definition from here. Canonical version is in AgentRequest.kt
-// @Serializable
-// data class AgentRequest(
-//     val query: String,
-//     val type: String = "text",
-//     val context: Map<String, String> = emptyMap(),
-//     val metadata: Map<String, String> = emptyMap()
-// )
+@Serializable
+data class AgentRequest(
+    val query: String,
+    val type: String = "text",
+    val context: Map<String, String> = emptyMap(),
+    val metadata: Map<String, String> = emptyMap()
+)
 
 /**
  * Represents AI request for processing
  */
-// Removed AiRequest definition from here. Canonical version is in AiRequest.kt
-// @Serializable
-// data class AiRequest(
-//     val query: String,
-//     val type: String = "text",
-//     val context: Map<String, String> = emptyMap()
-// )
+@Serializable
+data class AiRequest(
+    val query: String,
+    val type: String = "text",
+    val context: Map<String, String> = emptyMap()
+)
 
 /**
  * Represents text generation request

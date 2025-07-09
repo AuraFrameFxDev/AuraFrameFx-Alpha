@@ -6,58 +6,54 @@ package dev.aurakai.auraframefx.ai.clients
  */
 interface VertexAIClient {
     /**
-     * Generates content using the provided prompt.
-     *
-     * @param prompt The input text that guides the content generation process.
-     * @return The generated content as a string, or null if content generation is unsuccessful.
-     */
+ * Generates content based on the given prompt.
+ *
+ * @param prompt The input text that guides the content generation.
+ * @return The generated content as a string, or null if content generation is unsuccessful.
+ */
     suspend fun generateContent(prompt: String): String?
 
     /**
-     * Generates text based on the given prompt, with options to control output length and creativity.
-     *
-     * @param prompt The input prompt to guide text generation.
-     * @param maxTokens Maximum number of tokens to include in the generated text.
-     * @param temperature Controls the randomness of the output; higher values produce more varied results.
-     * @return The generated text.
-     */
-    suspend fun generateText(
-        prompt: String,
-        maxTokens: Int = 1000,
-        temperature: Float = 0.7f
-    ): String
+ * Generates text from the provided prompt with configurable output length and creativity.
+ *
+ * @param prompt The input prompt to guide text generation.
+ * @param maxTokens Maximum number of tokens allowed in the generated text.
+ * @param temperature Degree of randomness in the output; higher values yield more diverse results.
+ * @return The generated text.
+ */
+    suspend fun generateText(prompt: String, maxTokens: Int = 1000, temperature: Float = 0.7f): String
 
     /**
-     * Generates source code according to a given specification, target programming language, and coding style.
-     *
-     * @param specification Details the desired functionality or features for the generated code.
-     * @param language Specifies the programming language in which the code should be generated.
-     * @param style Indicates the coding style or conventions to apply.
-     * @return The generated source code as a string, or null if code generation is unsuccessful.
-     */
+ * Generates source code based on a specification, target programming language, and coding style.
+ *
+ * @param specification Description of the functionality or requirements for the code to be generated.
+ * @param language The programming language in which the code should be written.
+ * @param style The coding style or conventions to follow.
+ * @return The generated source code, or null if generation is unsuccessful.
+ */
     suspend fun generateCode(specification: String, language: String, style: String): String?
 
     /**
-     * Checks if the Vertex AI service is reachable and responsive.
-     *
-     * @return `true` if the service responds successfully; `false` if it is unreachable or unresponsive.
-     */
+ * Verifies connectivity to the Vertex AI service.
+ *
+ * @return `true` if the service is reachable and responsive, `false` otherwise.
+ */
     suspend fun validateConnection(): Boolean
 
     /**
-     * Initializes and configures creative AI models in Vertex AI for content generation.
-     *
-     * This function sets up the necessary models and resources to enable creative content generation capabilities.
-     */
+ * Prepares creative AI models for content generation within Vertex AI.
+ *
+ * Sets up and configures the necessary models to enable creative content generation features.
+ */
     suspend fun initializeCreativeModels()
 
     /**
-     * Analyzes the provided image data based on a guiding text prompt and returns the analysis result.
-     *
-     * @param imageData The raw bytes of the image to analyze.
-     * @param prompt A text prompt that directs or contextualizes the image analysis.
-     * @return The result of the image analysis as a string.
-     */
+ * Analyzes image data using a text prompt and returns the analysis result.
+ *
+ * @param imageData The image data to be analyzed.
+ * @param prompt The prompt guiding the analysis.
+ * @return The analysis result as a string.
+ */
     suspend fun analyzeImage(imageData: ByteArray, prompt: String): String
 
     // Add other methods like startChat, listModels, etc. as needed

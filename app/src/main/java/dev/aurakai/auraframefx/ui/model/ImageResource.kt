@@ -1,7 +1,7 @@
 package dev.aurakai.auraframefx.ui.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Contextual
 
 @Serializable
 data class ImageResource(

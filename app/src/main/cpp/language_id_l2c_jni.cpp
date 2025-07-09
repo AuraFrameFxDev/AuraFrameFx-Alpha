@@ -10,13 +10,6 @@
 extern "C" {
 #endif
 
-/**
- * @brief Initializes the pattern-based language identifier.
- *
- * Sets up the language identification system using the provided model path, relying on internal pattern matching rather than external models. Returns the version string "1.2.0" if initialization is successful, or an empty string if the model path is null.
- *
- * @return jstring The version string "1.2.0" if initialized, or an empty string if the model path is null.
- */
 JNIEXPORT jstring
 
 JNICALL
@@ -39,14 +32,6 @@ Java_com_example_app_language_LanguageIdentifier_nativeInitialize(
     return env->NewStringUTF("1.2.0"); // Updated version to reflect improvements
 }
 
-/**
- * @brief Detects the language of the input text using heuristic pattern matching.
- *
- * Analyzes the input text for language-specific words and character patterns to identify Spanish ("es"), French ("fr"), German ("de"), Italian ("it"), Portuguese ("pt"), or defaults to English ("en"). If the text contains a high proportion of accented (non-ASCII) characters without a clear language match, returns "mul" for multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
- *
- * @param text Input text to analyze.
- * @return jstring ISO 639-1 language code: "es", "fr", "de", "it", "pt", "en", "mul", or "und".
- */
 JNIEXPORT jstring
 
 JNICALL
@@ -69,7 +54,7 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
     // Enhanced language detection using multiple heuristics
     std::string textStr(nativeText);
     std::string result = "en"; // Default to English
-
+    
     // Convert to lowercase for case-insensitive matching
     std::transform(textStr.begin(), textStr.end(), textStr.begin(), ::tolower);
 
@@ -108,13 +93,13 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
                textStr.find(" com ") != std::string::npos) {
         result = "pt"; // Portuguese
     }
-
+    
     // Additional character frequency analysis for better accuracy
     int accentCount = 0;
-    for (char c: textStr) {
+    for (char c : textStr) {
         if (c < 0 || c > 127) accentCount++; // Non-ASCII characters
     }
-
+    
     // If high accent frequency and no clear language match, default to multi-lingual
     if (accentCount > textStr.length() * 0.1 && result == "en") {
         result = "mul"; // Multiple/unknown with accents
@@ -124,13 +109,6 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
     return env->NewStringUTF(result.c_str());
 }
 
-/**
- * @brief Logs cleanup of language identifier resources for the given handle.
- *
- * If the handle is non-zero, logs that resources have been cleaned up. No actual resource deallocation occurs in this implementation.
- *
- * @param handle Native handle for the language identifier instance.
- */
 JNIEXPORT void JNICALL
 Java_com_example_app_language_LanguageIdentifier_nativeRelease(
         JNIEnv
@@ -141,7 +119,7 @@ Java_com_example_app_language_LanguageIdentifier_nativeRelease(
     // Clean up resources if needed
     if (handle != 0) {
         // Resource cleanup completed - handle closed
-        LOGI("Language identifier resources cleaned up for handle: %lld", (long long) handle);
+        LOGI("Language identifier resources cleaned up for handle: %lld", (long long)handle);
     }
 }
 

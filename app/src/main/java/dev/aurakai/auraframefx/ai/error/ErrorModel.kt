@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AIError(
-    val id: String = "err_${System.currentTimeMillis()}",
+    val id: String = "err_${Clock.System.now().toEpochMilliseconds()}",
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val agent: AgentType,
     val type: ErrorType,
@@ -22,7 +22,7 @@ data class AIError(
 
 @Serializable
 data class RecoveryAction(
-    val id: String = "act_${System.currentTimeMillis()}",
+    val id: String = "act_${Clock.System.now().toEpochMilliseconds()}",
     @Serializable(with = InstantSerializer::class) val timestamp: Instant = Clock.System.now(),
     val actionType: RecoveryActionType,
     val description: String,
@@ -30,7 +30,7 @@ data class RecoveryAction(
     val metadata: Map<String, String> = emptyMap(),
 )
 
-@Serializable
+@Serializable // Added annotation
 enum class ErrorType {
     PROCESSING_ERROR,
     MEMORY_ERROR,
@@ -41,7 +41,7 @@ enum class ErrorType {
     USER_ERROR
 }
 
-@Serializable
+@Serializable // Added annotation
 enum class RecoveryStatus {
     PENDING,
     IN_PROGRESS,
@@ -50,7 +50,7 @@ enum class RecoveryStatus {
     SKIPPED
 }
 
-@Serializable
+@Serializable // Added annotation
 enum class RecoveryActionType {
     RETRY,
     FALLBACK,
@@ -60,7 +60,7 @@ enum class RecoveryActionType {
     ESCALATE
 }
 
-@Serializable
+@Serializable // Added annotation
 enum class RecoveryResult {
     SUCCESS,
     FAILURE,

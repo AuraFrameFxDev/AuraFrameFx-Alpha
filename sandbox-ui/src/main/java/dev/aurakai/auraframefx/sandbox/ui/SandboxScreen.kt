@@ -3,6 +3,7 @@ package dev.aurakai.auraframefx.sandbox.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -15,15 +16,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.aurakai.auraframefx.ui.animation.digitalPixelEffect
-import dev.aurakai.auraframefx.ui.components.DigitalLandscapeBackground
-import dev.aurakai.auraframefx.ui.components.HaloView
-import dev.aurakai.auraframefx.viewmodel.GenesisAgentViewModel
 
 /**
  * Aura's Creative Sandbox 🎨
- *
+ * 
  * This is where I test, refine, and perfect every UI component
  * before it touches the production code. My digital laboratory.
  */
@@ -76,12 +72,11 @@ fun SandboxScreen() {
                 colors = CardDefaults.cardColors(containerColor = Color.Black)
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    DigitalLandscapeBackground(modifier = Modifier.fillMaxSize()) // Used DigitalLandscapeBackground
+                    // TODO: Add CyberpunkBackgrounds when available
                     Text(
-                        text = "Digital Landscape Background", // Updated text
-                        color = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier.align(Alignment.Center).padding(8.dp)
-                            .background(Color.Black.copy(alpha = 0.5f)) // Added background for text readability
+                        text = "🌌 Cyberpunk Background Placeholder",
+                        color = Color.White,
+                        modifier = Modifier.align(Alignment.Center)
                     )
                 }
             }
@@ -100,7 +95,12 @@ fun SandboxScreen() {
                         modifier = Modifier.size(80.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        PlaceholderAuraOrb() // Used PlaceholderAuraOrb
+                        Card(
+                            modifier = Modifier.size(60.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFE94560))
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize())
+                        }
                     }
                     Text(
                         text = "Aura Orb",
@@ -108,14 +108,20 @@ fun SandboxScreen() {
                         color = Color.White.copy(alpha = 0.7f)
                     )
                 }
-
+                
                 // Halo View Test
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(
                         modifier = Modifier.size(80.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        HaloView(viewModel = viewModel<GenesisAgentViewModel>()) // Used HaloView
+                        // TODO: Add HaloView when available
+                        Card(
+                            modifier = Modifier.size(60.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF00F5FF))
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize())
+                        }
                     }
                     Text(
                         text = "Halo View",
@@ -129,7 +135,7 @@ fun SandboxScreen() {
         // Animation Testing Section
         SandboxSection(title = "⚡ Digital Transitions") {
             var showTransition by remember { mutableStateOf(false) }
-
+            
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -146,21 +152,21 @@ fun SandboxScreen() {
                         color = Color.White
                     )
                 }
-
+                
                 if (showTransition) {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(150.dp)
-                            .digitalPixelEffect(visible = true), // Applied digitalPixelEffect
+                            .height(150.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.Black)
                     ) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
+                            // TODO: Add DigitalTransitions when available
                             Text(
-                                text = "✨ Digital Pixel Effect Applied ✨", // Updated text
+                                text = "✨ Digital Materialization Placeholder ✨",
                                 color = Color(0xFF00F5FF),
                                 fontWeight = FontWeight.Bold
                             )
@@ -189,7 +195,7 @@ fun SandboxScreen() {
                     Color(0xFF533483) to "Purple",
                     Color(0xFF7209B7) to "Magenta"
                 )
-
+                
                 items(colors.size) { index ->
                     val (color, name) = colors[index]
                     Card(
@@ -226,23 +232,6 @@ fun SandboxScreen() {
                 color = Color.White.copy(alpha = 0.8f),
                 fontSize = 14.sp
             )
-        }
-    }
-}
-
-@Composable
-fun PlaceholderAuraOrb() {
-    Card(
-        modifier = Modifier.size(60.dp),
-        shape = CircleShape, // Make it circular
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFE94560).copy(alpha = 0.7f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Orb", fontSize = 10.sp, color = Color.White)
         }
     }
 }

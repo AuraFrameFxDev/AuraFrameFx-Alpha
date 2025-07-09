@@ -1,6 +1,7 @@
 package com.example.app.ipc
 
 // Explicitly import the AIDL interface
+import com.example.app.ipc.IAuraDriveService
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -19,10 +20,10 @@ class OracleDriveServiceConnector(private val context: Context) {
     val isServiceConnected: StateFlow<Boolean> = _isServiceConnected.asStateFlow()
 
     private val serviceConnection = object : ServiceConnection {
-        /****
-         * Called when the AuraDrive service is connected.
+        /**
+         * Handles the event when the AuraDrive service is connected.
          *
-         * Obtains the remote `IAuraDriveService` interface from the provided binder and updates the connection state to indicate the service is connected.
+         * Retrieves the remote `IAuraDriveService` interface from the provided binder and marks the service as connected.
          *
          * @param name The component name of the connected service.
          * @param service The binder interface to the connected service.
@@ -32,11 +33,6 @@ class OracleDriveServiceConnector(private val context: Context) {
             _isServiceConnected.value = true
         }
 
-        /**
-         * Called when the AuraDrive service is disconnected, clearing the service reference and updating the connection state.
-         *
-         * @param name The component name of the disconnected service.
-         */
         override fun onServiceDisconnected(name: ComponentName?) {
             auraDriveService = null
             _isServiceConnected.value = false
@@ -44,9 +40,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Attempts to bind to the remote AuraDrive service using an explicit intent.
+     * Binds to the remote AuraDrive service using an explicit intent.
      *
-     * Sets the connection state to disconnected if a security exception occurs during binding.
+     * Attempts to establish a connection to the AuraDrive service component. If binding fails due to a security exception, the connection state is set to false.
      */
     fun bindService() {
         val intent = Intent().apply {
@@ -65,7 +61,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Unbinds from the AuraDrive service and marks the connection as disconnected.
      *
-     * Any exceptions during unbinding are ignored.
+     * Any exceptions during unbinding are silently ignored.
      */
     fun unbindService() {
         try {
@@ -90,13 +86,13 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Toggles the LSPosed module on the connected Oracle Drive service using the service's default logic.
-     *
-     * The `packageName` and `enable` parameters are ignored.
-     *
-     * @return "Success" if the module was toggled successfully, "Failed" if the operation did not succeed, or null if the service is unavailable or a remote exception occurs.
-     */
-    suspend fun toggleModuleOnOracleDrive(packageName: String, enable: Boolean): String? =
+         * Toggles the LSPosed module on the connected Oracle Drive service using the service's default logic.
+         *
+         * The `packageName` and `enable` parameters are ignored.
+         *
+         * @return "Success" if the module was toggled successfully, "Failed" if the operation did not succeed, or null if the service is unavailable or a remote exception occurs.
+         */
+        suspend fun toggleModuleOnOracleDrive(packageName: String, enable: Boolean): String? =
         withContext(Dispatchers.IO) {
             try {
                 val result = auraDriveService?.toggleLSPosedModule()
