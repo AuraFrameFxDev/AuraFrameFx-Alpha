@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id "org.jetbrains.kotlin.jvm" version "2.2.0"
 }
@@ -8,9 +10,9 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
-    implementation "javax.inject:javax.inject:1"
+    implementation libs.kotlinStdlib
+    implementation libs.kotlinxCoroutinesCore
+    implementation libs.javaxInject
 }
 
 kotlin {
@@ -25,7 +27,7 @@ sourceSets {
     }
 }
 
-task compileKotlinOnly(type: org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+task compileKotlinOnly(type: KotlinCompile) {
     source = fileTree(dir: "app/src/main/java", include: "**/*.kt")
     classpath = configurations.compileClasspath
     destinationDirectory = file("build/classes")

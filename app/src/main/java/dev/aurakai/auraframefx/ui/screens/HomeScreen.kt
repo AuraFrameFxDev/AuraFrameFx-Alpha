@@ -106,13 +106,13 @@ fun HomeScreen(navController: NavController) {
                 cornerStyle = CornerStyle.SHARP
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    // Menu items like in image reference 1
-                    listOf(
-                        stringResource(R.string.menu_ui_engine),
-                        stringResource(R.string.menu_aurashield),
-                        stringResource(R.string.menu_aurakaiecosys),
-                        stringResource(R.string.menu_conference_room)
-                    ).forEach { menuItem ->
+                    val menuItems = listOf(
+                        stringResource(R.string.menu_dashboard) to null,
+                        stringResource(R.string.menu_analytics) to null,
+                        stringResource(R.string.menu_conference_room) to NavDestination.AiChat.route
+                    )
+
+                    menuItems.forEach { (menuItem, destination) ->
                         CyberMenuItem(
                             text = menuItem,
                             modifier = Modifier
@@ -121,8 +121,8 @@ fun HomeScreen(navController: NavController) {
                                 .digitalPixelEffect(visible = selectedMenuItem == menuItem)
                                 .clickable {
                                     selectedMenuItem = menuItem
-                                    if (menuItem == stringResource(R.string.menu_conference_room)) {
-                                        navController.navigate(NavDestination.AiChat.route)
+                                    destination?.let { route ->
+                                        navController.navigate(route)
                                     }
                                 },
                             isSelected = selectedMenuItem == menuItem
@@ -133,7 +133,7 @@ fun HomeScreen(navController: NavController) {
 
                     AuraSparkleButton(
                         text = stringResource(R.string.ai_chat_placeholder),
-                        onClick = { 
+                        onClick = {
                             selectedMenuItem = "ai_chat"
                             navController.navigate(NavDestination.AiChat.route)
                         }
