@@ -97,12 +97,12 @@ def create_mock_response(status_code=200, json_data=None, headers=None, text=Non
     
     Parameters:
         status_code (int, optional): The HTTP status code to simulate. Defaults to 200.
-        json_data (any, optional): The value returned by the mock's `json()` method. If not provided, calling `json()` raises a ValueError.
-        headers (dict, optional): HTTP headers to include in the mock response. Defaults to an empty dictionary.
+        json_data (optional): The value returned by the mock's `json()` method. If not provided, calling `json()` raises a ValueError.
+        headers (dict, optional): Headers to include in the mock response. Defaults to an empty dictionary.
         text (str, optional): The response text content. Defaults to an empty string.
     
     Returns:
-        Mock: A unittest.mock.Mock object simulating an HTTP response, including `status_code`, `headers`, `text`, a `json()` method, and a `raise_for_status()` method that raises an exception for error status codes.
+        Mock: A mock object simulating an HTTP response, including `status_code`, `headers`, `text`, a `json()` method, and a `raise_for_status()` method that raises an exception for error status codes.
     """
     from unittest.mock import Mock
     
@@ -125,10 +125,10 @@ def create_mock_response(status_code=200, json_data=None, headers=None, text=Non
 
 def create_test_connector(config_overrides=None):
     """
-    Instantiate and return a GenesisConnector configured for testing, allowing optional overrides of default settings.
+    Create and return a GenesisConnector instance for testing, using default test configuration merged with any provided overrides.
     
     Parameters:
-        config_overrides (dict, optional): Configuration values to override the default test settings.
+        config_overrides (dict, optional): Configuration values to override the defaults for the test connector.
     
     Returns:
         GenesisConnector: A test instance initialized with the merged configuration.

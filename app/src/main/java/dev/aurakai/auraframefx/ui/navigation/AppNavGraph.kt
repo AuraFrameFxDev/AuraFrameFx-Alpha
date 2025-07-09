@@ -33,7 +33,7 @@ import dev.aurakai.auraframefx.ui.screens.SettingsScreen
  * @param navController The navigation controller used to manage navigation between screens.
  */
 /**
- * Sets up the main navigation graph for the app, defining routes and their associated composable screens.
+ * Sets up the main navigation graph for the app, mapping navigation routes to their corresponding composable screens.
  *
  * @param navController The navigation controller that manages navigation between screens.
  */

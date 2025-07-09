@@ -58,9 +58,9 @@ enum class Emotion {
         /**
              * Returns the Emotion that matches the provided string, case-insensitively.
              *
-             * If no matching emotion is found, NEUTRAL is returned.
+             * If no matching Emotion is found, NEUTRAL is returned.
              *
-             * @param name The string to match against defined emotion names.
+             * @param name The string to match against Emotion names.
              * @return The corresponding Emotion, or NEUTRAL if no match is found.
              */
         fun fromString(name: String): Emotion = 

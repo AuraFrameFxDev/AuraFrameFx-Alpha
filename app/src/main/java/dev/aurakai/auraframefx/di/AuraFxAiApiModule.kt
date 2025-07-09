@@ -19,9 +19,9 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Supplies a singleton OkHttpClient configured to log complete HTTP request and response bodies.
+     * Supplies a singleton OkHttpClient instance configured to log complete HTTP request and response bodies.
      *
-     * @return An OkHttpClient instance with comprehensive logging enabled for network debugging.
+     * @return An OkHttpClient with comprehensive logging enabled for network debugging.
      */
     @Provides
     @Singleton
@@ -36,11 +36,11 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Supplies a singleton Json serializer configured for robust handling of API data.
+     * Supplies a singleton Json serializer configured for flexible and robust API data processing.
      *
-     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values, ensuring resilient serialization and deserialization of API responses.
+     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values to ensure resilient serialization and deserialization of API responses.
      *
-     * @return A configured Json instance for processing API data.
+     * @return A configured Json instance for handling API data.
      */
     @Provides
     @Singleton
@@ -52,10 +52,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Supplies a singleton `AIContentApi` configured to interact with the AuraFrameFx AI API.
+     * Supplies a singleton AIContentApi instance configured for communication with the AuraFrameFx AI API.
      *
-     * @param okHttpClient The HTTP client used for API network communication.
-     * @return An `AIContentApi` instance initialized with the AuraFrameFx API base URL and the specified HTTP client.
+     * @param okHttpClient The HTTP client used for network requests to the AuraFrameFx API.
+     * @return An AIContentApi instance initialized with the AuraFrameFx API base URL and the provided HTTP client.
      */
     @Provides
     @Singleton

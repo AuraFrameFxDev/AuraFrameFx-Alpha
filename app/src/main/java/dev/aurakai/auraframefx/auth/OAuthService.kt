@@ -25,7 +25,7 @@ class OAuthService(
     /**
      * Provides an intent to start the OAuth sign-in process.
      *
-     * @return An intent to launch the sign-in activity, or null if not implemented.
+     * @return The intent to launch the sign-in activity, or null if not implemented.
      */
     fun getSignInIntent(): Intent? {
         // TODO: Implement logic to create and return a sign-in Intent for a provider (e.g., Google).
@@ -34,10 +34,10 @@ class OAuthService(
     }
 
     /**
-     * Handles the result returned from the OAuth sign-in activity.
+     * Handles the result of the OAuth sign-in activity.
      *
-     * @param _data The intent data received after the sign-in activity completes.
-     * @return An object representing the sign-in result, or null if not implemented.
+     * @param _data The intent data returned from the sign-in activity.
+     * @return The outcome of the sign-in process, or null if not implemented.
      */
     fun handleSignInResult(_data: Intent?): Any? { // Using Any? as placeholder for Task<GoogleSignInAccount>
         // TODO: Parameter _data reported as unused. Utilize to process sign-in result.
@@ -57,7 +57,7 @@ class OAuthService(
     /**
      * Signs out the current user from the OAuth provider.
      *
-     * @return A placeholder object representing the result of the sign-out operation, or `null` if not implemented.
+     * @return `null` as a placeholder until the sign-out logic is implemented.
      */
     fun signOut(): Any? { // Using Any? as placeholder for Task<Void>
         // TODO: Implement sign-out logic for the provider.
@@ -68,7 +68,7 @@ class OAuthService(
     /**
      * Revokes the current user's access to the OAuth provider.
      *
-     * @return A placeholder object representing the result of the revoke operation, or null if not implemented.
+     * @return A placeholder object representing the result of the revoke operation, or null if unimplemented.
      */
     fun revokeAccess(): Any? { // Using Any? as placeholder for Task<Void>
         // TODO: Implement revoke access logic for the provider.

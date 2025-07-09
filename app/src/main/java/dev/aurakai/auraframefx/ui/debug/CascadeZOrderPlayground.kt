@@ -22,7 +22,7 @@ class CascadeDebugViewModel @Inject constructor(
     val processingState: StateFlow<ProcessingState> = cascadeAgent.processingState
 
     /**
-     * Updates the CascadeAgent's vision state to the specified value.
+     * Sets the CascadeAgent's vision state to the specified value.
      *
      * @param newState The new vision state to apply.
      */
@@ -42,9 +42,9 @@ class CascadeDebugViewModel @Inject constructor(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Composable debug UI for inspecting and updating the CascadeAgent's vision and processing states.
+ * Displays a debug UI for inspecting and updating the CascadeAgent's vision and processing states.
  *
- * Presents editable fields and controls for modifying the current vision and processing states via the provided ViewModel, and displays both current and historical state values for development and debugging purposes.
+ * Provides editable fields for entering new vision and processing states, buttons to apply updates through the ViewModel, and displays both current and historical state information. Intended for development and debugging use.
  */
 @Composable
 fun CascadeZOrderPlayground(
