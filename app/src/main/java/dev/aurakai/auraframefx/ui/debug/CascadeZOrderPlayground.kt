@@ -39,6 +39,11 @@ class CascadeDebugViewModel @Inject constructor(
     val visionState = cascadeAgent.visionState
     val processingState = cascadeAgent.processingState
 
+    /**
+     * Updates the Cascade agent's vision state with the provided value.
+     *
+     * @param newState The new vision state to set for the agent.
+     */
     fun updateVisionState(newState: VisionState) {
         cascadeAgent.updateVisionState(newState)
     }
@@ -49,13 +54,11 @@ class CascadeDebugViewModel @Inject constructor(
 }
 
 /**
- * Displays an interactive graph visualization of the Cascade agent states and their relationships.
+ * Renders an interactive force-directed graph visualizing the Cascade agent's components and their current states.
  *
- * This composable provides a force-directed graph visualization of the agent's state, including
- * vision, processing, and other relevant components. Users can pan, zoom, and select nodes to
- * inspect their current state and connections.
+ * Users can explore the relationships between agent subsystems (such as vision, processing, and data store), select nodes to view detailed state information, and observe real-time updates as the agent's state changes.
  *
- * @param viewModel The ViewModel that provides the agent state data and handles updates.
+ * @param viewModel Supplies the agent's state data and manages updates for the visualization.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -208,7 +211,9 @@ fun CascadeZOrderPlayground(
 }
 
 /**
- * Displays detailed information about a selected node.
+ * Shows a detailed panel with information about the given graph node, including its name, state, last updated time, and connections.
+ *
+ * @param node The graph node whose details are displayed.
  */
 @Composable
 private fun NodeDetails(node: GraphNode) {
@@ -313,6 +318,11 @@ private fun NodeDetails(node: GraphNode) {
     }
 }
 
+/**
+ * Displays a preview of the Cascade agent state visualizer UI within a Material theme.
+ *
+ * Renders the interactive graph visualization and details panel for design-time inspection in the Compose preview.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
 @Composable
