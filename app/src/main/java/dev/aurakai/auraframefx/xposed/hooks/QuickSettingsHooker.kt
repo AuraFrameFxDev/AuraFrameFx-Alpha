@@ -13,6 +13,11 @@ class QuickSettingsHooker(
     private val classLoader: ClassLoader,
     private val config: QuickSettingsConfig
 ) {
+    /**
+     * Applies Xposed hooks to Android Quick Settings panel classes to enable custom theming, tile layout modifications, and optional custom quick access buttons.
+     *
+     * Hooks methods in QSPanel and QuickQSPanel to intercept tile setup and background updates, allowing for runtime customization based on the current configuration. Most modification logic is represented as placeholders for future implementation.
+     */
     fun applyQuickSettingsHooks() {
         // TODO: Implement Xposed hooks for Quick Settings
         // Placeholder: Actual class and method names will vary by Android version and ROM

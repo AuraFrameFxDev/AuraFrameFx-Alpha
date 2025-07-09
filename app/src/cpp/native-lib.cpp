@@ -9,7 +9,14 @@
 // If the Kotlin class is a companion object, the class name part includes 'Companion'.
 // However, for methods defined in `companion object {}` and called as `NativeLib.stringFromJNI()`,
 // the JNI signature usually refers to the enclosing class `NativeLib`.
-extern "C" JNIEXPORT jstring JNICALL
+extern "C" /**
+ * @brief Returns a greeting string from the native C++ core to the Java/Kotlin layer.
+ *
+ * This JNI function is called from the `NativeLib` class in the `dev.aurakai.auraframefx.core` package.
+ *
+ * @return jstring A UTF-8 encoded greeting message for the Java/Kotlin caller.
+ */
+JNIEXPORT jstring JNICALL
 Java_dev_aurakai_auraframefx_core_NativeLib_stringFromJNI(
         JNIEnv* env,
         jobject /* this */) { // For companion object methods, 'this' refers to the class instance.

@@ -17,6 +17,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.aurakai.auraframefx.R // Assuming R class is generated and accessible
 
+/**
+ * Displays the Meta-Morph Grid screen with a holographic grid background, title, avatar placeholder, and welcome message.
+ *
+ * This composable provides a visually distinctive UI intended as a starting point for further enhancements, such as additional UI elements or system integrations.
+ */
 @Composable
 fun MetaMorphGridScreen() {
     Box(
@@ -63,6 +68,11 @@ fun MetaMorphGridScreen() {
     }
 }
 
+/**
+ * Draws a semi-transparent cyan grid background filling the available space.
+ *
+ * Renders evenly spaced vertical and horizontal lines to create a holographic grid effect.
+ */
 @Composable
 fun HolographicGridBackground() {
     Canvas(modifier = Modifier.fillMaxSize()) {
@@ -95,6 +105,11 @@ fun HolographicGridBackground() {
     }
 }
 
+/**
+ * Displays a placeholder avatar image for Aura's tutorial.
+ *
+ * Attempts to load a drawable resource as the avatar; if unavailable, shows a fallback box with the text "Avatar."
+ */
 @Composable
 fun AuraTutorialAvatar() {
     // Assuming you have a placeholder drawable resource for Aura's avatar

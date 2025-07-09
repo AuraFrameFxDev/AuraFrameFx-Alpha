@@ -32,6 +32,11 @@ import dev.aurakai.auraframefx.ui.theme.AppDimensions
  * Presents a vertically arranged list of settings, each in a card with a title, description, and toggle switch.
  * Each setting maintains its own toggle state locally within the screen.
  */
+/**
+ * Displays the main settings screen with configurable options for theme, notifications, privacy, and incantation settings.
+ *
+ * Presents each setting as a card with a title, description, and toggle switch, and includes a dedicated section for incantation and voice configuration.
+ */
 @Composable
 fun SettingsScreen() {
     Column(
@@ -90,6 +95,11 @@ fun SettingsScreen() {
     }
 }
 
+/**
+ * Displays a settings card for configuring the wake-word ("incantation") and voice activation options.
+ *
+ * Shows a toggle to enable or disable the wake-word feature. When enabled, provides a text field for entering a custom wake-word and a button to save the setting. The current implementation manages state locally and prints changes to the console; persistence is not yet implemented.
+ */
 @Composable
 private fun IncantationSettingsCard() {
     var wakeWordEnabled by remember { mutableStateOf(false) }

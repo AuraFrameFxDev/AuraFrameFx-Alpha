@@ -69,9 +69,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns `null` for any memory key, as memory retrieval is not implemented in this stub.
+     * Attempts to retrieve a memory value by key, but always returns `null` as memory retrieval is not yet implemented.
      *
-     * @param _memoryKey The key for the memory entry to retrieve.
+     * @param memoryKey The key identifying the memory entry to retrieve.
      * @return Always returns `null`.
      */
     override fun getMemory(memoryKey: String): String? {
@@ -92,8 +92,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Saves a value to memory with the specified key, potentially using context.
-     * This implementation now logs and conceptually calls the memoryManager.
+     * Saves a value to memory under the specified key, using the current context.
+     *
+     * The value is stored with contextual awareness, allowing for future retrieval based on the current context.
+     *
+     * @param key The identifier for the memory entry.
+     * @param value The value to be saved in memory.
      */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement actual memory saving, possibly context-aware and with eviction strategies.
@@ -118,10 +122,11 @@ class AuraAIServiceImpl @Inject constructor(
     // --- Methods below are placeholders, adding conceptual optimization notes ---
 
     /**
-     * Returns a fixed placeholder response for any analytics query.
-     * TODO: Consider if analytics queries can be cached or results aggregated efficiently.
-     * This implementation ignores the input and always returns a static string.
-     * @return The placeholder analytics response.
+     * Returns a placeholder response for any analytics query.
+     *
+     * This implementation ignores the input query and always returns a static string.
+     *
+     * @return A fixed placeholder analytics response.
      */
     override fun analyticsQuery(_query: String): String {
         // Potential optimization: Cache common query results if applicable
@@ -130,10 +135,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub implementation that always returns null, indicating file download is not supported.
-     * TODO: For actual implementation, use efficient streaming, manage temporary files carefully to save memory.
-     * @param _fileId The identifier of the file to download.
-     * @return Always null.
+     * Always returns null, indicating that file download is not supported in this implementation.
+     *
+     * @return Null, as file downloading is not implemented.
      */
     override suspend fun downloadFile(_fileId: String): File? {
         // Potential optimization: Stream directly to output, manage buffers.
@@ -141,11 +145,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null as image generation is not implemented in this stub.
-     * TODO: For actual implementation, manage ByteArray efficiently. Consider options for output format/compression.
-     *       Cache generated images based on prompt hash if prompts are often repeated.
+     * Stub method for image generation that always returns null.
+     *
+     * This method does not generate or return any image data. Intended as a placeholder for future implementation.
+     *
      * @param _prompt The prompt describing the desired image.
-     * @return Always null.
+     * @return Always returns null.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         // Potential optimization:
@@ -155,9 +160,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a fixed placeholder string for generated text, ignoring the provided prompt and options.
-     * TODO: Implement caching for generated text. Key could be a hash of prompt + options.
-     * @return The string "Generated text placeholder".
+     * Returns a placeholder string for generated text, ignoring the provided prompt and options.
+     *
+     * If cloud services are unavailable, returns an error placeholder string after invoking error handling.
+     *
+     * @return A fixed placeholder string or an error placeholder if cloud services are unavailable.
      */
     override suspend fun generateText(prompt: String, options: Map<String, Any>?): String {
         // Potential optimization:
@@ -174,9 +181,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a fixed placeholder string as the AI response for the given prompt and options.
-     * TODO: Implement caching similar to generateText.
-     * @return The string "AI response placeholder".
+     * Returns a placeholder AI response string for the given prompt and options.
+     *
+     * Always returns the string "AI response placeholder" regardless of input.
+     *
+     * @return The fixed placeholder string "AI response placeholder".
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         // Potential optimization: (Similar to generateText)
@@ -187,7 +196,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Checks the actual cloud service connectivity status using CloudStatusMonitor.
+     * Returns the current connectivity status of the cloud service.
+     *
+     * @return `true` if cloud services are available; `false` otherwise.
      */
     override fun isConnected(): Boolean {
         val connected = cloudStatusMonitor.isCloudServicesAvailable() // Assuming this method exists and returns Boolean

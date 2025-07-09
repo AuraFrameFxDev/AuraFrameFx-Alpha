@@ -13,9 +13,9 @@ extern "C" {
 /**
  * @brief Initializes the native language identifier and logs the provided model path.
  *
- * Converts the input Java string `modelPath` to a UTF-8 C string and logs it for informational purposes. The model path is not used in the current rule-based detection, but is accepted for potential future use. Returns the native library version string "1.2.0", or an empty string if `modelPath` is null or cannot be converted.
+ * Converts the given Java string `modelPath` to a UTF-8 C string and logs it for informational purposes. The model path is not used in the current rule-based detection but is accepted for potential future use. Returns the native library version string "1.2.0", or an empty string if `modelPath` is null or cannot be converted.
  *
- * @return jstring The native library version string "1.2.0", or an empty string if initialization fails.
+ * @return jstring The native library version string "1.2.0", or an empty string if the input is invalid.
  */
 JNIEXPORT jstring
 
@@ -43,9 +43,9 @@ Java_dev_aurakai_auraframefx_core_NativeLib_nativeInitialize(
 }
 
 /**
- * @brief Detects the language of the input text using heuristic keyword and character analysis.
+ * @brief Identifies the language of the input text using heuristic keyword and character analysis.
  *
- * Analyzes the input string for language-specific keywords and articles to identify Spanish ("es"), French ("fr"), German ("de"), Italian ("it"), or Portuguese ("pt"). Defaults to English ("en") if no language-specific keywords are found. If more than 10% of the characters are non-ASCII and no language is detected, returns "mul" to indicate multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
+ * Examines the input string for language-specific keywords and articles to detect Spanish ("es"), French ("fr"), German ("de"), Italian ("it"), or Portuguese ("pt"). If no language-specific keywords are found, defaults to English ("en"). If more than 10% of the characters are non-ASCII and no language is detected, returns "mul" to indicate multiple or unknown accented languages. Returns "und" if the input is null or cannot be processed.
  *
  * @param text Input text to analyze for language identification.
  * @return jstring ISO 639-1 language code: "en", "es", "fr", "de", "it", "pt", "mul", or "und".
@@ -156,7 +156,7 @@ Java_dev_aurakai_auraframefx_core_NativeLib_nativeDetectLanguage(
 /**
  * @brief Placeholder for releasing resources associated with a language identifier handle.
  *
- * Currently, this function does not perform any resource deallocation, as the implementation is stateless and does not allocate resources per handle. Intended for future use if resource management becomes necessary.
+ * This function currently performs no operations, as the language identification implementation is stateless and does not allocate resources per handle. It is reserved for future enhancements that may require explicit resource management.
  */
 JNIEXPORT void JNICALL
 Java_dev_aurakai_auraframefx_core_NativeLib_nativeRelease(
@@ -176,9 +176,9 @@ Java_dev_aurakai_auraframefx_core_NativeLib_nativeRelease(
 }
 
 /**
- * @brief Returns the current version string of the native language identifier library.
+ * @brief Retrieves the version string of the native language identification library.
  *
- * @return jstring The version string, e.g., "1.2.0".
+ * @return jstring The current library version, such as "1.2.0".
  */
 JNIEXPORT jstring
 
