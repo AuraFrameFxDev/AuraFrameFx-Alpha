@@ -29,25 +29,25 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     /**
- * Returns the name of the agent.
+ * Returns the agent's name, "Kai".
  *
- * @return The agent name, "Kai".
+ * @return The agent name.
  */
     override fun getName(): String? = "Kai"
 
     /**
- * Returns the agent type as `AgentType.KAI`.
+ * Returns the type of this agent as `AgentType.KAI`.
  *
- * @return The type of this agent.
+ * @return The agent type.
  */
     override fun getType(): AgentType = AgentType.KAI
 
     /**
-         * Returns a map indicating the supported capabilities of the Kai agent.
+         * Returns a map of the Kai agent's enabled capabilities.
          *
-         * The returned map includes the keys "security", "analysis", "memory", and "service_implemented", each set to true.
+         * The map contains capability names as keys ("security", "analysis", "memory", "service_implemented"), each mapped to `true`.
          *
-         * @return A map of capability names to true, representing enabled features.
+         * @return A map indicating which capabilities are enabled for the agent.
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
@@ -58,11 +58,11 @@ class KaiAIService @Inject constructor(
         )
 
     /**
-     * Handles an AI request using the provided context and returns a response referencing both.
+     * Processes an AI request with the given context and returns a response referencing both.
      *
-     * @param request The AI request to handle.
-     * @param context Additional context to include in the response.
-     * @return An AgentResponse containing a message that references the request query and context, with a confidence score of 1.0.
+     * @param request The AI request to process.
+     * @param context Contextual information to include in the response.
+     * @return An AgentResponse containing a message referencing the request query and context, with a confidence score of 1.0.
      */
     override suspend fun processRequest(
         request: AiRequest,

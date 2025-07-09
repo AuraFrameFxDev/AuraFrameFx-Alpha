@@ -9,9 +9,9 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class AmbientMusicService @Inject constructor() : Service() {
     /**
-     * Called when a client attempts to bind to the service.
+     * Handles binding requests from clients.
      *
-     * Always returns null, indicating that binding is not supported for this service.
+     * Always returns null, indicating that this service does not support binding.
      *
      * @return Always null.
      */
@@ -23,7 +23,7 @@ class AmbientMusicService @Inject constructor() : Service() {
     }
 
     /**
-     * Handles a request to start the service and specifies that the service should not be restarted if terminated by the system.
+     * Handles a request to start the service and specifies that it should not be restarted if terminated by the system.
      *
      * @return `START_NOT_STICKY`, indicating the service will not be automatically recreated after being killed.
      */
@@ -34,9 +34,9 @@ class AmbientMusicService @Inject constructor() : Service() {
     }
 
     /**
-     * Called by the system when the service is first created.
+     * Called once when the service is created to perform initialization.
      *
-     * This method is invoked once to perform any necessary initialization before the service begins handling commands.
+     * Override this method to set up resources or perform setup tasks before the service handles any commands.
      */
     override fun onCreate() {
         super.onCreate()
@@ -56,7 +56,7 @@ class AmbientMusicService @Inject constructor() : Service() {
     /**
      * Pauses music playback.
      *
-     * This method currently has no implementation.
+     * This method is a placeholder and does not perform any action.
      */
     fun pause() {
         // TODO: Implement pause logic. Reported as unused. Implement or remove.

@@ -39,9 +39,10 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Returns the current log file name based on today's date in yyyyMMdd format.
+     * Generates the log file name for the current day using the format "prefixyyyyMMdd.txt".
      *
-     * The file name is prefixed with the log filename prefix and suffixed with ".txt".
+     * The file name combines the log filename prefix, the current date in yyyyMMdd format, and a ".txt" extension.
+     * @return The generated log file name for today's date.
      */
     private fun getCurrentLogFileName(): String {
         val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.US)
@@ -49,9 +50,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Writes a formatted log entry to both Android Logcat and the current day's persistent log file.
+     * Asynchronously writes a formatted log entry to both Android Logcat and the current day's persistent log file.
      *
-     * The log entry includes a timestamp, log level, and tag. Multi-line messages are indented for readability, and if a throwable is provided, its stack trace is appended. If writing to the log file fails, the entry is logged as an error to Logcat as a fallback.
+     * The log entry includes a timestamp, log level, and tag. Multi-line messages are indented for readability, and if a throwable is provided, its stack trace is appended. If writing to the persistent log file fails, the entry is logged as an error to Logcat as a fallback.
      *
      * @param level The log level (e.g., "DEBUG", "INFO", "WARN", "ERROR", "VERBOSE").
      * @param entryTag The tag associated with the log entry.
@@ -108,61 +109,59 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-         * Asynchronously logs a debug-level message to both Android Logcat and the current day's persistent log file.
+         * Asynchronously logs a debug-level message to Android Logcat and the current day's persistent log file.
          *
-         * @param tag Identifies the source of the log message.
-         * @param message The message to log.
-         * @param throwable Optional exception to include in the log entry.
+         * @param tag The source identifier for the log message.
+         * @param message The message to log; multi-line messages are supported.
+         * @param throwable An optional exception to include in the log entry.
          */
     fun d(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("DEBUG", tag, message, throwable) }
 
     /**
-         * Asynchronously logs an informational message with the given tag and optional exception.
+         * Asynchronously logs an informational message to both Android Logcat and the current day's persistent log file.
          *
-         * The message is written to both Android Logcat and the current day's persistent log file.
-         *
-         * @param tag Identifier for the log entry source.
-         * @param message The informational message to log.
-         * @param throwable Optional exception whose stack trace will be included in the log entry.
+         * @param tag Identifier for the source of the log entry.
+         * @param message The informational message to log. Multi-line messages are supported.
+         * @param throwable Optional exception to include its stack trace in the log entry.
          */
     fun i(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("INFO", tag, message, throwable) }
 
     /**
-         * Asynchronously logs a warning message to both Android Logcat and the current day's persistent log file.
+         * Asynchronously logs a warning message to Android Logcat and the current day's persistent log file.
          *
          * @param tag Identifier for the source of the log message.
-         * @param message The warning message to log.
+         * @param message The warning message to record; supports multi-line content.
          * @param throwable Optional exception to include in the log entry.
          */
     fun w(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("WARN", tag, message, throwable) }
 
     /**
-         * Asynchronously logs an error-level message with the specified tag and optional exception.
+         * Asynchronously logs an error-level message with the given tag and optional exception.
          *
-         * The message is recorded in both Android Logcat and the current day's persistent log file.
+         * The message is written to both Android Logcat and the current day's persistent log file.
          *
-         * @param tag The source identifier for the log entry.
-         * @param message The error message to log.
-         * @param throwable An optional exception whose stack trace will be included in the log entry.
+         * @param tag Identifier for the log entry source.
+         * @param message The error message to log; multi-line messages are supported.
+         * @param throwable Optional exception whose stack trace will be included in the log entry.
          */
     fun e(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("ERROR", tag, message, throwable) }
 
     /**
-         * Asynchronously logs a verbose-level message to both Android Logcat and the current day's persistent log file.
+         * Asynchronously logs a verbose-level message to Android Logcat and the current day's persistent log file.
          *
          * @param tag Identifier for the source of the log message.
-         * @param message The message to log.
+         * @param message The message to log. Multi-line messages are supported.
          * @param throwable Optional exception whose stack trace will be included in the log entry.
          */
     fun v(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("VERBOSE", tag, message, throwable) }
 
     /**
-     * Reads and returns the contents of all log files in the internal logs directory.
+     * Reads and returns the contents of all persistent log files in the internal logs directory.
      *
      * @return A map where each key is a log filename (matching the log filename prefix) and the value is its content, with the newest files first.
      */
@@ -196,9 +195,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Reads and returns the contents of the current day's log file.
+     * Retrieves the contents of the current day's persistent log file.
      *
-     * @return The contents of today's log file, or an empty string if the file does not exist or cannot be read.
+     * @return The contents of today's log file, or an empty string if the file is missing or unreadable.
      */
     suspend fun readCurrentDayLogs(): String = withContext(Dispatchers.IO) {
         val fileName = getCurrentLogFileName()
@@ -208,9 +207,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Deletes log files older than the configured retention period from the internal logs directory.
+     * Removes log files older than the configured retention period from the internal logs directory.
      *
-     * Scans for files with the log filename prefix and removes those whose last modified time exceeds the retention threshold. Logs the number of files deleted or a warning if the directory does not exist.
+     * Scans the logs directory for files with the designated log filename prefix and deletes those whose last modified time exceeds the retention threshold. Logs the number of files deleted or a warning if the directory does not exist.
      */
     private suspend fun cleanupOldLogs() = withContext(Dispatchers.IO) {
         // Use injected context

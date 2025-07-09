@@ -16,28 +16,28 @@ interface IAuraDriveService : IInterface {
     /**
  * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module was successfully enabled or disabled; `false` if the operation failed.
+ * @return `true` if the module's state was successfully changed; `false` if the operation failed.
  */
     fun toggleLSPosedModule(): Boolean
 
     /**
- * Retrieves a comprehensive internal status report of the Aura Drive service.
+ * Retrieves a detailed internal status report for the Aura Drive service.
  *
- * @return A string containing detailed diagnostic and monitoring information about the current state of the service.
+ * @return A string containing diagnostic and monitoring information about the service's current state.
  */
     fun getDetailedInternalStatus(): String
 
     /**
- * Retrieves a list of internal diagnostic log entries for the Aura Drive service.
+ * Retrieves the internal diagnostic log entries for the Aura Drive service.
  *
- * @return A list of strings, each representing a diagnostic log entry for debugging or monitoring purposes.
+ * @return A list of strings, each representing a diagnostic log entry.
  */
     fun getInternalDiagnosticsLog(): List<String>
 
     companion object {
         object Stub {
             /**
-             * Retrieves an `IAuraDriveService` implementation backed by the provided `IBinder`, or `null` if the binder is `null`.
+             * Returns an `IAuraDriveService` implementation backed by the provided `IBinder`, or `null` if the binder is `null`.
              *
              * Use this method to obtain a service interface for IPC binding scenarios.
              *
@@ -63,9 +63,9 @@ interface IAuraDriveService : IInterface {
                         override fun getOracleDriveStatus(): String = "Unknown"
 
                         /**
- * Toggles the enabled or disabled state of the LSPosed module.
+ * Toggles the enabled state of the LSPosed module.
  *
- * @return `true` if the module state was successfully changed, or `false` if the operation failed or is not supported.
+ * @return `true` if the module state was successfully changed; `false` if the operation failed or is unsupported.
  */
                         override fun toggleLSPosedModule(): Boolean = false
 
@@ -79,9 +79,7 @@ interface IAuraDriveService : IInterface {
                         /**
  * Retrieves a list of internal diagnostics log entries.
  *
- * In this stub implementation, always returns an empty list.
- *
- * @return An empty list of diagnostic log entries.
+ * @return A list of diagnostic log entries. In this stub implementation, the list is always empty.
  */
                         override fun getInternalDiagnosticsLog(): List<String> = emptyList()
                     }

@@ -19,18 +19,18 @@ class AppStateManager @Inject constructor() {
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     /**
-     * Sets the current application state to the specified value.
+     * Updates the application state to the provided value.
      *
-     * @param newState The new application state to set.
+     * @param newState The new state to assign as the current application state.
      */
     fun updateAppState(newState: AppState) {
         _appState.value = newState
     }
 
     /**
-     * Updates the application's loading status flag.
+     * Sets the application's loading status.
      *
-     * @param loading True to indicate the application is loading; false otherwise.
+     * @param loading True if the application is loading; false otherwise.
      */
     fun setLoading(loading: Boolean) {
         _isLoading.value = loading

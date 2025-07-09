@@ -23,28 +23,29 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Returns a static placeholder response for any analytics query.
      *
-     * The input query is ignored and a fixed string is always returned.
-     * @return The placeholder analytics response.
+     * The input query is ignored and a static string is always returned.
+     * @return The static analytics response placeholder.
      */
     override fun analyticsQuery(_query: String): String {
         return "Analytics response placeholder"
     }
 
     /**
-     * Stub method for file download; always returns null to indicate unimplemented functionality.
+     * Stub method for file download; always returns null to indicate the functionality is not implemented.
      *
      * @param _fileId The identifier of the file to download.
-     * @return Always null.
+     * @return Always null, as file download is not implemented.
      */
     override suspend fun downloadFile(_fileId: String): File? {
         return null
     }
 
     /**
-     * Always returns null, indicating that image generation is not implemented in this stub.
+     * Stub method for image generation that always returns null.
      *
-     * @param _prompt The prompt describing the desired image.
-     * @return Always null.
+     * This implementation does not generate images and ignores the input prompt.
+     *
+     * @return Always null, indicating image generation is not implemented.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         return null
@@ -69,7 +70,7 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Always returns `null`, indicating that memory retrieval is not implemented in this stub.
+     * Stub method for retrieving a memory entry; always returns `null` to indicate unimplemented functionality.
      *
      * @param _memoryKey The key for the memory entry to retrieve.
      * @return Always `null`.
@@ -79,9 +80,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder method for saving a value to memory with the specified key.
+     * Stub method for saving a value to memory with the specified key.
      *
-     * This implementation does not perform any operation and serves as a stub for future memory-saving functionality.
+     * This implementation does not perform any operation and is intended as a placeholder for future memory-saving functionality.
      */
     override fun saveMemory(key: String, value: Any) {
         // TODO: Implement memory saving

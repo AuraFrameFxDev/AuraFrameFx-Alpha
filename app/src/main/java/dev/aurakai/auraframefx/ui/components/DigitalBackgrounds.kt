@@ -50,6 +50,14 @@ import kotlin.math.sin
  * @param modifier Modifier to be applied to the Canvas.
  * @param color The color and alpha transparency of the grid lines.
  */
+/**
+ * Renders a digital landscape background as a grid of evenly spaced vertical and horizontal lines.
+ *
+ * The grid covers the entire composable area, creating a digital or circuit-like effect. The color and transparency of the lines can be customized.
+ *
+ * @param modifier Modifier to apply to the Canvas.
+ * @param color The color of the grid lines, including alpha for transparency.
+ */
 @Composable
 fun DigitalLandscapeBackground(
     modifier: Modifier = Modifier,
@@ -61,12 +69,12 @@ fun DigitalLandscapeBackground(
 }
 
 /**
- * Displays a seamless hexagonal grid background with staggered hexagon outlines.
+ * Renders a seamless hexagonal grid background with staggered hexagon outlines.
  *
- * Renders a continuous pattern of hexagon outlines across the composable area, with each row horizontally offset to create a tiling effect. The grid's color and opacity can be customized.
+ * Draws a continuous pattern of hexagon outlines across the composable area, offsetting each row horizontally to create a tiling effect. The grid's color and opacity can be customized.
  *
- * @param alpha The opacity of the hexagon grid, where 0.0 is fully transparent and 1.0 is fully opaque.
- * @param color The color of the hexagon outlines, with the specified alpha applied.
+ * @param alpha Opacity of the hexagon grid, from 0.0 (fully transparent) to 1.0 (fully opaque).
+ * @param color Color of the hexagon outlines, with the specified alpha applied.
  */
 @Composable
 fun HexagonGridBackground(
@@ -80,9 +88,9 @@ fun HexagonGridBackground(
 }
 
 /**
- * Renders a grid of evenly spaced vertical and horizontal lines across the canvas to create a digital landscape effect.
+ * Draws a grid of evenly spaced vertical and horizontal lines over the entire canvas to create a digital landscape pattern.
  *
- * @param color The color applied to the grid lines.
+ * @param color The color used for the grid lines.
  */
 private fun DrawScope.drawDigitalLandscape(color: Color) {
     // Simple grid pattern for digital landscape
@@ -106,9 +114,9 @@ private fun DrawScope.drawDigitalLandscape(color: Color) {
 }
 
 /**
- * Renders a seamless staggered hexagonal grid by outlining interlocking hexagons across the canvas.
+ * Draws a seamless hexagonal grid pattern by outlining staggered hexagons across the canvas.
  *
- * Each row is horizontally offset to create a continuous tiling effect. Only hexagons fully within the canvas bounds are drawn.
+ * Each row is horizontally offset to create an interlocking tiling effect. Only hexagons fully contained within the canvas are rendered.
  *
  * @param color The color used for the hexagon outlines.
  */
@@ -134,13 +142,13 @@ private fun DrawScope.drawHexagonGrid(color: Color) {
 }
 
 /**
- * Draws a hexagon outline centered at the specified position with the given radius and color.
+ * Draws a single hexagon outline centered at the given position with the specified radius and color.
  *
- * The hexagon is constructed by connecting six vertices spaced at 60-degree intervals around the center.
+ * The hexagon is created by connecting six equally spaced vertices around the center point.
  *
- * @param center The coordinate at which the hexagon is centered.
- * @param radius The distance from the center to each vertex.
- * @param color The outline color of the hexagon.
+ * @param center The center coordinate of the hexagon.
+ * @param radius The distance from the center to each vertex of the hexagon.
+ * @param color The color used for the hexagon outline.
  */
 private fun DrawScope.drawHexagon(
     center: androidx.compose.ui.geometry.Offset,

@@ -6,11 +6,9 @@ import java.io.File
 interface AuraAIService {
 
     /**
-     * Returns a static placeholder response for analytics queries.
+     * Returns a static placeholder string for analytics queries, ignoring the input.
      *
-     * Ignores the input query and always returns a fixed string.
-     *
-     * @return A static placeholder response string.
+     * @return A fixed placeholder response.
      */
     fun analyticsQuery(_query: String): String {
         // TODO: Implement analytics query
@@ -18,10 +16,10 @@ interface AuraAIService {
     }
 
     /**
-     * Retrieves a file by its unique identifier.
+     * Asynchronously retrieves a file by its unique identifier.
      *
      * @param _fileId The unique identifier of the file to retrieve.
-     * @return The file if found, or null if unavailable.
+     * @return The file if found, or null if the file does not exist or retrieval is not implemented.
      */
     suspend fun downloadFile(_fileId: String): File? {
         // TODO: Implement file download
@@ -29,10 +27,10 @@ interface AuraAIService {
     }
 
     /**
-     * Generates an image from the given textual prompt.
+     * Asynchronously generates an image based on the provided textual prompt.
      *
      * @param _prompt The text description used to guide image generation.
-     * @return A ByteArray containing the generated image data, or null if image generation is not implemented or fails.
+     * @return The generated image as a ByteArray, or null if image generation is not implemented or fails.
      */
     suspend fun generateImage(_prompt: String): ByteArray? { // Returns URL or path to image -> ByteArray?
         // TODO: Implement image generation
@@ -40,12 +38,12 @@ interface AuraAIService {
     }
 
     /**
-     * Generates AI text from a prompt using optional configuration parameters.
+     * Asynchronously generates AI text from a prompt with optional configuration parameters.
      *
-     * The options map may include "temperature" (Double) and "max_tokens" (Int) to adjust generation behavior.
+     * The options map can include "temperature" (Double) and "max_tokens" (Int) to influence the generation process.
      *
      * @param prompt The input prompt for text generation.
-     * @param options Optional parameters to influence generation, such as "temperature" and "max_tokens".
+     * @param options Optional parameters to adjust generation behavior, such as "temperature" and "max_tokens".
      * @return A structured string containing the generated text, configuration details, and status, or an error message if generation fails.
      */
     suspend fun generateText(prompt: String, options: Map<String, Any>? = null): String {
@@ -66,11 +64,11 @@ interface AuraAIService {
     }
 
     /**
-     * Generates a structured AI response string for the given prompt, optionally using context and system instructions from the provided options.
+     * Generates a formatted AI response string for the given prompt, optionally incorporating context and system instructions from the provided options.
      *
-     * @param prompt The input prompt for which to generate a response.
+     * @param prompt The input prompt to generate a response for.
      * @param options Optional map that may include "context" and "system_prompt" keys to influence the response.
-     * @return A formatted AI response string, or an error message if generation fails.
+     * @return The structured AI response string, or an error message if generation fails.
      */
     fun getAIResponse(
         prompt: String,
@@ -96,18 +94,20 @@ interface AuraAIService {
     }
 
     /**
- * Retrieves a value from memory associated with the specified key.
+ * Retrieves the stored string value associated with the given memory key.
  *
- * @param memoryKey The unique identifier for the memory entry.
- * @return The stored string value if found, or null if the key does not exist.
+ * @param memoryKey The key identifying the memory entry to retrieve.
+ * @return The value associated with the key, or null if no entry exists.
  */
     fun getMemory(memoryKey: String): String?
 
     /**
- * Stores a value in memory associated with the given key.
+ * Saves a value in memory under the specified key.
  *
- * @param key The unique identifier for the memory entry.
- * @param value The value to be stored.
+ * Overwrites any existing value associated with the key.
+ *
+ * @param key The identifier for the memory entry.
+ * @param value The value to store.
  */
     fun saveMemory(key: String, value: Any)
 
@@ -122,10 +122,10 @@ interface AuraAIService {
     }
 
     /**
-     * Publishes a message to a specified Pub/Sub topic.
+     * Publishes a message to the specified Pub/Sub topic.
      *
-     * @param _topic The target topic for the message.
-     * @param _message The content to publish.
+     * @param _topic The name of the topic to publish to.
+     * @param _message The message content to be published.
      */
     fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing
@@ -133,10 +133,10 @@ interface AuraAIService {
 
 
     /**
-     * Uploads a file and returns its unique identifier or URL.
+     * Asynchronously uploads a file and returns its unique identifier or URL.
      *
-     * @param _file The file to be uploaded.
-     * @return The file's unique identifier or URL if the upload succeeds, or null if not implemented or the upload fails.
+     * @param _file The file to upload.
+     * @return The unique identifier or URL of the uploaded file if successful, or null if the upload fails or is not implemented.
      */
     suspend fun uploadFile(_file: File): String? { // Returns file ID or URL
         // TODO: Implement file upload

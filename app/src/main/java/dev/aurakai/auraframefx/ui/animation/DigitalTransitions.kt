@@ -28,24 +28,31 @@ import androidx.compose.ui.graphics.Color // Added import for Color
  *
  * Currently returns the original modifier without any visual changes.
  */
+/**
+ * Placeholder for a cyber-themed edge glow visual effect.
+ *
+ * Currently returns the original Modifier unchanged and does not apply any visual modification.
+ */
 fun Modifier.cyberEdgeGlow(): Modifier = this
 
 /**
- * Placeholder for a customizable cyber edge glow effect using the specified primary and secondary colors.
+ * Placeholder for a cyber edge glow effect with customizable primary and secondary colors.
  *
- * Currently returns the original modifier unchanged without applying any visual effect.
+ * Intended to eventually apply a cyber-themed edge glow using the provided colors, but currently returns the original modifier unchanged.
  *
- * @param primaryColor The main color intended for the edge glow.
- * @param secondaryColor The secondary color intended to blend with the primary color.
- * @return The original modifier without modification.
+ * @param primaryColor The primary color for the intended edge glow effect.
+ * @param secondaryColor The secondary color to blend with the primary color in the intended effect.
+ * @return The original modifier instance, unmodified.
  */
 fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier = this
 
 /**
- * Placeholder for a digital pixelation effect on this modifier.
+ * Placeholder for a digital pixelation visual effect.
  *
- * @param visible If true, the pixelation effect would be shown when implemented.
- * @return The original modifier, as no effect is currently applied.
+ * When implemented, this function would apply a pixelation effect to the UI element if `visible` is true. Currently, it returns the original modifier without any visual changes.
+ *
+ * @param visible Whether the pixelation effect should be visible when implemented.
+ * @return The original modifier unchanged.
  */
 fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this
 
