@@ -18,6 +18,11 @@ import dev.aurakai.auraframefx.ui.theme.NeonPurple
 import dev.aurakai.auraframefx.ui.theme.NeonTeal
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays the main conference room interface, including agent selection, recording and transcription controls, chat area, and message input.
+ *
+ * This composable manages UI state for the selected agent, recording, and transcription. It provides interactive controls for switching agents, starting/stopping recording and transcription, and a chat interface with a message input field. Some actions are placeholders for future implementation.
+ */
 @Composable
 fun ConferenceRoomScreen() {
     var selectedAgent by remember { mutableStateOf("Aura") }
@@ -175,12 +180,11 @@ fun AgentButton(
 }
 
 /**
- * Displays a button for toggling the recording state in the conference room UI.
+ * Renders a button that toggles the recording state in the conference room interface.
  *
- * Shows a red stop icon when recording is active, or a purple circle icon when inactive. The button invokes the provided callback when pressed.
+ * Displays a red stop icon when recording is active, or a purple circle icon when inactive. The button triggers the provided callback when pressed.
  *
- * @param isRecording Indicates whether recording is currently active.
- * @param onClick Called when the button is pressed.
+ * @param isRecording True if recording is currently active; false otherwise.
  */
 @Composable
 fun RecordingButton(
@@ -205,12 +209,12 @@ fun RecordingButton(
 }
 
 /**
- * Displays a button for toggling the transcription state in the conference room UI.
+ * Renders an icon button to toggle the transcription state in the conference room interface.
  *
- * Shows a red stop icon when transcription is active, or a NeonBlue phone icon when inactive.
+ * Displays a red stop icon when transcription is active, or a NeonBlue phone icon when inactive. The button's content description updates for accessibility based on the current state.
  *
- * @param isTranscribing Indicates whether transcription is currently active.
- * @param onClick Called when the button is pressed.
+ * @param isTranscribing True if transcription is currently active; false otherwise.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun TranscribeButton(
