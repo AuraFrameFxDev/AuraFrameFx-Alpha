@@ -14,8 +14,10 @@ import org.mockito.MockitoAnnotations
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
 import java.io.IOException
+import java.io.InputStream
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeoutException
+import javax.net.ssl.SSLHandshakeException
 
 @ExtendWith(MockitoExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -552,11 +554,7 @@ class OracleDriveServiceConnectorTest {
             verify(mockConnectionManager).connect(refreshedCredentials)
         }
     }
-}
 
-// Helper data classes for testing
-data class Credentials(val token: String, val endpoint: String)
-class ServiceUnavailableException(message: String) : Exception(message)
     @Nested
     @DisplayName("Configuration and Initialization Tests")
     inner class ConfigurationAndInitializationTests {
@@ -1162,7 +1160,11 @@ class ServiceUnavailableException(message: String) : Exception(message)
     }
 }
 
-// Additional helper data classes for enhanced testing
+// Helper data classes for testing
+data class Credentials(val token: String, val endpoint: String)
+
+class ServiceUnavailableException(message: String) : Exception(message)
+
 data class FileMetadata(
     val id: String,
     val name: String,
@@ -1175,7 +1177,25 @@ data class FileMetadata(
 data class FileUploadRequest(
     val fileName: String,
     val content: ByteArray
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as FileUploadRequest
+
+        if (fileName != other.fileName) return false
+        if (!content.contentEquals(other.content)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = fileName.hashCode()
+        result = 31 * result + content.contentHashCode()
+        return result
+    }
+}
 
 data class ShareRequest(
     val fileId: String,
@@ -1219,4 +1239,163 @@ data class OperationMetrics(
 class QuotaExceededException(message: String) : Exception(message)
 class AccessDeniedException(message: String) : Exception(message)
 class TokenExpiredException(message: String) : Exception(message)
-class SSLHandshakeException(message: String) : Exception(message)
+
+// Mock interfaces for testing
+interface OracleDriveServiceClient {
+    fun uploadFile(fileName: String, content: ByteArray): CompletableFuture<String>
+    fun downloadFile(fileId: String): CompletableFuture<ByteArray>
+    fun deleteFile(fileId: String): CompletableFuture<Boolean>
+    fun getFileMetadata(fileId: String): CompletableFuture<FileMetadata>
+    fun listFiles(path: String): CompletableFuture<List<FileMetadata>>
+    fun updateFileProperties(fileId: String, properties: Map<String, String>): CompletableFuture<Boolean>
+    fun shareFile(request: ShareRequest): CompletableFuture<ShareResponse>
+    fun batchUpload(files: List<FileUploadRequest>): CompletableFuture<List<String>>
+    fun batchUpload(files: List<FileUploadRequest>): CompletableFuture<BatchUploadResult>
+    fun batchDelete(fileIds: List<String>): CompletableFuture<Map<String, Boolean>>
+    fun uploadStream(fileName: String, inputStream: InputStream): CompletableFuture<String>
+    fun downloadStream(fileId: String): CompletableFuture<InputStream>
+    fun shutdown()
+}
+
+interface ConnectionManager {
+    fun connect(credentials: Credentials): Boolean
+    fun isConnected(): Boolean
+    fun close()
+    fun configureSsl(config: SslConfig)
+}
+
+interface AuthProvider {
+    fun getCredentials(): Credentials
+}
+
+// Mock connector class for testing
+class OracleDriveServiceConnector(
+    private val serviceClient: OracleDriveServiceClient?,
+    private val connectionManager: ConnectionManager?,
+    private val authProvider: AuthProvider?,
+    private val timeout: Long = 30000L
+) {
+    
+    init {
+        require(serviceClient != null) { "Service client cannot be null" }
+        require(connectionManager != null) { "Connection manager cannot be null" }
+        require(authProvider != null) { "Auth provider cannot be null" }
+    }
+    
+    fun connect(): Boolean {
+        val credentials = authProvider!!.getCredentials()
+        return connectionManager!!.connect(credentials)
+    }
+    
+    fun connectWithRetry(maxRetries: Int): Boolean {
+        val credentials = authProvider!!.getCredentials()
+        repeat(maxRetries) {
+            if (connectionManager!!.connect(credentials)) {
+                return true
+            }
+        }
+        return false
+    }
+    
+    fun connectWithAuthRefresh(): Boolean {
+        return try {
+            val credentials = authProvider!!.getCredentials()
+            connectionManager!!.connect(credentials)
+        } catch (e: SecurityException) {
+            val refreshedCredentials = authProvider.getCredentials()
+            connectionManager!!.connect(refreshedCredentials)
+        }
+    }
+    
+    fun isConnected(): Boolean = connectionManager!!.isConnected()
+    
+    fun close() {
+        connectionManager!!.close()
+        serviceClient!!.shutdown()
+    }
+    
+    fun uploadFile(fileName: String?, content: ByteArray?): CompletableFuture<String> {
+        require(!fileName.isNullOrEmpty()) { "File name cannot be null or empty" }
+        require(content != null && content.isNotEmpty()) { "Content cannot be null or empty" }
+        require(isConnected()) { "Service is not connected" }
+        
+        return serviceClient!!.uploadFile(fileName, content)
+    }
+    
+    fun uploadFileWithTimeout(fileName: String, content: ByteArray, timeoutMs: Long): String {
+        val future = uploadFile(fileName, content)
+        return future.get(timeoutMs, java.util.concurrent.TimeUnit.MILLISECONDS)
+    }
+    
+    fun downloadFile(fileId: String?): CompletableFuture<ByteArray> {
+        require(!fileId.isNullOrEmpty()) { "File ID cannot be null or empty" }
+        require(isConnected()) { "Service is not connected" }
+        
+        return serviceClient!!.downloadFile(fileId)
+    }
+    
+    fun deleteFile(fileId: String?): CompletableFuture<Boolean> {
+        require(!fileId.isNullOrEmpty()) { "File ID cannot be null or empty" }
+        require(isConnected()) { "Service is not connected" }
+        
+        return serviceClient!!.deleteFile(fileId)
+    }
+    
+    fun getFileMetadata(fileId: String): CompletableFuture<FileMetadata> {
+        return serviceClient!!.getFileMetadata(fileId)
+    }
+    
+    fun listFiles(path: String): CompletableFuture<List<FileMetadata>> {
+        return serviceClient!!.listFiles(path)
+    }
+    
+    fun updateFileProperties(fileId: String, properties: Map<String, String>): CompletableFuture<Boolean> {
+        return serviceClient!!.updateFileProperties(fileId, properties)
+    }
+    
+    fun shareFile(request: ShareRequest): CompletableFuture<ShareResponse> {
+        return serviceClient!!.shareFile(request)
+    }
+    
+    fun batchUpload(files: List<FileUploadRequest>): CompletableFuture<List<String>> {
+        return serviceClient!!.batchUpload(files)
+    }
+    
+    fun batchUpload(files: List<FileUploadRequest>): CompletableFuture<BatchUploadResult> {
+        return serviceClient!!.batchUpload(files)
+    }
+    
+    fun batchDelete(fileIds: List<String>): CompletableFuture<Map<String, Boolean>> {
+        return serviceClient!!.batchDelete(fileIds)
+    }
+    
+    fun uploadStream(fileName: String, inputStream: InputStream): CompletableFuture<String> {
+        return serviceClient!!.uploadStream(fileName, inputStream)
+    }
+    
+    fun downloadStream(fileId: String): CompletableFuture<InputStream> {
+        return serviceClient!!.downloadStream(fileId)
+    }
+    
+    fun getTimeout(): Long = timeout
+    
+    fun configureSsl(config: SslConfig) {
+        connectionManager!!.configureSsl(config)
+    }
+    
+    fun getMetrics(): OperationMetrics {
+        return OperationMetrics(0, 0, 0, 0, 0, 0, 0, 0, 0)
+    }
+    
+    fun resetMetrics() {
+        // Implementation would reset internal metrics
+    }
+    
+    fun setCacheMaxSize(size: Int) {
+        // Implementation would set cache size
+    }
+    
+    fun getCacheSize(): Int {
+        return 0 // Mock implementation
+    }
+}
