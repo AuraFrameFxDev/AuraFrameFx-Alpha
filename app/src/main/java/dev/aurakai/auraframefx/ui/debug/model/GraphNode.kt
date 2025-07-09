@@ -6,6 +6,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import dev.aurakai.auraframefx.model.agent_states.ProcessingState
 import dev.aurakai.auraframefx.model.agent_states.VisionState
 import java.util.*
+import kotlin.math.sqrt
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Storage
 
 @Immutable
 data class GraphNode(
@@ -118,9 +126,4 @@ enum class ConnectionType {
     DASHED
 }
 
-// Extension properties for Dp
-val Int.dp: Dp
-    get() = Dp(this.toFloat())
-
-val Float.dp: Dp
-    get() = Dp(this)
+// Extension properties for Dp have been removed as androidx.compose.ui.unit.dp is now imported.

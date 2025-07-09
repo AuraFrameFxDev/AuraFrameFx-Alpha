@@ -14,13 +14,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset as ComposeOffset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import dev.aurakai.auraframefx.ui.debug.model.GraphNode
 import dev.aurakai.auraframefx.ui.debug.model.Connection
 import dev.aurakai.auraframefx.ui.debug.model.NodeType
+import dev.aurakai.auraframefx.ui.debug.model.ConnectionType // Import ConnectionType
 import dev.aurakai.auraframefx.ui.debug.model.Offset as GraphOffset
 import kotlin.math.*
 
@@ -66,6 +66,9 @@ fun InteractiveGraph(
         val canvasWidth = constraints.maxWidth.toFloat()
         val canvasHeight = constraints.maxHeight.toFloat()
         
+        val density = LocalDensity.current
+        val gridLineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+
         // Calculate content bounds for centering
         val contentWidth = 1000f * scale
         val contentHeight = 800f * scale
@@ -89,26 +92,29 @@ fun InteractiveGraph(
                 }
         ) {
             // Draw grid
-            drawGrid(scale, translation)
+            drawGrid(scale, translation, gridLineColor, density)
             
             // Draw connections first (behind nodes)
             nodes.forEach { node ->
                 node.connections.forEach { connection ->
                     val targetNode = nodes.find { it.id == connection.targetId }
-                    targetNode?.let { drawConnection(node, it, connection) }
+                    targetNode?.let { drawConnection(node, it, connection, density) }
                 }
             }
             
             // Draw nodes
             nodes.forEach { node ->
                 val isSelected = node.id == selectedNodeId
-                val nodeScale = if (isSelected) pulse else 1f
+                val nodePulseScale = if (isSelected) pulse else 1f
                 
-                withTransform({
-                    scale(scale, scale, ComposeOffset(offsetX, offsetY) + node.position.toCompose() * scale)
-                    scale(nodeScale, nodeScale, center = node.position.toCompose())
-                }) {
-                    drawNode(node, isSelected)
+                withTransform({ // Assuming this is DrawScope.withTransform, receiver is DrawTransform
+                    val globalTransformPivot = ComposeOffset(offsetX, offsetY) + node.position.toCompose() * scale
+                    this.scale(scaleX = scale, scaleY = scale, pivotX = globalTransformPivot.x, pivotY = globalTransformPivot.y)
+
+                    val pulseTransformPivot = node.position.toCompose()
+                    this.scale(scaleX = nodePulseScale, scaleY = nodePulseScale, pivotX = pulseTransformPivot.x, pivotY = pulseTransformPivot.y)
+                }) { // Receiver here is DrawScope
+                    drawNode(node, isSelected, density)
                 }
             }
         }
@@ -122,17 +128,18 @@ fun InteractiveGraph(
  *
  * @param scale The current zoom level, affecting grid spacing and line thickness.
  * @param translation The current pan offset, shifting the grid accordingly.
+ * @param gridLineColor The color to use for the grid lines.
+ * @param density The current screen density.
  */
-private fun DrawScope.drawGrid(scale: Float, translation: ComposeOffset) {
-    val gridSize = 40f / scale
-    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+private fun DrawScope.drawGrid(scale: Float, translation: ComposeOffset, gridLineColor: Color, density: Density) {
+    val gridSize = 40f / scale // This is in Px, no Dp conversion needed for logic
     
     // Draw vertical lines
     for (x in 0 until size.width.toInt() step gridSize.toInt()) {
         drawLine(
-            color = gridColor,
-            start = Offset(x.toFloat(), 0f) - translation,
-            end = Offset(x.toFloat(), size.height) - translation,
+            color = gridLineColor,
+            start = ComposeOffset(x.toFloat(), 0f) - translation, // Ensure using ComposeOffset if operations defined on it
+            end = ComposeOffset(x.toFloat(), size.height) - translation,
             strokeWidth = 1f / scale
         )
     }
@@ -140,9 +147,9 @@ private fun DrawScope.drawGrid(scale: Float, translation: ComposeOffset) {
     // Draw horizontal lines
     for (y in 0 until size.height.toInt() step gridSize.toInt()) {
         drawLine(
-            color = gridColor,
-            start = Offset(0f, y.toFloat()) - translation,
-            end = Offset(size.width, y.toFloat()) - translation,
+            color = gridLineColor,
+            start = ComposeOffset(0f, y.toFloat()) - translation,
+            end = ComposeOffset(size.width, y.toFloat()) - translation,
             strokeWidth = 1f / scale
         )
     }
@@ -156,68 +163,72 @@ private fun DrawScope.drawGrid(scale: Float, translation: ComposeOffset) {
  *
  * @param node The graph node to draw.
  * @param isSelected Whether the node is currently selected, affecting its visual appearance.
+ * @param density The current screen density.
  */
-private fun DrawScope.drawNode(node: GraphNode, isSelected: Boolean) {
-    val nodeSize = node.type.defaultSize.toPx()
-    val center = node.position
-    
-    // Draw glow/selection ring
-    if (isSelected) {
-        val ringWidth = 4.dp.toPx()
+private fun DrawScope.drawNode(node: GraphNode, isSelected: Boolean, density: Density) {
+    with(density) {
+        val nodeSizePx = node.type.defaultSize.toPx()
+        val centerCompose = node.position.toCompose() // Use ComposeOffset for drawing
+
+        // Draw glow/selection ring
+        if (isSelected) {
+            val ringWidthPx = 4.dp.toPx()
+            drawCircle(
+                color = node.type.color.copy(alpha = 0.5f),
+                radius = nodeSizePx * 0.7f,
+                center = centerCompose,
+                style = Stroke(width = ringWidthPx * 2)
+            )
+        }
+
+        // Draw node background
         drawCircle(
-            color = node.type.color.copy(alpha = 0.5f),
-            radius = nodeSize * 0.7f,
-            center = center,
-            style = Stroke(width = ringWidth * 2)
+            color = node.type.color.copy(alpha = 0.2f),
+            radius = nodeSizePx * 0.6f,
+            center = centerCompose
         )
-    }
-    
-    // Draw node background
-    drawCircle(
-        color = node.type.color.copy(alpha = 0.2f),
-        radius = nodeSize * 0.6f,
-        center = center
-    )
-    
-    // Draw node border
-    drawCircle(
-        color = node.type.color,
-        radius = nodeSize * 0.6f,
-        center = center,
-        style = Stroke(width = 2.dp.toPx())
-    )
-    
-    // Draw node icon background
-    val iconSize = nodeSize * 0.5f
-    val iconBgRadius = iconSize * 0.8f
-    
-    // Draw icon background circle
-    drawCircle(
-        color = node.type.color,
-        radius = iconBgRadius,
-        center = center
-    )
-    
-    // Draw the icon (simplified - actual icon rendering would require more complex handling)
-    // For now, we'll just draw a smaller circle as a placeholder
-    drawCircle(
-        color = Color.White,
-        radius = iconBgRadius * 0.5f,
-        center = center
-    )
-    
-    // Draw node label
-    drawContext.canvas.nativeCanvas.apply {
-        drawText(
-            node.name,
-            center.x,
-            center.y + nodeSize * 0.8f,
-            android.graphics.Paint().apply {
-                color = android.graphics.Color.WHITE
-                textSize = 12.dp.toPx()
-                textAlign = android.graphics.Paint.Align.CENTER
-            }
+
+        // Draw node border
+        drawCircle(
+            color = node.type.color,
+            radius = nodeSizePx * 0.6f,
+            center = centerCompose,
+            style = Stroke(width = 2.dp.toPx())
         )
+
+        // Draw node icon background
+        val iconSizePx = nodeSizePx * 0.5f
+        val iconBgRadiusPx = iconSizePx * 0.8f
+
+        // Draw icon background circle
+        drawCircle(
+            color = node.type.color,
+            radius = iconBgRadiusPx,
+            center = centerCompose
+        )
+
+        // Draw the icon (simplified - actual icon rendering would require more complex handling)
+        // For now, we'll just draw a smaller circle as a placeholder
+        drawCircle(
+            color = Color.White,
+            radius = iconBgRadiusPx * 0.5f,
+            center = centerCompose
+        )
+
+        // Draw node label
+        drawContext.canvas.nativeCanvas.apply {
+            val labelTextSizePx = 12.dp.toPx()
+            drawText(
+                node.name,
+                centerCompose.x,
+                centerCompose.y + nodeSizePx * 0.8f,
+                android.graphics.Paint().apply {
+                    color = android.graphics.Color.WHITE // Consider MaterialTheme.colorScheme.onSurface
+                    textSize = labelTextSizePx
+                    textAlign = android.graphics.Paint.Align.CENTER
+                }
+            )
+        }
     }
 }
 
@@ -231,91 +242,124 @@ private fun DrawScope.drawNode(node: GraphNode, isSelected: Boolean) {
  * @param from The source node of the connection.
  * @param to The target node of the connection.
  * @param connection The connection data specifying type and style.
+ * @param density The current screen density.
  */
 private fun DrawScope.drawConnection(
     from: GraphNode,
     to: GraphNode,
-    connection: Connection
+    connection: Connection,
+    density: Density
 ) {
-    val fromCenter = from.position
-    val toCenter = to.position
-    val direction = toCenter - fromCenter
-    val distance = sqrt(direction.x * direction.x + direction.y * direction.y)
-    val directionNormalized = direction / distance
-    
-    val fromRadius = from.type.defaultSize.toPx() * 0.6f
-    val toRadius = to.type.defaultSize.toPx() * 0.6f
-    
-    val start = fromCenter + directionNormalized * fromRadius
-    val end = toCenter - directionNormalized * toRadius
-    
-    // Draw connection line
-    val strokeWidth = 2.dp.toPx()
-    val color = when (connection.type) {
-        ConnectionType.DIRECT -> Color.White.copy(alpha = 0.7f)
-        ConnectionType.BIDIRECTIONAL -> Color.Green.copy(alpha = 0.7f)
-        ConnectionType.DASHED -> Color.Yellow.copy(alpha = 0.7f)
-    }
-    
-    if (connection.type == ConnectionType.DASHED) {
-        // Draw dashed line
-        val dashLength = 10f
-        val gapLength = 5f
-        val totalLength = distance - fromRadius - toRadius
-        val dashCount = (totalLength / (dashLength + gapLength)).toInt()
-        
-        for (i in 0 until dashCount) {
-            val dashStart = start + directionNormalized * (i * (dashLength + gapLength))
-            val dashEnd = dashStart + directionNormalized * dashLength
+    with(density) {
+        val fromCenterCompose = from.position.toCompose()
+        val toCenterCompose = to.position.toCompose()
+        // It's important to use ComposeOffset for +/- operations if they are defined for it
+        // The GraphOffset has them defined, so from.position - to.position should work if GraphOffset is used for direction
+        val directionGraphOffset = to.position - from.position // GraphOffset
+        val distance = sqrt(directionGraphOffset.x * directionGraphOffset.x + directionGraphOffset.y * directionGraphOffset.y)
+
+        if (distance == 0f) return // Avoid division by zero if nodes are at the same position
+
+        val directionNormalizedGraphOffset = directionGraphOffset * (1f / distance) // GraphOffset, uses times operator
+
+        // Convert normalized direction to ComposeOffset for use with Compose drawing operations
+        val directionNormalizedCompose = directionNormalizedGraphOffset.toCompose()
+
+
+        val fromRadiusPx = from.type.defaultSize.toPx() * 0.6f
+        val toRadiusPx = to.type.defaultSize.toPx() * 0.6f
+
+        val startCompose = fromCenterCompose + directionNormalizedCompose * fromRadiusPx
+        val endCompose = toCenterCompose - directionNormalizedCompose * toRadiusPx
+
+        // Draw connection line
+        val strokeWidthPx = 2.dp.toPx()
+        val color = when (connection.type) {
+            ConnectionType.DIRECT -> Color.White.copy(alpha = 0.7f)
+            ConnectionType.BIDIRECTIONAL -> Color.Green.copy(alpha = 0.7f)
+            ConnectionType.DASHED -> Color.Yellow.copy(alpha = 0.7f)
+            // else -> Color.Gray // Make 'when' exhaustive if not already
+        }
+
+        if (connection.type == ConnectionType.DASHED) {
+            // Draw dashed line
+            val dashLength = 10f // px
+            val gapLength = 5f   // px
+            // Recalculate totalLength based on ComposeOffsets if startCompose/endCompose are used for it
+            val lineVector = endCompose - startCompose
+            val totalLength = sqrt(lineVector.x * lineVector.x + lineVector.y * lineVector.y)
+
+            if (totalLength <= 0f) return // Nothing to draw if length is zero or negative
+
+            val dashCount = (totalLength / (dashLength + gapLength)).toInt()
+            val actualDashVector = directionNormalizedCompose * dashLength
+
+            for (i in 0 until dashCount) {
+                val dashStartOffset = directionNormalizedCompose * (i * (dashLength + gapLength))
+                val dashStart = startCompose + dashStartOffset
+                val dashEnd = dashStart + actualDashVector
+                drawLine(
+                    color = color,
+                    start = dashStart,
+                    end = dashEnd,
+                    strokeWidth = strokeWidthPx
+                )
+            }
+        } else {
+            // Draw solid line
             drawLine(
                 color = color,
-                start = dashStart,
-                end = dashEnd,
-                strokeWidth = strokeWidth
+                start = startCompose,
+                end = endCompose,
+                strokeWidth = strokeWidthPx
             )
         }
-    } else {
-        // Draw solid line
-        drawLine(
-            color = color,
-            start = start,
-            end = end,
-            strokeWidth = strokeWidth
-        )
-    }
-    
-    // Draw arrow head
-    if (connection.type != ConnectionType.BIDIRECTIONAL || true) {
-        val arrowSize = 10.dp.toPx()
-        val arrowAngle = Math.PI.toFloat() / 4f
+
+        // Draw arrow head
+        // The condition `connection.type != ConnectionType.BIDIRECTIONAL || true` always evaluates to true.
+        // It should likely be just `connection.type != ConnectionType.BIDIRECTIONAL` if arrows aren't for bidirectional
+        // or always draw if all types have arrows. Assuming arrow for DIRECT and DASHED, and maybe both ends for BIDIRECTIONAL.
+        // For now, let's assume it means "draw an arrow pointing towards 'to' node unless it's special".
+        // The original logic implies an arrow is always drawn at 'endCompose'.
         
-        val arrowDir = if (connection.type == ConnectionType.BIDIRECTIONAL) {
-            -directionNormalized
-        } else {
-            directionNormalized
-        }
-        
-        val arrowP1 = end.rotate(
-            angle = arrowAngle,
-            pivot = end + arrowDir * arrowSize,
-            pivotOffset = end
-        )
-        
-        val arrowP2 = end.rotate(
-            angle = -arrowAngle,
-            pivot = end + arrowDir * arrowSize,
-            pivotOffset = end
-        )
+        val arrowSizePx = 10.dp.toPx()
+        val arrowAngleRad = Math.PI.toFloat() / 6f // Adjusted for a narrower arrow head, common is PI/6
+
+        // Arrow for 'to' node
+        val arrowTip = endCompose
+        val arrowBaseOffset = directionNormalizedCompose * arrowSizePx
+
+        val p1 = arrowTip - arrowBaseOffset.rotate(arrowAngleRad, ComposeOffset.Zero)
+        val p2 = arrowTip - arrowBaseOffset.rotate(-arrowAngleRad, ComposeOffset.Zero)
         
         drawPath(
             path = Path().apply {
-                moveTo(end.x, end.y)
-                lineTo(arrowP1.x, arrowP1.y)
-                lineTo(arrowP2.x, arrowP2.y)
+                moveTo(arrowTip.x, arrowTip.y)
+                lineTo(p1.x, p1.y)
+                lineTo(p2.x, p2.y)
                 close()
             },
             color = color
         )
+
+        // If bidirectional, draw arrow at the other end too
+        if (connection.type == ConnectionType.BIDIRECTIONAL) {
+            val arrowTipStart = startCompose
+            val arrowBaseOffsetStart = (directionNormalizedCompose * -1f) * arrowSizePx // Reversed direction
+
+            val p1Start = arrowTipStart - arrowBaseOffsetStart.rotate(arrowAngleRad, ComposeOffset.Zero)
+            val p2Start = arrowTipStart - arrowBaseOffsetStart.rotate(-arrowAngleRad, ComposeOffset.Zero)
+
+            drawPath(
+                path = Path().apply {
+                    moveTo(arrowTipStart.x, arrowTipStart.y)
+                    lineTo(p1Start.x, p1Start.y)
+                    lineTo(p2Start.x, p2Start.y)
+                    close()
+                },
+                color = color
+            )
+        }
     }
 }
 
@@ -326,8 +370,8 @@ private fun DrawScope.drawConnection(
  *
  * @return The element-wise sum of the two offsets.
  */
-private operator fun Offset.plus(other: Offset): Offset {
-    return Offset(x + other.x, y + other.y)
+internal operator fun ComposeOffset.plus(other: ComposeOffset): ComposeOffset {
+    return ComposeOffset(x + other.x, y + other.y)
 }
 
 /**
@@ -335,8 +379,8 @@ private operator fun Offset.plus(other: Offset): Offset {
  *
  * @return A new [Offset] representing the component-wise subtraction.
  */
-private operator fun Offset.minus(other: Offset): Offset {
-    return Offset(x - other.x, y - other.y)
+internal operator fun ComposeOffset.minus(other: ComposeOffset): ComposeOffset {
+    return ComposeOffset(x - other.x, y - other.y)
 }
 
 /**
@@ -345,8 +389,23 @@ private operator fun Offset.minus(other: Offset): Offset {
  * @param scalar The value to divide both x and y components by.
  * @return A new [Offset] with each component divided by [scalar].
  */
-private operator fun Offset.div(scalar: Float): Offset {
-    return Offset(x / scalar, y / scalar)
+internal operator fun ComposeOffset.div(scalar: Float): ComposeOffset {
+    if (scalar == 0f) {
+        // Handle division by zero, e.g., return zero offset or throw exception
+        // For now, returning zero offset to avoid crash, but this should be reviewed.
+        return ComposeOffset(0f, 0f)
+    }
+    return ComposeOffset(x / scalar, y / scalar)
+}
+
+/**
+ * Multiplies the components of this [Offset] by the given scalar value.
+ *
+ * @param scalar The value to multiply both x and y components by.
+ * @return A new [Offset] with each component multiplied by [scalar].
+ */
+internal operator fun ComposeOffset.times(scalar: Float): ComposeOffset {
+    return ComposeOffset(x * scalar, y * scalar)
 }
 
 /**

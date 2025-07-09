@@ -281,7 +281,7 @@ class KaiAgent @Inject constructor(
      * @throws IllegalArgumentException if the analysis target is not specified in the request context.
      */
     private suspend fun handleSecurityAnalysis(request: AgentRequest): Map<String, Any> {
-        val target = request.context["target"] as? String
+        val target = request.context?.get("target") as? String
             ?: throw IllegalArgumentException("Analysis target required")
 
         logger.info("KaiAgent", "Performing security analysis on: $target")
@@ -311,7 +311,7 @@ class KaiAgent @Inject constructor(
      * @throws IllegalArgumentException if threat data is missing from the request context.
      */
     private suspend fun handleThreatAssessment(request: AgentRequest): Map<String, Any> {
-        val threatData = request.context["threat_data"] as? String
+        val threatData = request.context?.get("threat_data") as? String
             ?: throw IllegalArgumentException("Threat data required")
 
         logger.info("KaiAgent", "Assessing threat characteristics")
@@ -337,7 +337,7 @@ class KaiAgent @Inject constructor(
      * @return A map containing performance metrics, identified bottlenecks, optimization recommendations, a performance score, and monitoring suggestions for the analyzed component.
      */
     private suspend fun handlePerformanceAnalysis(request: AgentRequest): Map<String, Any> {
-        val component = request.context["component"] as? String ?: "system"
+        val component = request.context?.get("component") as? String ?: "system"
 
         logger.info("KaiAgent", "Analyzing performance of: $component")
 
@@ -364,7 +364,7 @@ class KaiAgent @Inject constructor(
      * @throws IllegalArgumentException if the code content is missing from the request context.
      */
     private suspend fun handleCodeReview(request: AgentRequest): Map<String, Any> {
-        val code = request.context["code"] as? String
+        val code = request.context?.get("code") as? String
             ?: throw IllegalArgumentException("Code content required")
 
         logger.info("KaiAgent", "Conducting secure code review")
