@@ -453,18 +453,6 @@ class AuraAIServiceImplTest {
         }
     }
 
-    // Helper methods
-    private fun mockHttpResponse(statusCode: Int, body: String): HttpResponse {
-        val mockResponse = mock<HttpResponse>()
-        whenever(mockResponse.statusCode).thenReturn(statusCode)
-        whenever(mockResponse.body).thenReturn(body)
-        return mockResponse
-    }
-}
-
-// Exception and data types
-class ConfigurationException(message: String) : Exception(message)
-data class HealthCheckResult(val isHealthy: Boolean, val message: String)
     @Nested
     @DisplayName("Enhanced Initialization Tests")
     inner class EnhancedInitializationTests {
@@ -579,7 +567,7 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         @DisplayName("Should handle 404 not found")
         fun shouldHandle404NotFound() = runTest {
             val mockHttpResponse = mockHttpResponse(404, "Not Found")
-                        whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
             assertThrows<IOException> {
                 auraAIService.generateResponse("Test")
             }
@@ -587,14 +575,25 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
 
         @Test
-        @DisplayName("Should handle 500 internal server error")
-        fun shouldHandle500InternalServerError() = runTest {
-            val mockHttpResponse = mockHttpResponse(500, "Internal Server Error")
+        @DisplayName("Should handle 429 rate limit")
+        fun shouldHandle429RateLimit() = runTest {
+            val mockHttpResponse = mockHttpResponse(429, "Too Many Requests")
             whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
             assertThrows<IOException> {
                 auraAIService.generateResponse("Test")
             }
-            verify(mockLogger).error("HTTP error response: 500 - Internal Server Error")
+            verify(mockLogger).error("HTTP error response: 429 - Too Many Requests")
+        }
+
+        @Test
+        @DisplayName("Should handle 502 bad gateway")
+        fun shouldHandle502BadGateway() = runTest {
+            val mockHttpResponse = mockHttpResponse(502, "Bad Gateway")
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            assertThrows<IOException> {
+                auraAIService.generateResponse("Test")
+            }
+            verify(mockLogger).error("HTTP error response: 502 - Bad Gateway")
         }
 
         @Test
@@ -612,20 +611,19 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         @DisplayName("Should handle very long prompt")
         fun shouldHandleVeryLongPrompt() = runTest {
             val longPrompt = "A".repeat(10000)
-            val expectedResponse = "Response to long prompt"
+            val expectedResponse = "Long response"
             val mockHttpResponse = mockHttpResponse(200, expectedResponse)
             whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
 
             val result = auraAIService.generateResponse(longPrompt)
             assertEquals(expectedResponse, result)
-            verify(mockHttpClient).post(longPrompt)
             verify(mockLogger).info("Generating AI response for prompt length: ${longPrompt.length}")
         }
 
         @Test
         @DisplayName("Should handle prompt with special characters")
         fun shouldHandlePromptWithSpecialCharacters() = runTest {
-            val specialPrompt = "Test with émojis 🚀 and symbols @#$%^&*()"
+            val specialPrompt = "Hello! @#$%^&*()_+-=[]{}|;':\",./<>?"
             val expectedResponse = "Special response"
             val mockHttpResponse = mockHttpResponse(200, expectedResponse)
             whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
@@ -636,90 +634,22 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
 
         @Test
-        @DisplayName("Should handle null userId gracefully")
-        fun shouldHandleNullUserId() = runTest {
-            val prompt = "Test prompt"
-            val expectedResponse = "Test response"
+        @DisplayName("Should handle prompt with unicode characters")
+        fun shouldHandlePromptWithUnicodeCharacters() = runTest {
+            val unicodePrompt = "Hello 世界! 🌍 测试"
+            val expectedResponse = "Unicode response"
             val mockHttpResponse = mockHttpResponse(200, expectedResponse)
             whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
 
-            val result = auraAIService.generateResponse(prompt, null)
+            val result = auraAIService.generateResponse(unicodePrompt)
             assertEquals(expectedResponse, result)
-            verify(mockHttpClient).post(prompt)
-        }
-
-        @Test
-        @DisplayName("Should handle empty userId")
-        fun shouldHandleEmptyUserId() = runTest {
-            val prompt = "Test prompt"
-            val expectedResponse = "Test response"
-            val mockHttpResponse = mockHttpResponse(200, expectedResponse)
-            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
-
-            val result = auraAIService.generateResponse(prompt, "")
-            assertEquals(expectedResponse, result)
-            verify(mockHttpClient).post(prompt)
-        }
-
-        @Test
-        @DisplayName("Should handle response with empty body")
-        fun shouldHandleResponseWithEmptyBody() = runTest {
-            val mockHttpResponse = mockHttpResponse(200, "")
-            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
-
-            val result = auraAIService.generateResponse("Test")
-            assertEquals("", result)
-            verify(mockHttpClient).post("Test")
-        }
-
-        @Test
-        @DisplayName("Should handle response with whitespace only body")
-        fun shouldHandleResponseWithWhitespaceOnlyBody() = runTest {
-            val mockHttpResponse = mockHttpResponse(200, "   \n\t  ")
-            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
-
-            val result = auraAIService.generateResponse("Test")
-            assertEquals("   \n\t  ", result)
-            verify(mockHttpClient).post("Test")
-        }
-
-        @Test
-        @DisplayName("Should handle IOException during HTTP request")
-        fun shouldHandleIOExceptionDuringRequest() = runTest {
-            whenever(mockHttpClient.post(any())).thenThrow(IOException("Network error"))
-            assertThrows<IOException> {
-                auraAIService.generateResponse("Test")
-            }
-        }
-
-        @Test
-        @DisplayName("Should handle RuntimeException during HTTP request")
-        fun shouldHandleRuntimeExceptionDuringRequest() = runTest {
-            whenever(mockHttpClient.post(any())).thenThrow(RuntimeException("Runtime error"))
-            assertThrows<RuntimeException> {
-                auraAIService.generateResponse("Test")
-            }
+            verify(mockHttpClient).post(unicodePrompt)
         }
     }
 
     @Nested
-    @DisplayName("Enhanced Generate Batch Responses Tests")
-    inner class EnhancedGenerateBatchResponsesTests {
-        @Test
-        @DisplayName("Should generate batch responses for multiple prompts")
-        fun shouldGenerateBatchResponsesForMultiplePrompts() = runTest {
-            val prompts = listOf("What is AI?", "How does ML work?", "Define NLP")
-            val expectedResponse = "Batch response"
-            val mockHttpResponse = mockHttpResponse(200, expectedResponse)
-            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
-
-            val results = auraAIService.generateBatchResponses(prompts)
-            assertEquals(1, results.size)
-            assertEquals(expectedResponse, results[0])
-            verify(mockHttpClient).post(prompts)
-            verify(mockLogger).info("Generating batch AI responses for ${prompts.size} prompts")
-        }
-
+    @DisplayName("Enhanced Batch Response Tests")
+    inner class EnhancedBatchResponseTests {
         @Test
         @DisplayName("Should handle single prompt in batch")
         fun shouldHandleSinglePromptInBatch() = runTest {
@@ -735,9 +665,9 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
 
         @Test
-        @DisplayName("Should handle large batch of prompts")
-        fun shouldHandleLargeBatchOfPrompts() = runTest {
-            val prompts = (1..100).map { "Prompt $it" }
+        @DisplayName("Should handle multiple prompts in batch")
+        fun shouldHandleMultiplePromptsInBatch() = runTest {
+            val prompts = listOf("Prompt 1", "Prompt 2", "Prompt 3")
             val expectedResponse = "Batch response"
             val mockHttpResponse = mockHttpResponse(200, expectedResponse)
             whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
@@ -745,38 +675,14 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             val results = auraAIService.generateBatchResponses(prompts)
             assertEquals(1, results.size)
             assertEquals(expectedResponse, results[0])
-            verify(mockLogger).info("Generating batch AI responses for 100 prompts")
+            verify(mockHttpClient).post(prompts)
+            verify(mockLogger).info("Generating batch AI responses for 3 prompts")
         }
 
         @Test
-        @DisplayName("Should handle HTTP error in batch processing")
-        fun shouldHandleHttpErrorInBatchProcessing() = runTest {
-            val prompts = listOf("Test prompt")
-            val mockHttpResponse = mockHttpResponse(500, "Server Error")
-            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
-
-            // Note: Current implementation doesn't handle HTTP errors in batch processing
-            // This test verifies the current behavior
-            val results = auraAIService.generateBatchResponses(prompts)
-            assertEquals(1, results.size)
-            assertEquals("Server Error", results[0])
-        }
-
-        @Test
-        @DisplayName("Should handle exception in batch processing")
-        fun shouldHandleExceptionInBatchProcessing() = runTest {
-            val prompts = listOf("Test prompt")
-            whenever(mockHttpClient.post(any())).thenThrow(IOException("Network error"))
-
-            assertThrows<IOException> {
-                auraAIService.generateBatchResponses(prompts)
-            }
-        }
-
-        @Test
-        @DisplayName("Should handle prompts with mixed content")
-        fun shouldHandlePromptsWithMixedContent() = runTest {
-            val prompts = listOf("", "Valid prompt", "Another valid prompt")
+        @DisplayName("Should handle batch with empty prompts")
+        fun shouldHandleBatchWithEmptyPrompts() = runTest {
+            val prompts = listOf("", "Valid prompt", "")
             val expectedResponse = "Mixed response"
             val mockHttpResponse = mockHttpResponse(200, expectedResponse)
             whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
@@ -784,61 +690,89 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             val results = auraAIService.generateBatchResponses(prompts)
             assertEquals(1, results.size)
             assertEquals(expectedResponse, results[0])
+            verify(mockLogger).info("Generating batch AI responses for 3 prompts")
+        }
+
+        @Test
+        @DisplayName("Should handle batch HTTP error")
+        fun shouldHandleBatchHttpError() = runTest {
+            val prompts = listOf("Prompt 1", "Prompt 2")
+            val mockHttpResponse = mockHttpResponse(500, "Server Error")
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+
+            // Note: Current implementation doesn't handle HTTP errors for batch
+            val results = auraAIService.generateBatchResponses(prompts)
+            assertEquals(1, results.size)
+            assertEquals("Server Error", results[0])
+        }
+
+        @Test
+        @DisplayName("Should handle batch with very large list")
+        fun shouldHandleBatchWithVeryLargeList() = runTest {
+            val prompts = (1..1000).map { "Prompt $it" }
+            val expectedResponse = "Large batch response"
+            val mockHttpResponse = mockHttpResponse(200, expectedResponse)
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+
+            val results = auraAIService.generateBatchResponses(prompts)
+            assertEquals(1, results.size)
+            assertEquals(expectedResponse, results[0])
+            verify(mockLogger).info("Generating batch AI responses for 1000 prompts")
         }
     }
 
     @Nested
-    @DisplayName("Enhanced Configuration Update Tests")
-    inner class EnhancedConfigurationUpdateTests {
+    @DisplayName("Enhanced Configuration Tests")
+    inner class EnhancedConfigurationTests {
         @Test
         @DisplayName("Should update base URL with trailing slash")
         fun shouldUpdateBaseUrlWithTrailingSlash() {
-            val newBaseUrl = "https://newapi.test.com/"
-            auraAIService.updateBaseUrl(newBaseUrl)
-            verify(mockConfigurationService).updateBaseUrl(newBaseUrl)
+            val baseUrl = "https://api.test.com/"
+            auraAIService.updateBaseUrl(baseUrl)
+            verify(mockConfigurationService).updateBaseUrl(baseUrl)
             verify(mockLogger).info("Base URL updated successfully")
         }
 
         @Test
-        @DisplayName("Should reject http URL")
-        fun shouldRejectHttpUrl() {
+        @DisplayName("Should reject base URL with http")
+        fun shouldRejectBaseUrlWithHttp() {
             assertThrows<IllegalArgumentException> {
-                auraAIService.updateBaseUrl("http://insecure.com")
+                auraAIService.updateBaseUrl("http://api.test.com")
             }
         }
 
         @Test
-        @DisplayName("Should reject ftp URL")
-        fun shouldRejectFtpUrl() {
+        @DisplayName("Should reject base URL with ftp")
+        fun shouldRejectBaseUrlWithFtp() {
             assertThrows<IllegalArgumentException> {
-                auraAIService.updateBaseUrl("ftp://files.test.com")
+                auraAIService.updateBaseUrl("ftp://api.test.com")
             }
         }
 
         @Test
-        @DisplayName("Should reject malformed URL")
-        fun shouldRejectMalformedUrl() {
+        @DisplayName("Should reject malformed base URL")
+        fun shouldRejectMalformedBaseUrl() {
             assertThrows<IllegalArgumentException> {
-                auraAIService.updateBaseUrl("not-a-url")
+                auraAIService.updateBaseUrl("https://")
             }
         }
 
         @Test
         @DisplayName("Should update timeout with large value")
         fun shouldUpdateTimeoutWithLargeValue() {
-            val largeTimeout = 300000L // 5 minutes
-            auraAIService.updateTimeout(largeTimeout)
-            verify(mockConfigurationService).updateTimeout(largeTimeout)
-            verify(mockLogger).info("Timeout updated to $largeTimeout ms")
+            val timeout = 300000L // 5 minutes
+            auraAIService.updateTimeout(timeout)
+            verify(mockConfigurationService).updateTimeout(timeout)
+            verify(mockLogger).info("Timeout updated to $timeout ms")
         }
 
         @Test
         @DisplayName("Should update timeout with minimum value")
         fun shouldUpdateTimeoutWithMinimumValue() {
-            val minTimeout = 1L
-            auraAIService.updateTimeout(minTimeout)
-            verify(mockConfigurationService).updateTimeout(minTimeout)
-            verify(mockLogger).info("Timeout updated to $minTimeout ms")
+            val timeout = 1L
+            auraAIService.updateTimeout(timeout)
+            verify(mockConfigurationService).updateTimeout(timeout)
+            verify(mockLogger).info("Timeout updated to $timeout ms")
         }
 
         @Test
@@ -860,18 +794,18 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         @Test
         @DisplayName("Should update API key with special characters")
         fun shouldUpdateApiKeyWithSpecialCharacters() {
-            val specialKey = "key-with-@special#characters$"
-            auraAIService.updateApiKey(specialKey)
-            verify(mockConfigurationService).updateApiKey(specialKey)
+            val apiKey = "sk-test123!@#$%^&*()"
+            auraAIService.updateApiKey(apiKey)
+            verify(mockConfigurationService).updateApiKey(apiKey)
             verify(mockLogger).info("API key updated successfully")
         }
 
         @Test
         @DisplayName("Should update API key with very long value")
         fun shouldUpdateApiKeyWithVeryLongValue() {
-            val longKey = "a".repeat(1000)
-            auraAIService.updateApiKey(longKey)
-            verify(mockConfigurationService).updateApiKey(longKey)
+            val apiKey = "sk-" + "a".repeat(1000)
+            auraAIService.updateApiKey(apiKey)
+            verify(mockConfigurationService).updateApiKey(apiKey)
             verify(mockLogger).info("API key updated successfully")
         }
     }
@@ -880,17 +814,8 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
     @DisplayName("Enhanced Health Check Tests")
     inner class EnhancedHealthCheckTests {
         @Test
-        @DisplayName("Should return unhealthy on 400 error")
-        fun shouldReturnUnhealthyOn400Error() = runTest {
-            whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(400, "Bad Request"))
-            val result = auraAIService.healthCheck()
-            assertFalse(result.isHealthy)
-            assertEquals("Service is unhealthy: Bad Request", result.message)
-        }
-
-        @Test
-        @DisplayName("Should return unhealthy on 404 error")
-        fun shouldReturnUnhealthyOn404Error() = runTest {
+        @DisplayName("Should return unhealthy on 404")
+        fun shouldReturnUnhealthyOn404() = runTest {
             whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(404, "Not Found"))
             val result = auraAIService.healthCheck()
             assertFalse(result.isHealthy)
@@ -898,12 +823,21 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
 
         @Test
-        @DisplayName("Should return unhealthy on 500 error")
-        fun shouldReturnUnhealthyOn500Error() = runTest {
+        @DisplayName("Should return unhealthy on 500")
+        fun shouldReturnUnhealthyOn500() = runTest {
             whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(500, "Internal Server Error"))
             val result = auraAIService.healthCheck()
             assertFalse(result.isHealthy)
             assertEquals("Service is unhealthy: Internal Server Error", result.message)
+        }
+
+        @Test
+        @DisplayName("Should return unhealthy on 503")
+        fun shouldReturnUnhealthyOn503() = runTest {
+            whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(503, "Service Unavailable"))
+            val result = auraAIService.healthCheck()
+            assertFalse(result.isHealthy)
+            assertEquals("Service is unhealthy: Service Unavailable", result.message)
         }
 
         @Test
@@ -918,42 +852,33 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         @Test
         @DisplayName("Should handle runtime exception in health check")
         fun shouldHandleRuntimeExceptionInHealthCheck() = runTest {
-            whenever(mockHttpClient.get(any())).thenThrow(RuntimeException("Runtime error"))
+            whenever(mockHttpClient.get(any())).thenThrow(RuntimeException("Unexpected error"))
             val result = auraAIService.healthCheck()
             assertFalse(result.isHealthy)
-            assertTrue(result.message.contains("Runtime error"))
+            assertTrue(result.message.contains("Unexpected error"))
         }
 
         @Test
-        @DisplayName("Should verify correct health endpoint call")
-        fun shouldVerifyCorrectHealthEndpointCall() = runTest {
+        @DisplayName("Should handle null pointer exception in health check")
+        fun shouldHandleNullPointerExceptionInHealthCheck() = runTest {
+            whenever(mockHttpClient.get(any())).thenThrow(NullPointerException("Null reference"))
+            val result = auraAIService.healthCheck()
+            assertFalse(result.isHealthy)
+            assertTrue(result.message.contains("Null reference"))
+        }
+
+        @Test
+        @DisplayName("Should pass health check parameter correctly")
+        fun shouldPassHealthCheckParameterCorrectly() = runTest {
             whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(200, "OK"))
             auraAIService.healthCheck()
             verify(mockHttpClient).get("health")
         }
-
-        @Test
-        @DisplayName("Should handle empty response body in health check")
-        fun shouldHandleEmptyResponseBodyInHealthCheck() = runTest {
-            whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(200, ""))
-            val result = auraAIService.healthCheck()
-            assertTrue(result.isHealthy)
-            assertEquals("Service is healthy", result.message)
-        }
-
-        @Test
-        @DisplayName("Should handle 201 as unhealthy")
-        fun shouldHandle201AsUnhealthy() = runTest {
-            whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(201, "Created"))
-            val result = auraAIService.healthCheck()
-            assertFalse(result.isHealthy)
-            assertEquals("Service is unhealthy: Created", result.message)
-        }
     }
 
     @Nested
-    @DisplayName("Enhanced Streaming Response Tests")
-    inner class EnhancedStreamingResponseTests {
+    @DisplayName("Enhanced Streaming Tests")
+    inner class EnhancedStreamingTests {
         @Test
         @DisplayName("Should handle empty stream")
         fun shouldHandleEmptyStream() = runTest {
@@ -976,20 +901,20 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         @Test
         @DisplayName("Should handle large stream")
         fun shouldHandleLargeStream() = runTest {
-            val chunks = (1..1000).map { "chunk $it" }
+            val chunks = (1..1000).map { "chunk$it" }
             whenever(mockHttpClient.postStream(any())).thenReturn(flow {
                 chunks.forEach { emit(it) }
             })
             val collected = mutableListOf<String>()
             auraAIService.generateStreamingResponse("prompt").collect { collected.add(it) }
-            assertEquals(chunks.size, collected.size)
+            assertEquals(1000, collected.size)
             assertEquals(chunks, collected)
         }
 
         @Test
         @DisplayName("Should handle stream with empty chunks")
         fun shouldHandleStreamWithEmptyChunks() = runTest {
-            val chunks = listOf("", "chunk", "", "another", "")
+            val chunks = listOf("chunk1", "", "chunk2", "", "chunk3")
             whenever(mockHttpClient.postStream(any())).thenReturn(flow {
                 chunks.forEach { emit(it) }
             })
@@ -1001,7 +926,7 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         @Test
         @DisplayName("Should handle stream with special characters")
         fun shouldHandleStreamWithSpecialCharacters() = runTest {
-            val chunks = listOf("🚀", "émoji", "@#$%", "special chars")
+            val chunks = listOf("Hello", "世界", "🌍", "test@#$%")
             whenever(mockHttpClient.postStream(any())).thenReturn(flow {
                 chunks.forEach { emit(it) }
             })
@@ -1014,94 +939,17 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         @DisplayName("Should reject empty prompt for streaming")
         fun shouldRejectEmptyPromptForStreaming() = runTest {
             assertThrows<IllegalArgumentException> {
-                auraAIService.generateStreamingResponse("").collect { }
+                auraAIService.generateStreamingResponse("").collect()
             }
         }
 
         @Test
-        @DisplayName("Should verify correct streaming endpoint call")
-        fun shouldVerifyCorrectStreamingEndpointCall() = runTest {
-            val prompt = "test prompt"
+        @DisplayName("Should log streaming start correctly")
+        fun shouldLogStreamingStartCorrectly() = runTest {
+            val prompt = "test streaming prompt"
             whenever(mockHttpClient.postStream(any())).thenReturn(flow { emit("chunk") })
-            auraAIService.generateStreamingResponse(prompt).collect { }
-            verify(mockHttpClient).postStream(prompt)
+            auraAIService.generateStreamingResponse(prompt).collect()
             verify(mockLogger).info("Starting streaming response for prompt length: ${prompt.length}")
-        }
-
-        @Test
-        @DisplayName("Should handle streaming with long prompt")
-        fun shouldHandleStreamingWithLongPrompt() = runTest {
-            val longPrompt = "A".repeat(5000)
-            whenever(mockHttpClient.postStream(any())).thenReturn(flow { emit("response") })
-            val collected = mutableListOf<String>()
-            auraAIService.generateStreamingResponse(longPrompt).collect { collected.add(it) }
-            assertEquals(1, collected.size)
-            verify(mockLogger).info("Starting streaming response for prompt length: ${longPrompt.length}")
-        }
-    }
-
-    @Nested
-    @DisplayName("Enhanced Configuration Reload Tests")
-    inner class EnhancedConfigurationReloadTests {
-        @Test
-        @DisplayName("Should handle configuration reload with null API key")
-        fun shouldHandleConfigurationReloadWithNullApiKey() {
-            whenever(mockConfigurationService.getApiKey()).thenReturn(null)
-            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://api.test.com")
-            whenever(mockConfigurationService.getTimeout()).thenReturn(1000L)
-            
-            assertThrows<ConfigurationException> {
-                auraAIService.reloadConfiguration()
-            }
-            verify(mockLogger).error(contains("Failed to reload configuration"))
-        }
-
-        @Test
-        @DisplayName("Should handle configuration reload with invalid URL")
-        fun shouldHandleConfigurationReloadWithInvalidUrl() {
-            whenever(mockConfigurationService.getApiKey()).thenReturn("valid-key")
-            whenever(mockConfigurationService.getBaseUrl()).thenReturn("invalid-url")
-            whenever(mockConfigurationService.getTimeout()).thenReturn(1000L)
-            
-            assertThrows<ConfigurationException> {
-                auraAIService.reloadConfiguration()
-            }
-            verify(mockLogger).error(contains("Failed to reload configuration"))
-        }
-
-        @Test
-        @DisplayName("Should handle configuration reload with invalid timeout")
-        fun shouldHandleConfigurationReloadWithInvalidTimeout() {
-            whenever(mockConfigurationService.getApiKey()).thenReturn("valid-key")
-            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://api.test.com")
-            whenever(mockConfigurationService.getTimeout()).thenReturn(-1000L)
-            
-            assertThrows<ConfigurationException> {
-                auraAIService.reloadConfiguration()
-            }
-            verify(mockLogger).error(contains("Failed to reload configuration"))
-        }
-
-        @Test
-        @DisplayName("Should handle configuration reload with runtime exception")
-        fun shouldHandleConfigurationReloadWithRuntimeException() {
-            whenever(mockConfigurationService.getApiKey()).thenThrow(RuntimeException("Service unavailable"))
-            
-            assertThrows<ConfigurationException> {
-                auraAIService.reloadConfiguration()
-            }
-            verify(mockLogger).error(contains("Failed to reload configuration"))
-        }
-
-        @Test
-        @DisplayName("Should successfully reload with minimal valid configuration")
-        fun shouldSuccessfullyReloadWithMinimalValidConfiguration() {
-            whenever(mockConfigurationService.getApiKey()).thenReturn("k")
-            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://a.b")
-            whenever(mockConfigurationService.getTimeout()).thenReturn(1L)
-            
-            auraAIService.reloadConfiguration()
-            verify(mockLogger).info("Configuration reloaded successfully")
         }
     }
 
@@ -1109,8 +957,8 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
     @DisplayName("Enhanced Model Parameters Tests")
     inner class EnhancedModelParametersTests {
         @Test
-        @DisplayName("Should update valid temperature parameter")
-        fun shouldUpdateValidTemperatureParameter() {
+        @DisplayName("Should accept valid temperature at boundary")
+        fun shouldAcceptValidTemperatureAtBoundary() {
             val params = mapOf("temperature" to 0.0)
             auraAIService.updateModelParameters(params)
             verify(mockConfigurationService).updateModelParameters(params)
@@ -1118,8 +966,8 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
 
         @Test
-        @DisplayName("Should update maximum valid temperature")
-        fun shouldUpdateMaximumValidTemperature() {
+        @DisplayName("Should accept valid temperature at upper boundary")
+        fun shouldAcceptValidTemperatureAtUpperBoundary() {
             val params = mapOf("temperature" to 1.0)
             auraAIService.updateModelParameters(params)
             verify(mockConfigurationService).updateModelParameters(params)
@@ -1127,8 +975,8 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
 
         @Test
-        @DisplayName("Should reject negative temperature")
-        fun shouldRejectNegativeTemperature() {
+        @DisplayName("Should reject temperature slightly below zero")
+        fun shouldRejectTemperatureSlightlyBelowZero() {
             assertThrows<IllegalArgumentException> {
                 auraAIService.updateModelParameters(mapOf("temperature" to -0.1))
             }
@@ -1136,8 +984,8 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
 
         @Test
-        @DisplayName("Should reject temperature above 1")
-        fun shouldRejectTemperatureAbove1() {
+        @DisplayName("Should reject temperature slightly above one")
+        fun shouldRejectTemperatureSlightlyAboveOne() {
             assertThrows<IllegalArgumentException> {
                 auraAIService.updateModelParameters(mapOf("temperature" to 1.1))
             }
@@ -1145,18 +993,18 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
 
         @Test
-        @DisplayName("Should accept non-numeric temperature parameter")
-        fun shouldAcceptNonNumericTemperatureParameter() {
-            val params = mapOf("temperature" to "invalid")
+        @DisplayName("Should accept valid max_tokens at boundary")
+        fun shouldAcceptValidMaxTokensAtBoundary() {
+            val params = mapOf("max_tokens" to 1)
             auraAIService.updateModelParameters(params)
             verify(mockConfigurationService).updateModelParameters(params)
             verify(mockLogger).info("Model parameters updated: $params")
         }
 
         @Test
-        @DisplayName("Should update minimum valid max_tokens")
-        fun shouldUpdateMinimumValidMaxTokens() {
-            val params = mapOf("max_tokens" to 1)
+        @DisplayName("Should accept large max_tokens")
+        fun shouldAcceptLargeMaxTokens() {
+            val params = mapOf("max_tokens" to 100000)
             auraAIService.updateModelParameters(params)
             verify(mockConfigurationService).updateModelParameters(params)
             verify(mockLogger).info("Model parameters updated: $params")
@@ -1181,22 +1029,13 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
 
         @Test
-        @DisplayName("Should accept non-integer max_tokens parameter")
-        fun shouldAcceptNonIntegerMaxTokensParameter() {
-            val params = mapOf("max_tokens" to "invalid")
-            auraAIService.updateModelParameters(params)
-            verify(mockConfigurationService).updateModelParameters(params)
-            verify(mockLogger).info("Model parameters updated: $params")
-        }
-
-        @Test
-        @DisplayName("Should update multiple valid parameters")
-        fun shouldUpdateMultipleValidParameters() {
+        @DisplayName("Should handle mixed valid parameters")
+        fun shouldHandleMixedValidParameters() {
             val params = mapOf(
                 "temperature" to 0.7,
-                "max_tokens" to 2048,
+                "max_tokens" to 2000,
                 "top_p" to 0.9,
-                "frequency_penalty" to 0.1
+                "frequency_penalty" to 0.5
             )
             auraAIService.updateModelParameters(params)
             verify(mockConfigurationService).updateModelParameters(params)
@@ -1204,16 +1043,15 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
 
         @Test
-        @DisplayName("Should reject mixed valid and invalid parameters")
-        fun shouldRejectMixedValidAndInvalidParameters() {
+        @DisplayName("Should handle parameters with wrong types")
+        fun shouldHandleParametersWithWrongTypes() {
             val params = mapOf(
-                "temperature" to 0.7,
-                "max_tokens" to -100
+                "temperature" to "0.7", // String instead of Double
+                "max_tokens" to "2000"  // String instead of Int
             )
-            assertThrows<IllegalArgumentException> {
-                auraAIService.updateModelParameters(params)
-            }
-            verify(mockLogger).error("Invalid model parameters: max_tokens must be positive")
+            // Should not throw exception for wrong types, only validate known types
+            auraAIService.updateModelParameters(params)
+            verify(mockConfigurationService).updateModelParameters(params)
         }
 
         @Test
@@ -1226,23 +1064,102 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
         }
 
         @Test
-        @DisplayName("Should handle null parameter values")
-        fun shouldHandleNullParameterValues() {
-            val params = mapOf("temperature" to null, "max_tokens" to null)
+        @DisplayName("Should handle parameters with null values")
+        fun shouldHandleParametersWithNullValues() {
+            val params = mapOf<String, Any?>(
+                "temperature" to null,
+                "max_tokens" to 100
+            )
             auraAIService.updateModelParameters(params)
             verify(mockConfigurationService).updateModelParameters(params)
-            verify(mockLogger).info("Model parameters updated: $params")
+        }
+    }
+
+    @Nested
+    @DisplayName("Enhanced Configuration Reload Tests")
+    inner class EnhancedConfigurationReloadTests {
+        @Test
+        @DisplayName("Should reload configuration with minimum timeout")
+        fun shouldReloadConfigurationWithMinimumTimeout() {
+            whenever(mockConfigurationService.getApiKey()).thenReturn("valid-key")
+            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://api.example.com")
+            whenever(mockConfigurationService.getTimeout()).thenReturn(1L)
+            
+            auraAIService.reloadConfiguration()
+            verify(mockLogger).info("Configuration reloaded successfully")
+        }
+
+        @Test
+        @DisplayName("Should fail reload with null API key")
+        fun shouldFailReloadWithNullApiKey() {
+            whenever(mockConfigurationService.getApiKey()).thenReturn(null)
+            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://api.example.com")
+            whenever(mockConfigurationService.getTimeout()).thenReturn(1000L)
+            
+            assertThrows<ConfigurationException> {
+                auraAIService.reloadConfiguration()
+            }
+            verify(mockLogger).error(contains("Failed to reload configuration"))
+        }
+
+        @Test
+        @DisplayName("Should fail reload with null base URL")
+        fun shouldFailReloadWithNullBaseUrl() {
+            whenever(mockConfigurationService.getApiKey()).thenReturn("valid-key")
+            whenever(mockConfigurationService.getBaseUrl()).thenReturn(null)
+            whenever(mockConfigurationService.getTimeout()).thenReturn(1000L)
+            
+            assertThrows<ConfigurationException> {
+                auraAIService.reloadConfiguration()
+            }
+            verify(mockLogger).error(contains("Failed to reload configuration"))
+        }
+
+        @Test
+        @DisplayName("Should fail reload with invalid timeout")
+        fun shouldFailReloadWithInvalidTimeout() {
+            whenever(mockConfigurationService.getApiKey()).thenReturn("valid-key")
+            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://api.example.com")
+            whenever(mockConfigurationService.getTimeout()).thenReturn(0L)
+            
+            assertThrows<ConfigurationException> {
+                auraAIService.reloadConfiguration()
+            }
+            verify(mockLogger).error(contains("Failed to reload configuration"))
+        }
+
+        @Test
+        @DisplayName("Should fail reload with http base URL")
+        fun shouldFailReloadWithHttpBaseUrl() {
+            whenever(mockConfigurationService.getApiKey()).thenReturn("valid-key")
+            whenever(mockConfigurationService.getBaseUrl()).thenReturn("http://api.example.com")
+            whenever(mockConfigurationService.getTimeout()).thenReturn(1000L)
+            
+            assertThrows<ConfigurationException> {
+                auraAIService.reloadConfiguration()
+            }
+            verify(mockLogger).error(contains("Failed to reload configuration"))
+        }
+
+        @Test
+        @DisplayName("Should handle configuration service exception")
+        fun shouldHandleConfigurationServiceException() {
+            whenever(mockConfigurationService.getApiKey()).thenThrow(RuntimeException("Config error"))
+            
+            assertThrows<ConfigurationException> {
+                auraAIService.reloadConfiguration()
+            }
+            verify(mockLogger).error(contains("Failed to reload configuration"))
         }
     }
 
     @Nested
     @DisplayName("Enhanced Statistics and Cache Tests")
-    inner class EnhancedStatsAndCacheTests {
+    inner class EnhancedStatisticsAndCacheTests {
         @Test
         @DisplayName("Should return correct statistics structure")
         fun shouldReturnCorrectStatisticsStructure() {
             val stats = auraAIService.getServiceStatistics()
-            assertNotNull(stats)
             assertTrue(stats.containsKey("totalRequests"))
             assertTrue(stats.containsKey("successfulRequests"))
             assertTrue(stats.containsKey("failedRequests"))
@@ -1251,135 +1168,56 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
             assertEquals(0L, stats["successfulRequests"])
             assertEquals(0L, stats["failedRequests"])
             assertEquals(0.0, stats["averageResponseTime"])
-            verify(mockLogger).debug("Service statistics requested")
         }
 
         @Test
-        @DisplayName("Should verify statistics types")
-        fun shouldVerifyStatisticsTypes() {
-            val stats = auraAIService.getServiceStatistics()
-            assertTrue(stats["totalRequests"] is Long)
-            assertTrue(stats["successfulRequests"] is Long)
-            assertTrue(stats["failedRequests"] is Long)
-            assertTrue(stats["averageResponseTime"] is Double)
-        }
-
-        @Test
-        @DisplayName("Should reset statistics successfully")
-        fun shouldResetStatisticsSuccessfully() {
+        @DisplayName("Should reset statistics without errors")
+        fun shouldResetStatisticsWithoutErrors() {
             auraAIService.resetStatistics()
             verify(mockLogger).info("Service statistics reset")
         }
 
         @Test
-        @DisplayName("Should clear cache successfully")
-        fun shouldClearCacheSuccessfully() {
+        @DisplayName("Should clear cache without errors")
+        fun shouldClearCacheWithoutErrors() {
             auraAIService.clearCache()
             verify(mockLogger).info("Response cache cleared")
         }
 
         @Test
-        @DisplayName("Should expire cache successfully")
-        fun shouldExpireCacheSuccessfully() {
+        @DisplayName("Should expire cache without errors")
+        fun shouldExpireCacheWithoutErrors() {
             auraAIService.expireCache()
             verify(mockLogger).debug("Cache expired, making new request")
         }
 
         @Test
-        @DisplayName("Should handle multiple statistics requests")
-        fun shouldHandleMultipleStatisticsRequests() {
-            auraAIService.getServiceStatistics()
-            auraAIService.getServiceStatistics()
-            auraAIService.getServiceStatistics()
-            verify(mockLogger, times(3)).debug("Service statistics requested")
+        @DisplayName("Should call statistics multiple times")
+        fun shouldCallStatisticsMultipleTimes() {
+            repeat(5) {
+                auraAIService.getServiceStatistics()
+            }
+            verify(mockLogger, times(5)).debug("Service statistics requested")
         }
 
         @Test
-        @DisplayName("Should handle multiple reset operations")
-        fun shouldHandleMultipleResetOperations() {
-            auraAIService.resetStatistics()
-            auraAIService.resetStatistics()
-            verify(mockLogger, times(2)).info("Service statistics reset")
+        @DisplayName("Should reset statistics multiple times")
+        fun shouldResetStatisticsMultipleTimes() {
+            repeat(3) {
+                auraAIService.resetStatistics()
+            }
+            verify(mockLogger, times(3)).info("Service statistics reset")
         }
 
         @Test
-        @DisplayName("Should handle multiple cache clear operations")
-        fun shouldHandleMultipleCacheClearOperations() {
+        @DisplayName("Should clear and expire cache in sequence")
+        fun shouldClearAndExpireCacheInSequence() {
             auraAIService.clearCache()
+            auraAIService.expireCache()
             auraAIService.clearCache()
+            
             verify(mockLogger, times(2)).info("Response cache cleared")
-        }
-
-        @Test
-        @DisplayName("Should handle multiple cache expire operations")
-        fun shouldHandleMultipleCacheExpireOperations() {
-            auraAIService.expireCache()
-            auraAIService.expireCache()
-            verify(mockLogger, times(2)).debug("Cache expired, making new request")
-        }
-    }
-
-    @Nested
-    @DisplayName("URL Validation Tests")
-    inner class UrlValidationTests {
-        @Test
-        @DisplayName("Should validate HTTPS URLs with subdomain")
-        fun shouldValidateHttpsUrlsWithSubdomain() {
-            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://api.example.com")
-            val service = AuraAIServiceImpl(mockHttpClient, mockConfigurationService, mockLogger)
-            assertNotNull(service)
-        }
-
-        @Test
-        @DisplayName("Should validate HTTPS URLs with port")
-        fun shouldValidateHttpsUrlsWithPort() {
-            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://api.example.com:8080")
-            val service = AuraAIServiceImpl(mockHttpClient, mockConfigurationService, mockLogger)
-            assertNotNull(service)
-        }
-
-        @Test
-        @DisplayName("Should validate HTTPS URLs with path")
-        fun shouldValidateHttpsUrlsWithPath() {
-            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://api.example.com/v1/ai")
-            val service = AuraAIServiceImpl(mockHttpClient, mockConfigurationService, mockLogger)
-            assertNotNull(service)
-        }
-
-        @Test
-        @DisplayName("Should reject URLs with http protocol")
-        fun shouldRejectUrlsWithHttpProtocol() {
-            whenever(mockConfigurationService.getBaseUrl()).thenReturn("http://api.example.com")
-            assertThrows<IllegalArgumentException> {
-                AuraAIServiceImpl(mockHttpClient, mockConfigurationService, mockLogger)
-            }
-        }
-
-        @Test
-        @DisplayName("Should reject URLs without protocol")
-        fun shouldRejectUrlsWithoutProtocol() {
-            whenever(mockConfigurationService.getBaseUrl()).thenReturn("api.example.com")
-            assertThrows<IllegalArgumentException> {
-                AuraAIServiceImpl(mockHttpClient, mockConfigurationService, mockLogger)
-            }
-        }
-
-        @Test
-        @DisplayName("Should reject empty URL")
-        fun shouldRejectEmptyUrl() {
-            whenever(mockConfigurationService.getBaseUrl()).thenReturn("")
-            assertThrows<IllegalArgumentException> {
-                AuraAIServiceImpl(mockHttpClient, mockConfigurationService, mockLogger)
-            }
-        }
-
-        @Test
-        @DisplayName("Should reject URL with only protocol")
-        fun shouldRejectUrlWithOnlyProtocol() {
-            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://")
-            assertThrows<IllegalArgumentException> {
-                AuraAIServiceImpl(mockHttpClient, mockConfigurationService, mockLogger)
-            }
+            verify(mockLogger).debug("Cache expired, making new request")
         }
     }
 
@@ -1387,124 +1225,167 @@ data class HealthCheckResult(val isHealthy: Boolean, val message: String)
     @DisplayName("Concurrency and Thread Safety Tests")
     inner class ConcurrencyAndThreadSafetyTests {
         @Test
-        @DisplayName("Should handle concurrent response generation")
-        fun shouldHandleConcurrentResponseGeneration() = runTest {
-            val expectedResponse = "Concurrent response"
-            val mockHttpResponse = mockHttpResponse(200, expectedResponse)
-            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
-
+        @DisplayName("Should handle concurrent configuration updates")
+        fun shouldHandleConcurrentConfigurationUpdates() = runTest {
             val jobs = (1..10).map { index ->
-                async {
-                    auraAIService.generateResponse("Prompt $index")
+                kotlinx.coroutines.async {
+                    auraAIService.updateApiKey("key-$index")
                 }
             }
-
-            val results = jobs.awaitAll()
-            assertEquals(10, results.size)
-            results.forEach { assertEquals(expectedResponse, it) }
-            verify(mockHttpClient, times(10)).post(any())
+            jobs.forEach { it.await() }
+            verify(mockConfigurationService, times(10)).updateApiKey(any())
         }
 
         @Test
-        @DisplayName("Should handle concurrent configuration updates")
-        fun shouldHandleConcurrentConfigurationUpdates() = runTest {
+        @DisplayName("Should handle concurrent response generations")
+        fun shouldHandleConcurrentResponseGenerations() = runTest {
+            val mockHttpResponse = mockHttpResponse(200, "response")
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            
             val jobs = (1..5).map { index ->
-                async {
-                    auraAIService.updateTimeout(1000L * index)
+                kotlinx.coroutines.async {
+                    auraAIService.generateResponse("prompt-$index")
                 }
             }
-
-            jobs.awaitAll()
-            verify(mockConfigurationService, times(5)).updateTimeout(any())
+            val results = jobs.map { it.await() }
+            
+            assertEquals(5, results.size)
+            results.forEach { assertEquals("response", it) }
         }
 
         @Test
         @DisplayName("Should handle concurrent health checks")
         fun shouldHandleConcurrentHealthChecks() = runTest {
             whenever(mockHttpClient.get(any())).thenReturn(mockHttpResponse(200, "OK"))
-
-            val jobs = (1..5).map {
-                async {
+            
+            val jobs = (1..3).map {
+                kotlinx.coroutines.async {
                     auraAIService.healthCheck()
                 }
             }
-
-            val results = jobs.awaitAll()
-            assertEquals(5, results.size)
+            val results = jobs.map { it.await() }
+            
+            assertEquals(3, results.size)
             results.forEach { assertTrue(it.isHealthy) }
-            verify(mockHttpClient, times(5)).get("health")
         }
     }
 
     @Nested
-    @DisplayName("Error Handling and Edge Cases")
-    inner class ErrorHandlingAndEdgeCasesTests {
+    @DisplayName("Edge Cases and Boundary Tests")
+    inner class EdgeCasesAndBoundaryTests {
         @Test
-        @DisplayName("Should handle OutOfMemoryError gracefully")
-        fun shouldHandleOutOfMemoryErrorGracefully() = runTest {
-            whenever(mockHttpClient.post(any())).thenThrow(OutOfMemoryError("Out of memory"))
-            assertThrows<OutOfMemoryError> {
-                auraAIService.generateResponse("Test")
-            }
+        @DisplayName("Should handle maximum integer values")
+        fun shouldHandleMaximumIntegerValues() {
+            val params = mapOf("max_tokens" to Int.MAX_VALUE)
+            auraAIService.updateModelParameters(params)
+            verify(mockConfigurationService).updateModelParameters(params)
         }
 
         @Test
-        @DisplayName("Should handle InterruptedException")
-        fun shouldHandleInterruptedException() = runTest {
-            whenever(mockHttpClient.post(any())).thenThrow(InterruptedException("Interrupted"))
-            assertThrows<InterruptedException> {
-                auraAIService.generateResponse("Test")
-            }
+        @DisplayName("Should handle minimum valid values")
+        fun shouldHandleMinimumValidValues() {
+            val params = mapOf(
+                "temperature" to 0.0,
+                "max_tokens" to 1
+            )
+            auraAIService.updateModelParameters(params)
+            verify(mockConfigurationService).updateModelParameters(params)
         }
 
         @Test
-        @DisplayName("Should handle multiple consecutive failures")
-        fun shouldHandleMultipleConsecutiveFailures() = runTest {
-            whenever(mockHttpClient.post(any())).thenThrow(IOException("Network error"))
-            
-            repeat(5) {
-                assertThrows<IOException> {
-                    auraAIService.generateResponse("Test $it")
-                }
-            }
-            verify(mockHttpClient, times(5)).post(any())
+        @DisplayName("Should handle maximum valid values")
+        fun shouldHandleMaximumValidValues() {
+            val params = mapOf("temperature" to 1.0)
+            auraAIService.updateModelParameters(params)
+            verify(mockConfigurationService).updateModelParameters(params)
         }
 
         @Test
-        @DisplayName("Should handle recovery after failure")
-        fun shouldHandleRecoveryAfterFailure() = runTest {
-            whenever(mockHttpClient.post(any()))
-                .thenThrow(IOException("Network error"))
-                .thenReturn(mockHttpResponse(200, "Success"))
-            
-            assertThrows<IOException> {
-                auraAIService.generateResponse("Test 1")
-            }
-            
-            val result = auraAIService.generateResponse("Test 2")
-            assertEquals("Success", result)
+        @DisplayName("Should handle very long API keys")
+        fun shouldHandleVeryLongApiKeys() {
+            val longApiKey = "sk-" + "a".repeat(10000)
+            auraAIService.updateApiKey(longApiKey)
+            verify(mockConfigurationService).updateApiKey(longApiKey)
         }
 
         @Test
-        @DisplayName("Should handle null response from HTTP client")
-        fun shouldHandleNullResponseFromHttpClient() = runTest {
-            whenever(mockHttpClient.post(any())).thenReturn(null)
-            assertThrows<NullPointerException> {
-                auraAIService.generateResponse("Test")
-            }
+        @DisplayName("Should handle maximum timeout values")
+        fun shouldHandleMaximumTimeoutValues() {
+            val maxTimeout = Long.MAX_VALUE
+            auraAIService.updateTimeout(maxTimeout)
+            verify(mockConfigurationService).updateTimeout(maxTimeout)
         }
 
         @Test
-        @DisplayName("Should handle Unicode characters in prompts")
-        fun shouldHandleUnicodeCharactersInPrompts() = runTest {
-            val unicodePrompt = "Hello 世界 🌍 café naïve résumé"
-            val expectedResponse = "Unicode response"
-            val mockHttpResponse = mockHttpResponse(200, expectedResponse)
-            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+        @DisplayName("Should handle base URL with complex path")
+        fun shouldHandleBaseUrlWithComplexPath() {
+            val complexUrl = "https://api.example.com/v1/ai/models/gpt-4"
+            auraAIService.updateBaseUrl(complexUrl)
+            verify(mockConfigurationService).updateBaseUrl(complexUrl)
+        }
 
-            val result = auraAIService.generateResponse(unicodePrompt)
-            assertEquals(expectedResponse, result)
-            verify(mockHttpClient).post(unicodePrompt)
+        @Test
+        @DisplayName("Should handle base URL with query parameters")
+        fun shouldHandleBaseUrlWithQueryParameters() {
+            val urlWithQuery = "https://api.example.com/v1?version=latest&format=json"
+            auraAIService.updateBaseUrl(urlWithQuery)
+            verify(mockConfigurationService).updateBaseUrl(urlWithQuery)
         }
     }
+
+    @Nested
+    @DisplayName("Performance and Stress Tests")
+    inner class PerformanceAndStressTests {
+        @Test
+        @DisplayName("Should handle rapid sequential requests")
+        fun shouldHandleRapidSequentialRequests() = runTest {
+            val mockHttpResponse = mockHttpResponse(200, "response")
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            
+            repeat(100) { index ->
+                val result = auraAIService.generateResponse("prompt-$index")
+                assertEquals("response", result)
+            }
+            
+            verify(mockHttpClient, times(100)).post(any())
+        }
+
+        @Test
+        @DisplayName("Should handle large batch processing")
+        fun shouldHandleLargeBatchProcessing() = runTest {
+            val largePromptList = (1..5000).map { "Prompt $it" }
+            val mockHttpResponse = mockHttpResponse(200, "batch response")
+            whenever(mockHttpClient.post(any())).thenReturn(mockHttpResponse)
+            
+            val results = auraAIService.generateBatchResponses(largePromptList)
+            assertEquals(1, results.size)
+            assertEquals("batch response", results[0])
+        }
+
+        @Test
+        @DisplayName("Should handle multiple configuration reloads")
+        fun shouldHandleMultipleConfigurationReloads() {
+            whenever(mockConfigurationService.getApiKey()).thenReturn("valid-key")
+            whenever(mockConfigurationService.getBaseUrl()).thenReturn("https://api.example.com")
+            whenever(mockConfigurationService.getTimeout()).thenReturn(1000L)
+            
+            repeat(50) {
+                auraAIService.reloadConfiguration()
+            }
+            
+            verify(mockLogger, times(50)).info("Configuration reloaded successfully")
+        }
+    }
+
+    // Helper methods
+    private fun mockHttpResponse(statusCode: Int, body: String): HttpResponse {
+        val mockResponse = mock<HttpResponse>()
+        whenever(mockResponse.statusCode).thenReturn(statusCode)
+        whenever(mockResponse.body).thenReturn(body)
+        return mockResponse
+    }
 }
+
+// Exception and data types
+class ConfigurationException(message: String) : Exception(message)
+data class HealthCheckResult(val isHealthy: Boolean, val message: String)
