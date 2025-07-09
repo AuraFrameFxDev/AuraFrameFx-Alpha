@@ -31,23 +31,23 @@ class KaiAIService @Inject constructor(
     /**
  * Returns the name of the agent, "Kai".
  *
- * @return The agent's name.
+ * @return The string "Kai".
  */
     override fun getName(): String? = "Kai"
 
     /**
  * Returns the type of this agent.
  *
- * @return The agent type, which is always `AgentType.KAI`.
+ * @return Always returns `AgentType.KAI`.
  */
     override fun getType(): AgentType = AgentType.KAI
 
     /**
-         * Returns a map of the Kai agent's supported capabilities.
+         * Returns a map indicating the supported capabilities of the Kai agent.
          *
-         * The map includes capability names as keys ("security", "analysis", "memory", "service_implemented"), each set to true to indicate support.
+         * The returned map contains capability names as keys ("security", "analysis", "memory", "service_implemented"), each mapped to `true` to signify support.
          *
-         * @return A map of capability names to their support status.
+         * @return A map where each key is a capability name and the value is `true` if supported.
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
@@ -58,10 +58,10 @@ class KaiAIService @Inject constructor(
         )
 
     /**
-     * Processes an AI request with additional context and returns a fixed response.
+     * Processes an AI request with the provided context and returns a fixed response.
      *
-     * @param request The AI request to process.
-     * @param context Additional context relevant to the request.
+     * @param request The AI request to handle.
+     * @param context Contextual information relevant to the request.
      * @return An AgentResponse containing a message referencing the request query and context, with a confidence score of 1.0.
      */
     override suspend fun processRequest(
