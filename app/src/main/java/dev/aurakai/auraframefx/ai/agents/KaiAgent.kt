@@ -272,12 +272,12 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Performs a multi-layered security analysis on a specified target.
+     * Performs a comprehensive security analysis on the specified target.
      *
-     * Executes vulnerability scanning, risk assessment, compliance checking, security scoring, and generates actionable recommendations for the target specified in the request context.
+     * Executes vulnerability scanning, risk assessment, compliance checking, security scoring, and generates actionable recommendations for the target provided in the request context.
      *
      * @param request The agent request containing the analysis target in its context.
-     * @return A map with keys for vulnerabilities, risk assessment, compliance status, security score, recommendations, and the analysis timestamp.
+     * @return A map containing vulnerabilities, risk assessment, compliance status, security score, recommendations, and the analysis timestamp.
      * @throws IllegalArgumentException if the analysis target is not specified in the request context.
      */
     private suspend fun handleSecurityAnalysis(request: AgentRequest): Map<String, Any> {
@@ -302,13 +302,13 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Performs a threat assessment using threat data from the request context.
+     * Performs a threat assessment based on threat data provided in the request context.
      *
-     * Analyzes the provided threat data to generate a security analysis, mitigation strategy, response timeline, and escalation path.
+     * Analyzes the supplied threat data to produce a security assessment, recommended mitigation strategy, response timeline, and escalation path.
      *
-     * @param request The agent request containing threat data in its context.
-     * @return A map with the results of the threat assessment, including "threat_analysis", "mitigation_strategy", "response_timeline", and "escalation_path".
-     * @throws IllegalArgumentException if threat data is missing from the request context.
+     * @param request The agent request containing threat data in its context map.
+     * @return A map with keys "threat_analysis", "mitigation_strategy", "response_timeline", and "escalation_path", each containing the corresponding assessment results.
+     * @throws IllegalArgumentException if the threat data is missing from the request context.
      */
     private suspend fun handleThreatAssessment(request: AgentRequest): Map<String, Any> {
         val threatData = request.context?.get("threat_data") as? String
@@ -329,12 +329,12 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Performs performance analysis on a specified system component and returns optimization recommendations.
+     * Analyzes the performance of a specified system component and provides optimization recommendations.
      *
-     * Extracts the target component from the request context (defaulting to "system" if not provided), gathers performance metrics, identifies bottlenecks, suggests optimizations, computes a performance score, and provides monitoring suggestions.
+     * Extracts the component name from the request context (defaults to "system" if not specified), gathers performance metrics, identifies bottlenecks, suggests optimizations, calculates a performance score, and offers monitoring suggestions.
      *
-     * @param request The agent request containing context information, including the component to analyze.
-     * @return A map containing performance metrics, identified bottlenecks, optimization recommendations, a performance score, and monitoring suggestions for the analyzed component.
+     * @param request The agent request containing optional context information about the component to analyze.
+     * @return A map with performance metrics, detected bottlenecks, recommended optimizations, a computed performance score, and monitoring suggestions for the component.
      */
     private suspend fun handlePerformanceAnalysis(request: AgentRequest): Map<String, Any> {
         val component = request.context?.get("component") as? String ?: "system"
@@ -355,12 +355,12 @@ class KaiAgent @Inject constructor(
     }
 
     /**
-     * Reviews code using AI to identify security vulnerabilities and assess code quality.
+     * Performs an AI-driven code review to identify security vulnerabilities and assess code quality.
      *
-     * Analyzes code provided in the request context, detects security issues, evaluates quality metrics, and generates actionable recommendations.
+     * Analyzes the code provided in the request context, detects security issues, evaluates quality metrics, and generates actionable recommendations. Throws an exception if the code content is missing from the request context.
      *
      * @param request The agent request containing the code to review in its context.
-     * @return A map containing the AI-generated analysis, detected security issues, quality metrics, and recommendations.
+     * @return A map with the AI-generated analysis, detected security issues, quality metrics, and recommendations.
      * @throws IllegalArgumentException if the code content is missing from the request context.
      */
     private suspend fun handleCodeReview(request: AgentRequest): Map<String, Any> {

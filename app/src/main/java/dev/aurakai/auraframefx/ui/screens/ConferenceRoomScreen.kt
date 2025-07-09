@@ -23,6 +23,11 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
  * This composable manages local state for agent selection, recording, and transcription. Interactive elements for settings, chat, and message input are present but not yet implemented.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Displays the main conference room UI, including agent selection, recording and transcription controls, chat area, and message input.
+ *
+ * This composable manages local state for the selected agent, recording, and transcription toggles. It presents a header, agent selection buttons, controls for recording and transcription, a placeholder for chat messages, and an input area for composing messages. Interactive elements such as settings, message sending, and chat display are present but not yet implemented.
+ */
 @Composable
 fun ConferenceRoomScreen() {
     var selectedAgent by remember { mutableStateOf("Aura") } // Default to a non-resource string initially
@@ -193,10 +198,10 @@ fun AgentButton(
 }
 
 /**
- * Renders a button that toggles the recording state, displaying a stop icon when recording or a record icon otherwise.
+ * Displays a button for toggling the recording state, showing a stop icon when active and a record icon when inactive.
  *
- * @param isRecording Indicates whether recording is currently active.
- * @param onClick Invoked when the button is pressed to toggle the recording state.
+ * @param isRecording True if recording is currently active; false otherwise.
+ * @param onClick Called when the button is pressed to toggle recording.
  */
 @Composable
 fun RecordingButton(
@@ -221,12 +226,12 @@ fun RecordingButton(
 }
 
 /**
- * Displays a button that toggles the transcription state.
+ * Renders an icon button for toggling transcription on or off.
  *
- * The button icon and color indicate whether transcription is active. Pressing the button triggers the provided click handler.
+ * The button displays a stop icon in red when transcription is active, and a phone icon in blue when inactive. The icon's content description updates for accessibility based on the transcription state.
  *
- * @param isTranscribing Whether transcription is currently active.
- * @param onClick Called when the button is pressed.
+ * @param isTranscribing True if transcription is currently active; false otherwise.
+ * @param onClick Invoked when the button is pressed.
  */
 @Composable
 fun TranscribeButton(
