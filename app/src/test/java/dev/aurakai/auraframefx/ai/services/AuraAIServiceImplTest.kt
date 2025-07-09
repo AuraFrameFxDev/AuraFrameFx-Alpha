@@ -11,7 +11,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.runBlocking
@@ -101,7 +100,6 @@ class AuraAIServiceImplTest {
         val longRequest = "a".repeat(10000)
 
         // Act & Assert
-        // This should either succeed or throw a specific exception
         try {
             val result = auraAIService.processRequest(longRequest)
             assertNotNull(result)
