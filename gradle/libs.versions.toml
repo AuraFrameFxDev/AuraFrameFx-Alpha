@@ -1,6 +1,6 @@
 [versions]
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
-agp = "8.1.4"
+agp = "8.11.0"
 generativeai = "0.9.0"
 kotlin = "2.2.0"
 ksp = "2.2.0-2.0.2"
@@ -36,6 +36,7 @@ firebaseStorageKtx = "21.0.2"
 kotlinxCoroutines = "1.10.2"
 kotlinxSerializationJson = "1.9.0"
 kotlinxDatetime = "0.7.1-0.6.x-compat"
+ndkVersion = "29.0.3"
 retrofit = "3.0.0"
 okhttp = "5.1.0"
 converterGson = "3.0.0"
