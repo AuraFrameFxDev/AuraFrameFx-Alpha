@@ -22,10 +22,10 @@ override fun getName(): String? = "MockAura"
     /**
  * Gets the agent type for this mock AI service.
  *
- * @return The fixed value `AgentType.AURA`.
+ * @return The constant value `AgentType.AURA`.
  */
 override fun getType(): AgentType = AgentType.AURA /**
-     * Produces a mock AgentResponse that echoes the input query and context for testing purposes.
+     * Produces a mock AgentResponse echoing the input query and context for testing.
      *
      * The response content includes the provided query and context, with a fixed confidence score of 1.0.
      *
@@ -59,12 +59,12 @@ override fun getName(): String? = "MockKai"
     /**
  * Gets the agent type for this mock Kai AI service.
  *
- * @return The fixed value `AgentType.KAI`.
+ * @return The constant value `AgentType.KAI`.
  */
 override fun getType(): AgentType = AgentType.KAI /**
-     * Produces a mock AgentResponse for KaiAI that includes the input query and context in the response content with a fixed confidence score of 1.0.
+     * Produces a mock AgentResponse for KaiAI, echoing the input query and context with a fixed confidence score of 1.0.
      *
-     * @param request The AI request whose query is echoed in the response.
+     * @param request The AI request whose query is echoed in the response content.
      * @param context The context string included in the response content.
      * @return An AgentResponse containing the echoed query and context with a confidence score of 1.0.
      */
@@ -92,14 +92,14 @@ class MockCascadeAIService : Agent {
  */
 override fun getName(): String? = "MockCascade"
     /**
- * Gets the fixed agent type for this mock service.
+ * Gets the constant agent type for the mock Cascade AI service.
  *
- * @return The constant AgentType.CASCADE.
+ * @return The AgentType.CASCADE value.
  */
 override fun getType(): AgentType = AgentType.CASCADE /**
      * Produces a mock AgentResponse for CascadeAI that echoes the input query and context with a fixed confidence score of 1.0.
      *
-     * @param request The AI request whose query is included in the response content.
+     * @param request The AI request whose query is echoed in the response content.
      * @param context The context string included in the response content.
      * @return An AgentResponse containing the echoed query and context with a confidence score of 1.0.
      */

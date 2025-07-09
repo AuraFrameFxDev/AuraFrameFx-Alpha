@@ -35,10 +35,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null for any requested file download, as file download functionality is not implemented.
+     * Stub implementation for downloading a file by its ID.
+     *
+     * Always returns null, as file download functionality is not implemented.
      *
      * @param _fileId The ID of the file to download.
-     * @return Always null.
+     * @return Null, indicating no file is downloaded.
      */
     override suspend fun downloadFile(_fileId: String): File? {
         // TODO: Implement file download; Reported as unused
@@ -47,12 +49,12 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a placeholder value for image generation based on the provided prompt.
+     * Returns null as image generation is not implemented.
      *
-     * This method logs the prompt and always returns null, indicating that image generation is not implemented.
+     * This placeholder method logs the provided prompt but does not generate or return any image data.
      *
      * @param _prompt The prompt describing the desired image.
-     * @return Always null, as image generation is not supported.
+     * @return Always null.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         // TODO: Implement image generation; Reported as unused
@@ -74,11 +76,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a fixed placeholder AI response string for the given prompt.
+     * Returns a placeholder AI response string for the provided prompt.
      *
      * @param prompt The input text for which an AI response is requested.
-     * @param options Optional parameters that may influence the AI response (currently unused).
-     * @return A placeholder string representing the AI response.
+     * @param options Optional parameters for customizing the response (currently ignored).
+     * @return A fixed placeholder string simulating an AI-generated response.
      */
     override fun getAIResponse(prompt: String, options: Map<String, Any>?): String? {
         // TODO: Implement AI response retrieval; Reported as unused
@@ -87,10 +89,10 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns a placeholder memory value for the given key.
+     * Retrieves a placeholder memory value for the specified key.
      *
-     * @param _memoryKey The key for which to retrieve the memory value.
-     * @return A fixed string representing the memory value for the specified key, or null if not implemented.
+     * @param _memoryKey The key whose associated memory value is requested.
+     * @return A fixed string representing the memory value for the given key.
      */
     override fun getMemory(_memoryKey: String): String? {
         // TODO: Implement memory retrieval; Reported as unused
@@ -99,9 +101,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub method for saving a value to memory under a given key.
+     * Placeholder method for saving a value to memory under the specified key.
      *
-     * This implementation does not persist the value and serves as a placeholder.
+     * This implementation does not persist any data and is intended as a stub.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.
@@ -112,9 +114,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Indicates whether the service is currently connected.
+     * Checks if the service is currently connected.
      *
-     * @return Always returns true as a placeholder.
+     * @return Always returns true as a placeholder; no actual connection check is performed.
      */
     override fun isConnected(): Boolean {
         // TODO: Implement actual connection check; Reported to always return true
@@ -125,7 +127,7 @@ class AuraAIServiceImpl @Inject constructor(
     /**
      * Publishes a message to a PubSub topic.
      *
-     * This placeholder implementation logs the topic and message but does not perform any actual publishing.
+     * This placeholder implementation logs the topic and message but does not perform any actual publishing or message delivery.
      */
     override fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing; Reported as unused
