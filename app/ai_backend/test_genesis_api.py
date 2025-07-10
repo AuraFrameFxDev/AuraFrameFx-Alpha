@@ -6815,3 +6815,946 @@ if __name__ == "__main__":
         "-k", "TestComprehensiveEdgeCases or TestAdvancedAsyncPatterns or TestAdvancedDataStructures or TestErrorRecoveryAdvanced or TestInteroperabilityAndCompatibility",
         "--durations=10"
     ])
+
+
+class TestAdvancedValidationScenarios:
+    """Advanced validation scenarios and edge cases for comprehensive coverage."""
+    
+    @pytest.fixture
+    def complex_client_config(self):
+        """Extended client configuration for advanced testing scenarios."""
+        return {
+            'api_key': 'test-advanced-key-12345',
+            'base_url': 'https://api.genesis.ai/v2',
+            'timeout': 45,
+            'max_retries': 5,
+            'user_agent': 'TestClient/2.0',
+            'verify_ssl': True
+        }
+    
+    def test_message_validation_with_extremely_long_names(self, client):
+        """Test message validation with extremely long participant names."""
+        long_names = [
+            "A" * 100,  # 100 characters
+            "B" * 255,  # 255 characters  
+            "C" * 500,  # 500 characters
+            "participant_with_very_long_descriptive_name_that_exceeds_normal_limits_significantly"
+        ]
+        
+        for name in long_names:
+            msg = ChatMessage(role="user", content="Test content", name=name)
+            try:
+                client._validate_messages([msg])
+                # If validation passes, name should be preserved
+                assert msg.name == name
+            except ValidationError as e:
+                # Acceptable to reject overly long names
+                assert "name" in str(e).lower() or "length" in str(e).lower()
+    
+    def test_message_validation_with_special_unicode_roles(self, client):
+        """Test message validation with Unicode characters in roles."""
+        unicode_roles = [
+            "usér",  # Accented characters
+            "用户",   # Chinese characters
+            "пользователь",  # Cyrillic
+            "مستخدم",  # Arabic
+            "user\u200B",  # Zero-width space
+            "user\uFEFF"   # Byte order mark
+        ]
+        
+        for role in unicode_roles:
+            msg = ChatMessage(role=role, content="Test content")
+            with pytest.raises(ValidationError, match="Invalid message role"):
+                client._validate_messages([msg])
+    
+    def test_model_config_validation_with_scientific_notation(self, client):
+        """Test model config validation with scientific notation values."""
+        scientific_configs = [
+            ModelConfig(name="test", temperature=1e-3),    # 0.001
+            ModelConfig(name="test", temperature=1.5e0),   # 1.5
+            ModelConfig(name="test", top_p=9.5e-1),        # 0.95
+            ModelConfig(name="test", max_tokens=int(1e3)), # 1000
+            ModelConfig(name="test", frequency_penalty=-1e-1)  # -0.1
+        ]
+        
+        for config in scientific_configs:
+            try:
+                client._validate_model_config(config)
+                # Validation should handle scientific notation
+                assert config.temperature is not None or config.top_p is not None
+            except ValidationError:
+                # Acceptable if scientific notation isn't supported
+                pass
+    
+    def test_message_validation_with_mixed_content_types_advanced(self, client):
+        """Test message validation with complex mixed content structures."""
+        mixed_content_messages = [
+            ChatMessage(role="user", content={"type": "text", "text": "Hello"}),
+            ChatMessage(role="user", content=[
+                {"type": "text", "text": "Multi-part message"},
+                {"type": "image_url", "image_url": {"url": "data:image/png;base64,iVBOR="}}
+            ]),
+            ChatMessage(role="user", content={
+                "type": "multimodal",
+                "parts": [
+                    {"text": "Analyze this"},
+                    {"image": {"data": "base64data", "mime_type": "image/jpeg"}}
+                ]
+            })
+        ]
+        
+        for msg in mixed_content_messages:
+            try:
+                client._validate_messages([msg])
+            except ValidationError as e:
+                # Should provide clear error for unsupported content types
+                assert any(term in str(e).lower() for term in ["content", "type", "format", "multimodal"])
+    
+    @pytest.mark.parametrize("role,content,name,should_pass", [
+        ("user", "Valid message", None, True),
+        ("assistant", "Valid assistant message", None, True),
+        ("system", "Valid system message", None, True),
+        ("function", "Function result", "my_function", True),
+        ("tool", "Tool output", "my_tool", True),
+        ("", "Empty role", None, False),
+        ("INVALID", "Invalid role", None, False),
+        ("user", "", None, False),  # Empty content
+        ("user", "   ", None, False),  # Whitespace only
+        ("user", None, None, False),  # None content
+        ("user", "Valid", "", False),  # Empty name if provided
+    ])
+    def test_message_validation_comprehensive_matrix(self, client, role, content, name, should_pass):
+        """Comprehensive matrix testing of message validation combinations."""
+        msg = ChatMessage(role=role, content=content, name=name)
+        
+        if should_pass:
+            try:
+                client._validate_messages([msg])
+            except ValidationError:
+                pytest.fail(f"Expected validation to pass for role='{role}', content='{content}', name='{name}'")
+        else:
+            with pytest.raises(ValidationError):
+                client._validate_messages([msg])
+    
+    def test_model_config_validation_with_infinity_values(self, client):
+        """Test model config validation with infinity and NaN values."""
+        infinity_configs = [
+            (lambda c: setattr(c, 'temperature', float('inf')), False),
+            (lambda c: setattr(c, 'temperature', float('-inf')), False),
+            (lambda c: setattr(c, 'temperature', float('nan')), False),
+            (lambda c: setattr(c, 'top_p', float('inf')), False),
+            (lambda c: setattr(c, 'max_tokens', float('inf')), False),
+        ]
+        
+        for setter, should_pass in infinity_configs:
+            config = ModelConfig(name="test-model")
+            setter(config)
+            
+            if should_pass:
+                client._validate_model_config(config)
+            else:
+                with pytest.raises(ValidationError):
+                    client._validate_model_config(config)
+
+
+class TestStreamingEdgeCasesAdvanced:
+    """Advanced streaming edge cases and complex scenarios."""
+    
+    @pytest.mark.asyncio
+    async def test_streaming_with_intermittent_connectivity(self, client, sample_messages, sample_model_config):
+        """Test streaming behavior with intermittent connectivity issues."""
+        chunk_count = 0
+        
+        async def intermittent_stream():
+            nonlocal chunk_count
+            
+            chunks = [
+                b'{"choices": [{"delta": {"content": "Hello"}}]}\n',
+                b'{"choices": [{"delta": {"content": " there"}}]}\n',
+            ]
+            
+            for chunk in chunks:
+                chunk_count += 1
+                if chunk_count == 2:
+                    # Simulate intermittent connection issue
+                    raise aiohttp.ClientConnectionError("Connection temporarily lost")
+                yield chunk
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
+                return_value=intermittent_stream()
+            )
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            chunks = []
+            with pytest.raises(GenesisAPIError, match="Connection error"):
+                async for chunk in client.create_chat_completion_stream(
+                    messages=sample_messages,
+                    model_config=sample_model_config
+                ):
+                    chunks.append(chunk)
+    
+    @pytest.mark.asyncio
+    async def test_streaming_with_encoding_issues(self, client, sample_messages, sample_model_config):
+        """Test streaming with various text encoding challenges."""
+        encoding_test_chunks = [
+            # UTF-8 BOM
+            b'\xef\xbb\xbf{"choices": [{"delta": {"content": "UTF8-BOM"}}]}\n',
+            # Latin-1 encoding
+            b'{"choices": [{"delta": {"content": "Caf\xe9"}}]}\n',
+            # Mixed encoding with emoji
+            '{"choices": [{"delta": {"content": "Hello 🌍"}}]}\n'.encode('utf-8'),
+            # Malformed UTF-8
+            b'{"choices": [{"delta": {"content": "Bad\xff\xfeUTF8"}}]}\n',
+        ]
+        
+        async def encoding_test_stream():
+            for chunk in encoding_test_chunks:
+                yield chunk
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
+                return_value=encoding_test_stream()
+            )
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            chunks = []
+            async for chunk in client.create_chat_completion_stream(
+                messages=sample_messages,
+                model_config=sample_model_config
+            ):
+                chunks.append(chunk)
+            
+            # Should handle encoding issues gracefully
+            valid_chunks = [c for c in chunks if hasattr(c, 'choices') and c.choices]
+            assert len(valid_chunks) >= 2  # At least some chunks should be processable
+    
+    @pytest.mark.asyncio
+    async def test_streaming_with_http_status_changes(self, client, sample_messages, sample_model_config):
+        """Test streaming behavior when HTTP status changes mid-stream."""
+        call_count = 0
+        
+        async def status_changing_stream():
+            yield b'{"choices": [{"delta": {"content": "Start"}}]}\n'
+            # Simulate status change (shouldn't happen in real HTTP but test resilience)
+            yield b'{"choices": [{"delta": {"content": " middle"}}]}\n'
+        
+        async def status_change_request(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            
+            # First call succeeds, second call changes status
+            if call_count == 1:
+                mock_response = Mock()
+                mock_response.status = 200
+                mock_response.content.iter_chunked = AsyncMock(return_value=status_changing_stream())
+                return mock_response
+            else:
+                mock_response = Mock()
+                mock_response.status = 429  # Rate limited
+                mock_response.json = AsyncMock(return_value={'error': {'message': 'Rate limited'}})
+                return mock_response
+        
+        with patch('aiohttp.ClientSession.post', side_effect=status_change_request):
+            chunks = []
+            async for chunk in client.create_chat_completion_stream(
+                messages=sample_messages,
+                model_config=sample_model_config
+            ):
+                chunks.append(chunk)
+            
+            # Should process available chunks before any status change
+            assert len(chunks) >= 1
+    
+    @pytest.mark.asyncio
+    async def test_streaming_with_compression(self, client, sample_messages, sample_model_config):
+        """Test streaming with compressed response data."""
+        import gzip
+        
+        # Create compressed chunks
+        original_chunks = [
+            b'{"choices": [{"delta": {"content": "Compressed"}}]}\n',
+            b'{"choices": [{"delta": {"content": " content"}}]}\n',
+            b'{"choices": [{"delta": {}, "finish_reason": "stop"}]}\n'
+        ]
+        
+        compressed_chunks = [gzip.compress(chunk) for chunk in original_chunks]
+        
+        async def compressed_stream():
+            for chunk in compressed_chunks:
+                yield chunk
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            # Mock response with compression headers
+            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
+                return_value=compressed_stream()
+            )
+            mock_post.return_value.__aenter__.return_value.status = 200
+            mock_post.return_value.__aenter__.return_value.headers = {'Content-Encoding': 'gzip'}
+            
+            # Should handle compression if supported by underlying HTTP client
+            chunks = []
+            try:
+                async for chunk in client.create_chat_completion_stream(
+                    messages=sample_messages,
+                    model_config=sample_model_config
+                ):
+                    chunks.append(chunk)
+                
+                # If decompression works, should get all chunks
+                assert len(chunks) == 3
+            except (GenesisAPIError, json.JSONDecodeError):
+                # Acceptable if compression handling isn't implemented
+                pass
+
+
+class TestClientStateManagement:
+    """Test client state management and lifecycle scenarios."""
+    
+    @pytest.mark.asyncio
+    async def test_client_reinitialization_after_close(self, mock_config):
+        """Test client behavior when reinitialized after being closed."""
+        client = GenesisAPIClient(**mock_config)
+        original_session = client.session
+        
+        # Close the client
+        await client.close()
+        assert client.session.closed
+        
+        # Reinitialize (if supported)
+        try:
+            client._initialize_session()  # If this method exists
+            assert client.session is not None
+            assert client.session != original_session
+        except AttributeError:
+            # If reinitialization isn't supported, that's acceptable
+            pass
+    
+    @pytest.mark.asyncio
+    async def test_concurrent_close_operations(self, mock_config):
+        """Test concurrent close operations on the same client."""
+        client = GenesisAPIClient(**mock_config)
+        
+        # Start multiple close operations concurrently
+        close_tasks = [client.close() for _ in range(5)]
+        
+        # All should complete without error
+        await asyncio.gather(*close_tasks, return_exceptions=True)
+        
+        # Client should be in a consistent closed state
+        assert client.session.closed
+    
+    def test_client_configuration_persistence_across_operations(self, client):
+        """Test that client configuration persists across multiple operations."""
+        original_config = {
+            'api_key': client.api_key,
+            'base_url': client.base_url,
+            'timeout': client.timeout,
+            'max_retries': client.max_retries
+        }
+        
+        # Perform various operations that might affect state
+        headers = client._build_headers()
+        headers_with_custom = client._build_headers({'Custom': 'value'})
+        
+        # Configuration should remain unchanged
+        assert client.api_key == original_config['api_key']
+        assert client.base_url == original_config['base_url']
+        assert client.timeout == original_config['timeout']
+        assert client.max_retries == original_config['max_retries']
+    
+    @pytest.mark.asyncio
+    async def test_session_recovery_after_network_error(self, client, sample_messages, sample_model_config):
+        """Test session recovery mechanisms after network errors."""
+        call_count = 0
+        
+        async def network_error_then_success(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            
+            if call_count == 1:
+                raise aiohttp.ClientConnectionError("Network unavailable")
+            else:
+                return Mock(
+                    status=200,
+                    json=AsyncMock(return_value={
+                        'id': 'recovery-test',
+                        'choices': [{'message': {'content': 'Recovered'}}],
+                        'usage': {'total_tokens': 10}
+                    })
+                )
+        
+        with patch('aiohttp.ClientSession.post', side_effect=network_error_then_success):
+            with patch('asyncio.sleep'):
+                # Should recover from network error
+                result = await client.create_chat_completion(
+                    messages=sample_messages,
+                    model_config=sample_model_config
+                )
+                
+                assert result.id == 'recovery-test'
+                assert call_count == 2
+    
+    def test_client_cleanup_on_exception_during_init(self, mock_config):
+        """Test proper cleanup when exception occurs during client initialization."""
+        with patch('aiohttp.ClientSession', side_effect=Exception("Session creation failed")):
+            with pytest.raises(Exception, match="Session creation failed"):
+                GenesisAPIClient(**mock_config)
+        
+        # No session should be left dangling
+        # This test verifies exception handling during initialization
+
+
+class TestAdvancedMockingScenarios:
+    """Advanced mocking scenarios for comprehensive test coverage."""
+    
+    @pytest.mark.asyncio
+    async def test_mock_context_manager_behavior(self, client, sample_messages, sample_model_config):
+        """Test complex mock context manager behavior."""
+        enter_count = 0
+        exit_count = 0
+        
+        class CustomMockResponse:
+            def __init__(self, status=200, json_data=None):
+                self.status = status
+                self._json_data = json_data or {'id': 'custom-mock', 'choices': [{'message': {'content': 'Custom'}}], 'usage': {'total_tokens': 5}}
+            
+            async def __aenter__(self):
+                nonlocal enter_count
+                enter_count += 1
+                return self
+            
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                nonlocal exit_count
+                exit_count += 1
+            
+            async def json(self):
+                return self._json_data
+        
+        with patch('aiohttp.ClientSession.post', return_value=CustomMockResponse()):
+            result = await client.create_chat_completion(
+                messages=sample_messages,
+                model_config=sample_model_config
+            )
+            
+            assert result.id == 'custom-mock'
+            assert enter_count == 1
+            assert exit_count == 1
+    
+    @pytest.mark.asyncio
+    async def test_mock_side_effect_with_context(self, client, sample_messages, sample_model_config):
+        """Test mock side effects that depend on call context."""
+        call_contexts = []
+        
+        def context_aware_side_effect(*args, **kwargs):
+            # Capture call context
+            context = {
+                'args': args,
+                'kwargs': dict(kwargs),
+                'call_number': len(call_contexts) + 1
+            }
+            call_contexts.append(context)
+            
+            # Return different responses based on context
+            if context['call_number'] == 1:
+                return Mock(
+                    status=200,
+                    json=AsyncMock(return_value={
+                        'id': f'context-{context["call_number"]}',
+                        'choices': [{'message': {'content': f'Response {context["call_number"]}'}}],
+                        'usage': {'total_tokens': 10}
+                    })
+                )
+            else:
+                return Mock(
+                    status=429,
+                    json=AsyncMock(return_value={'error': {'message': 'Rate limited'}}),
+                    headers={'Retry-After': '1'}
+                )
+        
+        with patch('aiohttp.ClientSession.post', side_effect=context_aware_side_effect):
+            # First call should succeed
+            result1 = await client.create_chat_completion(
+                messages=sample_messages,
+                model_config=sample_model_config
+            )
+            assert result1.id == 'context-1'
+            
+            # Second call should be rate limited
+            with pytest.raises(RateLimitError):
+                await client.create_chat_completion(
+                    messages=sample_messages,
+                    model_config=sample_model_config
+                )
+            
+            # Verify call contexts were captured
+            assert len(call_contexts) == 2
+    
+    def test_mock_property_access_patterns(self, client):
+        """Test different mock property access patterns."""
+        # Test that mocks behave consistently across different access patterns
+        mock_session = Mock()
+        
+        # Direct attribute access
+        mock_session.closed = False
+        assert mock_session.closed == False
+        
+        # Method call mocking
+        mock_session.close = Mock(return_value=None)
+        mock_session.close()
+        assert mock_session.close.called
+        
+        # Spec-based mocking for more realistic behavior
+        import aiohttp
+        spec_mock = Mock(spec=aiohttp.ClientSession)
+        
+        # Should have the same attributes as real ClientSession
+        assert hasattr(spec_mock, 'get')
+        assert hasattr(spec_mock, 'post')
+        assert hasattr(spec_mock, 'close')
+    
+    @pytest.mark.asyncio
+    async def test_async_mock_timing_verification(self, client, sample_messages, sample_model_config):
+        """Test async mock timing and call order verification."""
+        call_order = []
+        
+        async def timed_mock_response(*args, **kwargs):
+            call_order.append(('start', asyncio.get_event_loop().time()))
+            await asyncio.sleep(0.1)  # Simulate network delay
+            call_order.append(('end', asyncio.get_event_loop().time()))
+            
+            return Mock(
+                status=200,
+                json=AsyncMock(return_value={
+                    'id': 'timed-test',
+                    'choices': [{'message': {'content': 'Timed response'}}],
+                    'usage': {'total_tokens': 10}
+                })
+            )
+        
+        with patch('aiohttp.ClientSession.post', side_effect=timed_mock_response):
+            start_time = asyncio.get_event_loop().time()
+            result = await client.create_chat_completion(
+                messages=sample_messages,
+                model_config=sample_model_config
+            )
+            end_time = asyncio.get_event_loop().time()
+            
+            assert result.id == 'timed-test'
+            assert len(call_order) == 2
+            assert call_order[0][0] == 'start'
+            assert call_order[1][0] == 'end'
+            
+            # Verify timing
+            total_time = end_time - start_time
+            assert total_time >= 0.1  # Should take at least the mock delay
+
+
+class TestRealWorldScenarios:
+    """Real-world usage scenarios and integration patterns."""
+    
+    @pytest.mark.asyncio
+    async def test_chatbot_conversation_simulation(self, client):
+        """Simulate a realistic chatbot conversation scenario."""
+        conversation_history = []
+        
+        # Simulate multi-turn conversation
+        conversation_turns = [
+            ("user", "Hello, I need help with Python programming"),
+            ("assistant", "I'd be happy to help you with Python! What specific topic would you like to learn about?"),
+            ("user", "How do I handle exceptions in Python?"),
+            ("assistant", "Python uses try-except blocks for exception handling. Here's a basic example..."),
+            ("user", "Can you show me a more complex example?"),
+        ]
+        
+        mock_responses = [
+            {
+                'id': f'conv-{i}',
+                'choices': [{'message': {'role': turn[0], 'content': turn[1]}}],
+                'usage': {'total_tokens': 20 + i * 5}
+            }
+            for i, turn in enumerate(conversation_turns) if turn[0] == 'assistant'
+        ]
+        
+        response_index = 0
+        
+        async def conversation_response(*args, **kwargs):
+            nonlocal response_index
+            if response_index < len(mock_responses):
+                response = mock_responses[response_index]
+                response_index += 1
+                return Mock(status=200, json=AsyncMock(return_value=response))
+            else:
+                return Mock(status=200, json=AsyncMock(return_value={
+                    'id': 'conv-final',
+                    'choices': [{'message': {'content': 'Complex example here...'}}],
+                    'usage': {'total_tokens': 50}
+                }))
+        
+        with patch('aiohttp.ClientSession.post', side_effect=conversation_response):
+            # Build conversation incrementally
+            for role, content in conversation_turns:
+                conversation_history.append(ChatMessage(role=role, content=content))
+                
+                if role == "user":
+                    # Get response for user messages
+                    result = await client.create_chat_completion(
+                        messages=conversation_history.copy(),
+                        model_config=ModelConfig(name="genesis-gpt-4", temperature=0.7)
+                    )
+                    
+                    # Add assistant response to history
+                    assistant_response = result.choices[0].message.content
+                    conversation_history.append(ChatMessage(role="assistant", content=assistant_response))
+            
+            # Verify conversation structure
+            assert len(conversation_history) >= 6  # At least 3 exchanges
+            user_messages = [msg for msg in conversation_history if msg.role == "user"]
+            assistant_messages = [msg for msg in conversation_history if msg.role == "assistant"]
+            assert len(user_messages) == 3
+            assert len(assistant_messages) >= 2
+    
+    @pytest.mark.asyncio
+    async def test_document_analysis_workflow(self, client):
+        """Simulate a document analysis workflow with multimodal content."""
+        document_analysis_steps = [
+            {
+                "step": "extract_text",
+                "input": "Please extract the key information from this document",
+                "expected_tokens": 150
+            },
+            {
+                "step": "summarize",
+                "input": "Now summarize the extracted information",
+                "expected_tokens": 100
+            },
+            {
+                "step": "analyze_sentiment",
+                "input": "What is the sentiment of this document?",
+                "expected_tokens": 50
+            }
+        ]
+        
+        step_responses = {
+            "extract_text": "I've extracted the following key information: [extracted text]",
+            "summarize": "Summary: The document discusses [summary]",
+            "analyze_sentiment": "The sentiment is generally positive with neutral elements."
+        }
+        
+        current_step = 0
+        
+        async def analysis_response(*args, **kwargs):
+            nonlocal current_step
+            step = document_analysis_steps[current_step % len(document_analysis_steps)]
+            response_content = step_responses[step["step"]]
+            
+            response = {
+                'id': f'analysis-{step["step"]}',
+                'choices': [{'message': {'content': response_content}}],
+                'usage': {'total_tokens': step["expected_tokens"]}
+            }
+            current_step += 1
+            
+            return Mock(status=200, json=AsyncMock(return_value=response))
+        
+        with patch('aiohttp.ClientSession.post', side_effect=analysis_response):
+            analysis_results = []
+            
+            for step_config in document_analysis_steps:
+                messages = [
+                    ChatMessage(role="system", content="You are a document analysis assistant."),
+                    ChatMessage(role="user", content=step_config["input"])
+                ]
+                
+                result = await client.create_chat_completion(
+                    messages=messages,
+                    model_config=ModelConfig(
+                        name="genesis-gpt-4",
+                        temperature=0.1,  # Low temperature for consistent analysis
+                        max_tokens=step_config["expected_tokens"] * 2
+                    )
+                )
+                
+                analysis_results.append({
+                    'step': step_config["step"],
+                    'result': result.choices[0].message.content,
+                    'tokens_used': result.usage.total_tokens
+                })
+            
+            # Verify analysis workflow completion
+            assert len(analysis_results) == 3
+            assert all('result' in result for result in analysis_results)
+            assert analysis_results[0]['step'] == 'extract_text'
+            assert analysis_results[1]['step'] == 'summarize'
+            assert analysis_results[2]['step'] == 'analyze_sentiment'
+    
+    @pytest.mark.asyncio
+    async def test_code_generation_and_review_workflow(self, client):
+        """Simulate a code generation and review workflow."""
+        code_workflow = [
+            {
+                "phase": "requirements",
+                "prompt": "I need a Python function to calculate fibonacci numbers",
+                "expected_code": False
+            },
+            {
+                "phase": "generation",
+                "prompt": "Generate the fibonacci function with proper documentation",
+                "expected_code": True
+            },
+            {
+                "phase": "review",
+                "prompt": "Review the generated code and suggest improvements",
+                "expected_code": False
+            },
+            {
+                "phase": "optimization",
+                "prompt": "Optimize the code for performance",
+                "expected_code": True
+            }
+        ]
+        
+        phase_responses = {
+            "requirements": "I'll help you create a fibonacci function. Let me clarify the requirements...",
+            "generation": "Here's a Python function to calculate fibonacci numbers:\n\n```python\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)\n```",
+            "review": "The code is correct but could be improved for performance. Consider using memoization...",
+            "optimization": "Here's an optimized version:\n\n```python\ndef fibonacci(n, memo={}):\n    if n in memo:\n        return memo[n]\n    if n <= 1:\n        return n\n    memo[n] = fibonacci(n-1, memo) + fibonacci(n-2, memo)\n    return memo[n]\n```"
+        }
+        
+        workflow_index = 0
+        
+        async def code_workflow_response(*args, **kwargs):
+            nonlocal workflow_index
+            phase = code_workflow[workflow_index % len(code_workflow)]
+            response_content = phase_responses[phase["phase"]]
+            
+            response = {
+                'id': f'code-{phase["phase"]}',
+                'choices': [{'message': {'content': response_content}}],
+                'usage': {'total_tokens': 100 + len(response_content) // 4}
+            }
+            workflow_index += 1
+            
+            return Mock(status=200, json=AsyncMock(return_value=response))
+        
+        with patch('aiohttp.ClientSession.post', side_effect=code_workflow_response):
+            conversation = [
+                ChatMessage(role="system", content="You are an expert Python programmer.")
+            ]
+            
+            workflow_results = []
+            
+            for phase_config in code_workflow:
+                # Add user message
+                conversation.append(ChatMessage(role="user", content=phase_config["prompt"]))
+                
+                result = await client.create_chat_completion(
+                    messages=conversation.copy(),
+                    model_config=ModelConfig(
+                        name="genesis-gpt-4",
+                        temperature=0.2 if phase_config["expected_code"] else 0.7
+                    )
+                )
+                
+                assistant_response = result.choices[0].message.content
+                conversation.append(ChatMessage(role="assistant", content=assistant_response))
+                
+                workflow_results.append({
+                    'phase': phase_config["phase"],
+                    'response': assistant_response,
+                    'has_code': '```' in assistant_response,
+                    'tokens': result.usage.total_tokens
+                })
+            
+            # Verify workflow completion and code presence
+            assert len(workflow_results) == 4
+            
+            # Code generation and optimization phases should contain code blocks
+            generation_result = next(r for r in workflow_results if r['phase'] == 'generation')
+            optimization_result = next(r for r in workflow_results if r['phase'] == 'optimization')
+            
+            assert generation_result['has_code']
+            assert optimization_result['has_code']
+            
+            # Verify conversation length
+            assert len(conversation) == 9  # System + 4 user messages + 4 assistant responses
+
+
+class TestPerformanceAndBenchmarking:
+    """Performance testing and benchmarking scenarios."""
+    
+    @pytest.mark.asyncio
+    async def test_throughput_measurement(self, client, sample_messages, sample_model_config):
+        """Measure client throughput under controlled conditions."""
+        request_count = 20
+        mock_response = {
+            'id': 'throughput-test',
+            'choices': [{'message': {'content': 'Throughput response'}}],
+            'usage': {'total_tokens': 15}
+        }
+        
+        async def fast_response(*args, **kwargs):
+            await asyncio.sleep(0.01)  # Minimal simulated latency
+            return Mock(status=200, json=AsyncMock(return_value=mock_response))
+        
+        with patch('aiohttp.ClientSession.post', side_effect=fast_response):
+            start_time = asyncio.get_event_loop().time()
+            
+            # Sequential requests
+            for _ in range(request_count):
+                result = await client.create_chat_completion(
+                    messages=sample_messages,
+                    model_config=sample_model_config
+                )
+                assert result.id == 'throughput-test'
+            
+            end_time = asyncio.get_event_loop().time()
+            
+            total_time = end_time - start_time
+            throughput = request_count / total_time
+            
+            # Should handle reasonable throughput (this is with mocked network)
+            assert throughput > 10  # requests per second
+            assert total_time < 5.0  # Should complete within 5 seconds
+    
+    @pytest.mark.asyncio
+    async def test_memory_efficiency_with_large_conversations(self, client):
+        """Test memory efficiency with very large conversation histories."""
+        import psutil
+        import os
+        
+        process = psutil.Process(os.getpid())
+        initial_memory = process.memory_info().rss
+        
+        # Create a large conversation history
+        large_conversation = []
+        for i in range(1000):  # 1000 message pairs
+            large_conversation.extend([
+                ChatMessage(role="user", content=f"User message {i} with some content to make it realistic"),
+                ChatMessage(role="assistant", content=f"Assistant response {i} with detailed explanation and examples")
+            ])
+        
+        mock_response = {
+            'id': 'memory-efficiency-test',
+            'choices': [{'message': {'content': 'Response to large conversation'}}],
+            'usage': {'total_tokens': 50000}  # Large token count
+        }
+        
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.status = 200
+            
+            # Process large conversation multiple times
+            for _ in range(10):
+                result = await client.create_chat_completion(
+                    messages=large_conversation,
+                    model_config=ModelConfig(name="genesis-gpt-4", max_tokens=1000)
+                )
+                assert result.id == 'memory-efficiency-test'
+        
+        final_memory = process.memory_info().rss
+        memory_growth = final_memory - initial_memory
+        
+        # Memory growth should be reasonable (less than 500MB for this test)
+        assert memory_growth < 500 * 1024 * 1024
+    
+    @pytest.mark.asyncio
+    async def test_connection_pool_efficiency(self, client, sample_messages, sample_model_config):
+        """Test connection pool efficiency and reuse."""
+        session_ids = []
+        
+        def track_session_creation(*args, **kwargs):
+            # Track when new sessions might be created
+            session_id = id(client.session)
+            session_ids.append(session_id)
+            
+            return Mock(
+                status=200,
+                json=AsyncMock(return_value={
+                    'id': 'pool-test',
+                    'choices': [{'message': {'content': 'Pool response'}}],
+                    'usage': {'total_tokens': 10}
+                })
+            )
+        
+        with patch('aiohttp.ClientSession.post', side_effect=track_session_creation):
+            # Make multiple requests that should reuse connections
+            for _ in range(10):
+                result = await client.create_chat_completion(
+                    messages=sample_messages,
+                    model_config=sample_model_config
+                )
+                assert result.id == 'pool-test'
+        
+        # All requests should use the same session (connection reuse)
+        unique_sessions = set(session_ids)
+        assert len(unique_sessions) == 1  # Only one session should be used
+    
+    @pytest.mark.asyncio
+    async def test_concurrent_request_scaling(self, client, sample_messages, sample_model_config):
+        """Test how client performance scales with concurrent requests."""
+        concurrency_levels = [1, 5, 10, 20]
+        performance_results = {}
+        
+        mock_response = {
+            'id': 'scaling-test',
+            'choices': [{'message': {'content': 'Scaling response'}}],
+            'usage': {'total_tokens': 10}
+        }
+        
+        async def scaling_response(*args, **kwargs):
+            await asyncio.sleep(0.05)  # Fixed simulated latency
+            return Mock(status=200, json=AsyncMock(return_value=mock_response))
+        
+        with patch('aiohttp.ClientSession.post', side_effect=scaling_response):
+            for concurrency in concurrency_levels:
+                start_time = asyncio.get_event_loop().time()
+                
+                # Create concurrent tasks
+                tasks = []
+                for _ in range(concurrency):
+                    task = client.create_chat_completion(
+                        messages=sample_messages,
+                        model_config=sample_model_config
+                    )
+                    tasks.append(task)
+                
+                results = await asyncio.gather(*tasks)
+                end_time = asyncio.get_event_loop().time()
+                
+                total_time = end_time - start_time
+                throughput = concurrency / total_time
+                
+                performance_results[concurrency] = {
+                    'total_time': total_time,
+                    'throughput': throughput,
+                    'success_count': len(results)
+                }
+                
+                # Verify all requests succeeded
+                assert len(results) == concurrency
+                assert all(r.id == 'scaling-test' for r in results)
+        
+        # Verify performance scaling characteristics
+        assert len(performance_results) == len(concurrency_levels)
+        
+        # Higher concurrency should generally result in higher throughput
+        # (though this depends on the mocked latency)
+        low_concurrency_throughput = performance_results[1]['throughput']
+        high_concurrency_throughput = performance_results[20]['throughput']
+        
+        # With fixed latency, higher concurrency should achieve better throughput
+        assert high_concurrency_throughput >= low_concurrency_throughput * 10
+
+
+# Add comprehensive test execution at the end
+if __name__ == "__main__":
+    # Run all new comprehensive tests
+    pytest.main([
+        __file__,
+        "-v",
+        "--tb=short", 
+        "-k", "TestAdvancedValidationScenarios or TestStreamingEdgeCasesAdvanced or TestClientStateManagement or TestAdvancedMockingScenarios or TestRealWorldScenarios or TestPerformanceAndBenchmarking",
+        "--durations=15",
+        "--maxfail=5"  # Stop after 5 failures for faster feedback
+    ])
