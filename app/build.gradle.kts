@@ -119,6 +119,9 @@ dependencies {
     implementation(libs.androidxUiToolingPreview)
     implementation(libs.androidxMaterial3)
     implementation(libs.androidxNavigationCompose)
+    
+    // Material 3 Views (for XML theming)
+    implementation("com.google.android.material:material:1.12.0")
 
     // Animation
     implementation(libs.androidxComposeAnimation)
