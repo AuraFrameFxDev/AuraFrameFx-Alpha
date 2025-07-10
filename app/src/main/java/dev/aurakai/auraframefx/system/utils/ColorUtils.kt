@@ -19,7 +19,7 @@ import dev.aurakai.auraframefx.R
  */
 object ColorUtils {
     private const val TAG = "ColorUtils"
-    
+
     /**
      * Parse a color string and return the corresponding color-int.
      * If the string cannot be parsed, returns the default color.
@@ -36,7 +36,7 @@ object ColorUtils {
             defaultColor
         }
     }
-    
+
     /**
      * Adjust the alpha component of a color.
      *
@@ -53,7 +53,7 @@ object ColorUtils {
             Color.blue(color)
         )
     }
-    
+
     /**
      * Adjust the alpha component of a color by a factor.
      *
@@ -66,7 +66,7 @@ object ColorUtils {
         val alpha = (Color.alpha(color) * factor.coerceIn(0f, 1f)).toInt()
         return withAlpha(color, alpha)
     }
-    
+
     /**
      * Create a gradient drawable with the given colors and corner radius.
      *
@@ -84,7 +84,7 @@ object ColorUtils {
             this.cornerRadius = cornerRadius
         }
     }
-    
+
     /**
      * Create a ripple drawable with the given content and ripple color.
      *
@@ -104,7 +104,7 @@ object ColorUtils {
             mask
         )
     }
-    
+
     /**
      * Create a selectable item background with the given color and corner radius.
      *
@@ -122,12 +122,12 @@ object ColorUtils {
     ): Drawable {
         val bgColor = withAlpha(color, (Color.alpha(color) * 0.5f).toInt())
         val defaultRipple = ContextCompat.getColor(context, R.color.control_highlight_color)
-        
+
         val content = GradientDrawable().apply {
             setColor(bgColor)
             this.cornerRadius = cornerRadius
         }
-        
+
         return createRippleDrawable(
             content = content,
             rippleColor = rippleColor ?: defaultRipple,
@@ -137,7 +137,7 @@ object ColorUtils {
             }
         )
     }
-    
+
     /**
      * Set the background of a view with optional insets and corner radius.
      *
@@ -156,13 +156,14 @@ object ColorUtils {
         insetRight: Int = 0,
         insetBottom: Int = 0
     ) {
-        view.background = if (insetLeft != 0 || insetTop != 0 || insetRight != 0 || insetBottom != 0) {
-            InsetDrawable(drawable, insetLeft, insetTop, insetRight, insetBottom)
-        } else {
-            drawable
-        }
+        view.background =
+            if (insetLeft != 0 || insetTop != 0 || insetRight != 0 || insetBottom != 0) {
+                InsetDrawable(drawable, insetLeft, insetTop, insetRight, insetBottom)
+            } else {
+                drawable
+            }
     }
-    
+
     /**
      * Check if a color is light (suitable for dark text).
      *
@@ -172,7 +173,7 @@ object ColorUtils {
     fun isColorLight(@ColorInt color: Int): Boolean {
         return ColorUtils.calculateLuminance(color) > 0.5
     }
-    
+
     /**
      * Get an appropriate text color for the given background color.
      *
@@ -189,7 +190,7 @@ object ColorUtils {
     ): Int {
         return if (isColorLight(backgroundColor)) lightColor else darkColor
     }
-    
+
     /**
      * Get a color with the given resource ID, or a default color if not found.
      *
@@ -210,7 +211,7 @@ object ColorUtils {
             defaultColor
         }
     }
-    
+
     /**
      * Get a drawable with the given resource ID, or null if not found.
      *
@@ -225,7 +226,7 @@ object ColorUtils {
             null
         }
     }
-    
+
     /**
      * Create a color state list with the given colors for different states.
      *

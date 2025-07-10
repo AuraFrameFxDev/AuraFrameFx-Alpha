@@ -16,13 +16,13 @@ class QuickSettingsConfigManager(private val context: Context) {
     private val tag = "QuickSettingsConfigManager"
     private val gson = Gson()
     private val configFile = File(context.filesDir, "quick_settings_config.json")
-    
+
     // Default configuration
     private val defaultConfig = QuickSettingsConfig.DEFAULT
-    
+
     // Cache for the current configuration
     private var currentConfig: QuickSettingsConfig = defaultConfig
-    
+
     /**
      * Loads the Quick Settings configuration from storage.
      * If no saved configuration exists, returns the default configuration.
@@ -33,13 +33,13 @@ class QuickSettingsConfigManager(private val context: Context) {
                 Log.d(tag, "No saved config found, using default")
                 return@withContext defaultConfig
             }
-            
+
             val json = configFile.readText()
             if (json.isBlank()) {
                 Log.d(tag, "Empty config file, using default")
                 return@withContext defaultConfig
             }
-            
+
             // Parse the JSON into our config object
             val type = object : TypeToken<QuickSettingsConfig>() {}.type
             gson.fromJson<QuickSettingsConfig>(json, type) ?: defaultConfig
@@ -50,7 +50,7 @@ class QuickSettingsConfigManager(private val context: Context) {
             currentConfig = it
         }
     }
-    
+
     /**
      * Saves the Quick Settings configuration to storage.
      */
@@ -65,19 +65,22 @@ class QuickSettingsConfigManager(private val context: Context) {
             false
         }
     }
-    
+
     /**
      * Updates a specific tile's configuration.
      */
-    suspend fun updateTileConfig(tileId: String, update: (QuickSettingsTileConfig) -> QuickSettingsTileConfig): Boolean {
+    suspend fun updateTileConfig(
+        tileId: String,
+        update: (QuickSettingsTileConfig) -> QuickSettingsTileConfig
+    ): Boolean {
         return try {
             val currentTiles = currentConfig.tiles.toMutableList()
             val index = currentTiles.indexOfFirst { it.id == tileId }
-            
+
             if (index != -1) {
                 val updatedTile = update(currentTiles[index])
                 currentTiles[index] = updatedTile
-                
+
                 val updatedConfig = currentConfig.copy(tiles = currentTiles)
                 saveConfig(updatedConfig)
             } else {
@@ -88,19 +91,19 @@ class QuickSettingsConfigManager(private val context: Context) {
             false
         }
     }
-    
+
     /**
      * Resets the configuration to default values.
      */
     suspend fun resetToDefault(): Boolean {
         return saveConfig(defaultConfig)
     }
-    
+
     /**
      * Gets the current configuration.
      */
     fun getCurrentConfig(): QuickSettingsConfig = currentConfig
-    
+
     /**
      * Applies the current configuration to the Quick Settings panel.
      * This should be called after the Quick Settings panel is inflated.
@@ -110,14 +113,16 @@ class QuickSettingsConfigManager(private val context: Context) {
         // to the actual Quick Settings panel
         // Implementation will depend on the specific hooks and view hierarchy
     }
-    
+
     companion object {
         @Volatile
         private var instance: QuickSettingsConfigManager? = null
-        
+
         fun getInstance(context: Context): QuickSettingsConfigManager {
             return instance ?: synchronized(this) {
-                instance ?: QuickSettingsConfigManager(context.applicationContext).also { instance = it }
+                instance ?: QuickSettingsConfigManager(context.applicationContext).also {
+                    instance = it
+                }
             }
         }
     }

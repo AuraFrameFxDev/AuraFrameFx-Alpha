@@ -62,12 +62,16 @@ data class TaskStatus(
     enum class Status(val value: kotlin.String) {
         @Json(name = "PENDING")
         PENDING("PENDING"),
+
         @Json(name = "IN_PROGRESS")
         IN_PROGRESS("IN_PROGRESS"),
+
         @Json(name = "COMPLETED")
         COMPLETED("COMPLETED"),
+
         @Json(name = "FAILED")
         FAILED("FAILED"),
+
         @Json(name = "CANCELLED")
         CANCELLED("CANCELLED");
     }

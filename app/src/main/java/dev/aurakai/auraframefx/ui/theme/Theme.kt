@@ -29,30 +29,30 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = OnPrimary,
     primaryContainer = NeonTeal.copy(alpha = 0.2f),
     onPrimaryContainer = OnPrimary,
-    
+
     secondary = NeonPurple,
     onSecondary = OnSecondary,
     secondaryContainer = NeonPurple.copy(alpha = 0.2f),
     onSecondaryContainer = OnSecondary,
-    
+
     tertiary = NeonBlue,
     onTertiary = OnTertiary,
     tertiaryContainer = NeonBlue.copy(alpha = 0.2f),
     onTertiaryContainer = OnTertiary,
-    
+
     background = DarkBackground,
     onBackground = OnSurface,
-    
+
     surface = Surface,
     onSurface = OnSurface,
     surfaceVariant = SurfaceVariant,
     onSurfaceVariant = OnSurfaceVariant,
-    
+
     error = ErrorColor,
     onError = OnPrimary,
     errorContainer = ErrorColor.copy(alpha = 0.2f),
     onErrorContainer = OnPrimary,
-    
+
     outline = OnSurfaceVariant,
     outlineVariant = SurfaceVariant
 )
@@ -62,30 +62,30 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = LightOnPrimary,
     primaryContainer = LightPrimary.copy(alpha = 0.2f),
     onPrimaryContainer = LightOnPrimary,
-    
+
     secondary = LightSecondary,
     onSecondary = LightOnSecondary,
     secondaryContainer = LightSecondary.copy(alpha = 0.2f),
     onSecondaryContainer = LightOnSecondary,
-    
+
     tertiary = LightTertiary,
     onTertiary = LightOnTertiary,
     tertiaryContainer = LightTertiary.copy(alpha = 0.2f),
     onTertiaryContainer = LightOnTertiary,
-    
+
     background = LightBackground,
     onBackground = LightOnBackground,
-    
+
     surface = LightSurface,
     onSurface = LightOnSurface,
     surfaceVariant = LightSurfaceVariant,
     onSurfaceVariant = LightOnSurfaceVariant,
-    
+
     error = ErrorColor,
     onError = LightOnError,
     errorContainer = ErrorColor.copy(alpha = 0.2f),
     onErrorContainer = LightOnError,
-    
+
     outline = LightOnSurfaceVariant,
     outlineVariant = LightSurfaceVariant
 )

@@ -18,12 +18,12 @@ import dev.aurakai.auraframefx.R
  */
 object ViewUtils {
     private const val TAG = "ViewUtils"
-    
+
     // Standard interpolators
     val FAST_OUT_SLOW_IN: Interpolator = PathInterpolator(0.4f, 0f, 0.2f, 1f)
     val FAST_OUT_LINEAR_IN: Interpolator = PathInterpolator(0.4f, 0f, 1f, 1f)
     val LINEAR_OUT_SLOW_IN: Interpolator = PathInterpolator(0f, 0f, 0.2f, 1f)
-    
+
     /**
      * Set the visibility of a view with optional animation.
      *
@@ -44,13 +44,13 @@ object ViewUtils {
             onEnd?.invoke()
             return
         }
-        
+
         if (!animate) {
             view.visibility = if (visible) View.VISIBLE else View.GONE
             onEnd?.invoke()
             return
         }
-        
+
         if (visible) {
             view.alpha = 0f
             view.visibility = View.VISIBLE
@@ -75,7 +75,7 @@ object ViewUtils {
                 .start()
         }
     }
-    
+
     /**
      * Recursively find all views of a specific type in a view hierarchy.
      *
@@ -91,21 +91,21 @@ object ViewUtils {
         includeInvisible: Boolean = false
     ): List<T> {
         val result = mutableListOf<T>()
-        
+
         if (type.isInstance(root) && (includeInvisible || root.visibility == View.VISIBLE)) {
             result.add(root as T)
         }
-        
+
         if (root is ViewGroup) {
             for (i in 0 until root.childCount) {
                 val child = root.getChildAt(i)
                 result.addAll(findViewsByType(child, type, includeInvisible))
             }
         }
-        
+
         return result
     }
-    
+
     /**
      * Recursively find the first view of a specific type in a view hierarchy.
      *
@@ -123,7 +123,7 @@ object ViewUtils {
         if (type.isInstance(root) && (includeInvisible || root.visibility == View.VISIBLE)) {
             return root as T
         }
-        
+
         if (root is ViewGroup) {
             for (i in 0 until root.childCount) {
                 val child = root.getChildAt(i)
@@ -133,10 +133,10 @@ object ViewUtils {
                 }
             }
         }
-        
+
         return null
     }
-    
+
     /**
      * Recursively find views with a specific tag in a view hierarchy.
      *
@@ -151,21 +151,21 @@ object ViewUtils {
         includeInvisible: Boolean = false
     ): List<View> {
         val result = mutableListOf<View>()
-        
+
         if (root.getTag(R.id.quick_settings_tag) == tag && (includeInvisible || root.visibility == View.VISIBLE)) {
             result.add(root)
         }
-        
+
         if (root is ViewGroup) {
             for (i in 0 until root.childCount) {
                 val child = root.getChildAt(i)
                 result.addAll(findViewsWithTag(child, tag, includeInvisible))
             }
         }
-        
+
         return result
     }
-    
+
     /**
      * Set a tag on a view using a resource ID to avoid tag conflicts.
      *
@@ -175,7 +175,7 @@ object ViewUtils {
     fun setViewTag(view: View, tag: String) {
         view.setTag(R.id.quick_settings_tag, tag)
     }
-    
+
     /**
      * Get a tag from a view that was set with [setViewTag].
      *
@@ -185,7 +185,7 @@ object ViewUtils {
     fun getViewTag(view: View): String? {
         return view.getTag(R.id.quick_settings_tag) as? String
     }
-    
+
     /**
      * Remove all child views from a ViewGroup.
      *
@@ -194,7 +194,7 @@ object ViewUtils {
     fun removeAllViews(viewGroup: ViewGroup) {
         viewGroup.removeAllViews()
     }
-    
+
     /**
      * Recursively enable or disable all child views in a view hierarchy.
      *
@@ -203,7 +203,7 @@ object ViewUtils {
      */
     fun setViewAndChildrenEnabled(view: View, enabled: Boolean) {
         view.isEnabled = enabled
-        
+
         if (view is ViewGroup) {
             for (i in 0 until view.childCount) {
                 val child = view.getChildAt(i)
@@ -211,7 +211,7 @@ object ViewUtils {
             }
         }
     }
-    
+
     /**
      * Wait for the view to be laid out and then execute a callback.
      *
@@ -223,8 +223,9 @@ object ViewUtils {
             callback(view)
             return
         }
-        
-        view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+
+        view.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 if (view.isLaidOut) {
                     view.viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -233,7 +234,7 @@ object ViewUtils {
             }
         })
     }
-    
+
     /**
      * Set a click listener that prevents rapid double-clicks.
      *
@@ -243,7 +244,7 @@ object ViewUtils {
      */
     fun setOnSingleClickListener(view: View, interval: Long = 500, onClick: (View) -> Unit) {
         var lastClickTime: Long = 0
-        
+
         view.setOnClickListener { v ->
             val currentTime = System.currentTimeMillis()
             if (currentTime - lastClickTime >= interval) {
@@ -252,7 +253,7 @@ object ViewUtils {
             }
         }
     }
-    
+
     /**
      * Measure the view and its content to determine the measured width and height.
      *
@@ -266,7 +267,7 @@ object ViewUtils {
         )
         return Pair(view.measuredWidth, view.measuredHeight)
     }
-    
+
     /**
      * Set the view's width and height in pixels.
      *
@@ -280,7 +281,7 @@ object ViewUtils {
         params.height = height
         view.layoutParams = params
     }
-    
+
     /**
      * Set the view's width in pixels.
      *
@@ -288,11 +289,12 @@ object ViewUtils {
      * @param width The width in pixels.
      */
     fun setViewWidth(view: View, width: Int) {
-        val params = view.layoutParams ?: ViewGroup.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val params =
+            view.layoutParams ?: ViewGroup.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT)
         params.width = width
         view.layoutParams = params
     }
-    
+
     /**
      * Set the view's height in pixels.
      *
@@ -300,11 +302,12 @@ object ViewUtils {
      * @param height The height in pixels.
      */
     fun setViewHeight(view: View, height: Int) {
-        val params = view.layoutParams ?: ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, height)
+        val params =
+            view.layoutParams ?: ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, height)
         params.height = height
         view.layoutParams = params
     }
-    
+
     /**
      * Set the view's padding in pixels.
      *
@@ -314,7 +317,7 @@ object ViewUtils {
     fun setViewPadding(view: View, padding: Int) {
         view.setPadding(padding, padding, padding, padding)
     }
-    
+
     /**
      * Set the view's padding in pixels.
      *
@@ -327,7 +330,7 @@ object ViewUtils {
     fun setViewPadding(view: View, left: Int, top: Int, right: Int, bottom: Int) {
         view.setPadding(left, top, right, bottom)
     }
-    
+
     /**
      * Set the view's background with a drawable resource.
      *
@@ -337,7 +340,7 @@ object ViewUtils {
     fun setBackgroundResource(view: View, @DrawableRes drawableRes: Int) {
         view.background = ContextCompat.getDrawable(view.context, drawableRes)
     }
-    
+
     /**
      * Set the view's background with a drawable.
      *
@@ -347,7 +350,7 @@ object ViewUtils {
     fun setBackgroundDrawable(view: View, drawable: Drawable?) {
         ViewCompat.setBackground(view, drawable)
     }
-    
+
     /**
      * Set the view's background color with a color resource.
      *
@@ -357,7 +360,7 @@ object ViewUtils {
     fun setBackgroundColorResource(view: View, @androidx.annotation.ColorRes colorRes: Int) {
         view.setBackgroundColor(ContextCompat.getColor(view.context, colorRes))
     }
-    
+
     /**
      * Set the view's background color.
      *
@@ -367,7 +370,7 @@ object ViewUtils {
     fun setBackgroundColor(view: View, @androidx.annotation.ColorInt color: Int) {
         view.setBackgroundColor(color)
     }
-    
+
     /**
      * Set the view's elevation in pixels.
      *

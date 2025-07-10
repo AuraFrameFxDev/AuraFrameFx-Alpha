@@ -72,7 +72,7 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
     // Enhanced language detection using multiple heuristics
     std::string textStr(nativeText);
     std::string result = "en"; // Default to English
-    
+
     // Convert to lowercase for case-insensitive matching
     std::transform(textStr.begin(), textStr.end(), textStr.begin(), ::tolower);
 
@@ -80,7 +80,8 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
     // Keywords are checked with spaces around them to avoid matching substrings within words.
     if (textStr.find(" el ") != std::string::npos ||
         textStr.find(" la ") != std::string::npos ||
-        textStr.find(" de ") != std::string::npos || // Also in Portuguese, but more prominent in Spanish start
+        textStr.find(" de ") != std::string::npos ||
+        // Also in Portuguese, but more prominent in Spanish start
         textStr.find(" que ") != std::string::npos || // Also in French/Portuguese
         textStr.find(" es ") != std::string::npos ||
         textStr.find(" con ") != std::string::npos || // Also in Italian
@@ -134,15 +135,15 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
                textStr.find(" de ") != std::string::npos) { // Also in Spanish
         result = "pt"; // Portuguese
     }
-    
+
     // Additional character frequency analysis for better accuracy
     int accentCount = 0;
-    for (char c : textStr) {
+    for (char c: textStr) {
         // Basic check for non-ASCII characters. A more sophisticated approach might
         // involve checking specific Unicode ranges for common accented characters.
         if (c < 0 || c > 127) accentCount++; // Non-ASCII characters
     }
-    
+
     // If a significant portion of the text contains non-ASCII characters (potential accents)
     // and no specific language was detected via keywords (still "en"), classify as "mul".
     if (accentCount > textStr.length() * 0.1 && result == "en") {
@@ -163,19 +164,20 @@ Java_com_example_app_language_LanguageIdentifier_nativeDetectLanguage(
 JNIEXPORT void JNICALL
 Java_com_example_app_language_LanguageIdentifier_nativeRelease(
         JNIEnv
-        *env,
-        jobject /* this */,
-        jlong handle
+*env,
+jobject /* this */,
+jlong handle
 ) {
-    // Clean up resources if needed.
-    // In the current implementation, nativeInitialize does not allocate any specific resources
-    // tied to the handle, as detection is stateless and rule-based.
-    // This function serves as a placeholder for potential future enhancements
-    // where dynamic resources might be managed.
-    if (handle != 0) {
-        // Resource cleanup completed - handle closed
-        LOGI("Language identifier resources cleaned up for handle: %lld (Placeholder - no specific resources allocated)", (long long)handle);
-    }
+// Clean up resources if needed.
+// In the current implementation, nativeInitialize does not allocate any specific resources
+// tied to the handle, as detection is stateless and rule-based.
+// This function serves as a placeholder for potential future enhancements
+// where dynamic resources might be managed.
+if (handle != 0) {
+// Resource cleanup completed - handle closed
+LOGI("Language identifier resources cleaned up for handle: %lld (Placeholder - no specific resources allocated)",
+     (long long) handle);
+}
 }
 
 /**
@@ -187,7 +189,7 @@ JNIEXPORT jstring
 
 JNICALL
 Java_com_example_app_language_LanguageIdentifier_nativeGetVersion(
-        JNIEnv *env,
+        JNIEnv * env,
         jclass /* clazz */) {
     return env->NewStringUTF("1.2.0"); // Standardized version
 }

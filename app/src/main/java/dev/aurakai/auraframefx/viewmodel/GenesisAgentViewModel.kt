@@ -265,7 +265,7 @@ class GenesisAgentViewModel @Inject constructor(
 /**
  * ViewModel for managing the Genesis Agent state and operations.
  * This ViewModel is designed to work with Hilt for dependency injection.
- * 
+ *
  * Key Features:
  * - Manages agent status and state
  * - Handles task assignment and history

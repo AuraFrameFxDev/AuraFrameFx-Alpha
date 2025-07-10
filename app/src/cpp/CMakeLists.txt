@@ -27,14 +27,14 @@ find_library(log-lib log)
 target_link_libraries(aura-lib PRIVATE ${log-lib})
 
 # Set compile options
-target_compile_options(aura-lib PRIVATE 
-    -Wall
-    -Werror
-    -fexceptions
-    -frtti
+target_compile_options(aura-lib PRIVATE
+        -Wall
+        -Werror
+        -fexceptions
+        -frtti
 )
 
 # Set include directories
 target_include_directories(aura-lib PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )

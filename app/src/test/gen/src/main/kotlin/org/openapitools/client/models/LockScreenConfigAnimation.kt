@@ -46,8 +46,10 @@ data class LockScreenConfigAnimation(
     enum class Type(val value: kotlin.String) {
         @Json(name = "Fade")
         Fade("Fade"),
+
         @Json(name = "Slide")
         Slide("Slide"),
+
         @Json(name = "Zoom")
         Zoom("Zoom");
     }

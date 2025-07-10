@@ -57,8 +57,10 @@ data class TaskScheduleRequest(
     enum class Priority(val value: kotlin.String) {
         @Json(name = "HIGH")
         HIGH("HIGH"),
+
         @Json(name = "NORMAL")
         NORMAL("NORMAL"),
+
         @Json(name = "LOW")
         LOW("LOW");
     }

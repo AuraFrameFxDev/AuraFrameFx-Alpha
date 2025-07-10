@@ -7,43 +7,49 @@
         <item name="colorOnPrimary">@color/light_on_primary</item>
         <item name="colorPrimaryContainer">@color/light_primary</item>
         <item name="colorOnPrimaryContainer">@color/light_on_primary</item>
-        
+
         <!-- Secondary colors -->
         <item name="colorSecondary">@color/light_secondary</item>
         <item name="colorOnSecondary">@color/light_on_secondary</item>
         <item name="colorSecondaryContainer">@color/light_secondary</item>
         <item name="colorOnSecondaryContainer">@color/light_on_secondary</item>
-        
+
         <!-- Tertiary colors -->
         <item name="colorTertiary">@color/light_tertiary</item>
         <item name="colorOnTertiary">@color/light_on_tertiary</item>
-        
+
         <!-- Background colors -->
         <item name="android:colorBackground">@color/light_background</item>
         <item name="colorOnBackground">@color/light_on_background</item>
         <item name="android:windowBackground">@color/light_background</item>
-        
+
         <!-- Surface colors -->
         <item name="colorSurface">@color/light_surface</item>
         <item name="colorOnSurface">@color/light_on_surface</item>
         <item name="colorSurfaceVariant">@color/surface_variant</item>
         <item name="colorOnSurfaceVariant">@color/on_surface_variant</item>
-        
+
         <!-- Status and Navigation bar -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:enforceNavigationBarContrast">false</item>
         <item name="android:enforceStatusBarContrast">false</item>
-        
+
         <!-- Material 3 specific -->
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
-        
+
         <!-- Material 3 shape appearance -->
-        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.AuraFrameFX.SmallComponent</item>
-        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.AuraFrameFX.MediumComponent</item>
-        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.AuraFrameFX.LargeComponent</item>
+        <item name="shapeAppearanceSmallComponent">
+            @style/ShapeAppearance.AuraFrameFX.SmallComponent
+        </item>
+        <item name="shapeAppearanceMediumComponent">
+            @style/ShapeAppearance.AuraFrameFX.MediumComponent
+        </item>
+        <item name="shapeAppearanceLargeComponent">
+            @style/ShapeAppearance.AuraFrameFX.LargeComponent
+        </item>
     </style>
 
     <!-- Shape Appearances -->

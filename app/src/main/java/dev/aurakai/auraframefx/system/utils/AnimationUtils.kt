@@ -23,13 +23,13 @@ import kotlin.math.max
  */
 object AnimationUtils {
     private const val TAG = "AnimationUtils"
-    
+
     // Default animation durations
     private const val DEFAULT_DURATION = 200L
     private const val REVEAL_DURATION = 400L
     private const val SPRING_STIFFNESS = 0.7f
     private const val SPRING_DAMPING = 0.8f
-    
+
     /**
      * Fade in a view with an optional callback when the animation ends.
      *
@@ -48,10 +48,10 @@ object AnimationUtils {
             onEnd?.invoke()
             return
         }
-        
+
         view.alpha = 0f
         view.visibility = View.VISIBLE
-        
+
         view.animate()
             .alpha(1f)
             .setDuration(duration)
@@ -62,7 +62,7 @@ object AnimationUtils {
             }
             .start()
     }
-    
+
     /**
      * Fade out a view with an optional callback when the animation ends.
      *
@@ -81,7 +81,7 @@ object AnimationUtils {
             onEnd?.invoke()
             return
         }
-        
+
         view.animate()
             .alpha(0f)
             .setDuration(duration)
@@ -93,7 +93,7 @@ object AnimationUtils {
             }
             .start()
     }
-    
+
     /**
      * Reveal a view with a circular reveal animation.
      *
@@ -116,9 +116,9 @@ object AnimationUtils {
             onEnd?.invoke()
             return
         }
-        
+
         view.visibility = View.VISIBLE
-        
+
         val finalRadius = max(
             hypot(centerX.toDouble(), centerY.toDouble()),
             hypot(
@@ -126,7 +126,7 @@ object AnimationUtils {
                 (view.height - centerY).toDouble()
             )
         ).toFloat()
-        
+
         val anim = ViewAnimationUtils.createCircularReveal(
             view,
             centerX,
@@ -134,13 +134,13 @@ object AnimationUtils {
             startRadius,
             finalRadius
         )
-        
+
         anim.duration = duration
         anim.interpolator = DecelerateInterpolator()
         anim.addListener(onEnd = { onEnd?.invoke() })
         anim.start()
     }
-    
+
     /**
      * Hide a view with a circular reveal animation.
      *
@@ -163,12 +163,12 @@ object AnimationUtils {
             onEnd?.invoke()
             return
         }
-        
+
         val startRadius = max(
             view.width.toFloat(),
             view.height.toFloat()
         )
-        
+
         val anim = ViewAnimationUtils.createCircularReveal(
             view,
             centerX,
@@ -176,7 +176,7 @@ object AnimationUtils {
             startRadius,
             endRadius
         )
-        
+
         anim.duration = duration
         anim.interpolator = AccelerateInterpolator()
         anim.addListener(
@@ -187,7 +187,7 @@ object AnimationUtils {
         )
         anim.start()
     }
-    
+
     /**
      * Animate the background color of a view.
      *
@@ -215,7 +215,7 @@ object AnimationUtils {
         )
         animator.start()
     }
-    
+
     /**
      * Animate the background color of a view with a ripple effect.
      *
@@ -232,7 +232,7 @@ object AnimationUtils {
     ) {
         val startColor = ColorUtils.withAlpha(rippleColor, 0x4D) // 30% alpha
         val endColor = ColorUtils.withAlpha(rippleColor, 0x00) // 0% alpha
-        
+
         val animator = ValueAnimator.ofObject(ArgbEvaluator(), startColor, endColor)
         animator.duration = duration
         animator.addUpdateListener { animator ->
@@ -244,7 +244,7 @@ object AnimationUtils {
         )
         animator.start()
     }
-    
+
     /**
      * Create a scale animation for a view.
      *
@@ -267,7 +267,7 @@ object AnimationUtils {
     ) {
         view.scaleX = fromX
         view.scaleY = fromY
-        
+
         view.animate()
             .scaleX(toX)
             .scaleY(toY)
@@ -278,7 +278,7 @@ object AnimationUtils {
             }
             .start()
     }
-    
+
     /**
      * Create a bounce animation for a view.
      *
@@ -309,7 +309,7 @@ object AnimationUtils {
             }
             .start()
     }
-    
+
     /**
      * Create a shake animation for a view.
      *
@@ -341,7 +341,7 @@ object AnimationUtils {
         }
         view.startAnimation(anim)
     }
-    
+
     /**
      * Animate a view's elevation.
      *
@@ -368,7 +368,7 @@ object AnimationUtils {
         )
         animator.start()
     }
-    
+
     /**
      * Crossfade between two views.
      *
@@ -391,7 +391,7 @@ object AnimationUtils {
                 .setDuration(duration)
                 .setListener(null)
         }
-        
+
         fadeOutView.animate()
             .alpha(0f)
             .setDuration(duration)

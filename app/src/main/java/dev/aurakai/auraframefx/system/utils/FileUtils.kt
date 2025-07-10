@@ -9,7 +9,7 @@ import java.io.*
  */
 object FileUtils {
     private const val TAG = "FileUtils"
-    
+
     /**
      * Saves the given string content to a file in the application's internal storage.
      *
@@ -28,7 +28,7 @@ object FileUtils {
             false
         }
     }
-    
+
     /**
      * Reads the contents of a file from the application's internal storage and returns it as a string.
      *
@@ -46,7 +46,7 @@ object FileUtils {
             null
         }
     }
-    
+
     /**
      * Checks if a file with the given name exists in the application's internal storage directory.
      *
@@ -56,7 +56,7 @@ object FileUtils {
     fun fileExists(context: Context, fileName: String): Boolean {
         return File(context.filesDir, fileName).exists()
     }
-    
+
     /**
      * Deletes a file with the specified name from the application's internal storage.
      *
@@ -71,7 +71,7 @@ object FileUtils {
             false
         }
     }
-    
+
     /****
      * Retrieves the absolute file system path of a file within the application's internal storage directory.
      *

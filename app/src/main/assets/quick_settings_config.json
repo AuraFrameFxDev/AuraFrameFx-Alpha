@@ -13,7 +13,10 @@
       },
       "background": {
         "type": "gradient",
-        "colors": ["#4A90E2", "#357ABD"],
+        "colors": [
+          "#4A90E2",
+          "#357ABD"
+        ],
         "cornerRadius": 16,
         "elevation": 4
       },

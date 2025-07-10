@@ -8,6 +8,7 @@ import dev.aurakai.auraframefx.model.AiRequest
 import dev.aurakai.auraframefx.security.SecurityContext
 import dev.aurakai.auraframefx.utils.AuraFxLogger
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,7 +21,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.kotlin.*
 import java.util.concurrent.ConcurrentHashMap
 
 class DummyAgent(
@@ -58,16 +58,14 @@ class FailingAgent(
 
 import dev.aurakai.auraframefx.ai.clients.VertexAIClient
 import dev.aurakai.auraframefx.context.ContextManager
+import dev.aurakai.auraframefx.security.SecurityContext
 import dev.aurakai.auraframefx.utils.AuraFxLogger
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
 @RunWith(JUnit4::class)
@@ -87,6 +85,15 @@ class GenesisAgentTest {
 
     @Before
     fun setup() {
+        // Setup default behaviors for mocks before initializing GenesisAgent
+        coEvery { mockAuraService.processRequest(any(), any()) } returns AgentResponse("Aura response", 0.9f)
+        coEvery { mockKaiService.processRequest(any(), any()) } returns AgentResponse("Kai response", 0.9f)
+        coEvery { mockCascadeService.processRequest(any(), any()) } returns AgentResponse("Cascade response", 0.9f)
+        
+        // Mock logger behavior
+        every { mockLogger.info(any(), any()) } returns Unit
+        every { mockLogger.error(any(), any()) } returns Unit
+        
         // Initialize GenesisAgent with mocked dependencies
         genesisAgent = GenesisAgent(
             vertexAIClient = mockVertexAIClient,
@@ -97,16 +104,12 @@ class GenesisAgentTest {
             auraService = mockAuraService,
             kaiService = mockKaiService
         )
-        
-        // Setup default behaviors for mocks
-        coEvery { mockAuraService.processRequest(any()) } returns AgentResponse("Aura response", 0.9f)
-        coEvery { mockKaiService.processRequest(any()) } returns AgentResponse("Kai response", 0.9f)
-        coEvery { mockCascadeService.processRequest(any()) } returns AgentResponse("Cascade response", 0.9f)
     }
     
     @After
     fun tearDown() {
-        // Clean up resources if needed
+        // Clear any verification counts
+        clearMocks(mockAuraService, mockKaiService, mockCascadeService, mockLogger)
     }
 
     @Test

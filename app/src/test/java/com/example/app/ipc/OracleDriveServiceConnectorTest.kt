@@ -1031,8 +1031,8 @@ class OracleDriveServiceConnectorTest {
             whenever(mockServiceClient.uploadBatch(any()))
                 .thenReturn(
                     CompletableFuture.completedFuture(
-                    batchFiles.map { "upload_${it.first}" }
-                ))
+                        batchFiles.map { "upload_${it.first}" }
+                    ))
 
             // When
             val result = connector.uploadBatch(batchFiles)
