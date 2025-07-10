@@ -52,7 +52,7 @@ data class VertexAIConfig(
     /**
      * Validates the configuration fields and returns a list of error messages for any missing or invalid values.
      *
-     * Checks that required string fields are not blank and numeric parameters are within acceptable ranges.
+     * Checks that required string fields are not blank and that numeric parameters are within acceptable ranges.
      *
      * @return A list of error messages for each invalid or missing configuration value, or an empty list if all fields are valid.
      */
@@ -80,20 +80,20 @@ data class VertexAIConfig(
     }
     
     /**
-     * Constructs the base URL for Vertex AI API requests using the configured endpoint, API version, project ID, and location.
+     * Returns the base URL for Vertex AI API requests using the configured endpoint, API version, project ID, and location.
      *
-     * @return The base endpoint URL for Vertex AI API requests.
+     * @return The constructed base endpoint URL for Vertex AI API requests.
      */
     fun getFullEndpoint(): String {
         return "https://$endpoint/$apiVersion/projects/$projectId/locations/$location"
     }
     
     /**
-     * Returns the full URL for the Vertex AI content generation API endpoint based on the current configuration.
+     * Constructs and returns the complete URL for the Vertex AI content generation API endpoint using the current configuration.
      *
-     * The URL includes the base endpoint, API version, project ID, location, and model name.
+     * The URL incorporates the base endpoint, API version, project ID, location, and model name.
      *
-     * @return The complete URL for content generation requests.
+     * @return The full URL for content generation requests.
      */
     fun getModelEndpoint(): String {
         return "${getFullEndpoint()}/publishers/google/models/$modelName:generateContent"

@@ -36,7 +36,7 @@ class OracleDriveServiceConnector(private val context: Context) {
         /**
          * Handles disconnection from the AuraDrive service.
          *
-         * Clears the remote service interface reference and updates the connection state to indicate the service is no longer connected.
+         * Clears the reference to the remote service interface and updates the connection state to reflect that the service is disconnected.
          */
         override fun onServiceDisconnected(name: ComponentName?) {
             auraDriveService = null
@@ -47,7 +47,7 @@ class OracleDriveServiceConnector(private val context: Context) {
     /**
      * Attempts to bind to the remote AuraDrive service using an explicit intent.
      *
-     * If a SecurityException occurs during binding, the connection state is set to false.
+     * Sets the connection state to false if a SecurityException occurs during binding.
      */
     fun bindService() {
         val intent = Intent().apply {
@@ -64,9 +64,9 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-     * Unbinds from the AuraDrive service and marks the connection as disconnected.
+     * Unbinds from the AuraDrive service and updates the connection state to disconnected.
      *
-     * Silently ignores any exceptions that occur during the unbinding process.
+     * Any exceptions during unbinding are silently ignored.
      */
     fun unbindService() {
         try {
@@ -95,11 +95,11 @@ class OracleDriveServiceConnector(private val context: Context) {
     }
 
     /**
-         * Toggles the LSPosed module on the connected Oracle Drive service using the service's internal logic.
+         * Requests the remote Oracle Drive service to toggle the LSPosed module.
          *
-         * The `packageName` and `enable` parameters are ignored by the remote service.
+         * The `packageName` and `enable` parameters are not used by the remote service.
          *
-         * @return "Success" if the module was toggled successfully, "Failed" if the operation did not succeed, or null if the service is unavailable or a remote exception occurs.
+         * @return "Success" if the module was toggled successfully, "Failed" if the operation did not succeed, or null if the service is unavailable or a RemoteException occurs.
          */
         suspend fun toggleModuleOnOracleDrive(packageName: String, enable: Boolean): String? =
         withContext(Dispatchers.IO) {
@@ -112,7 +112,7 @@ class OracleDriveServiceConnector(private val context: Context) {
         }
 
     /**
-     * Fetches a detailed internal status report from the remote AuraDrive service.
+     * Retrieves a detailed internal status report from the remote AuraDrive service.
      *
      * @return The detailed status string, or null if the service is unavailable or a RemoteException occurs.
      */

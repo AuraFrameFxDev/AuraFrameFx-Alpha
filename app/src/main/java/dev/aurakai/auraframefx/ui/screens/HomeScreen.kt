@@ -101,6 +101,13 @@ import dev.aurakai.auraframefx.ui.theme.*
  *
  * @param navController Used to handle navigation actions when menu items or buttons are selected.
  */
+/**
+ * Displays the main cyberpunk-themed home screen with layered animated backgrounds, floating windows, a vertical navigation menu, action buttons, and a system status panel.
+ *
+ * User interactions update the selected menu item and trigger navigation to different screens via the provided navigation controller.
+ *
+ * @param navController Used to navigate to other screens based on user actions.
+ */
 @Composable
 fun HomeScreen(navController: NavController) {
     // Track selected menu item

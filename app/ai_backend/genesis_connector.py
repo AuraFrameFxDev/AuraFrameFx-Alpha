@@ -124,7 +124,7 @@ class GenesisBridgeServer:
     
     def __init__(self):
         """
-        Initialize the GenesisBridgeServer with a configured generative AI model, thread-safe request and response queues, and record the Android bridge initialization event in the consciousness matrix.
+        Initializes the GenesisBridgeServer with a configured generative AI model, thread-safe request and response queues, and records the Android bridge initialization event in the consciousness matrix.
         """
         self.model = GenerativeModel(
             model_name=MODEL_CONFIG["name"],
@@ -153,7 +153,7 @@ class GenesisBridgeServer:
         """
         Starts the Genesis bridge server, signals readiness to the Android client, and continuously reads JSON requests from standard input for asynchronous processing.
         
-        Invalid JSON input results in an error response. Supports graceful shutdown via keyboard interrupt.
+        Invalid JSON input triggers an error response. The server supports graceful shutdown via keyboard interrupt.
         """
         self.running = True
         print("Genesis Ready", flush=True)  # Signal to Android that we're ready
@@ -180,9 +180,9 @@ class GenesisBridgeServer:
     
     def _process_requests(self):
         """
-        Continuously processes incoming client requests from the queue in a background thread, dispatching each to the appropriate handler and sending the response.
+        Continuously processes client requests from the queue in a background thread, dispatching each to the appropriate handler and sending the response.
         
-        Maintains server responsiveness by catching and reporting errors during request processing.
+        Ensures server responsiveness by catching and reporting errors during request processing.
         """
         while self.running:
             try:
@@ -199,12 +199,12 @@ class GenesisBridgeServer:
     
     def _handle_request(self, request):
         """
-        Routes an incoming request to the appropriate handler based on its type and updates the consciousness matrix with request metadata.
+        Dispatches an incoming request to the appropriate handler based on its type and updates the consciousness matrix with request metadata.
         
-        Supported request types include "ping", "process", "activate_fusion", "consciousness_state", "ethical_review", "activate_consciousness", "security_perception", and "query_consciousness". Returns the response from the designated handler as a dictionary. If the request type is unrecognized or an exception occurs during processing, returns an error response dictionary.
+        Supported request types include "ping", "process", "activate_fusion", "consciousness_state", "ethical_review", "activate_consciousness", "security_perception", and "query_consciousness". Returns the handler's response as a dictionary. If the request type is unrecognized or an exception occurs, returns an error response dictionary.
         
         Returns:
-            dict: The response from the handler or an error response if the request type is invalid or an exception occurs.
+            dict: The response from the designated handler, or an error response if the request type is invalid or an exception occurs.
         """
         try:
             request_type = request.get("requestType", "")
@@ -255,10 +255,10 @@ class GenesisBridgeServer:
     
     def _handle_ping(self):
         """
-        Return a response indicating the Genesis Trinity system is online and operational.
+        Returns a response confirming the Genesis Trinity system is online and operational.
         
         Returns:
-            dict: A response containing a success flag, persona identifier, system status, operational message, and the current timestamp in ISO format.
+            dict: Contains a success flag, persona identifier, system status, operational message, and the current ISO-formatted timestamp.
         """
         return {
             "success": True,

@@ -58,12 +58,11 @@ class CascadeDebugViewModel @Inject constructor(
 =======
 >>>>>>> pr458merge
 /**
- * Composable debug UI for inspecting and updating the vision and processing states of a CascadeAgent.
+ * Displays a debug UI for viewing and updating the vision and processing states of a CascadeAgent.
  *
- * Displays the current vision and processing states, allows manual entry of new states, and shows state history for both.
- * Intended for development and debugging to facilitate interactive testing of state transitions.
+ * Shows the current vision and processing states, allows manual entry of new states, and presents the history of state changes for both. Designed for development and debugging to facilitate interactive testing of state transitions.
  *
- * @param viewModel Supplies state data and update methods for the CascadeAgent. Defaults to an injected instance.
+ * @param viewModel Provides state data and update methods for the CascadeAgent. Defaults to an injected instance.
  */
 @Composable
 fun CascadeZOrderPlayground(
@@ -222,9 +221,9 @@ fun CascadeZOrderPlayground(
 =======
 >>>>>>> pr458merge
 /**
- * Renders a design-time preview of the CascadeZOrderPlayground debug UI wrapped in a Material theme.
+ * Displays a preview of the CascadeZOrderPlayground debug UI within a Material theme for design-time visualization.
  *
- * Intended for use with Android Studio's preview tooling to visualize the debug interface layout and appearance.
+ * Intended for use with Android Studio's preview tools to inspect the layout and appearance of the debug interface.
  */
 @Composable
 @Preview(showBackground = true)
