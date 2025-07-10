@@ -21,7 +21,7 @@ class AIPipelineProcessor @Inject constructor(
     private val kaiService: KaiAIService,
     private val cascadeService: CascadeAIService,
 ) {
-    private val _pipelineState = MutableStateFlow<PipelineState>(Idle)
+    private val _pipelineState = MutableStateFlow<PipelineState>(PipelineState.Idle)
     val pipelineState: StateFlow<PipelineState> = _pipelineState
 
     private val _processingContext = MutableStateFlow(mapOf<String, Any>())
@@ -39,7 +39,7 @@ class AIPipelineProcessor @Inject constructor(
      * @return A list of agent messages containing responses from each participating agent and the final aggregated response.
      */
     suspend fun processTask(task: String): List<AgentMessage> {
-        _pipelineState.value = Processing(task = task)
+        _pipelineState.value = PipelineState.Processing(task = task)
 
         // Step 1: Context Retrieval
         val context = retrieveContext(task)
@@ -122,7 +122,7 @@ class AIPipelineProcessor @Inject constructor(
         // Step 6: Update context and memory
         updateContext(task, responses)
 
-        _pipelineState.update { Completed(task) }
+        _pipelineState.update { PipelineState.Completed(task) }
         return responses
     }
 

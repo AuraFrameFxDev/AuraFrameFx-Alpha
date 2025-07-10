@@ -1,36 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Required permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission
-        android:name="android.permission.FOREGROUND_SERVICE"
-        tools:ignore="ForegroundServicesPolicy" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-
-    <!-- Xposed Framework -->
-    <uses-permission android:name="de.robv.android.xposed.installer.INSTALL" />
-    <uses-permission android:name="de.robv.android.xposed.installer.UPDATE_SYSTEM_MODULE" />
 
     <application
         android:name=".AuraFrameApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="AuraFrameFX LSPosed Module"
-        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AuraFrameFX.Material3"
-        tools:ignore="GoogleAppIndexingWarning">
-
-        <!-- Xposed Module Metadata -->
+        android:theme="@style/Theme.AuraFrameFX.Material3">
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
@@ -41,79 +22,26 @@
             android:name="xposedminversion"
             android:value="93" />
 
-        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.AuraFrameFX.Material3.NoActionBar">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- Settings Activity -->
-        <activity
-            android:name=".ui.settings.SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-
-        <!-- Vertex Sync Service -->
         <service
             android:name=".VertexSyncService"
-            android:enabled="true"
-            android:exported="false"
-            android:process=":vertex_sync" />
+            android:exported="false" />
 
-        <!-- Voice Activation Service -->
-        <service
-            android:name=".ai.VoiceActivationService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="microphone"
-            android:label="@string/voice_activation_service_label"
-            android:process=":voice_activation" />
-
-        <!-- Boot Completed Receiver -->
         <receiver
             android:name=".receivers.BootCompletedReceiver"
             android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
-
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-
-        <!-- File Provider for sharing files -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-
-        <!-- WorkManager Configuration -->
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="merge">
-            <meta-data
-                android:name="androidx.work.WorkManagerInitializer"
-                android:value="androidx.startup"
-                tools:node="remove" />
-        </provider>
     </application>
+
 </manifest>

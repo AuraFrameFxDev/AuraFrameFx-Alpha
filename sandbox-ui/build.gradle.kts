@@ -32,22 +32,15 @@ android {
         targetCompatibility = JavaVersion.VERSION_24
     }
 
+    kotlinOptions {
+    }
+
     buildFeatures {
         compose = true
     }
 
     composeOptions {
         kotlinCompilerExtensionVersion = "2.2.0"
-    }
-
-    kotlin {
-        jvmToolchain(24)
-        compilerOptions {
-            freeCompilerArgs.addAll(
-                "-opt-in=kotlin.RequiresOptIn",
-                "-Xjvm-default=all"
-            )
-        }
     }
 }
 
@@ -56,51 +49,34 @@ dependencies {
     implementation(project(":app"))
 
     // AndroidX Core
-    implementation(libs.androidxCoreKtx)
-    implementation(libs.androidxLifecycleRuntimeKtx)
-    implementation(libs.androidxActivityCompose)
+    implementation("androidx.core:core-ktx:1.16.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.1")
+    implementation("androidx.activity:activity-compose:1.10.1")
 
-    // Firebase BOM with all Firebase services
-    implementation(platform(libs.firebaseBom))
-    implementation(libs.firebaseAnalyticsKtx)
-    implementation(libs.firebaseCrashlyticsKtx)
-    implementation(libs.firebasePerfKtx)
-    implementation(libs.firebaseConfigKtx)
-    implementation(libs.firebaseStorageKtx)
-    implementation(libs.firebaseMessagingKtx)
-    implementation(libs.firebaseAuthKtx)
-    implementation(libs.firebaseFirestoreKtx)
-
-    // Compose BOM with Material 3
-    implementation(platform(libs.composeBom))
-    implementation(libs.androidxUi)
-    implementation(libs.androidxUiToolingPreview)
-    implementation(libs.androidxMaterial3)
-    implementation(libs.androidxComposeAnimation)
+    // Compose BOM
+    implementation(platform("androidx.compose:compose-bom:2025.06.01"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.animation:animation")
+    implementation("androidx.compose.foundation:foundation")
 
     // Navigation
-    implementation(libs.androidxNavigationCompose)
+    implementation("androidx.navigation:navigation-compose:2.9.1")
 
     // Hilt
-    implementation(libs.hiltAndroid)
-    kapt(libs.hiltCompiler)
-    implementation(libs.hiltNavigationCompose)
-
-    // Firebase Hilt Integration
-    kapt(libs.androidxHiltCompiler)
-    implementation(libs.kotlinxCoroutinesPlayServices)
-
-    // Logging
-    implementation(libs.timber)
+    implementation("com.google.dagger:hilt-android:2.56.2")
+    kapt("com.google.dagger:hilt-compiler:2.56.2")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // Debug tools
-    debugImplementation(libs.uiTooling)
-    debugImplementation(libs.uiTestManifest)
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.8.3")
 
     // Testing
-    testImplementation(libs.testJunit)
-    androidTestImplementation(libs.androidxTestExtJunit)
-    androidTestImplementation(libs.espressoCore)
-    androidTestImplementation(libs.composeBom)
-    androidTestImplementation(libs.uiTestJunit4)
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2025.06.01"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 }

@@ -69,7 +69,7 @@ fun AppNavGraph(navController: NavHostController) {
             route = NavDestination.OracleDriveControl.route
         ) {
             // Fixed: Use actual OracleDriveControlScreen instead of placeholder
-            OracleDriveControlScreen()
+            dev.aurakai.auraframefx.ui.screens.oracledrive.OracleDriveControlScreen()
         }
 
         // Add AI Content navigation

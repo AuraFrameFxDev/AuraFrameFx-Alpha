@@ -1,11 +1,10 @@
-import os
 import pytest
+import os
 import sys
 from unittest.mock import MagicMock
 
 # Add the app directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
-
 
 @pytest.fixture
 def mock_api_key():
@@ -17,7 +16,6 @@ def mock_api_key():
     """
     return "test_api_key_12345"
 
-
 @pytest.fixture
 def mock_base_url():
     """
@@ -27,7 +25,6 @@ def mock_base_url():
         str: The mock Genesis API base URL.
     """
     return "https://api.genesis.test"
-
 
 @pytest.fixture
 def sample_api_response():
@@ -61,7 +58,6 @@ def sample_api_response():
         }
     }
 
-
 @pytest.fixture
 def sample_error_response():
     """
@@ -80,7 +76,6 @@ def sample_error_response():
             "code": "invalid_model"
         }
     }
-
 
 @pytest.fixture(autouse=True)
 def mock_environment():

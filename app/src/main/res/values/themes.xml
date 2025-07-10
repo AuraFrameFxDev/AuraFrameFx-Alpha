@@ -18,8 +18,4 @@
         <item name="android:navigationBarColor">@color/dark_background</item>
     </style>
 
-    <style name="Theme.AuraFrameFX.Material3.NoActionBar" parent="Theme.AuraFrameFX.Material3">
-        <item name="windowNoTitle">true</item>
-        <item name="windowActionBar">false</item>
-    </style>
 </resources>

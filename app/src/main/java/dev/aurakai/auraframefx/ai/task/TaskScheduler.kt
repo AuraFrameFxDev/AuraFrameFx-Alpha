@@ -240,5 +240,5 @@ data class TaskStats(
     val completedTasks: Int = 0,
     val pendingTasks: Int = 0,
     val taskCounts: Map<TaskStatus, Int> = emptyMap(),
-    @kotlinx.serialization.Serializable(with = InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
+    @kotlinx.serialization.Serializable(with = dev.aurakai.auraframefx.serialization.InstantSerializer::class) val lastUpdated: Instant = Clock.System.now(),
 )

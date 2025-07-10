@@ -331,7 +331,7 @@ class GenesisAgentTest {
 
     @Test
     fun testGenesisAgent_getType() {
-        genesisAgent.getType()
+        val type = genesisAgent.getType()
         // Type might be null or a specific value - just verify it doesn't throw
         assertNotNull("Method should execute without throwing", true)
     }

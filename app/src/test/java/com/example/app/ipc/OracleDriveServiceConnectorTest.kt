@@ -1319,7 +1319,7 @@ class OracleDriveServiceConnectorTest {
             )
 
             // When & Then
-            environments.forEach { (_, credentials) ->
+            environments.forEach { (env, credentials) ->
                 whenever(mockAuthProvider.getCredentials()).thenReturn(credentials)
                 whenever(mockConnectionManager.connect(credentials)).thenReturn(true)
 

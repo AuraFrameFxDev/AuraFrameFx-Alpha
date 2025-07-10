@@ -301,6 +301,7 @@ private fun DrawScope.drawConnection(
         val lineLength = distance - fromRadius - toRadius
         if (lineLength <= 0) return // No space to draw the line
 
+        var drawnLength = 0f
         val pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashLength, gapLength), 0f)
         drawLine(
             color = color,

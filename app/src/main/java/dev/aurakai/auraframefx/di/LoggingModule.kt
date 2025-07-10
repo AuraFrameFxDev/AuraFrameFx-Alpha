@@ -7,7 +7,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.aurakai.auraframefx.ai.services.KaiAIService
-import dev.aurakai.auraframefx.core.logging.TimberInitializer
 import dev.aurakai.auraframefx.data.logging.AuraFxLogger
 import javax.inject.Singleton
 import dev.aurakai.auraframefx.data.logging.AuraFxLogger as AuraFxLoggerImpl
@@ -18,15 +17,6 @@ import dev.aurakai.auraframefx.data.logging.AuraFxLogger as AuraFxLoggerImpl
 @Module
 @InstallIn(SingletonComponent::class)
 object LoggingModule {
-
-    /**
-     * Provides a singleton instance of [TimberInitializer] for initializing Timber logging.
-     *
-     * @return A singleton instance of [TimberInitializer].
-     */
-    @Provides
-    @Singleton
-    fun provideTimberInitializer(): TimberInitializer = TimberInitializer()
 
     /**
      * Provides a singleton instance of `AuraFxLogger` for application-wide logging.
@@ -40,5 +30,7 @@ object LoggingModule {
     fun provideAuraFxLogger(
         @ApplicationContext context: Context,
         kaiService: KaiAIService
-    ): AuraFxLogger = AuraFxLoggerImpl(context, kaiService)
+    ): AuraFxLogger {
+        return AuraFxLoggerImpl(context, kaiService)
+    }
 }

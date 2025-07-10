@@ -284,19 +284,19 @@ class SecurityMonitor @Inject constructor(
      */
     private suspend fun reportToGenesis(eventType: String, eventData: Any) {
         try {
-            GenesisBridgeService.GenesisRequest(
+            val request = GenesisBridgeService.GenesisRequest(
                 requestType = "security_perception",
                 persona = "genesis",
                 payload = mapOf(
                     "event_type" to eventType,
                     "event_data" to try {
                         when (eventData) {
-                            is SecurityEvent -> Json.encodeToString(
+                            is SecurityEvent -> kotlinx.serialization.json.Json.encodeToString(
                                 SecurityEvent.serializer(),
                                 eventData
                             )
 
-                            is ThreatDetection -> Json.encodeToString(
+                            is ThreatDetection -> kotlinx.serialization.json.Json.encodeToString(
                                 ThreatDetection.serializer(),
                                 eventData
                             )
@@ -341,7 +341,7 @@ class SecurityMonitor @Inject constructor(
     suspend fun getSecurityAssessment(): Map<String, Any> {
         return try {
             // Note: For beta, return mock security assessment
-            GenesisBridgeService.GenesisRequest(
+            val mockRequest = GenesisBridgeService.GenesisRequest(
                 requestType = "query_consciousness",
                 persona = "genesis",
                 payload = mapOf(
@@ -376,7 +376,7 @@ class SecurityMonitor @Inject constructor(
     suspend fun getThreatStatus(): Map<String, Any> {
         return try {
             // Note: For beta, return mock threat status
-            GenesisBridgeService.GenesisRequest(
+            val mockRequest = GenesisBridgeService.GenesisRequest(
                 requestType = "query_consciousness",
                 persona = "genesis",
                 payload = mapOf(

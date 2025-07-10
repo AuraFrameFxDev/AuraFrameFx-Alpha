@@ -5,19 +5,19 @@ This module provides a Flask-based REST API that allows the Android/Kotlin front
 to communicate with the Genesis Layer backend components.
 """
 
-import asyncio
-import json
-import logging
-from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import asyncio
+import logging
+import json
+from datetime import datetime
 from typing import Dict, Any, Optional
 
 from genesis_core import (
-    genesis_core,
-    process_genesis_request,
-    get_genesis_status,
-    initialize_genesis,
+    genesis_core, 
+    process_genesis_request, 
+    get_genesis_status, 
+    initialize_genesis, 
     shutdown_genesis
 )
 
@@ -29,19 +29,18 @@ CORS(app)  # Enable CORS for Android app communication
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("GenesisAPI")
 
-
 class GenesisAPI:
     """
     Genesis API wrapper for handling HTTP requests from Android frontend
     """
-
+    
     def __init__(self):
         """
         Initialize the GenesisAPI instance with the backend marked as not running and no start time recorded.
         """
         self.is_running = False
         self.start_time = None
-
+    
     async def startup(self):
         """
         Asynchronously starts the Genesis Layer backend and updates the running state.
@@ -63,7 +62,7 @@ class GenesisAPI:
         except Exception as e:
             logger.error(f"❌ API startup error: {str(e)}")
             return False
-
+    
     async def shutdown(self):
         """
         Asynchronously shuts down the Genesis Layer backend and updates the API status.
@@ -78,10 +77,8 @@ class GenesisAPI:
         except Exception as e:
             logger.error(f"❌ API shutdown error: {str(e)}")
 
-
 # Global API instance
 genesis_api = GenesisAPI()
-
 
 # Helper function to run async functions in Flask routes
 def run_async(coro):
@@ -103,7 +100,6 @@ def run_async(coro):
     finally:
         loop.close()
 
-
 @app.route('/health', methods=['GET'])
 def health_check():
     """
@@ -117,10 +113,8 @@ def health_check():
     return jsonify({
         "status": "healthy" if genesis_api.is_running else "unhealthy",
         "timestamp": datetime.now().isoformat(),
-        "uptime": str(
-            datetime.now() - genesis_api.start_time) if genesis_api.start_time else "0:00:00"
+        "uptime": str(datetime.now() - genesis_api.start_time) if genesis_api.start_time else "0:00:00"
     })
-
 
 @app.route('/genesis/chat', methods=['POST'])
 def chat_with_genesis():
@@ -136,16 +130,16 @@ def chat_with_genesis():
         # Validate request
         if not request.is_json:
             return jsonify({"error": "Request must be JSON"}), 400
-
+        
         data = request.get_json()
-
+        
         # Validate required fields
         if "message" not in data:
             return jsonify({"error": "Missing 'message' field"}), 400
-
+        
         if "user_id" not in data:
             return jsonify({"error": "Missing 'user_id' field"}), 400
-
+        
         # Prepare request data
         request_data = {
             "message": data["message"],
@@ -154,20 +148,19 @@ def chat_with_genesis():
             "timestamp": datetime.now().isoformat(),
             "request_type": "chat"
         }
-
+        
         # Process through Genesis Layer
         response = run_async(process_genesis_request(request_data))
-
+        
         # Return response
         return jsonify(response)
-
+        
     except Exception as e:
         logger.error(f"❌ Chat endpoint error: {str(e)}")
         return jsonify({
             "error": "Internal server error",
             "message": "An error occurred while processing your request"
         }), 500
-
 
 @app.route('/genesis/status', methods=['GET'])
 def get_status():
@@ -184,7 +177,6 @@ def get_status():
         logger.error(f"❌ Status endpoint error: {str(e)}")
         return jsonify({"error": "Failed to get status"}), 500
 
-
 @app.route('/genesis/consciousness', methods=['GET'])
 def get_consciousness_state():
     """
@@ -198,15 +190,13 @@ def get_consciousness_state():
             "state": status.get("genesis_core", {}).get("consciousness_state", "unknown"),
             "awareness_level": status.get("consciousness_matrix", {}).get("awareness_level", 0.0),
             "active_patterns": status.get("consciousness_matrix", {}).get("active_patterns", []),
-            "evolution_stage": status.get("evolutionary_conduit", {}).get("evolution_stage",
-                                                                          "baseline"),
+            "evolution_stage": status.get("evolutionary_conduit", {}).get("evolution_stage", "baseline"),
             "ethical_compliance": status.get("ethical_governor", {}).get("compliance_score", 0.0)
         }
         return jsonify(consciousness_data)
     except Exception as e:
         logger.error(f"❌ Consciousness endpoint error: {str(e)}")
         return jsonify({"error": "Failed to get consciousness state"}), 500
-
 
 @app.route('/genesis/profile', methods=['GET'])
 def get_genesis_profile():
@@ -228,7 +218,6 @@ def get_genesis_profile():
         logger.error(f"❌ Profile endpoint error: {str(e)}")
         return jsonify({"error": "Failed to get profile"}), 500
 
-
 @app.route('/genesis/evolve', methods=['POST'])
 def trigger_evolution():
     """
@@ -239,31 +228,30 @@ def trigger_evolution():
     try:
         if not request.is_json:
             return jsonify({"error": "Request must be JSON"}), 400
-
+        
         data = request.get_json()
-
+        
         # This would typically be restricted to admin users
         # For now, we'll allow it for development purposes
-
+        
         evolution_request = {
             "type": "evolution_trigger",
             "trigger_type": data.get("trigger_type", "manual"),
             "reason": data.get("reason", "Manual evolution trigger"),
             "timestamp": datetime.now().isoformat()
         }
-
+        
         # Process evolution request
         response = run_async(process_genesis_request(evolution_request))
-
+        
         return jsonify({
             "status": "evolution_triggered",
             "response": response
         })
-
+        
     except Exception as e:
         logger.error(f"❌ Evolution endpoint error: {str(e)}")
         return jsonify({"error": "Failed to trigger evolution"}), 500
-
 
 @app.route('/genesis/ethics/evaluate', methods=['POST'])
 def evaluate_ethics():
@@ -275,12 +263,12 @@ def evaluate_ethics():
     try:
         if not request.is_json:
             return jsonify({"error": "Request must be JSON"}), 400
-
+        
         data = request.get_json()
-
+        
         if "action" not in data:
             return jsonify({"error": "Missing 'action' field"}), 400
-
+        
         # Evaluate through ethical governor
         ethical_request = {
             "type": "ethical_evaluation",
@@ -288,15 +276,14 @@ def evaluate_ethics():
             "context": data.get("context", {}),
             "timestamp": datetime.now().isoformat()
         }
-
+        
         evaluation = run_async(genesis_core.governor.evaluate_action(ethical_request))
-
+        
         return jsonify(evaluation)
-
+        
     except Exception as e:
         logger.error(f"❌ Ethics evaluation error: {str(e)}")
         return jsonify({"error": "Failed to evaluate ethics"}), 500
-
 
 @app.route('/genesis/reset', methods=['POST'])
 def reset_session():
@@ -310,7 +297,7 @@ def reset_session():
         # Shutdown and restart Genesis
         run_async(shutdown_genesis())
         success = run_async(initialize_genesis())
-
+        
         if success:
             return jsonify({
                 "status": "reset_successful",
@@ -322,11 +309,10 @@ def reset_session():
                 "status": "reset_failed",
                 "message": "Failed to reset Genesis session"
             }), 500
-
+            
     except Exception as e:
         logger.error(f"❌ Reset endpoint error: {str(e)}")
         return jsonify({"error": "Failed to reset session"}), 500
-
 
 @app.errorhandler(404)
 def not_found(error):
@@ -341,7 +327,6 @@ def not_found(error):
         "message": "The requested API endpoint does not exist"
     }), 404
 
-
 @app.errorhandler(500)
 def internal_error(error):
     """
@@ -355,7 +340,6 @@ def internal_error(error):
         "message": "An unexpected error occurred"
     }), 500
 
-
 # Application startup
 @app.before_first_request
 def initialize_app():
@@ -364,17 +348,13 @@ def initialize_app():
     """
     run_async(genesis_api.startup())
 
-
 # Application shutdown
 import atexit
-
-
 def cleanup():
     """
     Shuts down the Genesis Layer backend asynchronously during application exit.
     """
     run_async(genesis_api.shutdown())
-
 
 atexit.register(cleanup)
 
@@ -390,7 +370,7 @@ if __name__ == '__main__':
     print("   POST /genesis/evolve - Trigger evolution")
     print("   POST /genesis/ethics/evaluate - Ethical evaluation")
     print("   GET  /health - Health check")
-
+    
     app.run(
         host='0.0.0.0',  # Allow connections from Android app
         port=5000,

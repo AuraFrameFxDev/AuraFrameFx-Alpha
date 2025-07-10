@@ -1,18 +1,40 @@
 # app/src/main/cpp/CMakeLists.txt
 
-# Sets the minimum version of CMake required.
+# Set shorter paths for build outputs
+set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
+
+# Set minimum required CMake version
 cmake_minimum_required(VERSION 3.22.1)
 
-# Declares your project and the languages used.
-project("auraframesfx" LANGUAGES CXX)
+# Configure project with shorter name
+project("aura" LANGUAGES CXX)
 
-# Adds your C++ code as a shared library (.so file).
-# "aura-native-lib" is the name of your library.
-# "native-lib.cpp" is your source code file.
-add_library(aura-native-lib SHARED native-lib.cpp)
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Finds the standard Android logging library.
+# Add library with shorter name
+add_library(aura-lib SHARED native-lib.cpp)
+
+# Set output name to match the original
+set_target_properties(aura-lib PROPERTIES OUTPUT_NAME "aura-native-lib")
+
+# Find and link required libraries
 find_library(log-lib log)
+target_link_libraries(aura-lib PRIVATE ${log-lib})
 
-# Links the logging library to your native library so you can print to logcat from C++.
-target_link_libraries(aura-native-lib ${log-lib})
+# Set compile options
+target_compile_options(aura-lib PRIVATE 
+    -Wall
+    -Werror
+    -fexceptions
+    -frtti
+)
+
+# Set include directories
+target_include_directories(aura-lib PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)

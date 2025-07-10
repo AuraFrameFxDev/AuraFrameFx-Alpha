@@ -9,13 +9,6 @@ plugins {
     alias(libs.plugins.openapi.generator)
 }
 
-// Configure KSP for Room
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-    arg("room.incremental", "true")
-    arg("room.expandProjection", "true")
-}
-
 android {
     namespace = "dev.aurakai.auraframefx"
     compileSdk = 36
@@ -50,19 +43,22 @@ android {
         targetCompatibility = JavaVersion.VERSION_24
     }
 
-    kotlin {
-        jvmToolchain(24)
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24)
-            freeCompilerArgs.addAll(
-                "-opt-in=kotlin.RequiresOptIn",
-                "-Xjvm-default=all"
-            )
-        }
+    kotlinOptions {
+        @Suppress("DEPRECATION")
+        jvmTarget = "24"
+        @Suppress("DEPRECATION")
+        freeCompilerArgs = listOf(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xjvm-default=all"
+        )
     }
 
     buildFeatures {
         compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
     externalNativeBuild {
@@ -71,17 +67,14 @@ android {
             version = "3.22.1"
         }
     }
+
 }
 
 // OpenAPI Generator: Generate Kotlin client
-val openApiSpec = "$projectDir/api-spec/aura-framefx-api.yaml"
-val openApiOutputDir = "${layout.buildDirectory.get().asFile}/generated/source/openapi"
-
-// Only configure OpenAPI generation if the spec file exists
-tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("generateAuraApi") {
+openApiGenerate {
     generatorName.set("kotlin")
-    inputSpec.set(openApiSpec)
-    outputDir.set(openApiOutputDir)
+    inputSpec.set("$projectDir/api-spec/aura-framefx-api.yaml")
+    outputDir.set("${layout.buildDirectory.get().asFile}/generated/source/openapi")
     apiPackage.set("dev.aurakai.auraframefx.api.client.apis")
     modelPackage.set("dev.aurakai.auraframefx.api.client.models")
     invokerPackage.set("dev.aurakai.auraframefx.api.client.infrastructure")
@@ -92,26 +85,11 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("gen
             "library" to "jvm-retrofit2"
         )
     )
-    // Skip if the spec file doesn't exist
-    onlyIf { file(openApiSpec).exists() }
 }
 
-// Only add the task dependency if the spec file exists
-if (file(openApiSpec).exists()) {
-    tasks.named("preBuild") {
-        dependsOn("generateAuraApi")
-    }
-
-    // Configure the source sets in the android block
-    android {
-        sourceSets {
-            getByName("main") {
-                java.srcDirs("${layout.buildDirectory.get()}/generated/source/openapi/src/main/kotlin")
-            }
-        }
-    }
-} else {
-    logger.warn("OpenAPI spec file not found at $openApiSpec. Skipping OpenAPI code generation.")
+// Ensure KSP and compilation tasks depend on the code generation
+tasks.named("preBuild") {
+    dependsOn("openApiGenerate")
 }
 
 dependencies {
@@ -167,7 +145,7 @@ dependencies {
     implementation(libs.androidxSecurityCrypto)
 
     // Google AI
-    implementation(libs.generativeai)
+    implementation(libs.lifecycleCommonJava8)
 
     // Firebase
     implementation(platform(libs.firebaseBom))
@@ -177,10 +155,8 @@ dependencies {
     implementation(libs.firebaseConfigKtx)
     implementation(libs.firebaseStorageKtx)
     implementation(libs.firebaseMessagingKtx)
-    implementation(libs.firebaseAuthKtx)
-    implementation(libs.firebaseFirestoreKtx)
 
-    // Kotlin Coroutines with Play Services
+    // Kotlin
     implementation(libs.kotlinxCoroutinesAndroid)
     implementation(libs.kotlinxCoroutinesPlayServices)
     implementation(libs.kotlinxSerializationJson)

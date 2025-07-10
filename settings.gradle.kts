@@ -1,19 +1,9 @@
+// settings.gradle.kts
 pluginManagement {
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
-        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
-    }
-
-    resolutionStrategy {
-        eachPlugin {
-            // Force KSP version to match Kotlin version
-            if (requested.id.id.startsWith("com.google.devtools.ksp")) {
-                useVersion("2.2.0-2.0.2")
-            }
-        }
     }
 }
 
@@ -31,33 +21,82 @@ rootProject.name = "AuraFrameFX"
 include(":app")
 include(":sandbox-ui")
 
-// AI Modules
 include(":lib-ai")
-(21..44).forEach { version ->
-    include(":lib-ai-ai$version")
-    include(":lib-ai-ai$version-xposed")
-}
+include(":lib-ai-ai21")
+include(":lib-ai-ai22")
+include(":lib-ai-ai23")
+include(":lib-ai-ai24")
+include(":lib-ai-ai25")
+include(":lib-ai-ai26")
+include(":lib-ai-ai27")
+include(":lib-ai-ai28")
+include(":lib-ai-ai29")
+include(":lib-ai-ai30")
+include(":lib-ai-ai31")
+include(":lib-ai-ai32")
+include(":lib-ai-ai33")
+include(":lib-ai-ai34")
+include(":lib-ai-ai35")
+include(":lib-ai-ai36")
+include(":lib-ai-ai37")
+include(":lib-ai-ai38")
+include(":lib-ai-ai39")
+include(":lib-ai-ai40")
+include(":lib-ai-ai41")
+include(":lib-ai-ai42")
+include(":lib-ai-ai43")
+include(":lib-ai-ai44")
 
-// System Modules
-val systemModules = listOf(
-    "quicksettings", "lockscreen", "overlay", "homescreen", "notchbar",
-    "statusbar", "navigationbar", "telephony", "customization", "keyguard",
-    "systemui", "display", "notifications", "apps", "photos", "video",
-    "permissions", "bluetooth", "sound", "media", "settings", "tweaks",
-    "battery", "fonts", "contacts", "weather", "widget", "fingerprint",
-    "translation", "vpn", "usb", "camera", "vibrator", "messaging", "calendar"
-)
+include(":lib-ai-ai21-xposed")
+include(":lib-ai-ai22-xposed")
+include(":lib-ai-ai23-xposed")
+include(":lib-ai-ai24-xposed")
+include(":lib-ai-ai25-xposed")
+include(":lib-ai-ai26-xposed")
+include(":lib-ai-ai27-xposed")
+include(":lib-ai-ai28-xposed")
+include(":lib-ai-ai29-xposed")
+include(":lib-ai-ai30-xposed")
+include(":lib-ai-ai31-xposed")
+include(":lib-ai-ai32-xposed")
+include(":lib-ai-ai33-xposed")
+include(":lib-ai-ai34-xposed")
+include(":lib-ai-ai35-xposed")
+include(":lib-ai-ai36-xposed")
+include(":lib-ai-ai37-xposed")
+include(":lib-ai-ai38-xposed")
+include(":lib-ai-ai39-xposed")
+include(":lib-ai-ai40-xposed")
+include(":lib-ai-ai41-xposed")
+include(":lib-ai-ai42-xposed")
+include(":lib-ai-ai43-xposed")
+include(":lib-ai-ai44-xposed")
 
-systemModules.forEach { module ->
-    include(":lib-system-$module")
-    include(":lib-system-${module}-xposed")
-}
+include(":lib-system-quicksettings")
+include(":lib-system-quicksettings-xposed")
+include(":lib-system-lockscreen")
+include(":lib-system-lockscreen-xposed")
+include(":lib-system-overlay")
+include(":lib-system-overlay-xposed")
+include(":lib-system-homescreen")
+include(":lib-system-homescreen-xposed")
 
-// Include Xposed variants
-include(":lib-system-sysui")
-include(":lib-system-sysui-xposed")
-include(":lib-system-graphics")
-include(":lib-system-graphics-xposed")
+include(":lib-system-notchbar")
+include(":lib-system-notchbar-xposed")
+
+include(":lib-system-statusbar")
+include(":lib-system-statusbar-xposed")
+
+include(":lib-system-navigationbar")
+include(":lib-system-navigationbar-xposed")
+
+include(":lib-system-telephony")
+
+include(":lib-system-customization")
+include(":lib-system-customization-xposed")
+
+include(":lib-system-keyguard")
+include(":lib-system-keyguard-xposed")
 
 include(":lib-system-systemui")
 include(":lib-system-systemui-xposed")
