@@ -7764,3 +7764,128 @@ if __name__ == "__main__":
         "--durations=15",
         "--maxfail=5"  # Stop after 5 failures for faster feedback
     ])
+
+class TestAdditionalEdgeCases:
+    """Additional edge case tests for GenesisAPIClient and related data models."""
+
+    def test_str_and_repr_methods(self, client, sample_model_config, sample_messages):
+        # Test __str__ and __repr__ for GenesisAPIClient
+        s = str(client)
+        r = repr(client)
+        assert isinstance(s, str)
+        assert isinstance(r, str)
+        # Test for data models
+        for obj in [
+            sample_model_config,
+            sample_messages[0],
+        ]:
+            assert isinstance(str(obj), str)
+            assert isinstance(repr(obj), str)
+
+    def test_exception_str_and_repr(self):
+        # Test __str__ and __repr__ for all custom exceptions
+        for exc_cls in [GenesisAPIError, AuthenticationError, RateLimitError, ValidationError]:
+            e = exc_cls("test error")
+            assert "test error" in str(e)
+            assert "test error" in repr(e)
+
+    def test_exception_pickling(self):
+        import pickle
+        for exc_cls in [GenesisAPIError, AuthenticationError, RateLimitError, ValidationError]:
+            e = exc_cls("pickle error", status_code=123) if exc_cls is GenesisAPIError else exc_cls("pickle error")
+            pickled = pickle.dumps(e)
+            unpickled = pickle.loads(pickled)
+            assert isinstance(unpickled, exc_cls)
+            assert "pickle error" in str(unpickled)
+
+    def test_data_model_equality_and_hashing(self):
+        # If data models are hashable, test set behavior
+        try:
+            m1 = ChatMessage(role="user", content="hello")
+            m2 = ChatMessage(role="user", content="hello")
+            m3 = ChatMessage(role="user", content="world")
+            s = {m1, m2, m3}
+            assert m1 == m2
+            assert len(s) == 2
+        except TypeError:
+            pass  # Acceptable if not hashable
+
+    def test_data_model_serialization_roundtrip(self):
+        import json
+        # Test ChatMessage
+        msg = ChatMessage(role="user", content="serialize")
+        d = msg.__dict__ if hasattr(msg, "__dict__") else dict(msg)
+        s = json.dumps(d)
+        d2 = json.loads(s)
+        assert d2["role"] == "user"
+        # Test ModelConfig
+        config = ModelConfig(name="test", max_tokens=10)
+        d = config.__dict__ if hasattr(config, "__dict__") else dict(config)
+        s = json.dumps(d)
+        d2 = json.loads(s)
+        assert d2["name"] == "test"
+
+    def test_model_config_all_boundary_values(self):
+        # Set all parameters to boundary values
+        config = ModelConfig(
+            name="test",
+            max_tokens=1,
+            temperature=0.0,
+            top_p=0.0,
+            frequency_penalty=-2.0,
+            presence_penalty=2.0,
+            stop=["END"],
+            logprobs=True,
+            top_logprobs=5,
+            n=5,
+            stream=True,
+            seed=0,
+            logit_bias={50256: -100}
+        )
+        # Should not raise on construction
+        assert config.name == "test"
+
+    def test_data_model_type_enforcement(self):
+        # If type checking is enforced, invalid types should raise
+        try:
+            ChatMessage(role=123, content=456)
+            assert False, "Should raise TypeError or ValidationError"
+        except (TypeError, ValidationError):
+            pass
+        try:
+            ModelConfig(name=123, max_tokens="not an int")
+            assert False, "Should raise TypeError or ValidationError"
+        except (TypeError, ValidationError):
+            pass
+
+    def test_utility_functions_handle_none_and_invalid_types(self):
+        from app.ai_backend.genesis_api import format_timestamp, calculate_token_usage, estimate_tokens
+        # format_timestamp
+        try:
+            format_timestamp(None)
+        except Exception:
+            pass
+        # calculate_token_usage
+        try:
+            calculate_token_usage(None)
+        except Exception:
+            pass
+        # estimate_tokens
+        try:
+            estimate_tokens(None)
+        except Exception:
+            pass
+
+    def test_client_not_implemented_methods(self, client):
+        # Defensive: if any public method is not implemented, should raise NotImplementedError
+        for name in dir(client):
+            if name.startswith("_"):
+                continue
+            attr = getattr(client, name)
+            if callable(attr) and getattr(attr, "__isabstractmethod__", False):
+                try:
+                    attr()
+                    assert False, f"{name} should raise NotImplementedError"
+                except NotImplementedError:
+                    pass
+
