@@ -20,37 +20,74 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.aurakai.auraframefx.R
 import dev.aurakai.auraframefx.model.Emotion
 import dev.aurakai.auraframefx.viewmodel.AuraMoodViewModel
 
 private val DarkColorScheme = darkColorScheme(
     primary = NeonTeal,
-    secondary = NeonPurple,
-    tertiary = NeonBlue,
-    background = DarkBackground,
-    surface = Surface,
     onPrimary = OnPrimary,
+    primaryContainer = NeonTeal.copy(alpha = 0.2f),
+    onPrimaryContainer = OnPrimary,
+    
+    secondary = NeonPurple,
     onSecondary = OnSecondary,
-    onTertiary = OnPrimary,
+    secondaryContainer = NeonPurple.copy(alpha = 0.2f),
+    onSecondaryContainer = OnSecondary,
+    
+    tertiary = NeonBlue,
+    onTertiary = OnTertiary,
+    tertiaryContainer = NeonBlue.copy(alpha = 0.2f),
+    onTertiaryContainer = OnTertiary,
+    
+    background = DarkBackground,
     onBackground = OnSurface,
+    
+    surface = Surface,
     onSurface = OnSurface,
+    surfaceVariant = SurfaceVariant,
+    onSurfaceVariant = OnSurfaceVariant,
+    
     error = ErrorColor,
-    onError = OnPrimary
+    onError = OnPrimary,
+    errorContainer = ErrorColor.copy(alpha = 0.2f),
+    onErrorContainer = OnPrimary,
+    
+    outline = OnSurfaceVariant,
+    outlineVariant = SurfaceVariant
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = LightPrimary,
-    secondary = LightSecondary,
-    tertiary = LightTertiary,
-    background = LightBackground,
-    surface = LightSurface,
     onPrimary = LightOnPrimary,
+    primaryContainer = LightPrimary.copy(alpha = 0.2f),
+    onPrimaryContainer = LightOnPrimary,
+    
+    secondary = LightSecondary,
     onSecondary = LightOnSecondary,
+    secondaryContainer = LightSecondary.copy(alpha = 0.2f),
+    onSecondaryContainer = LightOnSecondary,
+    
+    tertiary = LightTertiary,
     onTertiary = LightOnTertiary,
+    tertiaryContainer = LightTertiary.copy(alpha = 0.2f),
+    onTertiaryContainer = LightOnTertiary,
+    
+    background = LightBackground,
     onBackground = LightOnBackground,
+    
+    surface = LightSurface,
     onSurface = LightOnSurface,
-    error = LightError,
-    onError = LightOnError
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = LightOnSurfaceVariant,
+    
+    error = ErrorColor,
+    onError = LightOnError,
+    errorContainer = ErrorColor.copy(alpha = 0.2f),
+    onErrorContainer = LightOnError,
+    
+    outline = LightOnSurfaceVariant,
+    outlineVariant = LightSurfaceVariant
 )
 
 // Let's define a CompositionLocal to provide the mood-based color
