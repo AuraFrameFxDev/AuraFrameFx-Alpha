@@ -13,12 +13,12 @@ plugins {
 
 android {
     namespace = "dev.aurakai.auraframefx"
-    compileSdk = 36
+    compileSdk = 34 // Use latest stable SDK
 
     defaultConfig {
         applicationId = "dev.aurakai.auraframefx"
         minSdk = 33
-        targetSdk = 36
+        targetSdk = 34 // Use latest stable SDK
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -41,13 +41,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_24
-        targetCompatibility = JavaVersion.VERSION_24
+        sourceCompatibility = JavaVersion.VERSION_17 // Target Java 17
+        targetCompatibility = JavaVersion.VERSION_17 // Target Java 17
     }
 
     kotlinOptions {
         @Suppress("DEPRECATION")
-        jvmTarget = "24"
+        jvmTarget = "17" // Target Kotlin JVM 17
         @Suppress("DEPRECATION")
         freeCompilerArgs = listOf(
             "-opt-in=kotlin.RequiresOptIn",
