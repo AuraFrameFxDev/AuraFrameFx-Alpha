@@ -37,6 +37,9 @@
 
     <color name="light_outline">#8D8D8D</color>
     <color name="light_outline_variant">#3D3D3D</color>
+    
+    <!-- Material 3 Compatibility Colors -->
+    <color name="onPrimary">@color/light_on_primary</color>
 
     <!-- Dark Theme Colors (for future implementation) -->
     <color name="dark_primary">#00FFCC</color>
