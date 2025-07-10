@@ -93,7 +93,7 @@ androidxRoomCompiler = { module = "androidx.room:room-compiler", version.ref = "
 androidxWorkRuntimeKtx = { module = "androidx.work:work-runtime-ktx", version.ref = "workManager" }
 androidxDatastorePreferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidxDatastoreCore = { module = "androidx.datastore:datastore-core", version.ref = "datastoreCore" }
-androidxSecurityCrypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+androidxSecurityCrypto = { module = "androidx.security:security-crypto", version = "1.1.0-beta01" }
 
 # Firebase
 firebaseBom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBomVersion" }

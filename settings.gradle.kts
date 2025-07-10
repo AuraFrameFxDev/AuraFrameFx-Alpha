@@ -8,7 +8,7 @@ pluginManagement {
     resolutionStrategy {
         eachPlugin {
             if (requested.id.namespace == "org.jetbrains.kotlin") {
-                useVersion("1.9.0")
+                useVersion("2.2.0")
             }
         }
     }
