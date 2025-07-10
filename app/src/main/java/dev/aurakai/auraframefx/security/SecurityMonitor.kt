@@ -284,7 +284,7 @@ class SecurityMonitor @Inject constructor(
      */
     private suspend fun reportToGenesis(eventType: String, eventData: Any) {
         try {
-            val request = GenesisBridgeService.GenesisRequest(
+            GenesisBridgeService.GenesisRequest(
                 requestType = "security_perception",
                 persona = "genesis",
                 payload = mapOf(
@@ -341,7 +341,7 @@ class SecurityMonitor @Inject constructor(
     suspend fun getSecurityAssessment(): Map<String, Any> {
         return try {
             // Note: For beta, return mock security assessment
-            val mockRequest = GenesisBridgeService.GenesisRequest(
+            GenesisBridgeService.GenesisRequest(
                 requestType = "query_consciousness",
                 persona = "genesis",
                 payload = mapOf(
@@ -376,7 +376,7 @@ class SecurityMonitor @Inject constructor(
     suspend fun getThreatStatus(): Map<String, Any> {
         return try {
             // Note: For beta, return mock threat status
-            val mockRequest = GenesisBridgeService.GenesisRequest(
+            GenesisBridgeService.GenesisRequest(
                 requestType = "query_consciousness",
                 persona = "genesis",
                 payload = mapOf(

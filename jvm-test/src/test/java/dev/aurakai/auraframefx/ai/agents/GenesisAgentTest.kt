@@ -10,10 +10,13 @@ import io.mockk.verify
 import io.mockk.clearAllMocks
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 
 // Mock implementations for dependencies
 class MockVertexAIClient
@@ -108,7 +111,7 @@ class GenesisAgentTest {
     // Test instance
     private lateinit var genesisAgent: GenesisAgent
 
-    @Before
+    @BeforeEach
     fun setup() {
         // Initialize GenesisAgent with mocked dependencies
         genesisAgent = GenesisAgent(
@@ -122,7 +125,7 @@ class GenesisAgentTest {
         )
     }
     
-    @After
+    @AfterEach
     fun tearDown() {
         // Clear any mocks if needed
         clearAllMocks()
@@ -203,7 +206,7 @@ class GenesisAgentTest {
     @Test
     fun `test error handling when agent not found`() = runTest {
         // When/Then
-        assertThrows(NoSuchElementException::class.java) {
+        assertThrows(NoSuchElementException::class) {
             genesisAgent.routeRequestToAgent("NonexistentAgent", "test request")
         }
     }
@@ -566,7 +569,7 @@ class GenesisAgentTest {
 
     @Test
     fun testGenesisAgent_getType() {
-        genesisAgent.getType()
+        val type = genesisAgent.getType()
         // Type might be null or a specific value - just verify it doesn't throw
         assertNotNull("Method should execute without throwing", true)
     }

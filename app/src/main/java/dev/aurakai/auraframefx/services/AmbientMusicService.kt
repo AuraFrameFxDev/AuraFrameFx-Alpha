@@ -34,24 +34,6 @@ class AmbientMusicService @Inject constructor() : Service() {
     }
 
     /**
-     * Called by the system when the service is first created to perform one-time initialization.
-     */
-    override fun onCreate() {
-        super.onCreate()
-        // TODO: Initialization code for the service.
-    }
-
-    /**
-     * Handles cleanup operations when the service is destroyed.
-     *
-     * Called before the service is terminated to allow for resource release or other shutdown tasks.
-     */
-    override fun onDestroy() {
-        super.onDestroy()
-        // TODO: Cleanup code for the service.
-    }
-
-    /**
      * Pauses music playback.
      *
      * This method is a placeholder and does not perform any action.

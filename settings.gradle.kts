@@ -18,6 +18,10 @@ dependencyResolutionManagement {
 
 rootProject.name = "AuraFrameFX"
 
+// Include the main app module and our new JVM test module
+include(":app")
+include(":jvm-test")
+
 include(":app")
 include(":sandbox-ui")
 

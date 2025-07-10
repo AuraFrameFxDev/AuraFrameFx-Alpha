@@ -111,7 +111,7 @@ class AppNavGraphTest {
             AppNavGraph(navController = navController)
         }
 
-        val initialDestination = navController.currentDestination?.route
+        navController.currentDestination?.route
 
         // Try to navigate to invalid destination
         composeTestRule.runOnIdle {

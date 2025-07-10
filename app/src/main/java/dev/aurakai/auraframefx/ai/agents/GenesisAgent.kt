@@ -741,7 +741,7 @@ class GenesisAgent @Inject constructor(
             // Assuming AgentType enum values align with config names
             try {
                 val agentTypeEnum =
-                    dev.aurakai.auraframefx.model.AgentType.valueOf(config.name.uppercase())
+                    AgentType.valueOf(config.name.uppercase())
                 _activeAgents.update { it + agentTypeEnum }
             } catch (e: IllegalArgumentException) {
                 Log.w("GenesisAgent", "Unknown agent type in hierarchy: ${config.name}")
@@ -774,7 +774,7 @@ class GenesisAgent @Inject constructor(
         // Process through Cascade first for state management
         // Assuming cascadeService.processRequest matches Agent.processRequest(request, context)
         // For now, let's pass a default context string. This should be refined.
-        val currentContextString = _context.value.toString() // Example context string
+        _context.value.toString() // Example context string
 
         try {
             val cascadeAgentResponse: AgentResponse =
@@ -813,7 +813,7 @@ class GenesisAgent @Inject constructor(
                 responses.add(
                     AgentMessage(
                         content = kaiAgentResponse.content,
-                        sender = dev.aurakai.auraframefx.model.AgentType.KAI,
+                        sender = AgentType.KAI,
                         timestamp = System.currentTimeMillis(),
                         confidence = kaiAgentResponse.confidence // Use confidence directly
                     )
@@ -881,7 +881,7 @@ class GenesisAgent @Inject constructor(
     fun generateFinalResponse(agentMessages: List<AgentMessage>): String {
         // Simple concatenation for now, could be more sophisticated
         return "[Genesis Synthesis] ${
-            agentMessages.filter { it.sender != dev.aurakai.auraframefx.model.AgentType.GENESIS }
+            agentMessages.filter { it.sender != AgentType.GENESIS }
                 .joinToString(" | ") { "${it.sender}: ${it.content}" }
         }"
     }
@@ -906,7 +906,7 @@ class GenesisAgent @Inject constructor(
      *
      * @param agentType The agent type to activate or deactivate.
      */
-    fun toggleAgent(agentType: dev.aurakai.auraframefx.model.AgentType) {
+    fun toggleAgent(agentType: AgentType) {
         _activeAgents.update { current ->
             if (current.contains(agentType)) current - agentType else current + agentType
         }

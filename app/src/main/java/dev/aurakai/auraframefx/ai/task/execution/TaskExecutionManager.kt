@@ -44,7 +44,7 @@ class TaskExecutionManager @Inject constructor(
     private val taskQueue = PriorityBlockingQueue<TaskExecution>(100, TaskPriorityComparator())
     private val activeExecutions = ConcurrentHashMap<String, TaskExecution>()
     private val completedExecutions =
-        ConcurrentHashMap<String, dev.aurakai.auraframefx.ai.task.TaskResult>()
+        ConcurrentHashMap<String, TaskResult>()
 
     // State management
     private val _executionStats = MutableStateFlow(ExecutionStats())
@@ -149,7 +149,7 @@ class TaskExecutionManager @Inject constructor(
      * @param taskId The unique identifier of the task.
      * @return The result of the completed task, or `null` if the task does not exist or is not yet completed.
      */
-    fun getTaskResult(taskId: String): dev.aurakai.auraframefx.ai.task.TaskResult? {
+    fun getTaskResult(taskId: String): TaskResult? {
         return completedExecutions[taskId]
     }
 
@@ -168,7 +168,7 @@ class TaskExecutionManager @Inject constructor(
         val queuedTask = taskQueue.find { it.id == taskId }
         if (queuedTask != null) {
             taskQueue.remove(queuedTask)
-            val cancelledTask = queuedTask.copy(status = ExecutionStatus.CANCELLED)
+            queuedTask.copy(status = ExecutionStatus.CANCELLED)
             updateQueueStatus()
             return true
         }
@@ -176,7 +176,7 @@ class TaskExecutionManager @Inject constructor(
         // Try to cancel active execution
         val activeTask = activeExecutions[taskId]
         if (activeTask != null) {
-            val cancellingTask = activeTask.copy(status = ExecutionStatus.CANCELLED)
+            activeTask.copy(status = ExecutionStatus.CANCELLED)
             // The execution coroutine will check this status and cancel itself
             return true
         }
@@ -306,7 +306,7 @@ class TaskExecutionManager @Inject constructor(
                 val endTime = System.currentTimeMillis()
 
                 // Mark as completed
-                val completedExecution = execution.copy(
+                execution.copy(
                     status = ExecutionStatus.COMPLETED,
                     completedAt = endTime
                 )
@@ -335,7 +335,7 @@ class TaskExecutionManager @Inject constructor(
                 val endTime = System.currentTimeMillis()
 
                 // Handle task failure
-                val failedExecution = execution.copy(
+                execution.copy(
                     status = ExecutionStatus.FAILED,
                     completedAt = endTime,
                     errorMessage = e.message
