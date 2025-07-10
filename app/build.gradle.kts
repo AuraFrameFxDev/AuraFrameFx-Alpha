@@ -176,6 +176,9 @@ dependencies {
     implementation(libs.coilCompose)
     implementation(libs.timber)
     implementation(libs.guava)
+    
+    // Material 3 Views (for XML theming)
+    implementation("com.google.android.material:material:1.12.0")
 
     // Accompanist
     implementation(libs.accompanistSystemuicontroller)
