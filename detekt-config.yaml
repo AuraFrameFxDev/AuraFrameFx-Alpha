@@ -1,0 +1,80 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+  weights: null
+config:
+  validation: true
+  warningsAsErrors: false
+  checkExhaustiveness: false
+  excludes: ''
+processors:
+  active: true
+  exclude:
+    - DetektProgressListener
+console-reports:
+  active: true
+  exclude:
+    - ProjectStatisticsReport
+    - ComplexityReport
+    - NotificationReport
+    - FindingsReport
+    - FileBasedFindingsReport
+output-reports:
+  active: true
+  exclude:
+    - TxtOutputReport
+    - XmlOutputReport
+    - HtmlOutputReport
+    - SarifOutputReport
+comments:
+  active: false
+complexity:
+  active: true
+  CognitiveComplexMethod:
+    active: false
+    threshold: 15
+  ComplexCondition:
+    active: false
+    threshold: 4
+  ComplexInterface:
+    active: false
+    threshold: 10
+    includeStaticDeclarations: false
+    includePrivateDeclarations: false
+    ignoreOverloaded: false
+  CyclomaticComplexMethod:
+    active: false
+    threshold: 15
+    ignoreSingleWhenExpression: false
+    ignoreSimpleWhenEntries: false
+    ignoreNestingFunctions: false
+    nestingFunctions:
+      - also
+      - apply
+      - forEach
+      - isNotNull
+      - ifNull
+      - let
+      - run
+      - use
+      - with
+  LabeledExpression:
+    active: false
+    ignoredLabels: []
+  LargeClass:
+    active: false
+    threshold: 600
+  LongMethod:
+    active: false
+    threshold: 60
+  LongParameterList:
+    active: false
+    functionThreshold: 6
+    constructorThreshold: 7
+    ignoreDefaultParameters: false
+    ignoreDataClasses: true
+    ignoreAnnotatedParameter: []
+  MethodOverloading:
+    active: false
+    threshold: 6
+  NamedArguments:
