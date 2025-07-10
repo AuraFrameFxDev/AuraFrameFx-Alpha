@@ -6,10 +6,10 @@ import java.io.File
 interface AuraAIService {
 
     /**
-     * Returns a fixed placeholder string for analytics queries, indicating the functionality is not implemented.
+     * Returns a placeholder string indicating that analytics query functionality is not implemented.
      *
      * @param _query The analytics query string.
-     * @return A placeholder response string.
+     * @return A fixed placeholder response.
      */
     fun analyticsQuery(_query: String): String {
         // TODO: Implement analytics query
@@ -17,10 +17,10 @@ interface AuraAIService {
     }
 
     /**
-     * Asynchronously downloads a file by its unique identifier.
+     * Asynchronously downloads a file using its unique identifier.
      *
      * @param _fileId The unique identifier of the file to download.
-     * @return The downloaded file, or null if the file could not be retrieved.
+     * @return The downloaded file, or null if the file is not found or the operation is unimplemented.
      */
     suspend fun downloadFile(_fileId: String): File? {
         // TODO: Implement file download
@@ -28,10 +28,10 @@ interface AuraAIService {
     }
 
     /**
-     * Asynchronously generates an image based on the provided text prompt.
+     * Asynchronously generates an image from a text prompt.
      *
-     * @param _prompt The textual description used to generate the image.
-     * @return The generated image as a ByteArray, or null if image generation is unavailable or not implemented.
+     * @param _prompt The text description to guide image generation.
+     * @return A ByteArray containing the generated image data, or null if image generation is not available.
      */
     suspend fun generateImage(_prompt: String): ByteArray? { // Returns URL or path to image -> ByteArray?
         // TODO: Implement image generation
@@ -39,7 +39,7 @@ interface AuraAIService {
     }
 
     /**
-     * Asynchronously generates a structured text response based on the provided prompt and optional configuration.
+     * Asynchronously generates a structured text response based on the given prompt and optional configuration.
      *
      * The response includes the original prompt, applied generation options ("temperature" and "max_tokens"), and a status message. Returns an error message string if text generation fails.
      *
@@ -65,9 +65,9 @@ interface AuraAIService {
     }
 
     /**
-     * Generates a formatted AI response string for the given prompt, optionally incorporating context and system instructions from the options map.
+     * Generates a formatted AI response string for the given prompt, optionally including context and system instructions from the options map.
      *
-     * If "context" or "system_prompt" are provided in the options, they are included in the response. Returns an error message string if an exception occurs.
+     * If "context" or "system_prompt" are provided in the options, they are incorporated into the response. Returns an error message string if an exception occurs.
      *
      * @param prompt The input prompt for which to generate an AI response.
      * @param options Optional map that may include "context" (String) and/or "system_prompt" (String) to customize the response.
@@ -104,15 +104,15 @@ interface AuraAIService {
 fun getMemory(memoryKey: String): String?
     
     /**
- * Stores a value under the specified key for later retrieval.
+ * Saves a value associated with the given key for future retrieval.
  *
- * @param key The unique identifier for the memory entry.
- * @param value The value to be stored.
+ * @param key The identifier under which the value will be stored.
+ * @param value The data to store.
  */
 fun saveMemory(key: String, value: Any)
 
     /**
-     * Returns `true` to indicate the AI service is always considered connected.
+     * Indicates whether the AI service is considered connected.
      *
      * @return Always returns true.
      */
@@ -122,10 +122,10 @@ fun saveMemory(key: String, value: Any)
     }
 
     /**
-     * Publishes a message to a specified Pub/Sub topic.
+     * Publishes a message to the specified Pub/Sub topic.
      *
-     * @param _topic The name of the topic to publish to.
-     * @param _message The message content to be published.
+     * @param _topic The target topic for the message.
+     * @param _message The content to publish.
      */
     fun publishPubSub(_topic: String, _message: String) {
         // TODO: Implement PubSub publishing
@@ -136,7 +136,7 @@ fun saveMemory(key: String, value: Any)
     /**
      * Asynchronously uploads a file and returns its unique identifier or URL.
      *
-     * @param _file The file to upload.
+     * @param _file The file to be uploaded.
      * @return The unique identifier or URL of the uploaded file, or null if the upload is not implemented or fails.
      */
     suspend fun uploadFile(_file: File): String? { // Returns file ID or URL

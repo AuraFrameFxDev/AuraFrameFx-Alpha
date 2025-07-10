@@ -23,6 +23,11 @@ class AmbientMusicService @Inject constructor() : Service() {
      *
      * @return Always `null`.
      */
+    /**
+     * Always returns `null`, indicating that this service does not support binding.
+     *
+     * @return Always `null`, as binding is not supported.
+     */
     override fun onBind(_intent: Intent?): IBinder? { // intent -> _intent
         // TODO: Implement binding if needed, otherwise this service cannot be bound.
         // TODO: Parameter _intent reported as unused.
@@ -44,6 +49,13 @@ class AmbientMusicService @Inject constructor() : Service() {
      *
      * @return The start mode for the service, always `START_NOT_STICKY`.
      */
+    /**
+     * Handles requests to start the service.
+     *
+     * Always returns `START_NOT_STICKY`, indicating the service will not be restarted automatically if it is killed by the system.
+     *
+     * @return The flag indicating the service should not be recreated if terminated.
+     */
     override fun onStartCommand(_intent: Intent?, _flags: Int, _startId: Int): Int {
         // TODO: Implement service logic for starting the service.
         // TODO: Utilize parameters (_intent, _flags, _startId) or remove if not needed by actual implementation.
@@ -63,6 +75,11 @@ class AmbientMusicService @Inject constructor() : Service() {
      *
      * Override this method to set up resources or perform setup tasks needed for the service lifecycle.
      */
+    /**
+     * Called when the service is first created.
+     *
+     * Use this method to perform one-time setup or initialization for the service.
+     */
     override fun onCreate() {
         super.onCreate()
         // TODO: Initialization code for the service.
@@ -80,6 +97,9 @@ class AmbientMusicService @Inject constructor() : Service() {
      * Called when the service is being destroyed.
      *
      * Override this method to perform cleanup before the service is terminated.
+     */
+    /**
+     * Called when the service is being destroyed to perform cleanup operations.
      */
     override fun onDestroy() {
         super.onDestroy()

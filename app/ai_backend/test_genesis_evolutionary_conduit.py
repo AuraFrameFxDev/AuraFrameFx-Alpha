@@ -5610,7 +5610,9 @@ class TestEvolutionaryParametersExtreme(unittest.TestCase):
     """Extreme edge case tests for EvolutionaryParameters."""
     
     def test_parameters_with_zero_values(self):
-        """Test parameters initialized with zero values where applicable."""
+        """
+        Verify that EvolutionaryParameters can be initialized with zero values for mutation rate, crossover rate, and selection pressure, and that these values are correctly set.
+        """
         params = EvolutionaryParameters(
             population_size=1,  # Minimum valid
             generations=1,      # Minimum valid  
@@ -5626,7 +5628,9 @@ class TestEvolutionaryParametersExtreme(unittest.TestCase):
         self.assertEqual(params.selection_pressure, 0.0)
     
     def test_parameters_with_maximum_values(self):
-        """Test parameters with maximum reasonable values."""
+        """
+        Verify that EvolutionaryParameters can be initialized with maximum reasonable values for all parameters.
+        """
         params = EvolutionaryParameters(
             population_size=1000000,
             generations=1000000,
@@ -5642,7 +5646,9 @@ class TestEvolutionaryParametersExtreme(unittest.TestCase):
         self.assertEqual(params.selection_pressure, 1.0)
     
     def test_parameters_with_scientific_notation(self):
-        """Test parameters with scientific notation values."""
+        """
+        Verify that EvolutionaryParameters correctly handles values provided in scientific notation.
+        """
         params = EvolutionaryParameters(
             population_size=int(1e3),
             generations=int(1e4),
@@ -5658,7 +5664,9 @@ class TestEvolutionaryParametersExtreme(unittest.TestCase):
         self.assertEqual(params.selection_pressure, 0.05)
     
     def test_parameters_immutability_verification(self):
-        """Test that parameter objects maintain immutability."""
+        """
+        Verify that EvolutionaryParameters objects remain immutable when their dictionary representations are modified.
+        """
         params = EvolutionaryParameters(population_size=100)
         
         # Attempting to modify should not affect original
@@ -5669,7 +5677,9 @@ class TestEvolutionaryParametersExtreme(unittest.TestCase):
         self.assertEqual(params.population_size, 100)
     
     def test_parameters_thread_safety(self):
-        """Test parameter access in multi-threaded environment."""
+        """
+        Verify that accessing EvolutionaryParameters attributes is thread-safe by concurrently reading parameters from multiple threads and checking for consistency and absence of errors.
+        """
         import threading
         import time
         
@@ -5678,6 +5688,11 @@ class TestEvolutionaryParametersExtreme(unittest.TestCase):
         errors = []
         
         def access_params():
+            """
+            Repeatedly accesses population size and mutation rate parameters in a tight loop, recording the results and capturing any exceptions encountered.
+            
+            This function is typically used to test the thread safety and reliability of parameter access under rapid, concurrent conditions.
+            """
             try:
                 for _ in range(1000):
                     # Rapid access to parameters
@@ -5713,10 +5728,17 @@ class TestMutationStrategyStress(unittest.TestCase):
     """Stress tests for MutationStrategy class."""
     
     def setUp(self):
+        """
+        Set up the test environment by initializing a MutationStrategy instance for use in mutation strategy tests.
+        """
         self.strategy = MutationStrategy()
     
     def test_mutation_with_extremely_large_genomes(self):
-        """Test mutation performance with extremely large genomes."""
+        """
+        Test the performance and correctness of the mutation strategy when applied to extremely large genomes.
+        
+        This test verifies that mutation operates efficiently on genomes of increasing size, maintains output integrity, and ensures that mutations are actually performed. It also checks that mutation time does not scale exponentially with genome size.
+        """
         import time
         
         # Test with progressively larger genomes
@@ -5745,7 +5767,11 @@ class TestMutationStrategyStress(unittest.TestCase):
             self.assertLess(times[i], times[i-1] * 20)  # Not more than 20x slower
     
     def test_mutation_memory_stress(self):
-        """Test mutation under memory stress conditions."""
+        """
+        Stress tests the mutation strategy for memory leaks by performing repeated mutations and monitoring object growth.
+        
+        Ensures that repeated application of the mutation operator does not cause excessive memory usage or object retention.
+        """
         import gc
         import sys
         
@@ -5774,7 +5800,11 @@ class TestMutationStrategyStress(unittest.TestCase):
         self.assertLess(object_growth, 10000)
     
     def test_mutation_concurrent_access(self):
-        """Test mutation with concurrent access patterns."""
+        """
+        Test that the mutation strategy handles concurrent access correctly and consistently preserves genome length.
+        
+        This test runs multiple threads performing repeated mutations on the same genome and verifies that no errors occur and all mutated genomes have the expected length.
+        """
         import threading
         import random
         
@@ -5783,6 +5813,11 @@ class TestMutationStrategyStress(unittest.TestCase):
         errors = []
         
         def mutate_concurrently():
+            """
+            Performs 100 concurrent Gaussian mutations on a genome using random mutation rates and sigmas, recording the length of each mutated genome.
+            
+            Appends any exceptions encountered during mutation to the `errors` list.
+            """
             try:
                 for _ in range(100):
                     rate = random.uniform(0.0, 1.0)
@@ -5812,7 +5847,11 @@ class TestMutationStrategyStress(unittest.TestCase):
             self.assertEqual(length, len(genome))
     
     def test_mutation_with_pathological_inputs(self):
-        """Test mutation with pathological input cases."""
+        """
+        Test that the mutation strategy handles genomes with pathological numeric values, such as infinities and extreme magnitudes, without introducing NaN values or failing unexpectedly.
+        
+        This test verifies that the mutation method either processes the input gracefully or raises appropriate exceptions for pathological cases.
+        """
         # Test with genome containing special values
         pathological_genome = [
             0.0, -0.0, 1.0, -1.0, 
@@ -5837,7 +5876,11 @@ class TestMutationStrategyStress(unittest.TestCase):
             pass
     
     def test_mutation_distribution_properties_advanced(self):
-        """Test advanced statistical properties of mutation distributions."""
+        """
+        Test that the gaussian mutation operator produces mutations with statistical properties matching a normal distribution.
+        
+        This test verifies that the mean and standard deviation of a large set of mutations are close to expected values, and that the proportion of mutations within 1, 2, and 3 standard deviations approximates those of a standard normal distribution.
+        """
         genome = [0.0] * 1000  # Large genome for statistical analysis
         mutations = []
         
@@ -5873,10 +5916,17 @@ class TestSelectionStrategyRobustness(unittest.TestCase):
     """Robustness tests for SelectionStrategy class."""
     
     def setUp(self):
+        """
+        Set up the test environment by initializing a SelectionStrategy instance for use in selection strategy tests.
+        """
         self.strategy = SelectionStrategy()
     
     def test_selection_with_extreme_fitness_distributions(self):
-        """Test selection with extreme fitness distributions."""
+        """
+        Test selection strategies when applied to populations with highly skewed fitness distributions.
+        
+        Verifies that tournament selection favors individuals with higher fitness in an exponentially decaying fitness landscape, and that the selection bias is statistically significant.
+        """
         # Test with exponentially distributed fitness
         population = []
         for i in range(100):
@@ -5897,7 +5947,11 @@ class TestSelectionStrategyRobustness(unittest.TestCase):
         self.assertLess(avg_index, 50)  # Should bias toward early indices
     
     def test_selection_stability_under_noise(self):
-        """Test selection stability when fitness has noise."""
+        """
+        Verify that tournament selection remains biased toward higher-fitness individuals even when fitness values are perturbed by noise.
+        
+        This test adds Gaussian noise to the fitness values of a population and repeatedly applies tournament selection, checking that the average true fitness of selected individuals remains significantly above the population average.
+        """
         base_population = [
             {'genome': [i], 'fitness': i * 0.01} 
             for i in range(50)
@@ -5928,7 +5982,11 @@ class TestSelectionStrategyRobustness(unittest.TestCase):
         self.assertGreater(avg_true_fitness, population_avg_true_fitness * 1.2)
     
     def test_selection_convergence_analysis(self):
-        """Test selection convergence properties."""
+        """
+        Test that tournament selection favors top individuals, verifying convergence pressure by measuring the selection rate of the top 10% of the population.
+        
+        Asserts that the observed selection rate for top individuals is significantly higher than random chance, indicating effective selection pressure.
+        """
         population = [
             {'genome': [i], 'fitness': random.random()} 
             for i in range(100)
@@ -5953,7 +6011,9 @@ class TestSelectionStrategyRobustness(unittest.TestCase):
         self.assertGreater(selection_rate, 0.3)
     
     def test_selection_with_degenerate_cases(self):
-        """Test selection with degenerate population cases."""
+        """
+        Test tournament selection behavior with degenerate population scenarios, including uniform fitness values, single-individual populations, and minimal tournament sizes.
+        """
         # All individuals have same fitness
         uniform_population = [
             {'genome': [i], 'fitness': 0.5} 
@@ -5974,7 +6034,11 @@ class TestSelectionStrategyRobustness(unittest.TestCase):
         self.assertIn(selected, uniform_population)
     
     def test_selection_fairness_analysis(self):
-        """Test fairness properties of selection methods."""
+        """
+        Assess the fairness of selection methods by verifying that individuals with higher fitness levels are selected more frequently in proportion to their fitness.
+        
+        This test constructs a population with distinct fitness levels, performs repeated roulette wheel selections, and checks that selection rates increase monotonically with fitness.
+        """
         # Create population with known distribution
         population = []
         fitness_levels = [0.1, 0.3, 0.5, 0.7, 0.9]
@@ -6010,14 +6074,34 @@ class TestFitnessFunctionReliability(unittest.TestCase):
     """Reliability tests for FitnessFunction class."""
     
     def setUp(self):
+        """
+        Set up the test case by initializing a FitnessFunction instance for use in tests.
+        """
         self.fitness_func = FitnessFunction()
     
     def test_fitness_function_error_recovery_advanced(self):
-        """Test advanced error recovery in fitness functions."""
+        """
+        Test that the fitness function can recover from intermittent advanced errors and still produce correct results after multiple retries.
+        
+        Simulates a fitness function that intermittently raises different exceptions and verifies that the evaluation mechanism can handle these failures, allowing successful computations to proceed.
+        """
         call_count = 0
         failure_count = 0
         
         def unreliable_fitness_detailed(genome):
+            """
+            Simulates a fitness function that intermittently raises exceptions to test error handling.
+            
+            Parameters:
+                genome (list or iterable): The genome to evaluate.
+            
+            Returns:
+                float: The sum of the genome elements if no exception is raised.
+            
+            Raises:
+                ValueError: Simulates a data validation error on certain calls.
+                RuntimeError: Simulates a computation error on certain calls.
+            """
             nonlocal call_count, failure_count
             call_count += 1
             
@@ -6047,11 +6131,24 @@ class TestFitnessFunctionReliability(unittest.TestCase):
         self.assertGreater(success_count, 30)
     
     def test_fitness_function_performance_monitoring(self):
-        """Test fitness function performance monitoring."""
+        """
+        Test that the fitness function evaluation tracks and reflects performance differences based on genome size.
+        
+        Verifies that execution time increases with genome length when using a monitored fitness function with variable computation time, and that the fitness values returned are numeric.
+        """
         import time
         
         def monitored_fitness(genome):
             # Simulate variable computation time
+            """
+            Evaluates the fitness of a genome by summing its elements, simulating computation time proportional to genome length.
+            
+            Parameters:
+                genome (list or sequence of numbers): The genome to evaluate.
+            
+            Returns:
+                int or float: The sum of the genome's elements as the fitness value.
+            """
             delay = len(genome) * 0.001
             time.sleep(delay)
             return sum(genome)
@@ -6078,7 +6175,9 @@ class TestFitnessFunctionReliability(unittest.TestCase):
             self.assertGreaterEqual(execution_times[i], execution_times[i-1])
     
     def test_fitness_function_numerical_precision(self):
-        """Test fitness function numerical precision handling."""
+        """
+        Verify that the fitness function maintains numerical precision and stability when evaluating genomes with extremely small or large values.
+        """
         # Test with values near machine epsilon
         tiny_genome = [1e-15, 2e-15, 3e-15]
         
@@ -6095,20 +6194,58 @@ class TestFitnessFunctionReliability(unittest.TestCase):
         self.assertFalse(math.isinf(fitness))
     
     def test_fitness_function_with_complex_constraints(self):
-        """Test fitness function with complex constraint interactions."""
+        """
+        Tests that the fitness function correctly evaluates a genome when multiple complex constraints are applied, ensuring the result is a valid numeric fitness value.
+        """
         genome = [2.0, 3.0, 4.0]
         
         # Multiple interacting constraints
         def constraint1(g):
+            """
+            Check if the sum of elements in the input sequence does not exceed 10.
+            
+            Parameters:
+            	g (iterable): Sequence of numeric values to be summed.
+            
+            Returns:
+            	bool: True if the sum is less than or equal to 10, otherwise False.
+            """
             return sum(g) <= 10  # Sum constraint
         
         def constraint2(g):
+            """
+            Check if all elements in the input sequence are greater than or equal to 1.
+            
+            Parameters:
+            	g (iterable): Sequence of numeric values to check.
+            
+            Returns:
+            	bool: True if every element in g is at least 1, otherwise False.
+            """
             return all(x >= 1 for x in g)  # Lower bound constraint
         
         def constraint3(g):
+            """
+            Check if the product of the first two elements of the input is less than or equal to twice the third element.
+            
+            Parameters:
+                g (list or tuple): Sequence of at least three numeric values.
+            
+            Returns:
+                bool: True if g[0] * g[1] <= g[2] * 2, otherwise False.
+            """
             return g[0] * g[1] <= g[2] * 2  # Relational constraint
         
         def constraint4(g):
+            """
+            Check if the range of values in the input sequence does not exceed 3.
+            
+            Parameters:
+                g (Sequence[float]): A sequence of numeric values.
+            
+            Returns:
+                bool: True if the difference between the maximum and minimum values in g is less than or equal to 3, otherwise False.
+            """
             return max(g) - min(g) <= 3  # Range constraint
         
         constraints = [constraint1, constraint2, constraint3, constraint4]
@@ -6125,10 +6262,17 @@ class TestFitnessFunctionReliability(unittest.TestCase):
         self.assertFalse(math.isnan(fitness))
     
     def test_fitness_function_caching_efficiency(self):
-        """Test fitness function caching efficiency."""
+        """
+        Test that the fitness function caching mechanism avoids redundant evaluations for identical genomes and only recomputes when the input genome changes.
+        """
         evaluation_count = 0
         
         def expensive_cached_fitness(genome):
+            """
+            Evaluates the fitness of a genome using a computationally expensive function.
+            
+            Simulates an expensive fitness calculation by introducing a delay, then returns the sum of squares of the genome elements.
+            """
             nonlocal evaluation_count
             evaluation_count += 1
             # Simulate expensive computation
@@ -6159,10 +6303,17 @@ class TestPopulationManagerAdvancedScenarios(unittest.TestCase):
     """Advanced scenario tests for PopulationManager class."""
     
     def setUp(self):
+        """
+        Set up a new PopulationManager instance before each test.
+        """
         self.manager = PopulationManager()
     
     def test_population_lifecycle_management(self):
-        """Test complete population lifecycle management."""
+        """
+        Test the full lifecycle management of a population, including initialization, evaluation, selection, and reproduction stages.
+        
+        Verifies that each stage transitions correctly, population sizes are as expected, and selection improves average fitness.
+        """
         # Initialize population
         population = self.manager.initialize_random_population(100, 10)
         
@@ -6217,7 +6368,11 @@ class TestPopulationManagerAdvancedScenarios(unittest.TestCase):
         self.assertGreater(lifecycle_stages[2]['avg_fitness'], lifecycle_stages[1]['avg_fitness'])
     
     def test_population_genetic_drift_simulation(self):
-        """Test simulation of genetic drift in populations."""
+        """
+        Test that genetic drift alters allele frequencies in a simulated population over multiple generations.
+        
+        This test initializes a population with controlled allele frequencies, simulates genetic drift through repeated random sampling and replenishment, and verifies that significant changes in allele frequencies occur, indicating the presence of genetic drift.
+        """
         # Create population with specific allele frequencies
         initial_population = []
         
@@ -6265,7 +6420,11 @@ class TestPopulationManagerAdvancedScenarios(unittest.TestCase):
         self.assertGreater(significant_changes, 5)
     
     def test_population_bottleneck_effects(self):
-        """Test population bottleneck effects."""
+        """
+        Test the effects of a population bottleneck on genetic diversity.
+        
+        Simulates a drastic reduction in population size, measures the resulting loss of diversity, and verifies that diversity partially recovers after the population is restored through reproduction, but does not return to initial levels.
+        """
         # Create large diverse population
         large_population = self.manager.initialize_random_population(1000, 50)
         
@@ -6297,7 +6456,11 @@ class TestPopulationManagerAdvancedScenarios(unittest.TestCase):
         self.assertGreater(recovered_diversity, bottleneck_diversity)  # Some recovery
     
     def test_population_adaptation_tracking(self):
-        """Test tracking of population adaptation over time."""
+        """
+        Test that the population's adaptation to a dynamically changing environment is tracked correctly over multiple generations.
+        
+        Simulates a population evolving in an environment where the optimal genome shifts each generation. Tracks adaptation metrics such as best fitness, average fitness, diversity, and adaptation rate over time, and asserts that the population's average fitness improves as adaptation occurs.
+        """
         # Create population in changing environment
         population = self.manager.initialize_random_population(100, 10)
         
@@ -6310,6 +6473,15 @@ class TestPopulationManagerAdvancedScenarios(unittest.TestCase):
             
             # Fitness based on distance to optimum
             def adaptive_fitness(genome):
+                """
+                Calculates a fitness score inversely proportional to the squared distance between the input genome and an optimal genome.
+                
+                Parameters:
+                	genome (list or sequence of float): The genome to evaluate.
+                
+                Returns:
+                	float: Fitness value, where higher values indicate closer proximity to the optimal genome.
+                """
                 distance = sum((g - opt)**2 for g, opt in zip(genome, optimal_genome))
                 return 1.0 / (1.0 + distance)
             
@@ -6366,7 +6538,9 @@ class TestPopulationManagerAdvancedScenarios(unittest.TestCase):
         self.assertGreater(late_avg, early_avg)
     
     def test_population_coexistence_dynamics(self):
-        """Test dynamics of coexisting subpopulations."""
+        """
+        Test that distinct subpopulations optimized for different niches can coexist and maintain diversity and fitness over multiple generations in a multi-niche evolutionary scenario.
+        """
         # Create two distinct subpopulations
         subpop1 = []  # Specialists for one niche
         subpop2 = []  # Specialists for another niche
@@ -6386,6 +6560,17 @@ class TestPopulationManagerAdvancedScenarios(unittest.TestCase):
         
         # Multi-niche fitness function
         def multi_niche_fitness(genome):
+            """
+            Evaluates a genome's fitness based on proximity to two optimal average values.
+            
+            The function computes two fitness scores corresponding to peaks at average genome values of 1 and 9, returning the higher score. This creates a multi-niche landscape with two distinct optima.
+            
+            Parameters:
+                genome (list[float]): The genome to evaluate.
+            
+            Returns:
+                float: The fitness value, with higher values indicating closer proximity to either peak.
+            """
             avg_value = sum(genome) / len(genome)
             
             # Two fitness peaks: one at low values, one at high values
@@ -6453,7 +6638,11 @@ class TestIntegrationStressTests(unittest.TestCase):
     """Stress tests for integrated evolutionary system components."""
     
     def test_long_running_evolution_stability(self):
-        """Test system stability during long-running evolution."""
+        """
+        Test that the evolutionary system maintains stability and recovers from numerical issues during a simulated long-running evolution process.
+        
+        Simulates a long evolutionary run with a fitness function that can produce extreme values, and verifies that the system completes successfully, reports stability metrics, and indicates successful recovery from numerical errors.
+        """
         conduit = EvolutionaryConduit()
         
         # Configure for long run
@@ -6467,6 +6656,15 @@ class TestIntegrationStressTests(unittest.TestCase):
         
         def stability_fitness(genome):
             # Fitness function that might cause instability
+            """
+            Calculates the sum of squares of the genome, occasionally returning positive or negative infinity to simulate instability.
+            
+            Parameters:
+            	genome (iterable): Sequence of numerical values representing a genome.
+            
+            Returns:
+            	float: The sum of squares of the genome, or infinity/-infinity with low probability to mimic unstable fitness evaluation.
+            """
             result = sum(x**2 for x in genome)
             # Occasionally return extreme values
             if random.random() < 0.001:
@@ -6498,7 +6696,11 @@ class TestIntegrationStressTests(unittest.TestCase):
             self.assertTrue(result['stability_metrics']['recovery_successful'])
     
     def test_memory_leak_detection(self):
-        """Test for memory leaks in evolutionary components."""
+        """
+        Test that evolutionary components do not cause significant memory leaks during repeated population creation and destruction.
+        
+        This test repeatedly creates and destroys populations, tracks object references, and asserts that less than 5% of tracked objects remain after garbage collection, indicating minimal memory leakage.
+        """
         import gc
         import weakref
         
@@ -6506,6 +6708,11 @@ class TestIntegrationStressTests(unittest.TestCase):
         created_objects = []
         
         def create_and_destroy_populations():
+            """
+            Repeatedly creates, evaluates, and destroys populations to test memory management and object lifecycle behavior.
+            
+            This function initializes multiple populations, evaluates them, tracks references to selected individuals, clears populations, and periodically forces garbage collection to simulate and monitor population lifecycle and memory cleanup.
+            """
             conduit = EvolutionaryConduit()
             
             for i in range(10):
@@ -6542,7 +6749,11 @@ class TestIntegrationStressTests(unittest.TestCase):
         self.assertLess(leak_percentage, 0.05)
     
     def test_concurrent_evolution_interference(self):
-        """Test for interference between concurrent evolution processes."""
+        """
+        Test that concurrent evolution processes do not interfere with each other and produce isolated, thread-specific results.
+        
+        This test runs multiple evolution processes in parallel threads, each with a unique fitness function component tied to its thread ID. It verifies that all threads complete without errors, results are unique per thread, and the fitness values reflect the correct thread-specific computation.
+        """
         import threading
         import time
         
@@ -6550,6 +6761,11 @@ class TestIntegrationStressTests(unittest.TestCase):
         errors = []
         
         def run_concurrent_evolution(thread_id):
+            """
+            Runs an evolutionary process in a separate thread, injecting the thread ID into the fitness function to detect concurrent interference.
+            
+            Appends the result of the evolution or any exception encountered to shared results or errors lists, respectively.
+            """
             try:
                 conduit = EvolutionaryConduit()
                 params = EvolutionaryParameters(
@@ -6611,7 +6827,11 @@ class TestIntegrationStressTests(unittest.TestCase):
             self.assertAlmostEqual(result['best_individual']['fitness'], expected_total, places=6)
     
     def test_resource_exhaustion_handling(self):
-        """Test handling of resource exhaustion scenarios."""
+        """
+        Test that the evolutionary system gracefully handles scenarios where resource limits such as memory or time are reached.
+        
+        Verifies that evolution can terminate early and report resource status without crashing or data loss when subjected to constrained resources.
+        """
         conduit = EvolutionaryConduit()
         
         # Configure parameters that might cause resource issues
@@ -6625,6 +6845,15 @@ class TestIntegrationStressTests(unittest.TestCase):
         
         def resource_intensive_fitness(genome):
             # Simulate resource-intensive computation
+            """
+            Evaluates the fitness of a genome using a resource-intensive computation involving large matrix operations.
+            
+            Parameters:
+                genome (list[float]): The genome to be evaluated.
+            
+            Returns:
+                float: The computed fitness value based on matrix-weighted genome contributions.
+            """
             large_matrix = [[random.random() for _ in range(100)] for _ in range(100)]
             
             # Matrix operations
@@ -6668,7 +6897,11 @@ class TestEvolutionarySystemValidation(unittest.TestCase):
     """Validation tests for evolutionary system correctness."""
     
     def test_evolutionary_algorithm_convergence_proof(self):
-        """Test theoretical convergence properties of evolutionary algorithms."""
+        """
+        Test that the evolutionary algorithm demonstrates theoretical convergence properties on a unimodal fitness landscape.
+        
+        Simulates evolution using a unimodal fitness function and verifies monotonic improvement, convergence rate, and optimality gap, ensuring the algorithm's convergence behavior aligns with theoretical expectations.
+        """
         # Test monotonic improvement property
         conduit = EvolutionaryConduit()
         
@@ -6683,6 +6916,11 @@ class TestEvolutionarySystemValidation(unittest.TestCase):
         # Unimodal fitness function for guaranteed convergence
         def unimodal_fitness(genome):
             # Sphere function: single global optimum at origin
+            """
+            Evaluates the fitness of a genome using the unimodal Sphere function.
+            
+            Returns the negative sum of squares of the genome values, with the global optimum at the origin.
+            """
             return -sum(x**2 for x in genome)
         
         conduit.set_fitness_function(unimodal_fitness)
@@ -6723,7 +6961,11 @@ class TestEvolutionarySystemValidation(unittest.TestCase):
             self.assertGreater(improvement_rate, 0.8)  # At least 80% improvements
     
     def test_population_diversity_preservation_validation(self):
-        """Test validation of diversity preservation mechanisms."""
+        """
+        Validate that diversity preservation mechanisms maintain sufficient genetic diversity in a population over multiple generations.
+        
+        This test simulates an evolutionary process with fitness sharing to promote diversity, tracks diversity metrics across generations, and asserts that diversity does not fall below critical thresholds.
+        """
         manager = PopulationManager()
         
         # Create initial diverse population
@@ -6744,6 +6986,19 @@ class TestEvolutionarySystemValidation(unittest.TestCase):
         for generation in range(20):
             # Fitness sharing to maintain diversity
             def fitness_sharing(individual, population, sigma=1.0):
+                """
+                Adjust the fitness of an individual using fitness sharing to promote diversity within the population.
+                
+                The individual's fitness is divided by the sum of sharing values with other individuals whose genome distance is less than `sigma`, reducing fitness in crowded regions of the search space.
+                
+                Parameters:
+                    individual (dict): The individual whose fitness is being adjusted. Must contain 'fitness' and 'genome' keys.
+                    population (list): List of individuals, each with a 'genome' key.
+                    sigma (float, optional): The sharing threshold distance. Defaults to 1.0.
+                
+                Returns:
+                    float: The adjusted fitness value after applying fitness sharing.
+                """
                 base_fitness = individual['fitness']
                 sharing_sum = 0
                 
@@ -6795,7 +7050,11 @@ class TestEvolutionarySystemValidation(unittest.TestCase):
         self.assertGreater(min_diversity, diversity_crash_threshold)
     
     def test_selection_pressure_calibration_validation(self):
-        """Test validation of selection pressure calibration."""
+        """
+        Validate that tournament selection pressure scales correctly with tournament size by analyzing selection intensity and variance across a known fitness distribution.
+        
+        This test verifies that increasing tournament size in tournament selection leads to higher selection intensity and lower variance in selected fitness, confirming proper calibration of selection pressure. It also checks that weak selection approximates random choice and strong selection favors high-fitness individuals.
+        """
         strategy = SelectionStrategy()
         
         # Create population with known fitness distribution

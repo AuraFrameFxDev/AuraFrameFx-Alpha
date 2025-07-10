@@ -95,7 +95,7 @@ def create_mock_response(status_code=200, json_data=None, headers=None, text=Non
     """
     Create a mock HTTP response object for testing with customizable status code, headers, text, and JSON data.
     
-    The returned mock object includes `.status_code`, `.headers`, `.text`, a `.json()` method (which returns the provided JSON data or raises a `ValueError` if none is set), and a `.raise_for_status()` method (which raises an exception for status codes 400 or higher).
+    The returned mock object simulates an HTTP response, including `.status_code`, `.headers`, `.text`, a `.json()` method (which returns the provided JSON data or raises a `ValueError` if none is set), and a `.raise_for_status()` method (which raises an exception for status codes 400 or higher).
     
     Parameters:
         status_code (int, optional): HTTP status code to simulate. Defaults to 200.
@@ -127,10 +127,10 @@ def create_mock_response(status_code=200, json_data=None, headers=None, text=Non
 
 def create_test_connector(config_overrides=None):
     """
-    Instantiate and return a GenesisConnector configured for testing, applying any configuration overrides.
+    Create and return a GenesisConnector instance configured for testing, with optional overrides applied to the default test configuration.
     
     Parameters:
-        config_overrides (dict, optional): Configuration values to override the default test settings.
+        config_overrides (dict, optional): Dictionary of configuration values to override the defaults.
     
     Returns:
         GenesisConnector: A test instance initialized with the merged configuration.
