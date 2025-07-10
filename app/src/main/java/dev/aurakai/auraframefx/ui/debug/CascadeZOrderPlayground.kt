@@ -29,6 +29,11 @@ class CascadeDebugViewModel @Inject constructor(
      */
 =======
 >>>>>>> pr458merge
+    /**
+     * Updates the vision state of the CascadeAgent to the specified value.
+     *
+     * @param newState The new vision state to set.
+     */
     fun updateVisionState(newState: VisionState) {
         cascadeAgent.updateVisionState(newState)
     }
@@ -52,6 +57,14 @@ class CascadeDebugViewModel @Inject constructor(
  */
 =======
 >>>>>>> pr458merge
+/**
+ * Displays a debug UI for inspecting and updating the vision and processing states of a CascadeAgent.
+ *
+ * Presents the current vision and processing states, allows manual input of new states, and displays state history.
+ * Intended for use in development or debugging environments to interactively test state transitions.
+ *
+ * @param viewModel The ViewModel providing state and update methods for the CascadeAgent. Defaults to an injected instance.
+ */
 @Composable
 fun CascadeZOrderPlayground(
     viewModel: CascadeDebugViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
@@ -208,6 +221,9 @@ fun CascadeZOrderPlayground(
  */
 =======
 >>>>>>> pr458merge
+/**
+ * Displays a preview of the CascadeZOrderPlayground debug UI within a Material theme for design-time inspection.
+ */
 @Composable
 @Preview(showBackground = true)
 fun CascadeZOrderPlaygroundPreview() {

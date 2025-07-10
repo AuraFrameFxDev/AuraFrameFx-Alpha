@@ -20,10 +20,9 @@ fun Modifier.cyberEdgeGlow(): Modifier = this /**
  * @return The modifier with the cyber edge glow effect applied.
  */
 fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier = this /**
- * Applies a digital pixelation visual effect to the modifier when visible is true.
+ * Applies a cyber-themed edge glow effect to the modifier.
  *
- * @param visible Whether the pixelation effect should be applied.
- * @return The modified [Modifier] with the pixelation effect if visible, or the original [Modifier] otherwise.
+ * Currently a placeholder with no effect; returns the original modifier unchanged.
  */
 fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this /**
  * Applies a digital glitch visual effect to the modifier.
@@ -32,10 +31,26 @@ fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this /**
  * @return The original modifier unchanged.
  */
 =======
-fun Modifier.cyberEdgeGlow(): Modifier = this // Placeholder implementation
-fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier = this // Placeholder
+fun Modifier.cyberEdgeGlow(): Modifier = this /**
+ * Returns a modifier intended to apply a customizable cyber edge glow effect using the specified primary and secondary colors.
+ *
+ * @param primaryColor The main color for the edge glow effect.
+ * @param secondaryColor The secondary color to complement the glow.
+ * @return The original modifier with the intended cyber edge glow effect applied.
+ */
+fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier = this /**
+ * Applies a digital pixelation effect to the modifier when visible is true.
+ *
+ * @param visible If true, the pixelation effect is applied; otherwise, no effect is applied.
+ * @return The modified Modifier with the pixelation effect if visible is true, or the original Modifier.
+ */
 fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this // Placeholder
 >>>>>>> pr458merge
+/**
+ * Placeholder for applying a digital glitch visual effect to the modifier.
+ *
+ * Currently returns the original modifier unchanged.
+ */
 fun Modifier.digitalGlitchEffect(): Modifier = this // Placeholder
 
 // The object can be removed if it serves no other purpose,

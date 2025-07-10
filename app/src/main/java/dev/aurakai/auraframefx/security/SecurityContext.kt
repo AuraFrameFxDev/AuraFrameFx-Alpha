@@ -172,7 +172,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Encrypt sensitive data using Keystore.
+     * Encrypts the provided string using the Android Keystore and AES encryption.
+     *
+     * Attempts to initialize encryption if not already active. Returns an [EncryptedData] object containing the encrypted bytes, initialization vector, timestamp, and metadata, or null if encryption fails.
+     *
+     * @param data The UTF-8 string to encrypt.
+     * @return The encrypted data and metadata, or null if encryption is unsuccessful.
      */
     fun encrypt(data: String): EncryptedData? {
         if (_encryptionStatus.value != EncryptionStatus.ACTIVE) {
@@ -224,16 +229,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-<<<<<<< HEAD
      * Decrypts data previously encrypted with the Keystore.
      *
      * Attempts to initialize encryption if not already active. Returns the decrypted string if successful, or null if decryption fails.
      *
      * @param encryptedData The encrypted data and initialization vector to decrypt.
      * @return The decrypted string, or null if decryption fails.
-=======
-     * Decrypt previously encrypted data using Keystore.
->>>>>>> pr458merge
      */
     fun decrypt(encryptedData: EncryptedData): String? {
         if (_encryptionStatus.value != EncryptionStatus.ACTIVE) {
@@ -274,17 +275,13 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-<<<<<<< HEAD
      * Creates a shared secure context for communication with another agent.
      *
-     * Generates a unique identifier and timestamp, and packages the provided context for sharing. The content is not encrypted in this implementation.
+     * Generates a unique identifier and timestamp, and packages the provided context data for sharing with the specified agent. The content is not encrypted in this implementation.
      *
-     * @param agentType The target agent to share the context with.
+     * @param agentType The agent to share the context with.
      * @param context The context data to be shared.
      * @return A SharedSecureContext containing the packaged context and metadata.
-=======
-     * Share a secure context with another agent
->>>>>>> pr458merge
      */
     fun shareSecureContextWith(agentType: AgentType, context: String): SharedSecureContext {
         val secureId = generateSecureId()
@@ -301,13 +298,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-<<<<<<< HEAD
-     * Checks the application's integrity by retrieving and hashing its signature.
+     * Checks the application's integrity by retrieving its signature, computing a SHA-256 hash, and returning verification details.
      *
-     * Returns an [ApplicationIntegrity] object containing verification status, app version, signature hash, install and update times, and error information if verification fails.
-=======
-     * Verify the integrity of the application
->>>>>>> pr458merge
+     * @return An [ApplicationIntegrity] object containing verification status, app version, signature hash, install and update times, and error information if verification fails.
      */
     fun verifyApplicationIntegrity(): ApplicationIntegrity {
         try {
@@ -362,15 +355,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-<<<<<<< HEAD
      * Simulates detection of security threats for testing and beta purposes.
      *
      * @return A randomly generated list of simulated security threats.
-=======
-     * Simulates detection of potential security threats for testing purposes.
-     *
-     * @return A list of simulated `SecurityThreat` objects, randomly included to mimic threat detection during beta testing.
->>>>>>> pr458merge
      */
     private fun detectThreats(): List<SecurityThreat> {
         // In a real implementation, this would perform actual threat analysis
@@ -394,21 +381,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-<<<<<<< HEAD
-     * Determines the overall threat level based on the highest severity found in the provided list of security threats.
-     *
-     * Returns `ThreatLevel.LOW` if the list is empty.
-     *
-     * @param threats The list of detected security threats.
-     * @return The highest threat level among the threats, or `ThreatLevel.LOW` if the list is empty.
-=======
-     * Calculates the overall threat level based on the highest severity among detected security threats.
+     * Returns the overall threat level based on the highest severity among the provided security threats.
      *
      * If the list is empty, returns `ThreatLevel.LOW`.
      *
      * @param threats List of detected security threats.
-     * @return The highest threat level present in the list, or `ThreatLevel.LOW` if none.
->>>>>>> pr458merge
+     * @return The highest threat level found, or `ThreatLevel.LOW` if the list is empty.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -426,13 +404,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-<<<<<<< HEAD
-     * Generates a random 16-byte hexadecimal string for use as a secure identifier.
-=======
-     * Generates a random 16-byte hexadecimal string to be used as a secure identifier.
->>>>>>> pr458merge
+     * Generates a secure 32-character hexadecimal identifier.
      *
-     * @return A securely generated 32-character hexadecimal ID.
+     * @return A randomly generated 16-byte (32-character) hexadecimal string suitable for use as a secure ID.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -441,15 +415,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-<<<<<<< HEAD
-     * Asynchronously logs a security event for auditing and monitoring.
-     *
-     * The event is serialized and written to the debug log. In production environments, events should be securely persisted.
-=======
-     * Asynchronously logs a security event for auditing and monitoring purposes.
+     * Logs a security event asynchronously for auditing and monitoring.
      *
      * The event is serialized and written to the debug log. In production, events should be securely persisted.
->>>>>>> pr458merge
      *
      * @param event The security event to log.
      */
@@ -462,19 +430,11 @@ class SecurityContext @Inject constructor(
             // In a real implementation, this would store events securely
         }
     }    /**
-<<<<<<< HEAD
      * Logs a security validation event for the specified request type and data.
      *
-     * This method records the validation event for auditing but does not perform any actual validation.
+     * This method records the validation event for auditing but does not perform any actual validation of the request.
      *
      * @param requestType The type of request being logged.
-=======
-     * Records a security validation event for the given request type and data.
-     *
-     * This method logs a validation event for auditing purposes. No actual validation of the request is performed.
-     *
-     * @param requestType The type of request being validated.
->>>>>>> pr458merge
      * @param requestData The data associated with the request.
      */
     fun validateRequest(requestType: String, requestData: String) {

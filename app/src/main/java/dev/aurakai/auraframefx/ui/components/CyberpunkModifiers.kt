@@ -28,6 +28,11 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
      */
 =======
 >>>>>>> pr458merge
+    /**
+     * Applies a cyberpunk-themed neon blue edge glow effect to the modifier.
+     *
+     * Adds a shadow with 8.dp elevation and rounded corners, along with a semi-transparent neon blue border for a futuristic visual style.
+     */
     fun Modifier.cyberEdgeGlow() = this
     .shadow(
         elevation = 8.dp,
@@ -42,15 +47,9 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
     )
 
 /**
-<<<<<<< HEAD
-     * Applies a digital glitch effect with a neon purple shadow and border to the modifier.
+     * Applies a cyberpunk-inspired digital glitch effect with a neon purple shadow and border to the modifier.
      *
-     * The effect features a 4.dp elevation shadow and a 2.dp border with rounded corners, both using a neon purple color for a cyberpunk-inspired appearance.
-=======
-     * Applies a digital glitch visual effect with a neon purple shadow and border to the modifier.
-     *
-     * The effect includes a 4.dp elevation shadow and a 2.dp border, both using a neon purple color and rounded corners.
->>>>>>> pr458merge
+     * The effect features a 4.dp elevation shadow and a 2.dp border with rounded corners, both using a neon purple color for a distinctive visual style.
      */
     fun Modifier.digitalGlitchEffect() = this
     .shadow(
@@ -66,16 +65,9 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
     )
 
 /**
-<<<<<<< HEAD
-     * Applies a pixelated cyberpunk effect with a neon teal shadow and border to the modifier.
-     *
-     * Adds a 6.dp shadow and a 1.dp border with slightly rounded corners, using NeonTeal color at 70% opacity for a digital pixel visual style in Compose UI components.
-=======
      * Applies a cyberpunk-inspired pixel effect with a teal neon shadow and border to the modifier.
      *
-     * Adds a 6.dp shadow and a 1.dp border using a NeonTeal color with 70% opacity and slightly rounded corners.
-     * Intended for creating a digital pixelated visual style in Compose UI components.
->>>>>>> pr458merge
+     * Adds a 6.dp shadow and a 1.dp border using NeonTeal color at 70% opacity with slightly rounded corners, creating a digital pixelated visual style for Compose UI components.
      */
     fun Modifier.digitalPixelEffect() = this
     .shadow(
