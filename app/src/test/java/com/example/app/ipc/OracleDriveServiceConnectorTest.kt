@@ -2502,3 +2502,608 @@ class DataIntegrityException(message: String) : Exception(message)
 class DatacenterOutageException(message: String) : Exception(message)
 class UnknownHostException(message: String) : Exception(message)
 
+
+    @Nested
+    @DisplayName("Advanced Reactive Streams and Async Tests")
+    inner class AdvancedReactiveStreamsTests {
+        
+        @Test
+        @DisplayName("Should handle reactive streams for large file uploads")
+        fun testReactiveStreamsForLargeFiles() = runTest {
+            // Given
+            val chunkSize = 1024 * 1024 // 1MB chunks
+            val totalSize = 50 * 1024 * 1024 // 50MB total
+            val fileName = "reactive_large_file.dat"
+            val progressCallback = mock<(Long, Long) -> Unit>()
+            
+            whenever(mockServiceClient.uploadFileReactive(any(), any(), any()))
+                .thenReturn(CompletableFuture.completedFuture("reactive_upload"))
+            
+            // When
+            val result = connector.uploadFileReactive(fileName, totalSize, chunkSize, progressCallback)
+            
+            // Then
+            assertEquals("reactive_upload", result.get())
+            verify(progressCallback, atLeast(10)).invoke(any(), eq(totalSize.toLong()))
+        }
+        
+        @Test
+        @DisplayName("Should handle backpressure in reactive uploads")
+        fun testBackpressureInReactiveUploads() = runTest {
+            // Given
+            val fileName = "backpressure_test.dat"
+            val data = ByteArray(10 * 1024 * 1024) // 10MB
+            val backpressureConfig = BackpressureConfig(
+                bufferSize = 1024,
+                strategy = BackpressureStrategy.BUFFER
+            )
+            
+            connector.setBackpressureConfig(backpressureConfig)
+            
+            whenever(mockServiceClient.uploadFileWithBackpressure(any(), any(), any()))
+                .thenReturn(CompletableFuture.completedFuture("backpressure_upload"))
+            
+            // When
+            val result = connector.uploadFileWithBackpressure(fileName, data)
+            
+            // Then
+            assertEquals("backpressure_upload", result.get())
+            verify(mockServiceClient).uploadFileWithBackpressure(fileName, data, backpressureConfig)
+        }
+        
+        @Test
+        @DisplayName("Should handle stream cancellation gracefully")
+        fun testStreamCancellationHandling() = runTest {
+            // Given
+            val fileName = "cancellation_stream.dat"
+            val data = ByteArray(100 * 1024 * 1024) // 100MB
+            val cancellableStream = CompletableFuture<String>()
+            
+            whenever(mockServiceClient.uploadFileStream(any(), any()))
+                .thenReturn(cancellableStream)
+            
+            // When
+            val uploadFuture = connector.uploadFileStream(fileName, data)
+            delay(100) // Let upload start
+            uploadFuture.cancel(true)
+            
+            // Then
+            assertTrue(uploadFuture.isCancelled)
+            verify(mockServiceClient).cancelUploadStream(any())
+        }
+        
+        @Test
+        @DisplayName("Should handle parallel stream processing")
+        fun testParallelStreamProcessing() = runTest {
+            // Given
+            val files = (1..20).map { i ->
+                "parallel_$i.txt" to "content $i".toByteArray()
+            }
+            
+            whenever(mockServiceClient.uploadMultipleFilesParallel(any()))
+                .thenReturn(CompletableFuture.completedFuture(
+                    files.map { "upload_${it.first}" }
+                ))
+            
+            // When
+            val result = connector.uploadFilesParallel(files, parallelism = 5)
+            
+            // Then
+            val uploadIds = result.get()
+            assertEquals(20, uploadIds.size)
+            assertTrue(uploadIds.all { it.startsWith("upload_parallel_") })
+        }
+    }
+    
+    @Nested
+    @DisplayName("Advanced Caching and Performance Optimization Tests")
+    inner class AdvancedCachingPerformanceTests {
+        
+        @Test
+        @DisplayName("Should implement intelligent caching for frequently accessed files")
+        fun testIntelligentFileCache() = runTest {
+            // Given
+            val fileId = "frequently_accessed_file"
+            val cachedData = "cached content".toByteArray()
+            val cacheConfig = CacheConfig(
+                maxSize = 100,
+                ttlSeconds = 3600,
+                enableLRU = true
+            )
+            
+            connector.setCacheConfig(cacheConfig)
+            connector.cacheFile(fileId, cachedData)
+            
+            // When
+            val result1 = connector.downloadFileWithCache(fileId)
+            val result2 = connector.downloadFileWithCache(fileId)
+            
+            // Then
+            assertArrayEquals(cachedData, result1.get())
+            assertArrayEquals(cachedData, result2.get())
+            verify(mockServiceClient, times(0)).downloadFile(fileId) // Should not hit service due to cache
+        }
+        
+        @Test
+        @DisplayName("Should handle cache eviction policies correctly")
+        fun testCacheEvictionPolicies() = runTest {
+            // Given
+            val cacheConfig = CacheConfig(
+                maxSize = 5,
+                ttlSeconds = 1,
+                enableLRU = true
+            )
+            connector.setCacheConfig(cacheConfig)
+            
+            // When - Fill cache beyond capacity
+            repeat(10) { i ->
+                connector.cacheFile("file_$i", "content $i".toByteArray())
+            }
+            
+            // Then
+            val cacheStats = connector.getCacheStats()
+            assertEquals(5, cacheStats.currentSize)
+            assertTrue(cacheStats.evictionCount > 0)
+        }
+        
+        @Test
+        @DisplayName("Should optimize for hot and cold data patterns")
+        fun testHotColdDataOptimization() = runTest {
+            // Given
+            val hotFiles = (1..5).map { "hot_file_$it" }
+            val coldFiles = (1..20).map { "cold_file_$it" }
+            
+            whenever(mockServiceClient.getFileAccessPattern(any()))
+                .thenReturn(CompletableFuture.completedFuture(
+                    if (hotFiles.contains(it.arguments[0])) AccessPattern.HOT else AccessPattern.COLD
+                ))
+            
+            // When
+            hotFiles.forEach { fileId ->
+                connector.optimizeFileAccess(fileId)
+            }
+            coldFiles.forEach { fileId ->
+                connector.optimizeFileAccess(fileId)
+            }
+            
+            // Then
+            val optimizationStats = connector.getOptimizationStats()
+            assertEquals(5, optimizationStats.hotFilesOptimized)
+            assertEquals(20, optimizationStats.coldFilesOptimized)
+        }
+        
+        @Test
+        @DisplayName("Should implement predictive prefetching")
+        fun testPredictivePrefetching() = runTest {
+            // Given
+            val relatedFiles = listOf("doc1.pdf", "doc2.pdf", "doc3.pdf")
+            val accessHistory = AccessHistory(
+                patterns = mapOf(
+                    "doc1.pdf" to listOf("doc2.pdf", "doc3.pdf"),
+                    "doc2.pdf" to listOf("doc3.pdf")
+                )
+            )
+            
+            connector.setAccessHistory(accessHistory)
+            whenever(mockServiceClient.downloadFile(any()))
+                .thenReturn(CompletableFuture.completedFuture("content".toByteArray()))
+            
+            // When
+            connector.downloadFileWithPrefetch("doc1.pdf")
+            
+            // Then
+            verify(mockServiceClient).downloadFile("doc1.pdf")
+            verify(mockServiceClient).prefetchFile("doc2.pdf")
+            verify(mockServiceClient).prefetchFile("doc3.pdf")
+        }
+    }
+    
+    @Nested
+    @DisplayName("Advanced Security Hardening Tests")
+    inner class AdvancedSecurityHardeningTests {
+        
+        @Test
+        @DisplayName("Should implement defense against timing attacks")
+        fun testTimingAttackDefense() = runTest {
+            // Given
+            val validToken = "valid_token_12345"
+            val invalidTokens = listOf(
+                "invalid_token_1",
+                "invalid_token_12",
+                "invalid_token_123",
+                "invalid_token_1234",
+                "invalid_token_12345"
+            )
+            
+            whenever(mockAuthProvider.validateTokenConstantTime(any()))
+                .thenAnswer { invocation ->
+                    val token = invocation.arguments[0] as String
+                    // Simulate constant time validation
+                    Thread.sleep(100) // Always take same time
+                    token == validToken
+                }
+            
+            // When
+            val validationTimes = invalidTokens.map { token ->
+                val startTime = System.currentTimeMillis()
+                connector.validateTokenSecurely(token)
+                System.currentTimeMillis() - startTime
+            }
+            
+            // Then
+            val averageTime = validationTimes.average()
+            val maxDeviation = validationTimes.maxOf { kotlin.math.abs(it - averageTime) }
+            assertTrue(maxDeviation < 50) // Should have minimal timing variation
+        }
+        
+        @Test
+        @DisplayName("Should implement secure random number generation")
+        fun testSecureRandomGeneration() = runTest {
+            // Given
+            val secureRandom = mock<SecureRandom>()
+            whenever(secureRandom.nextBytes(any())).thenAnswer { invocation ->
+                val bytes = invocation.arguments[0] as ByteArray
+                // Fill with pseudo-random data
+                repeat(bytes.size) { i -> bytes[i] = (i % 256).toByte() }
+            }
+            
+            connector.setSecureRandom(secureRandom)
+            
+            // When
+            val sessionId = connector.generateSecureSessionId()
+            val encryptionKey = connector.generateEncryptionKey(256)
+            
+            // Then
+            assertNotNull(sessionId)
+            assertEquals(64, sessionId.length) // Hex representation of 32 bytes
+            assertNotNull(encryptionKey)
+            assertEquals(32, encryptionKey.size) // 256 bits = 32 bytes
+        }
+        
+        @Test
+        @DisplayName("Should implement secure file deletion with overwriting")
+        fun testSecureFileDeletion() = runTest {
+            // Given
+            val fileId = "sensitive_file_123"
+            val secureDeleteConfig = SecureDeleteConfig(
+                overwritePasses = 3,
+                useRandomPatterns = true,
+                verifyDeletion = true
+            )
+            
+            whenever(mockServiceClient.secureDeleteFile(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture(SecureDeleteResult(
+                    overwritePassesCompleted = 3,
+                    verificationPassed = true,
+                    deletionConfirmed = true
+                )))
+            
+            // When
+            val result = connector.secureDeleteFile(fileId, secureDeleteConfig)
+            
+            // Then
+            val deleteResult = result.get()
+            assertEquals(3, deleteResult.overwritePassesCompleted)
+            assertTrue(deleteResult.verificationPassed)
+            assertTrue(deleteResult.deletionConfirmed)
+        }
+        
+        @Test
+        @DisplayName("Should implement access control with fine-grained permissions")
+        fun testFineGrainedAccessControl() = runTest {
+            // Given
+            val userId = "user123"
+            val fileId = "confidential_document.pdf"
+            val permissions = FilePermissions(
+                read = true,
+                write = false,
+                delete = false,
+                share = false,
+                admin = false
+            )
+            
+            whenever(mockAuthProvider.getFilePermissions(userId, fileId))
+                .thenReturn(permissions)
+            
+            // When & Then
+            assertTrue(connector.canUserReadFile(userId, fileId))
+            assertFalse(connector.canUserWriteFile(userId, fileId))
+            assertFalse(connector.canUserDeleteFile(userId, fileId))
+            assertFalse(connector.canUserShareFile(userId, fileId))
+            assertFalse(connector.canUserAdministerFile(userId, fileId))
+        }
+        
+        @Test
+        @DisplayName("Should detect and prevent brute force attacks")
+        fun testBruteForceProtection() = runTest {
+            // Given
+            val ipAddress = "192.168.1.100"
+            val bruteForceConfig = BruteForceProtectionConfig(
+                maxAttempts = 5,
+                timeWindowMinutes = 15,
+                lockoutDurationMinutes = 30
+            )
+            
+            connector.setBruteForceProtection(bruteForceConfig)
+            
+            // When - Simulate multiple failed attempts
+            repeat(6) {
+                try {
+                    connector.authenticateFromIP(ipAddress, "wrong_credentials")
+                } catch (e: SecurityException) {
+                    // Expected
+                }
+            }
+            
+            // Then
+            assertTrue(connector.isIPAddressLockedOut(ipAddress))
+            val lockoutInfo = connector.getLockoutInfo(ipAddress)
+            assertTrue(lockoutInfo.remainingLockoutTime > 0)
+        }
+    }
+    
+    @Nested
+    @DisplayName("Advanced Metrics and Telemetry Tests")
+    inner class AdvancedMetricsTelemetryTests {
+        
+        @Test
+        @DisplayName("Should collect detailed performance metrics")
+        fun testDetailedPerformanceMetrics() = runTest {
+            // Given
+            val fileName = "metrics_test.txt"
+            val fileData = "test content".toByteArray()
+            val metricsCollector = mock<MetricsCollector>()
+            
+            connector.setMetricsCollector(metricsCollector)
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture("metrics_upload"))
+            
+            // When
+            connector.uploadFile(fileName, fileData)
+            
+            // Then
+            verify(metricsCollector).recordUploadLatency(any())
+            verify(metricsCollector).recordThroughput(eq(fileData.size.toLong()), any())
+            verify(metricsCollector).incrementCounter("uploads.success")
+            verify(metricsCollector).recordGauge("file.size", fileData.size.toDouble())
+        }
+        
+        @Test
+        @DisplayName("Should export metrics in Prometheus format")
+        fun testPrometheusMetricsExport() = runTest {
+            // Given
+            val prometheusRegistry = mock<PrometheusRegistry>()
+            connector.setPrometheusRegistry(prometheusRegistry)
+            
+            // When
+            val metricsOutput = connector.exportPrometheusMetrics()
+            
+            // Then
+            assertNotNull(metricsOutput)
+            assertTrue(metricsOutput.contains("oracle_drive_uploads_total"))
+            assertTrue(metricsOutput.contains("oracle_drive_upload_duration_seconds"))
+            assertTrue(metricsOutput.contains("oracle_drive_connection_pool_active"))
+            verify(prometheusRegistry).scrape()
+        }
+        
+        @Test
+        @DisplayName("Should implement distributed tracing")
+        fun testDistributedTracing() = runTest {
+            // Given
+            val traceId = "trace-123-456-789"
+            val spanId = "span-456-789"
+            val tracingContext = TracingContext(traceId, spanId)
+            
+            connector.setTracingContext(tracingContext)
+            
+            val fileName = "traced_file.txt"
+            val fileData = "traced content".toByteArray()
+            
+            whenever(mockServiceClient.uploadFileWithTracing(any(), any(), any()))
+                .thenReturn(CompletableFuture.completedFuture("traced_upload"))
+            
+            // When
+            val result = connector.uploadFileWithTracing(fileName, fileData)
+            
+            // Then
+            assertEquals("traced_upload", result.get())
+            verify(mockServiceClient).uploadFileWithTracing(fileName, fileData, tracingContext)
+            
+            val spans = connector.getCompletedSpans()
+            assertTrue(spans.any { it.operationName == "file.upload" })
+            assertTrue(spans.any { it.traceId == traceId })
+        }
+        
+        @Test
+        @DisplayName("Should implement custom business metrics")
+        fun testCustomBusinessMetrics() = runTest {
+            // Given
+            val businessMetricsConfig = BusinessMetricsConfig(
+                trackFileTypeDistribution = true,
+                trackUserActivityPatterns = true,
+                trackCostOptimization = true
+            )
+            
+            connector.setBusinessMetricsConfig(businessMetricsConfig)
+            
+            // When
+            connector.uploadFile("document.pdf", "pdf content".toByteArray())
+            connector.uploadFile("image.jpg", "jpg content".toByteArray())
+            connector.uploadFile("video.mp4", "mp4 content".toByteArray())
+            
+            // Then
+            val businessMetrics = connector.getBusinessMetrics()
+            assertEquals(3, businessMetrics.totalFiles)
+            assertEquals(1, businessMetrics.fileTypeDistribution["pdf"])
+            assertEquals(1, businessMetrics.fileTypeDistribution["jpg"])
+            assertEquals(1, businessMetrics.fileTypeDistribution["mp4"])
+            assertTrue(businessMetrics.averageFileSize > 0)
+        }
+        
+        @Test
+        @DisplayName("Should implement alerting based on SLA violations")
+        fun testSLAViolationAlerting() = runTest {
+            // Given
+            val slaConfig = SLAConfig(
+                maxUploadLatencyMs = 5000,
+                maxErrorRate = 0.05,
+                minThroughputMBps = 10.0
+            )
+            
+            val alertManager = mock<AlertManager>()
+            connector.setSLAConfig(slaConfig)
+            connector.setAlertManager(alertManager)
+            
+            // When - Simulate SLA violation
+            repeat(20) {
+                try {
+                    connector.uploadFile("slow_file_$it.txt", "content".toByteArray()).get()
+                    Thread.sleep(6000) // Simulate slow upload
+                } catch (e: Exception) {
+                    // Simulate some failures
+                }
+            }
+            
+            // Then
+            verify(alertManager, atLeastOnce()).sendAlert(argThat { alert ->
+                alert.type == AlertType.SLA_VIOLATION &&
+                alert.metric == "upload_latency"
+            })
+        }
+    }
+
+// Additional data classes for the new tests
+data class BackpressureConfig(
+    val bufferSize: Int,
+    val strategy: BackpressureStrategy
+)
+
+enum class BackpressureStrategy {
+    BUFFER, DROP, ERROR
+}
+
+data class CacheConfig(
+    val maxSize: Int,
+    val ttlSeconds: Long,
+    val enableLRU: Boolean
+)
+
+data class CacheStats(
+    val currentSize: Int,
+    val evictionCount: Long,
+    val hitRate: Double
+)
+
+enum class AccessPattern {
+    HOT, WARM, COLD
+}
+
+data class AccessHistory(
+    val patterns: Map<String, List<String>>
+)
+
+data class OptimizationStats(
+    val hotFilesOptimized: Int,
+    val coldFilesOptimized: Int
+)
+
+data class SecureDeleteConfig(
+    val overwritePasses: Int,
+    val useRandomPatterns: Boolean,
+    val verifyDeletion: Boolean
+)
+
+data class SecureDeleteResult(
+    val overwritePassesCompleted: Int,
+    val verificationPassed: Boolean,
+    val deletionConfirmed: Boolean
+)
+
+data class FilePermissions(
+    val read: Boolean,
+    val write: Boolean,
+    val delete: Boolean,
+    val share: Boolean,
+    val admin: Boolean
+)
+
+data class BruteForceProtectionConfig(
+    val maxAttempts: Int,
+    val timeWindowMinutes: Int,
+    val lockoutDurationMinutes: Int
+)
+
+data class LockoutInfo(
+    val remainingLockoutTime: Long,
+    val attemptCount: Int
+)
+
+interface MetricsCollector {
+    fun recordUploadLatency(latencyMs: Long)
+    fun recordThroughput(bytes: Long, durationMs: Long)
+    fun incrementCounter(name: String)
+    fun recordGauge(name: String, value: Double)
+}
+
+interface PrometheusRegistry {
+    fun scrape(): String
+}
+
+data class TracingContext(
+    val traceId: String,
+    val spanId: String
+)
+
+data class Span(
+    val operationName: String,
+    val traceId: String,
+    val spanId: String,
+    val startTime: Long,
+    val endTime: Long
+)
+
+data class BusinessMetricsConfig(
+    val trackFileTypeDistribution: Boolean,
+    val trackUserActivityPatterns: Boolean,
+    val trackCostOptimization: Boolean
+)
+
+data class BusinessMetrics(
+    val totalFiles: Int,
+    val fileTypeDistribution: Map<String, Int>,
+    val averageFileSize: Double,
+    val totalStorageUsed: Long
+)
+
+data class SLAConfig(
+    val maxUploadLatencyMs: Long,
+    val maxErrorRate: Double,
+    val minThroughputMBps: Double
+)
+
+interface AlertManager {
+    fun sendAlert(alert: Alert)
+}
+
+data class Alert(
+    val type: AlertType,
+    val metric: String,
+    val threshold: Double,
+    val currentValue: Double,
+    val severity: AlertSeverity
+)
+
+enum class AlertType {
+    SLA_VIOLATION, SECURITY_INCIDENT, RESOURCE_EXHAUSTION
+}
+
+enum class AlertSeverity {
+    LOW, MEDIUM, HIGH, CRITICAL
+}
+
+interface SecureRandom {
+    fun nextBytes(bytes: ByteArray)
+}
+
+}
