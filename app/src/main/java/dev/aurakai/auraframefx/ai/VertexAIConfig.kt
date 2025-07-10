@@ -50,11 +50,11 @@ data class VertexAIConfig(
     val enableFunctionCalling: Boolean = true
 ) {
     /**
-     * Checks the configuration for missing or invalid values and returns a list of error messages.
+     * Validates the configuration fields and returns a list of error messages for any missing or invalid values.
      *
-     * Validates that required string fields are not blank and numeric parameters are within acceptable ranges.
+     * Checks that required string fields are not blank and numeric parameters are within acceptable ranges.
      *
-     * @return A list of error messages for each invalid or missing configuration value; returns an empty list if all fields are valid.
+     * @return A list of error messages for each invalid or missing configuration value, or an empty list if all fields are valid.
      */
     fun validate(): List<String> {
         val errors = mutableListOf<String>()
@@ -80,7 +80,7 @@ data class VertexAIConfig(
     }
     
     /**
-     * Returns the base URL for Vertex AI API requests, constructed from the configured endpoint, API version, project ID, and location.
+     * Constructs the base URL for Vertex AI API requests using the configured endpoint, API version, project ID, and location.
      *
      * @return The base endpoint URL for Vertex AI API requests.
      */
@@ -89,11 +89,11 @@ data class VertexAIConfig(
     }
     
     /**
-     * Constructs the full URL for the content generation API endpoint using the current model configuration.
+     * Returns the full URL for the Vertex AI content generation API endpoint based on the current configuration.
      *
-     * The returned URL incorporates the base endpoint, API version, project ID, location, and model name.
+     * The URL includes the base endpoint, API version, project ID, location, and model name.
      *
-     * @return The complete endpoint URL for content generation requests.
+     * @return The complete URL for content generation requests.
      */
     fun getModelEndpoint(): String {
         return "${getFullEndpoint()}/publishers/google/models/$modelName:generateContent"

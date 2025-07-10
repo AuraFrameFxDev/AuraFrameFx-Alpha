@@ -3492,13 +3492,15 @@ class TestGenesisCoreConfigurationManagement:
     
     def setup_method(self):
         """
-        Set up a fresh GenesisCore instance before each test method.
+        Set up a new GenesisCore instance before each test method.
         """
         self.core = GenesisCore()
     
     def test_config_validation_with_schema(self):
         """
         Test that configuration objects are validated against predefined schemas, accepting valid configurations and initializing with invalid ones while potentially issuing validation warnings.
+        
+        Valid configurations should be accepted and set correctly. Invalid configurations should still allow initialization, but may trigger validation warnings.
         """
         valid_schemas = [
             {
@@ -3530,7 +3532,7 @@ class TestGenesisCoreConfigurationManagement:
     
     def test_config_inheritance_and_override(self):
         """
-        Test that configuration inheritance and override mechanisms correctly apply base and override settings in GenesisCore.
+        Test that GenesisCore correctly applies configuration inheritance and overrides, ensuring base settings are preserved and override values take precedence.
         """
         base_config = {
             "api_key": "base_key",
@@ -3560,7 +3562,7 @@ class TestGenesisCoreConfigurationManagement:
     
     def test_config_hot_reload_simulation(self):
         """
-        Verifies that the GenesisCore instance correctly initializes with updated configurations, simulating hot reload scenarios by re-instantiating with new config values.
+        Test that GenesisCore correctly initializes with new configuration values, simulating hot reload by re-instantiating with updated configs.
         """
         initial_config = {"api_key": "initial_key", "timeout": 30}
         core = GenesisCore(config=initial_config)
@@ -3580,7 +3582,7 @@ class TestGenesisCoreConfigurationManagement:
     
     def test_config_environment_specific_overrides(self):
         """
-        Verify that environment-specific configuration overrides are correctly applied during GenesisCore initialization for different environments.
+        Test that GenesisCore applies the correct configuration overrides for each specified environment during initialization.
         """
         environments = ["development", "staging", "production"]
         
@@ -3599,7 +3601,7 @@ class TestGenesisCoreConfigurationManagement:
     
     def test_config_feature_flags(self):
         """
-        Verify that the GenesisCore configuration correctly handles feature flags and their boolean values.
+        Test that GenesisCore correctly loads and interprets feature flags from the configuration, ensuring their boolean values are preserved.
         """
         feature_flags = {
             "new_algorithm": True,
@@ -3625,13 +3627,13 @@ class TestGenesisCoreAdvancedErrorScenarios:
     
     def setup_method(self):
         """
-        Set up a fresh GenesisCore instance before each test method.
+        Set up a new GenesisCore instance before each test method.
         """
         self.core = GenesisCore()
     
     def test_cascading_failure_scenarios(self):
         """
-        Test how the system handles cascading failures across multiple dependent services, including both exception propagation and fallback success scenarios.
+        Test the system's behavior when multiple dependent services fail in sequence, verifying both exception propagation and fallback handling for cascading failure scenarios.
         """
         failure_sequence = [
             ("primary_service", ConnectionError("Primary service down")),
@@ -3659,7 +3661,7 @@ class TestGenesisCoreAdvancedErrorScenarios:
     
     def test_resource_exhaustion_edge_cases(self):
         """
-        Test how the core module handles processing data under various simulated resource exhaustion scenarios, such as high memory, CPU, disk, network, and file handle usage.
+        Test the core module's ability to process data under simulated resource exhaustion conditions, including high memory, CPU, disk, network, and file handle usage.
         """
         resource_scenarios = [
             {"type": "memory", "limit": 1024*1024*1024},  # 1GB
@@ -3677,7 +3679,7 @@ class TestGenesisCoreAdvancedErrorScenarios:
     
     def test_data_corruption_detection_and_recovery(self):
         """
-        Tests that the system detects and recovers from various data corruption scenarios, ensuring graceful handling and non-null results for corrupted inputs.
+        Test that the system detects and gracefully recovers from various data corruption scenarios, ensuring that processing corrupted inputs does not result in null outputs.
         """
         corrupted_data_scenarios = [
             {"data": "valid_data", "checksum": "invalid_checksum"},
@@ -3694,19 +3696,19 @@ class TestGenesisCoreAdvancedErrorScenarios:
     
     def test_concurrent_error_handling(self):
         """
-        Test that error handling remains robust when multiple workers encounter errors concurrently.
+        Test concurrent error handling to ensure robustness when multiple threads encounter errors.
         
-        Simulates concurrent execution of workers that may raise different exceptions or succeed, verifying that all results are collected and errors are handled gracefully without affecting other threads.
+        Simulates multiple worker threads that may raise various exceptions or succeed, verifying that all results are collected and that errors in one thread do not impact others.
         """
         def error_prone_worker(worker_id):
             """
-            Simulates a worker processing multiple items, intentionally raising different errors for each item.
+            Simulates a worker processing several items, raising different exceptions for each and collecting the results.
             
             Parameters:
-                worker_id (int): Identifier for the worker instance.
+                worker_id (int): The identifier for the worker instance.
             
             Returns:
-                list: A list containing either processed results or error information for each simulated item.
+                list: A list containing either the processed result for each item or a dictionary with error details if an exception occurred.
             """
             errors_to_simulate = [
                 ConnectionError("Network error"),
@@ -3738,17 +3740,21 @@ class TestGenesisCoreAdvancedErrorScenarios:
     
     def test_error_propagation_and_context(self):
         """
-        Test that exceptions raised in nested operations propagate with preserved context and correct exception chaining.
+        Test that exceptions raised in deeply nested operations are propagated with correct exception chaining and context preservation.
+        
+        This test verifies that a ValueError raised at the deepest level is wrapped by a ConnectionError at the intermediate level, which is then wrapped by an HTTPError at the top level. It asserts that each exception in the chain contains the expected message and type, ensuring proper error context is maintained through all layers.
         """
         def nested_operation_level_3():
             """
             Raises a ValueError to simulate a failure at the deepest level of a nested operation.
+            
+            This function is typically used in tests to trigger and verify error propagation in nested call scenarios.
             """
             raise ValueError("Level 3 error with context")
         
         def nested_operation_level_2():
             """
-            Performs a mid-level operation and wraps ValueError exceptions from a lower-level operation as ConnectionError.
+            Performs a mid-level operation and raises a ConnectionError if a ValueError occurs in a lower-level operation.
             
             Raises:
                 ConnectionError: If a ValueError is raised by the nested lower-level operation.
@@ -3760,7 +3766,9 @@ class TestGenesisCoreAdvancedErrorScenarios:
         
         def nested_operation_level_1():
             """
-            Performs a top-level operation and wraps connection errors from a nested operation in an HTTPError.
+            Performs a top-level operation and raises an HTTPError if a ConnectionError occurs in a nested operation.
+            
+            If a ConnectionError is raised by the nested operation, it is wrapped and re-raised as an HTTPError with additional context.
             """
             try:
                 nested_operation_level_2()
@@ -3783,20 +3791,22 @@ class TestGenesisCoreAdvancedDataTransformation:
     
     def setup_method(self):
         """
-        Set up a fresh GenesisCore instance before each test method.
+        Set up a new GenesisCore instance before each test method.
         """
         self.core = GenesisCore()
     
     def test_streaming_data_transformation(self):
         """
-        Test that the data transformation logic correctly processes streaming data in batches, ensuring at least three batches are handled and each produces a non-None result.
+        Test that streaming data is processed in batches, verifying that at least three batches are handled and each batch yields a non-None result.
         """
         def data_stream_generator():
             """
-            Yields a sequence of streaming data items, each containing a timestamp, unique ID, data string, and batch number.
+            Yield streaming data items with timestamp, unique ID, data string, and batch number.
+            
+            Each yielded dictionary contains the current timestamp, a sequential integer ID, a string identifying the item, and a batch number grouping every 100 items.
             
             Yields:
-                dict: A dictionary with keys 'timestamp', 'id', 'data', and 'batch' for each item in the stream.
+                dict: Dictionary with keys 'timestamp', 'id', 'data', and 'batch' for each item.
             """
             for i in range(1000):
                 yield {
@@ -3829,9 +3839,9 @@ class TestGenesisCoreAdvancedDataTransformation:
     
     def test_complex_data_structure_transformation(self):
         """
-        Verifies that the data processing function correctly transforms complex, deeply nested data structures.
+        Test that the data processing function correctly handles and transforms complex, deeply nested data structures.
         
-        Ensures that processing such structures returns a non-None dictionary, validating support for nested objects and arrays.
+        Ensures that processing such structures returns a non-None dictionary, confirming support for nested objects and arrays.
         """
         complex_structures = [
             {
@@ -3877,7 +3887,7 @@ class TestGenesisCoreAdvancedDataTransformation:
     
     def test_data_normalization_and_denormalization(self):
         """
-        Test that the core data processing correctly handles both normalized and denormalized data structures, ensuring valid results for each format.
+        Test that data processing correctly handles both normalized and denormalized data structures, producing valid results for each format.
         """
         # Normalized data (separate tables)
         normalized_data = {
@@ -3918,9 +3928,9 @@ class TestGenesisCoreAdvancedDataTransformation:
     
     def test_data_aggregation_and_analytics(self):
         """
-        Test that the data processing function correctly performs aggregation and analytics transformations on event data.
+        Tests that the data processing function correctly aggregates and analyzes structured event data according to specified grouping and metric rules.
         
-        Verifies that the processed result is a non-null dictionary when given structured analytics input with grouping and metric rules.
+        Asserts that the processed result is a non-null dictionary when provided with analytics input containing events and aggregation instructions.
         """
         analytics_data = {
             "events": [
@@ -3943,7 +3953,7 @@ class TestGenesisCoreAdvancedDataTransformation:
     
     def test_schema_evolution_handling(self):
         """
-        Verify that the data transformation logic correctly handles input data with evolving schema versions, ensuring compatibility and graceful processing across different schema structures.
+        Test that data transformation logic processes input data with different schema versions, ensuring backward and forward compatibility across evolving data structures.
         """
         schema_versions = [
             {
@@ -3974,15 +3984,15 @@ class TestGenesisCoreAdvancedMonitoringAndLogging:
     
     def setup_method(self):
         """
-        Set up a fresh GenesisCore instance before each test method.
+        Set up a new GenesisCore instance before each test method.
         """
         self.core = GenesisCore()
     
     def test_structured_logging_with_context(self):
         """
-        Test that structured logging includes contextual information during data processing operations.
+        Test that structured logging captures and includes contextual information during data processing.
         
-        Verifies that the logger is accessed with contextual data for different logging contexts.
+        Verifies that the logger is accessed with the appropriate context for different logging scenarios.
         """
         log_contexts = [
             {
@@ -4012,9 +4022,9 @@ class TestGenesisCoreAdvancedMonitoringAndLogging:
     
     def test_performance_metrics_collection(self):
         """
-        Test that performance metrics such as response times and error rates are correctly collected for core operations.
+        Test that performance metrics are collected for core operations.
         
-        Simulates multiple executions of core methods and verifies that metrics are recorded for each operation.
+        Simulates repeated executions of core methods and verifies that response times and error rates are recorded for each operation.
         """
         metrics_collector = {
             "response_times": [],
@@ -4025,13 +4035,13 @@ class TestGenesisCoreAdvancedMonitoringAndLogging:
         
         def collect_metrics(operation_name, start_time, end_time, success=True):
             """
-            Records performance metrics for a given operation, including response time and error occurrence.
+            Record response time and error metrics for a specified operation.
             
             Parameters:
-                operation_name (str): The name of the operation being measured.
-                start_time (float): The start time of the operation (in seconds).
-                end_time (float): The end time of the operation (in seconds).
-                success (bool, optional): Indicates if the operation was successful. Defaults to True.
+                operation_name (str): Name of the operation being measured.
+                start_time (float): Start time of the operation in seconds.
+                end_time (float): End time of the operation in seconds.
+                success (bool, optional): Whether the operation completed successfully. Defaults to True.
             """
             duration = end_time - start_time
             metrics_collector["response_times"].append({
@@ -4071,7 +4081,9 @@ class TestGenesisCoreAdvancedMonitoringAndLogging:
     
     def test_distributed_tracing_correlation(self):
         """
-        Tests that distributed tracing correlation is maintained across multiple operations by simulating a trace hierarchy with parent and child spans. Ensures that each operation (input validation, data processing, external request) is executed with the correct trace context.
+        Test that distributed tracing correlation is preserved across multiple operations by simulating a trace hierarchy with parent and child spans.
+        
+        This test ensures that input validation, data processing, and external requests are each executed with the correct trace context, verifying that trace relationships are maintained throughout the workflow.
         """
         trace_hierarchy = {
             "parent_trace": {
@@ -4117,7 +4129,9 @@ class TestGenesisCoreAdvancedMonitoringAndLogging:
     
     def test_real_time_monitoring_alerts(self):
         """
-        Test that real-time monitoring correctly triggers warning and critical alerts when metric thresholds are exceeded.
+        Test that real-time monitoring triggers warning and critical alerts when metric thresholds are exceeded.
+        
+        Simulates various metric values and verifies that alerts are generated at the correct severity levels based on predefined thresholds.
         """
         monitoring_thresholds = {
             "response_time": {"warning": 1.0, "critical": 2.0},
@@ -4130,11 +4144,11 @@ class TestGenesisCoreAdvancedMonitoringAndLogging:
         
         def check_thresholds(metric_name, value):
             """
-            Evaluate a metric value against predefined thresholds and trigger alerts if limits are exceeded.
+            Checks if a metric value exceeds warning or critical thresholds and triggers corresponding alerts.
             
             Parameters:
-                metric_name (str): The name of the metric to check.
-                value (float): The current value of the metric.
+                metric_name (str): Name of the metric to evaluate.
+                value (float): Current value of the metric.
             """
             thresholds = monitoring_thresholds.get(metric_name, {})
             
@@ -4177,13 +4191,13 @@ class TestGenesisCoreAdvancedSecurityScenarios:
     
     def setup_method(self):
         """
-        Set up a fresh GenesisCore instance before each test method.
+        Set up a new GenesisCore instance before each test method.
         """
         self.core = GenesisCore()
     
     def test_advanced_injection_attack_prevention(self):
         """
-        Verifies that the system prevents execution or exposure of advanced injection attack payloads, including NoSQL, LDAP, template, code, and SSRF attacks, by ensuring processed results do not contain dangerous indicators.
+        Tests that advanced injection attack payloads (NoSQL, LDAP, template, code, SSRF) are not executed or exposed by the system, ensuring processed results do not contain dangerous indicators.
         """
         advanced_injection_attacks = [
             # NoSQL injection
@@ -4224,9 +4238,9 @@ class TestGenesisCoreAdvancedSecurityScenarios:
     
     def test_cryptographic_security_scenarios(self):
         """
-        Test that cryptographic data such as encrypted, hashed, or signed payloads are processed safely and correctly by the core module.
+        Test that the core module safely and correctly processes cryptographic data, including encrypted, hashed, and signed payloads.
         
-        This includes verifying that the system can handle various cryptographic formats and algorithms without errors or data leaks.
+        Verifies handling of various cryptographic formats and algorithms without errors or data leaks.
         """
         crypto_test_cases = [
             {
@@ -4252,9 +4266,9 @@ class TestGenesisCoreAdvancedSecurityScenarios:
     
     def test_input_sanitization_edge_cases(self):
         """
-        Test that input sanitization correctly handles edge case payloads designed to bypass security filters.
+        Test that input sanitization handles advanced edge case payloads designed to bypass security filters.
         
-        This test verifies that various advanced attack vectors—including Unicode normalization, polyglot payloads, mutation XSS, file inclusion attempts, protocol smuggling, and encoding bypasses—are either sanitized or safely processed by the core data processing logic. The test asserts that dangerous patterns are not present in the processed output.
+        This test ensures that the core data processing logic either sanitizes or safely processes inputs containing Unicode normalization attacks, polyglot payloads, mutation XSS, file inclusion attempts, protocol smuggling, and encoding bypasses. It asserts that dangerous patterns are not present in the processed output.
         """
         edge_case_inputs = [
             # Unicode normalization attacks
@@ -4303,9 +4317,9 @@ class TestGenesisCoreAdvancedSecurityScenarios:
     
     def test_authentication_and_authorization_edge_cases(self):
         """
-        Test handling of authentication and authorization edge cases, including token manipulation, privilege escalation, session manipulation, and malformed OAuth/JWT tokens.
+        Test the handling of authentication and authorization edge cases in the core logic.
         
-        Verifies that the core processing logic safely handles various security-sensitive scenarios without failing or exposing vulnerabilities.
+        Covers scenarios such as token manipulation, privilege escalation, session manipulation, and malformed OAuth/JWT tokens to ensure the system safely processes security-sensitive inputs without exposing vulnerabilities.
         """
         auth_test_cases = [
             # Token manipulation
@@ -4341,9 +4355,9 @@ class TestGenesisCoreAdvancedSecurityScenarios:
     
     def test_data_privacy_and_compliance(self):
         """
-        Test that sensitive data is handled in compliance with privacy and data protection requirements.
+        Test that sensitive data is processed in compliance with privacy and data protection requirements.
         
-        This test verifies that the core processing logic appropriately processes various types of sensitive data, including personally identifiable information (PII), financial data, health data, and data subject to GDPR. It ensures that the processing does not fail and that sensitive data is not mishandled.
+        This test verifies that the core logic correctly handles various types of sensitive data, such as PII, financial, health, and GDPR-regulated information, ensuring that processing completes successfully and sensitive data is not mishandled.
         """
         privacy_test_data = [
             # PII data
@@ -4402,13 +4416,9 @@ class TestGenesisCoreAdvancedSecurityScenarios:
 ])
 def test_parameterized_security_attacks(malicious_payload, attack_type):
     """
-    Test that the GenesisCore module safely processes various malicious payloads representing different security attack vectors.
+    Test that GenesisCore safely processes malicious payloads for various security attack types.
     
-    Parameters:
-        malicious_payload: Input data simulating a security attack (e.g., XSS, SQL injection, SSRF).
-        attack_type: The type of security attack being tested.
-    
-    Ensures that dangerous content is neutralized and not executed or exposed in the processed result.
+    Verifies that dangerous content in the input is neutralized and not executed or exposed in the processed result, ensuring robust protection against attacks such as XSS, SQL injection, SSRF, and related vectors.
     """
     core = GenesisCore()
     result = core.process_data(malicious_payload)
@@ -4436,13 +4446,13 @@ def test_parameterized_security_attacks(malicious_payload, attack_type):
 ])
 def test_parameterized_performance_scalability(data_size, performance_threshold):
     """
-    Test that data processing performance meets specified thresholds for various input sizes.
+    Test that processing a subset of generated data completes within the specified performance threshold.
     
     Parameters:
-        data_size (int): Number of data items to generate and process.
-        performance_threshold (float): Maximum allowed execution time in seconds for processing.
+        data_size (int): The number of data items to generate and process.
+        performance_threshold (float): The maximum allowed execution time in seconds.
     
-    The test asserts that processing a subset of the generated data completes within the given performance threshold and that all results are valid.
+    The test asserts that processing up to 100 generated data items finishes within the allowed time and that all processed results are valid (not None).
     """
     core = GenesisCore()
     
@@ -4475,12 +4485,12 @@ def test_parameterized_performance_scalability(data_size, performance_threshold)
 ])
 def test_parameterized_error_resilience(error_scenario):
     """
-    Test the resilience of GenesisCore's error handling by simulating various error scenarios.
+    Test GenesisCore's error handling by simulating and verifying resilience to various error scenarios.
     
     Parameters:
-        error_scenario (dict): A dictionary specifying the exception to simulate during a request.
+        error_scenario (dict): Specifies the exception to simulate during a request.
     
-    This test verifies that GenesisCore either gracefully handles or correctly propagates different types of errors encountered during requests.
+    This test ensures that GenesisCore either gracefully handles or correctly propagates different types of errors encountered during requests.
     """
     core = GenesisCore()
     
@@ -4500,10 +4510,10 @@ def test_parameterized_error_resilience(error_scenario):
 @pytest.fixture
 def security_test_suite():
     """
-    Provides a suite of security-related test data and sanitization rules for use in security testing scenarios.
+    Return a dictionary containing security test payloads, valid input samples, and sanitization rule configurations for use in security-related tests.
     
     Returns:
-        dict: Contains common injection payloads, valid input samples, and sanitization rule configurations for comprehensive security testing.
+        dict: Includes injection payloads for various attack types, representative valid inputs, and flags for sanitization behaviors.
     """
     return {
         "injection_payloads": {
@@ -4531,10 +4541,10 @@ def security_test_suite():
 @pytest.fixture
 def performance_test_suite():
     """
-    Provides utilities and configuration for performance testing, including data generators for various dataset sizes, performance thresholds, and metric storage.
+    Provides a suite of utilities and configuration for performance testing, including data generators for different dataset sizes, performance thresholds, and metric storage.
     
     Returns:
-        dict: A dictionary containing data generators, performance thresholds, and metric lists for use in performance tests.
+        dict: Contains data generators for small, medium, and large datasets, threshold values for time and memory usage, and lists for collecting performance metrics.
     """
     return {
         "data_generators": {
@@ -4559,10 +4569,10 @@ def performance_test_suite():
 @pytest.fixture
 def monitoring_test_suite():
     """
-    Return a dictionary of monitoring and observability test utilities, including log levels, metric types, alert conditions, and trace context identifiers.
+    Provides a dictionary of monitoring and observability test utilities for use in logging, metrics, alerting, and tracing tests.
     
     Returns:
-        dict: Monitoring utilities for use in observability and logging tests.
+        dict: Contains log levels, metric types, alert conditions, and trace context identifiers for monitoring-related test scenarios.
     """
     return {
         "log_levels": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
