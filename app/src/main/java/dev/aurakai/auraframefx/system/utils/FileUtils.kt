@@ -14,8 +14,8 @@ object FileUtils {
      * Saves the given string content to a file in the application's internal storage.
      *
      * @param fileName The name of the file to save.
-     * @param content The content to write to the file.
-     * @return `true` if the file was written successfully; `false` if an I/O error occurred.
+     * @param content The string content to write to the file.
+     * @return `true` if the content was written successfully; `false` if an I/O error occurred.
      */
     fun saveToFile(context: Context, fileName: String, content: String): Boolean {
         return try {
@@ -30,10 +30,10 @@ object FileUtils {
     }
     
     /**
-     * Reads the contents of a file from the app's internal storage and returns it as a string.
+     * Reads the contents of a file from the application's internal storage and returns it as a string.
      *
      * @param fileName The name of the file to read.
-     * @return The file content as a string, or null if the file does not exist or an I/O error occurs.
+     * @return The file content as a string, or `null` if the file does not exist or an I/O error occurs.
      */
     fun readFromFile(context: Context, fileName: String): String? {
         return try {
@@ -48,7 +48,7 @@ object FileUtils {
     }
     
     /**
-     * Checks if a file with the given name exists in the application's internal storage directory.
+     * Checks if a file with the specified name exists in the application's internal storage directory.
      *
      * @param fileName The name of the file to check.
      * @return `true` if the file exists, `false` otherwise.
@@ -58,10 +58,10 @@ object FileUtils {
     }
     
     /**
-     * Deletes a file with the specified name from the app's internal storage.
+     * Deletes a file with the specified name from the application's internal storage.
      *
      * @param fileName The name of the file to delete.
-     * @return `true` if the file was deleted successfully, or `false` if deletion failed.
+     * @return `true` if the file was deleted successfully, `false` otherwise.
      */
     fun deleteFile(context: Context, fileName: String): Boolean {
         return try {
@@ -72,11 +72,11 @@ object FileUtils {
         }
     }
     
-    /****
-     * Retrieves the absolute file system path of a file in the application's internal storage directory.
+    /**
+     * Returns the absolute path of a file within the application's internal storage directory.
      *
      * @param fileName The name of the file.
-     * @return The absolute path to the specified file within the app's internal storage.
+     * @return The absolute file system path for the specified file.
      */
     fun getFilePath(context: Context, fileName: String): String {
         return File(context.filesDir, fileName).absolutePath
