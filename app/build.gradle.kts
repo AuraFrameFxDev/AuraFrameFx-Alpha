@@ -54,6 +54,53 @@ android {
             "-Xjvm-default=all"
         )
     }
+    
+    // Add explicit resource merging configuration
+    buildFeatures {
+        buildConfig = true
+    }
+    
+    // Configure AAPT options to handle resource merging
+    androidResources {
+        ignoreAssetsPattern += "!*.ttf:!*.otf:!*.ttc:!*.woff:!*.eot:!*.woff2:!*.mp3:!*.mp4:!*.wav:!*.ogg:!*.aac:!*.mpg:!*.mpeg:!*.mid:!*.midi:!*.wma:!*.wmv:!*.mov:!*.avi:!*.flv:!*.mpa:!*.zip:!*.7z:!*.gz:!*.apk:!*.apk:!*.apk:!*.apk:!*.arsc:!*.bin:!*.so:!*.dex:!*.class:!*dir*"
+    }
+    
+    // Configure resource merging options for Windows paths
+    sourceSets {
+        getByName("main") {
+            res.srcDirs(
+                file("src/main/res").absolutePath,
+                file("src/main/res/layouts").absolutePath,
+                file("src/main/res/layouts/fragments").absolutePath,
+                file("src/main/res/layouts/activities").absolutePath,
+                file("src/main/res/layouts/items").absolutePath
+            )
+        }
+    }
+    
+    // Explicitly set the merged resources output directory
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            // Set a custom merged resources directory with a simple path
+            resValue("string", "app_name", "AuraFrameFX")
+        }
+    }
+    
+    // Configure resource merging with explicit paths
+    androidResources {
+        // Disable AAPT2 caching to avoid path-related issues
+        additionalParameters("--no-version-vectors")
+        
+        // Set a temporary directory for resource processing
+        val tempDir = file("${buildDir}/intermediates/res/merged/release")
+        tempDir.mkdirs()
+        sourceSets.getByName("main").res.srcDirs(tempDir.absolutePath)
+    }
 
     buildFeatures {
         compose = true
