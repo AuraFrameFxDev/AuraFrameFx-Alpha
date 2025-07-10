@@ -6,6 +6,7 @@ import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
+import kotlinx.coroutines.async
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -853,7 +854,6 @@ class OracleDriveControlViewModelTest {
         // Then - should not crash during cleanup
         assertTrue(true) // Test passes if no exceptions are thrown
     }
-}
 
     // Additional comprehensive tests for maximum coverage and robustness
 
@@ -1283,3 +1283,4 @@ class OracleDriveControlViewModelTest {
         coVerify(exactly = 0) { mockRepository.updateSpeed(10.0) }
         coVerify(exactly = 0) { mockRepository.updateSpeed(20.0) }
     }
+}

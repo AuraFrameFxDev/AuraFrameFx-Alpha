@@ -9,7 +9,6 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
 class IAuraDriveServiceTest {
@@ -171,7 +170,7 @@ class IAuraDriveServiceTest {
         every { auraDriveService.connect(any()) } throws RemoteException("Connection failed")
 
         // When & Then
-        assertThrows("Should throw RemoteException", RemoteException::class.java) {
+        assertThrows(RemoteException::class.java) {
             auraDriveService.connect(mockCallback)
         }
         verify { auraDriveService.connect(mockCallback) }
@@ -183,7 +182,7 @@ class IAuraDriveServiceTest {
         every { auraDriveService.disconnect() } throws RemoteException("Disconnection failed")
 
         // When & Then
-        assertThrows("Should throw RemoteException", RemoteException::class.java) {
+        assertThrows(RemoteException::class.java) {
             auraDriveService.disconnect()
         }
         verify { auraDriveService.disconnect() }
@@ -195,7 +194,7 @@ class IAuraDriveServiceTest {
         every { auraDriveService.getVersion() } throws RemoteException("Version retrieval failed")
 
         // When & Then
-        assertThrows("Should throw RemoteException", RemoteException::class.java) {
+        assertThrows(RemoteException::class.java) {
             auraDriveService.getVersion()
         }
         verify { auraDriveService.getVersion() }
@@ -207,7 +206,7 @@ class IAuraDriveServiceTest {
         every { auraDriveService.isConnected() } throws RemoteException("Connection check failed")
 
         // When & Then
-        assertThrows("Should throw RemoteException", RemoteException::class.java) {
+        assertThrows(RemoteException::class.java) {
             auraDriveService.isConnected()
         }
         verify { auraDriveService.isConnected() }
@@ -312,7 +311,6 @@ class IAuraDriveServiceTest {
     fun testVersion_BoundaryValues() = runTest {
         // Test various version formats
         val versions = listOf("0.0.0", "999.999.999", "1.0.0-alpha", "2.1.3-beta.1")
-        
         versions.forEach { version ->
             every { auraDriveService.getVersion() } returns version
             val result = auraDriveService.getVersion()
@@ -350,7 +348,7 @@ class IAuraDriveServiceTest {
         // Then
         verify { auraDriveService.connect(mockCallback) }
         verify { auraDriveService.disconnect() }
-        // Verify no additional callback invocations after disconnect
+        // Verify no additional connect invocations after disconnect
         verify(exactly = 1) { auraDriveService.connect(any()) }
     }
 }

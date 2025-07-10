@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 @ExperimentalCoroutinesApi
 @DisplayName("AuraAgent Tests")
@@ -164,6 +165,18 @@ class AuraAgentTest {
             assertNotNull(result)
             // Add assertions based on expected behavior
         }
+
+        @Test
+        @DisplayName("Should handle timeout scenarios")
+        fun shouldHandleTimeoutScenarios() = runTest {
+            // Given
+            val timeoutInput = "timeout_trigger"
+            
+            // When & Then
+            assertThrows<TimeoutException> {
+                auraAgent.processWithTimeout(timeoutInput, 1000)
+            }
+        }
     }
 
     @Nested
@@ -243,7 +256,7 @@ class AuraAgentTest {
 
         @Test
         @DisplayName("Should handle timeout scenarios")
-        fun shouldHandleTimeoutScenarios() = runTest {
+        fun shouldHandleTimeoutScenariosError() = runTest {
             // Given
             val timeoutInput = "timeout_trigger"
             
