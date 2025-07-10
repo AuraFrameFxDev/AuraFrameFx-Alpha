@@ -46,7 +46,7 @@
         <item name="colorOnSurface">@color/light_on_surface</item>
         <item name="colorSurfaceVariant">@color/light_surface_variant</item>
         <item name="colorOnSurfaceVariant">@color/light_on_surface_variant</item>
-        
+
         <!-- Outline colors -->
         <item name="colorOutline">@color/light_outline</item>
         <item name="colorOutlineVariant">@color/light_outline_variant</item>
@@ -76,7 +76,7 @@
         <item name="shapeAppearanceLargeComponent">
             @style/ShapeAppearance.AuraFrameFX.LargeComponent
         </item>
-        
+
         <!-- Add missing attributes -->
         <item name="materialButtonStyle">@style/Widget.AuraFrameFX.Button</item>
         <item name="materialCardViewStyle">@style/Widget.AuraFrameFX.CardView</item>
@@ -108,7 +108,7 @@
         <item name="cornerSizeMedium">8dp</item>
         <item name="cornerSizeLarge">12dp</item>
     </style>
-    
+
     <!-- Widget Styles -->
     <style name="Widget.AuraFrameFX.Button" parent="Widget.Material3.Button">
         <item name="android:textColor">?attr/colorOnPrimary</item>
@@ -125,7 +125,7 @@
         <item name="android:paddingTop">12dp</item>
         <item name="android:paddingBottom">12dp</item>
     </style>
-    
+
     <style name="Widget.AuraFrameFX.CardView" parent="Widget.Material3.CardView">
         <item name="cardBackgroundColor">@color/light_surface</item>
         <item name="cardElevation">1dp</item>
@@ -135,7 +135,7 @@
         <item name="cardPreventCornerOverlap">true</item>
         <item name="cardUseCompatPadding">true</item>
     </style>
-    
+
     <style name="Widget.AuraFrameFX.Chip" parent="Widget.Material3.Chip.Assist">
         <item name="chipBackgroundColor">@color/light_surface_variant</item>
         <item name="chipStrokeColor">@color/light_outline</item>
@@ -146,7 +146,7 @@
         <item name="android:checkable">false</item>
         <item name="closeIconTint">@color/light_on_surface_variant</item>
     </style>
-    
+
     <style name="Widget.AuraFrameFX.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
         <item name="boxStrokeColor">@color/light_outline</item>
         <item name="boxStrokeErrorColor">@color/light_error</item>

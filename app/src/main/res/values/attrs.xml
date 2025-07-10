@@ -9,7 +9,7 @@
     <attr name="cornerSizeSmall" format="dimension" />
     <attr name="cornerSizeMedium" format="dimension" />
     <attr name="cornerSizeLarge" format="dimension" />
-    
+
     <declare-styleable name="ShapeAppearance">
         <attr name="cornerFamily" />
         <attr name="cornerSize" />
@@ -17,14 +17,14 @@
         <attr name="cornerSizeMedium" />
         <attr name="cornerSizeLarge" />
     </declare-styleable>
-    
+
     <!-- Button attributes -->
     <declare-styleable name="MaterialButton">
         <attr name="buttonCornerRadius" format="dimension" />
         <attr name="buttonStrokeColor" format="color" />
         <attr name="buttonStrokeWidth" format="dimension" />
     </declare-styleable>
-    
+
     <!-- CardView attributes -->
     <declare-styleable name="CardView">
         <attr name="cardCornerRadius" format="dimension" />

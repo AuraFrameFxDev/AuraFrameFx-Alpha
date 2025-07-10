@@ -37,7 +37,7 @@
 
     <color name="light_outline">#8D8D8D</color>
     <color name="light_outline_variant">#3D3D3D</color>
-    
+
     <!-- Material 3 Compatibility Colors -->
     <color name="onPrimary">@color/light_on_primary</color>
 
@@ -77,7 +77,7 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
-    
+
     <!-- Missing color resources -->
     <color name="divider">#1F000000</color>
     <color name="onSurface">@color/light_on_surface</color>

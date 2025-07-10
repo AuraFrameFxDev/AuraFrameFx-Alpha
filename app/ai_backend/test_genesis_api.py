@@ -1,10 +1,6 @@
-import pytest
-import json
 import asyncio
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
-from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional
-
+import json
+import pytest
 # Import the module under test
 from app.ai_backend.genesis_api import (
     GenesisAPIClient,
@@ -17,11 +13,14 @@ from app.ai_backend.genesis_api import (
     ChatMessage,
     ChatCompletion
 )
+from datetime import datetime, timezone
+from typing import Dict, Any, List, Optional
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 
 class TestGenesisAPIClient:
     """Test suite for GenesisAPIClient class."""
-    
+
     @pytest.fixture
     def mock_config(self):
         return {
@@ -30,11 +29,11 @@ class TestGenesisAPIClient:
             'timeout': 30,
             'max_retries': 3
         }
-    
+
     @pytest.fixture
     def client(self, mock_config):
         return GenesisAPIClient(**mock_config)
-    
+
     @pytest.fixture
     def sample_messages(self):
         return [
@@ -42,7 +41,7 @@ class TestGenesisAPIClient:
             ChatMessage(role="user", content="What is the weather like today?"),
             ChatMessage(role="assistant", content="I don't have access to real-time weather data.")
         ]
-    
+
     @pytest.fixture
     def sample_model_config(self):
         return ModelConfig(
@@ -104,14 +103,15 @@ class TestGenesisAPIClient:
             }
         }
         with patch('aiohttp.ClientSession.post') as mock_post:
-            mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aenter__.return_value.json = AsyncMock(
+                return_value=mock_response)
             mock_post.return_value.__aenter__.return_value.status = 200
-            
+
             result = await client.create_chat_completion(
                 messages=sample_messages,
                 model_config=sample_model_config
             )
-            
+
             assert isinstance(result, ChatCompletion)
             assert result.id == 'chat-123'
             assert result.model == 'genesis-gpt-4'
@@ -120,33 +120,38 @@ class TestGenesisAPIClient:
             assert result.usage.total_tokens == 33
 
     @pytest.mark.asyncio
-    async def test_chat_completion_with_streaming(self, client, sample_messages, sample_model_config):
+    async def test_chat_completion_with_streaming(self, client, sample_messages,
+                                                  sample_model_config):
         mock_chunks = [
             {'choices': [{'delta': {'content': 'The'}}]},
             {'choices': [{'delta': {'content': ' weather'}}]},
             {'choices': [{'delta': {'content': ' is nice'}}]},
             {'choices': [{'delta': {}, 'finish_reason': 'stop'}]}
         ]
+
         async def mock_stream():
             for chunk in mock_chunks:
                 yield json.dumps(chunk).encode()
+
         with patch('aiohttp.ClientSession.post') as mock_post:
-            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(return_value=mock_stream())
+            mock_post.return_value.__aenter__.return_value.content.iter_chunked = AsyncMock(
+                return_value=mock_stream())
             mock_post.return_value.__aenter__.return_value.status = 200
-            
+
             chunks = []
             async for chunk in client.create_chat_completion_stream(
-                messages=sample_messages,
-                model_config=sample_model_config
+                    messages=sample_messages,
+                    model_config=sample_model_config
             ):
                 chunks.append(chunk)
-            
+
             assert len(chunks) == 4
             assert chunks[0].choices[0].delta.content == 'The'
             assert chunks[-1].choices[0].finish_reason == 'stop'
 
     @pytest.mark.asyncio
-    async def test_chat_completion_authentication_error(self, client, sample_messages, sample_model_config):
+    async def test_chat_completion_authentication_error(self, client, sample_messages,
+                                                        sample_model_config):
         with patch('aiohttp.ClientSession.post') as mock_post:
             mock_post.return_value.__aenter__.return_value.status = 401
             mock_post.return_value.__aenter__.return_value.json = AsyncMock(
@@ -159,7 +164,8 @@ class TestGenesisAPIClient:
                 )
 
     @pytest.mark.asyncio
-    async def test_chat_completion_rate_limit_error(self, client, sample_messages, sample_model_config):
+    async def test_chat_completion_rate_limit_error(self, client, sample_messages,
+                                                    sample_model_config):
         with patch('aiohttp.ClientSession.post') as mock_post:
             mock_post.return_value.__aenter__.return_value.status = 429
             mock_post.return_value.__aenter__.return_value.json = AsyncMock(
@@ -188,8 +194,10 @@ class TestGenesisAPIClient:
                 )
 
     @pytest.mark.asyncio
-    async def test_chat_completion_server_error_with_retry(self, client, sample_messages, sample_model_config):
+    async def test_chat_completion_server_error_with_retry(self, client, sample_messages,
+                                                           sample_model_config):
         call_count = 0
+
         async def mock_post_with_failure(*args, **kwargs):
             nonlocal call_count
             call_count += 1
@@ -206,10 +214,12 @@ class TestGenesisAPIClient:
                     'object': 'chat.completion',
                     'created': int(datetime.now(timezone.utc).timestamp()),
                     'model': 'genesis-gpt-4',
-                    'choices': [{'message': {'role': 'assistant', 'content': 'Success after retry'}}],
+                    'choices': [
+                        {'message': {'role': 'assistant', 'content': 'Success after retry'}}],
                     'usage': {'total_tokens': 10}
                 })
             return mock_response
+
         with patch('aiohttp.ClientSession.post', side_effect=mock_post_with_failure):
             with patch('asyncio.sleep'):
                 result = await client.create_chat_completion(
@@ -220,7 +230,8 @@ class TestGenesisAPIClient:
                 assert call_count == 3
 
     @pytest.mark.asyncio
-    async def test_chat_completion_max_retries_exceeded(self, client, sample_messages, sample_model_config):
+    async def test_chat_completion_max_retries_exceeded(self, client, sample_messages,
+                                                        sample_model_config):
         with patch('aiohttp.ClientSession.post') as mock_post:
             mock_post.return_value.__aenter__.return_value.status = 500
             mock_post.return_value.__aenter__.return_value.json = AsyncMock(
@@ -234,7 +245,8 @@ class TestGenesisAPIClient:
                     )
 
     @pytest.mark.asyncio
-    async def test_chat_completion_network_timeout(self, client, sample_messages, sample_model_config):
+    async def test_chat_completion_network_timeout(self, client, sample_messages,
+                                                   sample_model_config):
         with patch('aiohttp.ClientSession.post', side_effect=asyncio.TimeoutError()):
             with pytest.raises(GenesisAPIError, match="Request timeout"):
                 await client.create_chat_completion(
@@ -243,7 +255,8 @@ class TestGenesisAPIClient:
                 )
 
     @pytest.mark.asyncio
-    async def test_chat_completion_connection_error(self, client, sample_messages, sample_model_config):
+    async def test_chat_completion_connection_error(self, client, sample_messages,
+                                                    sample_model_config):
         import aiohttp
         with patch('aiohttp.ClientSession.post', side_effect=aiohttp.ClientConnectionError()):
             with pytest.raises(GenesisAPIError, match="Connection error"):
@@ -306,7 +319,8 @@ class TestGenesisAPIClient:
             ]
         }
         with patch('aiohttp.ClientSession.get') as mock_get:
-            mock_get.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_get.return_value.__aenter__.return_value.json = AsyncMock(
+                return_value=mock_response)
             mock_get.return_value.__aenter__.return_value.status = 200
             models = await client.list_models()
             assert len(models) == 2
@@ -323,7 +337,8 @@ class TestGenesisAPIClient:
             'permission': []
         }
         with patch('aiohttp.ClientSession.get') as mock_get:
-            mock_get.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
+            mock_get.return_value.__aenter__.return_value.json = AsyncMock(
+                return_value=mock_response)
             mock_get.return_value.__aenter__.return_value.status = 200
             model = await client.get_model('genesis-gpt-4')
             assert model.id == 'genesis-gpt-4'
@@ -389,7 +404,7 @@ class TestGenesisAPIClient:
 
 class TestDataModels:
     """Test suite for data model classes."""
-    
+
     def test_chat_message_creation(self):
         message = ChatMessage(role="user", content="Hello, world!")
         assert message.role == "user"
@@ -443,7 +458,7 @@ class TestDataModels:
 
 class TestExceptionClasses:
     """Test suite for custom exception classes."""
-    
+
     def test_genesis_api_error(self):
         error = GenesisAPIError("Test error message", status_code=500)
         assert str(error) == "Test error message"
@@ -468,7 +483,7 @@ class TestExceptionClasses:
 
 class TestUtilityFunctions:
     """Test suite for utility functions in the genesis_api module."""
-    
+
     def test_format_timestamp(self):
         from app.ai_backend.genesis_api import format_timestamp
         timestamp = 1677610602

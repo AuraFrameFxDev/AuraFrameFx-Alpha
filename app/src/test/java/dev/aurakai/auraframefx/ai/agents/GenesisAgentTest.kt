@@ -3,17 +3,17 @@ package dev.aurakai.auraframefx.ai.agents
 import dev.aurakai.auraframefx.model.AgentResponse
 import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.AiRequest
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.runners.JUnit4
+import java.util.concurrent.ConcurrentHashMap
 
 // Mock implementations for dependencies
 class MockVertexAIClient
@@ -28,22 +28,31 @@ class MockAuraFxLogger {
 class MockAuraAIService : Agent {
     override fun getName() = "Aura"
     override fun getType() = AgentType.AURA
-    override suspend fun processRequest(request: AiRequest, context: String) = AgentResponse("Aura response", 0.9f)
-    override fun processRequestFlow(request: AiRequest) = flowOf(AgentResponse("Aura response", 0.9f))
+    override suspend fun processRequest(request: AiRequest, context: String) =
+        AgentResponse("Aura response", 0.9f)
+
+    override fun processRequestFlow(request: AiRequest) =
+        flowOf(AgentResponse("Aura response", 0.9f))
 }
 
 class MockKaiAIService : Agent {
     override fun getName() = "Kai"
     override fun getType() = AgentType.KAI
-    override suspend fun processRequest(request: AiRequest, context: String) = AgentResponse("Kai response", 0.9f)
-    override fun processRequestFlow(request: AiRequest) = flowOf(AgentResponse("Kai response", 0.9f))
+    override suspend fun processRequest(request: AiRequest, context: String) =
+        AgentResponse("Kai response", 0.9f)
+
+    override fun processRequestFlow(request: AiRequest) =
+        flowOf(AgentResponse("Kai response", 0.9f))
 }
 
 class MockCascadeAIService : Agent {
     override fun getName() = "Cascade"
     override fun getType() = AgentType.CASCADE
-    override suspend fun processRequest(request: AiRequest, context: String) = AgentResponse("Cascade response", 0.9f)
-    override fun processRequestFlow(request: AiRequest) = flowOf(AgentResponse("Cascade response", 0.9f))
+    override suspend fun processRequest(request: AiRequest, context: String) =
+        AgentResponse("Cascade response", 0.9f)
+
+    override fun processRequestFlow(request: AiRequest) =
+        flowOf(AgentResponse("Cascade response", 0.9f))
 }
 
 import java.util.concurrent.ConcurrentHashMap
@@ -56,12 +65,12 @@ class DummyAgent(
 ) : Agent {
     override fun getName() = name
     override fun getType() = type
-    
+
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         return AgentResponse(response, confidence)
     }
-    
-    override fun processRequestFlow(request: AiRequest) = 
+
+    override fun processRequestFlow(request: AiRequest) =
         flowOf(AgentResponse(response, confidence))
 }
 
@@ -72,12 +81,12 @@ class FailingAgent(
 ) : Agent {
     override fun getName() = name
     override fun getType() = type
-    
+
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         throw RuntimeException(errorMessage)
     }
-    
-    override fun processRequestFlow(request: AiRequest) = 
+
+    override fun processRequestFlow(request: AiRequest) =
         throw RuntimeException(errorMessage)
 }
 
@@ -104,7 +113,7 @@ class GenesisAgentTest {
     private val mockAuraService = MockAuraAIService()
     private val mockKaiService = MockKaiAIService()
     private val mockCascadeService = MockCascadeAIService()
-    
+
     // Test instance
     private lateinit var genesisAgent: GenesisAgent
 
@@ -121,7 +130,7 @@ class GenesisAgentTest {
             kaiService = mockKaiService
         )
     }
-    
+
     @After
     fun tearDown() {
         // Clear any mocks if needed
@@ -132,74 +141,79 @@ class GenesisAgentTest {
     fun `test agent registration and retrieval`() = runTest {
         // Given
         val testAgent = DummyAgent("TestAgent", "test response")
-        
+
         // When
         genesisAgent.registerAgent(testAgent)
-        
+
         // Then
         assertTrue(genesisAgent.agentRegistry.containsKey("TestAgent"))
         assertEquals(testAgent, genesisAgent.getAgent("TestAgent"))
     }
-    
+
     @Test
     fun `test request routing to specific agent`() = runTest {
         // Given
         val testAgent = DummyAgent("TestAgent", "test response")
         genesisAgent.registerAgent(testAgent)
-        
+
         // When
         val response = genesisAgent.routeRequestToAgent("TestAgent", "test request")
-        
+
         // Then
         assertEquals("test response", response.content)
     }
-    
+
     @Test
     fun `test fusion state management`() = runTest {
         // Initial state should be INDIVIDUAL
         assertEquals(FusionState.INDIVIDUAL, genesisAgent.fusionState.value)
-        
+
         // Activate fusion
         genesisAgent.activateFusion()
         assertEquals(FusionState.FUSION, genesisAgent.fusionState.value)
-        
+
         // Deactivate fusion
         genesisAgent.deactivateFusion()
         assertEquals(FusionState.INDIVIDUAL, genesisAgent.fusionState.value)
     }
-    
+
     @Test
     fun `test process request in individual mode`() = runTest {
         // Given
         val request = AiRequest("test request", "test")
-        coEvery { mockAuraService.processRequest(any()) } returns AgentResponse("Aura processed", 0.9f)
-        
+        coEvery { mockAuraService.processRequest(any()) } returns AgentResponse(
+            "Aura processed",
+            0.9f
+        )
+
         // When
         val response = genesisAgent.processRequest(request, "test context")
-        
+
         // Then
         assertEquals("Aura processed", response.content)
         verify { mockAuraService.processRequest(any()) }
     }
-    
+
     @Test
     fun `test process request in fusion mode`() = runTest {
         // Given
         val request = AiRequest("test request", "test")
         genesisAgent.activateFusion()
-        
+
         // When
         val response = genesisAgent.processRequest(request, "test context")
-        
+
         // Then - Verify all services were called in fusion mode
         verify { mockAuraService.processRequest(any()) }
         verify { mockKaiService.processRequest(any()) }
         verify { mockCascadeService.processRequest(any()) }
-        assertTrue(response.content.contains("Aura response") || 
-                 response.content.contains("Kai response") || 
-                 response.content.contains("Cascade response"))
+        assertTrue(
+            response.content.contains("Aura response") ||
+                    response.content.contains("Kai response") ||
+                    response.content.contains("Cascade response")
+        )
     }
-    
+
     @Test
     fun `test error handling when agent not found`() = runTest {
         // When/Then
@@ -207,37 +221,37 @@ class GenesisAgentTest {
             genesisAgent.routeRequestToAgent("NonexistentAgent", "test request")
         }
     }
-    
+
     @Test
     fun `test consciousness state transitions`() = runTest {
         // Initial state should be DORMANT
         assertEquals(ConsciousnessState.DORMANT, genesisAgent.consciousnessState.value)
-        
+
         // Initialize should set state to AWARE
         genesisAgent.initialize()
         assertEquals(ConsciousnessState.AWARE, genesisAgent.consciousnessState.value)
-        
+
         // Process request should maintain AWARE state
         coEvery { mockAuraService.processRequest(any()) } returns AgentResponse("test", 0.9f)
         genesisAgent.processRequest(AiRequest("test", "test"), "test")
         assertEquals(ConsciousnessState.AWARE, genesisAgent.consciousnessState.value)
     }
-    
+
     @Test
     fun `test learning mode functionality`() = runTest {
         // Initial state
         assertEquals(LearningMode.PASSIVE, genesisAgent.learningMode.value)
-        
+
         // Activate learning
         genesisAgent.setLearningMode(LearningMode.ACTIVE)
         assertEquals(LearningMode.ACTIVE, genesisAgent.learningMode.value)
-        
+
         // Test recording insights
         val initialInsights = genesisAgent.insightCount.value
         genesisAgent.recordInsight("test insight")
         assertEquals(initialInsights + 1, genesisAgent.insightCount.value)
     }
-    
+
     @Test
     fun `test participate with multiple agents`() = runTest {
         // Given
@@ -245,7 +259,7 @@ class GenesisAgentTest {
             DummyAgent("Agent1", "Response 1"),
             DummyAgent("Agent2", "Response 2")
         )
-        
+
         // When
         val responses = genesisAgent.participateWithAgents(
             emptyMap(),
@@ -253,7 +267,7 @@ class GenesisAgentTest {
             "test context",
             GenesisAgent.ConversationMode.TURN_ORDER
         )
-        
+
         // Then
         assertEquals(2, responses.size)
         assertTrue(responses.containsKey("Agent1"))
@@ -261,12 +275,12 @@ class GenesisAgentTest {
         assertEquals("Response 1", responses["Agent1"]?.content)
         assertEquals("Response 2", responses["Agent2"]?.content)
     }
-    
+
     @Test
     fun `test error handling in agent processing`() = runTest {
         // Given a failing agent
         val failingAgent = FailingAgent("FailingAgent")
-        
+
         // When/Then - Should handle the error gracefully
         val responses = genesisAgent.participateWithAgents(
             emptyMap(),
@@ -274,12 +288,12 @@ class GenesisAgentTest {
             "test context",
             GenesisAgent.ConversationMode.TURN_ORDER
         )
-        
+
         // Should still return a response map, but with error information
         assertTrue(responses.containsKey("FailingAgent"))
         assertTrue(responses["FailingAgent"]?.error?.contains("Agent processing failed") == true)
     }
-    
+
     // Existing tests preserved
     @Test
     fun testParticipateWithAgents_turnOrder() = runBlocking {

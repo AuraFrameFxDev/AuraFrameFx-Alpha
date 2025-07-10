@@ -90,6 +90,7 @@ URL_FORMATS = [
     'https://127.0.0.1:8000',
 ]
 
+
 # Test helpers
 def create_mock_response(status_code=200, json_data=None, headers=None, text=None):
     """
@@ -105,23 +106,24 @@ def create_mock_response(status_code=200, json_data=None, headers=None, text=Non
         Mock: A mock object simulating an HTTP response, including `status_code`, `headers`, `text`, a `json()` method, and a `raise_for_status()` method that raises an exception for error status codes.
     """
     from unittest.mock import Mock
-    
+
     mock_response = Mock()
     mock_response.status_code = status_code
     mock_response.headers = headers or {}
     mock_response.text = text or ''
-    
+
     if json_data:
         mock_response.json.return_value = json_data
     else:
         mock_response.json.side_effect = ValueError("No JSON object could be decoded")
-    
+
     if status_code >= 400:
         mock_response.raise_for_status.side_effect = Exception(f"{status_code} Error")
     else:
         mock_response.raise_for_status.return_value = None
-    
+
     return mock_response
+
 
 def create_test_connector(config_overrides=None):
     """
@@ -136,10 +138,10 @@ def create_test_connector(config_overrides=None):
     config = TEST_CONFIG.copy()
     if config_overrides:
         config.update(config_overrides)
-    
+
     try:
         from app.ai_backend.genesis_connector import GenesisConnector
     except ImportError:
         from genesis_connector import GenesisConnector
-    
+
     return GenesisConnector(config)

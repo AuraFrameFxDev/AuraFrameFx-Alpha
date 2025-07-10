@@ -4,17 +4,17 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.view.View
 import android.view.ViewAnimationUtils
-import android.view.animation.*
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.Animation
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.LinearInterpolator
+import android.view.animation.TranslateAnimation
 import androidx.annotation.ColorInt
 import androidx.core.animation.addListener
 import androidx.core.view.ViewCompat
-import androidx.core.view.isVisible
-import dev.aurakai.auraframefx.R
 import kotlin.math.hypot
 import kotlin.math.max
 

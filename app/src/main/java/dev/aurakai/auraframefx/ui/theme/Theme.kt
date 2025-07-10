@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import dev.aurakai.auraframefx.R
 import dev.aurakai.auraframefx.model.Emotion
 import dev.aurakai.auraframefx.viewmodel.AuraMoodViewModel
 
