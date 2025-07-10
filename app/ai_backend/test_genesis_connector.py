@@ -12,6 +12,8 @@ from datetime import datetime, date, timezone, timedelta
 from collections import OrderedDict
 import requests
 
+from app.ai_backend.genesis_connector import GenesisConnector
+
 
 class TestGenesisConnectorDataSerialization(unittest.TestCase):
     """Comprehensive data serialization and deserialization tests."""
