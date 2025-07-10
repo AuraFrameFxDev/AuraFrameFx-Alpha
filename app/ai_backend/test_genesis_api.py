@@ -5546,13 +5546,17 @@ class TestComprehensiveEdgeCases:
     
     @pytest.fixture
     def mock_logger(self):
-        """Mock logger for testing logging functionality."""
+        """
+        Return a mock logger instance for use in testing logging behavior.
+        """
         import logging
         logger = Mock(spec=logging.Logger)
         return logger
     
     def test_chat_message_with_function_content(self):
-        """Test ChatMessage with function result content."""
+        """
+        Tests that a ChatMessage with the "function" role and JSON content is correctly initialized and its attributes are set as expected.
+        """
         function_message = ChatMessage(
             role="function",
             content='{"result": "success", "data": {"value": 42}}',
@@ -5563,7 +5567,9 @@ class TestComprehensiveEdgeCases:
         assert "success" in function_message.content
     
     def test_chat_message_with_tool_content(self):
-        """Test ChatMessage with tool result content."""
+        """
+        Tests that a ChatMessage with the "tool" role and JSON content is correctly initialized and its attributes are set as expected.
+        """
         tool_message = ChatMessage(
             role="tool",
             content='{"output": "File created successfully"}',
@@ -5573,7 +5579,9 @@ class TestComprehensiveEdgeCases:
         assert tool_message.name == "file_manager"
     
     def test_model_config_with_custom_parameters(self):
-        """Test ModelConfig with all possible custom parameters."""
+        """
+        Verifies that ModelConfig correctly accepts and stores all supported custom parameters.
+        """
         config = ModelConfig(
             name="genesis-gpt-4-turbo",
             max_tokens=4096,
@@ -5598,7 +5606,9 @@ class TestComprehensiveEdgeCases:
         assert config.seed == 12345
     
     def test_api_response_with_metadata(self):
-        """Test APIResponse with additional metadata fields."""
+        """
+        Tests that APIResponse correctly handles and exposes additional metadata fields in its data and headers.
+        """
         response = APIResponse(
             status_code=200,
             data={
@@ -5621,7 +5631,11 @@ class TestComprehensiveEdgeCases:
     
     @pytest.mark.asyncio
     async def test_streaming_with_tool_calls(self, client, sample_messages, sample_model_config):
-        """Test streaming with tool call responses."""
+        """
+        Test that streaming chat completions correctly handle tool call responses, including incremental function arguments and finish reasons.
+        
+        Simulates a streaming API response where tool calls are returned in multiple chunks, verifying that the client assembles and yields each chunk as expected and recognizes the finish reason for tool calls.
+        """
         tool_call_chunks = [
             {
                 'choices': [{
@@ -5652,6 +5666,12 @@ class TestComprehensiveEdgeCases:
         ]
         
         async def tool_call_stream():
+            """
+            Asynchronously yields encoded JSON chunks representing tool call data for streaming tests.
+            
+            Yields:
+                bytes: JSON-encoded chunk of tool call data.
+            """
             for chunk in tool_call_chunks:
                 yield json.dumps(chunk).encode()
         
@@ -5673,7 +5693,11 @@ class TestComprehensiveEdgeCases:
     
     @pytest.mark.asyncio
     async def test_chat_completion_with_response_format_schema(self, client, sample_messages, sample_model_config):
-        """Test chat completion with structured response format schema."""
+        """
+        Test that chat completion returns a structured response matching a specified JSON schema.
+        
+        This test verifies that when a response format schema is provided in the model configuration, the chat completion API returns a response conforming to the schema, and the structured content can be correctly parsed and validated.
+        """
         sample_model_config.response_format = {
             "type": "json_schema",
             "json_schema": {
@@ -5714,7 +5738,11 @@ class TestComprehensiveEdgeCases:
             assert response_data['result'] == 42
     
     def test_message_validation_with_image_and_audio_multimodal(self, client):
-        """Test validation of multimodal messages with both image and audio."""
+        """
+        Tests that the client correctly validates chat messages containing both image and audio multimodal content.
+        
+        Raises a ValidationError only if multimodal content is not supported, and asserts that the error message is relevant.
+        """
         multimodal_messages = [
             ChatMessage(
                 role="user",
@@ -5747,7 +5775,11 @@ class TestComprehensiveEdgeCases:
     
     @pytest.mark.asyncio
     async def test_batch_api_simulation(self, client):
-        """Test simulation of batch API requests."""
+        """
+        Simulates a batch API request scenario and verifies that the client can gracefully handle batch-like responses, even if batch API support is not explicitly implemented.
+        
+        This test mocks a batch API response and attempts to process it using the standard chat completion method, ensuring the client does not fail unexpectedly when encountering batch-related data.
+        """
         batch_request = {
             "input_file_id": "file-abc123",
             "endpoint": "/v1/chat/completions",
@@ -5783,7 +5815,11 @@ class TestComprehensiveEdgeCases:
     
     @pytest.mark.asyncio
     async def test_fine_tuning_context_handling(self, client, sample_messages):
-        """Test handling of fine-tuned model configurations."""
+        """
+        Test that the client correctly handles chat completions using a fine-tuned model configuration.
+        
+        Verifies that the response from a fine-tuned model is parsed and returned as expected.
+        """
         fine_tuned_config = ModelConfig(
             name="ft:genesis-gpt-4:organization:custom-model:abc123",
             temperature=0.1,
@@ -5815,7 +5851,9 @@ class TestComprehensiveEdgeCases:
             assert result.choices[0].message.content == 'Fine-tuned response'
     
     def test_message_validation_with_vision_models(self, client):
-        """Test message validation for vision-capable models."""
+        """
+        Tests that message validation correctly handles messages intended for vision-capable models, including those containing both text and image content. Accepts a ValidationError if vision or multimodal messages are not supported by the client.
+        """
         vision_messages = [
             ChatMessage(
                 role="user",
@@ -5842,7 +5880,9 @@ class TestComprehensiveEdgeCases:
     
     @pytest.mark.asyncio
     async def test_assistant_api_integration(self, client):
-        """Test integration with Assistant API concepts."""
+        """
+        Tests that the client can handle Assistant API integration by processing assistant-specific metadata and returning the expected chat completion response.
+        """
         assistant_config = {
             "assistant_id": "asst_abc123",
             "thread_id": "thread_abc123",
@@ -5875,7 +5915,11 @@ class TestComprehensiveEdgeCases:
     
     @pytest.mark.asyncio
     async def test_embeddings_api_simulation(self, client):
-        """Test simulation of embeddings API if available."""
+        """
+        Test the simulation of an embeddings API endpoint, verifying that the client can handle embedding requests and responses if such functionality is implemented.
+        
+        This test mocks an embeddings API response and checks whether the client can process embedding requests. If the embeddings API is not implemented, the test passes without error.
+        """
         embedding_request = {
             "input": ["Hello world", "How are you?"],
             "model": "text-embedding-ada-002"
@@ -5916,7 +5960,9 @@ class TestComprehensiveEdgeCases:
                 pass
     
     def test_model_config_with_custom_stop_sequences(self, client):
-        """Test model configuration with various stop sequences."""
+        """
+        Verifies that the model configuration correctly handles various custom stop sequences, accepting valid ones and raising a ValidationError for unsupported sequences.
+        """
         stop_sequences_tests = [
             ["Human:", "AI:"],
             ["\n\n", "###"],
@@ -5936,7 +5982,9 @@ class TestComprehensiveEdgeCases:
     
     @pytest.mark.asyncio
     async def test_webhook_simulation(self, client):
-        """Test webhook-like async response handling."""
+        """
+        Tests asynchronous handling of webhook-style API responses by simulating an async notification and verifying the received event and data.
+        """
         webhook_data = {
             'event': 'completion.done',
             'data': {
@@ -5948,6 +5996,12 @@ class TestComprehensiveEdgeCases:
         
         # Simulate webhook-style async notification
         async def simulate_webhook():
+            """
+            Simulates an asynchronous webhook response by waiting briefly before returning predefined data.
+            
+            Returns:
+                webhook_data: The simulated webhook response data.
+            """
             await asyncio.sleep(0.1)
             return webhook_data
         
@@ -5958,7 +6012,11 @@ class TestComprehensiveEdgeCases:
     
     @pytest.mark.asyncio
     async def test_model_switching_mid_conversation(self, client):
-        """Test switching models mid-conversation."""
+        """
+        Test that the client can switch models mid-conversation and correctly handle responses from different models.
+        
+        This test simulates a conversation where the model is changed from GPT-3.5 to GPT-4 between requests, verifying that the client sends the correct model configuration and parses the corresponding responses.
+        """
         conversation_messages = [
             ChatMessage(role="user", content="Hello, start with GPT-3.5"),
             ChatMessage(role="assistant", content="Hello! I'm GPT-3.5."),
@@ -5988,6 +6046,12 @@ class TestComprehensiveEdgeCases:
         call_count = 0
         
         async def model_switching_response(*args, **kwargs):
+            """
+            Simulates API responses that switch between different models on each call.
+            
+            Returns:
+                Mock: An asynchronous mock HTTP response with a JSON payload corresponding to the current model.
+            """
             nonlocal call_count
             response = mock_responses[call_count % len(mock_responses)]
             call_count += 1
@@ -6014,7 +6078,9 @@ class TestAdvancedAsyncPatterns:
     
     @pytest.mark.asyncio
     async def test_async_context_manager_nested(self, mock_config):
-        """Test nested async context managers."""
+        """
+        Tests that nested async context managers for GenesisAPIClient create independent sessions and properly close them after exit.
+        """
         async with GenesisAPIClient(**mock_config) as client1:
             async with GenesisAPIClient(**mock_config) as client2:
                 assert client1.session is not None
@@ -6027,7 +6093,9 @@ class TestAdvancedAsyncPatterns:
     
     @pytest.mark.asyncio
     async def test_async_generator_streaming(self, client, sample_messages, sample_model_config):
-        """Test async generator patterns in streaming."""
+        """
+        Tests that the client correctly handles streaming chat completions using an async generator, including early termination after a specified number of chunks.
+        """
         streaming_chunks = [
             {'choices': [{'delta': {'content': f'Chunk {i}'}}]}
             for i in range(100)
@@ -6035,6 +6103,9 @@ class TestAdvancedAsyncPatterns:
         streaming_chunks.append({'choices': [{'delta': {}, 'finish_reason': 'stop'}]})
         
         async def large_stream():
+            """
+            Asynchronously yields JSON-encoded byte chunks from the `streaming_chunks` iterable, simulating a network stream with a short delay between each chunk.
+            """
             for chunk in streaming_chunks:
                 yield json.dumps(chunk).encode()
                 await asyncio.sleep(0.001)  # Simulate network delay
@@ -6061,8 +6132,16 @@ class TestAdvancedAsyncPatterns:
     
     @pytest.mark.asyncio
     async def test_asyncio_task_cancellation_during_stream(self, client, sample_messages, sample_model_config):
-        """Test task cancellation during streaming operations."""
+        """
+        Verifies that task cancellation during an ongoing streaming chat completion is handled gracefully without resource leaks or unhandled exceptions.
+        """
         async def slow_stream():
+            """
+            Asynchronously yields a sequence of JSON-encoded chat completion chunks with incremental content, simulating a slow streaming response.
+            
+            Yields:
+                bytes: JSON-encoded bytes representing a chat completion delta for each step in the sequence.
+            """
             for i in range(1000):
                 yield json.dumps({'choices': [{'delta': {'content': f'Slow {i}'}}]}).encode()
                 await asyncio.sleep(0.01)  # Slow streaming
@@ -6074,6 +6153,9 @@ class TestAdvancedAsyncPatterns:
             mock_post.return_value.__aenter__.return_value.status = 200
             
             async def stream_consumer():
+                """
+                Asynchronously collects all chunks from a streamed chat completion response and returns them as a list.
+                """
                 chunks = []
                 async for chunk in client.create_chat_completion_stream(
                     messages=sample_messages,
@@ -6095,7 +6177,11 @@ class TestAdvancedAsyncPatterns:
     
     @pytest.mark.asyncio
     async def test_semaphore_limited_concurrency(self, client, sample_messages, sample_model_config):
-        """Test concurrency limiting with semaphores."""
+        """
+        Tests that concurrent chat completion requests are limited by a semaphore, ensuring no more than three requests are processed simultaneously.
+        
+        This verifies that the client can handle multiple concurrent requests while respecting concurrency limits.
+        """
         semaphore = asyncio.Semaphore(3)  # Limit to 3 concurrent requests
         
         mock_response = {
@@ -6105,6 +6191,12 @@ class TestAdvancedAsyncPatterns:
         }
         
         async def limited_request():
+            """
+            Performs a chat completion request using the client while limiting concurrency with a semaphore.
+            
+            Returns:
+                The chat completion response from the client.
+            """
             async with semaphore:
                 with patch('aiohttp.ClientSession.post') as mock_post:
                     mock_post.return_value.__aenter__.return_value.json = AsyncMock(return_value=mock_response)
@@ -6125,8 +6217,16 @@ class TestAdvancedAsyncPatterns:
     
     @pytest.mark.asyncio
     async def test_async_timeout_with_asyncio_timeout(self, client, sample_messages, sample_model_config):
-        """Test asyncio timeout handling."""
+        """
+        Tests that chat completion requests correctly time out using `asyncio.timeout` or `asyncio.wait_for`, ensuring proper handling of slow API responses and compatibility with different Python versions.
+        """
         async def slow_response():
+            """
+            Simulates a delayed asynchronous HTTP response for testing purposes.
+            
+            Returns:
+                Mock: A mock HTTP response object with a 2-second delay, status 200, and a predefined JSON payload.
+            """
             await asyncio.sleep(2)  # Slow response
             return Mock(
                 status=200,
@@ -6166,7 +6266,9 @@ class TestAdvancedDataStructures:
     """Test advanced data structure handling and edge cases."""
     
     def test_chat_message_equality_and_hashing(self):
-        """Test ChatMessage equality and hashing behavior."""
+        """
+        Tests that ChatMessage instances are compared for equality based on their attributes and verifies correct hashing behavior if supported.
+        """
         msg1 = ChatMessage(role="user", content="Hello")
         msg2 = ChatMessage(role="user", content="Hello")
         msg3 = ChatMessage(role="user", content="Hello", name="Alice")
@@ -6184,7 +6286,9 @@ class TestAdvancedDataStructures:
             pass
     
     def test_model_config_copy_and_modification(self):
-        """Test ModelConfig copying and modification behavior."""
+        """
+        Tests that ModelConfig instances can be shallow and deep copied, and verifies that copied instances retain the original attributes. Accepts lack of copy support without failure.
+        """
         original_config = ModelConfig(
             name="genesis-gpt-4",
             temperature=0.7,
@@ -6205,7 +6309,9 @@ class TestAdvancedDataStructures:
             pass
     
     def test_api_response_serialization(self):
-        """Test APIResponse serialization to various formats."""
+        """
+        Tests that the APIResponse object can be serialized to JSON and represented as a dictionary, verifying correct field presence and value integrity.
+        """
         response = APIResponse(
             status_code=200,
             data={'key': 'value', 'nested': {'inner': 'data'}},
@@ -6232,7 +6338,9 @@ class TestAdvancedDataStructures:
             pass
     
     def test_chat_completion_with_complex_choices(self):
-        """Test ChatCompletion with complex choice structures."""
+        """
+        Test that ChatCompletion correctly handles complex choice structures, including function calls, logprobs, and detailed usage statistics.
+        """
         complex_completion = ChatCompletion(
             id="complex-test",
             object="chat.completion",
@@ -6276,7 +6384,9 @@ class TestAdvancedDataStructures:
         assert complex_completion.usage['total_tokens'] == 22
     
     def test_nested_data_structure_handling(self):
-        """Test handling of deeply nested data structures."""
+        """
+        Verify that APIResponse correctly stores and allows access to deeply nested dictionary and list structures in its data attribute.
+        """
         nested_data = {
             'level1': {
                 'level2': {
@@ -6312,11 +6422,25 @@ class TestErrorRecoveryAdvanced:
     
     @pytest.mark.asyncio
     async def test_circuit_breaker_pattern_simulation(self, client, sample_messages, sample_model_config):
-        """Test circuit breaker pattern for error handling."""
+        """
+        Simulates and tests circuit breaker behavior during repeated connection failures in chat completion requests.
+        
+        This test verifies that after a series of connection errors, the circuit breaker either allows recovery and a successful response or prevents further attempts by raising a `GenesisAPIError`.
+        """
         failure_count = 0
         circuit_open = False
         
         async def circuit_breaker_request(*args, **kwargs):
+            """
+            Simulates a request with circuit breaker logic, raising connection errors for the first three attempts and succeeding thereafter.
+            
+            Raises:
+                GenesisAPIError: If the circuit breaker is open.
+                aiohttp.ClientConnectionError: For the first three failed attempts.
+            
+            Returns:
+                Mock: A mock response object simulating a successful API call after failures.
+            """
             nonlocal failure_count, circuit_open
             
             if circuit_open:
@@ -6352,16 +6476,32 @@ class TestErrorRecoveryAdvanced:
     
     @pytest.mark.asyncio
     async def test_jitter_in_retry_backoff(self, client, sample_messages, sample_model_config):
-        """Test jitter implementation in retry backoff."""
+        """
+        Test that retry backoff delays include jitter by verifying variation in retry intervals during repeated server errors.
+        
+        This test simulates repeated server errors and captures the retry delays to ensure that the retry logic introduces randomness (jitter) in the backoff intervals, rather than using fixed delays.
+        """
         retry_delays = []
         
         async def failing_request(*args, **kwargs):
+            """
+            Simulates an asynchronous HTTP request that always returns a mocked 500 server error response.
+            
+            Returns:
+                Mock: An asynchronous mock response object with status 500 and a JSON error payload.
+            """
             mock_response = Mock()
             mock_response.status = 500
             mock_response.json = AsyncMock(return_value={'error': {'message': 'Server error'}})
             return mock_response
         
         def capture_sleep(delay):
+            """
+            Appends the given delay to the retry_delays list and returns an awaitable that completes immediately.
+            
+            Parameters:
+                delay (float): The delay value to record.
+            """
             retry_delays.append(delay)
             return asyncio.sleep(0)  # Don't actually sleep in test
         
@@ -6382,10 +6522,18 @@ class TestErrorRecoveryAdvanced:
     
     @pytest.mark.asyncio
     async def test_adaptive_timeout_based_on_history(self, client, sample_messages, sample_model_config):
-        """Test adaptive timeout based on request history."""
+        """
+        Tests that the client adapts its timeout behavior based on observed request latency history by simulating variable-latency API responses and verifying latency tracking.
+        """
         request_history = []
         
         async def variable_latency_request(*args, **kwargs):
+            """
+            Simulate an asynchronous API request with variable latency for testing adaptive timeout logic.
+            
+            Returns:
+                Mock: A mock response object with a fixed JSON payload and status 200 after a random delay.
+            """
             import random
             latency = random.uniform(0.1, 2.0)  # Variable latency
             request_history.append(latency)
@@ -6418,7 +6566,11 @@ class TestErrorRecoveryAdvanced:
     
     @pytest.mark.asyncio
     async def test_graceful_degradation_with_fallback_models(self, client, sample_messages):
-        """Test graceful degradation with fallback to different models."""
+        """
+        Test that the client gracefully degrades by attempting chat completions with fallback models when initial models are unavailable.
+        
+        Simulates sequential failures for the first two models in the fallback chain and verifies that the client successfully completes the request using the final fallback model.
+        """
         model_fallback_chain = [
             "genesis-gpt-4",
             "genesis-gpt-3.5-turbo",
@@ -6428,6 +6580,12 @@ class TestErrorRecoveryAdvanced:
         attempt_count = 0
         
         async def model_fallback_request(*args, **kwargs):
+            """
+            Simulates an asynchronous API request with fallback logic, returning a 503 error for the first two attempts and a successful response with a fallback model on the third attempt.
+            
+            Returns:
+                Mock: A mock response object simulating either an error or a successful fallback model response.
+            """
             nonlocal attempt_count
             
             if attempt_count < 2:
@@ -6472,7 +6630,9 @@ class TestInteroperabilityAndCompatibility:
     """Test interoperability with different systems and compatibility."""
     
     def test_openai_api_compatibility(self, client):
-        """Test compatibility with OpenAI API format."""
+        """
+        Verify that OpenAI-style message dictionaries can be converted to ChatMessage objects and validated for compatibility with the client.
+        """
         openai_style_messages = [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": "Hello!"},
@@ -6504,7 +6664,11 @@ class TestInteroperabilityAndCompatibility:
             pass
     
     def test_anthropic_api_style_compatibility(self, client):
-        """Test compatibility with Anthropic API style."""
+        """
+        Verify that the client can accept and validate a model configuration using Anthropic API style parameters.
+        
+        This test checks whether Anthropic-style configuration dictionaries can be converted to the internal ModelConfig format and validated without raising errors, ensuring compatibility with Anthropic API conventions.
+        """
         anthropic_style_config = {
             "model": "claude-3-opus",
             "max_tokens": 1000,
@@ -6529,7 +6693,11 @@ class TestInteroperabilityAndCompatibility:
             pass
     
     def test_google_ai_api_compatibility(self, client):
-        """Test compatibility with Google AI API patterns."""
+        """
+        Tests that Google AI API message formats can be converted to the internal ChatMessage format and validated for compatibility.
+        
+        This includes mapping Google's "model" role to "assistant" and aggregating message parts into a single content string. The test verifies that the converted messages can be validated by the client, tolerating expected incompatibilities.
+        """
         google_style_messages = [
             {
                 "parts": [{"text": "Hello, how can I help you today?"}],
@@ -6562,7 +6730,11 @@ class TestInteroperabilityAndCompatibility:
                 pass
     
     def test_azure_openai_compatibility(self, client):
-        """Test compatibility with Azure OpenAI specific features."""
+        """
+        Verify that the client can handle Azure OpenAI-specific configuration parameters without raising unexpected errors.
+        
+        This test ensures that Azure deployment IDs and related parameters do not cause validation failures in the model configuration.
+        """
         azure_config = {
             "deployment_id": "gpt-4-deployment",
             "api_version": "2023-12-01-preview",
@@ -6579,7 +6751,11 @@ class TestInteroperabilityAndCompatibility:
             pass
     
     def test_langchain_integration_compatibility(self, client):
-        """Test compatibility with LangChain-style usage patterns."""
+        """
+        Tests that LangChain-style message and model configuration formats can be converted and validated for compatibility with the GenesisAPIClient.
+        
+        This includes mapping LangChain roles to standard roles, constructing ChatMessage and ModelConfig objects, and validating them using the client's internal validation methods.
+        """
         langchain_style_call = {
             "messages": [
                 {"role": "human", "content": "What is the capital of France?"},

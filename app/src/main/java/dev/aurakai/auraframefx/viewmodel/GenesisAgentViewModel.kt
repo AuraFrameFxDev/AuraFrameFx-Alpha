@@ -122,6 +122,11 @@ class GenesisAgentViewModel /* @Inject constructor(
     /**
      * Toggles the rotation state between active and inactive.
      */
+    /**
+     * Toggles the rotation state between active and inactive.
+     *
+     * Flips the `_isRotating` state, which can be observed to determine whether rotation is currently enabled.
+     */
     fun toggleRotation() {
         _isRotating.value = !_isRotating.value
     }
@@ -139,9 +144,9 @@ class GenesisAgentViewModel /* @Inject constructor(
     /**
      * Toggles the operational status of the specified agent between active and inactive states.
      *
-     * Updates the agent's status in the state flow and logs the status change in the task history.
+     * Updates the agent's status in the state flow and records the status change in the task history.
      *
-     * @param agent The agent whose status should be toggled.
+     * @param agent The agent whose operational status will be toggled.
      */
     fun toggleAgent(agent: AgentType) {
         viewModelScope.launch {

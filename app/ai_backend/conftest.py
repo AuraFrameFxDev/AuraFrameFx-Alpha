@@ -29,9 +29,9 @@ def mock_base_url():
 @pytest.fixture
 def sample_api_response():
     """
-    Provides a dictionary simulating a successful Genesis API chat completion response.
+    Provides a simulated Genesis API chat completion response as a dictionary.
     
-    The returned dictionary includes metadata, a list of choices with an assistant message, a finish reason, and token usage statistics. Useful for tests that require a realistic Genesis API response structure.
+    The dictionary includes metadata, a list of choices with an assistant message and finish reason, and token usage statistics. Useful for tests requiring a realistic Genesis API response structure.
     
     Returns:
         dict: Simulated Genesis API chat completion response.
@@ -61,9 +61,10 @@ def sample_api_response():
 @pytest.fixture
 def sample_error_response():
     """
-    Provides a simulated Genesis API error response dictionary for testing error handling.
+    Provides a simulated Genesis API error response as a dictionary for testing error handling.
     
-    The returned dictionary includes an `error` object with fields for error type, message, parameter, and code.
+    The dictionary contains an `error` object with fields for type, message, parameter, and code.
+    
     Returns:
         dict: Simulated Genesis API error response.
     """
@@ -79,9 +80,9 @@ def sample_error_response():
 @pytest.fixture(autouse=True)
 def mock_environment():
     """
-    Automatically sets and removes Genesis API environment variables for each test.
+    Ensures test isolation by setting and removing Genesis API environment variables before and after each test.
     
-    This autouse pytest fixture sets `GENESIS_API_KEY` and `GENESIS_BASE_URL` to test values before each test and deletes them afterward to ensure test isolation.
+    This autouse pytest fixture sets `GENESIS_API_KEY` and `GENESIS_BASE_URL` to test values prior to each test run and deletes them afterward.
     """
     os.environ["GENESIS_API_KEY"] = "test_env_key"
     os.environ["GENESIS_BASE_URL"] = "https://api.genesis.test"

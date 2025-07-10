@@ -146,7 +146,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Initialize the encryption subsystem using Keystore.
+     * Initializes the encryption subsystem by obtaining or creating a secret key via the KeystoreManager.
+     *
+     * Updates the encryption status and security state based on the outcome.
+     *
+     * @return `true` if encryption is successfully initialized; `false` if key creation or retrieval fails.
      */
     fun initializeEncryption(): Boolean {
         Log.d(TAG, "Initializing encryption using KeystoreManager.")
@@ -172,12 +176,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Encrypts the provided string using the Android Keystore and AES encryption.
+     * Encrypts a UTF-8 string using AES encryption with a key from the Android Keystore.
      *
-     * Attempts to initialize encryption if not already active. Returns an [EncryptedData] object containing the encrypted bytes, initialization vector, timestamp, and metadata, or null if encryption fails.
+     * If encryption is not already initialized, attempts to initialize it before proceeding. Returns an [EncryptedData] object containing the encrypted bytes, initialization vector, timestamp, and metadata, or null if encryption fails.
      *
-     * @param data The UTF-8 string to encrypt.
-     * @return The encrypted data and metadata, or null if encryption is unsuccessful.
+     * @param data The string to encrypt.
+     * @return An [EncryptedData] object with the encrypted content and metadata, or null if encryption is unsuccessful.
      */
     fun encrypt(data: String): EncryptedData? {
         if (_encryptionStatus.value != EncryptionStatus.ACTIVE) {
@@ -277,11 +281,11 @@ class SecurityContext @Inject constructor(
     /**
      * Creates a shared secure context for communication with another agent.
      *
-     * Generates a unique identifier and timestamp, and packages the provided context data for sharing with the specified agent. The content is not encrypted in this implementation.
+     * Generates a unique identifier and timestamp, and packages the provided context data as a byte array for sharing with the specified agent. The content is not encrypted in this implementation.
      *
      * @param agentType The agent to share the context with.
      * @param context The context data to be shared.
-     * @return A SharedSecureContext containing the packaged context and metadata.
+     * @return A SharedSecureContext containing the packaged context and associated metadata.
      */
     fun shareSecureContextWith(agentType: AgentType, context: String): SharedSecureContext {
         val secureId = generateSecureId()
@@ -298,9 +302,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Checks the application's integrity by retrieving its signature, computing a SHA-256 hash, and returning verification details.
+     * Verifies the application's integrity by retrieving its signature, computing a SHA-256 hash, and returning verification details.
      *
-     * @return An [ApplicationIntegrity] object containing verification status, app version, signature hash, install and update times, and error information if verification fails.
+     * @return An [ApplicationIntegrity] object containing the verification status, app version, signature hash, install and update times, and error information if verification fails.
      */
     fun verifyApplicationIntegrity(): ApplicationIntegrity {
         try {
@@ -355,9 +359,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Simulates detection of security threats for testing and beta purposes.
+     * Generates a random list of simulated security threats for testing or beta environments.
      *
-     * @return A randomly generated list of simulated security threats.
+     * @return A list of simulated `SecurityThreat` objects, which may be empty or contain one or more threats.
      */
     private fun detectThreats(): List<SecurityThreat> {
         // In a real implementation, this would perform actual threat analysis
@@ -381,12 +385,12 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Returns the overall threat level based on the highest severity among the provided security threats.
+     * Determines the overall threat level by returning the highest severity present in the given list of security threats.
      *
-     * If the list is empty, returns `ThreatLevel.LOW`.
+     * Returns `ThreatLevel.LOW` if the list is empty.
      *
-     * @param threats List of detected security threats.
-     * @return The highest threat level found, or `ThreatLevel.LOW` if the list is empty.
+     * @param threats The list of detected security threats to evaluate.
+     * @return The highest threat level found among the threats, or `ThreatLevel.LOW` if none are present.
      */
     private fun calculateThreatLevel(threats: List<SecurityThreat>): ThreatLevel {
         if (threats.isEmpty()) return ThreatLevel.LOW
@@ -404,9 +408,9 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Generates a secure 32-character hexadecimal identifier.
+     * Generates a random 32-character hexadecimal string for use as a secure identifier.
      *
-     * @return A randomly generated 16-byte (32-character) hexadecimal string suitable for use as a secure ID.
+     * @return A 32-character hexadecimal string generated from 16 random bytes.
      */
     private fun generateSecureId(): String {
         val bytes = ByteArray(16)
@@ -415,11 +419,11 @@ class SecurityContext @Inject constructor(
     }
 
     /**
-     * Logs a security event asynchronously for auditing and monitoring.
+     * Asynchronously logs a security event for auditing and monitoring purposes.
      *
-     * The event is serialized and written to the debug log. In production, events should be securely persisted.
+     * The event is serialized and written to the debug log. In production environments, events should be securely persisted instead of logged.
      *
-     * @param event The security event to log.
+     * @param event The security event to be logged.
      */
     fun logSecurityEvent(event: SecurityEvent) {
         scope.launch {

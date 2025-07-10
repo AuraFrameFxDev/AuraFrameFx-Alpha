@@ -59,8 +59,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Initializes the Text-to-Speech (TTS) engine and updates the initialization status.
      *
-     * Attempts to create a `TextToSpeech` instance and sets the initialization flag if successful.
-     * Language, voice, pitch, and rate configuration are not yet implemented.
+     * Attempts to create a `TextToSpeech` instance using the application context. Sets the initialization flag if successful. Language, voice, pitch, and rate configuration are not yet implemented.
      */
     private fun initializeTts() {
         // TODO: Implement robust TTS initialization, including language availability checks.
@@ -84,7 +83,7 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initializes the speech-to-text (STT) engine if speech recognition is supported on the device.
+     * Initializes the speech-to-text (STT) engine if supported on the device.
      *
      * Checks for speech recognition availability and creates a `SpeechRecognizer` instance if possible, updating the STT initialization state. Logs an error if speech recognition is not available.
      */
@@ -130,7 +129,7 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Synthesizes speech from the provided text using the specified locale.
+     * Initiates speech synthesis for the given text using the specified locale.
      *
      * Updates the conversation state to "Speaking." Returns `false` if the text-to-speech engine is not initialized; otherwise, returns `true` as a placeholder indicating the request was accepted.
      *

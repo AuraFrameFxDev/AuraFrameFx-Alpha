@@ -32,9 +32,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Returns null for any file ID, indicating that file download functionality is not implemented.
+     * Stub implementation that always returns null, indicating file download is not supported.
      *
-     * @param _fileId The identifier of the file to download (ignored).
+     * @param _fileId The file identifier (ignored).
      * @return Always null.
      */
     override suspend fun downloadFile(_fileId: String): File? {
@@ -42,11 +42,11 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Stub implementation for image generation that always returns null.
+     * Stub method for image generation that always returns null.
      *
-     * This method does not generate or return any image data, regardless of the input prompt.
+     * This implementation does not generate or return any image data, regardless of the input prompt.
      *
-     * @return Always returns null.
+     * @return Always null.
      */
     override suspend fun generateImage(_prompt: String): ByteArray? {
         return null
@@ -86,9 +86,9 @@ class AuraAIServiceImpl @Inject constructor(
     }
 
     /**
-     * Placeholder method for saving a value in memory associated with a key.
+     * Stub implementation for saving a value in memory associated with a key.
      *
-     * This implementation does not persist any data and serves as a stub for future functionality.
+     * This method does not perform any operation and does not persist data.
      *
      * @param key The identifier for the memory entry.
      * @param value The value to associate with the key.

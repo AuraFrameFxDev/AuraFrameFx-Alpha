@@ -33,9 +33,9 @@ import dev.aurakai.auraframefx.ui.theme.NeonTeal
  */
 >>>>>>> pr458merge
 /**
- * Displays the main conference room UI, including agent selection, recording and transcription controls, chat interface, and message input.
+ * Composes the main conference room UI with agent selection, recording and transcription controls, chat area, and message input.
  *
- * Provides interactive controls for selecting an agent, toggling recording and transcription states, and composing messages. Some actions and chat functionality are placeholders and not yet implemented.
+ * Users can select an agent, toggle recording and transcription states, and compose messages. Some actions and chat functionality are placeholders and not yet implemented.
  */
 @Composable
 fun ConferenceRoomScreen() {
@@ -159,13 +159,13 @@ fun ConferenceRoomScreen() {
 }
 
 /**
- * Displays a button for selecting an agent, visually indicating when it is selected.
+ * Renders a selectable button labeled with the agent's name, visually highlighting when selected.
  *
- * The button shows the agent's name and updates its appearance based on selection state. Invokes the provided callback when pressed.
+ * The button updates its background and text color based on selection state and triggers the provided callback when clicked.
  *
- * @param agent The name of the agent shown on the button.
- * @param isSelected Whether this agent is currently selected.
- * @param onClick Invoked when the button is clicked.
+ * @param agent The display name of the agent.
+ * @param isSelected True if this agent is currently selected; affects button styling.
+ * @param onClick Called when the button is pressed.
  */
 @Composable
 fun AgentButton(
@@ -194,12 +194,12 @@ fun AgentButton(
 }
 
 /**
- * Displays a toggle button for recording, updating its icon and accessibility description based on the recording state.
+ * Renders a toggle button for starting or stopping recording, updating its icon, color, and accessibility description based on the current recording state.
  *
- * Shows a red stop icon when recording is active and a purple circle icon when inactive.
+ * Displays a red stop icon when recording is active, and a purple circle icon when inactive.
  *
- * @param isRecording True if recording is active; false otherwise.
- * @param onClick Invoked when the button is pressed.
+ * @param isRecording Indicates whether recording is currently active.
+ * @param onClick Called when the button is pressed.
  */
 @Composable
 fun RecordingButton(
@@ -224,12 +224,12 @@ fun RecordingButton(
 }
 
 /**
- * Displays a toggle button for starting or stopping transcription in the conference room UI.
+ * Renders a toggle button for controlling transcription in the conference room UI.
  *
- * Shows a red stop icon when transcription is active, or a neon blue phone icon when inactive. The icon's content description updates for accessibility to indicate the current transcription state.
+ * Displays a red stop icon when transcription is active, or a neon blue phone icon when inactive. The icon's content description updates for accessibility to reflect the current state.
  *
- * @param isTranscribing Indicates whether transcription is currently active.
- * @param onClick Invoked when the button is pressed.
+ * @param isTranscribing True if transcription is currently active; false otherwise.
+ * @param onClick Called when the button is pressed.
  */
 @Composable
 fun TranscribeButton(

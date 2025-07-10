@@ -19,11 +19,11 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides a singleton OkHttpClient with full HTTP request and response body logging enabled.
+     * Provides a singleton OkHttpClient configured to log full HTTP request and response bodies.
      *
-     * The returned OkHttpClient is configured for detailed network debugging.
+     * The returned client is intended for detailed network debugging.
      *
-     * @return A singleton OkHttpClient instance with comprehensive logging.
+     * @return A singleton OkHttpClient instance with comprehensive HTTP body logging enabled.
      */
     @Provides
     @Singleton
@@ -38,11 +38,11 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton Json serializer configured for robust handling of API data.
+     * Provides a singleton Json serializer configured for flexible and resilient API data processing.
      *
-     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values to support flexible and resilient serialization and deserialization of API responses.
+     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values to ensure robust serialization and deserialization of API responses.
      *
-     * @return A configured Json instance for processing API data.
+     * @return A configured Json instance for handling API data.
      */
     @Provides
     @Singleton
@@ -54,10 +54,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton AIContentApi instance configured to communicate with the AuraFrameFx AI API.
+     * Creates and provides a singleton AIContentApi configured to interact with the AuraFrameFx AI API.
      *
-     * @param okHttpClient The HTTP client used for network requests to the API.
-     * @return An AIContentApi instance set up with the AuraFrameFx API base URL and the provided HTTP client.
+     * @param okHttpClient The OkHttpClient used for network communication.
+     * @return An AIContentApi instance set up with the AuraFrameFx API base URL and the specified HTTP client.
      */
     @Provides
     @Singleton

@@ -29,7 +29,7 @@ class ContextManager @Inject constructor(
     /**
      * Creates and registers a new context chain with an initial context node.
      *
-     * Initializes a context chain using the specified root context, initial content, agent, and optional metadata. All metadata values are stored as strings. The new chain is added to the active context registry, and context statistics are updated.
+     * Initializes a context chain using the provided root context, initial content, agent, and optional metadata. All metadata values are stored as strings. The new chain is added to the active context registry, and context statistics are updated.
      *
      * @param rootContext The identifier for the root context of the chain.
      * @param initialContext The content of the initial context node.
@@ -66,9 +66,9 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Updates an existing context chain by appending a new context node with the specified context, agent, and metadata.
+     * Appends a new context node to an existing context chain, updating its current context, history, agent mapping, and last updated timestamp.
      *
-     * The chain's current context, history, agent-to-context mapping, and last updated timestamp are updated. All metadata values are stored as strings.
+     * All metadata values are stored as strings. Throws an IllegalStateException if the specified context chain does not exist.
      *
      * @param chainId The unique identifier of the context chain to update.
      * @param newContext The context string to add to the chain.
@@ -106,10 +106,10 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Retrieves the active context chain associated with the specified chain ID.
+     * Returns the active context chain for the given chain ID, or null if no such chain exists.
      *
      * @param chainId The unique identifier of the context chain.
-     * @return The corresponding ContextChain if it exists, or null otherwise.
+     * @return The matching ContextChain, or null if not found.
      */
     fun getContextChain(chainId: String): ContextChain? {
         return _activeContexts.value[chainId]
