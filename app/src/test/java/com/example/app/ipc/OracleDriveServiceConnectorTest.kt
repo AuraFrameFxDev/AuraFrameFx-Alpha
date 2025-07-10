@@ -1915,59 +1915,156 @@ class FileSizeExceededException(message: String) : Exception(message)
 >>>>>>> pr458merge
 
     @Nested
-    @DisplayName("Protocol and Network Resilience Tests")
-    inner class ProtocolNetworkResilienceTests {
+    @DisplayName("Advanced Input Validation and Sanitization Tests")
+    inner class AdvancedInputValidationTests {
         
         @Test
-        @DisplayName("Should handle HTTP 429 rate limiting with exponential backoff")
-        fun testHTTP429RateLimitingWithBackoff() = runTest {
+        @DisplayName("Should handle SQL injection attempts in file names")
+        fun testSQLInjectionAttemptsInFileNames() = runTest {
             // Given
-            val fileName = "rate_limited.txt"
+            val maliciousFileNames = listOf(
+                "file'; DROP TABLE files; --",
+                "file\" OR 1=1 --",
+                "file<script>alert('xss')</script>",
+                "file${'\u0000'}null_byte.txt"
+            )
             val fileData = "content".toByteArray()
-            val http429Exception = HttpException(429, "Too Many Requests")
             
-            whenever(mockServiceClient.uploadFile(any(), any()))
-                .thenReturn(CompletableFuture.failedFuture(http429Exception))
-                .thenReturn(CompletableFuture.failedFuture(http429Exception))
-                .thenReturn(CompletableFuture.completedFuture("backoff_success"))
-            
-            // When
-            val result = connector.uploadFileWithExponentialBackoff(fileName, fileData)
-            
-            // Then
-            assertEquals("backoff_success", result.get())
-            verify(mockServiceClient, times(3)).uploadFile(fileName, fileData)
+            // When & Then
+            maliciousFileNames.forEach { fileName ->
+                assertThrows<IllegalArgumentException> {
+                    connector.uploadFile(fileName, fileData)
+                }
+            }
         }
         
         @Test
-        @DisplayName("Should handle network partition recovery")
-        fun testNetworkPartitionRecovery() = runTest {
+        @DisplayName("Should handle extremely deep file paths")
+        fun testExtremelyDeepFilePaths() = runTest {
             // Given
-            val fileName = "partition_test.txt"
+            val deepPath = "folder/".repeat(1000) + "file.txt"
             val fileData = "content".toByteArray()
-            val partitionException = NetworkPartitionException("Network partition detected")
             
             whenever(mockServiceClient.uploadFile(any(), any()))
-                .thenReturn(CompletableFuture.failedFuture(partitionException))
-                .thenReturn(CompletableFuture.completedFuture("partition_recovery"))
+                .thenReturn(CompletableFuture.completedFuture("deep_upload"))
             
             // When
-            val result = connector.uploadFileWithPartitionRecovery(fileName, fileData)
+            val result = connector.uploadFile(deepPath, fileData)
             
             // Then
-            assertEquals("partition_recovery", result.get())
-            verify(mockServiceClient, times(2)).uploadFile(fileName, fileData)
+            assertEquals("deep_upload", result.get())
+            verify(mockServiceClient).uploadFile(deepPath, fileData)
         }
         
         @Test
-        @DisplayName("Should handle DNS resolution failures")
+        @DisplayName("Should validate file extension restrictions")
+        fun testFileExtensionRestrictions() = runTest {
+            // Given
+            val restrictedExtensions = listOf(".exe", ".bat", ".sh", ".ps1")
+            val fileData = "malicious content".toByteArray()
+            
+            connector.setRestrictedExtensions(restrictedExtensions)
+            
+            // When & Then
+            restrictedExtensions.forEach { ext ->
+                assertThrows<SecurityException> {
+                    connector.uploadFile("malicious$ext", fileData)
+                }
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle international domain names in endpoints")
+        fun testInternationalDomainNames() = runTest {
+            // Given
+            val internationalEndpoints = listOf(
+                "https://тест.example.com",
+                "https://例え.テスト",
+                "https://example.中国"
+            )
+            
+            // When & Then
+            internationalEndpoints.forEach { endpoint ->
+                assertDoesNotThrow {
+                    connector.validateEndpoint(endpoint)
+                }
+            }
+        }
+        
+        @Test
+        @DisplayName("Should sanitize log outputs to prevent log injection")
+        fun testLogInjectionPrevention() = runTest {
+            // Given
+            val maliciousFileName = "legit_file\n[ERROR] Fake error message\nfile.txt"
+            val fileData = "content".toByteArray()
+            val auditLogger = mock<AuditLogger>()
+            connector.setAuditLogger(auditLogger)
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture("sanitized_upload"))
+            
+            // When
+            connector.uploadFile(maliciousFileName, fileData)
+            
+            // Then
+            verify(auditLogger).logFileOperation(
+                operation = "UPLOAD",
+                fileName = argThat { !it.contains('\n') && !it.contains('\r') },
+                fileSize = fileData.size.toLong(),
+                timestamp = any(),
+                userId = any()
+            )
+        }
+    }
+    
+    @Nested
+    @DisplayName("Advanced Network and Protocol Tests")
+    inner class AdvancedNetworkProtocolTests {
+        
+        @Test
+        @DisplayName("Should handle IPv6 endpoints correctly")
+        fun testIPv6EndpointHandling() = runTest {
+            // Given
+            val ipv6Endpoints = listOf(
+                "https://[2001:db8::1]:8080",
+                "https://[::1]:443",
+                "https://[2001:db8:85a3::8a2e:370:7334]"
+            )
+            
+            // When & Then
+            ipv6Endpoints.forEach { endpoint ->
+                assertDoesNotThrow {
+                    connector.validateEndpoint(endpoint)
+                }
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle proxy configuration changes")
+        fun testProxyConfigurationChanges() = runTest {
+            // Given
+            val proxyConfig = ProxyConfig("proxy.example.com", 8080, "user", "pass")
+            
+            whenever(mockConnectionManager.setProxyConfig(any())).thenReturn(true)
+            whenever(mockConnectionManager.connect(any())).thenReturn(true)
+            
+            // When
+            connector.setProxyConfiguration(proxyConfig)
+            val result = connector.connect()
+            
+            // Then
+            assertTrue(result)
+            verify(mockConnectionManager).setProxyConfig(proxyConfig)
+        }
+        
+        @Test
+        @DisplayName("Should handle DNS resolution failures gracefully")
         fun testDNSResolutionFailures() = runTest {
             // Given
-            val credentials = Credentials("token", "unresolvable.domain.com")
-            val dnsException = UnknownHostException("DNS resolution failed")
-            
-            whenever(mockAuthProvider.getCredentials()).thenReturn(credentials)
-            whenever(mockConnectionManager.connect(any())).thenThrow(dnsException)
+            val unresolveableEndpoint = Credentials("token", "https://nonexistent.invalid.tld")
+            whenever(mockAuthProvider.getCredentials()).thenReturn(unresolveableEndpoint)
+            whenever(mockConnectionManager.connect(any()))
+                .thenThrow(UnknownHostException("Host not found"))
             
             // When & Then
             assertThrows<UnknownHostException> {
@@ -1976,684 +2073,432 @@ class FileSizeExceededException(message: String) : Exception(message)
         }
         
         @Test
-        @DisplayName("Should handle SSL/TLS handshake failures")
-        fun testSSLTLSHandshakeFailures() = runTest {
+        @DisplayName("Should handle network interface changes during operations")
+        fun testNetworkInterfaceChanges() = runTest {
             // Given
-            val credentials = Credentials("token", "https://invalid-cert.endpoint.com")
-            val sslException = SSLHandshakeException("SSL handshake failed")
-            
-            whenever(mockAuthProvider.getCredentials()).thenReturn(credentials)
-            whenever(mockConnectionManager.connect(any())).thenThrow(sslException)
-            
-            // When & Then
-            assertThrows<SSLHandshakeException> {
-                connector.connect()
-            }
-        }
-        
-        @Test
-        @DisplayName("Should handle protocol version mismatches")
-        fun testProtocolVersionMismatches() = runTest {
-            // Given
-            val fileName = "protocol_test.txt"
+            val fileName = "network_change.txt"
             val fileData = "content".toByteArray()
-            val protocolException = ProtocolVersionMismatchException("Unsupported protocol version")
+            val networkException = NetworkException("Network interface changed")
             
             whenever(mockServiceClient.uploadFile(any(), any()))
-                .thenReturn(CompletableFuture.failedFuture(protocolException))
-            
-            // When & Then
-            assertThrows<ProtocolVersionMismatchException> {
-                connector.uploadFile(fileName, fileData).get()
-            }
-        }
-        
-        @Test
-        @DisplayName("Should handle connection keep-alive timeouts")
-        fun testConnectionKeepAliveTimeouts() = runTest {
-            // Given
-            val keepAliveException = SocketTimeoutException("Keep-alive timeout")
-            whenever(mockConnectionManager.maintainConnection())
-                .thenThrow(keepAliveException)
-            
-            // When & Then
-            assertThrows<SocketTimeoutException> {
-                connector.maintainConnection()
-            }
-        }
-    }
-    
-    @Nested
-    @DisplayName("Data Integrity and Validation Tests")
-    inner class DataIntegrityValidationTests {
-        
-        @Test
-        @DisplayName("Should validate file integrity using MD5 checksums")
-        fun testMD5ChecksumValidation() = runTest {
-            // Given
-            val fileName = "md5_test.txt"
-            val fileData = "integrity test content".toByteArray()
-            val expectedMD5 = "a1b2c3d4e5f6"
-            val actualMD5 = "a1b2c3d4e5f6"
-            
-            whenever(mockServiceClient.uploadFileWithMD5(any(), any(), any()))
-                .thenReturn(CompletableFuture.completedFuture(ChecksumResult("upload_123", actualMD5)))
+                .thenReturn(CompletableFuture.failedFuture(networkException))
+                .thenReturn(CompletableFuture.completedFuture("reconnected_upload"))
             
             // When
-            val result = connector.uploadFileWithMD5Validation(fileName, fileData, expectedMD5)
+            val result = connector.uploadFileWithNetworkRecovery(fileName, fileData)
             
             // Then
-            assertEquals("upload_123", result.get().uploadId)
-            assertEquals(expectedMD5, result.get().checksum)
+            assertEquals("reconnected_upload", result.get())
+            verify(mockServiceClient, times(2)).uploadFile(fileName, fileData)
         }
         
         @Test
-        @DisplayName("Should detect and handle checksum mismatches")
-        fun testChecksumMismatchDetection() = runTest {
+        @DisplayName("Should handle bandwidth throttling appropriately")
+        fun testBandwidthThrottling() = runTest {
             // Given
-            val fileName = "checksum_mismatch.txt"
-            val fileData = "content".toByteArray()
-            val expectedChecksum = "expected123"
-            val actualChecksum = "actual456"
-            val mismatchException = ChecksumMismatchException("Checksum validation failed")
+            val largeFileData = ByteArray(50 * 1024 * 1024) // 50MB
+            val fileName = "throttled.dat"
+            val throttleConfig = BandwidthThrottleConfig(maxBytesPerSecond = 1024 * 1024) // 1MB/s
             
-            whenever(mockServiceClient.uploadFileWithChecksum(any(), any(), any()))
-                .thenReturn(CompletableFuture.failedFuture(mismatchException))
-            
-            // When & Then
-            assertThrows<ChecksumMismatchException> {
-                connector.uploadFileWithChecksumValidation(fileName, fileData, expectedChecksum).get()
-            }
-        }
-        
-        @Test
-        @DisplayName("Should handle data serialization edge cases")
-        fun testDataSerializationEdgeCases() = runTest {
-            // Given
-            val complexObject = ComplexDataObject(
-                id = Long.MAX_VALUE,
-                name = "测试数据_🚀_файл", // Unicode characters
-                data = byteArrayOf(0x00, 0xFF.toByte(), 0x7F, 0x80.toByte()),
-                nested = NestedObject(
-                    timestamp = Long.MIN_VALUE,
-                    values = listOf(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN)
-                )
-            )
-            
-            whenever(mockServiceClient.uploadSerializedObject(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("serialized_upload"))
-            
-            // When
-            val result = connector.uploadSerializedObject("complex.dat", complexObject)
-            
-            // Then
-            assertEquals("serialized_upload", result.get())
-            verify(mockServiceClient).uploadSerializedObject("complex.dat", complexObject)
-        }
-        
-        @Test
-        @DisplayName("Should validate file format and MIME types")
-        fun testFileFormatMimeTypeValidation() = runTest {
-            // Given
-            val fileName = "document.pdf"
-            val fileData = "%PDF-1.4".toByteArray() // PDF header
-            val allowedMimeTypes = listOf("application/pdf", "text/plain")
-            
-            whenever(mockServiceClient.uploadFileWithMimeValidation(any(), any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("mime_validated"))
-            
-            // When
-            val result = connector.uploadFileWithMimeValidation(fileName, fileData, allowedMimeTypes)
-            
-            // Then
-            assertEquals("mime_validated", result.get())
-        }
-        
-        @Test
-        @DisplayName("Should handle invalid MIME type rejection")
-        fun testInvalidMimeTypeRejection() = runTest {
-            // Given
-            val fileName = "executable.exe"
-            val fileData = "MZ".toByteArray() // PE executable header
-            val allowedMimeTypes = listOf("text/plain", "image/jpeg")
-            val mimeException = InvalidMimeTypeException("Executable files not allowed")
-            
-            whenever(mockServiceClient.uploadFileWithMimeValidation(any(), any(), any()))
-                .thenReturn(CompletableFuture.failedFuture(mimeException))
-            
-            // When & Then
-            assertThrows<InvalidMimeTypeException> {
-                connector.uploadFileWithMimeValidation(fileName, fileData, allowedMimeTypes).get()
-            }
-        }
-    }
-    
-    @Nested
-    @DisplayName("Temporal and Timing Edge Cases Tests")
-    inner class TemporalTimingEdgeCasesTests {
-        
-        @Test
-        @DisplayName("Should handle operations during daylight saving time transitions")
-        fun testDaylightSavingTimeTransitions() = runTest {
-            // Given
-            val fileName = "dst_test.txt"
-            val fileData = "content".toByteArray()
-            val dstTransitionTime = ZonedDateTime.of(2024, 3, 10, 2, 30, 0, 0, ZoneId.of("America/New_York"))
-            
-            whenever(mockServiceClient.uploadFileWithTimestamp(any(), any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("dst_upload"))
-            
-            // When
-            val result = connector.uploadFileWithTimestamp(fileName, fileData, dstTransitionTime)
-            
-            // Then
-            assertEquals("dst_upload", result.get())
-        }
-        
-        @Test
-        @DisplayName("Should handle leap second edge cases")
-        fun testLeapSecondEdgeCases() = runTest {
-            // Given
-            val fileName = "leap_second.txt"
-            val fileData = "content".toByteArray()
-            val leapSecondTime = Instant.parse("2023-12-31T23:59:60Z") // Hypothetical leap second
-            
-            whenever(mockServiceClient.uploadFileWithPreciseTimestamp(any(), any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("leap_upload"))
-            
-            // When
-            val result = connector.uploadFileWithPreciseTimestamp(fileName, fileData, leapSecondTime)
-            
-            // Then
-            assertEquals("leap_upload", result.get())
-        }
-        
-        @Test
-        @DisplayName("Should handle year 2038 problem edge cases")
-        fun testYear2038Problem() = runTest {
-            // Given
-            val fileName = "y2038_test.txt"
-            val fileData = "content".toByteArray()
-            val y2038Timestamp = Instant.ofEpochSecond(2147483648L) // 2038-01-19 03:14:08 UTC
-            
-            whenever(mockServiceClient.uploadFileWithTimestamp(any(), any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("y2038_upload"))
-            
-            // When
-            val result = connector.uploadFileWithTimestamp(fileName, fileData, y2038Timestamp)
-            
-            // Then
-            assertEquals("y2038_upload", result.get())
-        }
-        
-        @Test
-        @DisplayName("Should handle timezone-specific file operations")
-        fun testTimezoneSpecificOperations() = runTest {
-            // Given
-            val fileName = "timezone_test.txt"
-            val fileData = "content".toByteArray()
-            val timeZones = listOf(
-                ZoneId.of("Pacific/Kiritimati"), // UTC+14
-                ZoneId.of("Pacific/Niue"),       // UTC-11
-                ZoneId.of("UTC"),
-                ZoneId.of("Asia/Kathmandu")      // UTC+05:45 (non-hour offset)
-            )
-            
-            whenever(mockServiceClient.uploadFileInTimezone(any(), any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("timezone_upload"))
-            
-            // When & Then
-            timeZones.forEach { timezone ->
-                val result = connector.uploadFileInTimezone(fileName, fileData, timezone)
-                assertEquals("timezone_upload", result.get())
-            }
-        }
-        
-        @Test
-        @DisplayName("Should handle concurrent operations with precise timing")
-        fun testConcurrentOperationsWithPreciseTiming() = runTest {
-            // Given
-            val fileData = "timing content".toByteArray()
-            val operationCount = 1000
-            val maxDurationMs = 5000L
+            connector.setBandwidthThrottle(throttleConfig)
             
             whenever(mockServiceClient.uploadFile(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("timing_upload"))
+                .thenReturn(CompletableFuture.completedFuture("throttled_upload"))
             
             // When
-            val startTime = System.nanoTime()
-            val futures = (1..operationCount).map { i ->
-                async { connector.uploadFile("timing_$i.txt", fileData) }
-            }
-            val results = futures.awaitAll()
-            val endTime = System.nanoTime()
-            val durationMs = (endTime - startTime) / 1_000_000
-            
-            // Then
-            assertEquals(operationCount, results.size)
-            assertTrue(durationMs < maxDurationMs, "Operations took too long: ${durationMs}ms")
-            assertTrue(results.all { it.get() == "timing_upload" })
-        }
-    }
-    
-    @Nested
-    @DisplayName("Cross-Platform and Environment Tests")
-    inner class CrossPlatformEnvironmentTests {
-        
-        @Test
-        @DisplayName("Should handle Windows-style file paths")
-        fun testWindowsStyleFilePaths() = runTest {
-            // Given
-            val windowsPath = "C:\\Users\\Test\\Documents\\file.txt"
-            val fileData = "content".toByteArray()
-            
-            whenever(mockServiceClient.uploadFile(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("windows_upload"))
-            
-            // When
-            val result = connector.uploadFile(windowsPath, fileData)
-            
-            // Then
-            assertEquals("windows_upload", result.get())
-            verify(mockServiceClient).uploadFile(windowsPath, fileData)
-        }
-        
-        @Test
-        @DisplayName("Should handle Unix-style file paths")
-        fun testUnixStyleFilePaths() = runTest {
-            // Given
-            val unixPath = "/home/user/documents/file.txt"
-            val fileData = "content".toByteArray()
-            
-            whenever(mockServiceClient.uploadFile(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("unix_upload"))
-            
-            // When
-            val result = connector.uploadFile(unixPath, fileData)
-            
-            // Then
-            assertEquals("unix_upload", result.get())
-            verify(mockServiceClient).uploadFile(unixPath, fileData)
-        }
-        
-        @Test
-        @DisplayName("Should handle different locale number formats")
-        fun testDifferentLocaleNumberFormats() = runTest {
-            // Given
-            val fileName = "locale_test.txt"
-            val fileData = "1,234.56".toByteArray() // US format
-            val locales = listOf(
-                Locale.US,           // 1,234.56
-                Locale.GERMANY,      // 1.234,56
-                Locale.FRANCE,       // 1 234,56
-                Locale("hi", "IN")   // Devanagari digits
-            )
-            
-            whenever(mockServiceClient.uploadFileWithLocale(any(), any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("locale_upload"))
-            
-            // When & Then
-            locales.forEach { locale ->
-                val result = connector.uploadFileWithLocale(fileName, fileData, locale)
-                assertEquals("locale_upload", result.get())
-            }
-        }
-        
-        @Test
-        @DisplayName("Should handle different character encodings")
-        fun testDifferentCharacterEncodings() = runTest {
-            // Given
-            val testString = "Hello 世界 مرحبا Здравствуй"
-            val encodings = listOf("UTF-8", "UTF-16", "ISO-8859-1", "Shift_JIS")
-            
-            whenever(mockServiceClient.uploadFileWithEncoding(any(), any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("encoding_upload"))
-            
-            // When & Then
-            encodings.forEach { encoding ->
-                val fileData = testString.toByteArray(Charset.forName(encoding))
-                val result = connector.uploadFileWithEncoding("encoding_test.txt", fileData, encoding)
-                assertEquals("encoding_upload", result.get())
-            }
-        }
-        
-        @Test
-        @DisplayName("Should handle environment variable configuration")
-        fun testEnvironmentVariableConfiguration() = runTest {
-            // Given
-            val envVars = mapOf(
-                "ORACLE_DRIVE_ENDPOINT" to "https://env.endpoint.com",
-                "ORACLE_DRIVE_TIMEOUT" to "30000",
-                "ORACLE_DRIVE_MAX_RETRIES" to "5"
-            )
-            
-            // When
-            val configuredConnector = connector.configureFromEnvironment(envVars)
-            
-            // Then
-            assertEquals("https://env.endpoint.com", configuredConnector.getEndpoint())
-            assertEquals(30000L, configuredConnector.getTimeout())
-            assertEquals(5, configuredConnector.getMaxRetries())
-        }
-    }
-    
-    @Nested
-    @DisplayName("Advanced Caching and Performance Tests")
-    inner class AdvancedCachingPerformanceTests {
-        
-        @Test
-        @DisplayName("Should implement LRU cache eviction correctly")
-        fun testLRUCacheEviction() = runTest {
-            // Given
-            val cacheSize = 3
-            val fileData = "cached content".toByteArray()
-            connector.setCacheSize(cacheSize)
-            
-            whenever(mockServiceClient.downloadFile(any()))
-                .thenReturn(CompletableFuture.completedFuture(fileData))
-            
-            // When
-            repeat(5) { i ->
-                connector.downloadFileWithCache("file_$i")
-            }
-            
-            // Access first file again to test LRU behavior
-            connector.downloadFileWithCache("file_0")
-            
-            // Then
-            val cacheStats = connector.getCacheStatistics()
-            assertEquals(cacheSize, cacheStats.size)
-            assertTrue(cacheStats.contains("file_0")) // Should be in cache due to recent access
-            assertFalse(cacheStats.contains("file_1")) // Should be evicted
-        }
-        
-        @Test
-        @DisplayName("Should handle cache coherency across multiple instances")
-        fun testCacheCoherencyMultipleInstances() = runTest {
-            // Given
-            val fileId = "shared_file"
-            val originalData = "original".toByteArray()
-            val updatedData = "updated".toByteArray()
-            
-            val connector2 = OracleDriveServiceConnector(mockServiceClient, mockConnectionManager, mockAuthProvider)
-            
-            whenever(mockServiceClient.downloadFile(fileId))
-                .thenReturn(CompletableFuture.completedFuture(originalData))
-                .thenReturn(CompletableFuture.completedFuture(updatedData))
-            
-            // When
-            connector.downloadFileWithCache(fileId) // Cache original
-            connector2.invalidateCache(fileId) // Invalidate from another instance
-            val result = connector.downloadFileWithCache(fileId) // Should fetch updated
-            
-            // Then
-            assertArrayEquals(updatedData, result.get())
-        }
-        
-        @Test
-        @DisplayName("Should handle cache warming and preloading")
-        fun testCacheWarmingPreloading() = runTest {
-            // Given
-            val fileIds = (1..10).map { "preload_file_$it" }
-            val fileData = "preloaded content".toByteArray()
-            
-            whenever(mockServiceClient.downloadFile(any()))
-                .thenReturn(CompletableFuture.completedFuture(fileData))
-            
-            // When
-            connector.preloadFilesToCache(fileIds)
-            
-            // Access files and measure cache hit rate
             val startTime = System.currentTimeMillis()
-            fileIds.forEach { fileId ->
-                connector.downloadFileWithCache(fileId)
-            }
+            val result = connector.uploadFile(fileName, largeFileData)
+            result.get()
             val endTime = System.currentTimeMillis()
             
             // Then
-            val cacheHitRate = connector.getCacheHitRate()
-            assertTrue(cacheHitRate > 0.8) // Should have high cache hit rate
-            assertTrue(endTime - startTime < 1000) // Should be fast due to caching
-        }
-        
-        @Test
-        @DisplayName("Should handle memory pressure and cache compression")
-        fun testMemoryPressureCacheCompression() = runTest {
-            // Given
-            val largeFileData = ByteArray(10 * 1024 * 1024) // 10MB
-            connector.enableCacheCompression(true)
-            
-            whenever(mockServiceClient.downloadFile(any()))
-                .thenReturn(CompletableFuture.completedFuture(largeFileData))
-            
-            // When
-            val initialMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
-            repeat(5) { i ->
-                connector.downloadFileWithCache("large_file_$i")
-            }
-            val finalMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
-            
-            // Then
-            val memoryIncrease = finalMemory - initialMemory
-            assertTrue(memoryIncrease < 50 * 1024 * 1024) // Should use less than 50MB due to compression
-        }
-        
-        @Test
-        @DisplayName("Should handle cache persistence across restarts")
-        fun testCachePersistenceAcrossRestarts() = runTest {
-            // Given
-            val fileId = "persistent_file"
-            val fileData = "persistent content".toByteArray()
-            connector.enablePersistentCache(true)
-            
-            whenever(mockServiceClient.downloadFile(any()))
-                .thenReturn(CompletableFuture.completedFuture(fileData))
-            
-            // When
-            connector.downloadFileWithCache(fileId) // Cache the file
-            connector.shutdown() // Simulate restart
-            connector.initialize() // Restart
-            val result = connector.downloadFileWithCache(fileId) // Should load from persistent cache
-            
-            // Then
-            assertArrayEquals(fileData, result.get())
-            val cacheStats = connector.getCacheStatistics()
-            assertTrue(cacheStats.persistentHits > 0)
+            val uploadTime = endTime - startTime
+            assertTrue(uploadTime >= 5000) // Should take at least 5 seconds due to throttling
         }
     }
     
     @Nested
-    @DisplayName("Advanced Security and Cryptography Tests")
-    inner class AdvancedSecurityCryptographyTests {
+    @DisplayName("Advanced Data Integrity and Corruption Tests")
+    inner class AdvancedDataIntegrityTests {
         
         @Test
-        @DisplayName("Should handle AES-256 encryption for sensitive files")
-        fun testAES256EncryptionSensitiveFiles() = runTest {
+        @DisplayName("Should detect and handle data corruption during upload")
+        fun testDataCorruptionDuringUpload() = runTest {
             // Given
-            val fileName = "sensitive_document.txt"
-            val sensitiveData = "confidential information".toByteArray()
-            val encryptionKey = generateAES256Key()
+            val fileName = "corruption_test.txt"
+            val originalData = "original content".toByteArray()
+            val corruptedChecksum = "corrupted_checksum"
             
-            whenever(mockServiceClient.uploadEncryptedFileAES256(any(), any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("aes256_upload"))
+            whenever(mockServiceClient.uploadFileWithChecksum(any(), any(), any()))
+                .thenReturn(CompletableFuture.failedFuture(
+                    DataIntegrityException("Checksum mismatch: expected vs actual")))
             
-            // When
-            val result = connector.uploadFileWithAES256Encryption(fileName, sensitiveData, encryptionKey)
-            
-            // Then
-            assertEquals("aes256_upload", result.get())
-            verify(mockServiceClient).uploadEncryptedFileAES256(fileName, sensitiveData, encryptionKey)
+            // When & Then
+            assertThrows<DataIntegrityException> {
+                connector.uploadFileWithIntegrityCheck(fileName, originalData).get()
+            }
         }
         
         @Test
-        @DisplayName("Should handle RSA key pair authentication")
-        fun testRSAKeyPairAuthentication() = runTest {
+        @DisplayName("Should handle partial data recovery scenarios")
+        fun testPartialDataRecovery() = runTest {
             // Given
-            val keyPair = generateRSAKeyPair()
-            val challenge = "authentication_challenge"
-            val signature = signChallenge(challenge, keyPair.private)
+            val fileName = "partial_recovery.txt"
+            val fullData = "complete file content".toByteArray()
+            val partialData = "complete file".toByteArray()
             
-            whenever(mockAuthProvider.authenticateWithRSA(any(), any())).thenReturn(true)
-            whenever(mockConnectionManager.connect(any())).thenReturn(true)
+            whenever(mockServiceClient.downloadFile(any()))
+                .thenReturn(CompletableFuture.completedFuture(partialData))
+            whenever(mockServiceClient.verifyFileIntegrity(any()))
+                .thenReturn(CompletableFuture.completedFuture(false))
             
-            // When
-            val result = connector.authenticateWithRSAKeyPair(keyPair.public, signature)
-            
-            // Then
-            assertTrue(result)
-            verify(mockAuthProvider).authenticateWithRSA(keyPair.public, signature)
+            // When & Then
+            assertThrows<DataIntegrityException> {
+                connector.downloadFileWithIntegrityCheck(fileName).get()
+            }
         }
         
         @Test
-        @DisplayName("Should handle digital signature verification")
-        fun testDigitalSignatureVerification() = runTest {
+        @DisplayName("Should handle bit-flip errors in transmitted data")
+        fun testBitFlipErrorHandling() = runTest {
             // Given
-            val fileName = "signed_document.txt"
-            val fileData = "document content".toByteArray()
-            val signature = "digital_signature_hash"
-            val publicKey = generateRSAKeyPair().public
+            val fileName = "bitflip_test.dat"
+            val originalData = byteArrayOf(0x00, 0x01, 0x02, 0x03, 0x04)
+            val corruptedData = byteArrayOf(0x00, 0x01, 0x06, 0x03, 0x04) // Bit flip in 3rd byte
             
-            whenever(mockServiceClient.uploadFileWithSignature(any(), any(), any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("signed_upload"))
+            whenever(mockServiceClient.downloadFile(any()))
+                .thenReturn(CompletableFuture.completedFuture(corruptedData))
+            whenever(mockServiceClient.getFileChecksum(any()))
+                .thenReturn(CompletableFuture.completedFuture(calculateChecksum(originalData)))
             
-            // When
-            val result = connector.uploadFileWithDigitalSignature(fileName, fileData, signature, publicKey)
-            
-            // Then
-            assertEquals("signed_upload", result.get())
-            verify(mockServiceClient).uploadFileWithSignature(fileName, fileData, signature, publicKey)
+            // When & Then
+            assertThrows<DataIntegrityException> {
+                connector.downloadFileWithChecksumVerification(fileName).get()
+            }
         }
         
         @Test
-        @DisplayName("Should handle certificate chain validation")
-        fun testCertificateChainValidation() = runTest {
+        @DisplayName("Should handle error correction for small corruptions")
+        fun testErrorCorrectionForSmallCorruptions() = runTest {
             // Given
-            val certificateChain = listOf(
-                generateX509Certificate("CN=leaf"),
-                generateX509Certificate("CN=intermediate"),
-                generateX509Certificate("CN=root")
-            )
+            val fileName = "error_correction.txt"
+            val originalData = "This is a test file for error correction".toByteArray()
+            val slightlyCorruptedData = "This is a test file for error correctio".toByteArray() // Missing last char
+            val correctedData = originalData
             
-            whenever(mockConnectionManager.validateCertificateChain(any())).thenReturn(true)
+            whenever(mockServiceClient.downloadFile(any()))
+                .thenReturn(CompletableFuture.completedFuture(slightlyCorruptedData))
+            whenever(mockServiceClient.attemptErrorCorrection(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture(correctedData))
             
             // When
-            val isValid = connector.validateCertificateChain(certificateChain)
+            val result = connector.downloadFileWithErrorCorrection(fileName)
             
             // Then
-            assertTrue(isValid)
-            verify(mockConnectionManager).validateCertificateChain(certificateChain)
+            assertArrayEquals(correctedData, result.get())
         }
         
-        @Test
-        @DisplayName("Should handle key rotation scenarios")
-        fun testKeyRotationScenarios() = runTest {
-            // Given
-            val oldKey = generateAES256Key()
-            val newKey = generateAES256Key()
-            val fileName = "rotation_test.txt"
-            val fileData = "content".toByteArray()
-            
-            whenever(mockServiceClient.uploadFileWithKeyRotation(any(), any(), any(), any()))
-                .thenReturn(CompletableFuture.completedFuture("rotated_upload"))
-            
-            // When
-            val result = connector.uploadFileWithKeyRotation(fileName, fileData, oldKey, newKey)
-            
-            // Then
-            assertEquals("rotated_upload", result.get())
-            verify(mockServiceClient).uploadFileWithKeyRotation(fileName, fileData, oldKey, newKey)
+        private fun calculateChecksum(data: ByteArray): String {
+            return "checksum_${data.contentHashCode()}"
         }
-        
-        @Test
-        @DisplayName("Should handle zero-knowledge proof authentication")
-        fun testZeroKnowledgeProofAuthentication() = runTest {
-            // Given
-            val secret = "shared_secret"
-            val challenge = generateRandomChallenge()
-            val proof = generateZKProof(secret, challenge)
-            
-            whenever(mockAuthProvider.verifyZKProof(any(), any())).thenReturn(true)
-            whenever(mockConnectionManager.connect(any())).thenReturn(true)
-            
-            // When
-            val result = connector.authenticateWithZKProof(proof, challenge)
-            
-            // Then
-            assertTrue(result)
-            verify(mockAuthProvider).verifyZKProof(proof, challenge)
-        }
-    }
-
-// Additional helper functions and data classes for new tests
-private fun generateAES256Key(): ByteArray = ByteArray(32) { it.toByte() }
-private fun generateRSAKeyPair(): java.security.KeyPair = java.security.KeyPairGenerator.getInstance("RSA").genKeyPair()
-private fun signChallenge(challenge: String, privateKey: java.security.PrivateKey): String = "signature_$challenge"
-private fun generateX509Certificate(dn: String): java.security.cert.X509Certificate = mock()
-private fun generateRandomChallenge(): String = "challenge_${System.currentTimeMillis()}"
-private fun generateZKProof(secret: String, challenge: String): String = "zkproof_${secret}_$challenge"
-
-// Additional exception classes
-class HttpException(val statusCode: Int, message: String) : Exception(message)
-class NetworkPartitionException(message: String) : Exception(message)
-class ProtocolVersionMismatchException(message: String) : Exception(message)
-class ChecksumMismatchException(message: String) : Exception(message)
-class InvalidMimeTypeException(message: String) : Exception(message)
-
-// Additional data classes for complex testing scenarios
-data class ComplexDataObject(
-    val id: Long,
-    val name: String,
-    val data: ByteArray,
-    val nested: NestedObject
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        other as ComplexDataObject
-        if (id != other.id) return false
-        if (name != other.name) return false
-        if (!data.contentEquals(other.data)) return false
-        if (nested != other.nested) return false
-        return true
     }
     
-    override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + name.hashCode()
-        result = 31 * result + data.contentHashCode()
-        result = 31 * result + nested.hashCode()
-        return result
+    @Nested
+    @DisplayName("Advanced Backup and Disaster Recovery Tests")
+    inner class AdvancedBackupDisasterRecoveryTests {
+        
+        @Test
+        @DisplayName("Should handle automatic failover to backup datacenter")
+        fun testAutomaticFailoverToBackupDatacenter() = runTest {
+            // Given
+            val primaryEndpoint = Credentials("token", "https://primary.oracle.com")
+            val backupEndpoint = Credentials("token", "https://backup.oracle.com")
+            
+            whenever(mockAuthProvider.getCredentials())
+                .thenReturn(primaryEndpoint)
+                .thenReturn(backupEndpoint)
+            whenever(mockConnectionManager.connect(primaryEndpoint))
+                .thenThrow(DatacenterOutageException("Primary datacenter unavailable"))
+            whenever(mockConnectionManager.connect(backupEndpoint))
+                .thenReturn(true)
+            
+            // When
+            val result = connector.connectWithAutomaticFailover()
+            
+            // Then
+            assertTrue(result)
+            verify(mockConnectionManager).connect(primaryEndpoint)
+            verify(mockConnectionManager).connect(backupEndpoint)
+        }
+        
+        @Test
+        @DisplayName("Should handle data replication verification")
+        fun testDataReplicationVerification() = runTest {
+            // Given
+            val fileName = "replication_test.txt"
+            val fileData = "replicated content".toByteArray()
+            val replicationStatus = ReplicationStatus(
+                replicas = 3,
+                healthyReplicas = 3,
+                isFullyReplicated = true
+            )
+            
+            whenever(mockServiceClient.uploadFileWithReplication(any(), any(), any()))
+                .thenReturn(CompletableFuture.completedFuture("replicated_upload"))
+            whenever(mockServiceClient.verifyReplication(any()))
+                .thenReturn(CompletableFuture.completedFuture(replicationStatus))
+            
+            // When
+            val uploadResult = connector.uploadFileWithReplication(fileName, fileData, minReplicas = 3)
+            val verificationResult = connector.verifyFileReplication("replicated_upload")
+            
+            // Then
+            assertEquals("replicated_upload", uploadResult.get())
+            assertTrue(verificationResult.get().isFullyReplicated)
+        }
+        
+        @Test
+        @DisplayName("Should handle cross-region data synchronization")
+        fun testCrossRegionDataSynchronization() = runTest {
+            // Given
+            val fileName = "cross_region.txt"
+            val fileData = "synchronized content".toByteArray()
+            val sourceRegion = "us-west-1"
+            val targetRegions = listOf("us-east-1", "eu-west-1", "ap-southeast-1")
+            
+            whenever(mockServiceClient.uploadFileToRegion(any(), any(), any()))
+                .thenReturn(CompletableFuture.completedFuture("cross_region_upload"))
+            whenever(mockServiceClient.synchronizeAcrossRegions(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture(
+                    SyncResult(targetRegions.map { it to true }.toMap())
+                ))
+            
+            // When
+            val result = connector.uploadFileWithCrossRegionSync(fileName, fileData, sourceRegion, targetRegions)
+            
+            // Then
+            assertEquals("cross_region_upload", result.get().uploadId)
+            assertTrue(result.get().syncResults.all { it.value })
+        }
+        
+        @Test
+        @DisplayName("Should handle disaster recovery testing scenarios")
+        fun testDisasterRecoveryTesting() = runTest {
+            // Given
+            val drTestConfig = DisasterRecoveryTestConfig(
+                simulateDatacenterOutage = true,
+                simulateNetworkPartition = true,
+                expectedRecoveryTime = 300_000L // 5 minutes
+            )
+            
+            whenever(mockServiceClient.executeDisasterRecoveryTest(any()))
+                .thenReturn(CompletableFuture.completedFuture(
+                    DrTestResult(
+                        recoveryTime = 250_000L,
+                        dataIntegrityMaintained = true,
+                        serviceAvailabilityMaintained = true
+                    )
+                ))
+            
+            // When
+            val result = connector.executeDisasterRecoveryTest(drTestConfig)
+            
+            // Then
+            assertTrue(result.get().recoveryTime < drTestConfig.expectedRecoveryTime)
+            assertTrue(result.get().dataIntegrityMaintained)
+            assertTrue(result.get().serviceAvailabilityMaintained)
+        }
     }
-}
+    
+    @Nested
+    @DisplayName("Advanced Load Balancing and Scaling Tests")
+    inner class AdvancedLoadBalancingScalingTests {
+        
+        @Test
+        @DisplayName("Should handle dynamic load balancing across multiple endpoints")
+        fun testDynamicLoadBalancing() = runTest {
+            // Given
+            val endpoints = listOf(
+                "https://node1.oracle.com",
+                "https://node2.oracle.com", 
+                "https://node3.oracle.com"
+            )
+            val loadBalancer = mock<LoadBalancer>()
+            
+            whenever(loadBalancer.selectEndpoint(endpoints))
+                .thenReturn("https://node2.oracle.com") // Simulate node2 being least loaded
+            whenever(mockConnectionManager.connect(any())).thenReturn(true)
+            
+            connector.setLoadBalancer(loadBalancer)
+            
+            // When
+            val result = connector.connectWithLoadBalancing(endpoints)
+            
+            // Then
+            assertTrue(result)
+            verify(loadBalancer).selectEndpoint(endpoints)
+        }
+        
+        @Test
+        @DisplayName("Should handle connection pool scaling under load")
+        fun testConnectionPoolScaling() = runTest {
+            // Given
+            val initialPoolSize = 5
+            val maxPoolSize = 20
+            val fileData = "scaling test".toByteArray()
+            
+            connector.setConnectionPoolConfig(
+                initialSize = initialPoolSize,
+                maxSize = maxPoolSize,
+                scaleUpThreshold = 0.8
+            )
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture("scaled_upload"))
+            
+            // When
+            val futures = (1..50).map { i ->
+                async { connector.uploadFile("scale_test_$i.txt", fileData) }
+            }
+            futures.awaitAll()
+            
+            // Then
+            val finalPoolSize = connector.getCurrentConnectionPoolSize()
+            assertTrue(finalPoolSize > initialPoolSize)
+            assertTrue(finalPoolSize <= maxPoolSize)
+        }
+        
+        @Test
+        @DisplayName("Should handle graceful degradation under extreme load")
+        fun testGracefulDegradationUnderExtremeLoad() = runTest {
+            // Given
+            val degradationConfig = DegradationConfig(
+                maxConcurrentOperations = 10,
+                queueTimeout = 5000L,
+                enableCircuitBreaker = true
+            )
+            
+            connector.setDegradationConfig(degradationConfig)
+            
+            val fileData = "degradation test".toByteArray()
+            val slowFutures = (1..20).map {
+                CompletableFuture<String>().apply {
+                    // Simulate slow operations
+                    completeOnTimeout("timeout_upload", 10_000, TimeUnit.MILLISECONDS)
+                }
+            }
+            
+            whenever(mockServiceClient.uploadFile(any(), any()))
+                .thenReturn(*slowFutures.toTypedArray())
+            
+            // When
+            val results = (1..20).map { i ->
+                async { 
+                    try {
+                        connector.uploadFile("degradation_$i.txt", fileData).get()
+                    } catch (e: Exception) {
+                        "rejected"
+                    }
+                }
+            }.awaitAll()
+            
+            // Then
+            val rejectedCount = results.count { it == "rejected" }
+            assertTrue(rejectedCount > 0) // Some requests should be rejected due to degradation
+        }
+        
+        @Test
+        @DisplayName("Should handle auto-scaling based on CPU and memory metrics")
+        fun testAutoScalingBasedOnMetrics() = runTest {
+            // Given
+            val autoScalingConfig = AutoScalingConfig(
+                cpuThreshold = 80.0,
+                memoryThreshold = 85.0,
+                scaleUpCooldown = 60_000L,
+                scaleDownCooldown = 300_000L
+            )
+            
+            val resourceMonitor = mock<ResourceMonitor>()
+            whenever(resourceMonitor.getCpuUsage()).thenReturn(85.0)
+            whenever(resourceMonitor.getMemoryUsage()).thenReturn(90.0)
+            
+            connector.setAutoScalingConfig(autoScalingConfig)
+            connector.setResourceMonitor(resourceMonitor)
+            
+            // When
+            connector.checkAndTriggerAutoScaling()
+            
+            // Then
+            verify(resourceMonitor).getCpuUsage()
+            verify(resourceMonitor).getMemoryUsage()
+            assertTrue(connector.isScalingInProgress())
+        }
+    }
 
-data class NestedObject(
-    val timestamp: Long,
-    val values: List<Double>
+// Additional data classes for the new tests
+data class ProxyConfig(
+    val host: String,
+    val port: Int,
+    val username: String?,
+    val password: String?
 )
 
-data class ChecksumResult(
+data class BandwidthThrottleConfig(
+    val maxBytesPerSecond: Long
+)
+
+data class ReplicationStatus(
+    val replicas: Int,
+    val healthyReplicas: Int,
+    val isFullyReplicated: Boolean
+)
+
+data class SyncResult(
+    val regionResults: Map<String, Boolean>
+)
+
+data class CrossRegionUploadResult(
     val uploadId: String,
-    val checksum: String
+    val syncResults: Map<String, Boolean>
 )
 
-data class CacheStatistics(
-    val size: Int,
-    val hitRate: Double,
-    val persistentHits: Long
-) {
-    fun contains(key: String): Boolean = true // Simplified for testing
+data class DisasterRecoveryTestConfig(
+    val simulateDatacenterOutage: Boolean,
+    val simulateNetworkPartition: Boolean,
+    val expectedRecoveryTime: Long
+)
+
+data class DrTestResult(
+    val recoveryTime: Long,
+    val dataIntegrityMaintained: Boolean,
+    val serviceAvailabilityMaintained: Boolean
+)
+
+data class DegradationConfig(
+    val maxConcurrentOperations: Int,
+    val queueTimeout: Long,
+    val enableCircuitBreaker: Boolean
+)
+
+data class AutoScalingConfig(
+    val cpuThreshold: Double,
+    val memoryThreshold: Double,
+    val scaleUpCooldown: Long,
+    val scaleDownCooldown: Long
+)
+
+interface LoadBalancer {
+    fun selectEndpoint(endpoints: List<String>): String
 }
 
-// Additional imports needed (these would be at the top of the file in practice)
-import java.net.UnknownHostException
-import java.net.SocketTimeoutException
-import javax.net.ssl.SSLHandshakeException
-import java.time.ZonedDateTime
-import java.time.ZoneId
-import java.time.Instant
-import java.util.Locale
-import java.nio.charset.Charset
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
+interface ResourceMonitor {
+    fun getCpuUsage(): Double
+    fun getMemoryUsage(): Double
+}
+
+// Additional exception classes
+class NetworkException(message: String) : Exception(message)
+class DataIntegrityException(message: String) : Exception(message)
+class DatacenterOutageException(message: String) : Exception(message)
+class UnknownHostException(message: String) : Exception(message)
 

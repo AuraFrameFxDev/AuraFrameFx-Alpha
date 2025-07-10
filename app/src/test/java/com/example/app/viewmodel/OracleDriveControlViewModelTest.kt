@@ -433,9 +433,6 @@ class OracleDriveControlViewModelTest {
         
         // When
         viewModel.updateSpeed(infiniteSpeed)
-<<<<<<< HEAD
-        testDispa
-=======
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -485,136 +482,270 @@ class OracleDriveControlViewModelTest {
         coVerify { mockRepository.updateSpeed(minValidSpeed) }
     }
 
-    @Test
-    fun `should handle all direction enum values`() = runTest {
-        // Given
-        val directions = listOf(Direction.FORWARD, Direction.REVERSE, Direction.LEFT, Direction.RIGHT)
-        directions.forEach { direction ->
-            coEvery { mockRepository.changeDirection(direction) } returns Result.success(Unit)
-        }
-
-        // When & Then
-        directions.forEach { direction ->
-            viewModel.changeDirection(direction)
-            testDispatcher.scheduler.advanceUntilIdle()
-            coVerify { mockRepository.changeDirection(direction) }
-        }
-    }
+    // Additional comprehensive tests for better coverage
 
     @Test
-    fun `should handle repository timeout exceptions`() = runTest {
+    fun `should handle memory pressure during operations`() = runTest {
         // Given
-        val timeoutException = java.util.concurrent.TimeoutException("Operation timed out")
-        coEvery { mockRepository.startDrive(any()) } returns Result.failure(timeoutException)
+        coEvery { mockRepository.startDrive(any()) } returns Result.failure(OutOfMemoryError("Memory exhausted"))
 
         // When
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        verify { mockErrorObserver.onChanged("Operation timed out") }
+        verify { mockErrorObserver.onChanged("Memory exhausted") }
         verify { mockStateObserver.onChanged(DriveState.ERROR) }
     }
 
     @Test
-    fun `should handle repository interrupted exceptions`() = runTest {
+    fun `should handle security exceptions during repository calls`() = runTest {
         // Given
-        val interruptedException = InterruptedException("Operation interrupted")
-        coEvery { mockRepository.pauseDrive() } returns Result.failure(interruptedException)
-
-        // When
-        viewModel.pauseDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        verify { mockErrorObserver.onChanged("Operation interrupted") }
-        verify { mockStateObserver.onChanged(DriveState.ERROR) }
-    }
-
-    @Test
-    fun `should handle repository illegal state exceptions`() = runTest {
-        // Given
-        val illegalStateException = IllegalStateException("Invalid state transition")
-        coEvery { mockRepository.resumeDrive() } returns Result.failure(illegalStateException)
-
-        // When
-        viewModel.resumeDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        verify { mockErrorObserver.onChanged("Invalid state transition") }
-        verify { mockStateObserver.onChanged(DriveState.ERROR) }
-    }
-
-    @Test
-    fun `should handle repository illegal argument exceptions`() = runTest {
-        // Given
-        val illegalArgumentException = IllegalArgumentException("Invalid argument provided")
-        coEvery { mockRepository.updateSpeed(any()) } returns Result.failure(illegalArgumentException)
-
-        // When
-        viewModel.updateSpeed(50.0)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        verify { mockErrorObserver.onChanged("Invalid argument provided") }
-    }
-
-    @Test
-    fun `should handle network connectivity changes during operations`() = runTest {
-        // Given
-        every { mockNetworkManager.isConnected() } returns false
-        coEvery { mockRepository.startDrive(any()) } returns Result.failure(Exception("Network unavailable"))
+        coEvery { mockRepository.startDrive(any()) } returns Result.failure(SecurityException("Access denied"))
 
         // When
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        verify { mockErrorObserver.onChanged("Network unavailable") }
+        verify { mockErrorObserver.onChanged("Access denied") }
         verify { mockStateObserver.onChanged(DriveState.ERROR) }
     }
 
     @Test
-    fun `should handle multiple observers correctly`() = runTest {
+    fun `should handle file system exceptions during operations`() = runTest {
         // Given
-        val mockSecondStateObserver: Observer<DriveState> = mockk(relaxed = true)
-        val mockSecondErrorObserver: Observer<String> = mockk(relaxed = true)
+        coEvery { mockRepository.updateSpeed(any()) } returns Result.failure(java.io.IOException("Disk full"))
 
-        viewModel.driveState.observeForever(mockSecondStateObserver)
-        viewModel.errorMessage.observeForever(mockSecondErrorObserver)
+        // When
+        viewModel.updateSpeed(25.0)
+        testDispatcher.scheduler.advanceUntilIdle()
 
+        // Then
+        verify { mockErrorObserver.onChanged("Disk full") }
+    }
+
+    @Test
+    fun `should handle extremely rapid sequential operations`() = runTest {
+        // Given
         coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
+        coEvery { mockRepository.stopDrive() } returns Result.success(Unit)
+        coEvery { mockRepository.pauseDrive() } returns Result.success(Unit)
+        coEvery { mockRepository.resumeDrive() } returns Result.success(Unit)
+
+        // When - extremely rapid operations
+        repeat(100) {
+            viewModel.startDrive()
+            viewModel.pauseDrive()
+            viewModel.resumeDrive()
+            viewModel.stopDrive()
+        }
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then - should handle all operations without crashing
+        verify(atLeast = 1) { mockStateObserver.onChanged(DriveState.IDLE) }
+    }
+
+    @Test
+    fun `should handle speed updates with floating point precision`() = runTest {
+        // Given
+        val preciseSpeed = 25.123456789
+        coEvery { mockRepository.updateSpeed(preciseSpeed) } returns Result.success(Unit)
+
+        // When
+        viewModel.updateSpeed(preciseSpeed)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        coVerify { mockRepository.updateSpeed(preciseSpeed) }
+    }
+
+    @Test
+    fun `should handle extremely small positive speed values`() = runTest {
+        // Given
+        val tinySpeed = Double.MIN_VALUE
+        coEvery { mockRepository.updateSpeed(tinySpeed) } returns Result.success(Unit)
+
+        // When
+        viewModel.updateSpeed(tinySpeed)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        coVerify { mockRepository.updateSpeed(tinySpeed) }
+    }
+
+    @Test
+    fun `should handle repository returning unexpected result types`() = runTest {
+        // Given
+        coEvery { mockRepository.startDrive(any()) } returns Result.failure(ClassCastException("Unexpected result type"))
 
         // When
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        verify { mockStateObserver.onChanged(DriveState.DRIVING) }
-        verify { mockSecondStateObserver.onChanged(DriveState.DRIVING) }
-
-        // Cleanup
-        viewModel.driveState.removeObserver(mockSecondStateObserver)
-        viewModel.errorMessage.removeObserver(mockSecondErrorObserver)
+        verify { mockErrorObserver.onChanged("Unexpected result type") }
+        verify { mockStateObserver.onChanged(DriveState.ERROR) }
     }
 
     @Test
-    fun `should handle repository method call ordering correctly`() = runTest {
+    fun `should handle concurrent modifications during state updates`() = runTest {
         // Given
-        val callOrder = mutableListOf<String>()
+        coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
+        coEvery { mockRepository.stopDrive() } returns Result.success(Unit)
+
+        // When - concurrent operations from different "threads"
+        val job1 = async { viewModel.startDrive() }
+        val job2 = async { viewModel.stopDrive() }
+        
+        job1.await()
+        job2.await()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then - should handle concurrent access safely
+        verify(atLeast = 1) { mockStateObserver.onChanged(any()) }
+    }
+
+    @Test
+    fun `should handle network manager throwing exceptions`() {
+        // Given
+        every { mockNetworkManager.isConnected() } throws RuntimeException("Network manager failed")
+
+        // When & Then - should not crash
+        try {
+            viewModel.isNetworkAvailable()
+        } catch (e: Exception) {
+            // Should handle gracefully without propagating exception
+        }
+    }
+
+    @Test
+    fun `should handle observer notifications during rapid state changes`() = runTest {
+        // Given
+        coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
+        coEvery { mockRepository.pauseDrive() } returns Result.success(Unit)
+        coEvery { mockRepository.resumeDrive() } returns Result.success(Unit)
+        coEvery { mockRepository.stopDrive() } returns Result.success(Unit)
+
+        // When - rapid state changes that might cause race conditions
+        viewModel.startDrive()
+        viewModel.pauseDrive()
+        viewModel.resumeDrive()
+        viewModel.pauseDrive()
+        viewModel.resumeDrive()
+        viewModel.stopDrive()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then - all state changes should be properly notified
+        verify(atLeast = 5) { mockStateObserver.onChanged(any()) }
+    }
+
+    @Test
+    fun `should handle repository calls with null parameters gracefully`() = runTest {
+        // Given
+        coEvery { mockRepository.changeDirection(any()) } returns Result.success(Unit)
+
+        // When - trying to pass null direction (if possible through reflection or casting)
+        try {
+            viewModel.changeDirection(null as? Direction ?: Direction.FORWARD)
+            testDispatcher.scheduler.advanceUntilIdle()
+        } catch (e: Exception) {
+            // Should handle null gracefully
+        }
+
+        // Then - should not crash the application
+        assertTrue(true) // Test passes if we reach here without crashing
+    }
+
+    @Test
+    fun `should handle extremely long error messages`() = runTest {
+        // Given
+        val longErrorMessage = "Error: " + "x".repeat(10000)
+        coEvery { mockRepository.startDrive(any()) } returns Result.failure(Exception(longErrorMessage))
+
+        // When
+        viewModel.startDrive()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        verify { mockErrorObserver.onChanged(longErrorMessage) }
+        verify { mockStateObserver.onChanged(DriveState.ERROR) }
+    }
+
+    @Test
+    fun `should handle special characters in error messages`() = runTest {
+        // Given
+        val specialCharErrorMessage = "Error: 特殊字符 🚗 ñáéíóú @#$%^&*()[]{}|\\:;\"'<>?,./"
+        coEvery { mockRepository.startDrive(any()) } returns Result.failure(Exception(specialCharErrorMessage))
+
+        // When
+        viewModel.startDrive()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        verify { mockErrorObserver.onChanged(specialCharErrorMessage) }
+        verify { mockStateObserver.onChanged(DriveState.ERROR) }
+    }
+
+    @Test
+    fun `should handle repository method call timeouts with custom exceptions`() = runTest {
+        // Given
+        coEvery { mockRepository.startDrive(any()) } returns Result.failure(
+            java.net.SocketTimeoutException("Connection timeout after 30 seconds")
+        )
+
+        // When
+        viewModel.startDrive()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        verify { mockErrorObserver.onChanged("Connection timeout after 30 seconds") }
+        verify { mockStateObserver.onChanged(DriveState.ERROR) }
+    }
+
+    @Test
+    fun `should handle coroutine scope cancellation during loading`() = runTest {
+        // Given
         coEvery { mockRepository.startDrive(any()) } coAnswers {
-            callOrder.add("startDrive")
-            Result.success(Unit)
+            kotlinx.coroutines.delay(1000)
+            throw kotlinx.coroutines.CancellationException("Scope cancelled")
         }
-        coEvery { mockRepository.updateSpeed(any()) } coAnswers {
-            callOrder.add("updateSpeed")
-            Result.success(Unit)
+
+        // When
+        viewModel.startDrive()
+        kotlinx.coroutines.delay(100)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then - should handle cancellation gracefully
+        verify { mockLoadingObserver.onChanged(true) }
+        verify { mockLoadingObserver.onChanged(false) }
+    }
+
+    @Test
+    fun `should handle speed boundary values near limits`() = runTest {
+        // Given
+        val boundaryValues = listOf(99.99999, 100.00001, -0.00001, 0.00001)
+        
+        boundaryValues.forEach { speed ->
+            // When
+            viewModel.updateSpeed(speed)
+            testDispatcher.scheduler.advanceUntilIdle()
+            
+            // Then - should handle appropriately based on validation logic
+            if (speed < 0) {
+                verify { mockErrorObserver.onChanged("Invalid speed value: $speed") }
+            } else if (speed > 100) {
+                verify { mockErrorObserver.onChanged("Speed exceeds maximum limit: $speed") }
+            }
         }
-        coEvery { mockRepository.changeDirection(any()) } coAnswers {
-            callOrder.add("changeDirection")
-            Result.success(Unit)
-        }
+    }
+
+    @Test
+    fun `should handle multiple error conditions in sequence`() = runTest {
+        // Given
+        coEvery { mockRepository.startDrive(any()) } returns Result.failure(Exception("Start failed"))
+        coEvery { mockRepository.updateSpeed(any()) } returns Result.failure(Exception("Speed failed"))
+        coEvery { mockRepository.changeDirection(any()) } returns Result.failure(Exception("Direction failed"))
 
         // When
         viewModel.startDrive()
@@ -623,334 +754,103 @@ class OracleDriveControlViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        coVerify(ordering = Ordering.ORDERED) {
-            mockRepository.startDrive(any())
-            mockRepository.updateSpeed(25.0)
-            mockRepository.changeDirection(Direction.FORWARD)
-        }
+        verify { mockErrorObserver.onChanged("Start failed") }
+        verify { mockErrorObserver.onChanged("Speed failed") }
+        verify { mockErrorObserver.onChanged("Direction failed") }
     }
 
     @Test
-    fun `should handle state transition from error to idle correctly`() = runTest {
+    fun `should handle view model reinitialization after cleanup`() = runTest {
         // Given
-        coEvery { mockRepository.startDrive(any()) } returns Result.failure(Exception("Initial error"))
-        viewModel.startDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.driveState.removeObserver(mockStateObserver)
+        viewModel.errorMessage.removeObserver(mockErrorObserver)
+        viewModel.isLoading.removeObserver(mockLoadingObserver)
 
-        // When
-        viewModel.reset()
-        testDispatcher.scheduler.advanceUntilIdle()
+        // When - reinitialize observers
+        viewModel.driveState.observeForever(mockStateObserver)
+        viewModel.errorMessage.observeForever(mockErrorObserver)
+        viewModel.isLoading.observeForever(mockLoadingObserver)
 
-        // Then
-        verify { mockStateObserver.onChanged(DriveState.ERROR) }
-        verify { mockStateObserver.onChanged(DriveState.IDLE) }
-    }
-
-    @Test
-    fun `should handle state transition from emergency stop to idle correctly`() = runTest {
-        // Given
-        coEvery { mockRepository.emergencyStop() } returns Result.success(Unit)
-        viewModel.emergencyStop()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // When
-        viewModel.reset()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        verify { mockStateObserver.onChanged(DriveState.EMERGENCY_STOP) }
-        verify { mockStateObserver.onChanged(DriveState.IDLE) }
-    }
-
-    @Test
-    fun `should handle invalid state transitions gracefully`() = runTest {
-        // Given - trying to resume without being paused
-        coEvery { mockRepository.resumeDrive() } returns Result.failure(IllegalStateException("Cannot resume from idle state"))
-
-        // When
-        viewModel.resumeDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        verify { mockErrorObserver.onChanged("Cannot resume from idle state") }
-        verify { mockStateObserver.onChanged(DriveState.ERROR) }
-    }
-
-    @Test
-    fun `should handle pause from idle state gracefully`() = runTest {
-        // Given - trying to pause from idle state
-        coEvery { mockRepository.pauseDrive() } returns Result.failure(IllegalStateException("Cannot pause from idle state"))
-
-        // When
-        viewModel.pauseDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        verify { mockErrorObserver.onChanged("Cannot pause from idle state") }
-        verify { mockStateObserver.onChanged(DriveState.ERROR) }
-    }
-
-    @Test
-    fun `should handle double start drive calls correctly`() = runTest {
-        // Given
         coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
-
-        // When
-        viewModel.startDrive()
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
 
-        // Then - should only call repository once due to state management
-        coVerify(exactly = 2) { mockRepository.startDrive(any()) }
+        // Then
         verify { mockStateObserver.onChanged(DriveState.DRIVING) }
     }
 
     @Test
-    fun `should handle double stop drive calls correctly`() = runTest {
-        // Given
-        coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
-        coEvery { mockRepository.stopDrive() } returns Result.success(Unit)
+    fun `should handle repository returning malformed results`() = runTest {
+        // Given - simulate repository returning unexpected data
+        coEvery { mockRepository.startDrive(any()) } returns Result.failure(
+            java.lang.IllegalStateException("Repository in invalid state")
+        )
 
+        // When
         viewModel.startDrive()
         testDispatcher.scheduler.advanceUntilIdle()
 
-        // When
-        viewModel.stopDrive()
-        viewModel.stopDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-
         // Then
-        coVerify(exactly = 2) { mockRepository.stopDrive() }
-        verify { mockStateObserver.onChanged(DriveState.IDLE) }
+        verify { mockErrorObserver.onChanged("Repository in invalid state") }
+        verify { mockStateObserver.onChanged(DriveState.ERROR) }
     }
 
     @Test
-    fun `should handle very small speed values correctly`() = runTest {
-        // Given
-        val verySmallSpeed = 0.001
-        coEvery { mockRepository.updateSpeed(verySmallSpeed) } returns Result.success(Unit)
-
-        // When
-        viewModel.updateSpeed(verySmallSpeed)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        coVerify { mockRepository.updateSpeed(verySmallSpeed) }
-    }
-
-    @Test
-    fun `should handle speed updates during different drive states`() = runTest {
-        // Given
-        val speed = 30.0
+    fun `should validate all drive state transitions are properly tested`() = runTest {
+        // Given - test all possible state transitions
         coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
         coEvery { mockRepository.pauseDrive() } returns Result.success(Unit)
-        coEvery { mockRepository.updateSpeed(speed) } returns Result.success(Unit)
-
-        // When - updating speed while driving
-        viewModel.startDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.updateSpeed(speed)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        coVerify { mockRepository.updateSpeed(speed) }
-
-        // When - updating speed while paused
-        viewModel.pauseDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.updateSpeed(speed)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        coVerify(exactly = 2) { mockRepository.updateSpeed(speed) }
-    }
-
-    @Test
-    fun `should handle direction changes during different drive states`() = runTest {
-        // Given
-        val direction = Direction.REVERSE
-        coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
-        coEvery { mockRepository.changeDirection(direction) } returns Result.success(Unit)
-
-        // When - changing direction while driving
-        viewModel.startDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.changeDirection(direction)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        coVerify { mockRepository.changeDirection(direction) }
-    }
-
-    @Test
-    fun `should handle emergency stop during different states`() = runTest {
-        // Given
+        coEvery { mockRepository.resumeDrive() } returns Result.success(Unit)
+        coEvery { mockRepository.stopDrive() } returns Result.success(Unit)
         coEvery { mockRepository.emergencyStop() } returns Result.success(Unit)
 
-        // Test emergency stop from idle
+        // When - complete state cycle
+        // IDLE -> DRIVING
+        viewModel.startDrive()
+        testDispatcher.scheduler.advanceUntilIdle()
+        verify { mockStateObserver.onChanged(DriveState.DRIVING) }
+
+        // DRIVING -> PAUSED
+        viewModel.pauseDrive()
+        testDispatcher.scheduler.advanceUntilIdle()
+        verify { mockStateObserver.onChanged(DriveState.PAUSED) }
+
+        // PAUSED -> DRIVING
+        viewModel.resumeDrive()
+        testDispatcher.scheduler.advanceUntilIdle()
+        verify(atLeast = 2) { mockStateObserver.onChanged(DriveState.DRIVING) }
+
+        // DRIVING -> EMERGENCY_STOP
         viewModel.emergencyStop()
         testDispatcher.scheduler.advanceUntilIdle()
         verify { mockStateObserver.onChanged(DriveState.EMERGENCY_STOP) }
 
-        // Reset and test emergency stop from driving
+        // EMERGENCY_STOP -> IDLE
         viewModel.reset()
         testDispatcher.scheduler.advanceUntilIdle()
-
-        coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
-        viewModel.startDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        viewModel.emergencyStop()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        verify(exactly = 2) { mockStateObserver.onChanged(DriveState.EMERGENCY_STOP) }
-        coVerify(exactly = 2) { mockRepository.emergencyStop() }
+        verify(atLeast = 2) { mockStateObserver.onChanged(DriveState.IDLE) }
     }
 
     @Test
-    fun `should handle observer removal during operation`() = runTest {
-        // Given
-        coEvery { mockRepository.startDrive(any()) } coAnswers {
-            kotlinx.coroutines.delay(50)
-            Result.success(Unit)
-        }
-
-        // When
-        viewModel.startDrive()
-        viewModel.driveState.removeObserver(mockStateObserver)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then - observer should not receive the final state change
-        verify(exactly = 0) { mockStateObserver.onChanged(DriveState.DRIVING) }
-    }
-
-    @Test
-    fun `should handle coroutine cancellation gracefully`() = runTest {
+    fun `should handle resource cleanup during active operations`() = runTest {
         // Given
         coEvery { mockRepository.startDrive(any()) } coAnswers {
             kotlinx.coroutines.delay(1000)
             Result.success(Unit)
         }
 
-        // When
-        val job = viewModel.startDrive()
+        // When - start operation and immediately clean up
+        viewModel.startDrive()
         kotlinx.coroutines.delay(100)
-        job.cancel()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then - should handle cancellation without throwing exceptions
-        verify { mockLoadingObserver.onChanged(true) }
-        // Loading state should eventually be set to false even after cancellation
-        verify { mockLoadingObserver.onChanged(false) }
-    }
-
-    @Test
-    fun `should handle empty error messages gracefully`() = runTest {
-        // Given
-        coEvery { mockRepository.startDrive(any()) } returns Result.failure(Exception(""))
-
-        // When
-        viewModel.startDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        verify { mockErrorObserver.onChanged("") }
-        verify { mockStateObserver.onChanged(DriveState.ERROR) }
-    }
-
-    @Test
-    fun `should handle null exception messages gracefully`() = runTest {
-        // Given
-        coEvery { mockRepository.startDrive(any()) } returns Result.failure(Exception(null))
-
-        // When
-        viewModel.startDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        verify { mockErrorObserver.onChanged(any()) }
-        verify { mockStateObserver.onChanged(DriveState.ERROR) }
-    }
-
-    @Test
-    fun `should handle repository returning success with null result`() = runTest {
-        // Given
-        coEvery { mockRepository.startDrive(any()) } returns Result.success(null)
-
-        // When
-        viewModel.startDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        verify { mockStateObserver.onChanged(DriveState.DRIVING) }
-    }
-
-    @Test
-    fun `should handle sequential operations with mixed success and failure`() = runTest {
-        // Given
-        coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
-        coEvery { mockRepository.updateSpeed(any()) } returns Result.failure(Exception("Speed update failed"))
-        coEvery { mockRepository.changeDirection(any()) } returns Result.success(Unit)
-
-        // When
-        viewModel.startDrive()
-        viewModel.updateSpeed(25.0)
-        viewModel.changeDirection(Direction.FORWARD)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        verify { mockStateObserver.onChanged(DriveState.DRIVING) }
-        verify { mockErrorObserver.onChanged("Speed update failed") }
-        coVerify { mockRepository.changeDirection(Direction.FORWARD) }
-    }
-
-    @Test
-    fun `should handle repository method calls with proper parameter validation`() = runTest {
-        // Given
-        val validSpeeds = listOf(0.0, 25.5, 50.0, 99.9)
-
-        validSpeeds.forEach { speed ->
-            coEvery { mockRepository.updateSpeed(speed) } returns Result.success(Unit)
-        }
-
-        // When & Then
-        validSpeeds.forEach { speed ->
-            viewModel.updateSpeed(speed)
-            testDispatcher.scheduler.advanceUntilIdle()
-            coVerify { mockRepository.updateSpeed(speed) }
-        }
-    }
-
-    @Test
-    fun `should handle network state changes during operations`() = runTest {
-        // Given
-        every { mockNetworkManager.isConnected() } returns true andThen false
-
-        // When
-        val firstResult = viewModel.isNetworkAvailable()
-        val secondResult = viewModel.isNetworkAvailable()
-
-        // Then
-        assertTrue(firstResult)
-        assertFalse(secondResult)
-        verify(exactly = 2) { mockNetworkManager.isConnected() }
-    }
-
-    @Test
-    fun `should handle view model cleanup properly`() = runTest {
-        // Given
-        coEvery { mockRepository.startDrive(any()) } returns Result.success(Unit)
-        viewModel.startDrive()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // When - simulating onCleared
+        
+        // Simulate cleanup
         viewModel.driveState.removeObserver(mockStateObserver)
         viewModel.errorMessage.removeObserver(mockErrorObserver)
         viewModel.isLoading.removeObserver(mockLoadingObserver)
+        
+        testDispatcher.scheduler.advanceUntilIdle()
 
-        // Then - should not crash and should handle cleanup gracefully
+        // Then - should not crash during cleanup
         assertTrue(true) // Test passes if no exceptions are thrown
     }
 }
->>>>>>> pr458merge

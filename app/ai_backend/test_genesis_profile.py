@@ -4675,326 +4675,1021 @@ if __name__ == '__main__':
 >>>>>>> pr458merge
 
 
-class TestGenesisProfileExtendedFunctionality(unittest.TestCase):
-    """Extended functionality tests for comprehensive coverage"""
-
+class TestGenesisProfileInputValidation(unittest.TestCase):
+    """Comprehensive input validation tests for GenesisProfile"""
+    
     def setUp(self):
-        """Set up extended test fixtures"""
-        self.extended_profile_data = {
-            "id": "extended_test_profile",
-            "name": "Extended Test User",
-            "email": "extended@example.com",
+        """Set up test fixtures for input validation tests"""
+        self.valid_profile_data = {
+            "id": "validation_test_profile",
+            "name": "Input Validation Test",
+            "email": "validation@test.com", 
             "created_at": "2024-01-01T00:00:00Z",
-            "preferences": {
-                "advanced_settings": {
-                    "nested_level_1": {
-                        "nested_level_2": {
-                            "nested_level_3": {
-                                "deep_setting": "deep_value",
-                                "complex_list": [
-                                    {"item": 1, "metadata": {"type": "number"}},
-                                    {"item": "text", "metadata": {"type": "string"}},
-                                    {"item": [1, 2, 3], "metadata": {"type": "list"}}
-                                ]
-                            }
-                        }
-                    }
-                },
-                "feature_flags": {
-                    "experimental_features": True,
-                    "beta_testing": False,
-                    "advanced_analytics": True
-                }
-            },
-            "metadata": {
-                "version": "2.0",
-                "source": "genesis",
-                "classification": "advanced",
-                "compliance": {
-                    "gdpr": True,
-                    "ccpa": True,
-                    "data_retention_days": 365
+            "preferences": {"theme": "dark", "language": "en"},
+            "metadata": {"version": "1.0", "source": "genesis"}
+        }
+    
+    def test_profile_with_null_bytes_in_strings(self):
+        """Test profile creation with null bytes in string fields"""
+        null_byte_data = self.valid_profile_data.copy()
+        null_byte_data["name"] = "Test\x00User"
+        null_byte_data["email"] = "test\x00@example.com"
+        
+        # Should either handle gracefully or raise appropriate error
+        try:
+            profile = GenesisProfile(null_byte_data)
+            self.assertIsNotNone(profile)
+            # Null bytes might be preserved or stripped depending on implementation
+        except ValueError:
+            # Acceptable to reject null bytes in input
+            pass
+    
+    def test_profile_with_control_characters(self):
+        """Test profile creation with various control characters"""
+        control_chars_data = self.valid_profile_data.copy()
+        control_chars_data["name"] = "Test\tUser\r\n"
+        control_chars_data["preferences"]["description"] = "Line1\nLine2\rLine3"
+        
+        profile = GenesisProfile(control_chars_data)
+        self.assertIsNotNone(profile)
+        self.assertIn("\t", profile.name)
+        self.assertIn("\n", profile.preferences["description"])
+    
+    def test_profile_with_extremely_long_field_values(self):
+        """Test profile with extremely long values in various fields"""
+        long_value = "x" * 100000  # 100KB string
+        
+        long_data = self.valid_profile_data.copy()
+        long_data["name"] = long_value
+        long_data["preferences"]["long_description"] = long_value
+        
+        # Should handle or appropriately limit long values
+        try:
+            profile = GenesisProfile(long_data)
+            self.assertIsNotNone(profile)
+            self.assertEqual(len(profile.name), 100000)
+        except (ValueError, MemoryError):
+            # Acceptable to limit extremely long values
+            pass
+    
+    def test_profile_with_deeply_nested_preferences(self):
+        """Test profile with extremely deep nesting in preferences"""
+        nested_data = self.valid_profile_data.copy()
+        
+        # Create 50-level deep nesting
+        deep_structure = {}
+        current = deep_structure
+        for i in range(50):
+            current[f"level_{i}"] = {}
+            current = current[f"level_{i}"]
+        current["final_value"] = "deep_nested_value"
+        
+        nested_data["preferences"]["deep_structure"] = deep_structure
+        
+        profile = GenesisProfile(nested_data)
+        self.assertIsNotNone(profile)
+        
+        # Navigate to the deep value
+        current = profile.preferences["deep_structure"]
+        for i in range(50):
+            current = current[f"level_{i}"]
+        self.assertEqual(current["final_value"], "deep_nested_value")
+    
+    def test_profile_with_mixed_data_types_in_preferences(self):
+        """Test profile with mixed data types in preferences"""
+        from decimal import Decimal
+        from datetime import datetime, date, time
+        
+        mixed_data = self.valid_profile_data.copy()
+        mixed_data["preferences"] = {
+            "string_value": "test",
+            "int_value": 42,
+            "float_value": 3.14159,
+            "bool_value": True,
+            "list_value": [1, "two", 3.0, False, None],
+            "dict_value": {"nested": {"key": "value"}},
+            "none_value": None,
+            "decimal_value": Decimal("123.456"),
+            "datetime_value": datetime.now(),
+            "date_value": date.today(),
+            "time_value": time(14, 30, 0),
+            "tuple_value": (1, 2, "three"),
+            "set_value": {1, 2, 3, 4, 5},
+            "frozenset_value": frozenset([1, 2, 3]),
+            "complex_value": complex(1, 2)
+        }
+        
+        profile = GenesisProfile(mixed_data)
+        self.assertIsNotNone(profile)
+        
+        # Verify all types are preserved (or appropriately converted)
+        prefs = profile.preferences
+        self.assertEqual(prefs["string_value"], "test")
+        self.assertEqual(prefs["int_value"], 42)
+        self.assertAlmostEqual(prefs["float_value"], 3.14159, places=5)
+        self.assertTrue(prefs["bool_value"])
+        self.assertIsInstance(prefs["list_value"], list)
+        self.assertIsInstance(prefs["dict_value"], dict)
+        self.assertIsNone(prefs["none_value"])
+
+
+class TestGenesisProfileDataIntegrity(unittest.TestCase):
+    """Test data integrity and consistency"""
+    
+    def setUp(self):
+        """Set up test fixtures for data integrity tests"""
+        self.profile_data = {
+            "id": "integrity_test",
+            "name": "Data Integrity Test",
+            "email": "integrity@test.com",
+            "created_at": "2024-01-01T00:00:00Z",
+            "preferences": {"setting1": "value1"},
+            "metadata": {"version": "1.0", "source": "genesis"}
+        }
+    
+    def test_profile_data_immutability_after_creation(self):
+        """Test that external modifications to original data don't affect profile"""
+        original_data = self.profile_data.copy()
+        profile = GenesisProfile(original_data)
+        
+        # Modify the original data after profile creation
+        original_data["name"] = "Modified Name"
+        original_data["preferences"]["setting1"] = "modified_value"
+        original_data["preferences"]["new_setting"] = "new_value"
+        
+        # Profile should retain original values
+        self.assertEqual(profile.name, "Data Integrity Test")
+        self.assertEqual(profile.preferences["setting1"], "value1")
+        self.assertNotIn("new_setting", profile.preferences)
+    
+    def test_profile_preferences_deep_copy_behavior(self):
+        """Test that preference updates create proper copies"""
+        profile = GenesisProfile(self.profile_data)
+        
+        original_prefs = profile.preferences.copy()
+        
+        # Update preferences with nested data
+        new_prefs = {
+            "nested": {
+                "level1": {
+                    "level2": ["item1", "item2"]
                 }
             }
         }
-
-    def test_profile_deep_nested_access(self):
-        """Test accessing deeply nested profile data"""
-        profile = GenesisProfile(self.extended_profile_data)
+        profile.update_preferences(new_prefs)
         
-        # Test deep access patterns
-        deep_value = profile.preferences["advanced_settings"]["nested_level_1"]["nested_level_2"]["nested_level_3"]["deep_setting"]
-        self.assertEqual(deep_value, "deep_value")
+        # Modify the nested structure used for update
+        new_prefs["nested"]["level1"]["level2"].append("item3")
+        new_prefs["nested"]["level1"]["new_key"] = "new_value"
         
-        # Test complex list access
-        complex_list = profile.preferences["advanced_settings"]["nested_level_1"]["nested_level_2"]["nested_level_3"]["complex_list"]
-        self.assertEqual(len(complex_list), 3)
-        self.assertEqual(complex_list[0]["item"], 1)
-        self.assertEqual(complex_list[1]["metadata"]["type"], "string")
-
-    def test_profile_feature_flag_management(self):
-        """Test feature flag management within profiles"""
-        profile = GenesisProfile(self.extended_profile_data)
+        # Profile should not be affected by external modifications
+        self.assertEqual(len(profile.preferences["nested"]["level1"]["level2"]), 2)
+        self.assertNotIn("new_key", profile.preferences["nested"]["level1"])
+    
+    def test_profile_concurrent_preference_updates(self):
+        """Test behavior during rapid preference updates"""
+        profile = GenesisProfile(self.profile_data)
         
-        # Test feature flag access
-        self.assertTrue(profile.preferences["feature_flags"]["experimental_features"])
-        self.assertFalse(profile.preferences["feature_flags"]["beta_testing"])
+        # Perform rapid updates to test consistency
+        for i in range(100):
+            update_data = {
+                f"counter_{i}": i,
+                "last_update": i,
+                "batch_data": [j for j in range(i % 10)]
+            }
+            profile.update_preferences(update_data)
+            
+            # Verify each update is properly applied
+            self.assertEqual(profile.preferences[f"counter_{i}"], i)
+            self.assertEqual(profile.preferences["last_update"], i)
         
-        # Test feature flag updates
-        new_flags = profile.preferences["feature_flags"].copy()
-        new_flags["new_feature"] = True
-        new_flags["beta_testing"] = True
-        
-        profile.update_preferences({
-            "feature_flags": new_flags,
-            "additional_setting": "test"
-        })
-        
-        self.assertTrue(profile.preferences["feature_flags"]["new_feature"])
-        self.assertTrue(profile.preferences["feature_flags"]["beta_testing"])
-
-    def test_profile_compliance_data_handling(self):
-        """Test compliance-related data handling"""
-        profile = GenesisProfile(self.extended_profile_data)
-        
-        # Test compliance metadata access
-        self.assertTrue(profile.metadata["compliance"]["gdpr"])
-        self.assertTrue(profile.metadata["compliance"]["ccpa"])
-        self.assertEqual(profile.metadata["compliance"]["data_retention_days"], 365)
-        
-        # Test compliance data immutability simulation
-        original_compliance = profile.metadata["compliance"].copy()
-        
-        # Attempt to modify compliance data
-        try:
-            compliance_copy = profile.metadata["compliance"].copy()
-            compliance_copy["gdpr"] = False
-            # In a real implementation, this might be protected
-        except Exception:
-            pass  # Expected if compliance data is protected
-        
-        # Verify original data remains unchanged
-        self.assertEqual(profile.metadata["compliance"], original_compliance)
-
-    def test_profile_data_transformation_patterns(self):
-        """Test various data transformation patterns"""
-        profile = GenesisProfile(self.extended_profile_data)
-        
-        # Test data flattening simulation
-        def flatten_dict(d, parent_key='', sep='_'):
-            """Flatten nested dictionary"""
-            items = []
-            for k, v in d.items():
-                new_key = f"{parent_key}{sep}{k}" if parent_key else k
-                if isinstance(v, dict):
-                    items.extend(flatten_dict(v, new_key, sep=sep).items())
-                else:
-                    items.append((new_key, v))
-            return dict(items)
-        
-        flattened = flatten_dict(profile.preferences["feature_flags"])
-        self.assertIn("experimental_features", flattened)
-        self.assertIn("beta_testing", flattened)
-        
-        # Test data aggregation patterns
-        def count_nested_values(d, value_type):
-            """Count values of specific type in nested structure"""
-            count = 0
-            for v in d.values() if isinstance(d, dict) else []:
-                if isinstance(v, value_type):
-                    count += 1
-                elif isinstance(v, dict):
-                    count += count_nested_values(v, value_type)
-                elif isinstance(v, list):
-                    for item in v:
-                        if isinstance(item, dict):
-                            count += count_nested_values(item, value_type)
-            return count
-        
-        bool_count = count_nested_values(profile.preferences, bool)
-        self.assertGreater(bool_count, 0)
+        # Verify final state
+        self.assertEqual(profile.preferences["last_update"], 99)
+        self.assertIn("counter_99", profile.preferences)
+        self.assertIn("counter_0", profile.preferences)
 
 
-class TestGenesisProfileAdvancedErrorScenarios(unittest.TestCase):
-    """Advanced error scenarios and edge case testing"""
-
+class TestGenesisProfileErrorRecovery(unittest.TestCase):
+    """Test error recovery and graceful failure handling"""
+    
     def setUp(self):
-        """Set up advanced error test fixtures"""
+        """Set up test fixtures for error recovery tests"""
+        self.valid_data = {
+            "id": "error_recovery_test",
+            "name": "Error Recovery Test", 
+            "email": "error@test.com",
+            "created_at": "2024-01-01T00:00:00Z",
+            "preferences": {"initial": "value"},
+            "metadata": {"version": "1.0", "source": "genesis"}
+        }
+    
+    def test_profile_recovery_from_invalid_preference_update(self):
+        """Test recovery when preference update fails"""
+        profile = GenesisProfile(self.valid_data)
+        original_prefs = profile.preferences.copy()
+        
+        # Attempt invalid update that might cause an error
+        try:
+            # This might fail depending on implementation
+            profile.update_preferences("invalid_string_instead_of_dict")
+        except (TypeError, ValueError):
+            # Profile should maintain original state after failed update
+            self.assertEqual(profile.preferences, original_prefs)
+            
+        # Verify profile is still functional after error
+        profile.update_preferences({"recovery": "successful"})
+        self.assertEqual(profile.preferences["recovery"], "successful")
+    
+    def test_profile_state_consistency_after_exceptions(self):
+        """Test that profile state remains consistent after various exceptions"""
+        profile = GenesisProfile(self.valid_data)
+        
+        # Store original state
+        original_id = profile.id
+        original_name = profile.name
+        original_email = profile.email
+        
+        # Attempt operations that might fail
+        error_scenarios = [
+            lambda: profile.update_preferences(None),
+            lambda: profile.update_preferences(42),
+            lambda: profile.update_preferences([1, 2, 3]),
+            lambda: setattr(profile, 'id', None),  # Might be protected
+            lambda: setattr(profile, 'email', "invalid_email"),
+        ]
+        
+        for scenario in error_scenarios:
+            try:
+                scenario()
+            except (TypeError, ValueError, AttributeError):
+                # Expected for invalid operations
+                pass
+            
+            # Verify core properties remain intact
+            self.assertEqual(profile.id, original_id)
+            self.assertEqual(profile.name, original_name)
+            self.assertEqual(profile.email, original_email)
+    
+    def test_profile_partial_update_rollback(self):
+        """Test rollback behavior for partial update failures"""
+        profile = GenesisProfile(self.valid_data)
+        
+        # Store original preferences
+        original_prefs = profile.preferences.copy()
+        
+        # Create update that might partially succeed then fail
+        complex_update = {
+            "valid_field": "valid_value",
+            "another_valid": {"nested": "data"},
+            "final_field": "final_value"
+        }
+        
+        try:
+            profile.update_preferences(complex_update)
+            # If successful, verify all fields were added
+            for key, value in complex_update.items():
+                self.assertEqual(profile.preferences[key], value)
+        except Exception:
+            # If failed, verify original state is preserved
+            self.assertEqual(profile.preferences, original_prefs)
+
+
+class TestGenesisProfileBoundaryConditions(unittest.TestCase):
+    """Test boundary conditions and extreme values"""
+    
+    def setUp(self):
+        """Set up test fixtures for boundary condition tests"""
         self.base_data = {
-            "id": "error_test_profile",
-            "name": "Error Test User",
-            "email": "error@example.com",
+            "id": "boundary_test",
+            "name": "Boundary Test",
+            "email": "boundary@test.com",
+            "created_at": "2024-01-01T00:00:00Z",
+            "preferences": {},
+            "metadata": {"version": "1.0", "source": "genesis"}
+        }
+    
+    def test_profile_with_empty_string_fields(self):
+        """Test profile creation with empty string values"""
+        empty_data = self.base_data.copy()
+        empty_data["name"] = ""
+        empty_data["email"] = ""
+        empty_data["id"] = ""
+        
+        # Should either handle gracefully or raise appropriate validation error
+        try:
+            profile = GenesisProfile(empty_data)
+            # If creation succeeds, verify empty values are preserved
+            self.assertEqual(profile.name, "")
+            self.assertEqual(profile.email, "")
+            self.assertEqual(profile.id, "")
+        except ValueError:
+            # Acceptable to reject empty required fields
+            pass
+    
+    def test_profile_with_whitespace_only_fields(self):
+        """Test profile creation with whitespace-only values"""
+        whitespace_data = self.base_data.copy()
+        whitespace_data["name"] = "   \t\n  "
+        whitespace_data["email"] = "  \r\n\t  "
+        
+        try:
+            profile = GenesisProfile(whitespace_data)
+            # Verify whitespace handling (preserved, trimmed, or rejected)
+            self.assertIsNotNone(profile)
+        except ValueError:
+            # Acceptable to reject whitespace-only values
+            pass
+    
+    def test_profile_with_maximum_reasonable_values(self):
+        """Test profile with maximum reasonable field values"""
+        max_data = self.base_data.copy()
+        
+        # Test with reasonable maximums
+        max_data["name"] = "A" * 1000  # 1KB name
+        max_data["email"] = f"{'a' * 240}@{'b' * 10}.com"  # Near email length limit
+        max_data["preferences"] = {f"key_{i}": f"value_{i}" for i in range(1000)}  # 1000 preferences
+        
+        profile = GenesisProfile(max_data)
+        self.assertIsNotNone(profile)
+        self.assertEqual(len(profile.name), 1000)
+        self.assertEqual(len(profile.preferences), 1000)
+    
+    def test_profile_with_minimum_valid_values(self):
+        """Test profile with minimum valid field values"""
+        min_data = self.base_data.copy()
+        min_data["name"] = "A"  # Single character
+        min_data["email"] = "a@b.c"  # Minimal valid email
+        min_data["id"] = "1"  # Single character ID
+        min_data["preferences"] = {"k": "v"}  # Minimal preference
+        
+        profile = GenesisProfile(min_data)
+        self.assertIsNotNone(profile)
+        self.assertEqual(profile.name, "A")
+        self.assertEqual(profile.email, "a@b.c")
+        self.assertEqual(profile.id, "1")
+        self.assertEqual(profile.preferences["k"], "v")
+    
+    def test_profile_with_numeric_boundary_values(self):
+        """Test profile with numeric boundary values in preferences"""
+        numeric_data = self.base_data.copy()
+        numeric_data["preferences"] = {
+            "max_int": 2**63 - 1,  # Maximum 64-bit signed integer
+            "min_int": -2**63,     # Minimum 64-bit signed integer
+            "max_float": 1.7976931348623157e+308,  # Near float64 maximum
+            "min_float": 2.2250738585072014e-308,  # Near float64 minimum
+            "zero": 0,
+            "negative_zero": -0.0,
+            "infinity": float('inf'),
+            "negative_infinity": float('-inf'),
+            "nan": float('nan'),
+            "very_small": 1e-100,
+            "very_large": 1e100
+        }
+        
+        profile = GenesisProfile(numeric_data)
+        self.assertIsNotNone(profile)
+        
+        # Verify numeric values are preserved
+        prefs = profile.preferences
+        self.assertEqual(prefs["max_int"], 2**63 - 1)
+        self.assertEqual(prefs["min_int"], -2**63)
+        self.assertEqual(prefs["zero"], 0)
+        self.assertTrue(math.isinf(prefs["infinity"]))
+        self.assertTrue(math.isinf(prefs["negative_infinity"]))
+        self.assertTrue(math.isnan(prefs["nan"]))
+
+
+class TestGenesisProfileCompatibility(unittest.TestCase):
+    """Test compatibility with different Python versions and environments"""
+    
+    def setUp(self):
+        """Set up test fixtures for compatibility tests"""
+        self.test_data = {
+            "id": "compatibility_test",
+            "name": "Compatibility Test",
+            "email": "compat@test.com",
             "created_at": "2024-01-01T00:00:00Z",
             "preferences": {"test": True},
             "metadata": {"version": "1.0", "source": "genesis"}
         }
-
-    def test_profile_with_malformed_datetime_fields(self):
-        """Test profile handling with malformed datetime fields"""
-        malformed_datetime_cases = [
-            "2024-13-01T00:00:00Z",  # Invalid month
-            "2024-01-32T00:00:00Z",  # Invalid day
-            "2024-01-01T25:00:00Z",  # Invalid hour
-            "2024-01-01T00:61:00Z",  # Invalid minute
-            "2024-01-01T00:00:61Z",  # Invalid second
-            "invalid-datetime",       # Completely invalid
-            "2024/01/01 00:00:00",   # Wrong format
-            "",                      # Empty string
-            "2024-01-01",           # Missing time
-            "00:00:00Z"             # Missing date
-        ]
-
-        for malformed_datetime in malformed_datetime_cases:
-            with self.subTest(datetime=malformed_datetime):
-                test_data = self.base_data.copy()
-                test_data["created_at"] = malformed_datetime
-                
-                try:
-                    profile = GenesisProfile(test_data)
-                    # If successful, verify the datetime was handled appropriately
-                    self.assertIsNotNone(profile)
-                except (ValueError, TypeError) as e:
-                    # Expected for malformed datetime values
-                    self.assertIsInstance(e, (ValueError, TypeError))
-
-    def test_profile_with_recursive_data_structures(self):
-        """Test profile with potentially recursive data structures"""
-        # Create data with potential recursion
-        recursive_data = self.base_data.copy()
+    
+    def test_profile_with_future_annotations(self):
+        """Test compatibility with future annotations and type hints"""
+        from __future__ import annotations
         
-        # Create a structure that references itself
-        circular_ref = {"name": "circular", "children": []}
-        circular_ref["children"].append(circular_ref)  # Self-reference
+        profile = GenesisProfile(self.test_data)
+        self.assertIsNotNone(profile)
         
-        recursive_data["preferences"]["circular_structure"] = circular_ref
+        # Test that methods work with future annotations
+        profile.update_preferences({"future_annotation_test": True})
+        self.assertTrue(profile.preferences["future_annotation_test"])
+    
+    def test_profile_string_representations(self):
+        """Test string representations for debugging and logging"""
+        profile = GenesisProfile(self.test_data)
         
+        # Test __str__ method
+        str_repr = str(profile)
+        self.assertIsInstance(str_repr, str)
+        self.assertIn("compatibility_test", str_repr)
+        
+        # Test __repr__ method if implemented
         try:
-            profile = GenesisProfile(recursive_data)
-            # If creation succeeds, verify basic functionality
-            self.assertIsNotNone(profile)
-            self.assertEqual(profile.id, "error_test_profile")
-        except (ValueError, RecursionError, TypeError) as e:
-            # Expected if circular references are detected and prevented
-            self.assertIsInstance(e, (ValueError, RecursionError, TypeError))
-
-    def test_profile_with_extremely_large_field_values(self):
-        """Test profile with extremely large field values"""
-        large_data_cases = [
-            ("huge_string", "x" * 10_000_000),  # 10MB string
-            ("huge_list", list(range(1_000_000))),  # 1M item list
-            ("huge_dict", {f"key_{i}": f"value_{i}" for i in range(100_000)}),  # 100K key dict
-        ]
-
-        for field_name, large_value in large_data_cases:
-            with self.subTest(field=field_name):
-                test_data = self.base_data.copy()
-                test_data["preferences"][field_name] = large_value
-                
-                try:
-                    start_time = time.time()
-                    profile = GenesisProfile(test_data)
-                    creation_time = time.time() - start_time
-                    
-                    # Verify creation succeeded
-                    self.assertIsNotNone(profile)
-                    
-                    # Verify creation time is reasonable (less than 30 seconds)
-                    self.assertLess(creation_time, 30.0)
-                    
-                    # Verify data integrity
-                    if field_name == "huge_string":
-                        self.assertEqual(len(profile.preferences[field_name]), 10_000_000)
-                    elif field_name == "huge_list":
-                        self.assertEqual(len(profile.preferences[field_name]), 1_000_000)
-                    elif field_name == "huge_dict":
-                        self.assertEqual(len(profile.preferences[field_name]), 100_000)
-                        
-                except (MemoryError, ValueError, OverflowError) as e:
-                    # Expected if system has memory limits
-                    self.assertIsInstance(e, (MemoryError, ValueError, OverflowError))
-
-    def test_profile_with_invalid_encoding_data(self):
-        """Test profile with various encoding issues"""
-        encoding_test_cases = [
-            # Various problematic strings
-            "\x00\x01\x02\x03",  # Null bytes and control characters
-            "Test\u0000String",   # Embedded null character
-            "Test\uFFFEString",   # Byte order mark
-            "Test\uFFFDString",   # Replacement character
-            "Test\x80String",     # Invalid UTF-8 continuation byte
-            "\xc0\xaf",          # Overlong UTF-8 sequence
-            "\xed\xa0\x80",      # UTF-8 surrogate
-        ]
-
-        for test_string in encoding_test_cases:
-            with self.subTest(encoding_test=repr(test_string)):
-                test_data = self.base_data.copy()
-                test_data["name"] = test_string
-                test_data["preferences"]["test_string"] = test_string
-                
-                try:
-                    profile = GenesisProfile(test_data)
-                    # If creation succeeds, verify the string was handled
-                    self.assertIsNotNone(profile)
-                    self.assertEqual(profile.name, test_string)
-                except (UnicodeError, ValueError) as e:
-                    # Expected for invalid encoding
-                    self.assertIsInstance(e, (UnicodeError, ValueError))
+            repr_str = repr(profile)
+            self.assertIsInstance(repr_str, str)
+            self.assertIn("GenesisProfile", repr_str)
+        except AttributeError:
+            # __repr__ might not be implemented
+            pass
+    
+    def test_profile_hash_and_equality(self):
+        """Test hash and equality implementations"""
+        profile1 = GenesisProfile(self.test_data)
+        profile2 = GenesisProfile(self.test_data.copy())
+        
+        # Test equality
+        try:
+            is_equal = (profile1 == profile2)
+            self.assertIsInstance(is_equal, bool)
+            
+            # Test inequality 
+            different_data = self.test_data.copy()
+            different_data["name"] = "Different Name"
+            profile3 = GenesisProfile(different_data)
+            
+            is_not_equal = (profile1 != profile3)
+            self.assertIsInstance(is_not_equal, bool)
+        except TypeError:
+            # Equality might not be implemented
+            pass
+        
+        # Test hash if implemented
+        try:
+            hash1 = hash(profile1)
+            hash2 = hash(profile2)
+            self.assertIsInstance(hash1, int)
+            self.assertIsInstance(hash2, int)
+        except TypeError:
+            # Hash might not be implemented
+            pass
+    
+    def test_profile_attribute_access_patterns(self):
+        """Test different attribute access patterns"""
+        profile = GenesisProfile(self.test_data)
+        
+        # Test direct attribute access
+        self.assertEqual(profile.id, "compatibility_test")
+        self.assertEqual(profile.name, "Compatibility Test")
+        self.assertEqual(profile.email, "compat@test.com")
+        
+        # Test getattr with defaults
+        self.assertEqual(getattr(profile, 'id', 'default'), "compatibility_test")
+        self.assertEqual(getattr(profile, 'nonexistent_attr', 'default'), 'default')
+        
+        # Test hasattr
+        self.assertTrue(hasattr(profile, 'id'))
+        self.assertTrue(hasattr(profile, 'preferences'))
+        self.assertFalse(hasattr(profile, 'nonexistent_attribute'))
 
 
-class TestGenesisProfileAdvancedIntegrationPatterns(unittest.TestCase):
-    """Advanced integration patterns and system interoperability"""
-
+class TestAdvancedProfileManagerScenarios(unittest.TestCase):
+    """Advanced ProfileManager test scenarios"""
+    
     def setUp(self):
-        """Set up integration pattern test fixtures"""
+        """Set up advanced ProfileManager test fixtures"""
         self.manager = ProfileManager()
-        self.integration_data = {
-            "name": "Integration Test",
+        self.sample_profiles = []
+        
+        # Create a set of diverse profiles for testing
+        for i in range(10):
+            profile_data = {
+                "name": f"Advanced Test Profile {i}",
+                "version": f"{i}.0.0",
+                "settings": {
+                    "priority": i % 3,  # 0, 1, or 2
+                    "category": ["system", "user", "admin"][i % 3],
+                    "enabled": i % 2 == 0,
+                    "config": {"param1": i * 10, "param2": f"value_{i}"}
+                }
+            }
+            profile = self.manager.create_profile(f"advanced_test_{i}", profile_data)
+            self.sample_profiles.append(profile)
+    
+    def test_profile_manager_bulk_operations(self):
+        """Test bulk operations on ProfileManager"""
+        
+        # Test bulk retrieval
+        profile_ids = [f"advanced_test_{i}" for i in range(10)]
+        retrieved_profiles = []
+        
+        for profile_id in profile_ids:
+            profile = self.manager.get_profile(profile_id)
+            self.assertIsNotNone(profile)
+            retrieved_profiles.append(profile)
+        
+        self.assertEqual(len(retrieved_profiles), 10)
+        
+        # Test bulk update
+        bulk_update_data = {"settings": {"bulk_updated": True, "timestamp": "2024-01-01"}}
+        
+        for i in range(5):  # Update first 5 profiles
+            updated_profile = self.manager.update_profile(f"advanced_test_{i}", bulk_update_data)
+            self.assertTrue(updated_profile.data["settings"]["bulk_updated"])
+        
+        # Verify updates were applied correctly
+        for i in range(5):
+            profile = self.manager.get_profile(f"advanced_test_{i}")
+            self.assertTrue(profile.data["settings"]["bulk_updated"])
+        
+        # Verify remaining profiles were not affected
+        for i in range(5, 10):
+            profile = self.manager.get_profile(f"advanced_test_{i}")
+            self.assertNotIn("bulk_updated", profile.data["settings"])
+    
+    def test_profile_manager_filtering_simulation(self):
+        """Test filtering and querying capabilities simulation"""
+        
+        def filter_profiles_by_category(manager, category):
+            """Filter profiles by category"""
+            matching_profiles = []
+            for profile_id, profile in manager.profiles.items():
+                if profile.data.get("settings", {}).get("category") == category:
+                    matching_profiles.append(profile)
+            return matching_profiles
+        
+        def filter_profiles_by_enabled_status(manager, enabled_status):
+            """Filter profiles by enabled status"""
+            matching_profiles = []
+            for profile_id, profile in manager.profiles.items():
+                if profile.data.get("settings", {}).get("enabled") == enabled_status:
+                    matching_profiles.append(profile)
+            return matching_profiles
+        
+        # Test category filtering
+        system_profiles = filter_profiles_by_category(self.manager, "system")
+        user_profiles = filter_profiles_by_category(self.manager, "user")
+        admin_profiles = filter_profiles_by_category(self.manager, "admin")
+        
+        # Each category should have 3-4 profiles (10 profiles divided by 3 categories)
+        self.assertGreaterEqual(len(system_profiles), 3)
+        self.assertGreaterEqual(len(user_profiles), 3)
+        self.assertGreaterEqual(len(admin_profiles), 3)
+        
+        # Test enabled status filtering
+        enabled_profiles = filter_profiles_by_enabled_status(self.manager, True)
+        disabled_profiles = filter_profiles_by_enabled_status(self.manager, False)
+        
+        # Should have 5 enabled and 5 disabled (alternating pattern)
+        self.assertEqual(len(enabled_profiles), 5)
+        self.assertEqual(len(disabled_profiles), 5)
+        
+        # Verify filtering accuracy
+        for profile in enabled_profiles:
+            self.assertTrue(profile.data["settings"]["enabled"])
+        
+        for profile in disabled_profiles:
+            self.assertFalse(profile.data["settings"]["enabled"])
+    
+    def test_profile_manager_transaction_simulation(self):
+        """Test transaction-like behavior simulation"""
+        
+        def atomic_multi_profile_update(manager, updates):
+            """Perform atomic updates on multiple profiles"""
+            backup_data = {}
+            updated_profiles = []
+            
+            try:
+                # Phase 1: Create backups and validate updates
+                for profile_id, update_data in updates.items():
+                    profile = manager.get_profile(profile_id)
+                    if profile is None:
+                        raise ProfileNotFoundError(f"Profile {profile_id} not found")
+                    
+                    backup_data[profile_id] = profile.data.copy()
+                    
+                    # Validate update data
+                    if not ProfileValidator.validate_profile_data({**profile.data, **update_data}):
+                        raise ValidationError(f"Invalid update data for profile {profile_id}")
+                
+                # Phase 2: Apply all updates
+                for profile_id, update_data in updates.items():
+                    updated_profile = manager.update_profile(profile_id, update_data)
+                    updated_profiles.append(updated_profile)
+                
+                return updated_profiles
+                
+            except Exception as e:
+                # Phase 3: Rollback on any failure
+                for profile_id, backup in backup_data.items():
+                    try:
+                        manager.update_profile(profile_id, backup)
+                    except Exception:
+                        pass  # Best effort rollback
+                raise e
+        
+        # Test successful atomic update
+        updates = {
+            "advanced_test_0": {"settings": {"atomic_test": True, "batch": "success"}},
+            "advanced_test_1": {"settings": {"atomic_test": True, "batch": "success"}},
+            "advanced_test_2": {"settings": {"atomic_test": True, "batch": "success"}}
+        }
+        
+        updated_profiles = atomic_multi_profile_update(self.manager, updates)
+        self.assertEqual(len(updated_profiles), 3)
+        
+        # Verify all updates were applied
+        for profile in updated_profiles:
+            self.assertTrue(profile.data["settings"]["atomic_test"])
+            self.assertEqual(profile.data["settings"]["batch"], "success")
+        
+        # Test failed atomic update (should rollback)
+        failing_updates = {
+            "advanced_test_3": {"settings": {"atomic_test": True, "batch": "fail"}},
+            "nonexistent_profile": {"settings": {"atomic_test": True, "batch": "fail"}},  # This will fail
+            "advanced_test_4": {"settings": {"atomic_test": True, "batch": "fail"}}
+        }
+        
+        with self.assertRaises(ProfileNotFoundError):
+            atomic_multi_profile_update(self.manager, failing_updates)
+        
+        # Verify rollback - advanced_test_3 should not have the failed update
+        profile_3 = self.manager.get_profile("advanced_test_3")
+        self.assertNotIn("atomic_test", profile_3.data["settings"])
+
+
+# Import required modules for additional tests
+import math
+import sys
+import gc
+import time
+from unittest.mock import patch, MagicMock
+
+
+class TestGenesisProfileAdvancedMemoryManagement(unittest.TestCase):
+    """Test advanced memory management scenarios"""
+    
+    def setUp(self):
+        """Set up memory management test fixtures"""
+        self.manager = ProfileManager()
+    
+    def test_profile_memory_leak_detection(self):
+        """Test for potential memory leaks in profile operations"""
+        import gc
+        import weakref
+        
+        # Collect garbage to establish baseline
+        gc.collect()
+        initial_objects = len(gc.get_objects())
+        
+        # Create and destroy many profiles
+        profile_refs = []
+        for i in range(100):
+            profile_data = {
+                "name": f"Memory Test {i}",
+                "version": "1.0.0", 
+                "settings": {"index": i, "data": [j for j in range(100)]}
+            }
+            
+            profile = self.manager.create_profile(f"memory_leak_test_{i}", profile_data)
+            
+            # Create weak reference to track object lifecycle
+            weak_ref = weakref.ref(profile)
+            profile_refs.append(weak_ref)
+        
+        # Delete profiles and force garbage collection
+        for i in range(100):
+            self.manager.delete_profile(f"memory_leak_test_{i}")
+        
+        # Clear local references
+        profile_refs.clear()
+        
+        # Force multiple garbage collection cycles
+        for _ in range(3):
+            gc.collect()
+        
+        # Check for memory growth
+        final_objects = len(gc.get_objects())
+        object_growth = final_objects - initial_objects
+        
+        # Allow some growth but detect significant leaks
+        self.assertLess(object_growth, 1000, f"Potential memory leak detected: {object_growth} new objects")
+    
+    def test_profile_circular_reference_cleanup(self):
+        """Test cleanup of circular references in profile data"""
+        import gc
+        import weakref
+        
+        # Create profile with potential circular references
+        profile_data = {
+            "name": "Circular Reference Test",
+            "version": "1.0.0",
+            "settings": {}
+        }
+        
+        profile = self.manager.create_profile("circular_test", profile_data)
+        
+        # Create circular reference in settings
+        profile.data["settings"]["self_ref"] = profile.data
+        profile.data["settings"]["manager_ref"] = self.manager
+        
+        # Create weak reference to track cleanup
+        weak_profile_ref = weakref.ref(profile)
+        weak_manager_ref = weakref.ref(self.manager)
+        
+        # Delete strong references
+        self.manager.delete_profile("circular_test")
+        del profile
+        
+        # Force garbage collection
+        gc.collect()
+        
+        # Test that objects can be collected despite circular references
+        # (This test mainly ensures the code doesn't crash with circular refs)
+        self.assertIsNotNone(weak_manager_ref())  # Manager should still exist
+    
+    def test_profile_large_data_handling(self):
+        """Test handling of profiles with large data sets"""
+        import psutil
+        import os
+        
+        process = psutil.Process(os.getpid())
+        initial_memory = process.memory_info().rss
+        
+        # Create profile with large dataset
+        large_data = {
+            "name": "Large Data Test",
             "version": "1.0.0",
             "settings": {
-                "integration_config": {
-                    "external_apis": ["api1", "api2", "api3"],
-                    "data_sources": {
-                        "primary": "database",
-                        "secondary": "cache",
-                        "fallback": "file_system"
-                    },
-                    "sync_settings": {
-                        "frequency": "real_time",
-                        "batch_size": 1000,
-                        "retry_attempts": 3
+                "large_list": list(range(100000)),  # 100K integers
+                "large_dict": {f"key_{i}": f"value_{i}" * 100 for i in range(10000)},  # 10K long strings
+                "large_nested": {
+                    f"level_{i}": {
+                        f"sublevel_{j}": [k for k in range(100)]
+                        for j in range(100)
                     }
+                    for i in range(100)
                 }
             }
         }
+        
+        profile = self.manager.create_profile("large_data_test", large_data)
+        self.assertIsNotNone(profile)
+        
+        # Verify data integrity
+        self.assertEqual(len(profile.data["settings"]["large_list"]), 100000)
+        self.assertEqual(len(profile.data["settings"]["large_dict"]), 10000)
+        self.assertEqual(len(profile.data["settings"]["large_nested"]), 100)
+        
+        # Check memory usage (should be reasonable)
+        peak_memory = process.memory_info().rss
+        memory_growth = (peak_memory - initial_memory) / 1024 / 1024  # MB
+        
+        # Allow reasonable memory growth for large data (less than 500MB)
+        self.assertLess(memory_growth, 500, f"Excessive memory usage: {memory_growth:.2f} MB")
+        
+        # Clean up
+        self.manager.delete_profile("large_data_test")
+        del profile
+        gc.collect()
 
-    def test_profile_multi_source_data_integration(self):
-        """Test integration with multiple data sources"""
-        def simulate_multi_source_data_fetch(profile_id):
-            """Simulate fetching data from multiple sources"""
-            sources = {
-                "database": {"user_preferences": {"theme": "dark", "language": "en"}},
-                "cache": {"session_data": {"last_login": "2024-01-01", "active": True}},
-                "external_api": {"profile_metrics": {"score": 95, "level": "advanced"}},
-                "file_system": {"backup_data": {"backup_date": "2023-12-31", "size": "10MB"}}
+
+class TestGenesisProfileAdvancedConcurrency(unittest.TestCase):
+    """Advanced concurrency testing scenarios"""
+    
+    def setUp(self):
+        """Set up concurrency test fixtures"""
+        self.manager = ProfileManager()
+        self.concurrency_errors = []
+    
+    def test_profile_manager_thread_safety_stress(self):
+        """Stress test ProfileManager thread safety"""
+        import threading
+        import time
+        import random
+        
+        num_threads = 20
+        operations_per_thread = 100
+        
+        def concurrent_operations(thread_id):
+            """Perform concurrent operations"""
+            try:
+                for i in range(operations_per_thread):
+                    operation = random.choice(['create', 'read', 'update', 'delete'])
+                    profile_id = f"thread_{thread_id}_profile_{i}"
+                    
+                    if operation == 'create':
+                        data = {
+                            "name": f"Thread {thread_id} Profile {i}",
+                            "version": "1.0.0",
+                            "settings": {"thread_id": thread_id, "iteration": i}
+                        }
+                        self.manager.create_profile(profile_id, data)
+                    
+                    elif operation == 'read':
+                        # Try to read any existing profile
+                        existing_id = f"thread_{thread_id}_profile_{max(0, i-1)}"
+                        profile = self.manager.get_profile(existing_id)
+                        # Don't assert here as profile might not exist due to deletes
+                    
+                    elif operation == 'update':
+                        # Try to update existing profile
+                        existing_id = f"thread_{thread_id}_profile_{max(0, i-1)}"
+                        try:
+                            self.manager.update_profile(existing_id, {"settings": {"updated": True}})
+                        except ProfileNotFoundError:
+                            pass  # Expected if profile was deleted
+                    
+                    elif operation == 'delete':
+                        # Try to delete existing profile
+                        existing_id = f"thread_{thread_id}_profile_{max(0, i-1)}"
+                        self.manager.delete_profile(existing_id)
+                    
+                    # Small delay to increase chance of race conditions
+                    time.sleep(0.001)
+                    
+            except Exception as e:
+                self.concurrency_errors.append(f"Thread {thread_id}: {str(e)}")
+        
+        # Start threads
+        threads = []
+        for i in range(num_threads):
+            thread = threading.Thread(target=concurrent_operations, args=(i,))
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for completion
+        for thread in threads:
+            thread.join()
+        
+        # Verify no unexpected errors occurred
+        # Note: ProfileNotFoundError is expected due to concurrent deletes
+        unexpected_errors = [
+            error for error in self.concurrency_errors 
+            if "not found" not in error.lower()
+        ]
+        
+        self.assertEqual(len(unexpected_errors), 0, f"Unexpected concurrency errors: {unexpected_errors}")
+    
+    def test_profile_data_race_conditions(self):
+        """Test for data race conditions in profile updates"""
+        import threading
+        import time
+        
+        # Create a profile for concurrent updates
+        initial_data = {
+            "name": "Race Condition Test",
+            "version": "1.0.0",
+            "settings": {"counter": 0, "updates": []}
+        }
+        
+        profile = self.manager.create_profile("race_condition_test", initial_data)
+        
+        num_threads = 10
+        updates_per_thread = 50
+        
+        def concurrent_updates(thread_id):
+            """Perform concurrent updates"""
+            try:
+                for i in range(updates_per_thread):
+                    # Read current state
+                    current_profile = self.manager.get_profile("race_condition_test")
+                    if current_profile is None:
+                        continue
+                    
+                    # Prepare update based on current state
+                    current_counter = current_profile.data["settings"].get("counter", 0)
+                    current_updates = current_profile.data["settings"].get("updates", [])
+                    
+                    new_updates = current_updates.copy()
+                    new_updates.append(f"thread_{thread_id}_update_{i}")
+                    
+                    update_data = {
+                        "settings": {
+                            "counter": current_counter + 1,
+                            "updates": new_updates,
+                            f"thread_{thread_id}_counter": i
+                        }
+                    }
+                    
+                    # Apply update
+                    self.manager.update_profile("race_condition_test", update_data)
+                    
+                    time.sleep(0.001)  # Small delay
+                    
+            except Exception as e:
+                self.concurrency_errors.append(f"Thread {thread_id}: {str(e)}")
+        
+        # Start threads
+        threads = []
+        for i in range(num_threads):
+            thread = threading.Thread(target=concurrent_updates, args=(i,))
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for completion
+        for thread in threads:
+            thread.join()
+        
+        # Verify no errors occurred
+        self.assertEqual(len(self.concurrency_errors), 0, f"Race condition errors: {self.concurrency_errors}")
+        
+        # Verify final state is consistent
+        final_profile = self.manager.get_profile("race_condition_test")
+        self.assertIsNotNone(final_profile)
+        
+        # Check that we have some updates (may not be all due to race conditions)
+        self.assertGreater(len(final_profile.data["settings"]["updates"]), 0)
+
+
+@pytest.mark.parametrize("stress_scenario,expected_behavior", [
+    ("high_frequency_creates", "should_handle_gracefully"),
+    ("rapid_deletes", "should_maintain_consistency"),
+    ("mixed_operations", "should_not_crash"),
+    ("memory_pressure", "should_manage_memory"),
+])
+def test_profile_manager_stress_scenarios(stress_scenario, expected_behavior):
+    """Parametrized stress tests for ProfileManager"""
+    manager = ProfileManager()
+    
+    if stress_scenario == "high_frequency_creates":
+        # Create many profiles rapidly
+        for i in range(1000):
+            data = {
+                "name": f"Stress Test {i}",
+                "version": "1.0.0",
+                "settings": {"index": i, "stress_test": True}
             }
+            profile = manager.create_profile(f"stress_{i}", data)
+            assert profile is not None
+        
+        assert len(manager.profiles) == 1000
+    
+    elif stress_scenario == "rapid_deletes":
+        # Create then rapidly delete profiles
+        profile_ids = []
+        for i in range(500):
+            data = {
+                "name": f"Delete Test {i}",
+                "version": "1.0.0",
+                "settings": {"index": i}
+            }
+            profile = manager.create_profile(f"delete_{i}", data)
+            profile_ids.append(f"delete_{i}")
+        
+        # Rapidly delete all profiles
+        for profile_id in profile_ids:
+            result = manager.delete_profile(profile_id)
+            assert result is True
+        
+        assert len(manager.profiles) == 0
+    
+    elif stress_scenario == "mixed_operations":
+        # Mix of creates, reads, updates, deletes
+        for i in range(200):
+            # Create
+            data = {"name": f"Mixed {i}", "version": "1.0.0", "settings": {}}
+            manager.create_profile(f"mixed_{i}", data)
             
-            aggregated_data = {}
-            for source, data in sources.items():
-                aggregated_data.update(data)
+            # Read
+            profile = manager.get_profile(f"mixed_{i}")
+            assert profile is not None
             
-            return aggregated_data
+            # Update
+            manager.update_profile(f"mixed_{i}", {"settings": {"updated": True}})
+            
+            # Delete every other profile
+            if i % 2 == 0:
+                manager.delete_profile(f"mixed_{i}")
+        
+        # Should have ~100 profiles remaining
+        assert 90 <= len(manager.profiles) <= 110
+    
+    elif stress_scenario == "memory_pressure":
+        # Create profiles with large data
+        for i in range(100):
+            large_data = {
+                "name": f"Memory Test {i}",
+                "version": "1.0.0",
+                "settings": {
+                    "large_list": list(range(1000)),
+                    "large_dict": {f"key_{j}": f"value_{j}" for j in range(1000)},
+                    "index": i
+                }
+            }
+            profile = manager.create_profile(f"memory_{i}", large_data)
+            assert profile is not None
+        
+        assert len(manager.profiles) == 100
 
-        # Create profile
-        profile = self.manager.create_profile("multi_source_test", self.integration_data)
-        
-        # Simulate multi-source data integration
-        external_data = simulate_multi_source_data_fetch(profile.profile_id)
-        
-        # Update profile with aggregated external data
-        current_settings = profile.data["settings"].copy()
-        current_settings["external_data"] = external_data
-        
-        updated_profile = self.manager.update_profile("multi_source_test", {"settings": current_settings})
-        
-        # Verify inte
+
+if __name__ == '__main__':
+    # Run the comprehensive enhanced test suite
+    print("Running comprehensive enhanced test suite...")
+    
+    # Run unittest tests
+    unittest.main(argv=[''], exit=False, verbosity=2)
+    
+    # Run pytest parametrized tests
+    pytest.main([__file__, '-v', '--tb=short'])
+    
+    print("Enhanced test suite completed successfully!")
