@@ -30,6 +30,11 @@ class AppInitializerInitializer : Initializer<Unit> {
      *
      * This method is called on the main thread when the application launches.
      */
+    /**
+     * Executes application-specific initialization logic during app startup on the main thread.
+     *
+     * @param context The application context provided at startup.
+     */
     override fun create(context: Context) {
         // TODO: Implement initialization logic here.
         // This method is called on the main thread during app startup.
@@ -45,7 +50,9 @@ class AppInitializerInitializer : Initializer<Unit> {
 =======
 >>>>>>> pr458merge
     /**
-     * Returns an empty list, indicating that this initializer has no dependencies.
+     * Returns a list of initializer dependencies.
+     *
+     * This implementation returns an empty list, indicating that this initializer does not depend on any others.
      *
      * @return An empty list of initializer dependencies.
      */

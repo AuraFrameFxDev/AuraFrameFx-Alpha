@@ -101,9 +101,9 @@ class DiagnosticsViewModel @Inject constructor(
     }
 
     /**
-     * Asynchronously refreshes the observable state with the current day's logs.
+     * Asynchronously updates the observable state with the current day's logs.
      *
-     * Sets a loading message while retrieving logs, then updates the state with today's logs if available, a placeholder if none are found, or an error message if retrieval fails.
+     * Displays a loading message while retrieving logs, then updates the state with today's logs if available, a placeholder if none are found, or an error message if retrieval fails.
      */
     fun refreshLogs() {
         viewModelScope.launch {
@@ -149,12 +149,12 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
-     * Retrieves up to 1000 log entries filtered by the specified severity level.
+     * Retrieves up to 1000 log entries that match the specified severity level.
      *
-     * Only log entries containing the given level (case-insensitive, enclosed in square brackets, e.g., "[ERROR]") are included.
+     * Only log entries containing the given level (case-insensitive, enclosed in square brackets, e.g., "[ERROR]") are included in the result.
      *
      * @param level The severity level to filter for (e.g., "ERROR", "INFO").
-     * @return A list of log entries matching the specified level, or a single-item list with an error message if filtering fails.
+     * @return A list of log entries matching the specified level, or a single-item list with an error message if retrieval or filtering fails.
      */
     fun getLogsByLevel(level: String): List<String> {
         return try {
@@ -169,9 +169,9 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
-     * Asynchronously clears all application logs and updates the observable logs state to indicate success or failure.
+     * Asynchronously clears all application logs and updates the observable logs state with the result.
      *
-     * Updates the logs state with a success message if clearing is successful, or an error message if an exception occurs.
+     * Sets the logs state to a success message if logs are cleared, or to an error message if clearing fails.
      */
     fun clearLogs() {
         viewModelScope.launch {
@@ -187,7 +187,7 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
-     * Asynchronously checks cloud connectivity and appends the result or an error message to the current logs.
+     * Asynchronously checks cloud connectivity and appends the connectivity status or an error message to the current logs.
      *
      * Updates the observable log state with either "Cloud reachability: CONNECTED", "Cloud reachability: DISCONNECTED", or an error message if the connectivity check fails.
      */
@@ -211,7 +211,7 @@ class DiagnosticsViewModel @Inject constructor(
     }
     
     /**
-     * Retrieves and formats critical offline configuration data.
+     * Retrieves and formats critical offline configuration data as a string.
      *
      * @return A string containing the critical offline data, or an error message if retrieval fails.
      */

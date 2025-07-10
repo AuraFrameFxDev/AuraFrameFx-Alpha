@@ -3193,7 +3193,7 @@ class TestMockIntegrations:
     @patch('app.ai_backend.genesis_ethical_governor.metrics_collector')
     def test_metrics_collection_integration(self, mock_metrics):
         """
-        Verify that GenesisEthicalGovernor integrates with a metrics collection system by recording metrics during decision evaluation and ensuring that trust score reduction is proportional to violation severity.
+        Tests that GenesisEthicalGovernor records metrics during decision evaluation and that trust score reductions correspond proportionally to violation severity when integrated with a metrics collection system.
         """
         mock_metrics.record_metric.return_value = None
         
@@ -3228,9 +3228,9 @@ class TestGenesisEthicalGovernorSecurityEnhanced:
     
     def test_sql_injection_protection(self):
         """
-        Tests that the system safely processes SQL injection payloads in user input and context data.
+        Verify that the system safely handles SQL injection payloads in user input and context data.
         
-        This test injects common SQL attack strings into the `EthicalContext` and `EthicalDecision` objects, verifying that `GenesisEthicalGovernor` evaluates them without error and, if security validation is enabled, appropriately flags or denies the malicious input.
+        This test injects common SQL injection attack strings into `EthicalContext` and `EthicalDecision` objects, ensuring that `GenesisEthicalGovernor` processes them without error and, when security validation is enabled, flags or denies malicious input via decision result metadata.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3268,9 +3268,9 @@ class TestGenesisEthicalGovernorSecurityEnhanced:
     
     def test_xss_protection(self):
         """
-        Test that the GenesisEthicalGovernor detects and mitigates XSS attack attempts in user-provided inputs.
+        Test that XSS attack payloads are detected and sanitized during decision evaluation.
         
-        Feeds multiple XSS payloads into the decision evaluation process and asserts that, if XSS protection is enabled, the resulting decision reasoning does not contain unsanitized payloads.
+        Feeds various XSS payloads into the decision process and asserts that, when XSS protection is enabled, the resulting decision reasoning does not contain unsanitized payloads.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3305,9 +3305,9 @@ class TestGenesisEthicalGovernorSecurityEnhanced:
     
     def test_command_injection_protection(self):
         """
-        Test that command injection payloads in context data and parameters are handled safely without execution or system compromise.
+        Verify that command injection payloads in context data and parameters are safely handled without execution or system compromise.
         
-        This test feeds various command injection strings into the decision evaluation process and asserts that the system returns a valid `DecisionResult` without being affected by the malicious input.
+        This test injects common command injection strings into the decision evaluation process and asserts that the system returns a valid `DecisionResult` without being affected by the malicious input.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3338,9 +3338,9 @@ class TestGenesisEthicalGovernorSecurityEnhanced:
     
     def test_buffer_overflow_protection(self):
         """
-        Test that the system handles extremely large input data without buffer overflows or crashes.
+        Test that the system safely processes extremely large input data without buffer overflows or crashes.
         
-        This test creates a 10MB string and uses it in both the context and parameters of a decision to ensure the governor processes large payloads safely. The test passes if the system either returns a valid result or fails gracefully with a MemoryError.
+        This test creates a 10MB string and uses it in both the context and parameters of a decision. The test passes if the governor returns a valid result or fails gracefully with a MemoryError.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3370,9 +3370,9 @@ class TestGenesisEthicalGovernorSecurityEnhanced:
     
     def test_regex_dos_protection(self):
         """
-        Tests that the system resists Regular Expression Denial of Service (ReDoS) attacks by ensuring decision evaluation completes promptly when processing malicious regex patterns.
+        Verifies that the system mitigates Regular Expression Denial of Service (ReDoS) attacks by ensuring decision evaluation completes promptly when processing malicious regex patterns.
         
-        The test feeds potentially dangerous regex patterns into the decision evaluation and asserts that execution time remains within acceptable limits and a valid decision result is returned.
+        The test submits potentially dangerous regex patterns and asserts that evaluation finishes within a reasonable time and returns a valid `DecisionResult`.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3407,7 +3407,7 @@ class TestGenesisEthicalGovernorSecurityEnhanced:
     
     def test_deserialization_attack_protection(self):
         """
-        Test that the system resists deserialization attacks by safely handling context data containing malicious serialized payloads.
+        Verify that the system safely handles context data containing malicious serialized payloads, ensuring resistance to deserialization attacks.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3446,12 +3446,12 @@ class TestGenesisEthicalGovernorBoundaryConditions:
     ])
     def test_extreme_timestamp_handling(self, timestamp_offset):
         """
-        Test processing of decisions with extreme timestamp values, such as dates far in the past or future.
+        Test evaluation of decisions with timestamps far in the past or future.
         
-        Verifies that the system evaluates decisions with non-standard timestamps and, for far-future dates, checks for appropriate anomaly flagging in the decision result metadata.
+        Verifies that the system processes decisions with extreme timestamp values and flags anomalies in the decision result metadata for far-future dates.
         
         Parameters:
-            timestamp_offset (timedelta): Offset applied to the current time to generate an extreme timestamp for testing.
+            timestamp_offset (timedelta): Time offset applied to generate an extreme timestamp for testing.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3483,9 +3483,9 @@ class TestGenesisEthicalGovernorBoundaryConditions:
     @pytest.mark.parametrize("user_id_length", [0, 1, 255, 1000, 10000])
     def test_user_id_length_boundaries(self, user_id_length):
         """
-        Test handling of user IDs with varying lengths, including empty and very long strings.
+        Test processing of user IDs with boundary lengths, including empty and very long strings.
         
-        Verifies that an empty user ID raises a ValueError, while valid non-empty user IDs of any length are processed successfully and return a DecisionResult.
+        Verifies that an empty user ID raises a ValueError, while any non-empty user ID, regardless of length, is accepted and results in a valid DecisionResult.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3517,7 +3517,7 @@ class TestGenesisEthicalGovernorBoundaryConditions:
     
     def test_floating_point_precision_edge_cases(self):
         """
-        Test that floating point precision is accurately maintained in decision confidence scores, ensuring values stay within valid bounds and small differences are handled correctly.
+        Verify that decision confidence scores maintain correct floating point precision, remain within valid bounds, and handle very small differences accurately.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3546,9 +3546,9 @@ class TestGenesisEthicalGovernorBoundaryConditions:
     
     def test_unicode_normalization_edge_cases(self):
         """
-        Test that GenesisEthicalGovernor processes actions and context data containing diverse Unicode normalization forms and special characters without error.
+        Verify that GenesisEthicalGovernor correctly processes actions and context data containing various Unicode normalization forms and special characters.
         
-        This includes composed and decomposed characters, emojis, mathematical script letters, and right-to-left override sequences, ensuring consistent handling and decision evaluation.
+        This test ensures consistent handling and decision evaluation for composed and decomposed characters, emojis, mathematical script letters, and right-to-left override sequences, without raising errors.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3580,7 +3580,7 @@ class TestGenesisEthicalGovernorBoundaryConditions:
     
     def test_null_byte_handling(self):
         """
-        Test that the system handles strings containing null bytes in context data and parameters without errors or unexpected behavior.
+        Verifies that the system correctly processes strings containing null bytes in context data and parameters without raising errors or exhibiting unexpected behavior.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3616,7 +3616,7 @@ class TestGenesisEthicalGovernorAdvancedConcurrency:
         """
         Test for race conditions during concurrent rule modifications and decision evaluations.
         
-        This test runs two threads in parallel: one rapidly adding and removing ethical rules, and another evaluating decisions. It asserts that the majority of decisions succeed and that error rates remain within acceptable bounds, verifying the thread safety and consistency of rule evaluation under concurrent modifications.
+        Runs two threads in parallel: one rapidly adding and removing ethical rules, and another evaluating decisions. Asserts that most decisions succeed and error rates remain low, verifying thread safety and consistency of rule evaluation under concurrent modifications.
         """
         import threading
         import time
@@ -3629,7 +3629,7 @@ class TestGenesisEthicalGovernorAdvancedConcurrency:
             """
             Continuously adds and removes ethical rules to simulate rapid rule changes for concurrency testing.
             
-            This function stresses the rule management system by rapidly performing add and remove operations, helping to identify thread safety and consistency issues during concurrent modifications.
+            This function is used to stress-test the rule management system by rapidly performing add and remove operations, helping to identify thread safety and consistency issues during concurrent modifications.
             """
             for i in range(100):
                 try:
@@ -3648,7 +3648,9 @@ class TestGenesisEthicalGovernorAdvancedConcurrency:
         
         def rapid_decisions():
             """
-            Evaluate 100 decisions in quick succession, appending each result to the results list and recording any exceptions encountered in the errors list.
+            Evaluates 100 decisions in rapid succession, collecting each result and recording any exceptions encountered.
+            
+            Appends each decision result to the `results` list and any exceptions to the `errors` list.
             """
             for i in range(100):
                 try:
@@ -3690,9 +3692,9 @@ class TestGenesisEthicalGovernorAdvancedConcurrency:
     
     def test_deadlock_prevention(self):
         """
-        Tests that concurrent operations on GenesisEthicalGovernor complete without deadlocks.
+        Verify that concurrent operations on GenesisEthicalGovernor do not result in deadlocks.
         
-        This test launches two threads that simultaneously perform a mix of rule management, decision evaluation, and trust score retrieval operations. It asserts that all operations finish within a specified timeout and that no threads remain blocked, verifying the governor's concurrency safety.
+        This test launches two threads that simultaneously perform mixed rule management, decision evaluation, and trust score retrieval operations. It asserts that all threads complete within a timeout, ensuring the governor's concurrency mechanisms prevent deadlocks.
         """
         import threading
         import time
@@ -3711,9 +3713,9 @@ class TestGenesisEthicalGovernorAdvancedConcurrency:
         
         def operation_a():
             """
-            Performs a rapid sequence of mixed operations on the governor to test for deadlocks under concurrent access.
+            Simulates a sequence of mixed operations on the governor to test for deadlocks during concurrent access.
             
-            This function repeatedly alternates between retrieving decision history, evaluating new decisions, and querying user trust scores to simulate realistic concurrent usage patterns.
+            This function alternates between retrieving decision history, evaluating new decisions, and querying user trust scores in rapid succession to mimic realistic concurrent usage patterns.
             """
             for i in range(50):
                 try:
@@ -3741,9 +3743,9 @@ class TestGenesisEthicalGovernorAdvancedConcurrency:
         
         def operation_b():
             """
-            Performs a rapid sequence of mixed rule modifications and decision evaluations to test the governor for deadlock conditions during concurrent operations.
+            Simulates a rapid sequence of mixed rule modifications and decision evaluations to test for deadlocks during concurrent operations.
             
-            This function is intended for use in concurrency and deadlock prevention tests, simulating realistic mixed workloads by alternating between adding rules, removing rules, and evaluating decisions in quick succession.
+            This function alternates between adding temporary rules, removing rules, and evaluating decisions in quick succession, providing a realistic workload for concurrency and deadlock prevention testing of the governor.
             """
             for i in range(50):
                 try:
@@ -3799,9 +3801,9 @@ class TestGenesisEthicalGovernorAdvancedConcurrency:
     
     def test_memory_consistency_under_concurrency(self):
         """
-        Verifies memory consistency during concurrent decision evaluations and shared state modifications.
+        Test that concurrent decision evaluations and shared state modifications maintain memory consistency.
         
-        This test launches multiple threads that increment a shared counter and evaluate decisions in parallel, then asserts that the final counter value and decision history accurately reflect all operations without data loss or corruption.
+        This test spawns multiple threads that increment a shared counter and evaluate decisions in parallel, then verifies that the final counter value and decision history reflect all operations without data loss or corruption.
         """
         import threading
         
@@ -3810,9 +3812,9 @@ class TestGenesisEthicalGovernorAdvancedConcurrency:
         
         def increment_with_decisions():
             """
-            Increment a shared counter and evaluate an ethical decision for each increment using the updated counter value in the context.
+            Increments a shared counter and evaluates an ethical decision for each increment, embedding the current counter value in the decision context.
             
-            Typically used in concurrency tests to verify memory consistency and thread safety during simultaneous decision evaluations.
+            Used in concurrency tests to assess memory consistency and thread safety during simultaneous decision evaluations.
             """
             for i in range(100):
                 shared_state["counter"] += 1
@@ -3853,7 +3855,7 @@ class TestGenesisEthicalGovernorAdvancedValidation:
     
     def test_json_schema_validation(self):
         """
-        Tests that the GenesisEthicalGovernor properly validates context data against a JSON schema, accepting valid data and flagging schema violations in the decision result metadata when present.
+        Verify that context data is validated against a JSON schema during decision evaluation, accepting valid data and flagging schema violations in the decision result metadata when present.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3917,9 +3919,9 @@ class TestGenesisEthicalGovernorAdvancedValidation:
     
     def test_circular_reference_detection(self):
         """
-        Test that the system can process context data with circular references without crashing or raising unexpected errors.
+        Verifies that the system handles context data containing circular references without crashing or raising unexpected errors.
         
-        Creates a context with a circular reference and verifies that decision evaluation completes successfully and returns a `DecisionResult`.
+        Creates a context with a circular reference and asserts that decision evaluation completes successfully, returning a `DecisionResult`.
         """
         governor = GenesisEthicalGovernor()
         
@@ -3946,9 +3948,9 @@ class TestGenesisEthicalGovernorAdvancedValidation:
     
     def test_data_type_coercion(self):
         """
-        Test that GenesisEthicalGovernor processes and validates context data with mixed and edge-case data types.
+        Test that GenesisEthicalGovernor correctly processes and validates context data containing mixed and edge-case data types.
         
-        Ensures that various data types and type coercion scenarios in EthicalContext are handled without errors and produce valid DecisionResult instances.
+        Verifies that various data types and type coercion scenarios in EthicalContext are handled without errors, and that valid DecisionResult instances are produced for both typical and edge-case inputs.
         """
         governor = GenesisEthicalGovernor()
         
@@ -4008,7 +4010,7 @@ class TestGenesisEthicalGovernorAdvancedValidation:
     
     def test_encoding_validation(self):
         """
-        Tests that the system correctly processes context data and parameters containing a variety of character encodings, including ASCII, Unicode, Latin-1, Cyrillic, Arabic, emoji, and mixed scripts.
+        Verifies that the system accurately processes context data and parameters containing diverse character encodings, including ASCII, Unicode, Latin-1, Cyrillic, Arabic, emoji, and mixed scripts.
         """
         governor = GenesisEthicalGovernor()
         
@@ -4046,9 +4048,9 @@ class TestGenesisEthicalGovernorAdvancedErrorRecovery:
     
     def test_partial_system_failure_recovery(self):
         """
-        Test recovery from partially corrupted decision history in the ethical governor.
+        Tests that the ethical governor can recover from a partially corrupted decision history.
         
-        Ensures that decision evaluation continues to function correctly when the decision history contains invalid or corrupted entries, and that new valid decisions can still be recorded.
+        Verifies that decision evaluation proceeds correctly when the decision history contains invalid or corrupted entries, and that new valid decisions are still recorded after recovery.
         """
         governor = GenesisEthicalGovernor()
         
@@ -4087,9 +4089,9 @@ class TestGenesisEthicalGovernorAdvancedErrorRecovery:
     
     def test_cascading_failure_prevention(self):
         """
-        Test that cascading failures are prevented when a rule dependency fails.
+        Test that the governor isolates failures in dependent rules to prevent cascading failures.
         
-        Adds a sequence of dependent rules to the governor, simulates a failure in one rule, and verifies that the failure is isolated—ensuring only the failing rule is reported and subsequent rules or the overall decision evaluation are not affected.
+        Adds a sequence of dependent rules, simulates a failure in one rule, and verifies that only the failing rule is reported while subsequent rules and the overall decision evaluation remain unaffected.
         """
         governor = GenesisEthicalGovernor()
         
@@ -4107,10 +4109,10 @@ class TestGenesisEthicalGovernorAdvancedErrorRecovery:
         
         def _check_previous_rule(ctx, idx):
             """
-            Check if the previous rule in a sequence passes, raising a RuntimeError if the rule index is 5.
+            Checks whether the previous rule in a sequence passes, raising a RuntimeError if the rule index is 5.
             
             Parameters:
-                idx (int): Index of the rule being checked.
+                idx (int): The index of the rule to check.
             
             Returns:
                 bool: True if the rule passes.
@@ -4151,23 +4153,23 @@ class TestGenesisEthicalGovernorAdvancedErrorRecovery:
     
     def test_resource_cleanup_after_exceptions(self):
         """
-        Test that resources acquired during rule evaluation are always released, ensuring no resource leaks occur after both successful and failing decision evaluations.
+        Verifies that resources acquired during rule evaluation are always released, ensuring no resource leaks occur after both successful and failing decision evaluations.
         """
         governor = GenesisEthicalGovernor()
         
         class ResourceTracker:
             def __init__(self):
                 """
-                Initialize the test class and set up a list to track resources for later cleanup.
+                Initialize the test class and create a list to track resources for cleanup after tests.
                 """
                 self.resources = []
             
             def acquire(self, resource_id):
                 """
-                Acquires a resource by its identifier and adds it to the managed resource list.
+                Acquire a resource by its identifier and add it to the managed resource list.
                 
                 Parameters:
-                    resource_id: Identifier of the resource to acquire.
+                    resource_id: The unique identifier of the resource to acquire.
                 
                 Returns:
                     The identifier of the acquired resource.
@@ -4177,10 +4179,10 @@ class TestGenesisEthicalGovernorAdvancedErrorRecovery:
             
             def release(self, resource_id):
                 """
-                Release the specified resource if it is currently allocated.
+                Releases a resource by its identifier if it is currently allocated.
                 
                 Parameters:
-                    resource_id: Identifier of the resource to release.
+                    resource_id: The identifier of the resource to be released.
                 """
                 if resource_id in self.resources:
                     self.resources.remove(resource_id)
@@ -4192,7 +4194,7 @@ class TestGenesisEthicalGovernorAdvancedErrorRecovery:
             Acquires a resource, performs simulated work, and raises an error if the action is "fail_me".
             
             Returns:
-                True if the action does not equal "fail_me".
+                True if the action is not "fail_me".
             
             Raises:
                 RuntimeError: If the action is "fail_me".
@@ -4264,9 +4266,9 @@ class TestGenesisEthicalGovernorComplexIntegration:
     @patch('app.ai_backend.genesis_ethical_governor.cache_service')
     def test_multi_tier_integration(self, mock_cache, mock_db):
         """
-        Test that GenesisEthicalGovernor correctly interacts with cache and database layers during decision evaluation using mocks.
+        Tests that GenesisEthicalGovernor interacts correctly with cache and database layers during decision evaluation using mock integrations.
         
-        Verifies that cache and database mocks are called as expected when the corresponding integrations are enabled.
+        Verifies that cache and database mocks are called as expected when the governor's integration features are enabled.
         """
         # Setup mocks
         mock_cache.get.return_value = None
@@ -4300,9 +4302,9 @@ class TestGenesisEthicalGovernorComplexIntegration:
     
     def test_workflow_state_management(self):
         """
-        Test that workflow state is consistently managed and tracked across multiple sequential decisions in a multi-step workflow.
+        Verifies that workflow state is consistently tracked across multiple sequential decisions in a multi-step workflow.
         
-        Simulates a multi-step workflow by evaluating each step as a separate decision and verifies that all steps are processed, recorded, and associated with the correct workflow identifier in the decision history.
+        Simulates a multi-step workflow by evaluating each step as a separate decision, then checks that all steps are processed, recorded, and correctly associated with the workflow identifier in the decision history.
         """
         governor = GenesisEthicalGovernor()
         
@@ -4347,20 +4349,17 @@ class TestGenesisEthicalGovernorComplexIntegration:
     
     def test_event_driven_rule_activation(self):
         """
-        Tests that event-driven, time-based ethical rules are activated or deactivated according to the context timestamp, ensuring decisions are evaluated correctly during and outside specified hours.
+        Verifies that event-driven, time-based ethical rules are correctly activated or deactivated based on the context timestamp, ensuring decisions are evaluated appropriately during and outside specified hours.
         """
         governor = GenesisEthicalGovernor()
         
         # Add time-based rule
         def time_sensitive_condition(ctx):
             """
-            Checks if the context's timestamp is within business hours (9 AM to 5 PM inclusive).
-            
-            Parameters:
-                ctx: An object with a `timestamp` attribute.
+            Determine whether the context's timestamp falls within business hours (9 AM to 5 PM inclusive).
             
             Returns:
-                True if the hour of `ctx.timestamp` is between 9 and 17 inclusive; otherwise, False.
+                bool: True if the hour of `ctx.timestamp` is between 9 and 17 inclusive; otherwise, False.
             """
             current_hour = ctx.timestamp.hour
             return 9 <= current_hour <= 17  # Business hours only
@@ -4419,9 +4418,9 @@ class TestGenesisEthicalGovernorStressTest:
     @pytest.mark.slow
     def test_sustained_high_load(self):
         """
-        Tests the GenesisEthicalGovernor's sustained decision processing performance under high load for 30 seconds.
+        Verify that GenesisEthicalGovernor can process decisions at a sustained high rate for 30 seconds without significant performance degradation.
         
-        Simulates rapid decision submissions with multiple rules to ensure the system maintains a throughput above 10 decisions per second and processes over 100 decisions during the test period.
+        Simulates rapid, repeated decision evaluations with multiple rules, asserting that throughput remains above 10 decisions per second and that over 100 decisions are processed during the test period.
         """
         governor = GenesisEthicalGovernor()
         
@@ -4474,7 +4473,7 @@ class TestGenesisEthicalGovernorStressTest:
     
     def test_memory_pressure_handling(self):
         """
-        Tests that GenesisEthicalGovernor can reliably evaluate decisions under simulated high memory pressure by allocating large objects and performing periodic garbage collection. Accepts MemoryError as a valid outcome in extreme conditions.
+        Verifies that GenesisEthicalGovernor can evaluate decisions reliably under simulated high memory pressure by allocating large objects and performing periodic garbage collection. Accepts MemoryError as a valid outcome if system memory is exhausted.
         """
         import gc
         

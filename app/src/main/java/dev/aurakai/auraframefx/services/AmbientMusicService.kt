@@ -33,6 +33,13 @@ class AmbientMusicService @Inject constructor() : Service() {
      *
      * @return Always null, as binding is not supported.
      */
+    /**
+     * Indicates that binding to this service is not supported.
+     *
+     * Always returns `null`, meaning clients cannot bind to this service.
+     *
+     * @return Always `null`.
+     */
     override fun onBind(_intent: Intent?): IBinder? { // intent -> _intent
         // TODO: Implement binding if needed, otherwise this service cannot be bound.
         // TODO: Parameter _intent reported as unused.
@@ -66,6 +73,13 @@ class AmbientMusicService @Inject constructor() : Service() {
      *
      * @return Always returns `START_NOT_STICKY`, indicating the service will not be recreated automatically after being killed.
      */
+    /**
+     * Handles requests to start the service.
+     *
+     * Always returns `START_NOT_STICKY`, indicating the system should not recreate the service if it is killed after returning from this method.
+     *
+     * @return The start mode for the service, always `START_NOT_STICKY`.
+     */
     override fun onStartCommand(_intent: Intent?, _flags: Int, _startId: Int): Int {
         // TODO: Implement service logic for starting the service.
         // TODO: Utilize parameters (_intent, _flags, _startId) or remove if not needed by actual implementation.
@@ -95,6 +109,11 @@ class AmbientMusicService @Inject constructor() : Service() {
      *
      * Use this method to perform one-time setup or initialization for the service.
      */
+    /**
+     * Called when the service is first created.
+     *
+     * Override this method to perform one-time setup or initialization logic for the service.
+     */
     override fun onCreate() {
         super.onCreate()
         // TODO: Initialization code for the service.
@@ -118,6 +137,11 @@ class AmbientMusicService @Inject constructor() : Service() {
      */
     /**
      * Called when the service is being destroyed to perform cleanup operations.
+     */
+    /**
+     * Called when the service is being destroyed.
+     *
+     * Override this method to perform cleanup operations before the service is terminated.
      */
     override fun onDestroy() {
         super.onDestroy()

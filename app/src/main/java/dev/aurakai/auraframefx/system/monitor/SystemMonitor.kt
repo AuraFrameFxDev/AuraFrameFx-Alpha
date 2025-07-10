@@ -36,11 +36,11 @@ class SystemMonitor @Inject constructor(
     val networkActivity: StateFlow<NetworkMetrics> = _networkActivity
 
     /**
-     * Starts periodic system performance monitoring if not already running.
+     * Initiates periodic system performance monitoring if not already active.
      *
-     * Launches a background coroutine that updates system metrics at the specified interval.
+     * Launches a background coroutine that updates system metrics at the specified interval in milliseconds.
      *
-     * @param intervalMs The interval in milliseconds between metric updates. Defaults to 5000 ms.
+     * @param intervalMs Interval in milliseconds between metric updates. Defaults to 5000 ms.
      */
     fun startMonitoring(intervalMs: Long = 5000) {
         if (isMonitoring) return
@@ -62,7 +62,7 @@ class SystemMonitor @Inject constructor(
     }
 
     /**
-     * Stops system performance monitoring and disables periodic metric updates.
+     * Stops the periodic system performance monitoring and disables further metric updates.
      */
     fun stopMonitoring() {
         logger.info("SystemMonitor", "Stopping system performance monitoring")
@@ -70,13 +70,13 @@ class SystemMonitor @Inject constructor(
     }
 
     /**
-     * Returns a map of current system performance metrics for the specified component.
+     * Retrieves a map of current system performance metrics tagged with the specified component.
      *
-     * The map includes CPU usage percentage, memory usage and available memory in bytes, memory usage percentage,
+     * The returned map includes CPU usage percentage, memory usage and available memory in bytes, memory usage percentage,
      * network bytes received and transmitted, process ID, thread count, JVM heap size and usage, and a timestamp.
      *
-     * @param component The identifier for the component associated with the collected metrics.
-     * @return A map containing metric names as keys and their current values.
+     * @param component Identifier for the component associated with the collected metrics.
+     * @return A map where keys are metric names and values are their current readings.
      */
     fun getPerformanceMetrics(component: String): Map<String, Any> {
         logger.debug("SystemMonitor", "Getting performance metrics for: $component")
@@ -98,9 +98,9 @@ class SystemMonitor @Inject constructor(
     }
 
     /**
-     * Calculates a normalized system health score between 0.0 (poor) and 1.0 (optimal) based on current CPU usage and available memory.
+     * Returns a normalized system health score between 0.0 (poor) and 1.0 (optimal) based on current CPU usage and available memory.
      *
-     * The score is the average of the inverted CPU usage ratio (capped at 100%) and the ratio of available to total memory (with a minimum threshold of 0.1).
+     * The score averages the inverted CPU usage ratio (capped at 100%) and the ratio of available to total memory (with a minimum threshold of 0.1).
      *
      * @return The current system health score, where higher values indicate better overall system performance.
      */
@@ -112,9 +112,9 @@ class SystemMonitor @Inject constructor(
     }
 
     /**
-     * Determines whether the system is under stress based on CPU usage, memory usage percentage, or available memory.
+     * Returns `true` if the system is under stress due to high CPU usage, high memory usage, or low available memory.
      *
-     * The system is considered under stress if CPU usage exceeds 80%, memory usage exceeds 85%, or available memory is less than 50 MB.
+     * The system is considered under stress if CPU usage exceeds 80%, memory usage exceeds 85%, or available memory drops below 50 MB.
      *
      * @return `true` if any stress threshold is exceeded; otherwise, `false`.
      */
@@ -125,9 +125,9 @@ class SystemMonitor @Inject constructor(
     }
 
     /**
-     * Returns a snapshot of current system performance metrics and status.
+     * Returns a comprehensive snapshot of current system performance metrics and status.
      *
-     * The report includes CPU usage, memory usage, available memory, memory usage percentage, network activity, system health score, stress status, process and thread counts, JVM heap statistics, and a timestamp.
+     * The report includes CPU usage, memory usage, available memory, memory usage percentage, network activity, system health score (0.0–1.0), stress status, process and thread counts, JVM heap statistics, and a timestamp.
      *
      * @return A [SystemPerformanceReport] containing all monitored metrics and system status at the time of invocation.
      */
@@ -149,9 +149,9 @@ class SystemMonitor @Inject constructor(
     }
 
     /**
-     * Updates CPU usage, memory usage, and network activity metrics asynchronously on the IO dispatcher.
+     * Asynchronously refreshes CPU usage, memory usage, and network activity metrics on the IO dispatcher.
      *
-     * Suspends while refreshing system metrics and updating their respective state flows.
+     * Suspends while updating internal state flows with the latest system performance data.
      */
 
     private suspend fun updateMetrics() = withContext(Dispatchers.IO) {
@@ -161,9 +161,9 @@ class SystemMonitor @Inject constructor(
     }
 
     /**
-     * Updates the CPU usage metric by calculating the current CPU usage and updating the state flow.
+     * Calculates and updates the current CPU usage metric in the state flow.
      *
-     * If calculation fails, logs a warning and leaves the previous value unchanged.
+     * If CPU usage calculation fails, logs a warning and retains the previous value.
      */
     private fun updateCpuUsage() {
         try {
@@ -176,9 +176,9 @@ class SystemMonitor @Inject constructor(
     }
 
     /**
-     * Updates the available and used memory state flows with current system memory information.
+     * Refreshes the available and used memory state flows with the latest system memory data.
      *
-     * If memory information cannot be retrieved, previous values are retained.
+     * If memory information cannot be retrieved, the previous memory values remain unchanged.
      */
     private fun updateMemoryMetrics() {
         try {

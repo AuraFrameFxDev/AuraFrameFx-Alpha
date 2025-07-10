@@ -44,9 +44,9 @@ class SecurityMonitor @Inject constructor(
     )
     
     /**
-     * Starts asynchronous monitoring of security state, threat detection, encryption status, and permissions.
+     * Initiates asynchronous monitoring of security state, threat detection, encryption status, and permissions.
      *
-     * Activates the Genesis bridge service if available, launches monitoring coroutines, and initiates Android-level threat detection. If monitoring is already active, this function does nothing.
+     * Activates the Genesis bridge service if available, launches monitoring coroutines for each security aspect, and starts Android-level threat detection. If monitoring is already active, this function has no effect.
      */
     suspend fun startMonitoring() {
         if (isMonitoring) return
@@ -82,9 +82,9 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Monitors changes in the security state and reports each update as a security event to Genesis.
+     * Continuously monitors the security state and reports each change as a security event to Genesis.
      *
-     * Collects the latest security state from the security context, creates a `SecurityEvent` reflecting the current error state and message, and sends it to Genesis for analysis.
+     * Collects updates from the security context, constructs a `SecurityEvent` reflecting the current error state and message, and sends it to Genesis for further analysis.
      */
     private suspend fun monitorSecurityState() {
         securityContext.securityState.collectLatest { state ->
@@ -113,9 +113,9 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Monitors the threat detection status and periodically scans for suspicious activity when enabled.
+     * Continuously monitors the threat detection status and, when active, periodically scans for suspicious activity.
      *
-     * When threat detection is active, launches a coroutine that checks for suspicious patterns every 30 seconds and reports any detected threats to Genesis.
+     * When threat detection is enabled, launches a coroutine that checks for suspicious patterns every 30 seconds and reports any detected threats to Genesis.
      */
     private suspend fun monitorThreatDetection() {
         securityContext.threatDetectionActive.collectLatest { isActive ->
@@ -141,9 +141,9 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Monitors changes in encryption status and reports updates and failures to Genesis.
+     * Continuously monitors encryption status changes and reports each update to Genesis.
      *
-     * For each encryption status update, sends a corresponding event to Genesis with appropriate severity.
+     * Sends a security event to Genesis for every encryption status change, assigning severity based on the status.
      * If an encryption error is detected, also reports a threat detection event indicating encryption failure.
      */
     private suspend fun monitorEncryptionStatus() {
@@ -189,9 +189,9 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Monitors permission state changes and reports denied permissions as security events to Genesis.
+     * Continuously monitors permission states and reports denied permissions as security events to Genesis.
      *
-     * Identifies any denied permissions in the current state and, when found, sends a warning event with details to Genesis for further analysis.
+     * When any permissions are denied, sends a warning event with details about the denied permissions for further analysis.
      */
     private suspend fun monitorPermissions() {
         securityContext.permissionsState.collectLatest { permissions ->
@@ -221,7 +221,7 @@ class SecurityMonitor @Inject constructor(
     }
     
     /**
-     * Identifies suspicious activity in the current security context and returns a list of detected threats.
+     * Analyzes the current security context for suspicious patterns and returns detected threats.
      *
      * Detects threats related to repeated encryption failures and denial of multiple critical privacy permissions (CAMERA, MICROPHONE, LOCATION).
      *
