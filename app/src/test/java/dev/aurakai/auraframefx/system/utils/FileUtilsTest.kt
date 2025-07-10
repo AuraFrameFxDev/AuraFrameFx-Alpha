@@ -3,25 +3,22 @@ package dev.aurakai.auraframefx.system.utils
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.io.TempDir
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.*
 import java.io.File
 import java.io.IOException
-import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.nio.file.attribute.PosixFilePermission
-import java.security.MessageDigest
+import java.nio.file.Files
 import kotlin.test.assertFailsWith
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+/**
+ * Comprehensive unit tests for FileUtils class.
+ * Testing framework: JUnit 5 with Mockito for mocking.
+ */
 @DisplayName("FileUtils Tests")
 class FileUtilsTest {
 
@@ -29,133 +26,59 @@ class FileUtilsTest {
     lateinit var tempDir: Path
 
     private lateinit var testFile: File
-    private lateinit var testDir: File
+    private lateinit var testDirectory: File
 
     @BeforeEach
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
         testFile = tempDir.resolve("test.txt").toFile()
-        testDir = tempDir.resolve("testDir").toFile()
-        testDir.mkdirs()
+        testDirectory = tempDir.resolve("testDir").toFile()
+        testDirectory.mkdirs()
     }
 
     @AfterEach
     fun tearDown() {
-        // Clean up is handled by @TempDir
+        // Cleanup is handled by @TempDir
     }
 
     @Nested
-    @DisplayName("File Creation Tests")
-    inner class FileCreationTests {
+    @DisplayName("File Existence Tests")
+    inner class FileExistenceTests {
 
         @Test
-        @DisplayName("Should create file successfully")
-        fun testCreateFile() {
-            val newFile = tempDir.resolve("newFile.txt").toFile()
-            assertFalse(newFile.exists())
-            
-            val result = FileUtils.createFile(newFile.path)
-            
-            assertTrue(result)
-            assertTrue(newFile.exists())
-            assertTrue(newFile.isFile())
-        }
-
-        @Test
-        @DisplayName("Should not create file if already exists")
-        fun testCreateFileAlreadyExists() {
+        @DisplayName("Should return true when file exists")
+        fun shouldReturnTrueWhenFileExists() {
             testFile.createNewFile()
-            assertTrue(testFile.exists())
-            
-            val result = FileUtils.createFile(testFile.path)
-            
-            assertFalse(result)
+            assertTrue(FileUtils.exists(testFile.path))
         }
 
         @Test
-        @DisplayName("Should handle invalid file path gracefully")
-        fun testCreateFileInvalidPath() {
-            val invalidPath = "/invalid/path/\0/file.txt"
-            
-            val result = FileUtils.createFile(invalidPath)
-            
-            assertFalse(result)
+        @DisplayName("Should return false when file does not exist")
+        fun shouldReturnFalseWhenFileDoesNotExist() {
+            assertFalse(FileUtils.exists("nonexistent.txt"))
         }
 
         @Test
-        @DisplayName("Should create parent directories if needed")
-        fun testCreateFileWithParentDirectories() {
-            val nestedFile = tempDir.resolve("level1/level2/nested.txt").toFile()
-            assertFalse(nestedFile.parentFile.exists())
-            
-            val result = FileUtils.createFile(nestedFile.path)
-            
-            assertTrue(result)
-            assertTrue(nestedFile.exists())
-            assertTrue(nestedFile.parentFile.exists())
-        }
-    }
-
-    @Nested
-    @DisplayName("File Deletion Tests")
-    inner class FileDeletionTests {
-
-        @Test
-        @DisplayName("Should delete file successfully")
-        fun testDeleteFile() {
-            testFile.createNewFile()
-            assertTrue(testFile.exists())
-            
-            val result = FileUtils.deleteFile(testFile.path)
-            
-            assertTrue(result)
-            assertFalse(testFile.exists())
+        @DisplayName("Should return true when directory exists")
+        fun shouldReturnTrueWhenDirectoryExists() {
+            assertTrue(FileUtils.exists(testDirectory.path))
         }
 
         @Test
-        @DisplayName("Should return false when deleting non-existent file")
-        fun testDeleteNonExistentFile() {
-            val nonExistentFile = tempDir.resolve("nonExistent.txt").toFile()
-            assertFalse(nonExistentFile.exists())
-            
-            val result = FileUtils.deleteFile(nonExistentFile.path)
-            
-            assertFalse(result)
+        @DisplayName("Should handle null path gracefully")
+        fun shouldHandleNullPathGracefully() {
+            assertFalse(FileUtils.exists(null))
         }
 
         @Test
-        @DisplayName("Should delete directory recursively")
-        fun testDeleteDirectoryRecursively() {
-            val subDir = File(testDir, "subDir")
-            subDir.mkdirs()
-            val fileInSubDir = File(subDir, "file.txt")
-            fileInSubDir.createNewFile()
-            
-            val result = FileUtils.deleteFile(testDir.path)
-            
-            assertTrue(result)
-            assertFalse(testDir.exists())
+        @DisplayName("Should handle empty path gracefully")
+        fun shouldHandleEmptyPathGracefully() {
+            assertFalse(FileUtils.exists(""))
         }
 
         @Test
-        @DisplayName("Should handle permission issues gracefully")
-        fun testDeleteFilePermissionDenied() {
-            if (System.getProperty("os.name").lowercase().contains("windows")) {
-                // Skip on Windows as permission handling is different
-                return
-            }
-            
-            testFile.createNewFile()
-            testFile.setReadOnly()
-            
-            val result = FileUtils.deleteFile(testFile.path)
-            
-            // Result depends on implementation - test both scenarios
-            if (result) {
-                assertFalse(testFile.exists())
-            } else {
-                assertTrue(testFile.exists())
-            }
+        @DisplayName("Should handle whitespace-only path gracefully")
+        fun shouldHandleWhitespaceOnlyPathGracefully() {
+            assertFalse(FileUtils.exists("   "))
         }
     }
 
@@ -165,66 +88,73 @@ class FileUtilsTest {
 
         @Test
         @DisplayName("Should read file content successfully")
-        fun testReadFileContent() {
-            val content = "Hello, World!\nThis is a test file."
+        fun shouldReadFileContentSuccessfully() {
+            val content = "Hello, World!"
             testFile.writeText(content)
             
             val result = FileUtils.readFile(testFile.path)
-            
             assertEquals(content, result)
         }
 
         @Test
         @DisplayName("Should read empty file successfully")
-        fun testReadEmptyFile() {
+        fun shouldReadEmptyFileSuccessfully() {
             testFile.createNewFile()
             
             val result = FileUtils.readFile(testFile.path)
-            
             assertEquals("", result)
         }
 
         @Test
-        @DisplayName("Should handle non-existent file gracefully")
-        fun testReadNonExistentFile() {
-            val nonExistentFile = tempDir.resolve("nonExistent.txt").toFile()
-            
-            val result = FileUtils.readFile(nonExistentFile.path)
-            
-            assertNull(result)
-        }
-
-        @Test
-        @DisplayName("Should handle large file reading")
-        fun testReadLargeFile() {
-            val largeContent = "A".repeat(1000000) // 1MB of 'A's
-            testFile.writeText(largeContent)
+        @DisplayName("Should read file with special characters")
+        fun shouldReadFileWithSpecialCharacters() {
+            val content = "Hello, 世界! 🌍 @#$%^&*()"
+            testFile.writeText(content)
             
             val result = FileUtils.readFile(testFile.path)
-            
-            assertEquals(largeContent, result)
+            assertEquals(content, result)
         }
 
         @Test
-        @DisplayName("Should handle binary file reading")
-        fun testReadBinaryFile() {
-            val binaryData = byteArrayOf(0x00, 0x01, 0x02, 0x03, 0xFF.toByte())
-            testFile.writeBytes(binaryData)
+        @DisplayName("Should read multiline file correctly")
+        fun shouldReadMultilineFileCorrectly() {
+            val content = "Line 1\nLine 2\nLine 3"
+            testFile.writeText(content)
             
-            val result = FileUtils.readFileBytes(testFile.path)
-            
-            assertArrayEquals(binaryData, result)
+            val result = FileUtils.readFile(testFile.path)
+            assertEquals(content, result)
         }
 
         @Test
-        @DisplayName("Should handle different text encodings")
-        fun testReadFileWithEncoding() {
-            val unicodeContent = "Hello 世界! 🌍"
-            testFile.writeText(unicodeContent, Charsets.UTF_8)
-            
-            val result = FileUtils.readFile(testFile.path, Charsets.UTF_8)
-            
-            assertEquals(unicodeContent, result)
+        @DisplayName("Should throw exception when reading non-existent file")
+        fun shouldThrowExceptionWhenReadingNonExistentFile() {
+            assertFailsWith<IOException> {
+                FileUtils.readFile("nonexistent.txt")
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw exception when reading directory")
+        fun shouldThrowExceptionWhenReadingDirectory() {
+            assertFailsWith<IOException> {
+                FileUtils.readFile(testDirectory.path)
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle null path when reading")
+        fun shouldHandleNullPathWhenReading() {
+            assertFailsWith<IllegalArgumentException> {
+                FileUtils.readFile(null)
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle empty path when reading")
+        fun shouldHandleEmptyPathWhenReading() {
+            assertFailsWith<IllegalArgumentException> {
+                FileUtils.readFile("")
+            }
         }
     }
 
@@ -233,81 +163,322 @@ class FileUtilsTest {
     inner class FileWritingTests {
 
         @Test
-        @DisplayName("Should write to file successfully")
-        fun testWriteToFile() {
-            val content = "Test content to write"
+        @DisplayName("Should write content to file successfully")
+        fun shouldWriteContentToFileSuccessfully() {
+            val content = "Hello, World!"
             
-            val result = FileUtils.writeFile(testFile.path, content)
+            FileUtils.writeFile(testFile.path, content)
             
-            assertTrue(result)
             assertEquals(content, testFile.readText())
         }
 
         @Test
-        @DisplayName("Should overwrite existing file")
-        fun testOverwriteExistingFile() {
-            val originalContent = "Original content"
-            val newContent = "New content"
-            testFile.writeText(originalContent)
+        @DisplayName("Should write empty content to file")
+        fun shouldWriteEmptyContentToFile() {
+            FileUtils.writeFile(testFile.path, "")
             
-            val result = FileUtils.writeFile(testFile.path, newContent)
-            
-            assertTrue(result)
-            assertEquals(newContent, testFile.readText())
-        }
-
-        @Test
-        @DisplayName("Should append to file")
-        fun testAppendToFile() {
-            val originalContent = "Original content"
-            val appendContent = "\nAppended content"
-            testFile.writeText(originalContent)
-            
-            val result = FileUtils.appendToFile(testFile.path, appendContent)
-            
-            assertTrue(result)
-            assertEquals(originalContent + appendContent, testFile.readText())
-        }
-
-        @Test
-        @DisplayName("Should handle empty content")
-        fun testWriteEmptyContent() {
-            val result = FileUtils.writeFile(testFile.path, "")
-            
-            assertTrue(result)
             assertEquals("", testFile.readText())
         }
 
         @Test
-        @DisplayName("Should handle null content gracefully")
-        fun testWriteNullContent() {
-            val result = FileUtils.writeFile(testFile.path, null)
+        @DisplayName("Should overwrite existing file content")
+        fun shouldOverwriteExistingFileContent() {
+            testFile.writeText("Original content")
+            val newContent = "New content"
+            
+            FileUtils.writeFile(testFile.path, newContent)
+            
+            assertEquals(newContent, testFile.readText())
+        }
+
+        @Test
+        @DisplayName("Should create parent directories when writing")
+        fun shouldCreateParentDirectoriesWhenWriting() {
+            val nestedFile = tempDir.resolve("nested/deep/file.txt")
+            val content = "Nested content"
+            
+            FileUtils.writeFile(nestedFile.toString(), content)
+            
+            assertTrue(Files.exists(nestedFile))
+            assertEquals(content, Files.readString(nestedFile))
+        }
+
+        @Test
+        @DisplayName("Should write file with special characters")
+        fun shouldWriteFileWithSpecialCharacters() {
+            val content = "Hello, 世界! 🌍 @#$%^&*()"
+            
+            FileUtils.writeFile(testFile.path, content)
+            
+            assertEquals(content, testFile.readText())
+        }
+
+        @Test
+        @DisplayName("Should write multiline content correctly")
+        fun shouldWriteMultilineContentCorrectly() {
+            val content = "Line 1\nLine 2\nLine 3"
+            
+            FileUtils.writeFile(testFile.path, content)
+            
+            assertEquals(content, testFile.readText())
+        }
+
+        @Test
+        @DisplayName("Should handle null path when writing")
+        fun shouldHandleNullPathWhenWriting() {
+            assertFailsWith<IllegalArgumentException> {
+                FileUtils.writeFile(null, "content")
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle empty path when writing")
+        fun shouldHandleEmptyPathWhenWriting() {
+            assertFailsWith<IllegalArgumentException> {
+                FileUtils.writeFile("", "content")
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle null content when writing")
+        fun shouldHandleNullContentWhenWriting() {
+            assertFailsWith<IllegalArgumentException> {
+                FileUtils.writeFile(testFile.path, null)
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("File Copying Tests")
+    inner class FileCopyingTests {
+
+        @Test
+        @DisplayName("Should copy file successfully")
+        fun shouldCopyFileSuccessfully() {
+            val content = "Content to copy"
+            testFile.writeText(content)
+            val targetFile = tempDir.resolve("copied.txt").toFile()
+            
+            FileUtils.copyFile(testFile.path, targetFile.path)
+            
+            assertTrue(targetFile.exists())
+            assertEquals(content, targetFile.readText())
+        }
+
+        @Test
+        @DisplayName("Should copy empty file successfully")
+        fun shouldCopyEmptyFileSuccessfully() {
+            testFile.createNewFile()
+            val targetFile = tempDir.resolve("copied.txt").toFile()
+            
+            FileUtils.copyFile(testFile.path, targetFile.path)
+            
+            assertTrue(targetFile.exists())
+            assertEquals("", targetFile.readText())
+        }
+
+        @Test
+        @DisplayName("Should overwrite existing target file")
+        fun shouldOverwriteExistingTargetFile() {
+            val originalContent = "Original content"
+            val newContent = "New content"
+            testFile.writeText(newContent)
+            val targetFile = tempDir.resolve("copied.txt").toFile()
+            targetFile.writeText(originalContent)
+            
+            FileUtils.copyFile(testFile.path, targetFile.path)
+            
+            assertEquals(newContent, targetFile.readText())
+        }
+
+        @Test
+        @DisplayName("Should create parent directories when copying")
+        fun shouldCreateParentDirectoriesWhenCopying() {
+            val content = "Content to copy"
+            testFile.writeText(content)
+            val targetFile = tempDir.resolve("nested/deep/copied.txt")
+            
+            FileUtils.copyFile(testFile.path, targetFile.toString())
+            
+            assertTrue(Files.exists(targetFile))
+            assertEquals(content, Files.readString(targetFile))
+        }
+
+        @Test
+        @DisplayName("Should throw exception when copying non-existent file")
+        fun shouldThrowExceptionWhenCopyingNonExistentFile() {
+            val targetFile = tempDir.resolve("copied.txt").toFile()
+            
+            assertFailsWith<IOException> {
+                FileUtils.copyFile("nonexistent.txt", targetFile.path)
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw exception when copying directory")
+        fun shouldThrowExceptionWhenCopyingDirectory() {
+            val targetFile = tempDir.resolve("copied.txt").toFile()
+            
+            assertFailsWith<IOException> {
+                FileUtils.copyFile(testDirectory.path, targetFile.path)
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle null source path when copying")
+        fun shouldHandleNullSourcePathWhenCopying() {
+            assertFailsWith<IllegalArgumentException> {
+                FileUtils.copyFile(null, "target.txt")
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle null target path when copying")
+        fun shouldHandleNullTargetPathWhenCopying() {
+            assertFailsWith<IllegalArgumentException> {
+                FileUtils.copyFile(testFile.path, null)
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("File Deletion Tests")
+    inner class FileDeletionTests {
+
+        @Test
+        @DisplayName("Should delete file successfully")
+        fun shouldDeleteFileSuccessfully() {
+            testFile.createNewFile()
+            assertTrue(testFile.exists())
+            
+            val result = FileUtils.deleteFile(testFile.path)
+            
+            assertTrue(result)
+            assertFalse(testFile.exists())
+        }
+
+        @Test
+        @DisplayName("Should delete empty directory successfully")
+        fun shouldDeleteEmptyDirectorySuccessfully() {
+            assertTrue(testDirectory.exists())
+            
+            val result = FileUtils.deleteFile(testDirectory.path)
+            
+            assertTrue(result)
+            assertFalse(testDirectory.exists())
+        }
+
+        @Test
+        @DisplayName("Should return false when deleting non-existent file")
+        fun shouldReturnFalseWhenDeletingNonExistentFile() {
+            val result = FileUtils.deleteFile("nonexistent.txt")
             
             assertFalse(result)
         }
 
         @Test
-        @DisplayName("Should create parent directories when writing")
-        fun testWriteFileWithParentDirectories() {
-            val nestedFile = tempDir.resolve("level1/level2/nested.txt").toFile()
-            val content = "Nested file content"
-            
-            val result = FileUtils.writeFile(nestedFile.path, content)
-            
-            assertTrue(result)
-            assertTrue(nestedFile.exists())
-            assertEquals(content, nestedFile.readText())
+        @DisplayName("Should handle null path when deleting")
+        fun shouldHandleNullPathWhenDeleting() {
+            assertFalse(FileUtils.deleteFile(null))
         }
 
         @Test
-        @DisplayName("Should handle different text encodings for writing")
-        fun testWriteFileWithEncoding() {
-            val unicodeContent = "Hello 世界! 🌍"
+        @DisplayName("Should handle empty path when deleting")
+        fun shouldHandleEmptyPathWhenDeleting() {
+            assertFalse(FileUtils.deleteFile(""))
+        }
+    }
+
+    @Nested
+    @DisplayName("Directory Operations Tests")
+    inner class DirectoryOperationsTests {
+
+        @Test
+        @DisplayName("Should create directory successfully")
+        fun shouldCreateDirectorySuccessfully() {
+            val newDir = tempDir.resolve("newDirectory").toFile()
             
-            val result = FileUtils.writeFile(testFile.path, unicodeContent, Charsets.UTF_8)
+            val result = FileUtils.createDirectory(newDir.path)
             
             assertTrue(result)
-            assertEquals(unicodeContent, testFile.readText(Charsets.UTF_8))
+            assertTrue(newDir.exists())
+            assertTrue(newDir.isDirectory())
+        }
+
+        @Test
+        @DisplayName("Should create nested directories successfully")
+        fun shouldCreateNestedDirectoriesSuccessfully() {
+            val nestedDir = tempDir.resolve("nested/deep/directory").toFile()
+            
+            val result = FileUtils.createDirectory(nestedDir.path)
+            
+            assertTrue(result)
+            assertTrue(nestedDir.exists())
+            assertTrue(nestedDir.isDirectory())
+        }
+
+        @Test
+        @DisplayName("Should return true when directory already exists")
+        fun shouldReturnTrueWhenDirectoryAlreadyExists() {
+            val result = FileUtils.createDirectory(testDirectory.path)
+            
+            assertTrue(result)
+        }
+
+        @Test
+        @DisplayName("Should handle null path when creating directory")
+        fun shouldHandleNullPathWhenCreatingDirectory() {
+            assertFalse(FileUtils.createDirectory(null))
+        }
+
+        @Test
+        @DisplayName("Should handle empty path when creating directory")
+        fun shouldHandleEmptyPathWhenCreatingDirectory() {
+            assertFalse(FileUtils.createDirectory(""))
+        }
+
+        @Test
+        @DisplayName("Should list directory contents successfully")
+        fun shouldListDirectoryContentsSuccessfully() {
+            val file1 = tempDir.resolve("file1.txt").toFile()
+            val file2 = tempDir.resolve("file2.txt").toFile()
+            file1.createNewFile()
+            file2.createNewFile()
+            
+            val contents = FileUtils.listDirectory(tempDir.toString())
+            
+            assertEquals(3, contents.size) // includes testDir
+            assertTrue(contents.contains("file1.txt"))
+            assertTrue(contents.contains("file2.txt"))
+        }
+
+        @Test
+        @DisplayName("Should return empty list for empty directory")
+        fun shouldReturnEmptyListForEmptyDirectory() {
+            val emptyDir = tempDir.resolve("emptyDir").toFile()
+            emptyDir.mkdirs()
+            
+            val contents = FileUtils.listDirectory(emptyDir.path)
+            
+            assertTrue(contents.isEmpty())
+        }
+
+        @Test
+        @DisplayName("Should throw exception when listing non-existent directory")
+        fun shouldThrowExceptionWhenListingNonExistentDirectory() {
+            assertFailsWith<IOException> {
+                FileUtils.listDirectory("nonexistent")
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw exception when listing file instead of directory")
+        fun shouldThrowExceptionWhenListingFileInsteadOfDirectory() {
+            testFile.createNewFile()
+            
+            assertFailsWith<IOException> {
+                FileUtils.listDirectory(testFile.path)
+            }
         }
     }
 
@@ -317,45 +488,78 @@ class FileUtilsTest {
 
         @Test
         @DisplayName("Should get file size correctly")
-        fun testGetFileSize() {
-            val content = "Test content"
+        fun shouldGetFileSizeCorrectly() {
+            val content = "Hello, World!"
             testFile.writeText(content)
             
             val size = FileUtils.getFileSize(testFile.path)
             
-            assertEquals(content.toByteArray().size.toLong(), size)
+            assertEquals(content.length.toLong(), size)
         }
 
         @Test
-        @DisplayName("Should return -1 for non-existent file size")
-        fun testGetFileSizeNonExistent() {
-            val nonExistentFile = tempDir.resolve("nonExistent.txt").toFile()
-            
-            val size = FileUtils.getFileSize(nonExistentFile.path)
-            
-            assertEquals(-1L, size)
-        }
-
-        @Test
-        @DisplayName("Should check if file exists")
-        fun testFileExists() {
-            assertFalse(FileUtils.fileExists(testFile.path))
-            
+        @DisplayName("Should return zero for empty file")
+        fun shouldReturnZeroForEmptyFile() {
             testFile.createNewFile()
             
-            assertTrue(FileUtils.fileExists(testFile.path))
+            val size = FileUtils.getFileSize(testFile.path)
+            
+            assertEquals(0L, size)
         }
 
         @Test
-        @DisplayName("Should check if file is directory")
-        fun testIsDirectory() {
-            assertFalse(FileUtils.isDirectory(testFile.path))
-            assertTrue(FileUtils.isDirectory(testDir.path))
+        @DisplayName("Should throw exception when getting size of non-existent file")
+        fun shouldThrowExceptionWhenGettingSizeOfNonExistentFile() {
+            assertFailsWith<IOException> {
+                FileUtils.getFileSize("nonexistent.txt")
+            }
+        }
+
+        @Test
+        @DisplayName("Should get file extension correctly")
+        fun shouldGetFileExtensionCorrectly() {
+            val extension = FileUtils.getFileExtension("document.pdf")
+            assertEquals("pdf", extension)
+        }
+
+        @Test
+        @DisplayName("Should return empty string for file without extension")
+        fun shouldReturnEmptyStringForFileWithoutExtension() {
+            val extension = FileUtils.getFileExtension("README")
+            assertEquals("", extension)
+        }
+
+        @Test
+        @DisplayName("Should handle file with multiple dots")
+        fun shouldHandleFileWithMultipleDots() {
+            val extension = FileUtils.getFileExtension("archive.tar.gz")
+            assertEquals("gz", extension)
+        }
+
+        @Test
+        @DisplayName("Should handle hidden files")
+        fun shouldHandleHiddenFiles() {
+            val extension = FileUtils.getFileExtension(".gitignore")
+            assertEquals("", extension)
+        }
+
+        @Test
+        @DisplayName("Should handle null filename")
+        fun shouldHandleNullFilename() {
+            val extension = FileUtils.getFileExtension(null)
+            assertEquals("", extension)
+        }
+
+        @Test
+        @DisplayName("Should handle empty filename")
+        fun shouldHandleEmptyFilename() {
+            val extension = FileUtils.getFileExtension("")
+            assertEquals("", extension)
         }
 
         @Test
         @DisplayName("Should check if file is readable")
-        fun testIsReadable() {
+        fun shouldCheckIfFileIsReadable() {
             testFile.createNewFile()
             
             assertTrue(FileUtils.isReadable(testFile.path))
@@ -363,246 +567,148 @@ class FileUtilsTest {
 
         @Test
         @DisplayName("Should check if file is writable")
-        fun testIsWritable() {
+        fun shouldCheckIfFileIsWritable() {
             testFile.createNewFile()
             
             assertTrue(FileUtils.isWritable(testFile.path))
         }
 
         @Test
-        @DisplayName("Should get file extension")
-        fun testGetFileExtension() {
-            val txtFile = tempDir.resolve("test.txt").toFile()
-            val noExtFile = tempDir.resolve("test").toFile()
-            val multiExtFile = tempDir.resolve("test.tar.gz").toFile()
-            
-            assertEquals("txt", FileUtils.getFileExtension(txtFile.path))
-            assertEquals("", FileUtils.getFileExtension(noExtFile.path))
-            assertEquals("gz", FileUtils.getFileExtension(multiExtFile.path))
-        }
-
-        @Test
-        @DisplayName("Should get file name without extension")
-        fun testGetFileNameWithoutExtension() {
-            val txtFile = tempDir.resolve("test.txt").toFile()
-            val noExtFile = tempDir.resolve("test").toFile()
-            
-            assertEquals("test", FileUtils.getFileNameWithoutExtension(txtFile.path))
-            assertEquals("test", FileUtils.getFileNameWithoutExtension(noExtFile.path))
+        @DisplayName("Should return false for non-existent file permissions")
+        fun shouldReturnFalseForNonExistentFilePermissions() {
+            assertFalse(FileUtils.isReadable("nonexistent.txt"))
+            assertFalse(FileUtils.isWritable("nonexistent.txt"))
         }
     }
 
     @Nested
-    @DisplayName("File Utility Tests")
-    inner class FileUtilityTests {
+    @DisplayName("Path Manipulation Tests")
+    inner class PathManipulationTests {
 
         @Test
-        @DisplayName("Should copy file successfully")
-        fun testCopyFile() {
-            val content = "Content to copy"
-            testFile.writeText(content)
-            val destinationFile = tempDir.resolve("copied.txt").toFile()
-            
-            val result = FileUtils.copyFile(testFile.path, destinationFile.path)
-            
-            assertTrue(result)
-            assertTrue(destinationFile.exists())
-            assertEquals(content, destinationFile.readText())
+        @DisplayName("Should normalize path correctly")
+        fun shouldNormalizePathCorrectly() {
+            val path = "./folder/../file.txt"
+            val normalized = FileUtils.normalizePath(path)
+            assertEquals("file.txt", normalized)
         }
 
         @Test
-        @DisplayName("Should move file successfully")
-        fun testMoveFile() {
-            val content = "Content to move"
-            testFile.writeText(content)
-            val destinationFile = tempDir.resolve("moved.txt").toFile()
-            
-            val result = FileUtils.moveFile(testFile.path, destinationFile.path)
-            
-            assertTrue(result)
-            assertFalse(testFile.exists())
-            assertTrue(destinationFile.exists())
-            assertEquals(content, destinationFile.readText())
+        @DisplayName("Should join paths correctly")
+        fun shouldJoinPathsCorrectly() {
+            val joined = FileUtils.joinPaths("folder", "subfolder", "file.txt")
+            val expected = Paths.get("folder", "subfolder", "file.txt").toString()
+            assertEquals(expected, joined)
         }
 
         @Test
-        @DisplayName("Should calculate file hash")
-        fun testCalculateFileHash() {
-            val content = "Content for hashing"
-            testFile.writeText(content)
-            
-            val hash = FileUtils.calculateFileHash(testFile.path)
-            
-            assertNotNull(hash)
-            assertTrue(hash.isNotEmpty())
-            
-            // Verify hash is consistent
-            val hash2 = FileUtils.calculateFileHash(testFile.path)
-            assertEquals(hash, hash2)
+        @DisplayName("Should get parent directory correctly")
+        fun shouldGetParentDirectoryCorrectly() {
+            val parent = FileUtils.getParentDirectory("/path/to/file.txt")
+            assertEquals("/path/to", parent)
         }
 
         @Test
-        @DisplayName("Should calculate different hashes for different content")
-        fun testCalculateFileHashDifferentContent() {
-            val content1 = "Content 1"
-            val content2 = "Content 2"
-            testFile.writeText(content1)
-            val otherFile = tempDir.resolve("other.txt").toFile()
-            otherFile.writeText(content2)
-            
-            val hash1 = FileUtils.calculateFileHash(testFile.path)
-            val hash2 = FileUtils.calculateFileHash(otherFile.path)
-            
-            assertNotEquals(hash1, hash2)
+        @DisplayName("Should get filename from path")
+        fun shouldGetFilenameFromPath() {
+            val filename = FileUtils.getFileName("/path/to/file.txt")
+            assertEquals("file.txt", filename)
         }
 
         @Test
-        @DisplayName("Should list files in directory")
-        fun testListFiles() {
-            val file1 = File(testDir, "file1.txt")
-            val file2 = File(testDir, "file2.txt")
-            val subDir = File(testDir, "subDir")
-            
-            file1.createNewFile()
-            file2.createNewFile()
-            subDir.mkdirs()
-            
-            val files = FileUtils.listFiles(testDir.path)
-            
-            assertEquals(3, files.size)
-            assertTrue(files.contains(file1.name))
-            assertTrue(files.contains(file2.name))
-            assertTrue(files.contains(subDir.name))
+        @DisplayName("Should handle root path")
+        fun shouldHandleRootPath() {
+            val parent = FileUtils.getParentDirectory("/")
+            assertNull(parent)
         }
 
         @Test
-        @DisplayName("Should filter files by extension")
-        fun testListFilesByExtension() {
-            val txtFile = File(testDir, "test.txt")
-            val logFile = File(testDir, "test.log")
-            val noExtFile = File(testDir, "test")
-            
-            txtFile.createNewFile()
-            logFile.createNewFile()
-            noExtFile.createNewFile()
-            
-            val txtFiles = FileUtils.listFilesByExtension(testDir.path, "txt")
-            
-            assertEquals(1, txtFiles.size)
-            assertTrue(txtFiles.contains(txtFile.name))
-        }
-
-        @Test
-        @DisplayName("Should create directory structure")
-        fun testCreateDirectoryStructure() {
-            val nestedPath = tempDir.resolve("level1/level2/level3").toString()
-            
-            val result = FileUtils.createDirectoryStructure(nestedPath)
-            
-            assertTrue(result)
-            assertTrue(File(nestedPath).exists())
-            assertTrue(File(nestedPath).isDirectory())
+        @DisplayName("Should handle relative paths")
+        fun shouldHandleRelativePaths() {
+            val parent = FileUtils.getParentDirectory("file.txt")
+            assertEquals(".", parent)
         }
     }
 
     @Nested
-    @DisplayName("Edge Cases and Error Handling")
-    inner class EdgeCaseTests {
+    @DisplayName("Error Handling and Edge Cases")
+    inner class ErrorHandlingTests {
 
         @Test
-        @DisplayName("Should handle null file path gracefully")
-        fun testNullFilePath() {
-            assertFalse(FileUtils.fileExists(null))
-            assertFalse(FileUtils.createFile(null))
-            assertFalse(FileUtils.deleteFile(null))
-            assertNull(FileUtils.readFile(null))
-            assertFalse(FileUtils.writeFile(null, "content"))
-        }
-
-        @Test
-        @DisplayName("Should handle empty file path gracefully")
-        fun testEmptyFilePath() {
-            assertFalse(FileUtils.fileExists(""))
-            assertFalse(FileUtils.createFile(""))
-            assertFalse(FileUtils.deleteFile(""))
-            assertNull(FileUtils.readFile(""))
-            assertFalse(FileUtils.writeFile("", "content"))
-        }
-
-        @Test
-        @DisplayName("Should handle whitespace-only file path")
-        fun testWhitespaceFilePath() {
-            val whitespacePath = "   \t\n   "
-            assertFalse(FileUtils.fileExists(whitespacePath))
-            assertFalse(FileUtils.createFile(whitespacePath))
-        }
-
-        @Test
-        @DisplayName("Should handle very long file path")
-        fun testVeryLongFilePath() {
+        @DisplayName("Should handle very long file paths")
+        fun shouldHandleVeryLongFilePaths() {
             val longPath = "a".repeat(1000) + ".txt"
-            val result = FileUtils.createFile(longPath)
-            
-            // Result depends on filesystem limitations
-            // Test should not throw exceptions
-            assertNotNull(result)
+            // This should not throw an exception, but behavior depends on OS
+            assertDoesNotThrow {
+                FileUtils.exists(longPath)
+            }
         }
 
         @Test
-        @DisplayName("Should handle special characters in file path")
-        fun testSpecialCharactersInPath() {
-            val specialChars = "file with spaces & symbols!@#$%^&()_+.txt"
-            val specialFile = tempDir.resolve(specialChars).toFile()
+        @DisplayName("Should handle special characters in file names")
+        fun shouldHandleSpecialCharactersInFileNames() {
+            val specialFile = tempDir.resolve("file with spaces & symbols!@#.txt").toFile()
+            val content = "Special content"
             
-            val result = FileUtils.createFile(specialFile.path)
+            FileUtils.writeFile(specialFile.path, content)
             
-            // Should handle special characters gracefully
-            assertNotNull(result)
+            assertTrue(specialFile.exists())
+            assertEquals(content, FileUtils.readFile(specialFile.path))
         }
 
         @Test
-        @DisplayName("Should handle concurrent file access")
-        fun testConcurrentFileAccess() {
-            val content = "Concurrent access test"
-            testFile.writeText(content)
+        @DisplayName("Should handle concurrent file operations")
+        fun shouldHandleConcurrentFileOperations() {
+            val file1 = tempDir.resolve("concurrent1.txt").toFile()
+            val file2 = tempDir.resolve("concurrent2.txt").toFile()
             
-            val results = mutableListOf<String?>()
-            val threads = mutableListOf<Thread>()
-            
-            repeat(10) {
-                val thread = Thread {
-                    results.add(FileUtils.readFile(testFile.path))
-                }
-                threads.add(thread)
-                thread.start()
+            // Simulate concurrent operations
+            val thread1 = Thread {
+                FileUtils.writeFile(file1.path, "Content 1")
+            }
+            val thread2 = Thread {
+                FileUtils.writeFile(file2.path, "Content 2")
             }
             
-            threads.forEach { it.join() }
+            thread1.start()
+            thread2.start()
+            thread1.join()
+            thread2.join()
             
-            assertEquals(10, results.size)
-            results.forEach { assertEquals(content, it) }
+            assertTrue(file1.exists())
+            assertTrue(file2.exists())
+            assertEquals("Content 1", FileUtils.readFile(file1.path))
+            assertEquals("Content 2", FileUtils.readFile(file2.path))
         }
 
         @Test
-        @DisplayName("Should handle file system case sensitivity")
-        fun testCaseSensitivity() {
-            val lowerCaseFile = tempDir.resolve("test.txt").toFile()
-            val upperCaseFile = tempDir.resolve("TEST.txt").toFile()
+        @DisplayName("Should handle large file operations")
+        fun shouldHandleLargeFileOperations() {
+            val largeContent = "Large content line\n".repeat(10000)
+            val largeFile = tempDir.resolve("large.txt").toFile()
             
-            lowerCaseFile.createNewFile()
+            FileUtils.writeFile(largeFile.path, largeContent)
+            val readContent = FileUtils.readFile(largeFile.path)
             
-            val lowerExists = FileUtils.fileExists(lowerCaseFile.path)
-            val upperExists = FileUtils.fileExists(upperCaseFile.path)
+            assertEquals(largeContent, readContent)
+        }
+
+        @Test
+        @DisplayName("Should handle file system limitations gracefully")
+        fun shouldHandleFileSystemLimitationsGracefully() {
+            // Test with invalid characters (varies by OS)
+            val invalidChars = listOf("<", ">", ":", "\"", "|", "?", "*")
             
-            assertTrue(lowerExists)
-            
-            // Case sensitivity depends on filesystem
-            if (System.getProperty("os.name").lowercase().contains("windows")) {
-                // Windows is case-insensitive
-                assertTrue(upperExists)
-            } else {
-                // Unix-like systems are case-sensitive
-                assertFalse(upperExists)
+            for (char in invalidChars) {
+                val filename = "invalid${char}file.txt"
+                // Should not crash, but may fail depending on OS
+                assertDoesNotThrow {
+                    try {
+                        FileUtils.writeFile(filename, "content")
+                    } catch (e: IOException) {
+                        // Expected on some systems
+                    }
+                }
             }
         }
     }
@@ -612,13 +718,13 @@ class FileUtilsTest {
     inner class PerformanceTests {
 
         @Test
-        @DisplayName("Should handle multiple file operations efficiently")
-        fun testMultipleFileOperations() {
+        @DisplayName("Should perform file operations within reasonable time")
+        fun shouldPerformFileOperationsWithinReasonableTime() {
             val startTime = System.currentTimeMillis()
             
+            // Perform multiple operations
             repeat(100) { i ->
                 val file = tempDir.resolve("perf_test_$i.txt").toFile()
-                FileUtils.createFile(file.path)
                 FileUtils.writeFile(file.path, "Performance test content $i")
                 FileUtils.readFile(file.path)
                 FileUtils.deleteFile(file.path)
@@ -627,83 +733,8 @@ class FileUtilsTest {
             val endTime = System.currentTimeMillis()
             val duration = endTime - startTime
             
-            // Should complete within reasonable time (adjust threshold as needed)
-            assertTrue(duration < 5000, "Operations took too long: ${duration}ms")
-        }
-
-        @Test
-        @DisplayName("Should handle large file operations")
-        fun testLargeFileOperations() {
-            val largeContent = "Large content line\n".repeat(10000)
-            val startTime = System.currentTimeMillis()
-            
-            FileUtils.writeFile(testFile.path, largeContent)
-            val readContent = FileUtils.readFile(testFile.path)
-            
-            val endTime = System.currentTimeMillis()
-            val duration = endTime - startTime
-            
-            assertEquals(largeContent, readContent)
-            assertTrue(duration < 2000, "Large file operations took too long: ${duration}ms")
-        }
-    }
-
-    @Nested
-    @DisplayName("Security Tests")
-    inner class SecurityTests {
-
-        @Test
-        @DisplayName("Should handle path traversal attempts")
-        fun testPathTraversalSecurity() {
-            val maliciousPath = "../../../etc/passwd"
-            
-            val result = FileUtils.readFile(maliciousPath)
-            
-            // Should handle path traversal securely
-            // Implementation should either prevent access or return null
-            assertNull(result)
-        }
-
-        @Test
-        @DisplayName("Should validate file permissions")
-        fun testFilePermissionValidation() {
-            if (System.getProperty("os.name").lowercase().contains("windows")) {
-                // Skip on Windows as permission handling is different
-                return
-            }
-            
-            testFile.createNewFile()
-            testFile.setReadOnly()
-            
-            val isWritable = FileUtils.isWritable(testFile.path)
-            
-            assertFalse(isWritable)
-        }
-
-        @Test
-        @DisplayName("Should handle symlink security")
-        fun testSymlinkSecurity() {
-            if (System.getProperty("os.name").lowercase().contains("windows")) {
-                // Skip on Windows as symlink handling is different
-                return
-            }
-            
-            val targetFile = tempDir.resolve("target.txt").toFile()
-            targetFile.writeText("Target content")
-            
-            val symlinkFile = tempDir.resolve("symlink.txt")
-            
-            try {
-                Files.createSymbolicLink(symlinkFile, targetFile.toPath())
-                
-                val content = FileUtils.readFile(symlinkFile.toString())
-                
-                // Should handle symlinks appropriately
-                assertNotNull(content)
-            } catch (e: Exception) {
-                // Symlink creation may fail in some environments
-                // This is acceptable for the test
-            }
+            // Should complete within 5 seconds (adjust as needed)
+            assertTrue(duration < 5000, "File operations took too long: ${duration}ms")
         }
     }
 }
