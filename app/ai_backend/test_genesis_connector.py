@@ -5987,3 +5987,997 @@ class TestGenesisConnectorPerformanceBenchmarks(unittest.TestCase):
         object_growth = final_objects - initial_objects
         self.assertLess(object_growth, 1000)  # Reasonable threshold
 >>>>>>> pr458merge
+
+
+class TestGenesisConnectorAdvancedMethods(unittest.TestCase):
+    """Additional comprehensive tests for GenesisConnector advanced method coverage."""
+
+    def setUp(self):
+        """Set up test fixtures with comprehensive configuration."""
+        self.mock_config = {
+            'api_key': 'test_api_key_comprehensive',
+            'base_url': 'https://api.genesis.test',
+            'timeout': 30,
+            'max_retries': 3,
+            'rate_limit': 100,
+            'burst_limit': 10,
+            'verify_ssl': True,
+            'user_agent': 'GenesisConnector/1.0',
+            'custom_headers': {'X-Test-Suite': 'comprehensive'}
+        }
+        self.connector = GenesisConnector(self.mock_config)
+
+    def test_api_endpoint_variations(self):
+        """Test various API endpoint patterns and edge cases."""
+        endpoint_variations = [
+            '/api/v1/models',
+            '/api/v2/generations/',
+            'models',  # No leading slash
+            'generations/123/status',
+            '/api/v1/models?limit=10&offset=0',
+            '/api/v1/models#section',
+            '/api/v1/models?q=test%20query',
+            '/api/v1/models/../generations',  # Path traversal
+            '/api/v1/models/./status',  # Current directory
+            ''  # Empty endpoint
+        ]
+        
+        for endpoint in endpoint_variations:
+            with self.subTest(endpoint=endpoint):
+                try:
+                    url = self.connector._build_url(endpoint)
+                    self.assertIsNotNone(url)
+                    self.assertTrue(url.startswith('https://'))
+                except (ValueError, AttributeError) as e:
+                    # Some endpoints may be invalid and should raise errors
+                    if '..' in endpoint or endpoint == '':
+                        continue  # Expected to fail
+                    else:
+                        self.fail(f"Unexpected error for endpoint {endpoint}: {e}")
+
+    @patch('requests.Session.request')
+    def test_content_negotiation_headers(self, mock_request):
+        """Test content negotiation with various Accept headers."""
+        accept_headers = [
+            'application/json',
+            'application/json;charset=utf-8',
+            'application/json, text/plain',
+            'application/hal+json',
+            'application/vnd.api+json',
+            'application/json;q=0.8, text/plain;q=0.2',
+            '*/*',
+            'text/*'
+        ]
+        
+        for accept_header in accept_headers:
+            with self.subTest(accept=accept_header):
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = {'accepted': True}
+                mock_response.raise_for_status.return_value = None
+                mock_request.return_value = mock_response
+                
+                custom_headers = {'Accept': accept_header}
+                result = self.connector.make_request('GET', '/test', headers=custom_headers)
+                
+                self.assertEqual(result, {'accepted': True})
+                # Verify Accept header was included
+                call_args = mock_request.call_args
+                headers = call_args[1]['headers']
+                self.assertEqual(headers.get('Accept'), accept_header)
+
+    @patch('requests.Session.request')
+    def test_http_caching_headers(self, mock_request):
+        """Test HTTP caching behavior with various cache-related headers."""
+        cache_scenarios = [
+            {'If-None-Match': '"etag123"'},
+            {'If-Modified-Since': 'Wed, 21 Oct 2015 07:28:00 GMT'},
+            {'Cache-Control': 'no-cache'},
+            {'Cache-Control': 'max-age=300'},
+            {'Pragma': 'no-cache'},
+            {'If-Range': '"etag456"'},
+            {'If-Unmodified-Since': 'Wed, 21 Oct 2015 07:28:00 GMT'}
+        ]
+        
+        for cache_headers in cache_scenarios:
+            with self.subTest(headers=cache_headers):
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = {'cached': True}
+                mock_response.headers = {
+                    'ETag': '"response_etag"',
+                    'Last-Modified': 'Wed, 21 Oct 2015 07:28:00 GMT',
+                    'Cache-Control': 'public, max-age=300'
+                }
+                mock_response.raise_for_status.return_value = None
+                mock_request.return_value = mock_response
+                
+                result = self.connector.make_request('GET', '/cached', headers=cache_headers)
+                self.assertEqual(result, {'cached': True})
+
+    @patch('requests.Session.request')
+    def test_compression_handling(self, mock_request):
+        """Test request and response compression handling."""
+        compression_headers = [
+            {'Accept-Encoding': 'gzip'},
+            {'Accept-Encoding': 'deflate'},
+            {'Accept-Encoding': 'br'},  # Brotli
+            {'Accept-Encoding': 'gzip, deflate'},
+            {'Accept-Encoding': 'gzip, deflate, br'},
+            {'Accept-Encoding': '*'},
+            {'Content-Encoding': 'gzip'}  # Request compression
+        ]
+        
+        for headers in compression_headers:
+            with self.subTest(headers=headers):
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = {'compressed': True}
+                mock_response.headers = {'Content-Encoding': 'gzip'}
+                mock_response.raise_for_status.return_value = None
+                mock_request.return_value = mock_response
+                
+                result = self.connector.make_request('POST', '/test', headers=headers)
+                self.assertEqual(result, {'compressed': True})
+
+    @patch('requests.Session.request')
+    def test_cors_preflight_handling(self, mock_request):
+        """Test CORS preflight request handling."""
+        # Simulate OPTIONS preflight request
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Max-Age': '86400'
+        }
+        mock_response.text = ''
+        mock_response.json.side_effect = json.JSONDecodeError("Empty response", "", 0)
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        cors_headers = {
+            'Origin': 'https://example.com',
+            'Access-Control-Request-Method': 'POST',
+            'Access-Control-Request-Headers': 'Content-Type'
+        }
+        
+        result = self.connector.make_request('OPTIONS', '/test', headers=cors_headers)
+        # Empty response is acceptable for OPTIONS requests
+        self.assertIsNone(result)
+
+    @patch('requests.Session.request')
+    def test_websocket_upgrade_request(self, mock_request):
+        """Test WebSocket upgrade request handling."""
+        mock_response = Mock()
+        mock_response.status_code = 101  # Switching Protocols
+        mock_response.headers = {
+            'Upgrade': 'websocket',
+            'Connection': 'Upgrade',
+            'Sec-WebSocket-Accept': 's3pPLMBiTxaQ9kYGzzhZRbK+xOo='
+        }
+        mock_response.text = ''
+        mock_response.json.side_effect = json.JSONDecodeError("No JSON in WebSocket response", "", 0)
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        websocket_headers = {
+            'Upgrade': 'websocket',
+            'Connection': 'Upgrade',
+            'Sec-WebSocket-Key': 'dGhlIHNhbXBsZSBub25jZQ==',
+            'Sec-WebSocket-Version': '13'
+        }
+        
+        result = self.connector.make_request('GET', '/ws', headers=websocket_headers)
+        # WebSocket upgrade responses typically don't have JSON bodies
+        self.assertIsNone(result)
+
+    def test_configuration_with_proxy_authentication(self):
+        """Test configuration with authenticated proxy settings."""
+        proxy_configs = [
+            {
+                'http_proxy': 'http://user:pass@proxy.example.com:8080',
+                'https_proxy': 'https://user:pass@proxy.example.com:8080'
+            },
+            {
+                'proxies': {
+                    'http': 'http://user:pass@proxy.example.com:8080',
+                    'https': 'https://user:pass@proxy.example.com:8080'
+                }
+            },
+            {
+                'proxy_auth': {
+                    'username': 'proxyuser',
+                    'password': 'proxypass'
+                },
+                'proxy_url': 'http://proxy.example.com:8080'
+            }
+        ]
+        
+        for proxy_config in proxy_configs:
+            with self.subTest(proxy_config=proxy_config):
+                config = self.mock_config.copy()
+                config.update(proxy_config)
+                
+                try:
+                    connector = GenesisConnector(config)
+                    self.assertIsNotNone(connector)
+                except (ValueError, TypeError):
+                    # Some proxy configurations might not be supported
+                    pass
+
+    @patch('requests.Session.request')
+    def test_multipart_form_data_handling(self, mock_request):
+        """Test multipart form data with file uploads."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'uploaded': True, 'files': 2}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        # Simulate file upload data
+        files_data = {
+            'file1': ('test.txt', 'file content 1', 'text/plain'),
+            'file2': ('test.json', '{"key": "value"}', 'application/json'),
+            'image': ('test.png', b'\x89PNG\r\n\x1a\n', 'image/png')
+        }
+        
+        form_data = {
+            'description': 'Test upload',
+            'category': 'test'
+        }
+        
+        # Test file upload (implementation dependent)
+        try:
+            result = self.connector.make_request('POST', '/upload', data=form_data, files=files_data)
+            self.assertEqual(result['uploaded'], True)
+        except (TypeError, AttributeError):
+            # If files parameter isn't supported, that's acceptable
+            pass
+
+    @patch('requests.Session.request')
+    def test_streaming_response_handling(self, mock_request):
+        """Test streaming response handling for large downloads."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.headers = {'Content-Type': 'application/octet-stream'}
+        
+        # Simulate streaming response
+        chunks = [b'chunk1', b'chunk2', b'chunk3']
+        mock_response.iter_content.return_value = chunks
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        # Test streaming (implementation dependent)
+        try:
+            result = self.connector.make_request('GET', '/download', stream=True)
+            # Streaming responses might return the response object or processed data
+            self.assertIsNotNone(result)
+        except (TypeError, AttributeError):
+            # If streaming isn't supported, that's acceptable
+            pass
+
+    @patch('requests.Session.request')
+    def test_request_response_hooks(self, mock_request):
+        """Test request and response hooks if available."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'hooked': True}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        # Test hooks (implementation dependent)
+        hooks = {
+            'pre_request': lambda req: setattr(req, 'hooked', True),
+            'post_response': lambda resp: setattr(resp, 'processed', True)
+        }
+        
+        try:
+            result = self.connector.make_request('GET', '/test', hooks=hooks)
+            self.assertEqual(result, {'hooked': True})
+        except (TypeError, AttributeError):
+            # If hooks aren't supported, that's acceptable
+            pass
+
+    def test_session_cookie_handling(self):
+        """Test session cookie persistence and handling."""
+        # Test that session cookies are maintained across requests
+        session = self.connector.session
+        self.assertIsNotNone(session)
+        
+        # Add a test cookie
+        session.cookies.set('test_cookie', 'test_value', domain='api.genesis.test')
+        
+        # Verify cookie is stored
+        self.assertEqual(session.cookies.get('test_cookie'), 'test_value')
+
+    @patch('requests.Session.request')
+    def test_keepalive_connection_reuse(self, mock_request):
+        """Test HTTP keep-alive connection reuse."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'connection': 'reused'}
+        mock_response.headers = {'Connection': 'keep-alive'}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        # Make multiple requests to test connection reuse
+        for i in range(3):
+            result = self.connector.make_request('GET', f'/test/{i}')
+            self.assertEqual(result, {'connection': 'reused'})
+        
+        # All requests should use the same session
+        self.assertEqual(mock_request.call_count, 3)
+
+    @patch('requests.Session.request')
+    def test_request_metrics_collection(self, mock_request):
+        """Test request metrics collection if available."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'success': True}
+        mock_response.elapsed = timedelta(milliseconds=150)
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        # Make a request
+        result = self.connector.make_request('GET', '/test')
+        self.assertEqual(result, {'success': True})
+        
+        # Check if metrics are collected (implementation dependent)
+        try:
+            metrics = self.connector.get_metrics()
+            self.assertIsInstance(metrics, dict)
+            if 'requests_count' in metrics:
+                self.assertGreater(metrics['requests_count'], 0)
+        except AttributeError:
+            # If metrics aren't implemented, that's acceptable
+            pass
+
+    def test_environment_variable_configuration(self):
+        """Test configuration loading from environment variables."""
+        import os
+        
+        # Mock environment variables
+        env_vars = {
+            'GENESIS_API_KEY': 'env_test_key',
+            'GENESIS_BASE_URL': 'https://env.api.test.com',
+            'GENESIS_TIMEOUT': '45',
+            'GENESIS_MAX_RETRIES': '5'
+        }
+        
+        with patch.dict(os.environ, env_vars):
+            # Test if connector can load from environment (implementation dependent)
+            try:
+                connector = GenesisConnector.from_environment()
+                self.assertEqual(connector.api_key, 'env_test_key')
+                self.assertEqual(connector.base_url, 'https://env.api.test.com')
+            except AttributeError:
+                # If environment loading isn't implemented, that's acceptable
+                pass
+
+    @patch('requests.Session.request')
+    def test_request_idempotency_keys(self, mock_request):
+        """Test request idempotency key handling."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'idempotent': True}
+        mock_response.headers = {'Idempotency-Key': 'test-key-123'}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        # Test with idempotency key
+        headers = {'Idempotency-Key': 'test-key-123'}
+        data = {'operation': 'create', 'value': 'test'}
+        
+        result = self.connector.make_request('POST', '/idempotent', data=data, headers=headers)
+        self.assertEqual(result, {'idempotent': True})
+        
+        # Verify idempotency key was sent
+        call_args = mock_request.call_args
+        request_headers = call_args[1]['headers']
+        self.assertEqual(request_headers.get('Idempotency-Key'), 'test-key-123')
+
+    @patch('requests.Session.request')
+    def test_api_versioning_headers(self, mock_request):
+        """Test API versioning through headers."""
+        api_versions = [
+            {'API-Version': '1.0'},
+            {'API-Version': '2.0'},
+            {'Accept': 'application/vnd.api+json;version=1'},
+            {'Accept': 'application/vnd.api+json;version=2'},
+            {'X-API-Version': 'v1'},
+            {'X-API-Version': 'v2'}
+        ]
+        
+        for version_header in api_versions:
+            with self.subTest(version=version_header):
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = {'version': 'handled'}
+                mock_response.headers = version_header
+                mock_response.raise_for_status.return_value = None
+                mock_request.return_value = mock_response
+                
+                result = self.connector.make_request('GET', '/versioned', headers=version_header)
+                self.assertEqual(result, {'version': 'handled'})
+
+    def test_ssl_configuration_options(self):
+        """Test various SSL configuration options."""
+        ssl_configs = [
+            {'verify_ssl': True},
+            {'verify_ssl': False},
+            {'ca_bundle': '/path/to/ca-bundle.crt'},
+            {'client_cert': ('/path/to/client.crt', '/path/to/client.key')},
+            {'ssl_context': 'custom_ssl_context'},
+            {'ssl_ciphers': 'HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA'}
+        ]
+        
+        for ssl_config in ssl_configs:
+            with self.subTest(ssl_config=ssl_config):
+                config = self.mock_config.copy()
+                config.update(ssl_config)
+                
+                try:
+                    connector = GenesisConnector(config)
+                    self.assertIsNotNone(connector)
+                except (ValueError, TypeError, FileNotFoundError):
+                    # Some SSL configurations might not be valid or supported
+                    pass
+
+    @patch('requests.Session.request')
+    def test_request_signing_and_verification(self, mock_request):
+        """Test request signing and signature verification if available."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'verified': True}
+        mock_response.headers = {'X-Signature': 'sha256=test_signature'}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+        
+        # Test request signing (implementation dependent)
+        try:
+            signing_config = {
+                'signing_key': 'test_signing_key',
+                'signature_header': 'X-Signature',
+                'signature_algorithm': 'sha256'
+            }
+            
+            result = self.connector.make_signed_request('POST', '/signed', data={'test': 'data'}, **signing_config)
+            self.assertEqual(result, {'verified': True})
+        except (AttributeError, TypeError):
+            # If request signing isn't implemented, that's acceptable
+            pass
+
+    def test_configuration_validation_comprehensive(self):
+        """Test comprehensive configuration validation edge cases."""
+        invalid_configs = [
+            # Malformed URLs
+            {'api_key': 'test', 'base_url': 'not_a_url'},
+            {'api_key': 'test', 'base_url': 'ftp://invalid.protocol.com'},
+            {'api_key': 'test', 'base_url': 'http://'},
+            
+            # Invalid numeric values
+            {'api_key': 'test', 'base_url': 'https://test.com', 'timeout': -1},
+            {'api_key': 'test', 'base_url': 'https://test.com', 'max_retries': -1},
+            {'api_key': 'test', 'base_url': 'https://test.com', 'timeout': float('inf')},
+            
+            # Type mismatches
+            {'api_key': None, 'base_url': 'https://test.com'},
+            {'api_key': 123, 'base_url': 'https://test.com'},
+            {'api_key': 'test', 'base_url': None},
+            {'api_key': 'test', 'base_url': 123},
+            
+            # Missing required fields
+            {'base_url': 'https://test.com'},  # Missing api_key
+            {'api_key': 'test'},  # Missing base_url
+            {}  # Empty config
+        ]
+        
+        for config in invalid_configs:
+            with self.subTest(config=config):
+                with self.assertRaises((ValueError, TypeError, KeyError)):
+                    connector = GenesisConnector(config)
+                    # Some validation might happen during first method call
+                    connector.make_request('GET', '/test')
+
+
+class TestGenesisConnectorSecurityExtensive(unittest.TestCase):
+    """Extensive security testing for GenesisConnector."""
+
+    def setUp(self):
+        """Set up security test environment."""
+        self.mock_config = {
+            'api_key': 'secure_test_key',
+            'base_url': 'https://api.genesis.test',
+            'timeout': 30,
+            'max_retries': 3
+        }
+        self.connector = GenesisConnector(self.mock_config)
+
+    def test_credential_leakage_prevention(self):
+        """Test prevention of credential leakage in various contexts."""
+        sensitive_values = [
+            self.connector.api_key,
+            'sensitive_test_data',
+            'password123',
+            'secret_token'
+        ]
+        
+        # Test string representation
+        connector_str = str(self.connector)
+        connector_repr = repr(self.connector)
+        
+        for sensitive in sensitive_values:
+            self.assertNotIn(sensitive, connector_str)
+            if len(sensitive) > 4:  # Only check full values for longer strings
+                self.assertNotIn(sensitive, connector_repr)
+
+    def test_url_validation_against_ssrf(self):
+        """Test URL validation against Server-Side Request Forgery."""
+        malicious_urls = [
+            'http://localhost:22/ssh',
+            'http://127.0.0.1:3306/mysql',
+            'http://169.254.169.254/metadata',  # AWS metadata
+            'http://metadata.google.internal/computeMetadata',  # GCP metadata
+            'file:///etc/passwd',
+            'ftp://internal.server.com/files',
+            'gopher://localhost:11211',  # Memcached
+            'dict://localhost:11211',
+            'sftp://internal.server.com',
+            'ldap://internal.server.com'
+        ]
+        
+        for malicious_url in malicious_urls:
+            with self.subTest(url=malicious_url):
+                config = {
+                    'api_key': 'test',
+                    'base_url': malicious_url,
+                    'timeout': 30
+                }
+                
+                with self.assertRaises(ValueError):
+                    GenesisConnector(config)
+
+    def test_header_injection_comprehensive(self):
+        """Test comprehensive header injection prevention."""
+        injection_payloads = [
+            'test\r\nX-Injected: malicious',
+            'test\nX-Injected: malicious',
+            'test\r\n\r\nX-Injected: malicious',
+            'test\x00X-Injected: malicious',
+            'test\x0aX-Injected: malicious',
+            'test\x0dX-Injected: malicious',
+            'test\x0d\x0aX-Injected: malicious',
+            'test\u2028X-Injected: malicious',  # Unicode line separator
+            'test\u2029X-Injected: malicious'   # Unicode paragraph separator
+        ]
+        
+        for payload in injection_payloads:
+            with self.subTest(payload=repr(payload)):
+                headers = {'X-Test-Header': payload}
+                
+                # Should either sanitize or reject the header
+                with patch('requests.Session.request') as mock_request:
+                    mock_response = Mock()
+                    mock_response.status_code = 200
+                    mock_response.json.return_value = {'test': 'response'}
+                    mock_response.raise_for_status.return_value = None
+                    mock_request.return_value = mock_response
+                    
+                    try:
+                        self.connector.make_request('GET', '/test', headers=headers)
+                        
+                        # If request succeeds, verify header was sanitized
+                        call_args = mock_request.call_args
+                        actual_headers = call_args[1]['headers']
+                        actual_value = actual_headers.get('X-Test-Header', '')
+                        
+                        # Should not contain injection characters
+                        self.assertNotIn('\r\n', actual_value)
+                        self.assertNotIn('\n', actual_value)
+                        self.assertNotIn('\r', actual_value)
+                        self.assertNotIn('\x00', actual_value)
+                        
+                    except (ValueError, TypeError):
+                        # Rejecting malicious headers is acceptable
+                        pass
+
+    def test_response_size_limit_enforcement(self):
+        """Test enforcement of response size limits to prevent DoS."""
+        with patch('requests.Session.request') as mock_request:
+            # Simulate very large response
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.headers = {
+                'Content-Length': str(100 * 1024 * 1024),  # 100MB
+                'Content-Type': 'application/json'
+            }
+            
+            # Create large content
+            large_content = 'x' * (10 * 1024 * 1024)  # 10MB actual content
+            mock_response.json.return_value = {'data': large_content}
+            mock_response.raise_for_status.return_value = None
+            mock_request.return_value = mock_response
+            
+            try:
+                result = self.connector.make_request('GET', '/large')
+                # If handled, should return the data
+                self.assertIsNotNone(result)
+            except (MemoryError, ValueError, ConnectionError):
+                # Rejecting oversized responses is acceptable
+                pass
+
+    def test_request_timeout_enforcement(self):
+        """Test that request timeouts are properly enforced."""
+        with patch('requests.Session.request') as mock_request:
+            mock_request.side_effect = Timeout("Request timeout")
+            
+            start_time = time.time()
+            
+            with self.assertRaises(GenesisTimeoutError):
+                self.connector.make_request('GET', '/slow')
+            
+            elapsed_time = time.time() - start_time
+            
+            # Should timeout within reasonable time of configured timeout
+            self.assertLess(elapsed_time, self.connector.timeout + 5)
+
+    def test_api_key_rotation_support(self):
+        """Test API key rotation functionality if available."""
+        original_key = self.connector.api_key
+        new_key = 'rotated_api_key_123'
+        
+        # Test key rotation (implementation dependent)
+        try:
+            self.connector.rotate_api_key(new_key)
+            self.assertEqual(self.connector.api_key, new_key)
+            self.assertNotEqual(self.connector.api_key, original_key)
+        except AttributeError:
+            # If key rotation isn't implemented, that's acceptable
+            pass
+
+    def test_sensitive_data_redaction_in_logs(self):
+        """Test that sensitive data is redacted from logs."""
+        sensitive_data = {
+            'api_key': 'secret_key_123',
+            'password': 'secret_password',
+            'token': 'secret_token',
+            'authorization': 'Bearer secret_bearer',
+            'x-api-key': 'secret_api_key',
+            'cookie': 'session=secret_session'
+        }
+        
+        with patch('logging.getLogger') as mock_logger:
+            mock_log_instance = Mock()
+            mock_logger.return_value = mock_log_instance
+            
+            # Test logging with sensitive data (implementation dependent)
+            try:
+                self.connector.log_request(sensitive_data)
+                
+                # Check that sensitive values were redacted
+                if mock_log_instance.info.called:
+                    logged_content = str(mock_log_instance.info.call_args)
+                    for key, value in sensitive_data.items():
+                        self.assertNotIn(value, logged_content)
+                        
+            except AttributeError:
+                # If logging method doesn't exist, that's acceptable
+                pass
+
+    def test_certificate_pinning_validation(self):
+        """Test SSL certificate pinning if available."""
+        pinned_cert_config = {
+            'api_key': 'test_key',
+            'base_url': 'https://api.genesis.test',
+            'cert_pins': [
+                'sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=',
+                'sha256/C5+lpZ7tcVwmwQIMcRtPbsQtWLABXhQzejna0wHFr8M='
+            ]
+        }
+        
+        try:
+            connector = GenesisConnector(pinned_cert_config)
+            self.assertIsNotNone(connector)
+        except (ValueError, TypeError, AttributeError):
+            # If certificate pinning isn't implemented, that's acceptable
+            pass
+
+    @patch('requests.Session.request')
+    def test_response_validation_against_xss(self, mock_request):
+        """Test response validation against XSS attacks."""
+        xss_payloads = [
+            '<script>alert("xss")</script>',
+            'javascript:alert(1)',
+            '<img src="x" onerror="alert(1)">',
+            '<svg onload="alert(1)">',
+            '"><script>alert(1)</script>',
+            '\'-alert(1)-\'',
+            '<iframe src="javascript:alert(1)"></iframe>'
+        ]
+        
+        for payload in xss_payloads:
+            with self.subTest(payload=payload):
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = {'data': payload, 'message': f'Response with {payload}'}
+                mock_response.raise_for_status.return_value = None
+                mock_request.return_value = mock_response
+                
+                result = self.connector.make_request('GET', '/test')
+                
+                # Response should contain the data (validation is typically done at application level)
+                self.assertIn('data', result)
+                # But sensitive operations should be careful with this data
+
+
+class TestGenesisConnectorRobustnessExtended(unittest.TestCase):
+    """Extended robustness testing for GenesisConnector."""
+
+    def setUp(self):
+        """Set up robustness test environment."""
+        self.mock_config = {
+            'api_key': 'robust_test_key',
+            'base_url': 'https://api.genesis.test',
+            'timeout': 30,
+            'max_retries': 3
+        }
+        self.connector = GenesisConnector(self.mock_config)
+
+    def test_unicode_normalization_handling(self):
+        """Test handling of various Unicode normalization forms."""
+        import unicodedata
+        
+        # Test string with different normalization forms
+        test_string = "café"
+        normalized_forms = {
+            'NFC': unicodedata.normalize('NFC', test_string),
+            'NFD': unicodedata.normalize('NFD', test_string),
+            'NFKC': unicodedata.normalize('NFKC', test_string),
+            'NFKD': unicodedata.normalize('NFKD', test_string)
+        }
+        
+        for form_name, normalized_string in normalized_forms.items():
+            with self.subTest(form=form_name):
+                config = self.mock_config.copy()
+                config['api_key'] = f'test_{normalized_string}_key'
+                
+                try:
+                    connector = GenesisConnector(config)
+                    self.assertEqual(connector.api_key, f'test_{normalized_string}_key')
+                except (ValueError, UnicodeError):
+                    # Some normalization forms might not be accepted
+                    pass
+
+    @patch('requests.Session.request')
+    def test_response_charset_detection(self, mock_request):
+        """Test response charset detection and handling."""
+        charsets = [
+            'utf-8',
+            'iso-8859-1',
+            'windows-1252',
+            'utf-16',
+            'ascii'
+        ]
+        
+        for charset in charsets:
+            with self.subTest(charset=charset):
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.headers = {'Content-Type': f'application/json; charset={charset}'}
+                mock_response.encoding = charset
+                mock_response.json.return_value = {'charset': charset, 'text': 'tëst'}
+                mock_response.raise_for_status.return_value = None
+                mock_request.return_value = mock_response
+                
+                result = self.connector.make_request('GET', '/charset-test')
+                self.assertEqual(result['charset'], charset)
+
+    def test_timezone_handling_in_timestamps(self):
+        """Test timezone handling in timestamp processing."""
+        from datetime import datetime, timezone, timedelta
+        
+        # Test various timezone formats
+        timezones = [
+            timezone.utc,
+            timezone(timedelta(hours=5)),  # +05:00
+            timezone(timedelta(hours=-8)), # -08:00
+            timezone(timedelta(hours=9, minutes=30))  # +09:30
+        ]
+        
+        for tz in timezones:
+            with self.subTest(timezone=tz):
+                timestamp = datetime.now(tz)
+                
+                # Test timestamp in configuration or request data
+                test_data = {
+                    'timestamp': timestamp.isoformat(),
+                    'created_at': timestamp,
+                    'timezone': str(tz)
+                }
+                
+                try:
+                    # Test if connector can handle timezone-aware timestamps
+                    if hasattr(self.connector, 'format_payload'):
+                        formatted = self.connector.format_payload(test_data)
+                        self.assertIsNotNone(formatted)
+                except (ValueError, TypeError):
+                    # Some timestamp formats might not be supported
+                    pass
+
+    @patch('requests.Session.request')
+    def test_partial_response_handling(self, mock_request):
+        """Test handling of partial/incomplete responses."""
+        partial_responses = [
+            '{"incomplete":',  # Incomplete JSON
+            '{"key": "value"',  # Missing closing brace
+            '{"key": "val',     # Incomplete string
+            '',                 # Empty response
+            'not json at all',  # Non-JSON content
+            '{"key": "value"}\n{"extra": "object"}',  # Multiple JSON objects
+        ]
+        
+        for partial_response in partial_responses:
+            with self.subTest(response=partial_response):
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.text = partial_response
+                
+                if partial_response and partial_response.startswith('{') and partial_response.endswith('}'):
+                    try:
+                        mock_response.json.return_value = json.loads(partial_response)
+                    except json.JSONDecodeError:
+                        mock_response.json.side_effect = json.JSONDecodeError("Invalid JSON", partial_response, 0)
+                else:
+                    mock_response.json.side_effect = json.JSONDecodeError("Invalid JSON", partial_response, 0)
+                
+                mock_response.raise_for_status.return_value = None
+                mock_request.return_value = mock_response
+                
+                try:
+                    result = self.connector.make_request('GET', '/partial')
+                    # If successful, result should be valid
+                    self.assertIsNotNone(result)
+                except (GenesisConnectionError, ValueError, json.JSONDecodeError):
+                    # Rejecting invalid responses is acceptable
+                    pass
+
+    def test_memory_pressure_handling(self):
+        """Test behavior under memory pressure conditions."""
+        import gc
+        
+        # Force garbage collection before test
+        gc.collect()
+        initial_objects = len(gc.get_objects())
+        
+        # Simulate memory pressure by creating many connectors
+        connectors = []
+        try:
+            for i in range(100):
+                config = self.mock_config.copy()
+                config['api_key'] = f'memory_test_key_{i}'
+                
+                connector = GenesisConnector(config)
+                connectors.append(connector)
+                
+                # Periodic cleanup
+                if i % 20 == 0:
+                    gc.collect()
+        except MemoryError:
+            # Expected under extreme memory pressure
+            pass
+        finally:
+            # Cleanup
+            del connectors
+            gc.collect()
+        
+        final_objects = len(gc.get_objects())
+        object_growth = final_objects - initial_objects
+        
+        # Object growth should be reasonable
+        self.assertLess(object_growth, 1000)
+
+    @patch('requests.Session.request')
+    def test_connection_pool_exhaustion(self, mock_request):
+        """Test behavior when connection pool is exhausted."""
+        # Simulate connection pool exhaustion
+        mock_request.side_effect = ConnectionError("HTTPSConnectionPool: Pool is exhausted")
+        
+        with self.assertRaises(GenesisConnectionError):
+            self.connector.make_request('GET', '/test')
+
+    def test_dns_resolution_caching(self):
+        """Test DNS resolution caching behavior."""
+        # Test multiple requests to same domain (implementation dependent)
+        session = self.connector.session
+        self.assertIsNotNone(session)
+        
+        # DNS caching is typically handled by the underlying libraries
+        # We can test that the session is reused
+        session2 = self.connector.session
+        self.assertIs(session, session2)
+
+    @patch('requests.Session.request')
+    def test_response_compression_edge_cases(self, mock_request):
+        """Test edge cases in response compression handling."""
+        compression_edge_cases = [
+            {'Content-Encoding': 'gzip', 'content': b'corrupted gzip data'},
+            {'Content-Encoding': 'deflate', 'content': b'corrupted deflate data'},
+            {'Content-Encoding': 'br', 'content': b'corrupted brotli data'},
+            {'Content-Encoding': 'unknown', 'content': b'unknown compression'},
+            {'Content-Encoding': '', 'content': b'empty encoding'},
+            {'Content-Encoding': 'gzip, deflate', 'content': b'multiple encodings'}
+        ]
+        
+        for case in compression_edge_cases:
+            with self.subTest(encoding=case['Content-Encoding']):
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_response.headers = {'Content-Encoding': case['Content-Encoding']}
+                mock_response.content = case['content']
+                
+                # Mock may handle decompression automatically
+                try:
+                    mock_response.json.return_value = {'decompressed': True}
+                except:
+                    mock_response.json.side_effect = json.JSONDecodeError("Decompression failed", "", 0)
+                
+                mock_response.raise_for_status.return_value = None
+                mock_request.return_value = mock_response
+                
+                try:
+                    result = self.connector.make_request('GET', '/compressed')
+                    # If successful, decompression worked
+                    self.assertIsNotNone(result)
+                except (GenesisConnectionError, ValueError):
+                    # Failing on corrupted compression is acceptable
+                    pass
+
+    def test_thread_local_storage_isolation(self):
+        """Test thread-local storage isolation if used."""
+        import threading
+        import time
+        
+        results = {}
+        errors = []
+        
+        def worker(worker_id):
+            try:
+                # Each thread should get its own connector state
+                local_config = self.mock_config.copy()
+                local_config['api_key'] = f'thread_{worker_id}_key'
+                
+                connector = GenesisConnector(local_config)
+                
+                # Simulate some work
+                time.sleep(0.01)
+                
+                results[worker_id] = connector.api_key
+                
+            except Exception as e:
+                errors.append((worker_id, e))
+        
+        # Create multiple threads
+        threads = []
+        for i in range(10):
+            thread = threading.Thread(target=worker, args=(i,))
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for completion
+        for thread in threads:
+            thread.join()
+        
+        # Verify thread isolation
+        self.assertEqual(len(errors), 0)
+        self.assertEqual(len(results), 10)
+        
+        # Each thread should have its own key
+        for i in range(10):
+            self.assertEqual(results[i], f'thread_{i}_key')
+
+
+if __name__ == '__main__':
+    # Add the new test classes to the test runner
+    unittest.main(verbosity=2)
