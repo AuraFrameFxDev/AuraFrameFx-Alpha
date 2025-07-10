@@ -106,7 +106,7 @@ dependencies {
     kspTest(libs.daggerHiltAndroidCompiler)
 
     // Time and Date
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+    implementation(libs.kotlinxDatetime)
 
     // AndroidX & Compose
     implementation(libs.androidxCoreKtx)
@@ -139,10 +139,10 @@ dependencies {
     ksp(libs.androidxRoomCompiler)
 
     // Security
-    implementation("androidx.security:security-crypto:1.1.0-beta01")
+    implementation(libs.androidxSecurityCrypto)
 
     // Google AI
-    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation(libs.generativeai)
 
     // Firebase
     implementation(platform(libs.firebaseBom))
@@ -176,9 +176,6 @@ dependencies {
     implementation(libs.coilCompose)
     implementation(libs.timber)
     implementation(libs.guava)
-    
-    // Material 3 Views (for XML theming)
-    implementation("com.google.android.material:material:1.12.0")
 
     // Accompanist
     implementation(libs.accompanistSystemuicontroller)

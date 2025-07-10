@@ -74,6 +74,14 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
+    
+    <!-- Missing color resources -->
+    <color name="divider">#1F000000</color>
+    <color name="onSurface">@color/light_on_surface</color>
+    <color name="primary">@color/light_primary</color>
+    <color name="outline">@color/light_outline</color>
+    <color name="onSurfaceMedium">#99000000</color>
+    <color name="background">@color/light_background</color>
 
     <!-- Legacy Colors (for compatibility) -->
     <color name="app_background_light">#1A1A1A</color>
