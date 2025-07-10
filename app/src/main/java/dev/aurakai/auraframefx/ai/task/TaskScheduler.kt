@@ -27,6 +27,19 @@ class TaskScheduler @Inject constructor(
     private val _activeTasks = mutableMapOf<String, Task>()
     private val _completedTasks = mutableMapOf<String, Task>()
 
+    /**
+     * Creates a new task with the specified parameters, adds it to the scheduler, updates statistics, schedules it for execution, and returns the created task.
+     *
+     * @param content The main content or description of the task.
+     * @param context The context in which the task should be executed.
+     * @param priority The priority level of the task.
+     * @param urgency The urgency level of the task.
+     * @param importance The importance level of the task.
+     * @param requiredAgents The set of agent types required to execute the task.
+     * @param dependencies The set of task IDs that must be completed before this task can be executed.
+     * @param metadata Additional metadata associated with the task.
+     * @return The newly created Task instance.
+     */
     fun createTask(
         content: String,
         context: String,
@@ -58,10 +71,9 @@ class TaskScheduler @Inject constructor(
     }
 
     /**
-     * Calculates weighted scores for a task, updates its metadata with these scores, adds it to the task queue,
-     * sorts the queue by total score in descending order, and triggers processing of the queue.
+     * Schedules a task by calculating its weighted scores, updating its metadata, adding it to the task queue, and sorting the queue by total score.
      *
-     * If an error occurs during scheduling, it is handled via the error handler with relevant context and task ID.
+     * Triggers processing of the queue to attempt execution of eligible tasks. Handles any scheduling errors using the error handler with relevant context and task ID.
      */
     private fun scheduleTask(task: Task) {
         try {
@@ -97,9 +109,9 @@ class TaskScheduler @Inject constructor(
     }
 
     /**
-     * Executes eligible tasks from the queue until reaching the maximum allowed active tasks or encountering a task that cannot be executed.
+     * Processes the task queue by executing eligible tasks until the maximum number of active tasks is reached or a blocking condition is encountered.
      *
-     * Removes each executed task from the queue. Stops processing when a task's dependencies or agent requirements are not satisfied.
+     * Removes each executed task from the queue. Stops processing when a task cannot be executed due to unmet dependencies or agent requirements.
      */
     private fun processQueue() {
         while (_taskQueue.isNotEmpty() && _activeTasks.size < config.maxActiveTasks) {
@@ -132,6 +144,15 @@ class TaskScheduler @Inject constructor(
      * Returns `true` if all dependencies have been completed and agent requirements are considered satisfied.
      * Currently, agent availability is always assumed to be met if required agents are specified.
      *
+     * @return `true` if the task can be executed; otherwise, `false`.
+     */
+    /**
+     * Determines whether a task is eligible for execution based on its dependencies and required agents.
+     *
+     * Returns `true` if all dependencies have been completed and agent requirements are considered satisfied.
+     * Currently, agent availability is assumed to be met if required agents are specified.
+     *
+     * @param task The task to evaluate for execution eligibility.
      * @return `true` if the task can be executed; otherwise, `false`.
      */
     private fun canExecuteTask(task: Task): Boolean {
@@ -169,6 +190,13 @@ class TaskScheduler @Inject constructor(
      *
      * The task's status is set to `IN_PROGRESS`, its assigned agents are updated to match the required agents,
      * and it is added to the active tasks map and the overall tasks state.
+     *
+     * @param task The task to be executed.
+     */
+    /**
+     * Marks the given task as in progress, assigns its required agents, and updates active and overall task tracking.
+     *
+     * The task's status is set to `IN_PROGRESS`, its assigned agents are updated, and it is added to the active tasks map and the main tasks state flow.
      *
      * @param task The task to be executed.
      */
@@ -211,6 +239,15 @@ class TaskScheduler @Inject constructor(
      * Moves the task between active, completed, or failed collections based on the new status.
      * On failure, triggers error handling with relevant context and metadata.
      * Refreshes the task in the main task map, updates aggregated statistics, and reprocesses the task queue.
+     *
+     * @param taskId The unique identifier of the task to update.
+     * @param status The new status to assign to the task.
+     */
+    /**
+     * Updates the status of a task and manages its lifecycle transitions.
+     *
+     * Moves the task between active and completed collections as appropriate, triggers error handling on failure,
+     * updates the main task map, refreshes task statistics, and reprocesses the task queue.
      *
      * @param taskId The unique identifier of the task to update.
      * @param status The new status to assign to the task.
@@ -293,7 +330,7 @@ class TaskScheduler @Inject constructor(
 =======
 >>>>>>> pr458merge
     /**
-     * Updates the aggregated task statistics to reflect the addition or status change of the specified task.
+     * Updates the aggregated task statistics to reflect the addition or status change of a task.
      *
      * Increments the total task count, updates counts for active, completed, and pending tasks, refreshes the last updated timestamp, and adjusts the count for the task's current status.
      *

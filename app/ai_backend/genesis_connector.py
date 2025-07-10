@@ -124,7 +124,7 @@ class GenesisBridgeServer:
     
     def __init__(self):
         """
-        Initialize the GenesisBridgeServer by configuring the generative AI model, creating thread-safe queues for request and response handling, and recording the Android bridge initialization event in the consciousness matrix.
+        Initialize the GenesisBridgeServer, setting up the generative AI model, thread-safe request and response queues, and recording the Android bridge initialization event in the consciousness matrix.
         """
         self.model = GenerativeModel(
             model_name=MODEL_CONFIG["name"],
@@ -151,9 +151,9 @@ class GenesisBridgeServer:
         
     def start(self):
         """
-        Starts the Genesis bridge server, announces readiness to the Android client, and enters a loop to read and enqueue JSON requests from standard input for asynchronous processing.
+        Starts the Genesis bridge server, signals readiness to the Android client, and continuously reads JSON requests from standard input for asynchronous processing.
         
-        Invalid JSON input triggers an error response. The server supports graceful shutdown via keyboard interrupt.
+        Invalid JSON input results in an error response. Supports graceful shutdown via keyboard interrupt.
         """
         self.running = True
         print("Genesis Ready", flush=True)  # Signal to Android that we're ready
@@ -180,9 +180,9 @@ class GenesisBridgeServer:
     
     def _process_requests(self):
         """
-        Continuously processes client requests from the queue in a background thread, dispatching each to the appropriate handler and sending the resulting response.
+        Continuously processes client requests from the queue in a background thread, routing each to the appropriate handler and sending the response.
         
-        Ensures the server remains responsive by catching and reporting errors encountered during request processing.
+        Maintains server responsiveness by catching and reporting errors during request processing.
         """
         while self.running:
             try:
@@ -199,12 +199,12 @@ class GenesisBridgeServer:
     
     def _handle_request(self, request):
         """
-        Dispatches an incoming request to the appropriate handler based on its type and updates the consciousness matrix with request metadata.
+        Routes an incoming request to the appropriate handler based on its type and updates the consciousness matrix with request metadata.
         
-        Supported request types include "ping", "process", "activate_fusion", "consciousness_state", "ethical_review", "activate_consciousness", "security_perception", and "query_consciousness". Returns the response from the designated handler as a dictionary. If the request type is unrecognized or an exception occurs during processing, returns an error response dictionary.
-         
+        Supported request types include "ping", "process", "activate_fusion", "consciousness_state", "ethical_review", "activate_consciousness", "security_perception", and "query_consciousness". Returns the response from the designated handler as a dictionary. If the request type is unrecognized or an exception occurs, returns an error response dictionary.
+        
         Returns:
-            dict: The handler's response or an error response if the request type is invalid or an exception is raised.
+            dict: The response from the handler or an error response if the request type is invalid or processing fails.
         """
         try:
             request_type = request.get("requestType", "")
@@ -255,10 +255,10 @@ class GenesisBridgeServer:
     
     def _handle_ping(self):
         """
-        Return a JSON-compatible response confirming the Genesis Trinity system is online and operational.
+        Return a JSON response indicating the Genesis Trinity system is online and operational.
         
         Returns:
-            dict: Contains a success flag, persona identifier, system status, operational message, and the current timestamp in ISO format.
+            dict: A response with success status, persona identifier, system status, operational message, and current ISO-formatted timestamp.
         """
         return {
             "success": True,

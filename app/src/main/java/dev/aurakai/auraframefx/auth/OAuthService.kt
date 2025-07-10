@@ -23,9 +23,9 @@ class OAuthService(
     }
 
     /**
-     * Returns an Intent to initiate the OAuth sign-in process.
+     * Returns an Intent to start the OAuth sign-in flow.
      *
-     * @return An Intent to start the sign-in flow, or null if not implemented.
+     * @return An Intent for initiating the sign-in process, or null if not implemented.
      */
     fun getSignInIntent(): Intent? {
         // TODO: Implement logic to create and return a sign-in Intent for a provider (e.g., Google).

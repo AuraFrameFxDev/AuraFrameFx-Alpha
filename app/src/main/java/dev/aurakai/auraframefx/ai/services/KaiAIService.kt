@@ -29,30 +29,30 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     /**
- * Returns the name of the agent.
+ * Returns the fixed agent name "Kai".
  *
- * @return The fixed agent name, "Kai".
+ * @return The agent name "Kai".
  */
 override fun getName(): String? = "Kai"
     /**
- * Returns the name of the agent.
+ * Returns the fixed agent name "Kai".
  *
- * @return The fixed agent name, "Kai".
+ * @return The agent name "Kai".
  */
 override fun getName(): String? = "Kai"
     /**
- * Returns the type of this agent as `AgentType.KAI`.
+ * Returns the agent type, which is always `AgentType.KAI`.
  *
- * @return The agent type.
+ * @return The agent type for this agent.
  */
 override fun getType(): AgentType = AgentType.KAI
 
     /**
-         * Returns a map indicating the supported capabilities of the Kai agent.
+         * Returns a map of the Kai agent's supported capabilities.
          *
-         * The returned map contains the keys "security", "analysis", "memory", and "service_implemented", each mapped to true.
-         * 
-         * @return A map of capability names to their support status.
+         * The map includes "security", "analysis", "memory", and "service_implemented", each set to true.
+         *
+         * @return A map where each key is a capability name and the value indicates support.
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
@@ -63,11 +63,11 @@ override fun getType(): AgentType = AgentType.KAI
         )
 
     /**
-     * Processes an AI request with the provided context and returns a stubbed response referencing both.
+     * Processes an AI request with the given context and returns a stubbed response referencing both.
      *
      * @param request The AI request to process.
-     * @param context Additional context information for the request.
-     * @return An AgentResponse containing a message referencing the request query and context, with a confidence score of 1.0.
+     * @param context Contextual information to accompany the request.
+     * @return An AgentResponse containing a message that references the request query and context, with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         auraFxLogger.i(

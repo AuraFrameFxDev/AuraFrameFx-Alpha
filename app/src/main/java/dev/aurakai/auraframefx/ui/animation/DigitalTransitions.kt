@@ -12,12 +12,19 @@ import androidx.compose.ui.graphics.Color // Added import for Color
  * Currently a placeholder with no visual effect.
  * @return The original modifier unchanged.
  */
-fun Modifier.cyberEdgeGlow(): Modifier = this /**
- * Returns a modifier intended to apply a customizable cyber edge glow effect using the given primary and secondary colors.
+/**
+ * Placeholder for applying a cyber-themed edge glow effect to the modifier.
  *
- * @param primaryColor The primary color for the edge glow.
- * @param secondaryColor The secondary color for the edge glow.
- * @return The modifier with the intended cyber edge glow effect applied.
+ * Currently returns the original modifier without any visual changes.
+ */
+fun Modifier.cyberEdgeGlow(): Modifier = this /**
+ * Returns a modifier intended to apply a customizable cyber edge glow effect using the specified primary and secondary colors.
+ *
+ * Currently, this function is a placeholder and returns the original modifier without applying any visual effect.
+ *
+ * @param primaryColor The primary color to be used for the edge glow effect.
+ * @param secondaryColor The secondary color to be used for the edge glow effect.
+ * @return The original modifier, unchanged.
  */
 fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier = this /**
  * Applies a cyber-themed edge glow effect to this modifier.
@@ -32,25 +39,26 @@ fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this /**
  */
 =======
 fun Modifier.cyberEdgeGlow(): Modifier = this /**
- * Returns a modifier intended to apply a customizable cyber edge glow effect using the given primary and secondary colors.
+ * Returns a modifier intended to apply a customizable cyber edge glow effect using the specified primary and secondary colors.
  *
- * @param primaryColor The primary color for the edge glow.
- * @param secondaryColor The secondary color for the edge glow.
- * @return The modifier with the intended cyber edge glow effect applied.
+ * Currently, this function is a placeholder and returns the original modifier without applying any visual effect.
+ *
+ * @param primaryColor The primary color to be used for the edge glow effect.
+ * @param secondaryColor The secondary color to be used for the edge glow effect.
+ * @return The original modifier, unchanged.
  */
 fun Modifier.cyberEdgeGlow(primaryColor: Color, secondaryColor: Color): Modifier = this /**
- * Applies a digital pixelation visual effect to this modifier when enabled.
+ * Intended to apply a digital pixelation effect to this modifier when enabled.
  *
- * @param visible Whether the pixelation effect should be applied.
- * @return The modifier with the digital pixelation effect if visible is true; otherwise, the original modifier.
+ * @param visible If true, the digital pixelation effect should be applied; otherwise, no effect is applied.
+ * @return The original modifier, as this function is currently a placeholder and does not modify the modifier.
  */
 fun Modifier.digitalPixelEffect(visible: Boolean): Modifier = this // Placeholder
 >>>>>>> pr458merge
 /**
- * Intended to apply a digital glitch visual effect to the modifier.
+ * Placeholder for applying a digital glitch visual effect to this modifier.
  *
- * Currently returns the original modifier unchanged.
- * @return The original modifier without any effect applied.
+ * Currently returns the original modifier without any changes.
  */
 fun Modifier.digitalGlitchEffect(): Modifier = this // Placeholder
 

@@ -56,10 +56,10 @@ class NeuralWhisper @Inject constructor(
         // TODO: Any other initialization for audio processing or AI interaction components.
     }
 
-    /**
-     * Initializes the Text-to-Speech (TTS) engine and sets the initialization status.
+    /****
+     * Initializes the Text-to-Speech (TTS) engine and updates the initialization status.
      *
-     * Attempts to create a `TextToSpeech` instance and marks TTS as initialized if successful.
+     * Attempts to create a `TextToSpeech` instance and marks TTS as initialized if successful. 
      * Language, voice, pitch, and rate configuration are not yet implemented.
      */
     private fun initializeTts() {
@@ -103,12 +103,12 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Transcribes audio input to text using speech-to-text processing.
+     * Converts audio input to text using speech-to-text processing.
      *
-     * Updates the conversation state to reflect listening and processing stages. Returns a placeholder transcription if speech-to-text is initialized; otherwise, returns null.
+     * Updates the conversation state to indicate listening and processing stages. Returns a placeholder transcription if speech-to-text is initialized; otherwise, returns null.
      *
-     * @param audioInput The audio data or trigger for starting speech recognition.
-     * @return The transcribed text if speech-to-text is initialized, or null otherwise.
+     * @param audioInput The audio data or trigger for initiating speech recognition.
+     * @return The transcribed text if speech-to-text is initialized, or null if not initialized.
      */
     suspend fun speechToText(audioInput: Any /* Placeholder type */): String? {
         // TODO: Implement actual STT logic.
@@ -130,7 +130,7 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initiates speech synthesis for the given text using the specified locale.
+     * Requests speech synthesis for the provided text using the specified locale.
      *
      * Updates the conversation state to "Speaking." Returns `false` if the text-to-speech engine is not initialized; otherwise, returns `true` as a placeholder indicating the request was accepted.
      *
@@ -215,9 +215,9 @@ class NeuralWhisper @Inject constructor(
     /**
      * Stops the current audio recording session and returns a status message.
      *
-     * Updates the conversation state to "Processing" while stopping the recording. Returns a success message if the operation completes without exception, or an error message if an error occurs.
+     * Updates the conversation state to "Processing" during the stop operation. Returns a success message if stopping completes without exception, or an error message if an error occurs.
      *
-     * @return A message indicating the result of the stop recording operation.
+     * @return A message indicating whether the recording was stopped successfully or describing the error encountered.
      */
     fun stopRecording(): String {
         return try {

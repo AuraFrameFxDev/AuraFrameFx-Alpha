@@ -38,6 +38,14 @@ object DatabaseModule {
      * @param context The application context used to build the database.
      * @return The initialized AppDatabase instance.
      */
+    /**
+     * Provides a singleton instance of the Room `AppDatabase` configured with destructive migration fallback.
+     *
+     * The database is built using the application context and named "aura_frame_fx_database".
+     *
+     * @param context The application context used to create the database.
+     * @return The singleton `AppDatabase` instance.
+     */
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
@@ -62,10 +70,10 @@ object DatabaseModule {
 =======
 >>>>>>> pr458merge
     /**
-     * Returns the AgentMemoryDao for accessing agent memory data from the provided AppDatabase.
+     * Provides the AgentMemoryDao instance from the given AppDatabase.
      *
-     * @param database The Room database instance.
-     * @return The AgentMemoryDao used for agent memory operations.
+     * @param database The Room database instance to retrieve the DAO from.
+     * @return The AgentMemoryDao for accessing agent memory data.
      */
     @Provides
     fun provideAgentMemoryDao(database: AppDatabase): AgentMemoryDao {

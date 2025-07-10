@@ -21,7 +21,7 @@ class AppStateManager @Inject constructor() {
     /**
      * Replaces the current application state with the specified new state.
      *
-     * @param newState The new application state to apply.
+     * @param newState The new state to set as the current application state.
      */
     fun updateAppState(newState: AppState) {
         _appState.value = newState
@@ -30,7 +30,7 @@ class AppStateManager @Inject constructor() {
     /**
      * Updates the application's loading status.
      *
-     * @param loading Indicates whether the application is currently loading.
+     * @param loading True if the application is loading; false otherwise.
      */
     fun setLoading(loading: Boolean) {
         _isLoading.value = loading

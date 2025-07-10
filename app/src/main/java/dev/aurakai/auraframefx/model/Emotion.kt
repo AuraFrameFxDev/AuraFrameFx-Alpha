@@ -56,12 +56,12 @@ enum class Emotion {
         fun random(): Emotion = values().random()
         
         /**
-             * Returns the Emotion corresponding to the given string, ignoring case.
+             * Returns the Emotion that matches the given string, ignoring case.
              *
-             * If no matching emotion is found, returns NEUTRAL.
+             * If no matching emotion is found, NEUTRAL is returned.
              *
              * @param name The string to match against emotion names.
-             * @return The matching Emotion, or NEUTRAL if no match exists.
+             * @return The corresponding Emotion, or NEUTRAL if no match is found.
              */
         fun fromString(name: String): Emotion = 
             values().find { it.name.equals(name, ignoreCase = true) } ?: NEUTRAL

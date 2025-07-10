@@ -30,9 +30,9 @@ data class ChatMessage(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 /**
- * Displays an interactive AI chat screen with a scrollable conversation history and persistent input field.
+ * Displays an interactive AI chat interface with a scrollable conversation history and persistent input field.
  *
- * Users can send messages, which are appended to the chat and followed by a simulated AI response. The chat history and input text are preserved across recompositions and configuration changes to ensure continuity.
+ * Users can enter and send messages, which are added to the chat and immediately followed by a simulated AI response. The chat history and input text are preserved across recompositions and configuration changes for a seamless user experience.
  */
 @Composable
 fun AiChatScreen() {
@@ -121,11 +121,11 @@ fun AiChatScreen() {
 }
 
 /**
- * Renders a chat message bubble with alignment, color, and shape determined by the sender.
+ * Displays a single chat message bubble with visual styling based on the sender.
  *
- * User messages appear right-aligned with primary container colors and an outgoing bubble shape; AI messages are left-aligned with surface variant colors and an incoming bubble shape. The bubble width is constrained for readability.
+ * User messages are right-aligned with primary container colors and an outgoing bubble shape, while AI messages are left-aligned with surface variant colors and an incoming bubble shape. The bubble width is limited for readability.
  *
- * @param message The chat message to render, including sender information.
+ * @param message The chat message to display, containing the message text and sender information.
  */
 @Composable
 fun ChatMessageItem(message: ChatMessage) {
@@ -164,9 +164,9 @@ fun ChatMessageItem(message: ChatMessage) {
 }
 
 /**
- * Shows a design-time preview of the AI chat screen within the custom AuraFrameFXTheme.
+ * Displays a design-time preview of the AI chat screen using the custom AuraFrameFXTheme.
  *
- * This preview allows developers to visualize the chat UI as it will appear in the app, using the defined theme and sample data.
+ * Enables developers to visualize the chat UI with sample data and theming during development.
  */
 @Preview(showBackground = true)
 @Composable
