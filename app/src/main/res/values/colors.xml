@@ -41,38 +41,6 @@
     <!-- Material 3 Compatibility Colors -->
     <color name="onPrimary">@color/light_on_primary</color>
 
-    <!-- Dark Theme Colors (for future implementation) -->
-    <color name="dark_primary">#00FFCC</color>
-    <color name="dark_on_primary">#000000</color>
-    <color name="dark_primary_container">#00CC99</color>
-    <color name="dark_on_primary_container">#000000</color>
-
-    <color name="dark_secondary">#E000FF</color>
-    <color name="dark_on_secondary">#000000</color>
-    <color name="dark_secondary_container">#B000CC</color>
-    <color name="dark_on_secondary_container">#000000</color>
-
-    <color name="dark_tertiary">#00FFFF</color>
-    <color name="dark_on_tertiary">#000000</color>
-    <color name="dark_tertiary_container">#00CCCC</color>
-    <color name="dark_on_tertiary_container">#000000</color>
-
-    <color name="dark_error">#FFB4AB</color>
-    <color name="dark_error_container">#93000A</color>
-    <color name="dark_on_error">#690005</color>
-    <color name="dark_on_error_container">#FFB4AB</color>
-
-    <color name="dark_background">#1A1A1A</color>
-    <color name="dark_on_background">#E1E1E1</color>
-
-    <color name="dark_surface">#121212</color>
-    <color name="dark_on_surface">#E1E1E1</color>
-    <color name="dark_surface_variant">#3D3D3D</color>
-    <color name="dark_on_surface_variant">#C5C5C5</color>
-
-    <color name="dark_outline">#5C5C5C</color>
-    <color name="dark_outline_variant">#3D3D3D</color>
-
     <!-- Common Colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
