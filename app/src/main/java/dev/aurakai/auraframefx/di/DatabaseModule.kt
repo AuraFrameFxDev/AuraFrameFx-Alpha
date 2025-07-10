@@ -26,6 +26,12 @@ object DatabaseModule {
      */
 =======
 >>>>>>> pr458merge
+    /**
+     * Provides a singleton instance of the Room `AppDatabase` configured with destructive migration fallback.
+     *
+     * @param context The application context used to build the database.
+     * @return The singleton `AppDatabase` instance.
+     */
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
@@ -49,6 +55,12 @@ object DatabaseModule {
      */
 =======
 >>>>>>> pr458merge
+    /**
+     * Provides an instance of AgentMemoryDao from the given AppDatabase.
+     *
+     * @param database The Room database instance.
+     * @return The AgentMemoryDao for accessing agent memory data.
+     */
     @Provides
     fun provideAgentMemoryDao(database: AppDatabase): AgentMemoryDao {
         return database.agentMemoryDao()

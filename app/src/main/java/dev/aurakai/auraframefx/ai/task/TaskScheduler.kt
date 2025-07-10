@@ -90,6 +90,11 @@ class TaskScheduler @Inject constructor(
         }
     }
 
+    /**
+     * Processes the task queue by executing eligible tasks until the maximum number of active tasks is reached or no further tasks can be executed.
+     *
+     * Removes each executed task from the queue. Stops processing if a task cannot be executed due to unmet dependencies or agent requirements.
+     */
     private fun processQueue() {
         while (_taskQueue.isNotEmpty() && _activeTasks.size < config.maxActiveTasks) {
             val nextTask = _taskQueue.first()
@@ -110,6 +115,11 @@ class TaskScheduler @Inject constructor(
      */
 =======
 >>>>>>> pr458merge
+    /**
+     * Determines whether a task is eligible for execution based on its dependencies and required agents.
+     *
+     * Returns `true` if all dependencies are completed and agent requirements are considered satisfied; otherwise, returns `false`.
+     */
     private fun canExecuteTask(task: Task): Boolean {
         // Check dependencies
         val dependencies = task.dependencies.mapNotNull { _tasks.value[it] }
@@ -135,6 +145,11 @@ class TaskScheduler @Inject constructor(
      */
 =======
 >>>>>>> pr458merge
+    /**
+     * Marks the given task as in progress, assigns required agents, and updates internal tracking of active and all tasks.
+     *
+     * Updates the task's status to `IN_PROGRESS`, assigns the required agents, adds it to the active tasks map, and updates the overall tasks state.
+     */
     private fun executeTask(task: Task) {
         val updatedTask = task.copy(
             status = TaskStatus.IN_PROGRESS,
@@ -158,6 +173,16 @@ class TaskScheduler @Inject constructor(
      */
 =======
 >>>>>>> pr458merge
+    /**
+     * Updates the status of a task and manages its state transitions.
+     *
+     * If the status is `COMPLETED`, moves the task from active to completed tasks.
+     * If the status is `FAILED`, removes the task from active tasks and triggers error handling.
+     * Updates the task in the internal task map, refreshes task statistics, and processes the task queue.
+     *
+     * @param taskId The unique identifier of the task to update.
+     * @param status The new status to assign to the task.
+     */
     fun updateTaskStatus(taskId: String, status: TaskStatus) {
         val task = _tasks.value[taskId] ?: return
         val updatedTask = task.copy(status = status)
@@ -235,6 +260,14 @@ class TaskScheduler @Inject constructor(
      */
 =======
 >>>>>>> pr458merge
+    /**
+     * Updates the aggregated task statistics to reflect the addition or status change of the given task.
+     *
+     * Increments the total task count, updates counts of active, completed, and pending tasks,
+     * refreshes the last updated timestamp, and adjusts the count for the task's current status.
+     *
+     * @param task The task whose status or addition triggers the statistics update.
+     */
     private fun updateStats(task: Task) {
         _taskStats.update { current ->
             current.copy(

@@ -120,14 +120,14 @@ class AuraFxLogger @Inject constructor(
         loggerScope.launch { writeLogEntry("DEBUG", tag, message, throwable) }
 
     /**
-     * Logs an informational message asynchronously with the specified tag and optional throwable.
-     *
-     * The log entry is written to both Android Logcat and the current day's log file.
-     *
-     * @param tag The tag identifying the source of the log message.
-     * @param message The informational message to log.
-     * @param throwable An optional throwable whose stack trace will be included in the log entry.
-     */
+ * Asynchronously logs a warning message with the specified tag and optional throwable.
+ *
+ * The log entry is written to both Android Logcat and the current day's log file.
+ *
+ * @param tag The tag identifying the source of the log message.
+ * @param message The warning message to log.
+ * @param throwable An optional throwable whose stack trace will be included in the log entry.
+ */
     fun i(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("INFO", tag, message, throwable) }
 
@@ -149,7 +149,16 @@ class AuraFxLogger @Inject constructor(
      * @param throwable An optional throwable whose stack trace will be included in the log entry.
      */
 >>>>>>> pr458merge
-    fun w(tag: String, message: String, throwable: Throwable? = null) =
+    /**
+      * Asynchronously logs a warning message with the specified tag and optional throwable.
+      *
+      * The message is written to both Android Logcat and the current day's log file.
+      *
+      * @param tag Identifies the source of the log message.
+      * @param message The warning message to log.
+      * @param throwable Optional exception whose stack trace will be included in the log entry.
+      */
+     fun w(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("WARN", tag, message, throwable) }
 
     /**
@@ -167,7 +176,14 @@ class AuraFxLogger @Inject constructor(
      *
      * The log entry is written to both Android Logcat and the current day's log file.
      *
-     * @param tag The tag identifying the source of the log message.
+     * /**
+ * Asynchronously logs an error-level message to both Android Logcat and the current day's log file.
+ *
+ * @param tag Identifier for the source of the log message.
+ * @param message The error message to be logged.
+ * @param throwable Optional exception whose stack trace will be included in the log entry.
+ */
+@param tag The tag identifying the source of the log message.
      * @param message The error message to log.
      * @param throwable An optional throwable whose stack trace will be included in the log entry.
      */
@@ -191,17 +207,20 @@ class AuraFxLogger @Inject constructor(
      * @param throwable Optional throwable whose stack trace will be included in the log entry.
      */
 >>>>>>> pr458merge
-    fun v(tag: String, message: String, throwable: Throwable? = null) =
+    /**
+         * Asynchronously logs a verbose-level message to both Android Logcat and the internal daily log file.
+         *
+         * @param tag The tag identifying the source of the log message.
+         * @param message The message to log.
+         * @param throwable An optional throwable to include in the log entry.
+         */
+        fun v(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("VERBOSE", tag, message, throwable) }
 
     /**
-     * Reads and returns the contents of all log files in the internal logs directory.
+     * Reads and returns the contents of all log files in the internal logs directory whose names match the log filename prefix.
      *
-<<<<<<< HEAD
-     * @return A map where each key is a log filename and the value is its content, including only files matching the log filename prefix. The map is sorted with the newest files first.
-=======
-     * @return A map where each key is a log filename and the value is its content. Only files matching the log filename prefix are included. The map is sorted with the newest files first.
->>>>>>> pr458merge
+     * @return A map where each key is a log filename and the value is its content, with the newest files listed first.
      */
     suspend fun readAllLogs(): Map<String, String> = withContext(Dispatchers.IO) {
         val logs = mutableMapOf<String, String>()
@@ -233,7 +252,7 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Reads and returns the contents of the current day's log file.
+     * Retrieves the contents of the current day's log file.
      *
      * @return The contents of today's log file, or an empty string if the file does not exist or cannot be read.
      */
@@ -245,15 +264,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-<<<<<<< HEAD
-     * Removes log files older than the retention period from the internal logs directory.
+     * Deletes log files from the internal logs directory that are older than the configured retention period.
      *
-     * Scans the log directory for files with the configured log filename prefix and deletes those whose last modified time exceeds the retention threshold.
-=======
-     * Deletes log files older than the retention period from the internal logs directory.
-     *
-     * Scans the log directory for files matching the log filename prefix and removes those whose last modified time exceeds the configured retention period.
->>>>>>> pr458merge
+     * Scans for files with the log filename prefix and removes those whose last modified time exceeds the retention threshold.
      */
     private suspend fun cleanupOldLogs() = withContext(Dispatchers.IO) {
         // Use injected context
@@ -283,13 +296,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-<<<<<<< HEAD
-     * Cancels all ongoing logging and maintenance operations, stopping the logger.
-=======
-     * Shuts down the logger by cancelling all ongoing logging and maintenance coroutines.
->>>>>>> pr458merge
+     * Shuts down the logger, cancelling all ongoing logging and maintenance coroutines.
      *
-     * After calling this method, no further log entries will be processed or written.
+     * After this method is called, no further log entries will be processed or written.
      */
     fun shutdown() {
         Log.d(TAG, "AuraFxLogger shutting down loggerScope.")
@@ -310,6 +319,16 @@ class AuraFxLogger @Inject constructor(
 =======
     // Internal file operation methods using injected context
 >>>>>>> pr458merge
+    /**
+     * Writes text content to a file in the app's internal storage using the injected context.
+     *
+     * Creates parent directories if they do not exist. Appends to the file if `append` is true; otherwise, overwrites the file.
+     *
+     * @param filePath Relative path within the app's internal storage.
+     * @param content The text content to write.
+     * @param append Whether to append to the file (`true`) or overwrite it (`false`).
+     * @return `true` if the write operation succeeds, `false` if an error occurs.
+     */
     private fun writeToFileInternal(filePath: String, content: String, append: Boolean): Boolean {
         return try {
             val fullPath = File(context.filesDir, filePath)

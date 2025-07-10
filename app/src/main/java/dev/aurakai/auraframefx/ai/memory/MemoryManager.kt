@@ -31,6 +31,12 @@ class MemoryManager @Inject constructor(
      */
 =======
 >>>>>>> pr458merge
+    /**
+     * Stores a memory item and updates memory statistics and recent access tracking.
+     *
+     * @param item The memory item to store.
+     * @return The ID of the stored memory item.
+     */
     fun storeMemory(item: MemoryItem): String {
         memoryStore[item.id] = item
         updateStats()
@@ -109,6 +115,9 @@ class MemoryManager @Inject constructor(
      */
 =======
 >>>>>>> pr458merge
+    /**
+     * Updates the memory statistics state with the current total item count, recent item count within the configured duration, and aggregate memory size.
+     */
     private fun updateStats() {
         _memoryStats.update { current ->
             current.copy(
