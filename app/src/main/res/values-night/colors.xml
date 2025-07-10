@@ -11,5 +11,4 @@
          If specific on_error for night is needed, it should be defined here. -->
     <!-- Primary, Secondary, Tertiary neon colors from the main colors.xml are assumed to be used
          unless specific night versions are required. -->
-    <color name="neon_teal_transparent">#3300FFCC</color> <!-- 20% opacity for neon_teal -->
 </resources>
