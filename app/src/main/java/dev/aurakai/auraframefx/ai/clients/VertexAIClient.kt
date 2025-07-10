@@ -6,9 +6,9 @@ package dev.aurakai.auraframefx.ai.clients
  */
 interface VertexAIClient {
     /**
- * Generates content based on the provided text prompt.
+ * Generates content from a text prompt.
  *
- * @param prompt The text prompt used to guide content generation.
+ * @param prompt The text prompt to guide content generation.
  * @return The generated content as a string, or null if generation fails.
  */
     suspend fun generateContent(prompt: String): String?
@@ -24,33 +24,33 @@ interface VertexAIClient {
     suspend fun generateText(prompt: String, maxTokens: Int = 1000, temperature: Float = 0.7f): String
 
     /**
- * Generates source code according to the provided specification, programming language, and coding style.
+ * Generates source code based on a specification, target language, and coding style.
  *
- * @param specification Description of the desired functionality or requirements for the generated code.
- * @param language The target programming language for the generated code.
- * @param style The coding style or conventions to apply.
- * @return The generated source code as a string, or null if code generation fails.
+ * @param specification Description of the functionality or requirements for the code to be generated.
+ * @param language The programming language in which the code should be generated.
+ * @param style The coding style or conventions to follow for the generated code.
+ * @return The generated source code as a string, or null if generation is unsuccessful.
  */
     suspend fun generateCode(specification: String, language: String, style: String): String?
 
     /**
- * Checks whether the Vertex AI service is reachable and responsive.
+ * Verifies connectivity to the Vertex AI service.
  *
- * @return `true` if the connection is successful, `false` otherwise.
+ * @return `true` if the service is reachable and responsive; `false` otherwise.
  */
     suspend fun validateConnection(): Boolean
 
     /**
- * Initializes and configures creative AI models within Vertex AI to enable content generation features.
+ * Initializes creative AI models in Vertex AI to enable content generation capabilities.
  */
     suspend fun initializeCreativeModels()
 
     /**
- * Analyzes image data using a guiding text prompt and returns the analysis result as a string.
+ * Analyzes the provided image data using a guiding text prompt and returns the analysis result.
  *
- * @param imageData The raw bytes of the image to analyze.
- * @param prompt The text prompt that guides the analysis.
- * @return The analysis result as a string.
+ * @param imageData The raw bytes of the image to be analyzed.
+ * @param prompt The text prompt that directs the analysis.
+ * @return The result of the image analysis as a string.
  */
     suspend fun analyzeImage(imageData: ByteArray, prompt: String): String
 

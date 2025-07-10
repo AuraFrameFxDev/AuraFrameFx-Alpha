@@ -50,11 +50,11 @@ data class VertexAIConfig(
     val enableFunctionCalling: Boolean = true
 ) {
     /**
-     * Validates the configuration fields and returns a list of error messages for any invalid or missing values.
+     * Checks the configuration for missing or invalid values and returns a list of error messages.
      *
-     * Ensures required string fields are not blank and numeric parameters are within valid ranges.
+     * Validates that required string fields are not blank and numeric parameters are within acceptable ranges.
      *
-     * @return A list of error messages describing configuration issues, or an empty list if all fields are valid.
+     * @return A list of error messages for each invalid or missing configuration value; returns an empty list if all fields are valid.
      */
     fun validate(): List<String> {
         val errors = mutableListOf<String>()
@@ -80,20 +80,20 @@ data class VertexAIConfig(
     }
     
     /**
-     * Constructs the base URL for Vertex AI API requests using the configured endpoint, API version, project ID, and location.
+     * Returns the base URL for Vertex AI API requests, constructed from the configured endpoint, API version, project ID, and location.
      *
-     * @return The base endpoint URL for API requests.
+     * @return The base endpoint URL for Vertex AI API requests.
      */
     fun getFullEndpoint(): String {
         return "https://$endpoint/$apiVersion/projects/$projectId/locations/$location"
     }
     
     /**
-     * Returns the complete URL for the content generation API endpoint for the configured model.
+     * Constructs the full URL for the content generation API endpoint using the current model configuration.
      *
-     * The URL includes the base endpoint, API version, project ID, location, and model name as specified in the current configuration.
+     * The returned URL incorporates the base endpoint, API version, project ID, location, and model name.
      *
-     * @return The full endpoint URL for invoking content generation with the selected model.
+     * @return The complete endpoint URL for content generation requests.
      */
     fun getModelEndpoint(): String {
         return "${getFullEndpoint()}/publishers/google/models/$modelName:generateContent"

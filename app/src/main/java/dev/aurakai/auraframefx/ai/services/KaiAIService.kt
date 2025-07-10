@@ -29,31 +29,30 @@ class KaiAIService @Inject constructor(
     private val auraFxLogger: AuraFxLogger,
 ) : Agent {
     /**
-<<<<<<< HEAD
- * Retrieves the name of the agent.
+ * Returns the name of the agent.
  *
- * @return The agent name, "Kai".
+ * @return The fixed agent name, "Kai".
  */
 override fun getName(): String? = "Kai"
     /**
- * Returns the fixed name of the agent, "Kai".
+ * Returns the name of the agent.
  *
- * @return The agent's name.
+ * @return The fixed agent name, "Kai".
  */
 override fun getName(): String? = "Kai"
     /**
- * Returns the agent type as `AgentType.KAI`.
+ * Returns the type of this agent as `AgentType.KAI`.
  *
- * @return The type of this agent.
+ * @return The agent type.
  */
 override fun getType(): AgentType = AgentType.KAI
 
     /**
-         * Returns a map of the Kai agent's supported capabilities.
+         * Returns a map indicating the supported capabilities of the Kai agent.
          *
-         * The map includes the keys "security", "analysis", "memory", and "service_implemented", each set to true.
-         *
-         * @return A map indicating which capabilities are supported by the agent.
+         * The returned map contains the keys "security", "analysis", "memory", and "service_implemented", each mapped to true.
+         * 
+         * @return A map of capability names to their support status.
          */
     fun getCapabilities(): Map<String, Any> =
         mapOf(
@@ -64,10 +63,10 @@ override fun getType(): AgentType = AgentType.KAI
         )
 
     /**
-     * Processes an AI request with the given context and returns a stubbed response referencing both.
+     * Processes an AI request with the provided context and returns a stubbed response referencing both.
      *
      * @param request The AI request to process.
-     * @param context Contextual information associated with the request.
+     * @param context Additional context information for the request.
      * @return An AgentResponse containing a message referencing the request query and context, with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context

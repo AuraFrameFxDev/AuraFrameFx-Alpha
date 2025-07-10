@@ -20,6 +20,11 @@ class AppInitializerInitializer : Initializer<Unit> {
      *
      * This method is called on the main thread when the application launches.
      */
+    /**
+     * Performs application-specific initialization during app startup.
+     *
+     * This method is called on the main thread when the application launches.
+     */
     override fun create(context: Context) {
         // TODO: Implement initialization logic here.
         // This method is called on the main thread during app startup.
@@ -37,7 +42,7 @@ class AppInitializerInitializer : Initializer<Unit> {
     /**
      * Returns a list of initializer classes that this initializer depends on.
      *
-     * @return An empty list, indicating no dependencies.
+     * @return An empty list, indicating that there are no dependencies.
      */
     override fun dependencies(): List<Class<out Initializer<*>>> {
         // TODO: Define dependencies if this initializer depends on others.

@@ -57,6 +57,12 @@ class TaskScheduler @Inject constructor(
         return task
     }
 
+    /**
+     * Calculates weighted scores for a task, updates its metadata with these scores, adds it to the task queue,
+     * sorts the queue by total score in descending order, and triggers processing of the queue.
+     *
+     * If an error occurs during scheduling, it is handled via the error handler with relevant context and task ID.
+     */
     private fun scheduleTask(task: Task) {
         try {
             val priorityScore = calculatePriorityScore(task)
@@ -91,9 +97,9 @@ class TaskScheduler @Inject constructor(
     }
 
     /**
-     * Processes the task queue by executing eligible tasks until the maximum number of active tasks is reached or no further tasks can be executed.
+     * Executes eligible tasks from the queue until reaching the maximum allowed active tasks or encountering a task that cannot be executed.
      *
-     * Removes each executed task from the queue. Stops processing if a task cannot be executed due to unmet dependencies or agent requirements.
+     * Removes each executed task from the queue. Stops processing when a task's dependencies or agent requirements are not satisfied.
      */
     private fun processQueue() {
         while (_taskQueue.isNotEmpty() && _activeTasks.size < config.maxActiveTasks) {
@@ -119,6 +125,14 @@ class TaskScheduler @Inject constructor(
      * Determines whether a task is eligible for execution based on its dependencies and required agents.
      *
      * Returns `true` if all dependencies are completed and agent requirements are considered satisfied; otherwise, returns `false`.
+     */
+    /**
+     * Determines whether a task is eligible for execution based on its dependencies and required agents.
+     *
+     * Returns `true` if all dependencies have been completed and agent requirements are considered satisfied.
+     * Currently, agent availability is always assumed to be met if required agents are specified.
+     *
+     * @return `true` if the task can be executed; otherwise, `false`.
      */
     private fun canExecuteTask(task: Task): Boolean {
         // Check dependencies
@@ -150,6 +164,14 @@ class TaskScheduler @Inject constructor(
      *
      * Updates the task's status to `IN_PROGRESS`, assigns the required agents, adds it to the active tasks map, and updates the overall tasks state.
      */
+    /**
+     * Marks the given task as in progress, assigns required agents, and updates the active and overall task state.
+     *
+     * The task's status is set to `IN_PROGRESS`, its assigned agents are updated to match the required agents,
+     * and it is added to the active tasks map and the overall tasks state.
+     *
+     * @param task The task to be executed.
+     */
     private fun executeTask(task: Task) {
         val updatedTask = task.copy(
             status = TaskStatus.IN_PROGRESS,
@@ -179,6 +201,16 @@ class TaskScheduler @Inject constructor(
      * If the status is `COMPLETED`, moves the task from active to completed tasks.
      * If the status is `FAILED`, removes the task from active tasks and triggers error handling.
      * Updates the task in the internal task map, refreshes task statistics, and processes the task queue.
+     *
+     * @param taskId The unique identifier of the task to update.
+     * @param status The new status to assign to the task.
+     */
+    /**
+     * Updates the status of a task and manages its state transitions.
+     *
+     * Moves the task between active, completed, or failed collections based on the new status.
+     * On failure, triggers error handling with relevant context and metadata.
+     * Refreshes the task in the main task map, updates aggregated statistics, and reprocesses the task queue.
      *
      * @param taskId The unique identifier of the task to update.
      * @param status The new status to assign to the task.
@@ -261,12 +293,11 @@ class TaskScheduler @Inject constructor(
 =======
 >>>>>>> pr458merge
     /**
-     * Updates the aggregated task statistics to reflect the addition or status change of the given task.
+     * Updates the aggregated task statistics to reflect the addition or status change of the specified task.
      *
-     * Increments the total task count, updates counts of active, completed, and pending tasks,
-     * refreshes the last updated timestamp, and adjusts the count for the task's current status.
+     * Increments the total task count, updates counts for active, completed, and pending tasks, refreshes the last updated timestamp, and adjusts the count for the task's current status.
      *
-     * @param task The task whose status or addition triggers the statistics update.
+     * @param task The task whose addition or status change triggers the statistics update.
      */
     private fun updateStats(task: Task) {
         _taskStats.update { current ->

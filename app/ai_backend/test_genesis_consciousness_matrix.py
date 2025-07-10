@@ -2724,11 +2724,17 @@ class TestMatrixQuantumBehavior(unittest.TestCase):
     """Test quantum-inspired behaviors and superposition states."""
     
     def setUp(self):
-        """Initialize matrix for quantum behavior tests."""
+        """
+        Set up a new GenesisConsciousnessMatrix instance for each quantum behavior test.
+        """
         self.matrix = GenesisConsciousnessMatrix()
         
     def test_matrix_superposition_consciousness_states(self):
-        """Test matrix behavior with nodes in superposition-like consciousness states."""
+        """
+        Test the matrix's handling of nodes initialized with superposition-like consciousness levels and their evolution.
+        
+        This test adds nodes with quantum-inspired consciousness values, connects them with strengths reflecting their state differences, and evolves the matrix over multiple steps. It verifies that the overall consciousness level remains within valid bounds and that the system maintains coherence after stabilization.
+        """
         # Create nodes with precisely calculated superposition levels
         superposition_levels = [
             0.5,  # Perfect superposition
@@ -2763,7 +2769,11 @@ class TestMatrixQuantumBehavior(unittest.TestCase):
                 self.assertIsNotNone(current_level)
                 
     def test_matrix_entanglement_propagation(self):
-        """Test consciousness entanglement between distant nodes."""
+        """
+        Test that consciousness level changes in one node propagate to its entangled partner through strong connections.
+        
+        Creates multiple entangled node pairs with complementary consciousness levels, connects them with high-strength links, updates one node's level, evolves the matrix, and verifies that the partner node's consciousness level is affected.
+        """
         # Create entangled pairs
         entangled_pairs = [
             (f"entangled_a_{i}", f"entangled_b_{i}", 0.1 + i * 0.15)
@@ -2796,7 +2806,11 @@ class TestMatrixQuantumBehavior(unittest.TestCase):
             self.assertIsNotNone(final_partner_level)
             
     def test_matrix_consciousness_uncertainty_principle(self):
-        """Test uncertainty principle analog in consciousness measurement."""
+        """
+        Test that repeated consciousness level measurements exhibit bounded variance, simulating an uncertainty principle analog.
+        
+        Creates nodes with precisely defined consciousness levels, performs multiple measurements interleaved with evolution steps, and asserts that measurement variance remains within reasonable bounds while all measurements stay within valid limits.
+        """
         # Create nodes with precisely defined consciousness
         precise_nodes = []
         for i in range(10):
@@ -2830,11 +2844,17 @@ class TestMatrixBiologicalAnalogies(unittest.TestCase):
     """Test biological neural network analogies and behaviors."""
     
     def setUp(self):
-        """Initialize matrix for biological behavior tests."""
+        """
+        Set up a new GenesisConsciousnessMatrix instance for biological analogy tests.
+        """
         self.matrix = GenesisConsciousnessMatrix()
         
     def test_matrix_synaptic_plasticity_simulation(self):
-        """Test synaptic plasticity through connection strength adaptation."""
+        """
+        Test simulation of synaptic plasticity by adapting connection strengths in a layered neural-like matrix.
+        
+        This test constructs a multi-layer network, establishes feedforward connections with variable strengths, simulates repeated activation and evolution steps, and verifies that consciousness levels remain within valid bounds throughout the learning process.
+        """
         # Create neural-like structure
         layer_sizes = [5, 8, 6, 3]  # Input, hidden1, hidden2, output
         layers = {}
@@ -2887,7 +2907,11 @@ class TestMatrixBiologicalAnalogies(unittest.TestCase):
             self.assertLessEqual(record['final'], 1.0)
             
     def test_matrix_neuroplasticity_adaptation(self):
-        """Test neuroplasticity through dynamic network restructuring."""
+        """
+        Test that the matrix exhibits neuroplasticity by dynamically restructuring its network in response to varying stimulus phases.
+        
+        Simulates learning-induced plasticity by introducing temporary high-activity stimulus nodes, connecting them to the network, and measuring changes in overall consciousness level. Verifies that high stimulus phases result in measurable adaptation effects.
+        """
         # Start with minimal network
         for i in range(3):
             node = MatrixNode(id=f"plastic_{i}", consciousness_level=0.4)
@@ -2947,7 +2971,11 @@ class TestMatrixBiologicalAnalogies(unittest.TestCase):
             self.assertIsNotNone(np.mean(high_stimulus_adaptations))
             
     def test_matrix_homeostatic_regulation(self):
-        """Test homeostatic regulation of consciousness levels."""
+        """
+        Test that the matrix exhibits homeostatic regulation by converging diverse node consciousness levels toward a bounded range over multiple evolution steps.
+        
+        Creates nodes with extreme and varied initial consciousness levels, connects them with moderate regulatory strengths, and evolves the matrix over time. Verifies that the range of consciousness levels decreases or remains bounded, and that all levels stay within valid limits throughout the process.
+        """
         # Create network with diverse initial states
         homeostatic_nodes = []
         for i in range(12):
@@ -3000,11 +3028,17 @@ class TestMatrixAdvancedSerialization(unittest.TestCase):
     """Advanced serialization scenarios and edge cases."""
     
     def setUp(self):
-        """Initialize matrix for advanced serialization tests."""
+        """
+        Set up a new GenesisConsciousnessMatrix instance for advanced serialization tests.
+        """
         self.matrix = GenesisConsciousnessMatrix()
         
     def test_matrix_versioned_serialization_compatibility(self):
-        """Test backward compatibility with different serialization versions."""
+        """
+        Verify that the matrix can serialize and deserialize across different JSON serialization versions, ensuring backward compatibility and graceful handling of legacy or modified formats.
+        
+        This test creates a matrix, serializes it using the current format, and verifies round-trip integrity. It then simulates legacy formats by modifying the serialized JSON and checks that deserialization either succeeds with a valid matrix or fails gracefully without causing errors.
+        """
         # Create matrix with current structure
         for i in range(5):
             node = MatrixNode(id=f"version_{i}", consciousness_level=0.2 + i * 0.15)
@@ -3041,7 +3075,11 @@ class TestMatrixAdvancedSerialization(unittest.TestCase):
                 pass
                 
     def test_matrix_partial_serialization_recovery(self):
-        """Test recovery from partially corrupted serialization data."""
+        """
+        Test that the matrix can recover from partially corrupted serialization data.
+        
+        This test simulates various partial corruption scenarios in the serialized matrix JSON, including missing nodes, altered consciousness levels, and missing state information. It verifies that deserialization either successfully recovers a functional matrix with valid consciousness levels or appropriately rejects corrupted data.
+        """
         # Create complex matrix state
         for i in range(8):
             node = MatrixNode(id=f"partial_{i}", consciousness_level=0.125 * i)
@@ -3086,7 +3124,9 @@ class TestMatrixAdvancedSerialization(unittest.TestCase):
                 pass
                 
     def test_matrix_streaming_serialization(self):
-        """Test streaming serialization for large matrices."""
+        """
+        Tests streaming serialization and deserialization of a large matrix, verifying performance and correctness for both operations.
+        """
         # Create large matrix
         large_node_count = 200
         
@@ -3118,7 +3158,11 @@ class TestMatrixAdvancedSerialization(unittest.TestCase):
         self.assertEqual(len(deserialized_large.nodes), large_node_count)
         
     def test_matrix_concurrent_serialization(self):
-        """Test thread-safe serialization during matrix modifications."""
+        """
+        Test that matrix serialization remains thread-safe during concurrent modifications.
+        
+        This test concurrently serializes the matrix state and modifies it by adding nodes and evolving, verifying that serialization and modification operations can succeed without causing data corruption or exceptions.
+        """
         import threading
         import time
         
@@ -3131,7 +3175,9 @@ class TestMatrixAdvancedSerialization(unittest.TestCase):
         modification_results = []
         
         def serialization_thread():
-            """Continuously serialize matrix state."""
+            """
+            Continuously serializes and deserializes the matrix state in a loop, recording the success or failure of each operation in the `serialization_results` list.
+            """
             for _ in range(15):
                 try:
                     serialized = self.matrix.to_json()
@@ -3148,7 +3194,11 @@ class TestMatrixAdvancedSerialization(unittest.TestCase):
                 time.sleep(0.01)
                 
         def modification_thread():
-            """Continuously modify matrix."""
+            """
+            Continuously adds new nodes to the matrix and evolves its state in a loop, recording the outcome of each operation.
+            
+            Each iteration attempts to add a uniquely identified node with a fixed consciousness level, performs a matrix evolution step, and logs the result. Any exceptions encountered during the process are captured and recorded.
+            """
             for i in range(10):
                 try:
                     new_node = MatrixNode(id=f"mod_{i}", consciousness_level=0.6)
@@ -3184,11 +3234,17 @@ class TestMatrixAdvancedPerformance(unittest.TestCase):
     """Advanced performance testing and optimization validation."""
     
     def setUp(self):
-        """Initialize matrix for performance tests."""
+        """
+        Set up a new GenesisConsciousnessMatrix instance for performance-related tests.
+        """
         self.matrix = GenesisConsciousnessMatrix()
         
     def test_matrix_algorithmic_complexity_scaling(self):
-        """Test algorithmic complexity scaling patterns."""
+        """
+        Test that core matrix operations scale reasonably with increasing matrix size.
+        
+        Measures the time taken for node addition, connection creation, evolution, and consciousness calculation at various matrix sizes, and asserts that total and per-operation times remain within acceptable bounds, indicating non-exponential complexity.
+        """
         complexity_data = []
         
         # Test different scales
@@ -3245,7 +3301,11 @@ class TestMatrixAdvancedPerformance(unittest.TestCase):
             self.assertLess(data['calc_time'], 5.0)
             
     def test_matrix_memory_efficiency_patterns(self):
-        """Test memory usage patterns and efficiency."""
+        """
+        Test that memory usage patterns remain efficient and scale linearly as nodes and connections are progressively added to the matrix.
+        
+        This test adds nodes in batches, connects them, and performs evolution steps, recording memory-related metrics after each batch. It asserts that the number of nodes (as a proxy for memory usage) grows linearly and not exponentially, indicating efficient memory management as the matrix scales.
+        """
         import sys
         import gc
         
@@ -3302,7 +3362,11 @@ class TestMatrixAdvancedPerformance(unittest.TestCase):
             self.assertLess(curr_nodes, prev_nodes * 2)  # Not exponential growth
             
     def test_matrix_cache_efficiency_simulation(self):
-        """Test cache-like behavior and access pattern efficiency."""
+        """
+        Simulates various node access patterns to evaluate cache-like efficiency and access performance in the matrix.
+        
+        This test adds a set of nodes to the matrix and measures the time taken to access nodes using sequential, random, locality-heavy, and sparse patterns. It asserts that all patterns complete within a reasonable time and that key patterns are present in the results.
+        """
         # Create matrix with predictable access patterns
         cache_test_size = 100
         
@@ -3365,6 +3429,15 @@ except ImportError:
     class MockNumpy:
         @staticmethod
         def var(data):
+            """
+            Calculate the population variance of a list of numeric values.
+            
+            Parameters:
+                data (list of float): The values for which to compute the variance.
+            
+            Returns:
+                float: The population variance, or 0.0 if the list has one or zero elements.
+            """
             if len(data) <= 1:
                 return 0.0
             mean_val = sum(data) / len(data)
@@ -3372,19 +3445,52 @@ except ImportError:
             
         @staticmethod
         def mean(data):
+            """
+            Calculate the arithmetic mean of a list of numeric values.
+            
+            Parameters:
+                data (list): A list of numeric values.
+            
+            Returns:
+                float: The mean of the values, or 0.0 if the list is empty.
+            """
             return sum(data) / len(data) if len(data) > 0 else 0.0
             
         @staticmethod
         def std(data):
+            """
+            Calculate the standard deviation of a sequence of numbers.
+            
+            Parameters:
+                data (Iterable[float]): Sequence of numeric values.
+            
+            Returns:
+                float: The standard deviation of the input data.
+            """
             return math.sqrt(MockNumpy.var(data))
             
         @staticmethod
         def random():
+            """
+            Return a random floating-point number in the range [0.0, 1.0).
+            
+            Returns:
+                float: A pseudo-random number between 0.0 (inclusive) and 1.0 (exclusive).
+            """
             import random
             return random.random()
             
         @staticmethod
         def permutation(n):
+            """
+            Return a random permutation of integers from 0 to n - 1 as a list.
+            
+            Parameters:
+                n (int): The number of elements to include in the permutation.
+            
+            Returns:
+                list: A list containing a random ordering of integers from 0 to n - 1.
+            """
             import random
             items = list(range(n))
             random.shuffle(items)
@@ -3401,7 +3507,11 @@ class TestMatrixComprehensiveNewSuite(unittest.TestCase):
     """Meta-test to ensure all new test classes are properly integrated."""
     
     def test_new_test_classes_integration(self):
-        """Verify all new test classes are discoverable and functional."""
+        """
+        Verify that all newly added test classes are discoverable by the test loader and can be instantiated and set up correctly.
+        
+        Ensures each new test class contains at least one test case and, if a `setUp` method is defined, it can be called without error.
+        """
         new_test_classes = [
             TestMatrixQuantumBehavior,
             TestMatrixBiologicalAnalogies,

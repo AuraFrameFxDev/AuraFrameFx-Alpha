@@ -108,25 +108,23 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Asynchronously logs a debug-level message with an optional throwable.
-     *
-     * The log entry is written to both Android Logcat and the current day's log file.
-     *
-     * @param tag Tag identifying the source of the log message.
-     * @param message The message to log.
-     * @param throwable Optional exception to include in the log entry.
-     */
+         * Asynchronously logs a debug-level message and optional throwable to both Android Logcat and the current day's internal log file.
+         *
+         * @param tag Identifies the source of the log message.
+         * @param message The message to log.
+         * @param throwable Optional exception to include in the log entry.
+         */
     fun d(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("DEBUG", tag, message, throwable) }
 
     /**
- * Asynchronously logs a warning message with the specified tag and optional throwable.
+ * Asynchronously logs an informational message with the specified tag and optional throwable.
  *
- * The log entry is written to both Android Logcat and the current day's log file.
+ * The log entry is written to both Android Logcat and the current day's internal log file.
  *
- * @param tag The tag identifying the source of the log message.
- * @param message The warning message to log.
- * @param throwable An optional throwable whose stack trace will be included in the log entry.
+ * @param tag Identifies the source of the log message.
+ * @param message The informational message to log.
+ * @param throwable Optional exception whose stack trace will be included in the log entry.
  */
     fun i(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("INFO", tag, message, throwable) }
@@ -188,7 +186,14 @@ class AuraFxLogger @Inject constructor(
      * @param throwable An optional throwable whose stack trace will be included in the log entry.
      */
 >>>>>>> pr458merge
-    fun e(tag: String, message: String, throwable: Throwable? = null) =
+    /**
+      * Asynchronously logs an error-level message to both Android Logcat and the current day's log file.
+      *
+      * @param tag Identifier for the source of the log message.
+      * @param message The message to be logged.
+      * @param throwable Optional exception whose stack trace will be included in the log entry.
+      */
+     fun e(tag: String, message: String, throwable: Throwable? = null) =
         loggerScope.launch { writeLogEntry("ERROR", tag, message, throwable) }
 
     /**
@@ -208,7 +213,7 @@ class AuraFxLogger @Inject constructor(
      */
 >>>>>>> pr458merge
     /**
-         * Asynchronously logs a verbose-level message to both Android Logcat and the internal daily log file.
+         * Asynchronously logs a verbose-level message to both Android Logcat and the current day's internal log file.
          *
          * @param tag The tag identifying the source of the log message.
          * @param message The message to log.
@@ -218,9 +223,9 @@ class AuraFxLogger @Inject constructor(
         loggerScope.launch { writeLogEntry("VERBOSE", tag, message, throwable) }
 
     /**
-     * Reads and returns the contents of all log files in the internal logs directory whose names match the log filename prefix.
+     * Reads the contents of all log files in the internal logs directory that match the log filename prefix.
      *
-     * @return A map where each key is a log filename and the value is its content, with the newest files listed first.
+     * @return A map where each key is a log filename and the value is its content, with the newest files first.
      */
     suspend fun readAllLogs(): Map<String, String> = withContext(Dispatchers.IO) {
         val logs = mutableMapOf<String, String>()
@@ -252,7 +257,7 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Retrieves the contents of the current day's log file.
+     * Reads and returns the contents of the current day's log file.
      *
      * @return The contents of today's log file, or an empty string if the file does not exist or cannot be read.
      */
@@ -264,9 +269,9 @@ class AuraFxLogger @Inject constructor(
     }
 
     /**
-     * Deletes log files from the internal logs directory that are older than the configured retention period.
+     * Removes log files from the internal logs directory that are older than the configured retention period.
      *
-     * Scans for files with the log filename prefix and removes those whose last modified time exceeds the retention threshold.
+     * Only files with the log filename prefix are considered for deletion. Files exceeding the retention threshold are deleted asynchronously.
      */
     private suspend fun cleanupOldLogs() = withContext(Dispatchers.IO) {
         // Use injected context
@@ -300,6 +305,9 @@ class AuraFxLogger @Inject constructor(
      *
      * After this method is called, no further log entries will be processed or written.
      */
+    /**
+     * Cancels all ongoing logging and maintenance coroutines, shutting down the logger's background operations.
+     */
     fun shutdown() {
         Log.d(TAG, "AuraFxLogger shutting down loggerScope.")
         loggerScope.cancel()
@@ -320,14 +328,14 @@ class AuraFxLogger @Inject constructor(
     // Internal file operation methods using injected context
 >>>>>>> pr458merge
     /**
-     * Writes text content to a file in the app's internal storage using the injected context.
+     * Writes text content to a file in the app's internal storage.
      *
-     * Creates parent directories if they do not exist. Appends to the file if `append` is true; otherwise, overwrites the file.
+     * Ensures that parent directories exist before writing. Appends to the file if `append` is true; otherwise, overwrites the file.
      *
-     * @param filePath Relative path within the app's internal storage.
+     * @param filePath The relative path of the file within the app's internal storage.
      * @param content The text content to write.
-     * @param append Whether to append to the file (`true`) or overwrite it (`false`).
-     * @return `true` if the write operation succeeds, `false` if an error occurs.
+     * @param append If true, appends to the file; if false, overwrites the file.
+     * @return True if the write operation succeeds, false if an error occurs.
      */
     private fun writeToFileInternal(filePath: String, content: String, append: Boolean): Boolean {
         return try {
