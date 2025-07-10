@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors -->
+    <color name="neon_teal">#00FFCC</color>
+    <color name="neon_purple">#FF00FF</color>
+    <color name="neon_blue">#00FFFF</color>
+    <color name="neon_teal_transparent">#3300FFCC</color> <!-- 20% opacity for neon_teal -->
+
+    <!-- Background Colors -->
+    <color name="app_background_light">#E3C500</color>
+    <color name="dark_background">#000000</color>
+    <color name="surface">#FAF0B5</color>
+    <color name="surface_variant">#FFFBEF</color>
+
+    <!-- Text Colors -->
+    <color name="on_surface">#000000</color>
+    <color name="on_surface_variant">#363636</color>
+    <color name="on_primary">#000000</color>
+    <color name="on_secondary">#000000</color> <!-- Added missing on_secondary color -->
+
+    <!-- Status Bar and Navigation Bar -->
+
+    <!-- Accent Colors -->
+
+    <!-- Error and Warning Colors -->
+    <color name="error">#FF3B30</color>
+
+    <!-- Light Theme Colors - For Material Theme references -->
+    <color name="light_primary">#00FFCC</color>
+    <color name="light_on_primary">#000000</color>
+    <color name="light_secondary">#E000FF</color>
+    <color name="light_on_secondary">#000000</color>
+    <color name="light_tertiary">#00FFFF</color>
+    <color name="light_on_tertiary">#000000</color>
+    <color name="light_background">#1A1A1A</color>
+    <color name="light_on_background">#00FFCC</color>
+    <color name="light_surface">#2D2D2D</color>
+    <color name="light_on_surface">#00FFCC</color>
+    <color name="light_error">#FF0000</color>
+    <color name="light_on_error">#000000</color>
+
+</resources>

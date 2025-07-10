@@ -1,0 +1,25 @@
+{
+  "githubPullRequests.ignoredPullRequestBranches": [
+    "codespace-potential-funicular-g46gj7j4vp9r3vxxw"
+  ],
+  "kotlin.compiler.jvm.target": "24",
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-24",
+      "path": "/usr/lib/jvm/java-24-openjdk-amd64"
+    }
+  ],
+  "files.associations": {
+    "*.kts": "kotlin"
+  },
+  "terminal.integrated.env.linux": {
+    "ANDROID_HOME": "/usr/lib/android-sdk",
+    "ANDROID_SDK_ROOT": "/usr/lib/android-sdk"
+  },
+  "gradle.nestedProjects": true,
+  "files.exclude": {
+    "**/.gradle": true,
+    "**/build": true,
+    "**/.kotlin": true
+  }
+}
