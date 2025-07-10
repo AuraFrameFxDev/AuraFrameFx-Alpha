@@ -19,11 +19,11 @@ import javax.inject.Singleton
 object AuraFxAiApiModule {
 
     /**
-     * Provides a singleton OkHttpClient configured to log full HTTP request and response bodies.
+     * Provides a singleton OkHttpClient that logs complete HTTP request and response bodies.
      *
-     * The returned client enables detailed network debugging by logging all HTTP traffic at the body level.
+     * Enables detailed network debugging by capturing all HTTP traffic at the body level.
      *
-     * @return A singleton OkHttpClient instance with comprehensive HTTP body logging.
+     * @return A singleton OkHttpClient instance with full HTTP body logging enabled.
      */
     @Provides
     @Singleton
@@ -38,11 +38,11 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton Json serializer configured for flexible and resilient API data processing.
+     * Provides a singleton Json serializer configured for robust and flexible API data processing.
      *
-     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values to ensure robust serialization and deserialization of API responses.
+     * The serializer is set to ignore unknown keys, coerce input values, allow lenient parsing, and encode default values, supporting resilient serialization and deserialization of API responses.
      *
-     * @return A configured Json instance for handling API data.
+     * @return A configured Json instance for API data handling.
      */
     @Provides
     @Singleton
@@ -54,10 +54,10 @@ object AuraFxAiApiModule {
     }
 
     /**
-     * Provides a singleton instance of AIContentApi configured to interact with the AuraFrameFx AI API.
+     * Provides a singleton AIContentApi instance configured for the AuraFrameFx AI API.
      *
-     * @param okHttpClient The OkHttpClient used for executing network requests.
-     * @return An AIContentApi instance initialized with the AuraFrameFx API base URL and the specified HTTP client.
+     * @param okHttpClient The HTTP client used for network communication with the API.
+     * @return An AIContentApi initialized with the AuraFrameFx API base URL and the provided HTTP client.
      */
     @Provides
     @Singleton

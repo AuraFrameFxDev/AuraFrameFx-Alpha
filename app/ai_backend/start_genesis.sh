@@ -15,7 +15,7 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# print_status prints an informational message to stdout with a blue [INFO] label.
+# print_status prints a message to stdout with a blue [INFO] label.
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -25,12 +25,12 @@ print_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
-# print_warning prints a warning message to stdout with a yellow [WARNING] label.
+# print_warning prints a message to stdout with a yellow [WARNING] label.
 print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
-# print_error prints an error message to stdout with a red [ERROR] label.
+# print_error prints a message to stdout with a red [ERROR] label.
 print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }

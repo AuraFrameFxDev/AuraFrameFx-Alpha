@@ -68,7 +68,7 @@ class ContextManager @Inject constructor(
     /**
      * Appends a new context node to an existing context chain, updating its current context, history, agent mapping, and last updated timestamp.
      *
-     * All metadata values are stored as strings. Throws an IllegalStateException if the specified context chain does not exist.
+     * All metadata values are stored as strings.
      *
      * @param chainId The unique identifier of the context chain to update.
      * @param newContext The context string to add to the chain.
@@ -106,10 +106,10 @@ class ContextManager @Inject constructor(
     }
 
     /**
-     * Returns the active context chain for the given chain ID, or null if no such chain exists.
+     * Retrieves the active context chain associated with the specified chain ID.
      *
      * @param chainId The unique identifier of the context chain.
-     * @return The matching ContextChain, or null if not found.
+     * @return The corresponding ContextChain if found; otherwise, null.
      */
     fun getContextChain(chainId: String): ContextChain? {
         return _activeContexts.value[chainId]
