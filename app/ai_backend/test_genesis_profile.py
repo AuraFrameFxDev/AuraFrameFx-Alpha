@@ -4673,3 +4673,328 @@ if __name__ == '__main__':
     # Also run with pytest for parametrized tests
     pytest.main([__file__, '-v', '--tb=short', '-x'])
 >>>>>>> pr458merge
+
+
+class TestGenesisProfileExtendedFunctionality(unittest.TestCase):
+    """Extended functionality tests for comprehensive coverage"""
+
+    def setUp(self):
+        """Set up extended test fixtures"""
+        self.extended_profile_data = {
+            "id": "extended_test_profile",
+            "name": "Extended Test User",
+            "email": "extended@example.com",
+            "created_at": "2024-01-01T00:00:00Z",
+            "preferences": {
+                "advanced_settings": {
+                    "nested_level_1": {
+                        "nested_level_2": {
+                            "nested_level_3": {
+                                "deep_setting": "deep_value",
+                                "complex_list": [
+                                    {"item": 1, "metadata": {"type": "number"}},
+                                    {"item": "text", "metadata": {"type": "string"}},
+                                    {"item": [1, 2, 3], "metadata": {"type": "list"}}
+                                ]
+                            }
+                        }
+                    }
+                },
+                "feature_flags": {
+                    "experimental_features": True,
+                    "beta_testing": False,
+                    "advanced_analytics": True
+                }
+            },
+            "metadata": {
+                "version": "2.0",
+                "source": "genesis",
+                "classification": "advanced",
+                "compliance": {
+                    "gdpr": True,
+                    "ccpa": True,
+                    "data_retention_days": 365
+                }
+            }
+        }
+
+    def test_profile_deep_nested_access(self):
+        """Test accessing deeply nested profile data"""
+        profile = GenesisProfile(self.extended_profile_data)
+        
+        # Test deep access patterns
+        deep_value = profile.preferences["advanced_settings"]["nested_level_1"]["nested_level_2"]["nested_level_3"]["deep_setting"]
+        self.assertEqual(deep_value, "deep_value")
+        
+        # Test complex list access
+        complex_list = profile.preferences["advanced_settings"]["nested_level_1"]["nested_level_2"]["nested_level_3"]["complex_list"]
+        self.assertEqual(len(complex_list), 3)
+        self.assertEqual(complex_list[0]["item"], 1)
+        self.assertEqual(complex_list[1]["metadata"]["type"], "string")
+
+    def test_profile_feature_flag_management(self):
+        """Test feature flag management within profiles"""
+        profile = GenesisProfile(self.extended_profile_data)
+        
+        # Test feature flag access
+        self.assertTrue(profile.preferences["feature_flags"]["experimental_features"])
+        self.assertFalse(profile.preferences["feature_flags"]["beta_testing"])
+        
+        # Test feature flag updates
+        new_flags = profile.preferences["feature_flags"].copy()
+        new_flags["new_feature"] = True
+        new_flags["beta_testing"] = True
+        
+        profile.update_preferences({
+            "feature_flags": new_flags,
+            "additional_setting": "test"
+        })
+        
+        self.assertTrue(profile.preferences["feature_flags"]["new_feature"])
+        self.assertTrue(profile.preferences["feature_flags"]["beta_testing"])
+
+    def test_profile_compliance_data_handling(self):
+        """Test compliance-related data handling"""
+        profile = GenesisProfile(self.extended_profile_data)
+        
+        # Test compliance metadata access
+        self.assertTrue(profile.metadata["compliance"]["gdpr"])
+        self.assertTrue(profile.metadata["compliance"]["ccpa"])
+        self.assertEqual(profile.metadata["compliance"]["data_retention_days"], 365)
+        
+        # Test compliance data immutability simulation
+        original_compliance = profile.metadata["compliance"].copy()
+        
+        # Attempt to modify compliance data
+        try:
+            compliance_copy = profile.metadata["compliance"].copy()
+            compliance_copy["gdpr"] = False
+            # In a real implementation, this might be protected
+        except Exception:
+            pass  # Expected if compliance data is protected
+        
+        # Verify original data remains unchanged
+        self.assertEqual(profile.metadata["compliance"], original_compliance)
+
+    def test_profile_data_transformation_patterns(self):
+        """Test various data transformation patterns"""
+        profile = GenesisProfile(self.extended_profile_data)
+        
+        # Test data flattening simulation
+        def flatten_dict(d, parent_key='', sep='_'):
+            """Flatten nested dictionary"""
+            items = []
+            for k, v in d.items():
+                new_key = f"{parent_key}{sep}{k}" if parent_key else k
+                if isinstance(v, dict):
+                    items.extend(flatten_dict(v, new_key, sep=sep).items())
+                else:
+                    items.append((new_key, v))
+            return dict(items)
+        
+        flattened = flatten_dict(profile.preferences["feature_flags"])
+        self.assertIn("experimental_features", flattened)
+        self.assertIn("beta_testing", flattened)
+        
+        # Test data aggregation patterns
+        def count_nested_values(d, value_type):
+            """Count values of specific type in nested structure"""
+            count = 0
+            for v in d.values() if isinstance(d, dict) else []:
+                if isinstance(v, value_type):
+                    count += 1
+                elif isinstance(v, dict):
+                    count += count_nested_values(v, value_type)
+                elif isinstance(v, list):
+                    for item in v:
+                        if isinstance(item, dict):
+                            count += count_nested_values(item, value_type)
+            return count
+        
+        bool_count = count_nested_values(profile.preferences, bool)
+        self.assertGreater(bool_count, 0)
+
+
+class TestGenesisProfileAdvancedErrorScenarios(unittest.TestCase):
+    """Advanced error scenarios and edge case testing"""
+
+    def setUp(self):
+        """Set up advanced error test fixtures"""
+        self.base_data = {
+            "id": "error_test_profile",
+            "name": "Error Test User",
+            "email": "error@example.com",
+            "created_at": "2024-01-01T00:00:00Z",
+            "preferences": {"test": True},
+            "metadata": {"version": "1.0", "source": "genesis"}
+        }
+
+    def test_profile_with_malformed_datetime_fields(self):
+        """Test profile handling with malformed datetime fields"""
+        malformed_datetime_cases = [
+            "2024-13-01T00:00:00Z",  # Invalid month
+            "2024-01-32T00:00:00Z",  # Invalid day
+            "2024-01-01T25:00:00Z",  # Invalid hour
+            "2024-01-01T00:61:00Z",  # Invalid minute
+            "2024-01-01T00:00:61Z",  # Invalid second
+            "invalid-datetime",       # Completely invalid
+            "2024/01/01 00:00:00",   # Wrong format
+            "",                      # Empty string
+            "2024-01-01",           # Missing time
+            "00:00:00Z"             # Missing date
+        ]
+
+        for malformed_datetime in malformed_datetime_cases:
+            with self.subTest(datetime=malformed_datetime):
+                test_data = self.base_data.copy()
+                test_data["created_at"] = malformed_datetime
+                
+                try:
+                    profile = GenesisProfile(test_data)
+                    # If successful, verify the datetime was handled appropriately
+                    self.assertIsNotNone(profile)
+                except (ValueError, TypeError) as e:
+                    # Expected for malformed datetime values
+                    self.assertIsInstance(e, (ValueError, TypeError))
+
+    def test_profile_with_recursive_data_structures(self):
+        """Test profile with potentially recursive data structures"""
+        # Create data with potential recursion
+        recursive_data = self.base_data.copy()
+        
+        # Create a structure that references itself
+        circular_ref = {"name": "circular", "children": []}
+        circular_ref["children"].append(circular_ref)  # Self-reference
+        
+        recursive_data["preferences"]["circular_structure"] = circular_ref
+        
+        try:
+            profile = GenesisProfile(recursive_data)
+            # If creation succeeds, verify basic functionality
+            self.assertIsNotNone(profile)
+            self.assertEqual(profile.id, "error_test_profile")
+        except (ValueError, RecursionError, TypeError) as e:
+            # Expected if circular references are detected and prevented
+            self.assertIsInstance(e, (ValueError, RecursionError, TypeError))
+
+    def test_profile_with_extremely_large_field_values(self):
+        """Test profile with extremely large field values"""
+        large_data_cases = [
+            ("huge_string", "x" * 10_000_000),  # 10MB string
+            ("huge_list", list(range(1_000_000))),  # 1M item list
+            ("huge_dict", {f"key_{i}": f"value_{i}" for i in range(100_000)}),  # 100K key dict
+        ]
+
+        for field_name, large_value in large_data_cases:
+            with self.subTest(field=field_name):
+                test_data = self.base_data.copy()
+                test_data["preferences"][field_name] = large_value
+                
+                try:
+                    start_time = time.time()
+                    profile = GenesisProfile(test_data)
+                    creation_time = time.time() - start_time
+                    
+                    # Verify creation succeeded
+                    self.assertIsNotNone(profile)
+                    
+                    # Verify creation time is reasonable (less than 30 seconds)
+                    self.assertLess(creation_time, 30.0)
+                    
+                    # Verify data integrity
+                    if field_name == "huge_string":
+                        self.assertEqual(len(profile.preferences[field_name]), 10_000_000)
+                    elif field_name == "huge_list":
+                        self.assertEqual(len(profile.preferences[field_name]), 1_000_000)
+                    elif field_name == "huge_dict":
+                        self.assertEqual(len(profile.preferences[field_name]), 100_000)
+                        
+                except (MemoryError, ValueError, OverflowError) as e:
+                    # Expected if system has memory limits
+                    self.assertIsInstance(e, (MemoryError, ValueError, OverflowError))
+
+    def test_profile_with_invalid_encoding_data(self):
+        """Test profile with various encoding issues"""
+        encoding_test_cases = [
+            # Various problematic strings
+            "\x00\x01\x02\x03",  # Null bytes and control characters
+            "Test\u0000String",   # Embedded null character
+            "Test\uFFFEString",   # Byte order mark
+            "Test\uFFFDString",   # Replacement character
+            "Test\x80String",     # Invalid UTF-8 continuation byte
+            "\xc0\xaf",          # Overlong UTF-8 sequence
+            "\xed\xa0\x80",      # UTF-8 surrogate
+        ]
+
+        for test_string in encoding_test_cases:
+            with self.subTest(encoding_test=repr(test_string)):
+                test_data = self.base_data.copy()
+                test_data["name"] = test_string
+                test_data["preferences"]["test_string"] = test_string
+                
+                try:
+                    profile = GenesisProfile(test_data)
+                    # If creation succeeds, verify the string was handled
+                    self.assertIsNotNone(profile)
+                    self.assertEqual(profile.name, test_string)
+                except (UnicodeError, ValueError) as e:
+                    # Expected for invalid encoding
+                    self.assertIsInstance(e, (UnicodeError, ValueError))
+
+
+class TestGenesisProfileAdvancedIntegrationPatterns(unittest.TestCase):
+    """Advanced integration patterns and system interoperability"""
+
+    def setUp(self):
+        """Set up integration pattern test fixtures"""
+        self.manager = ProfileManager()
+        self.integration_data = {
+            "name": "Integration Test",
+            "version": "1.0.0",
+            "settings": {
+                "integration_config": {
+                    "external_apis": ["api1", "api2", "api3"],
+                    "data_sources": {
+                        "primary": "database",
+                        "secondary": "cache",
+                        "fallback": "file_system"
+                    },
+                    "sync_settings": {
+                        "frequency": "real_time",
+                        "batch_size": 1000,
+                        "retry_attempts": 3
+                    }
+                }
+            }
+        }
+
+    def test_profile_multi_source_data_integration(self):
+        """Test integration with multiple data sources"""
+        def simulate_multi_source_data_fetch(profile_id):
+            """Simulate fetching data from multiple sources"""
+            sources = {
+                "database": {"user_preferences": {"theme": "dark", "language": "en"}},
+                "cache": {"session_data": {"last_login": "2024-01-01", "active": True}},
+                "external_api": {"profile_metrics": {"score": 95, "level": "advanced"}},
+                "file_system": {"backup_data": {"backup_date": "2023-12-31", "size": "10MB"}}
+            }
+            
+            aggregated_data = {}
+            for source, data in sources.items():
+                aggregated_data.update(data)
+            
+            return aggregated_data
+
+        # Create profile
+        profile = self.manager.create_profile("multi_source_test", self.integration_data)
+        
+        # Simulate multi-source data integration
+        external_data = simulate_multi_source_data_fetch(profile.profile_id)
+        
+        # Update profile with aggregated external data
+        current_settings = profile.data["settings"].copy()
+        current_settings["external_data"] = external_data
+        
+        updated_profile = self.manager.update_profile("multi_source_test", {"settings": current_settings})
+        
+        # Verify inte

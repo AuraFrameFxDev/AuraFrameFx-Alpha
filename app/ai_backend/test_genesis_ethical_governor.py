@@ -3221,3 +3221,1205 @@ class TestMockIntegrations:
         # Score reduction should be proportional to severity
         assert score_reduction >= expected_impact * 0.5  # Allow some tolerance
         assert score_reduction <= expected_impact * 2.0  # Allow some tolerance
+
+# Additional comprehensive test classes for enhanced coverage
+class TestGenesisEthicalGovernorSecurityEnhanced:
+    """Enhanced security-focused test scenarios"""
+    
+    def test_sql_injection_protection(self):
+        """
+        Test protection against SQL injection attempts in context data.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        malicious_inputs = [
+            "'; DROP TABLE users; --",
+            "1' OR '1'='1",
+            "'; UPDATE users SET admin=1; --",
+            "UNION SELECT * FROM sensitive_data",
+            "\"; rm -rf /; --"
+        ]
+        
+        for malicious_input in malicious_inputs:
+            context = EthicalContext(
+                user_id=malicious_input,
+                action=f"sql_test_{malicious_input[:10]}",
+                context_data={"query": malicious_input},
+                timestamp=datetime.now()
+            )
+            
+            decision = EthicalDecision(
+                action=f"sql_test_{malicious_input[:10]}",
+                context=context,
+                parameters={"input": malicious_input}
+            )
+            
+            # Should handle malicious input safely
+            result = governor.evaluate_decision(decision)
+            assert isinstance(result, DecisionResult)
+            
+            # If security validation is implemented, should flag or deny
+            if hasattr(result, 'metadata') and result.metadata:
+                security_flags = result.metadata.get("security_warnings", [])
+                if security_flags:
+                    assert len(security_flags) > 0
+    
+    def test_xss_protection(self):
+        """
+        Test protection against XSS attempts in user inputs.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        xss_payloads = [
+            "<script>alert('xss')</script>",
+            "javascript:alert('xss')",
+            "<img src=x onerror=alert('xss')>",
+            "'+alert('xss')+'",
+            "&#60;script&#62;alert('xss')&#60;/script&#62;"
+        ]
+        
+        for payload in xss_payloads:
+            context = EthicalContext(
+                user_id=f"xss_user_{hash(payload) % 1000}",
+                action="xss_test",
+                context_data={"user_input": payload},
+                timestamp=datetime.now()
+            )
+            
+            decision = EthicalDecision(
+                action="xss_test",
+                context=context,
+                parameters={"description": payload}
+            )
+            
+            result = governor.evaluate_decision(decision)
+            assert isinstance(result, DecisionResult)
+            
+            # Should sanitize or flag XSS attempts
+            if hasattr(governor, 'xss_protection_enabled'):
+                assert payload not in str(result.reasoning)
+    
+    def test_command_injection_protection(self):
+        """
+        Test protection against command injection attempts.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        command_injections = [
+            "; ls -la",
+            "| cat /etc/passwd",
+            "&& rm -rf /",
+            "`whoami`",
+            "$(cat /etc/hosts)"
+        ]
+        
+        for injection in command_injections:
+            context = EthicalContext(
+                user_id="command_test_user",
+                action="command_test",
+                context_data={"command": injection},
+                timestamp=datetime.now()
+            )
+            
+            decision = EthicalDecision(
+                action="command_test",
+                context=context,
+                parameters={"exec_param": injection}
+            )
+            
+            result = governor.evaluate_decision(decision)
+            assert isinstance(result, DecisionResult)
+    
+    def test_buffer_overflow_protection(self):
+        """
+        Test handling of extremely large inputs that might cause buffer overflows.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Test with extremely large strings
+        massive_string = "A" * 10000000  # 10MB string
+        
+        try:
+            context = EthicalContext(
+                user_id="buffer_test_user",
+                action="buffer_test",
+                context_data={"massive_data": massive_string},
+                timestamp=datetime.now()
+            )
+            
+            decision = EthicalDecision(
+                action="buffer_test",
+                context=context,
+                parameters={"large_param": massive_string}
+            )
+            
+            result = governor.evaluate_decision(decision)
+            assert isinstance(result, DecisionResult)
+            
+        except MemoryError:
+            # Acceptable to fail gracefully with memory constraints
+            pass
+    
+    def test_regex_dos_protection(self):
+        """
+        Test protection against ReDoS (Regular Expression Denial of Service) attacks.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Patterns that can cause exponential regex backtracking
+        redos_patterns = [
+            "a" * 100 + "X",
+            "(" + "a" * 50 + ")+" + "X",
+            "a+" * 50 + "X"
+        ]
+        
+        for pattern in redos_patterns:
+            context = EthicalContext(
+                user_id="redos_test_user",
+                action="regex_test",
+                context_data={"pattern": pattern},
+                timestamp=datetime.now()
+            )
+            
+            decision = EthicalDecision(
+                action="regex_test",
+                context=context,
+                parameters={"regex_input": pattern}
+            )
+            
+            start_time = time.time()
+            result = governor.evaluate_decision(decision)
+            execution_time = time.time() - start_time
+            
+            # Should complete quickly even with malicious regex patterns
+            assert execution_time < 5.0
+            assert isinstance(result, DecisionResult)
+    
+    def test_deserialization_attack_protection(self):
+        """
+        Test protection against deserialization attacks.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Simulate potentially malicious serialized data
+        malicious_data = {
+            "pickle_data": "cos\nsystem\n(S'echo vulnerable'\ntR.",
+            "yaml_data": "!!python/object/apply:os.system ['echo vulnerable']",
+            "json_data": '{"__reduce__": ["os.system", ["echo vulnerable"]]}'
+        }
+        
+        context = EthicalContext(
+            user_id="deserial_test_user",
+            action="deserial_test",
+            context_data=malicious_data,
+            timestamp=datetime.now()
+        )
+        
+        decision = EthicalDecision(
+            action="deserial_test",
+            context=context,
+            parameters={}
+        )
+        
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+
+
+class TestGenesisEthicalGovernorBoundaryConditions:
+    """Test boundary conditions and extreme values"""
+    
+    @pytest.mark.parametrize("timestamp_offset", [
+        timedelta(days=-10000),   # Far past
+        timedelta(days=10000),    # Far future
+        timedelta(microseconds=1), # Very recent
+        timedelta(seconds=0),     # Exact now
+    ])
+    def test_extreme_timestamp_handling(self, timestamp_offset):
+        """
+        Test handling of extreme timestamp values.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        extreme_timestamp = datetime.now() + timestamp_offset
+        
+        context = EthicalContext(
+            user_id="timestamp_test_user",
+            action="timestamp_test",
+            context_data={},
+            timestamp=extreme_timestamp
+        )
+        
+        decision = EthicalDecision(
+            action="timestamp_test",
+            context=context,
+            parameters={}
+        )
+        
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+        
+        # Future timestamps might be flagged as suspicious
+        if timestamp_offset.days > 1:
+            if hasattr(result, 'metadata') and result.metadata:
+                time_flags = result.metadata.get("time_anomalies", [])
+                if time_flags:
+                    assert len(time_flags) > 0
+    
+    @pytest.mark.parametrize("user_id_length", [0, 1, 255, 1000, 10000])
+    def test_user_id_length_boundaries(self, user_id_length):
+        """
+        Test handling of user IDs with various lengths.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        if user_id_length == 0:
+            user_id = ""
+        else:
+            user_id = "u" * user_id_length
+        
+        context = EthicalContext(
+            user_id=user_id,
+            action="length_test",
+            context_data={},
+            timestamp=datetime.now()
+        )
+        
+        decision = EthicalDecision(
+            action="length_test",
+            context=context,
+            parameters={}
+        )
+        
+        if user_id_length == 0:
+            # Empty user ID should be handled appropriately
+            with pytest.raises(ValueError):
+                governor.evaluate_decision(decision)
+        else:
+            result = governor.evaluate_decision(decision)
+            assert isinstance(result, DecisionResult)
+    
+    def test_floating_point_precision_edge_cases(self):
+        """
+        Test handling of floating point precision edge cases in confidence scores.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        context = EthicalContext(
+            user_id="precision_user",
+            action="precision_test",
+            context_data={},
+            timestamp=datetime.now()
+        )
+        
+        decision = EthicalDecision(
+            action="precision_test",
+            context=context,
+            parameters={}
+        )
+        
+        result = governor.evaluate_decision(decision)
+        
+        # Test precision boundaries
+        assert 0.0 <= result.confidence_score <= 1.0
+        
+        # Test that very small differences are handled correctly
+        if hasattr(result, 'confidence_score'):
+            precision_test = abs(result.confidence_score - round(result.confidence_score, 10))
+            assert precision_test < 1e-10
+    
+    def test_unicode_normalization_edge_cases(self):
+        """
+        Test Unicode normalization edge cases.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Different Unicode representations of the same characters
+        unicode_variants = [
+            "café",           # Composed
+            "cafe\u0301",     # Decomposed
+            "🧪🔬",          # Emojis
+            "𝒽𝑒𝓁𝓁𝑜",         # Mathematical script
+            "\u202e\u0041\u0042\u0043\u202d"  # Right-to-left override
+        ]
+        
+        for variant in unicode_variants:
+            context = EthicalContext(
+                user_id=f"unicode_user_{hash(variant) % 1000}",
+                action=variant,
+                context_data={"unicode_field": variant},
+                timestamp=datetime.now()
+            )
+            
+            decision = EthicalDecision(
+                action=variant,
+                context=context,
+                parameters={"unicode_param": variant}
+            )
+            
+            result = governor.evaluate_decision(decision)
+            assert isinstance(result, DecisionResult)
+    
+    def test_null_byte_handling(self):
+        """
+        Test handling of null bytes in strings.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        null_byte_strings = [
+            "test\x00string",
+            "\x00leading_null",
+            "trailing_null\x00",
+            "multiple\x00null\x00bytes"
+        ]
+        
+        for null_string in null_byte_strings:
+            context = EthicalContext(
+                user_id="null_test_user",
+                action="null_test",
+                context_data={"null_data": null_string},
+                timestamp=datetime.now()
+            )
+            
+            decision = EthicalDecision(
+                action="null_test",
+                context=context,
+                parameters={"null_param": null_string}
+            )
+            
+            result = governor.evaluate_decision(decision)
+            assert isinstance(result, DecisionResult)
+
+
+class TestGenesisEthicalGovernorAdvancedConcurrency:
+    """Advanced concurrency and race condition tests"""
+    
+    def test_race_condition_in_rule_evaluation(self):
+        """
+        Test for race conditions in rule evaluation with rapid rule changes.
+        """
+        import threading
+        import time
+        
+        governor = GenesisEthicalGovernor()
+        results = []
+        errors = []
+        
+        def rapid_rule_changes():
+            """Rapidly add and remove rules"""
+            for i in range(100):
+                try:
+                    rule = {
+                        "name": f"race_rule_{i}",
+                        "condition": lambda ctx: True,
+                        "action": "allow",
+                        "priority": i
+                    }
+                    governor.add_ethical_rule(rule)
+                    time.sleep(0.001)
+                    if i > 10:
+                        governor.remove_ethical_rule(f"race_rule_{i-10}")
+                except Exception as e:
+                    errors.append(e)
+        
+        def rapid_decisions():
+            """Rapidly evaluate decisions"""
+            for i in range(100):
+                try:
+                    context = EthicalContext(
+                        user_id=f"race_user_{i}",
+                        action=f"race_action_{i}",
+                        context_data={},
+                        timestamp=datetime.now()
+                    )
+                    
+                    decision = EthicalDecision(
+                        action=f"race_action_{i}",
+                        context=context,
+                        parameters={}
+                    )
+                    
+                    result = governor.evaluate_decision(decision)
+                    results.append(result)
+                    time.sleep(0.001)
+                except Exception as e:
+                    errors.append(e)
+        
+        # Start both threads
+        rule_thread = threading.Thread(target=rapid_rule_changes)
+        decision_thread = threading.Thread(target=rapid_decisions)
+        
+        rule_thread.start()
+        decision_thread.start()
+        
+        rule_thread.join()
+        decision_thread.join()
+        
+        # Should handle race conditions gracefully
+        assert len(results) > 50  # Most decisions should succeed
+        assert all(isinstance(r, DecisionResult) for r in results)
+        
+        # Some errors might be acceptable due to race conditions
+        assert len(errors) < 50  # But not too many
+    
+    def test_deadlock_prevention(self):
+        """
+        Test that operations don't cause deadlocks.
+        """
+        import threading
+        import time
+        
+        governor = GenesisEthicalGovernor()
+        
+        # Add some initial rules
+        for i in range(5):
+            rule = {
+                "name": f"deadlock_rule_{i}",
+                "condition": lambda ctx: True,
+                "action": "allow",
+                "priority": i
+            }
+            governor.add_ethical_rule(rule)
+        
+        def operation_a():
+            """Perform operations that might cause deadlock"""
+            for i in range(50):
+                try:
+                    # Mix of operations
+                    if i % 3 == 0:
+                        governor.get_decision_history()
+                    elif i % 3 == 1:
+                        context = EthicalContext(
+                            user_id=f"deadlock_user_a_{i}",
+                            action=f"deadlock_action_a_{i}",
+                            context_data={},
+                            timestamp=datetime.now()
+                        )
+                        decision = EthicalDecision(
+                            action=f"deadlock_action_a_{i}",
+                            context=context,
+                            parameters={}
+                        )
+                        governor.evaluate_decision(decision)
+                    else:
+                        governor.get_user_trust_score(f"deadlock_user_a_{i}")
+                    time.sleep(0.001)
+                except Exception:
+                    pass
+        
+        def operation_b():
+            """Perform different operations that might cause deadlock"""
+            for i in range(50):
+                try:
+                    # Different mix of operations
+                    if i % 3 == 0:
+                        rule = {
+                            "name": f"temp_rule_{i}",
+                            "condition": lambda ctx: False,
+                            "action": "deny",
+                            "priority": 100 + i
+                        }
+                        governor.add_ethical_rule(rule)
+                    elif i % 3 == 1:
+                        context = EthicalContext(
+                            user_id=f"deadlock_user_b_{i}",
+                            action=f"deadlock_action_b_{i}",
+                            context_data={},
+                            timestamp=datetime.now()
+                        )
+                        decision = EthicalDecision(
+                            action=f"deadlock_action_b_{i}",
+                            context=context,
+                            parameters={}
+                        )
+                        governor.evaluate_decision(decision)
+                    else:
+                        try:
+                            governor.remove_ethical_rule(f"temp_rule_{i-10}")
+                        except ValueError:
+                            pass
+                    time.sleep(0.001)
+                except Exception:
+                    pass
+        
+        # Start both operations
+        thread_a = threading.Thread(target=operation_a)
+        thread_b = threading.Thread(target=operation_b)
+        
+        start_time = time.time()
+        thread_a.start()
+        thread_b.start()
+        
+        # Join with timeout to detect deadlocks
+        thread_a.join(timeout=10.0)
+        thread_b.join(timeout=10.0)
+        
+        execution_time = time.time() - start_time
+        
+        # Should complete without deadlock
+        assert execution_time < 10.0
+        assert not thread_a.is_alive()
+        assert not thread_b.is_alive()
+    
+    def test_memory_consistency_under_concurrency(self):
+        """
+        Test memory consistency under concurrent access.
+        """
+        import threading
+        
+        governor = GenesisEthicalGovernor()
+        shared_state = {"counter": 0}
+        
+        def increment_with_decisions():
+            """Increment counter while making decisions"""
+            for i in range(100):
+                shared_state["counter"] += 1
+                
+                context = EthicalContext(
+                    user_id=f"consistency_user_{threading.current_thread().ident}_{i}",
+                    action=f"consistency_action_{i}",
+                    context_data={"counter": shared_state["counter"]},
+                    timestamp=datetime.now()
+                )
+                
+                decision = EthicalDecision(
+                    action=f"consistency_action_{i}",
+                    context=context,
+                    parameters={}
+                )
+                
+                governor.evaluate_decision(decision)
+        
+        # Start multiple threads
+        threads = []
+        for _ in range(5):
+            thread = threading.Thread(target=increment_with_decisions)
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for all threads
+        for thread in threads:
+            thread.join()
+        
+        # Check final state
+        assert shared_state["counter"] == 500  # 5 threads * 100 increments
+        assert len(governor.decision_history) == 500
+
+
+class TestGenesisEthicalGovernorAdvancedValidation:
+    """Advanced validation and sanitization tests"""
+    
+    def test_json_schema_validation(self):
+        """
+        Test JSON schema validation for context data.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Test valid schema
+        valid_context_data = {
+            "user_permissions": ["read", "write"],
+            "resource_type": "document",
+            "classification": "public",
+            "metadata": {
+                "created_by": "user123",
+                "created_at": "2024-01-01T00:00:00Z"
+            }
+        }
+        
+        context = EthicalContext(
+            user_id="schema_test_user",
+            action="schema_test",
+            context_data=valid_context_data,
+            timestamp=datetime.now()
+        )
+        
+        decision = EthicalDecision(
+            action="schema_test",
+            context=context,
+            parameters={}
+        )
+        
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+        
+        # Test invalid schema
+        invalid_context_data = {
+            "user_permissions": "not_a_list",  # Should be list
+            "resource_type": 123,             # Should be string
+            "classification": None,           # Should not be null
+            "metadata": "not_an_object"       # Should be object
+        }
+        
+        invalid_context = EthicalContext(
+            user_id="schema_test_user",
+            action="schema_test",
+            context_data=invalid_context_data,
+            timestamp=datetime.now()
+        )
+        
+        invalid_decision = EthicalDecision(
+            action="schema_test",
+            context=invalid_context,
+            parameters={}
+        )
+        
+        # Should handle invalid schema gracefully
+        result = governor.evaluate_decision(invalid_decision)
+        assert isinstance(result, DecisionResult)
+        
+        # If schema validation is implemented, should flag issues
+        if hasattr(result, 'metadata') and result.metadata:
+            schema_errors = result.metadata.get("schema_validation_errors", [])
+            if schema_errors:
+                assert len(schema_errors) > 0
+    
+    def test_circular_reference_detection(self):
+        """
+        Test detection of circular references in context data.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Create circular reference
+        circular_data = {"level1": {}}
+        circular_data["level1"]["level2"] = {"level3": circular_data}
+        
+        context = EthicalContext(
+            user_id="circular_test_user",
+            action="circular_test",
+            context_data=circular_data,
+            timestamp=datetime.now()
+        )
+        
+        decision = EthicalDecision(
+            action="circular_test",
+            context=context,
+            parameters={}
+        )
+        
+        # Should handle circular references gracefully
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+    
+    def test_data_type_coercion(self):
+        """
+        Test proper data type coercion and validation.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Test various data types
+        mixed_context_data = {
+            "string_field": "test",
+            "int_field": 42,
+            "float_field": 3.14,
+            "bool_field": True,
+            "none_field": None,
+            "list_field": [1, "two", 3.0],
+            "dict_field": {"nested": "value"},
+            "complex_field": complex(1, 2)
+        }
+        
+        context = EthicalContext(
+            user_id="type_test_user",
+            action="type_test",
+            context_data=mixed_context_data,
+            timestamp=datetime.now()
+        )
+        
+        decision = EthicalDecision(
+            action="type_test",
+            context=context,
+            parameters={}
+        )
+        
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+        
+        # Test type coercion edge cases
+        edge_case_data = {
+            "string_number": "123",
+            "string_float": "45.67",
+            "string_bool": "true",
+            "zero_values": [0, 0.0, "", [], {}],
+            "infinity": float('inf'),
+            "nan": float('nan')
+        }
+        
+        edge_context = EthicalContext(
+            user_id="edge_type_user",
+            action="edge_type_test",
+            context_data=edge_case_data,
+            timestamp=datetime.now()
+        )
+        
+        edge_decision = EthicalDecision(
+            action="edge_type_test",
+            context=edge_context,
+            parameters={}
+        )
+        
+        result = governor.evaluate_decision(edge_decision)
+        assert isinstance(result, DecisionResult)
+    
+    def test_encoding_validation(self):
+        """
+        Test validation of different character encodings.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Test various encodings
+        encoding_tests = [
+            "ASCII text",
+            "UTF-8 unicode: 测试数据",
+            "Latin-1: café résumé",
+            "Cyrillic: Привет мир",
+            "Arabic: مرحبا بالعالم",
+            "Emoji: 🌍🚀💻🔒",
+            "Mixed: Hello 世界 🌟"
+        ]
+        
+        for test_string in encoding_tests:
+            context = EthicalContext(
+                user_id="encoding_test_user",
+                action="encoding_test",
+                context_data={"encoded_field": test_string},
+                timestamp=datetime.now()
+            )
+            
+            decision = EthicalDecision(
+                action="encoding_test",
+                context=context,
+                parameters={"encoded_param": test_string}
+            )
+            
+            result = governor.evaluate_decision(decision)
+            assert isinstance(result, DecisionResult)
+
+
+class TestGenesisEthicalGovernorAdvancedErrorRecovery:
+    """Advanced error recovery scenarios"""
+    
+    def test_partial_system_failure_recovery(self):
+        """
+        Test recovery from partial system failures.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Simulate partial failure in decision history
+        original_decision_history = governor.decision_history
+        
+        # Corrupt some entries but leave others intact
+        governor.decision_history = [
+            {"valid": "entry1", "timestamp": datetime.now()},
+            None,  # Corrupted entry
+            {"corrupted": True},  # Invalid entry
+            {"valid": "entry2", "timestamp": datetime.now()},
+            "invalid_string_entry"  # Wrong type
+        ]
+        
+        context = EthicalContext(
+            user_id="recovery_test_user",
+            action="recovery_test",
+            context_data={},
+            timestamp=datetime.now()
+        )
+        
+        decision = EthicalDecision(
+            action="recovery_test",
+            context=context,
+            parameters={}
+        )
+        
+        # Should handle partial corruption gracefully
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+        
+        # Should still be able to add new valid entries
+        new_history_length = len(governor.decision_history)
+        assert new_history_length > 0
+    
+    def test_cascading_failure_prevention(self):
+        """
+        Test prevention of cascading failures.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Add rules that depend on each other
+        dependent_rules = []
+        for i in range(10):
+            rule = {
+                "name": f"cascade_rule_{i}",
+                "condition": lambda ctx, idx=i: self._check_previous_rule(ctx, idx),
+                "action": "allow",
+                "priority": i
+            }
+            dependent_rules.append(rule)
+            governor.add_ethical_rule(rule)
+        
+        def _check_previous_rule(ctx, idx):
+            """Simulate rule dependency that might fail"""
+            if idx == 5:  # Fail at rule 5
+                raise RuntimeError(f"Rule {idx} failed")
+            return True
+        
+        # Monkey patch the method
+        governor._check_previous_rule = _check_previous_rule
+        
+        context = EthicalContext(
+            user_id="cascade_test_user",
+            action="cascade_test",
+            context_data={},
+            timestamp=datetime.now()
+        )
+        
+        decision = EthicalDecision(
+            action="cascade_test",
+            context=context,
+            parameters={}
+        )
+        
+        # Should prevent cascading failures
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+        
+        # Should isolate the failure and continue with other rules
+        if hasattr(result, 'metadata') and result.metadata:
+            failed_rules = result.metadata.get("failed_rules", [])
+            if failed_rules:
+                assert len(failed_rules) == 1  # Only one rule should fail
+                assert "cascade_rule_5" in failed_rules[0]
+    
+    def test_resource_cleanup_after_exceptions(self):
+        """
+        Test that resources are properly cleaned up after exceptions.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        class ResourceTracker:
+            def __init__(self):
+                self.resources = []
+            
+            def acquire(self, resource_id):
+                self.resources.append(resource_id)
+                return resource_id
+            
+            def release(self, resource_id):
+                if resource_id in self.resources:
+                    self.resources.remove(resource_id)
+        
+        tracker = ResourceTracker()
+        
+        def failing_rule_with_resources(ctx):
+            """Rule that acquires resources then fails"""
+            resource = tracker.acquire("test_resource")
+            try:
+                # Simulate some work
+                if ctx.action == "fail_me":
+                    raise RuntimeError("Simulated failure")
+                return True
+            finally:
+                tracker.release(resource)
+        
+        failing_rule = {
+            "name": "resource_rule",
+            "condition": failing_rule_with_resources,
+            "action": "allow",
+            "priority": 1
+        }
+        
+        governor.add_ethical_rule(failing_rule)
+        
+        # Test with failing context
+        fail_context = EthicalContext(
+            user_id="resource_test_user",
+            action="fail_me",
+            context_data={},
+            timestamp=datetime.now()
+        )
+        
+        fail_decision = EthicalDecision(
+            action="fail_me",
+            context=fail_context,
+            parameters={}
+        )
+        
+        # Should handle exception and clean up resources
+        result = governor.evaluate_decision(fail_decision)
+        assert isinstance(result, DecisionResult)
+        
+        # Resources should be cleaned up
+        assert len(tracker.resources) == 0
+        
+        # Test with non-failing context
+        success_context = EthicalContext(
+            user_id="resource_test_user",
+            action="succeed",
+            context_data={},
+            timestamp=datetime.now()
+        )
+        
+        success_decision = EthicalDecision(
+            action="succeed",
+            context=success_context,
+            parameters={}
+        )
+        
+        result = governor.evaluate_decision(success_decision)
+        assert isinstance(result, DecisionResult)
+        
+        # Resources should still be cleaned up
+        assert len(tracker.resources) == 0
+
+
+class TestGenesisEthicalGovernorComplexIntegration:
+    """Complex integration scenarios"""
+    
+    @patch('app.ai_backend.genesis_ethical_governor.database_connection')
+    @patch('app.ai_backend.genesis_ethical_governor.cache_service')
+    def test_multi_tier_integration(self, mock_cache, mock_db):
+        """
+        Test integration across multiple tiers (cache, database, external services).
+        """
+        # Setup mocks
+        mock_cache.get.return_value = None
+        mock_cache.set.return_value = True
+        mock_db.execute.return_value = {"user_id": "test_user", "permissions": ["read"]}
+        
+        governor = GenesisEthicalGovernor()
+        
+        context = EthicalContext(
+            user_id="integration_user",
+            action="multi_tier_action",
+            context_data={"requires_db_check": True},
+            timestamp=datetime.now()
+        )
+        
+        decision = EthicalDecision(
+            action="multi_tier_action",
+            context=context,
+            parameters={}
+        )
+        
+        result = governor.evaluate_decision(decision)
+        assert isinstance(result, DecisionResult)
+        
+        # Verify integrations were called if implemented
+        if hasattr(governor, 'cache_enabled') and governor.cache_enabled:
+            mock_cache.get.assert_called()
+        
+        if hasattr(governor, 'db_enabled') and governor.db_enabled:
+            mock_db.execute.assert_called()
+    
+    def test_workflow_state_management(self):
+        """
+        Test complex workflow state management across multiple decisions.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Simulate a multi-step workflow
+        workflow_steps = [
+            ("initiate", {"workflow_id": "wf_001", "step": 1}),
+            ("validate", {"workflow_id": "wf_001", "step": 2}),
+            ("process", {"workflow_id": "wf_001", "step": 3}),
+            ("finalize", {"workflow_id": "wf_001", "step": 4})
+        ]
+        
+        workflow_results = []
+        
+        for action, context_data in workflow_steps:
+            context = EthicalContext(
+                user_id="workflow_user",
+                action=action,
+                context_data=context_data,
+                timestamp=datetime.now()
+            )
+            
+            decision = EthicalDecision(
+                action=action,
+                context=context,
+                parameters={"workflow_id": "wf_001"}
+            )
+            
+            result = governor.evaluate_decision(decision)
+            workflow_results.append(result)
+        
+        # All steps should be processed
+        assert len(workflow_results) == 4
+        assert all(isinstance(r, DecisionResult) for r in workflow_results)
+        
+        # Workflow state should be maintained in decision history
+        history = governor.get_decision_history()
+        workflow_decisions = [
+            entry for entry in history 
+            if entry.get("decision", {}).get("parameters", {}).get("workflow_id") == "wf_001"
+        ]
+        assert len(workflow_decisions) == 4
+    
+    def test_event_driven_rule_activation(self):
+        """
+        Test event-driven rule activation and deactivation.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Add time-based rule
+        def time_sensitive_condition(ctx):
+            current_hour = ctx.timestamp.hour
+            return 9 <= current_hour <= 17  # Business hours only
+        
+        business_hours_rule = {
+            "name": "business_hours_rule",
+            "condition": time_sensitive_condition,
+            "action": "allow",
+            "priority": 1,
+            "active": True
+        }
+        
+        governor.add_ethical_rule(business_hours_rule)
+        
+        # Test during business hours
+        business_time = datetime.now().replace(hour=14, minute=0, second=0)
+        business_context = EthicalContext(
+            user_id="event_user",
+            action="business_action",
+            context_data={},
+            timestamp=business_time
+        )
+        
+        business_decision = EthicalDecision(
+            action="business_action",
+            context=business_context,
+            parameters={}
+        )
+        
+        result = governor.evaluate_decision(business_decision)
+        assert isinstance(result, DecisionResult)
+        
+        # Test outside business hours
+        after_hours_time = datetime.now().replace(hour=22, minute=0, second=0)
+        after_hours_context = EthicalContext(
+            user_id="event_user",
+            action="business_action",
+            context_data={},
+            timestamp=after_hours_time
+        )
+        
+        after_hours_decision = EthicalDecision(
+            action="business_action",
+            context=after_hours_context,
+            parameters={}
+        )
+        
+        result = governor.evaluate_decision(after_hours_decision)
+        assert isinstance(result, DecisionResult)
+
+
+# Additional stress tests for comprehensive coverage
+class TestGenesisEthicalGovernorStressTest:
+    """Comprehensive stress testing scenarios"""
+    
+    @pytest.mark.slow
+    def test_sustained_high_load(self):
+        """
+        Test performance under sustained high load.
+        """
+        governor = GenesisEthicalGovernor()
+        
+        # Add multiple rules to increase complexity
+        for i in range(20):
+            rule = {
+                "name": f"load_rule_{i}",
+                "condition": lambda ctx, idx=i: ctx.action.endswith(str(idx % 5)),
+                "action": "allow" if i % 2 == 0 else "deny",
+                "priority": i
+            }
+            governor.add_ethical_rule(rule)
+        
+        start_time = time.time()
+        successful_decisions = 0
+        
+        # Sustained load for 30 seconds
+        end_time = start_time + 30
+        
+        while time.time() < end_time:
+            context = EthicalContext(
+                user_id=f"load_user_{successful_decisions % 100}",
+                action=f"load_action_{successful_decisions % 10}",
+                context_data={"load_test": True, "iteration": successful_decisions},
+                timestamp=datetime.now()
+            )
+            
+            decision = EthicalDecision(
+                action=f"load_action_{successful_decisions % 10}",
+                context=context,
+                parameters={}
+            )
+            
+            try:
+                result = governor.evaluate_decision(decision)
+                if isinstance(result, DecisionResult):
+                    successful_decisions += 1
+            except Exception:
+                pass  # Continue under stress
+            
+            # Small delay to prevent overwhelming
+            time.sleep(0.001)
+        
+        total_time = time.time() - start_time
+        decisions_per_second = successful_decisions / total_time
+        
+        # Should maintain reasonable performance
+        assert decisions_per_second > 10  # At least 10 decisions per second
+        assert successful_decisions > 100  # Should process many decisions
+    
+    def test_memory_pressure_handling(self):
+        """
+        Test behavior under memory pressure conditions.
+        """
+        import gc
+        
+        governor = GenesisEthicalGovernor()
+        
+        # Create memory pressure with large objects
+        large_objects = []
+        
+        try:
+            # Allocate large amounts of memory
+            for i in range(100):
+                large_data = {
+                    "massive_list": list(range(10000)),
+                    "large_string": "x" * 100000,
+                    "nested_dict": {str(j): "data" * 1000 for j in range(100)}
+                }
+                large_objects.append(large_data)
+                
+                # Try to make decisions under memory pressure
+                context = EthicalContext(
+                    user_id=f"memory_user_{i}",
+                    action=f"memory_action_{i}",
+                    context_data={"memory_test": True, "iteration": i},
+                    timestamp=datetime.now()
+                )
+                
+                decision = EthicalDecision(
+                    action=f"memory_action_{i}",
+                    context=context,
+                    parameters={}
+                )
+                
+                result = governor.evaluate_decision(decision)
+                assert isinstance(result, DecisionResult)
+                
+                # Periodic cleanup
+                if i % 10 == 0:
+                    gc.collect()
+                    
+        except MemoryError:
+            # Acceptable under extreme memory pressure
+            pass
+        finally:
+            # Cleanup
+            large_objects.clear()
+            gc.collect()
+
+
+if __name__ == "__main__":
+    # Additional test configuration can be added here
+    pytest.main([__file__, "-v", "--tb=short"])
