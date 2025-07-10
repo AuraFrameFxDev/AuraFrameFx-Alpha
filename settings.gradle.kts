@@ -5,6 +5,13 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.namespace == "org.jetbrains.kotlin") {
+                useVersion("1.9.0")
+            }
+        }
+    }
 }
 
 dependencyResolutionManagement {
@@ -21,6 +28,9 @@ rootProject.name = "AuraFrameFX"
 // Include the main app module and our new JVM test module
 include(":app")
 include(":jvm-test")
+
+// Configure the JVM test module
+project(":jvm-test").projectDir = file("jvm-test")
 
 include(":app")
 include(":sandbox-ui")

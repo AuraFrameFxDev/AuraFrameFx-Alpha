@@ -1,4 +1,4 @@
-package com.example.app.ipc
+package dev.aurakai.auraframefx.ipc
 
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
