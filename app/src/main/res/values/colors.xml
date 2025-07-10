@@ -80,19 +80,19 @@
 
     <!-- Missing color resources -->
     <color name="divider">#1F000000</color>
-    <color name="onSurface">@color/light_on_surface</color>
-    <color name="primary">@color/light_primary</color>
-    <color name="outline">@color/light_outline</color>
+    <!-- <color name="onSurface">@color/light_on_surface</color> --> <!-- Duplicate, already defined or aliased -->
+    <!-- <color name="primary">@color/light_primary</color> --> <!-- Duplicate, already defined or aliased -->
+    <!-- <color name="outline">@color/light_outline</color> --> <!-- Duplicate, already defined or aliased -->
     <color name="onSurfaceMedium">#99000000</color>
-    <color name="background">@color/light_background</color>
+    <!-- <color name="background">@color/light_background</color> --> <!-- Duplicate, already defined or aliased -->
 
-    <!-- Legacy Colors (for compatibility) -->
-    <color name="app_background_light">#1A1A1A</color>
-    <color name="surface">#2D2D2D</color>
-    <color name="surface_variant">#3D3D3D</color>
-    <color name="on_surface">#E1E1E1</color>
-    <color name="on_surface_variant">#C5C5C5</color>
-    <color name="on_primary">#000000</color>
-    <color name="on_secondary">#000000</color>
-    <color name="error">#FF3B30</color>
+    <!-- Legacy Colors (for compatibility) - Ensure these are not duplicating Material 3 definitions -->
+    <!-- <color name="app_background_light">#1A1A1A</color> --> <!-- Duplicate of light_background -->
+    <!-- <color name="surface">#2D2D2D</color> --> <!-- Duplicate of light_surface -->
+    <!-- <color name="surface_variant">#3D3D3D</color> --> <!-- Duplicate of light_surface_variant -->
+    <!-- <color name="on_surface">#E1E1E1</color> --> <!-- Duplicate of light_on_surface -->
+    <!-- <color name="on_surface_variant">#C5C5C5</color> --> <!-- Duplicate of light_on_surface_variant -->
+    <!-- <color name="on_primary">#000000</color> --> <!-- Duplicate of light_on_primary -->
+    <!-- <color name="on_secondary">#000000</color> --> <!-- Duplicate of light_on_secondary -->
+    <!-- <color name="error">#FF3B30</color> --> <!-- Duplicate of light_error -->
 </resources>
