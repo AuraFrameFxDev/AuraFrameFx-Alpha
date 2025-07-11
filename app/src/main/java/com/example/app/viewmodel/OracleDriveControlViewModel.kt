@@ -38,9 +38,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Simulates unbinding from the Oracle Drive service in beta mode.
+     * Simulates unbinding from the Oracle Drive service for beta testing.
      *
-     * Updates the internal state to reflect a disconnected service and sets a status message indicating beta mode. No real unbinding occurs.
+     * Updates internal state to indicate the service is disconnected and sets a beta mode status message. No actual service unbinding is performed.
      */
     fun unbindService() {
         // Beta stub: No actual unbinding
@@ -49,9 +49,9 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Updates the status, detailed status, and diagnostics log with static messages indicating that Oracle Drive features are disabled in beta mode.
+     * Simulates a status refresh by updating status, detailed status, and diagnostics log with static messages indicating Oracle Drive features are disabled in beta mode.
      *
-     * This method provides simulated status and diagnostics for UI testing purposes without retrieving or reflecting any real service state.
+     * Intended for UI testing; does not interact with or reflect any real service state.
      */
     fun refreshStatus() {
         // Beta stub: Update with fake status
@@ -61,12 +61,12 @@ class OracleDriveControlViewModel : ViewModel() {
     }
     
     /**
-     * Simulates toggling a module by updating the diagnostics log with a placeholder message.
+     * Simulates enabling or disabling a module by updating the diagnostics log with a placeholder message.
      *
-     * This method provides feedback for UI testing in beta mode and does not alter any actual module state.
+     * This method is intended for UI testing in beta mode and does not affect any real module state.
      *
-     * @param packageName The package name of the module to simulate toggling.
-     * @param enable If `true`, simulates enabling the module; if `false`, simulates disabling it.
+     * @param packageName The identifier of the module to simulate toggling.
+     * @param enable Indicates whether to simulate enabling (`true`) or disabling (`false`) the module.
      */
     fun toggleModule(packageName: String, enable: Boolean) {
         // Beta stub: Just log the action without actually doing anything

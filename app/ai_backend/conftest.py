@@ -8,10 +8,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 @pytest.fixture
 def sample_ethical_framework():
     """
-    Provides a pytest fixture that returns an `EthicalFramework` instance initialized with the name "TestFramework" and a set of sample ethical principles for use in tests.
+    Return an `EthicalFramework` instance with the name "TestFramework" and sample ethical principles for use in tests.
     
     Returns:
-        EthicalFramework: An instance with predefined ethical principles for testing purposes.
+        EthicalFramework: Instance initialized with fairness, transparency, accountability, and privacy principles.
     """
     from app.ai_backend.test_genesis_ethical_governor import EthicalFramework
     return EthicalFramework(
@@ -22,12 +22,10 @@ def sample_ethical_framework():
 @pytest.fixture
 def sample_governance_policies():
     """
-    Return a list of sample GovernancePolicy objects for use in tests.
-    
-    The returned list includes example privacy and safety policies, each initialized with representative rules.
+    Provides a list of sample GovernancePolicy instances for testing.
     
     Returns:
-        List[GovernancePolicy]: Example governance policies for testing purposes.
+        List[GovernancePolicy]: A list containing example privacy and safety policies with representative rules.
     """
     from app.ai_backend.test_genesis_ethical_governor import GovernancePolicy
     return [
@@ -38,7 +36,7 @@ def sample_governance_policies():
 @pytest.fixture
 def ethical_governor(sample_ethical_framework, sample_governance_policies):
     """
-    Pytest fixture that returns an EthicalGovernor instance initialized with a sample ethical framework and governance policies for testing.
+    Pytest fixture that provides an EthicalGovernor instance configured with a sample ethical framework and governance policies for use in tests.
     """
     from app.ai_backend.test_genesis_ethical_governor import EthicalGovernor
     return EthicalGovernor(sample_ethical_framework, sample_governance_policies)

@@ -31,13 +31,13 @@ class KaiAIService @Inject constructor(
     /**
  * Returns the name of this agent.
  *
- * @return The agent name, "Kai".
+ * @return The string "Kai".
  */
 override fun getName(): String? = "Kai"
     /**
- * Returns the type of this agent.
+ * Returns the type of this agent as `AgentType.KAI`.
  *
- * @return The agent type, `AgentType.KAI`.
+ * @return The agent type constant for Kai.
  */
 override fun getType(): AgentType = AgentType.KAI
 
@@ -57,11 +57,11 @@ override fun getType(): AgentType = AgentType.KAI
         )
 
     /**
-     * Processes an AI request with the given context and returns a response referencing both.
+     * Processes an AI request using the provided context and returns a response referencing both.
      *
-     * @param request The AI request to handle.
-     * @param context Additional context relevant to the request.
-     * @return An AgentResponse containing a message that includes the request query and context, with a confidence score of 1.0.
+     * @param request The AI request to process.
+     * @param context The context associated with the request.
+     * @return An AgentResponse containing a message that includes both the request query and the context, with a confidence score of 1.0.
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse { // Added context
         auraFxLogger.i(
