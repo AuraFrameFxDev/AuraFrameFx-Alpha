@@ -1,4 +1,4 @@
-package com.example.app.viewmodel
+package dev.aurakai.auraframefx.app.viewmodel // Corrected package name
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
@@ -21,6 +21,10 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+
+// Assuming DriveRepository, NetworkManager, DriveState, Direction are in a package accessible from here
+// e.g., import dev.aurakai.auraframefx.model.*
+// or specific imports if they are in different sub-packages of dev.aurakai.auraframefx
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class OracleDriveControlViewModelTest {
@@ -336,4 +340,27 @@ class OracleDriveControlViewModelTest {
         verify { mockErrorObserver.onChanged("Invalid speed value: NaN") }
         coVerify(exactly = 0) { mockRepository.updateSpeed(any()) }
     }
+}
+
+// Mocked/Placeholder classes for dependencies - replace with actual imports or mocks
+interface DriveRepository {
+    suspend fun startDrive(params: Any): Result<Unit>
+    suspend fun stopDrive(): Result<Unit>
+    suspend fun pauseDrive(): Result<Unit>
+    suspend fun resumeDrive(): Result<Unit>
+    suspend fun updateSpeed(speed: Double): Result<Unit>
+    suspend fun changeDirection(direction: Direction): Result<Unit>
+    suspend fun emergencyStop(): Result<Unit>
+}
+
+interface NetworkManager {
+    fun isConnected(): Boolean
+}
+
+enum class DriveState {
+    IDLE, DRIVING, PAUSED, ERROR, EMERGENCY_STOP
+}
+
+enum class Direction {
+    FORWARD, REVERSE
 }
