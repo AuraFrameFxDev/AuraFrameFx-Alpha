@@ -27,7 +27,7 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          ndk-version: 26.2.11394342
+          packages: "ndk;26.2.11394342 platform-tools tools"
 
       - name: Cache Gradle dependencies
         uses: actions/cache@v4
