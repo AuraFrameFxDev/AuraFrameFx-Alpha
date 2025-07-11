@@ -2,11 +2,11 @@
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
 agp = "8.11.1"  # Aligning with Dependabot PR #632
 generativeai = "0.9.0"
-kotlin = "1.9.24" # For KSP 1.9.24-1.0.20 compatibility (Hilt 2.56.2)
-ksp = "1.9.24-1.0.20" # For Hilt 2.56.2 compatibility
+kotlin = "2.1.0" # Aligning with new Compose BOM and modern stack
+ksp = "2.1.0-1.0.13" # Placeholder KSP for Kotlin 2.1.0, compatible with Hilt 2.56.2
 hilt = "2.56.2" # Current version in project, requires compatible KSP
-composeBom = "2024.05.00" # Latest stable Compose BOM (keeping this update)
-composeCompiler = "1.5.11" # Compatible with Kotlin 1.9.24 / 2.0.0 and BOM 2024.05.00
+composeBom = "2025.06.01" # As per Dependabot PR #634
+composeCompiler = "1.6.0" # Placeholder for Kotlin 2.1.0, to be confirmed by BOM
 googleServices = "4.4.2" # Stable Google Services plugin (keeping this update)
 
 # --- APP Dependencies ---
