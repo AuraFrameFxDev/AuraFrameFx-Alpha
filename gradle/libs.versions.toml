@@ -1,6 +1,6 @@
 [versions]
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
-agp = "8.5.0"  # Updated to be compatible with Kotlin 2.2.0
+agp = "8.9"  # Updated as per user request
 generativeai = "0.9.0"
 kotlin = "2.2.0" # Reverted as per user request
 ksp = "2.2.0-2.0.2" # Reverted as per user request (aligned with Kotlin 2.2.0)
