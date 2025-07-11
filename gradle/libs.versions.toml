@@ -40,7 +40,7 @@ converterGson = "3.0.0" # Align with Retrofit
 retrofitKotlinxSerializationConverter = "1.0.0"
 coilCompose = "2.6.0"
 timber = "5.0.1"
-guavaAndroid = "33.2.1-android"
+guavaAndroid = "33.4.8-android"
 
 # --- Testing ---
 junit = "4.13.2"
