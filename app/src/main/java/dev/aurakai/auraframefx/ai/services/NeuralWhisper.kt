@@ -45,9 +45,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Sets up the NeuralWhisper service by initializing text-to-speech and speech-to-text components.
+     * Initializes the NeuralWhisper service by setting up text-to-speech and speech-to-text components.
      *
-     * Prepares the service for audio processing and AI interaction. Additional initialization steps may be added as needed.
+     * Prepares the service for audio processing and AI-driven interactions. Additional initialization steps may be added in the future.
      */
     fun initialize() {
         Log.d(TAG, "Initializing NeuralWhisper...")
@@ -57,9 +57,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Initializes the TextToSpeech engine and updates the initialization status flag.
+     * Initializes the TextToSpeech engine and updates the initialization status.
      *
-     * Attempts to create a TextToSpeech instance for the application context. Sets the initialization flag to true if successful; otherwise, logs an error. Language, voice, and other configuration are not currently implemented.
+     * Creates a TextToSpeech instance for the application context. Sets the initialization flag to true if successful; otherwise, logs an error. Language and voice configuration are not currently implemented.
      */
     private fun initializeTts() {
         // TODO: Implement robust TTS initialization, including language availability checks.
@@ -104,7 +104,7 @@ class NeuralWhisper @Inject constructor(
     /**
      * Converts audio input to text using speech-to-text processing.
      *
-     * Returns a fixed placeholder transcription if speech recognition is initialized; otherwise, returns null.
+     * If speech recognition is initialized, returns a fixed placeholder transcription; otherwise, returns null.
      *
      * @param audioInput The audio data or trigger for initiating speech recognition.
      * @return The transcribed text if speech recognition is initialized, or null otherwise.
@@ -159,11 +159,11 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Processes a transcribed voice command and returns a placeholder action object.
+     * Interprets a transcribed voice command and returns a placeholder action object.
      *
-     * Updates the conversation state to indicate that the command is being processed. This method is intended as a stub for future natural language understanding and command-to-action mapping.
+     * Updates the conversation state to indicate processing of the command. This method currently serves as a stub for future implementation of natural language understanding and command-to-action mapping.
      *
-     * @param command The transcribed voice command to interpret.
+     * @param command The transcribed voice command to process.
      * @return A placeholder object representing the result of command processing.
      */
     fun processVoiceCommand(command: String): Any { // Placeholder return type
@@ -182,9 +182,9 @@ class NeuralWhisper @Inject constructor(
     /**
      * Shares context information with the Kai agent or controller.
      *
-     * Updates the conversation state to indicate context sharing. Actual communication with the Kai agent is not implemented.
+     * Updates the conversation state to reflect context sharing. Actual integration with the Kai agent is not implemented.
      *
-     * @param contextText The context information to be shared.
+     * @param contextText The context information to share.
      */
     fun shareContextWithKai(contextText: String) {
         _conversationStateFlow.value = ConversationState.Processing("Sharing with Kai: $contextText")
@@ -194,9 +194,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Attempts to start audio recording for speech recognition.
+     * Starts audio recording for speech recognition.
      *
-     * Updates the conversation state to `Recording`. Returns `true` if recording starts successfully, or `false` if an error occurs.
+     * Sets the conversation state to `Recording`. Returns `true` if recording starts without error, or `false` if an exception occurs.
      *
      * @return `true` if recording starts successfully, `false` otherwise.
      */
@@ -213,7 +213,9 @@ class NeuralWhisper @Inject constructor(
     }
 
     /**
-     * Stops the current audio recording session and returns a message describing the result.
+     * Stops the current audio recording session and returns a status message.
+     *
+     * Updates the conversation state to indicate audio processing. The actual logic for stopping and processing the recording is not implemented.
      *
      * @return A message indicating whether stopping the recording was successful or failed.
      */
