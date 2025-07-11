@@ -1,0 +1,129 @@
+Gradle start parameters:
+  tasks = [assembleDebug]
+  excluded tasks = []
+  current dir = C:\Users\Wehtt\OneDrive\Pictures\AuraFrameFX-Alpha-AuraXoS\AuraFrameFX-Alpha-AuraXoS
+  project properties args = []
+  system properties args = [user.variant: , file.encoding: windows-1252, user.country: US, user.language: en]
+
+Build failed: [Execution failed for task ':app:checkDebugAarMetadata'.]
+
+Time metrics:
+  Total Gradle task time: 1.46 s
+
+
+
+No Kotlin task was run
+Task ':app:checkDebugAarMetadata' finished in 0.61 s
+Time metrics:
+  Total Gradle task time: 0.61 s
+
+Task ':app:mapDebugSourceSetPaths' finished in 0.45 s
+Time metrics:
+  Total Gradle task time: 0.45 s
+
+Task ':app:generateKotlinClient' finished in 0.16 s
+Time metrics:
+  Total Gradle task time: 0.16 s
+
+Task ':sandbox-ui:javaPreCompileDebug' finished in 0.03 s
+Time metrics:
+  Total Gradle task time: 0.03 s
+
+Task ':sandbox-ui:packageDebugResources' finished in 0.03 s
+Time metrics:
+  Total Gradle task time: 0.03 s
+
+Task ':sandbox-ui:mergeDebugJniLibFolders' finished in 0.03 s
+Time metrics:
+  Total Gradle task time: 0.03 s
+
+Task ':app:processDebugGoogleServices' finished in 0.02 s
+Time metrics:
+  Total Gradle task time: 0.02 s
+
+Task ':sandbox-ui:processDebugManifest' finished in 0.02 s
+Time metrics:
+  Total Gradle task time: 0.02 s
+
+Task ':sandbox-ui:parseDebugLocalResources' finished in 0.02 s
+Time metrics:
+  Total Gradle task time: 0.02 s
+
+Task ':sandbox-ui:generateDebugRFile' finished in 0.02 s
+Time metrics:
+  Total Gradle task time: 0.02 s
+
+Task ':sandbox-ui:generateDebugResValues' finished in 0.01 s
+Time metrics:
+  Total Gradle task time: 0.01 s
+
+Task ':sandbox-ui:mergeDebugShaders' finished in 0.01 s
+Time metrics:
+  Total Gradle task time: 0.01 s
+
+Task ':sandbox-ui:mergeDebugAssets' finished in 0.01 s
+Time metrics:
+  Total Gradle task time: 0.01 s
+
+Task ':app:generateDebugBuildConfig' finished in 0.01 s
+Time metrics:
+  Total Gradle task time: 0.01 s
+
+Task ':sandbox-ui:copyDebugJniLibsProjectAndLocalJars' finished in 0.01 s
+Time metrics:
+  Total Gradle task time: 0.01 s
+
+Task ':sandbox-ui:generateDebugResources' finished in 0.01 s
+Time metrics:
+  Total Gradle task time: 0.01 s
+
+Task ':sandbox-ui:extractDeepLinksForAarDebug' finished in 0.01 s
+Time metrics:
+  Total Gradle task time: 0.01 s
+
+Task ':sandbox-ui:writeDebugAarMetadata' finished in 0.01 s
+Time metrics:
+  Total Gradle task time: 0.01 s
+
+Task ':app:generateDebugResValues' finished in 0.01 s
+Time metrics:
+  Total Gradle task time: 0.01 s
+
+Task ':sandbox-ui:prepareLintJarForPublish' finished in 0.00 s
+Time metrics:
+  Total Gradle task time: 0.00 s
+
+Task ':sandbox-ui:mergeDebugNativeLibs' was skipped: NO-SOURCE
+Time metrics:
+  Total Gradle task time: 0.00 s
+
+Task ':sandbox-ui:stripDebugDebugSymbols' was skipped: NO-SOURCE
+Time metrics:
+  Total Gradle task time: 0.00 s
+
+Task ':sandbox-ui:checkKotlinGradlePluginConfigurationErrors' was skipped: SKIPPED
+Time metrics:
+  Total Gradle task time: 0.00 s
+
+Task ':app:checkKotlinGradlePluginConfigurationErrors' was skipped: SKIPPED
+Time metrics:
+  Total Gradle task time: 0.00 s
+
+Task ':sandbox-ui:prepareDebugArtProfile' finished in 0.00 s
+Time metrics:
+  Total Gradle task time: 0.00 s
+
+Task ':sandbox-ui:preBuild' finished in 0.00 s
+
+Task ':sandbox-ui:preDebugBuild' finished in 0.00 s
+
+Task ':sandbox-ui:compileDebugShaders' was skipped: NO-SOURCE
+
+Task ':sandbox-ui:generateDebugAssets' finished in 0.00 s
+
+Task ':app:preBuild' finished in 0.00 s
+
+Task ':app:preDebugBuild' finished in 0.00 s
+
+Task ':app:mergeDebugNativeDebugMetadata' was skipped: NO-SOURCE
+

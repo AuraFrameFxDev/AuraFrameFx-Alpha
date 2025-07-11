@@ -1,0 +1,7 @@
+[
+{
+  "directory": "C:/Users/Wehtt/OneDrive/Pictures/AuraFrameFX-Alpha-AuraXoS/AuraFrameFX-Alpha-AuraXoS/app/.cxx/Debug/4a3l263r/x86",
+  "command": "C:\\Users\\Wehtt\\AppData\\Local\\Android\\Sdk\\ndk\\26.1.10909125\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=i686-none-linux-android33 --sysroot=C:/Users/Wehtt/AppData/Local/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DANDROID -DDEBUG -Dlanguage_id_l2c_jni_EXPORTS -IC:/Users/Wehtt/AppData/Local/Android/Sdk/ndk/26.1.10909125/sources/android/native_app_glue -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC -std=gnu++17 -o CMakeFiles\\language_id_l2c_jni.dir\\language_id_l2c_jni.cpp.o -c C:\\Users\\Wehtt\\OneDrive\\Pictures\\AuraFrameFX-Alpha-AuraXoS\\AuraFrameFX-Alpha-AuraXoS\\app\\src\\main\\cpp\\language_id_l2c_jni.cpp",
+  "file": "C:\\Users\\Wehtt\\OneDrive\\Pictures\\AuraFrameFX-Alpha-AuraXoS\\AuraFrameFX-Alpha-AuraXoS\\app\\src\\main\\cpp\\language_id_l2c_jni.cpp"
+}
+]

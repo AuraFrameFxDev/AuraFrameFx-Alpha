@@ -1,0 +1,8 @@
+Gradle start parameters:
+  tasks = [wrapper]
+  excluded tasks = []
+  current dir = C:\Users\Wehtt\OneDrive\Pictures\AuraFrameFX-Alpha-AuraXoS\AuraFrameFX-Alpha-AuraXoS
+  project properties args = []
+  system properties args = [idea.active: true, user.variant: , file.encoding: UTF-8, idea.version: 2025.1, user.language: en, user.country: US, idea.vendor.name: Google]
+
+No Kotlin task was run

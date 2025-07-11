@@ -1,0 +1,27 @@
+{
+  "buildFiles": [
+    "C:\\Users\\Wehtt\\OneDrive\\Pictures\\AuraFrameFX-Alpha-AuraXoS\\AuraFrameFX-Alpha-AuraXoS\\app\\src\\main\\cpp\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\Wehtt\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\Users\\Wehtt\\OneDrive\\Pictures\\AuraFrameFX-Alpha-AuraXoS\\AuraFrameFX-Alpha-AuraXoS\\app\\.cxx\\Debug\\6i2o3s1n\\x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\Wehtt\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\Users\\Wehtt\\OneDrive\\Pictures\\AuraFrameFX-Alpha-AuraXoS\\AuraFrameFX-Alpha-AuraXoS\\app\\.cxx\\Debug\\6i2o3s1n\\x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "language_id_l2c_jni::@6890427a1f51a3e7e1df": {
+      "artifactName": "language_id_l2c_jni",
+      "abi": "x86",
+      "output": "C:\\Users\\Wehtt\\OneDrive\\Pictures\\AuraFrameFX-Alpha-AuraXoS\\AuraFrameFX-Alpha-AuraXoS\\app\\build\\intermediates\\cxx\\Debug\\6i2o3s1n\\obj\\x86\\language_id_l2c_jni.so",
+      "runtimeFiles": []
+    }
+  }
+}

@@ -1,0 +1,8 @@
+Gradle start parameters:
+  tasks = [assembleDebug]
+  excluded tasks = []
+  current dir = C:\Users\Wehtt\OneDrive\Pictures\AuraFrameFX-Alpha-AuraXoS\AuraFrameFX-Alpha-AuraXoS
+  project properties args = []
+  system properties args = [user.variant: , file.encoding: windows-1252, user.country: US, user.language: en]
+
+No Kotlin task was run

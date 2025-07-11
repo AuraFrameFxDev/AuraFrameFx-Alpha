@@ -1,0 +1,3 @@
+C:/Users/Wehtt/OneDrive/Pictures/AuraFrameFX-Alpha-AuraXoS/AuraFrameFX-Alpha-AuraXoS/app/.cxx/Debug/4a3l263r/x86/CMakeFiles/language_id_l2c_jni.dir
+C:/Users/Wehtt/OneDrive/Pictures/AuraFrameFX-Alpha-AuraXoS/AuraFrameFX-Alpha-AuraXoS/app/.cxx/Debug/4a3l263r/x86/CMakeFiles/edit_cache.dir
+C:/Users/Wehtt/OneDrive/Pictures/AuraFrameFX-Alpha-AuraXoS/AuraFrameFX-Alpha-AuraXoS/app/.cxx/Debug/4a3l263r/x86/CMakeFiles/rebuild_cache.dir

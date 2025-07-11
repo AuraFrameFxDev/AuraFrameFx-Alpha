@@ -1,0 +1,29 @@
+Gradle start parameters:
+  tasks = [clean]
+  excluded tasks = []
+  current dir = C:\Users\Wehtt\OneDrive\Pictures\AuraFrameFX-Alpha-AuraXoS\AuraFrameFX-Alpha-AuraXoS
+  project properties args = []
+  system properties args = [user.variant: , file.encoding: windows-1252, user.country: US, user.language: en]
+
+Time metrics:
+  Total Gradle task time: 0.29 s
+
+
+
+No Kotlin task was run
+Task ':app:clean' finished in 0.16 s
+Time metrics:
+  Total Gradle task time: 0.16 s
+
+Task ':sandbox-ui:clean' finished in 0.11 s
+Time metrics:
+  Total Gradle task time: 0.11 s
+
+Task ':app:externalNativeBuildCleanDebug' finished in 0.02 s
+Time metrics:
+  Total Gradle task time: 0.02 s
+
+Task ':app:externalNativeBuildCleanRelease' finished in 0.01 s
+Time metrics:
+  Total Gradle task time: 0.01 s
+
