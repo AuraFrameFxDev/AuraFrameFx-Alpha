@@ -38,7 +38,7 @@ retrofit = "2.11.0"
 okhttp = "4.12.0"
 converterGson = "2.11.0" # Align with Retrofit
 retrofitKotlinxSerializationConverter = "1.0.0"
-coilCompose = "2.6.0"
+coilCompose = "2.7.0"
 timber = "5.0.1"
 guavaAndroid = "33.4.8-android"
 
