@@ -1,12 +1,13 @@
 [versions]
 # --- CORE TOOLCHAIN: THE LATEST PUBLIC RELEASES ---
-agp = "8.9"  # Updated as per user request
+agp = "8.2.2"  # As per user feedback for stability
 generativeai = "0.9.0"
-kotlin = "2.2.0" # Reverted as per user request
-ksp = "2.2.0-2.0.2" # Reverted as per user request (aligned with Kotlin 2.2.0)
-hilt = "2.56.2" # Latest stable Hilt (keeping this update)
+
+kotlin = "2.1.21" # Reverted as per user request
+ksp = "2.1.21-2.0.1" # Reverted as per user request (aligned with Kotlin 2.2.0)
+hilt = "2.56.2" # Latest stable Hilt (keeping this update
 composeBom = "2024.05.00" # Latest stable Compose BOM (keeping this update)
-composeCompiler = "2.2.0" # Reverted as per user request (aligned with Kotlin 2.2.0 EAP)
+composeCompiler = "1.5.8" # As per user feedback for stability (matches Kotlin 1.9.22)
 googleServices = "4.4.2" # Stable Google Services plugin (keeping this update)
 
 # --- APP Dependencies ---
