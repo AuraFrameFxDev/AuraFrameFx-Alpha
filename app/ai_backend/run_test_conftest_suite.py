@@ -41,7 +41,7 @@ def run_tests(verbose=False, coverage=False, test_pattern=None, parallel=False):
     # Add parallel execution
     if parallel:
         try:
-            import pytest_xdist
+            import pytest_xdist  # noqa: F401
             cmd.extend(['-n', 'auto'])
         except ImportError:
             print("Warning: pytest-xdist not available, running sequentially")

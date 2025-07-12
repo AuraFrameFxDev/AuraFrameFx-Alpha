@@ -11,19 +11,14 @@ Testing Framework: pytest with pytest-asyncio
 import pytest
 import asyncio
 import logging
-from unittest.mock import Mock, MagicMock, AsyncMock, patch
-from typing import Dict, Any, Generator, List
 import tempfile
 import os
-import json
 from pathlib import Path
-from datetime import datetime, timedelta
-
+from datetime import datetime
+from unittest.mock import Mock, MagicMock, AsyncMock
 
 # Configure logging for tests
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -31,7 +26,6 @@ def event_loop():
     loop = asyncio.new_event_loop()
     yield loop
     loop.close()
-
 
 @pytest.fixture
 def mock_ai_config():
@@ -47,7 +41,6 @@ def mock_ai_config():
         "api_version": "v1"
     }
 
-
 @pytest.fixture
 def mock_genesis_core():
     """Provide mock Genesis core instance for testing."""
@@ -60,7 +53,6 @@ def mock_genesis_core():
     mock_core.get_status = Mock(return_value="active")
     return mock_core
 
-
 @pytest.fixture
 def mock_consciousness_matrix():
     """Provide mock consciousness matrix for testing."""
@@ -72,7 +64,6 @@ def mock_consciousness_matrix():
     mock_matrix.dimension = 512
     return mock_matrix
 
-
 @pytest.fixture
 def mock_ethical_governor():
     """Provide mock ethical governor for testing."""
@@ -82,7 +73,6 @@ def mock_ethical_governor():
     mock_governor.is_enabled = True
     mock_governor.policies = ["privacy", "safety", "fairness"]
     return mock_governor
-
 
 @pytest.fixture
 def mock_evolutionary_conduit():
@@ -94,13 +84,11 @@ def mock_evolutionary_conduit():
     mock_conduit.fitness_score = 0.88
     return mock_conduit
 
-
 @pytest.fixture
 def temp_directory():
     """Provide temporary directory for testing file operations."""
     with tempfile.TemporaryDirectory() as temp_dir:
         yield Path(temp_dir)
-
 
 @pytest.fixture
 def sample_test_data():
@@ -120,7 +108,6 @@ def sample_test_data():
             "system_state": "active"
         }
     }
-
 
 @pytest.fixture
 def mock_api_response():
@@ -143,7 +130,6 @@ def mock_api_response():
         }
     }
 
-
 @pytest.fixture
 def mock_database_connection():
     """Provide mock database connection for testing."""
@@ -157,7 +143,6 @@ def mock_database_connection():
     mock_db.transaction = AsyncMock()
     return mock_db
 
-
 @pytest.fixture
 def mock_genesis_profile():
     """Provide mock Genesis profile for testing."""
@@ -168,7 +153,6 @@ def mock_genesis_profile():
     mock_profile.personality_traits = {"creativity": 0.8, "logic": 0.9, "empathy": 0.7}
     mock_profile.name = "TestProfile"
     return mock_profile
-
 
 @pytest.fixture
 def mock_genesis_api():
@@ -181,22 +165,16 @@ def mock_genesis_api():
     mock_api.rate_limit = {"requests_per_minute": 100, "current_usage": 10}
     return mock_api
 
-
 @pytest.fixture(autouse=True)
 def setup_test_environment():
     """Automatically set up test environment for each test."""
-    # Set test environment variables
     original_env = os.environ.copy()
     os.environ["TESTING"] = "true"
     os.environ["LOG_LEVEL"] = "DEBUG"
     os.environ["GENESIS_ENV"] = "test"
-    
     yield
-    
-    # Restore original environment
     os.environ.clear()
     os.environ.update(original_env)
-
 
 @pytest.fixture
 def mock_logger():
@@ -209,7 +187,6 @@ def mock_logger():
     mock_log.critical = Mock()
     mock_log.exception = Mock()
     return mock_log
-
 
 @pytest.fixture
 def sample_ethical_data():
@@ -230,7 +207,6 @@ def sample_ethical_data():
         }
     }
 
-
 @pytest.fixture
 def mock_file_handler():
     """Provide mock file handler for testing file operations."""
@@ -241,7 +217,6 @@ def mock_file_handler():
     mock_handler.exists = Mock(return_value=True)
     mock_handler.get_size = Mock(return_value=1024)
     return mock_handler
-
 
 def pytest_configure(config):
     """Configure pytest with custom settings."""
@@ -261,18 +236,13 @@ def pytest_configure(config):
         "markers", "performance: marks tests as performance tests"
     )
 
-
 def pytest_collection_modifyitems(config, items):
     """Modify test collection to add markers automatically."""
     for item in items:
-        # Add asyncio marker to async test functions
         if asyncio.iscoroutinefunction(item.function):
             item.add_marker(pytest.mark.asyncio)
-        
-        # Add unit marker to test functions by default
         if not any(marker.name in ['integration', 'slow', 'performance'] for marker in item.iter_markers()):
             item.add_marker(pytest.mark.unit)
-
 
 # Utility functions for testing
 def create_mock_response(status_code=200, json_data=None, headers=None):
@@ -283,11 +253,9 @@ def create_mock_response(status_code=200, json_data=None, headers=None):
     mock_response.json.return_value = json_data or {}
     return mock_response
 
-
 def assert_async_mock_called_with(async_mock, *args, **kwargs):
     """Assert that an async mock was called with specific arguments."""
     async_mock.assert_called_with(*args, **kwargs)
-
 
 def assert_dict_contains_keys(dictionary, required_keys):
     """Assert that a dictionary contains all required keys."""
