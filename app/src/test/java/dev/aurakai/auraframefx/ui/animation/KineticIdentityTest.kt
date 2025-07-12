@@ -16,9 +16,6 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.click
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.IntOffset
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -49,7 +46,6 @@ class KineticIdentityTest {
                 )
             }
         }
-
         composeTestRule.onNodeWithTag("container").assertIsDisplayed()
     }
 
@@ -63,7 +59,6 @@ class KineticIdentityTest {
                     .testTag("kinetic-identity")
             )
         }
-
         composeTestRule.onNodeWithTag("kinetic-identity").assertIsDisplayed()
     }
 
@@ -81,18 +76,13 @@ class KineticIdentityTest {
                 )
             }
         }
-
-        // Perform touch input
         composeTestRule.onNodeWithTag("kinetic-identity")
             .performTouchInput {
                 click(center)
             }
-
-        // Verify callback was triggered
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             capturedPosition != null
         }
-        
         assertNotNull("Position should be captured", capturedPosition)
         assertTrue("Position change callback should be called", positionChangeCallCount > 0)
     }
@@ -111,23 +101,17 @@ class KineticIdentityTest {
                 )
             }
         }
-
-        // Perform multiple touch inputs
         composeTestRule.onNodeWithTag("kinetic-identity")
             .performTouchInput {
                 click(Offset(50f, 50f))
             }
-
         composeTestRule.onNodeWithTag("kinetic-identity")
             .performTouchInput {
                 click(Offset(100f, 100f))
             }
-
-        // Wait for callbacks to be processed
         composeTestRule.waitUntil(timeoutMillis = 2000) {
             positionChangeCallCount >= 2
         }
-
         assertTrue("Callback should be called multiple times", positionChangeCallCount >= 2)
     }
 
@@ -145,8 +129,6 @@ class KineticIdentityTest {
                 )
             }
         }
-
-        // Perform swipe gesture
         composeTestRule.onNodeWithTag("kinetic-identity")
             .performTouchInput {
                 swipe(
@@ -155,12 +137,9 @@ class KineticIdentityTest {
                     durationMillis = 300
                 )
             }
-
-        // Wait for at least one callback
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             capturedPosition != null
         }
-
         assertNotNull("Position should be captured during swipe", capturedPosition)
         assertTrue("Callback should be called during swipe", positionChangeCallCount > 0)
     }
@@ -172,21 +151,14 @@ class KineticIdentityTest {
             Box(modifier = Modifier.size(200.dp)) {
                 KineticIdentity(
                     modifier = Modifier.testTag("kinetic-identity")
-                    // No onPositionChange callback provided
                 )
             }
         }
-
-        // Should render without crashing
         composeTestRule.onNodeWithTag("kinetic-identity").assertIsDisplayed()
-
-        // Should handle touch input without crashing
         composeTestRule.onNodeWithTag("kinetic-identity")
             .performTouchInput {
                 click(center)
             }
-
-        // Component should still be displayed after interaction
         composeTestRule.onNodeWithTag("kinetic-identity").assertIsDisplayed()
     }
 
@@ -194,14 +166,12 @@ class KineticIdentityTest {
     fun kineticIdentity_positionCallbackReceivesValidOffset() {
         // Test that position callback receives valid Offset values
         var receivedValidOffset = false
-        
         composeTestRule.setContent {
             Box(modifier = Modifier.size(200.dp)) {
                 KineticIdentity(
                     modifier = Modifier.testTag("kinetic-identity"),
                     onPositionChange = { position ->
-                        // Validate that position has reasonable values
-                        if (position.x >= 0f && position.y >= 0f && 
+                        if (position.x >= 0f && position.y >= 0f &&
                             position.x <= 200f && position.y <= 200f) {
                             receivedValidOffset = true
                         }
@@ -210,16 +180,13 @@ class KineticIdentityTest {
                 )
             }
         }
-
         composeTestRule.onNodeWithTag("kinetic-identity")
             .performTouchInput {
                 click(Offset(50f, 75f))
             }
-
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             receivedValidOffset
         }
-
         assertTrue("Should receive valid offset coordinates", receivedValidOffset)
         assertNotNull("Position should be captured", capturedPosition)
     }
@@ -228,14 +195,12 @@ class KineticIdentityTest {
     fun kineticIdentity_layoutBehavior_handlesConstraintsCorrectly() {
         // Test layout behavior with different constraints
         composeTestRule.setContent {
-            // Test with specific size constraints
             Box(modifier = Modifier.size(150.dp, 100.dp)) {
                 KineticIdentity(
                     modifier = Modifier.testTag("kinetic-identity")
                 )
             }
         }
-
         composeTestRule.onNodeWithTag("kinetic-identity").assertIsDisplayed()
     }
 
@@ -249,7 +214,6 @@ class KineticIdentityTest {
                 )
             }
         }
-
         composeTestRule.onNodeWithTag("kinetic-identity").assertIsDisplayed()
     }
 
@@ -258,7 +222,6 @@ class KineticIdentityTest {
         // Test component behavior with state changes
         composeTestRule.setContent {
             var isEnabled by remember { mutableStateOf(true) }
-            
             Box(modifier = Modifier.size(200.dp)) {
                 if (isEnabled) {
                     KineticIdentity(
@@ -266,7 +229,6 @@ class KineticIdentityTest {
                         onPositionChange = { position ->
                             capturedPosition = position
                             positionChangeCallCount++
-                            // Toggle state after first interaction
                             if (positionChangeCallCount == 1) {
                                 isEnabled = false
                             }
@@ -275,17 +237,13 @@ class KineticIdentityTest {
                 }
             }
         }
-
-        // First interaction
         composeTestRule.onNodeWithTag("kinetic-identity")
             .performTouchInput {
                 click(center)
             }
-
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             positionChangeCallCount > 0
         }
-
         assertTrue("Should handle state changes correctly", positionChangeCallCount > 0)
     }
 
@@ -303,19 +261,15 @@ class KineticIdentityTest {
                 )
             }
         }
-
-        // Perform rapid touches
         repeat(5) { index ->
             composeTestRule.onNodeWithTag("kinetic-identity")
                 .performTouchInput {
                     click(Offset(20f + index * 10f, 20f + index * 10f))
                 }
         }
-
         composeTestRule.waitUntil(timeoutMillis = 2000) {
-            positionChangeCallCount >= 3 // Allow for some events to be processed
+            positionChangeCallCount >= 3
         }
-
         assertTrue("Should handle rapid touch events", positionChangeCallCount >= 3)
     }
 
@@ -323,7 +277,6 @@ class KineticIdentityTest {
     fun kineticIdentity_edgePositions_handlesCorrectly() {
         // Test touch at edge positions
         val edgePositions = mutableListOf<Offset>()
-        
         composeTestRule.setContent {
             Box(modifier = Modifier.size(100.dp)) {
                 KineticIdentity(
@@ -334,28 +287,23 @@ class KineticIdentityTest {
                 )
             }
         }
-
-        // Test corners and edges
         val testPositions = listOf(
-            Offset(0f, 0f),      // Top-left
-            Offset(100f, 0f),    // Top-right
-            Offset(0f, 100f),    // Bottom-left
-            Offset(100f, 100f),  // Bottom-right
-            Offset(50f, 0f),     // Top-center
-            Offset(50f, 100f)    // Bottom-center
+            Offset(0f, 0f),
+            Offset(100f, 0f),
+            Offset(0f, 100f),
+            Offset(100f, 100f),
+            Offset(50f, 0f),
+            Offset(50f, 100f)
         )
-
         testPositions.forEach { position ->
             composeTestRule.onNodeWithTag("kinetic-identity")
                 .performTouchInput {
                     click(position)
                 }
         }
-
         composeTestRule.waitUntil(timeoutMillis = 3000) {
             edgePositions.size >= testPositions.size / 2
         }
-
         assertTrue("Should handle edge positions correctly", edgePositions.isNotEmpty())
     }
 
@@ -363,7 +311,6 @@ class KineticIdentityTest {
     fun kineticIdentity_layoutIntOffset_behavesCorrectly() {
         // Test the IntOffset behavior in layout
         var layoutCalled = false
-        
         composeTestRule.setContent {
             Box(modifier = Modifier.size(100.dp)) {
                 KineticIdentity(
@@ -373,39 +320,32 @@ class KineticIdentityTest {
                 }
             }
         }
-
         composeTestRule.onNodeWithTag("kinetic-identity").assertIsDisplayed()
-        
-        // The layout should be called during composition
-        assertTrue("Layout should be executed", layoutCalled || true) // Always passes as layout happens
+        assertTrue("Layout should be executed", layoutCalled || true)
     }
 
     @Test
     fun kineticIdentity_coroutineScope_handlesCorrectly() {
         // Test that coroutine scope handles pointer events properly
         var coroutineExecuted = false
-        
         composeTestRule.setContent {
             Box(modifier = Modifier.size(200.dp)) {
                 KineticIdentity(
                     modifier = Modifier.testTag("kinetic-identity"),
-                    onPositionChange = { 
+                    onPositionChange = {
                         coroutineExecuted = true
                         capturedPosition = it
                     }
                 )
             }
         }
-
         composeTestRule.onNodeWithTag("kinetic-identity")
             .performTouchInput {
                 click(center)
             }
-
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             coroutineExecuted
         }
-
         assertTrue("Coroutine should execute on pointer input", coroutineExecuted)
     }
 }
