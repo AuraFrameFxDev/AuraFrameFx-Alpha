@@ -7,7 +7,6 @@ ksp = "1.9.22-1.0.17"
 hilt = "2.51.1"
 composeBom = "2024.05.00"
 composeCompiler = "1.5.8"
-kotlinComposePlugin = "1.6.10"
 googleServices = "4.4.2" # Stable Google Services plugin (keeping this update)
 
 # --- APP Dependencies ---
@@ -148,6 +147,5 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 openapi-generator = { id = "org.openapi.generator", version.ref = "openapiGeneratorPlugin" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
 firebase-perf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerfPlugin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.compose", version.ref = "kotlinComposePlugin" }
 gradle-toolchains-foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "toolchainsFoojayResolver" }
 
