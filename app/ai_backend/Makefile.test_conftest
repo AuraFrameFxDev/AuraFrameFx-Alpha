@@ -1,0 +1,43 @@
+# Makefile for test_conftest.py test suite
+.PHONY: test test-unit test-performance test-coverage test-quick clean help
+
+# Default target
+test:
+	python run_test_conftest_suite.py -v
+
+# Unit tests only (fast)
+test-unit:
+	python run_test_conftest_suite.py --unit-only -v
+
+# Performance tests only
+test-performance:
+	python run_test_conftest_suite.py --performance -v
+
+# Tests with coverage
+test-coverage:
+	python run_test_conftest_suite.py -c -v
+
+# Quick test run (exclude slow tests)
+test-quick:
+	python run_test_conftest_suite.py --quick -v
+
+# Parallel test execution
+test-parallel:
+	python run_test_conftest_suite.py --parallel -v
+
+# Clean generated files
+clean:
+	rm -rf __pycache__ .pytest_cache htmlcov .coverage
+	find . -name "*.pyc" -delete
+
+# Show help
+help:
+	@echo "Available targets:"
+	@echo "  test           - Run all tests"
+	@echo "  test-unit      - Run unit tests only"
+	@echo "  test-performance - Run performance tests only"
+	@echo "  test-coverage  - Run tests with coverage"
+	@echo "  test-quick     - Quick test run (no slow tests)"
+	@echo "  test-parallel  - Run tests in parallel"
+	@echo "  clean          - Clean generated files"
+	@echo "  help           - Show this help"
