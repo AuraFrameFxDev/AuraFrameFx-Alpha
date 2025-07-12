@@ -9,13 +9,14 @@ composeBom = "2025.06.01" # As per Dependabot PR #634
 composeCompiler = "2.2.0" # Aligned with Kotlin 2.2.0
 googleServices = "4.4.2" # Stable Google Services plugin (keeping this update)
 
+
 # --- APP Dependencies ---
 accompanistPager = "0.36.0" # Needs migration to official Compose Pager
 accompanistPermissions = "0.37.3" # Needs migration to official permissions handling
 accompanistSystemuicontroller = "0.36.0" # Needs migration (e.g., enableEdgeToEdge)
 coreKtx = "1.13.1"
 appcompat = "1.7.0"
-activityCompose = "1.9.0"
+activityCompose = "1.10.1"
 material = "1.12.0"
 navigationCompose = "2.7.7"
 hiltNavigationCompose = "1.2.0"
@@ -26,13 +27,13 @@ room = "2.6.1"
 workManager = "2.9.0"
 hiltWork = "1.2.0"
 datastore = "1.1.1"
-datastoreCore = "1.1.1"
+datastoreCore = "1.1.7"
 securityCrypto = "1.0.0" # androidxSecurityCrypto in [libraries] uses 1.1.0-beta01, which is fine
 firebaseBomVersion = "33.16.0"
 # firebaseConfigKtx = "22.1.2" # No longer needed, version from BoM
 # firebaseStorageKtx = "21.0.2" # No longer needed, version from BoM
 kotlinxCoroutines = "1.8.1"
-kotlinxSerializationJson = "1.6.3"
+kotlinxSerializationJson = "1.9.0"
 kotlinxDatetime = "0.6.0"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
