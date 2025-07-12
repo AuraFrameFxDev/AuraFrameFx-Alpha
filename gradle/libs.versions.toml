@@ -3,18 +3,17 @@
 agp = "8.11.1"  # Aligning with Dependabot PR #632
 generativeai = "0.9.0"
 kotlin = "2.2.0" # Latest stable Kotlin, aligning with new BOM
-ksp = "2.2.0-2.0.1" # KSP2 for Kotlin 2.2.0
+ksp = "2.2.0-2.0.0" # KSP2 for Kotlin 2.2.0
 hilt = "2.56.2" # Current version in project, requires compatible KSP
 composeBom = "2025.06.01" # As per Dependabot PR #634
 composeCompiler = "2.2.0" # Aligned with Kotlin 2.2.0
-
 googleServices = "4.4.2" # Stable Google Services plugin (keeping this update)
 
 # --- APP Dependencies ---
 accompanistPager = "0.36.0" # Needs migration to official Compose Pager
 accompanistPermissions = "0.37.3" # Needs migration to official permissions handling
 accompanistSystemuicontroller = "0.36.0" # Needs migration (e.g., enableEdgeToEdge)
-coreKtx = "1.16.0"
+coreKtx = "1.13.1"
 appcompat = "1.7.0"
 activityCompose = "1.9.0"
 material = "1.12.0"
@@ -23,7 +22,7 @@ hiltNavigationCompose = "1.2.0"
 lifecycle = "2.8.2"
 lifecycleRuntimeCompose = "2.8.2" # Aligned with lifecycle
 lifecycleViewmodelCompose = "2.8.2" # Aligned with lifecycle
-room = "2.7.2"
+room = "2.6.1"
 workManager = "2.9.0"
 hiltWork = "1.2.0"
 datastore = "1.1.1"
@@ -39,9 +38,9 @@ retrofit = "2.11.0"
 okhttp = "4.12.0"
 converterGson = "2.11.0" # Align with Retrofit
 retrofitKotlinxSerializationConverter = "1.0.0"
-coilCompose = "2.7.0"
+coilCompose = "2.6.0"
 timber = "5.0.1"
-guavaAndroid = "33.4.8-android"
+guavaAndroid = "33.2.1-android"
 
 # --- Testing ---
 junit = "4.13.2"
