@@ -172,7 +172,8 @@ class KineticIdentityTest {
                     modifier = Modifier.testTag("kinetic-identity"),
                     onPositionChange = { position ->
                         if (position.x >= 0f && position.y >= 0f &&
-                            position.x <= 200f && position.y <= 200f) {
+                            position.x <= 200f && position.y <= 200f
+                        ) {
                             receivedValidOffset = true
                         }
                         capturedPosition = position

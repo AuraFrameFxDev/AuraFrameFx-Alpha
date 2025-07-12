@@ -19,7 +19,6 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.click
 import androidx.compose.ui.unit.dp
 import org.junit.Rule
 import org.junit.Test
@@ -37,13 +36,13 @@ class KineticIdentityIntegrationTest {
         // Test KineticIdentity in a complex layout scenario
         composeTestRule.setContent {
             var lastPosition by remember { mutableStateOf("No touch yet") }
-            
+
             Column(modifier = Modifier.fillMaxSize()) {
                 Text(
                     text = "Position: $lastPosition",
                     modifier = Modifier.testTag("position-text")
                 )
-                
+
                 Box(
                     modifier = Modifier
                         .size(200.dp)
@@ -89,13 +88,13 @@ class KineticIdentityIntegrationTest {
         composeTestRule.setContent {
             var position1 by remember { mutableStateOf("0,0") }
             var position2 by remember { mutableStateOf("0,0") }
-            
+
             Column {
                 Text(
                     text = "Position 1: $position1",
                     modifier = Modifier.testTag("position1-text")
                 )
-                
+
                 Box(
                     modifier = Modifier
                         .size(100.dp)
@@ -110,12 +109,12 @@ class KineticIdentityIntegrationTest {
                         }
                     )
                 }
-                
+
                 Text(
                     text = "Position 2: $position2",
                     modifier = Modifier.testTag("position2-text")
                 )
-                
+
                 Box(
                     modifier = Modifier
                         .size(100.dp)
@@ -163,7 +162,7 @@ class KineticIdentityIntegrationTest {
     fun kineticIdentity_withOtherModifiers_maintainsFunctionality() {
         // Test KineticIdentity with various other modifiers
         var interactionCount = 0
-        
+
         composeTestRule.setContent {
             KineticIdentity(
                 modifier = Modifier
@@ -193,7 +192,7 @@ class KineticIdentityIntegrationTest {
         // Test performance with many interactions
         var totalInteractions = 0
         val maxInteractions = 20
-        
+
         composeTestRule.setContent {
             Box(modifier = Modifier.size(200.dp)) {
                 KineticIdentity(

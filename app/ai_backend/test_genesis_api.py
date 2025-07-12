@@ -1,6 +1,7 @@
 import pytest
 import json
 import asyncio
+import aiohttp
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from datetime import datetime, timezone
 import uuid
