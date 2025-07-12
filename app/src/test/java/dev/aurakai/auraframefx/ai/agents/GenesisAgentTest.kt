@@ -93,9 +93,9 @@ class GenesisAgentTest {
         assertEquals("response1", responses["Agent1"]?.content)
         assertEquals("response2", responses["Agent2"]?.content)
         assertEquals("response3", responses["Agent3"]?.content)
-        assertEquals(0.8f, responses["Agent1"]?.confidence)
-        assertEquals(0.9f, responses["Agent2"]?.confidence)
-        assertEquals(0.7f, responses["Agent3"]?.confidence)
+        assertEquals(0.8f, responses["Agent1"]!!.confidence, 0.0f)
+        assertEquals(0.9f, responses["Agent2"]!!.confidence, 0.0f)
+        assertEquals(0.7f, responses["Agent3"]!!.confidence, 0.0f)
     }
 
     @Test
@@ -194,7 +194,7 @@ class GenesisAgentTest {
 
         assertEquals(1, consensus.size)
         assertEquals("single response", consensus["Agent1"]?.content)
-        assertEquals(0.8f, consensus["Agent1"]?.confidence)
+        assertEquals(0.8f, consensus["Agent1"]!!.confidence, 0.0f)
     }
 
     @Test
@@ -207,7 +207,7 @@ class GenesisAgentTest {
 
         assertEquals(1, consensus.size)
         assertEquals("response2", consensus["Agent1"]?.content)
-        assertEquals(0.9f, consensus["Agent1"]?.confidence)
+        assertEquals(0.9f, consensus["Agent1"]!!.confidence, 0.0f)
     }
 
     @Test
@@ -225,9 +225,9 @@ class GenesisAgentTest {
 
         assertEquals(2, consensus.size)
         assertEquals("a1_resp2", consensus["Agent1"]?.content)
-        assertEquals(0.9f, consensus["Agent1"]?.confidence)
+        assertEquals(0.9f, consensus["Agent1"]!!.confidence, 0.0f)
         assertEquals("a2_resp1", consensus["Agent2"]?.content)
-        assertEquals(0.8f, consensus["Agent2"]?.confidence)
+        assertEquals(0.8f, consensus["Agent2"]!!.confidence, 0.0f)
     }
 
     @Test
@@ -238,7 +238,7 @@ class GenesisAgentTest {
         val consensus = genesisAgent.aggregateAgentResponses(listOf(resp1, resp2))
 
         assertEquals(1, consensus.size)
-        assertEquals(0.5f, consensus["Agent1"]?.confidence)
+        assertEquals(0.5f, consensus["Agent1"]!!.confidence, 0.0f)
         assertTrue(
             consensus["Agent1"]?.content == "response1" ||
             consensus["Agent1"]?.content == "response2"
@@ -254,7 +254,7 @@ class GenesisAgentTest {
 
         assertEquals(1, consensus.size)
         assertEquals("response2", consensus["Agent1"]?.content)
-        assertEquals(0.1f, consensus["Agent1"]?.confidence)
+        assertEquals(0.1f, consensus["Agent1"]!!.confidence, 0.0f)
     }
 
     @Test
@@ -266,7 +266,7 @@ class GenesisAgentTest {
 
         assertEquals(1, consensus.size)
         assertEquals("response2", consensus["Agent1"]?.content)
-        assertEquals(0.1f, consensus["Agent1"]?.confidence)
+        assertEquals(0.1f, consensus["Agent1"]!!.confidence, 0.0f)
     }
 
     @Test
@@ -279,7 +279,7 @@ class GenesisAgentTest {
 
         assertEquals(1, consensus.size)
         assertEquals("response100", consensus["Agent1"]?.content)
-        assertEquals(1.0f, consensus["Agent1"]?.confidence)
+        assertEquals(1.0f, consensus["Agent1"]!!.confidence, 0.0f)
     }
 
     @Test
@@ -322,7 +322,7 @@ class GenesisAgentTest {
     @Test
     fun testGenesisAgent_getType() {
         val type = genesisAgent.getType()
-        assertNotNull("Method should execute without throwing", true)
+        assertNotNull("Type should not be null", type)
     }
 
     @Test
@@ -342,7 +342,8 @@ class GenesisAgentTest {
     @Test
     fun testGenesisAgent_processRequest_nullRequest() = runBlocking {
         try {
-            genesisAgent.processRequest(null as AiRequest?)
+            val nullRequest: AiRequest? = null
+            genesisAgent.processRequest(nullRequest!!)
             fail("Should throw exception for null request")
         } catch (e: Exception) {
             assertTrue("Exception should be thrown", true)
@@ -364,7 +365,7 @@ class GenesisAgentTest {
         val request = AiRequest("test", emptyMap())
         val response = agent.processRequest(request)
         assertEquals("test response", response.content)
-        assertEquals(0.5f, response.confidence)
+        assertEquals(0.5f, response.confidence, 0.0f)
     }
 
     @Test

@@ -1,4 +1,3 @@
-<fixed_code>
 import pytest
 import json
 import asyncio
