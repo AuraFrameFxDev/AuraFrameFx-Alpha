@@ -11,6 +11,9 @@ import pytest
 import asyncio
 import sys
 import os
+# Ensure the module under test is importable when running from this directory
+sys.path.insert(0, os.path.dirname(__file__))
+
 from unittest.mock import Mock, patch, MagicMock
 from pathlib import Path
 import tempfile

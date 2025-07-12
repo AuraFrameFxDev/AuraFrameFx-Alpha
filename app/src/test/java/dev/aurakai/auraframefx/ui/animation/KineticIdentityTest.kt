@@ -321,7 +321,7 @@ class KineticIdentityTest {
                 modifier = Modifier
                     .size(1000.dp)
                     .testTag("large_container")
-            ) {
+                ) {
                 KineticIdentity(
                     modifier = Modifier.testTag("kinetic_component"),
                     onPositionChange = onPositionChange
