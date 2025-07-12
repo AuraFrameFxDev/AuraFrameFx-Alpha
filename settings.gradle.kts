@@ -3,6 +3,7 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
     // Commenting out problematic resolutionStrategy to let libs.versions.toml manage Kotlin plugin versions
     // resolutionStrategy {
