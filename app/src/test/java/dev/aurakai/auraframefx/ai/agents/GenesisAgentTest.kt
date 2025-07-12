@@ -342,7 +342,7 @@ class GenesisAgentTest {
     @Test
     fun testGenesisAgent_processRequest_nullRequest() = runBlocking {
         try {
-            genesisAgent.processRequest(null)
+            genesisAgent.processRequest(null as AiRequest?)
             fail("Should throw exception for null request")
         } catch (e: Exception) {
             assertTrue("Exception should be thrown", true)
